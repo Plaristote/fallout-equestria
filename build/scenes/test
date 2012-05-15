@@ -1,0 +1,67 @@
+name: TestScene
+
+
+def characters
+
+  def item
+    name:    Padlock
+    model:   objects/padlock.obj
+    texture: objects/padlock.png
+    scale: 0.2
+    def pos
+      x: 5
+      y: 3
+    end
+    def interactions
+      use
+    end
+  end
+
+  def horse
+    name:  Twilight
+    model: horse.obj
+    def pos
+      x: 6
+      y: 3
+    end
+
+    def interactions
+      talk_to
+      use_object
+      use_skill
+    end
+  end
+
+  def door
+    name: Door
+    model: doorframe.obj
+    scale: 1
+    vertical: 1
+    def pos
+      x: 2
+      y: 5
+    end
+
+    def interactions
+      use
+      use_object
+      use_skill
+    end
+  end
+
+  def horse
+    name: Fluttershy
+    model: horse.obj
+    def pos
+      x: 8
+      y: 3
+    end
+
+    def interactions
+      use
+      use_object
+      use_skill
+    end
+  end
+
+end
