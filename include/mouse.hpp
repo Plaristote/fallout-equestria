@@ -17,10 +17,10 @@ public:
 
   void                      Run(void);
 
-  Observatory::Signal<>             ButtonLeft;
-  Observatory::Signal<>             ButtonRight;
-  Observatory::Signal<NodePath>     UnitHovered;
-  Observatory::Signal<int, int>     CaseHovered;
+  Observatory::Signal<void>            ButtonLeft;
+  Observatory::Signal<void>            ButtonRight;
+  Observatory::Signal<void (NodePath)> UnitHovered;
+  Observatory::Signal<void (int, int)> CaseHovered;
 
   static void               CallbackButton1(const Event*, void* ptr)
   {

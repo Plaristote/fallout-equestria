@@ -1,6 +1,5 @@
 #include "objectnode.hpp"
 #include <panda3d/nodePathCollection.h>
-#define ABS(x) ((x) < 0 ? -(x) : (x))
 
 using namespace std;
 using namespace Observatory;
@@ -60,18 +59,18 @@ void ObjectNode::Run(float elapsedTime)
 //
 // Interactions
 //
-Signal<ObjectNode*> ObjectNode::ActionUse;
-Signal<ObjectNode*> ObjectNode::ActionUseObjectOn;
-Signal<ObjectNode*> ObjectNode::ActionUseSkillOn;
-Signal<ObjectNode*> ObjectNode::ActionTalkTo;
+Signal<void (ObjectNode*)> ObjectNode::ActionUse;
+Signal<void (ObjectNode*)> ObjectNode::ActionUseObjectOn;
+Signal<void (ObjectNode*)> ObjectNode::ActionUseSkillOn;
+Signal<void (ObjectNode*)> ObjectNode::ActionTalkTo;
 
 struct InteractionCallback
 {
-  InteractionCallback(string name, Signal<ObjectNode*>& signal) : name(name), signal(signal)
+  InteractionCallback(string name, Signal<void (ObjectNode*)>& signal) : name(name), signal(signal)
   {}
 
-  string                     name;
-  Signal<ObjectNode*>&       signal;
+  string                       name;
+  Signal<void (ObjectNode*)>&  signal;
 };
 
 InteractionCallback interactionCallbacks[] =

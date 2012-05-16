@@ -68,5 +68,5 @@ void InteractMenu::ButtonClicked(const Event*, void* data)
   ObjectNode::Interaction* interaction = reinterpret_cast<ObjectNode::Interaction*>(data);
 
   interaction->triggered->Emit(interaction->objectNode);
-  cout << "SIgnal emitted" << endl;
+  cout << "Signal emitted" << endl;
 }

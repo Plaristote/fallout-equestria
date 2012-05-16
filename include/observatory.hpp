@@ -5,38 +5,33 @@
 # include <algorithm>
 # include <iostream>
 
-# define CONNECT_HANDLE(handler, signal, object, method) ((handler)(signal, (signal).Connect((object), (method))))
-
 namespace Observatory
 {
   typedef void* ObserverId;
 
-  /*! \class Signal
-   * \brief Sort of template for the Observer DP. Awesome stuff inside.
-   */
-  template<typename ...Args>
+  template<typename p1 = void>
   class Signal
   {
     struct InterfaceObserver
     {
       virtual ~InterfaceObserver() {}
-      virtual void operator()(Args... args) = 0;
+      virtual void operator()() = 0;
 
       ObserverId id;
     };
-    
+
     class FunctionObserver : public InterfaceObserver
     {
       public:
-        typedef void (*Function)(Args... args);
-	
-	FunctionObserver(Function function) : _function(function) {}
-      
-        void operator()(Args... args)
+        typedef void (*Function)();
+
+        FunctionObserver(Function function) : _function(function) {}
+
+        void operator()()
         {
-	  _function(args...);
-	}
-      
+          _function();
+        }
+
       private:
         Function _function;
     };
@@ -45,11 +40,11 @@ namespace Observatory
     class Observer : public InterfaceObserver
     {
     public:
-      typedef void (ObserverClass::*Method)(Args... args);
+      typedef void (ObserverClass::*Method)();
 
       Observer(ObserverClass& observer, Method method) : _observer(observer), _method(method) {}
 
-      void operator()(Args... args) { (_observer.*_method)(args...); }
+      void operator()() { (_observer.*_method)(); }
 
     private:
       ObserverClass& _observer;
@@ -67,16 +62,16 @@ namespace Observatory
         delete *it;
     }
 
-    void       Emit(Args... args)
+    void       Emit()
     {
       _iterator = _observers.begin();
       while (_iterator != _observers.end())
       {
         typename Observers::iterator trace = _iterator;
 
-	(**_iterator)(args...);
-	if (trace == _iterator)
-	  _iterator++;
+        (**_iterator)();
+        if (trace == _iterator)
+          _iterator++;
       }
     }
 
@@ -87,11 +82,11 @@ namespace Observatory
 
       return (AddObserver(observer));
     }
-    
+
     ObserverId Connect(typename FunctionObserver::Function function)
     {
       InterfaceObserver* observer = new FunctionObserver(function);
-      
+
       return (AddObserver(observer));
     }
 
@@ -102,17 +97,17 @@ namespace Observatory
 
       for (; toDel != end ; ++toDel)
       {
-	if (*toDel == id)
-	{
-	  InterfaceObserver* observer = *toDel;
+        if (*toDel == id)
+        {
+          InterfaceObserver* observer = *toDel;
 
-	  if (toDel == _iterator)
-	    _iterator = _observers.erase(toDel);
-	  else
-	    _observers.erase(toDel);
-	  delete observer;
-	  break ;
-	}
+          if (toDel == _iterator)
+            _iterator = _observers.erase(toDel);
+          else
+            _observers.erase(toDel);
+          delete observer;
+          break ;
+        }
       }
     }
 
@@ -125,7 +120,7 @@ namespace Observatory
     ObserverId AddObserver(InterfaceObserver* observer)
     {
       ObserverId id = observer;
-      
+
       _observers.push_back(observer);
       return (id);
     }
@@ -134,78 +129,198 @@ namespace Observatory
     Observers                    _observers;
   };
 
-  /*! \class ObserverHandlers
-   * \brief Manager for easy disconnection of Observers using Signal
-   */
-  class ObserverHandlers
+  template<typename P1, typename P2>
+  class Signal<P1 (P2)>
   {
-    struct IHandler
+    struct InterfaceObserver
     {
-      virtual ~IHandler() {}
-      virtual void Disconnect(void) = 0;
-
-      bool operator==(ObserverId right) const { return (id == right); }
+      virtual ~InterfaceObserver() {}
+      virtual void operator()(P2 p2) = 0;
 
       ObserverId id;
     };
 
-    template<class Signal>
-    struct Handler : public IHandler
+    template<typename ObserverClass>
+    class Observer : public InterfaceObserver
     {
-      Handler(Signal& signal, ObserverId id) : signal(signal) { this->id = id; }
+    public:
+      typedef void (ObserverClass::*Method)(P2);
 
-      void Disconnect(void) { signal.Disconnect(id); }
+      Observer(ObserverClass& observer, Method method) : _observer(observer), _method(method) {}
 
-      Signal&    signal;
+      void operator()(P2 p2) { (_observer.*_method)(p2); }
+
+    private:
+      ObserverClass& _observer;
+      Method         _method;
     };
 
-    typedef std::list<IHandler*> Handlers;
-
+    typedef std::list<InterfaceObserver*> Observers;
   public:
-    ~ObserverHandlers() { DisconnectAll(); }
-
-    template<typename Signal>
-    ObserverId operator()(Signal& signal, ObserverId id)
+    ~Signal()
     {
-      IHandler* handler = new Handler<Signal>(signal, id);
-
-      _handlers.push_back(handler);
-      return (id);
-    }
-
-    void DisconnectAll()
-    {
-      Handlers::iterator it;
-      Handlers::iterator end = _handlers.end();
-
-      while ((it = _handlers.begin()) != end)
-        DisconnectAndRemove(it);
-    }
-
-    void Disconnect(ObserverId id)
-    {
-      Handlers::iterator it  = _handlers.begin();
-      Handlers::iterator end = _handlers.end();
+      typename Observers::iterator it  = _observers.begin();
+      typename Observers::iterator end = _observers.end();
 
       for (; it != end ; ++it)
+        delete *it;
+    }
+
+    void       Emit(P2 p2)
+    {
+      _iterator = _observers.begin();
+      while (_iterator != _observers.end())
       {
-        if ((*it)->id == id)
+        typename Observers::iterator trace = _iterator;
+
+        (**_iterator)(p2);
+        if (trace == _iterator)
+          _iterator++;
+      }
+    }
+
+    template<typename ObserverClass>
+    ObserverId Connect(ObserverClass& observerInstance, typename Observer<ObserverClass>::Method method)
+    {
+      InterfaceObserver* observer = new Observer<ObserverClass>(observerInstance, method);
+
+      return (AddObserver(observer));
+    }
+
+    void       Disconnect(ObserverId id)
+    {
+      typename Observers::iterator toDel = _observers.begin();
+      typename Observers::iterator end   = _observers.end();
+
+      for (; toDel != end ; ++toDel)
+      {
+        if (*toDel == id)
         {
-          DisconnectAndRemove(it);
+          InterfaceObserver* observer = *toDel;
+
+          if (toDel == _iterator)
+            _iterator = _observers.erase(toDel);
+          else
+            _observers.erase(toDel);
+          delete observer;
           break ;
         }
       }
     }
 
-  private:
-    void DisconnectAndRemove(Handlers::iterator it)
+    inline int ObserverCount(void) const
     {
-      (*it)->Disconnect();
-      delete (*it);
-      _handlers.erase(it);
+      return (_observers.size());
     }
 
-    Handlers _handlers;
+  private:
+    ObserverId AddObserver(InterfaceObserver* observer)
+    {
+      ObserverId id = observer;
+
+      _observers.push_back(observer);
+      return (id);
+    }
+
+    typename Observers::iterator _iterator;
+    Observers                    _observers;
+  };
+
+  template<typename P1, typename P2, typename P3>
+  class Signal<P1 (P2, P3)>
+  {
+    struct InterfaceObserver
+    {
+      virtual ~InterfaceObserver() {}
+      virtual void operator()(P2 p2, P3 p3) = 0;
+
+      ObserverId id;
+    };
+
+    template<typename ObserverClass>
+    class Observer : public InterfaceObserver
+    {
+    public:
+      typedef void (ObserverClass::*Method)(P2, P3);
+
+      Observer(ObserverClass& observer, Method method) : _observer(observer), _method(method) {}
+
+      void operator()(P2 p2, P3 p3) { (_observer.*_method)(p2, p3); }
+
+    private:
+      ObserverClass& _observer;
+      Method         _method;
+    };
+
+    typedef std::list<InterfaceObserver*> Observers;
+  public:
+    ~Signal()
+    {
+      typename Observers::iterator it  = _observers.begin();
+      typename Observers::iterator end = _observers.end();
+
+      for (; it != end ; ++it)
+        delete *it;
+    }
+
+    void       Emit(P2 p2, P3 p3)
+    {
+      _iterator = _observers.begin();
+      while (_iterator != _observers.end())
+      {
+        typename Observers::iterator trace = _iterator;
+
+        (**_iterator)(p2, p3);
+        if (trace == _iterator)
+          _iterator++;
+      }
+    }
+
+    template<typename ObserverClass>
+    ObserverId Connect(ObserverClass& observerInstance, typename Observer<ObserverClass>::Method method)
+    {
+      InterfaceObserver* observer = new Observer<ObserverClass>(observerInstance, method);
+
+      return (AddObserver(observer));
+    }
+
+    void       Disconnect(ObserverId id)
+    {
+      typename Observers::iterator toDel = _observers.begin();
+      typename Observers::iterator end   = _observers.end();
+
+      for (; toDel != end ; ++toDel)
+      {
+        if (*toDel == id)
+        {
+          InterfaceObserver* observer = *toDel;
+
+          if (toDel == _iterator)
+            _iterator = _observers.erase(toDel);
+          else
+            _observers.erase(toDel);
+          delete observer;
+          break ;
+        }
+      }
+    }
+
+    inline int ObserverCount(void) const
+    {
+      return (_observers.size());
+    }
+
+  private:
+    ObserverId AddObserver(InterfaceObserver* observer)
+    {
+      ObserverId id = observer;
+
+      _observers.push_back(observer);
+      return (id);
+    }
+
+    typename Observers::iterator _iterator;
+    Observers                    _observers;
   };  
 }
 

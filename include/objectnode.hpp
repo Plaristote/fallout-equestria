@@ -13,16 +13,16 @@ class Character;
 class ObjectNode : public MapElement
 {
 public:
-  static Observatory::Signal<ObjectNode*> ActionUse;
-  static Observatory::Signal<ObjectNode*> ActionUseObjectOn;
-  static Observatory::Signal<ObjectNode*> ActionUseSkillOn;
-  static Observatory::Signal<ObjectNode*> ActionTalkTo;
+  static Observatory::Signal<void (ObjectNode*)> ActionUse;
+  static Observatory::Signal<void (ObjectNode*)> ActionUseObjectOn;
+  static Observatory::Signal<void (ObjectNode*)> ActionUseSkillOn;
+  static Observatory::Signal<void (ObjectNode*)> ActionTalkTo;
 
   struct Interaction
   {
-    std::string                       name;
-    ObjectNode*                       objectNode;
-    Observatory::Signal<ObjectNode*>* triggered;
+    std::string                              name;
+    ObjectNode*                              objectNode;
+    Observatory::Signal<void (ObjectNode*)>* triggered;
   };
   typedef std::list<Interaction> Interactions;
   

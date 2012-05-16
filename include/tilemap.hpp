@@ -18,6 +18,7 @@ public:
   {
     MapTile(NodePath nodePath) : nodePath(nodePath) { hasHWall = false; hasVWall = false; }
     void                operator=(const NodePath& toSet) { nodePath = toSet; hasHWall = false; hasVWall = false; }
+
     operator NodePath() const { return (nodePath); }
 
     NodePath            nodePath;

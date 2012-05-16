@@ -276,7 +276,7 @@ Pathfinding* Tilemap::GeneratePathfinding(MapElement* pathseeker, int max_depth)
         MapTile             topLeft     = GetTile(x - 1, y - 1);
         Pathfinding::Node&  topLeftNode = pf.GetNode(x - 1, y - 1);
 
-        topLeftNode.arcs.push_back(Pathfinding::Node::Arc(&node, 1));
+        topLeftNode.arcs.push_back(Pathfinding::Node::Arc(&node, 1.1));
         node.arcs.push_back(Pathfinding::Node::Arc(&topLeftNode, 1.1));
       }
 
@@ -289,12 +289,23 @@ Pathfinding* Tilemap::GeneratePathfinding(MapElement* pathseeker, int max_depth)
         {
           Pathfinding::Node& topRightNode = pf.GetNode(x + 1, y - 1);
 
-          topRightNode.arcs.push_back(Pathfinding::Node::Arc(&node, 1));
+          topRightNode.arcs.push_back(Pathfinding::Node::Arc(&node, 1.1));
           node.arcs.push_back(Pathfinding::Node::Arc(&topRightNode, 1.1));
         }
       }
     }
   }
+
+  for (unsigned int x = beg_x ; x < end_x ; ++x)
+  {
+    for (unsigned int y = beg_y ; y < end_y ; ++y)
+    {
+      Pathfinding::Node& node = pf.GetNode(x, y);
+      
+      std::cout << "Node " << node.x << "/" << node.y << " has " << node.arcs.size() << " successors" << std::endl;
+    }
+  }
+  
 
   // Check all the MapElement for their own collisions
   // TODO Optimize by checking if the MapElement is part of the computed zone.

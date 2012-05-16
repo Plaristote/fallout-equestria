@@ -1,6 +1,5 @@
 #include "character.hpp"
 #include "scene_camera.hpp"
-#define ABS(x) ((x) < 0 ? -(x) : (x))
 
 using namespace std;
 
@@ -14,10 +13,10 @@ bool Character::GoTo(int x, int y)
   
   _path.clear();
 
-  int          pf_depth = (fabs(float((_mapPos.get_x() - x))) + fabs(float(((_mapPos.get_y() - y)))));
-  Pathfinding* pf       = _map.GeneratePathfinding(this, pf_depth);
+  //int          pf_depth = (fabs(float((_mapPos.get_x() - x))) + fabs(float(((_mapPos.get_y() - y)))));
+  Pathfinding* pf       = _map.GeneratePathfinding(this/*, pf_depth*/);
 
-  if (!(pf->FindPath(_path, _mapPos.get_x(), _mapPos.get_y(), x, y, pf_depth * 2 + 1)))
+  if (!(pf->FindPath(_path, _mapPos.get_x(), _mapPos.get_y(), x, y)))
   {
     cout << "Character didn't find any path between " << _mapPos.get_x() << "," << _mapPos.get_y() << " and " << x << "," << y << endl;
     success = false;
