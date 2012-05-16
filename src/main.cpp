@@ -342,6 +342,7 @@ int main(int argc, char *argv[])
 
   window->get_render().set_shader_auto();
 
+
     //do the main loop, equal to run() in python
   framework.main_loop();
     //close the window framework
