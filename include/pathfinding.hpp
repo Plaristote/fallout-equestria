@@ -11,7 +11,7 @@ public:
   struct Node;
 private:
   typedef AstarPathfinding<Pathfinding::Node> Astar;
-  typedef typename Astar::Node                AstarNode;
+  typedef Astar::Node                AstarNode;
   typedef std::vector<AstarNode*>             AstarNodes;
 public:
 

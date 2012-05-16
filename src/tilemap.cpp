@@ -249,7 +249,7 @@ Pathfinding* Tilemap::GeneratePathfinding(MapElement* pathseeker, int max_depth)
       }
 
       // To the top and left
-      if (x != 0 and y != 0 and !tile.hasHWall and !tile.hasVWall and !(GetTile(x - 1, y).hasVWall))
+      if ((x != 0) && (y != 0) && (!tile.hasHWall) && (!tile.hasVWall) && (!(GetTile(x - 1, y).hasVWall)))
       {
         MapTile             topLeft     = GetTile(x - 1, y - 1);
         Pathfinding::Node&  topLeftNode = pf.GetNode(x - 1, y - 1);
@@ -259,11 +259,11 @@ Pathfinding* Tilemap::GeneratePathfinding(MapElement* pathseeker, int max_depth)
       }
 
       // To the top and right
-      if (y != 0 and x + 1 != _size.get_x() and !tile.hasVWall)
+      if ((y != 0) && (x + 1 != _size.get_x()) && (!tile.hasVWall))
       {
         MapTile right    = GetTile(x + 1, y);
 
-        if (!right.hasHWall and !right.hasVWall)
+        if ((!right.hasHWall) && (!right.hasVWall))
         {
           Pathfinding::Node& topRightNode = pf.GetNode(x + 1, y - 1);
 

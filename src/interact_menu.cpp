@@ -48,9 +48,8 @@ InteractMenu::InteractMenu(WindowFramework* window, ObjectNode& object)
     defButNp.set_pos(position.get_x(), 0, position.get_y());
     // Set the position for the next iteration
     position.set_y(position.get_y() - ratio / 5);
-
     framework.define_key(button->get_click_event(MouseButton::one()), "button press", &InteractMenu::ButtonClicked, &interaction);
-    _buttons.push_back(ButtonStorage(button, defButNp));
+    _buttons.push_back(InteractMenu::ButtonStorage(button, defButNp));
   });
   cout << "Done opening menu" << endl;
 }
