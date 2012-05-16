@@ -11,7 +11,7 @@ void Parser::ParseString(DataBranch* value)
 
   for (; _it < _str.length() ; ++_it)
   {
-    if (_str[_it] == '"' and _str[_it] != '\\')
+    if ((_str[_it] == '"') && (_str[_it] != '\\'))
       break ;
   }
   if (_it < _str.length())

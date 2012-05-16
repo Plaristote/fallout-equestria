@@ -200,7 +200,7 @@ private:
 
 struct LevelObjectLoader
 {
-  typedef function<ObjectNode*(WindowFramework*, Tilemap&, Data)> Loader;
+  //typedef function<ObjectNode*(WindowFramework*, Tilemap&, Data)> Loader;
 
   LevelObjectLoader(string name, Loader func) : name(name), func(func) {}
   
