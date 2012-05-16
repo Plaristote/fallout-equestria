@@ -66,14 +66,6 @@ public:
     {
       return (Pathfinding::Heuristic(*this, goal));
     }
-    bool       IsGoal(Node& goal) const
-    {
-      return (goal == *this);
-    }
-    bool       IsSameState(Node& other) const
-    {
-      return (other == *this);
-    }
 
     void       DeleteArc(const Node& other)
     {

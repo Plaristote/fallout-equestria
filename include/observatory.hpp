@@ -9,7 +9,7 @@ namespace Observatory
 {
   typedef void* ObserverId;
 
-  template<typename p1 = void>
+  template<class p1 = void>
   class Signal
   {
     struct InterfaceObserver
@@ -36,7 +36,7 @@ namespace Observatory
         Function _function;
     };
 
-    template<typename ObserverClass>
+    template<class ObserverClass>
     class Observer : public InterfaceObserver
     {
     public:
@@ -75,7 +75,7 @@ namespace Observatory
       }
     }
 
-    template<typename ObserverClass>
+    template<class ObserverClass>
     ObserverId Connect(ObserverClass& observerInstance, typename Observer<ObserverClass>::Method method)
     {
       InterfaceObserver* observer = new Observer<ObserverClass>(observerInstance, method);
@@ -129,7 +129,7 @@ namespace Observatory
     Observers                    _observers;
   };
 
-  template<typename P1, typename P2>
+  template<class P1, class P2>
   class Signal<P1 (P2)>
   {
     struct InterfaceObserver
@@ -226,7 +226,7 @@ namespace Observatory
     Observers                    _observers;
   };
 
-  template<typename P1, typename P2, typename P3>
+  template<class P1, class P2, class P3>
   class Signal<P1 (P2, P3)>
   {
     struct InterfaceObserver

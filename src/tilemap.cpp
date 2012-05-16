@@ -27,6 +27,29 @@ void Tilemap::Load(Data data)
 
   Data::iterator currentTile = tilemap.begin();
 
+  // CREATING GROUND GROUPS
+  NodePath _groundNode = _window->get_render().attach_new_node("Ground Node");
+
+  std::vector<NodePath> _groundGroups;
+  unsigned int          _groupsSize;
+
+  if (data["zoneSizes"].Nil())
+    _groupsSize = 20;
+  else
+    _groupsSize = data["zoneSizes"];
+  
+  for (unsigned int   y = 0 ; y < _groupsSize ; ++y)
+  {
+    for (unsigned int x = 0 ; x < _groupsSize ; ++x)
+    {
+      std::stringstream stream;
+
+      stream << x << "," << y;
+      _groundGroups.push_back(_window->get_render().attach_new_node("Ground Grouping Node " + stream.str()));
+    }
+  }
+  // END GROUND GROUPS
+
   for (unsigned int   y = 0 ; y < _size.get_y() ; ++y)
   {
     for (unsigned int x = 0 ; x < _size.get_x() ; ++x)
@@ -44,6 +67,11 @@ void Tilemap::Load(Data data)
         newNode.set_texture(texture);
       }
       _nodes.push_back(newNode);
+
+      // Compute zone
+      unsigned int zoneIt = y + (x / _groupsSize);
+      newNode.reparent_to(_groundGroups[zoneIt]);
+
       ++currentTile;
 
       // Set NodePath tags
@@ -56,6 +84,11 @@ void Tilemap::Load(Data data)
       newNode.set_tag("pos_y", stream2.str());
     }
   }
+
+  std::for_each(_groundGroups.begin(), _groundGroups.end(), [](NodePath node)
+  {
+    //node.flatten_medium();
+  });
 
   // CEILING
   Data ceiling = data["ceiling"];
