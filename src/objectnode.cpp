@@ -42,7 +42,7 @@ void ObjectNode::ForceCurrentCase(int x, int y)
 {
   const Tilemap::MapTile& tile =_map.GetTile(x, y);
 
-  LPoint3 tilePos = tile.nodePath.get_pos();
+  LPoint3 tilePos = tile.position;
   LPoint3 charPos = _root.get_pos();
 
   charPos.set_x(tilePos.get_x());

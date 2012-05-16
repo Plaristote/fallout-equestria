@@ -12,7 +12,10 @@
 # include <iostream>
 # include <assert.h>
 
-using namespace std;
+/*
+ * A bit of documentation so you don't have to read this gorgeous piece of code:
+ * UserState must 
+ */
 
 template <class UserState>
 class AstarPathfinding
@@ -82,26 +85,16 @@ public:
 
     _state = Searching;
 
-    // Initialise the AStar specific parts of the Start Node
-    // The user only needs fill out the state information
-
-    std::cout << "Start coordinates are " << Start.x << "/" << Start.y << std::endl;
-    std::cout << "Goal  coordinates are " << Goal.x << "/" << Goal.y << std::endl;
-
-    std::cout << "Start coordinates are " << _start->userNode.x << "/" << _start->userNode.y << std::endl;
-    std::cout << "Goal  coordinates are " << _goal->userNode.x << "/" << _goal->userNode.y << std::endl;
-
     _start->g = 0;
     _start->h = _start->userNode.GoalDistanceEstimate( _goal->userNode );
     _start->f = _start->g + _start->h;
     _start->parent = 0;
 
     // Push the start node on the Open list
-
-    _openList.push_back( _start ); // heap now unsorted
+    _openList.push_back(_start);
 
     // Sort back element into heap
-    push_heap( _openList.begin(), _openList.end(), FunctorCompareNode() );
+    std::push_heap( _openList.begin(), _openList.end(), FunctorCompareNode() );
 
     // Initialise counter for search steps
     _nSteps = 0;

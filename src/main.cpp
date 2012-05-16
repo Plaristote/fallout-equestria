@@ -208,9 +208,18 @@ struct LevelObjectLoader
   Loader func;
 };
 
+#include <panda3d/pStatClient.h>
+
+float ceilingCurrentTransparency;
+
 Scene::Scene(WindowFramework* window, const std::string& filename) : _window(window), _mouse(window),
   _camera(window, window->get_camera_group()), _tilemap(window)
 {
+  ceilingCurrentTransparency = 1.f;
+  
+  if (!(PStatClient::connect("localhost", 5185)))
+    cout << "Can't connect to PStat client" << endl;
+  
   ObjectNode::ActionUse.Connect(*this, &Scene::CallbackActionUse);
   _currentInteractMenu = 0;
 
@@ -278,35 +287,44 @@ Scene::~Scene()
   AsyncTaskManager::get_global_ptr()->remove(this);
 }
 
-float ceilingCurrentTransparency = 1.f;
-
 AsyncTask::DoneStatus Scene::do_task(void)
 {
+  // FPS COUNTER
+  {
+    static Timer        fpsTimer;
+    static unsigned int fpsCounter = 0;
+
+    if (fpsTimer.GetElapsedTime() > 1.f)
+    {
+      cout << "[FPS Count]" << fpsCounter << endl;
+      cout << "[NodeCount]" << _window->get_render().count_num_descendants() << endl;
+      fpsTimer.Restart();
+      fpsCounter = 0;
+    }
+    fpsCounter++;
+  }
+  
   float elapsedTime = _timer.GetElapsedTime();
 
   _mouse.Run();
   _camera.Run(elapsedTime);
-
-  MapElement::Position  playerPos = (*(_characters.begin()))->GetPosition();
-  Tilemap::CeilingTile& ceiling   =_tilemap.GetCeiling(playerPos.x, playerPos.y);
-
- // if (ceiling.isCeiling)
- //   ceiling.SetTransparent(false);
 
   for_each(_objects.begin(), _objects.end(), [this, elapsedTime](ObjectNode* object)
   {
     object->Run(elapsedTime);
   });
 
-  playerPos = (*(_characters.begin()))->GetPosition();
-  ceiling   = _tilemap.GetCeiling(playerPos.x, playerPos.y);
+  MapElement::Position        playerPos = (*(_characters.begin()))->GetPosition();
+  const Tilemap::CeilingTile& ceiling   =_tilemap.GetCeiling(playerPos.x, playerPos.y);
 
-  if (ceiling.isCeiling && ceilingCurrentTransparency >= 0.f)
+  if (ceiling.isDefined && ceilingCurrentTransparency >= 0.f)
   {
+    if (ceilingCurrentTransparency >= 1.f)
+      ceilingCurrentTransparency = 1.f;
     ceilingCurrentTransparency -= 1.f * elapsedTime;
     _tilemap.SetCeilingTransparent(ceilingCurrentTransparency);
   }
-  else if (!ceiling.isCeiling && ceilingCurrentTransparency <= 1.f)
+  else if (!ceiling.isDefined && ceilingCurrentTransparency <= 1.f)
   {
     ceilingCurrentTransparency += 1.f * elapsedTime;
     _tilemap.SetCeilingTransparent(ceilingCurrentTransparency);

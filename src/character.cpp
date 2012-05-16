@@ -71,8 +71,8 @@ void Character::DoMovement(float elapsedTime)
   else if (dir & MotionBottom)
     pos.set_y(pos.get_y() - movement);
 
-  NodePath tile    = _map.GetTile(next.x, next.y);
-  LPoint3  tilePos = tile.get_pos();
+  Tilemap::MapTile& tile    = _map.GetTile(next.x, next.y);
+  LPoint3           tilePos = tile.position;
 
   if (ABS(tilePos.get_x() - pos.get_x()) <= movement)
     pos.set_x(tilePos.get_x());

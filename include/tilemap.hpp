@@ -14,25 +14,35 @@
 class Tilemap
 {
 public:
-  struct MapTile
+  struct Tile
   {
-    MapTile(NodePath nodePath) : nodePath(nodePath) { hasHWall = false; hasVWall = false; }
+    Tile(NodePath nodePath) : nodePath(nodePath), isDefined(true) {}
+    Tile(void)              : isDefined(false)                    {}
+    
+    bool     isDefined;
+    NodePath nodePath;
+    LPoint3  position;
+  };
+  
+  struct MapTile : public Tile
+  {
+    MapTile(NodePath nodePath) : Tile(nodePath) { hasHWall = false; hasVWall = false; }
+    MapTile(void)              : Tile()         { hasHWall = false; hasVWall = false; }
+    MapTile(const Tile& tile)  : Tile(tile)     { hasHWall = false; hasVWall = false; }
+
     void                operator=(const NodePath& toSet) { nodePath = toSet; hasHWall = false; hasVWall = false; }
 
     operator NodePath() const { return (nodePath); }
 
-    NodePath            nodePath;
     NodePath            hWall, vWall;
     bool                hasHWall, hasVWall;
   };
 
-  struct CeilingTile
+  struct CeilingTile : public Tile
   {
-    CeilingTile(NodePath nodePath) : isCeiling(true), nodePath(nodePath) {}
-    CeilingTile(void)              : isCeiling(false)                    {}
-
-    bool                    isCeiling;
-    NodePath                nodePath;
+    CeilingTile(NodePath nodePath) : Tile(nodePath) {}
+    CeilingTile(void)              : Tile()         {}
+    CeilingTile(const Tile& tile)  : Tile(tile)     {}
   };
   
   Tilemap(WindowFramework* window);
@@ -42,7 +52,7 @@ public:
   LPoint2               GetSize(void) const { return (_size); }
   const MapTile&        GetTile(unsigned int x, unsigned int y) const;
   MapTile&              GetTile(unsigned int x, unsigned int y);
-  CeilingTile&          GetCeiling(unsigned int x, unsigned int y);
+  const CeilingTile&    GetCeiling(unsigned int x, unsigned int y) const;
   void                  AddMapElement(MapElement* e) { _mapElements.push_back(e); }
   void                  DelMapElement(MapElement* e)
   {
@@ -57,11 +67,25 @@ public:
   Pathfinding*          GeneratePathfinding(MapElement*, int max_depth = 0) const;
 
 private:
+  template<class NodeType>
+  void                  LoadTiles(string tileType, Data tileset, Data map, LPoint3 posModificator, NodePath fatherGroup, vector<NodePath>& groups, vector<NodeType>& storage);
+
+  void                  LoadWalls(Data wallset, Data map, bool horizontal);
+  
   float                    _scale;
+  unsigned                 _groupSize;
   WindowFramework*         _window;
   std::vector<MapTile>     _nodes;
   std::vector<CeilingTile> _ceiling;
+
+  // Used for grouping tiles before flattening them
+  std::vector<NodePath>    _ceilingGroup;
+  std::vector<NodePath>    _groundGroup;
+
+  // Groups every ceiling group
   NodePath                 _ceilingNode;
+  NodePath                 _groundNode;
+
   LPoint2                  _size;
   std::list<MapElement*>   _mapElements;
 };
