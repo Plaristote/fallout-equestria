@@ -214,8 +214,6 @@ Pathfinding* Tilemap::GeneratePathfinding(MapElement* pathseeker, int max_depth)
   if (beg_y <  0)             beg_y = 0;
   if (end_y >= _size.get_y()) end_y = _size.get_y();
 
-  cout << "Only checking collision for zone (" << beg_x << "," << beg_y << ") to (" << end_x << "," << end_y << ")" << endl;
-
   // Add every needed arc for a given zone of the map to the pathfinder
   for (unsigned int x = beg_x ; x < end_x ; ++x)
   {

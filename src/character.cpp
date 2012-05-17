@@ -3,12 +3,33 @@
 
 using namespace std;
 
+bool Character::IsArcAccessible(int beg_x, int beg_y, int dest_x, int dest_y)
+{
+  if (beg_x == dest_x && dest_y == dest_y)
+    return (true);
+  bool success = false;
+
+  Pathfinding*      pf    = _map.GeneratePathfinding(this, 1);
+  Pathfinding::Node node1 = pf->GetNode(beg_x,  beg_y);
+  Pathfinding::Node node2 = pf->GetNode(dest_x, dest_y);
+
+  Pathfinding::Node::Arcs::iterator it, end;
+
+  for (it = node1.arcs.begin(), end = node1.arcs.end() ; it != end ; ++it)
+  {
+    if ((*it).first->x == node2.x && (*it).first->y == node2.y)
+    {
+      success = true;
+      break ;
+    }
+  }
+  return (success);
+}
+
 bool Character::GoTo(int x, int y)
 {
   bool success = true;
 
-  // TODO Replace this with something moving the character to the closest case instead of the last one
-  //      Or simply delete if future-me finds a better way.
   ForceClosestCase();
 
   _path.clear();
@@ -45,11 +66,31 @@ void Character::Run(float elapsedTime)
     DoMovement(elapsedTime);
 }
 
+Pathfinding::Node Character::GetCurrentDestination(void) const
+{
+  if (_path.size())
+  {
+    DirectionPath::const_iterator last = --(_path.end());
+
+    return (*last);
+  }
+  return (Pathfinding::Node());
+}
+
 void Character::DoMovement(float elapsedTime)
 {
   unsigned char     dir  = MotionNone;
   Pathfinding::Node next = *(_path.begin());
 
+  if (!(IsArcAccessible(_mapPos.get_x(), _mapPos.get_y(), next.x, next.y)))
+  {
+    Pathfinding::Node dest = GetCurrentDestination();
+    
+    ForceCurrentCase(_mapPos.get_x(), _mapPos.get_y());
+    GoTo(dest.x, dest.y);
+    return ;
+  }
+  
   if      (_mapPos.get_x() > next.x)
     dir |= MotionLeft;
   else if (_mapPos.get_x() < next.x)
