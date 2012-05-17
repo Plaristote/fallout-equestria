@@ -48,6 +48,7 @@ public:
   };
   
   Tilemap(WindowFramework* window);
+  ~Tilemap();
 
   void                  Load(Data data);
 
@@ -66,13 +67,14 @@ public:
 
   NodePath              GetCeilingNode(void) const { return (_ceilingNode); }
   void                  SetCeilingTransparent(float value);
-  Pathfinding*          GeneratePathfinding(MapElement*, int max_depth = 0) const;
+
+  Pathfinding*          SetupPathfinding(MapElement*, int max_depth = 0) const;
+  void                  SetdownPathfinding(MapElement*, int max_depth = 0) const;
 
 private:
-  template<class NodeType>
-  void                  LoadTiles(string tileType, Data tileset, Data map, LPoint3 posModificator, NodePath fatherGroup, vector<NodePath>& groups, vector<NodeType>& storage);
-
-  void                  LoadWalls(Data wallset, Data map, bool horizontal);
+  template<class NodeType> void LoadTiles(string tileType, Data tileset, Data map, LPoint3 posModificator, NodePath fatherGroup, vector<NodePath>& groups, vector<NodeType>& storage);
+  void                          LoadWalls(Data wallset, Data map, bool horizontal);
+  void                          LoadPathfinding(void);
   
   float                    _scale;
   unsigned                 _groupSize;
@@ -90,6 +92,9 @@ private:
 
   LPoint2                  _size;
   std::list<MapElement*>   _mapElements;
+
+  // Pathfinding Context
+  Pathfinding*             _pf;
 };
 
 #endif

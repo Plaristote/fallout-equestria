@@ -106,21 +106,21 @@ public:
 
   void  GetSize(int& x, int& y) const { x = _sizex; y = _sizey; }
 
-  void  ConnectNodes(Node& first, Node& second, float cost = 1.f)
+  static void  ConnectNodes(Node& first, Node& second, float cost = 1.f)
   {
     first.arcs.push_back(Pathfinding::Node::Arc(&second, cost));
     second.arcs.push_back(Pathfinding::Node::Arc(&first, cost));
   }
 
-  void  DisconnectNodes(int x1, int y1, int x2, int y2) { DisconnectNodes(GetNode(x1, y1), GetNode(x2, y2)); }
-  void  DisconnectNodes(Node& first, Node& second)
+  void         DisconnectNodes(int x1, int y1, int x2, int y2) { DisconnectNodes(GetNode(x1, y1), GetNode(x2, y2)); }
+  static void  DisconnectNodes(Node& first, Node& second)
   {
     first.DeleteArc(second);
     second.DeleteArc(first);
   }
 
-  void  DisconnectNode(int x, int y) { DisconnectNode(GetNode(x, y)); }
-  void  DisconnectNode(Node& node)
+  void         DisconnectNode(int x, int y) { DisconnectNode(GetNode(x, y)); }
+  static void  DisconnectNode(Node& node)
   {
     Node::Arcs::iterator cur = node.arcs.begin();
     Node::Arcs::iterator end = node.arcs.end();

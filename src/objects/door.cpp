@@ -47,11 +47,17 @@ void  Door::ProcessCollision(Pathfinding* map)
 {
   if (!_opened)
   {
-    Pathfinding::Node& node = map->GetNode(_mapPos.get_x(), _mapPos.get_y());
+    Pathfinding::Node&                node = map->GetNode(_mapPos.get_x(), _mapPos.get_y());
+    Pathfinding::Node*                toDc;
+    Pathfinding::Node::Arcs::iterator it;
 
     if (_vertical)
-      map->DisconnectNodes(node, map->GetNode(_mapPos.get_x(), _mapPos.get_y() - 1));
+      toDc = &(map->GetNode(_mapPos.get_x(), _mapPos.get_y() - 1));
     else
-      map->DisconnectNodes(node, map->GetNode(_mapPos.get_x() - 1, _mapPos.get_y()));
+      toDc = &(map->GetNode(_mapPos.get_x() - 1, _mapPos.get_y()));
+    it = std::find(node.arcs.begin(), node.arcs.end(), toDc);
+
+    if (it != node.arcs.end())
+      WithdrawArc(node, *it);
   }
 }

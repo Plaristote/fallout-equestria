@@ -2,6 +2,8 @@
 #include <iostream>
 #include <panda3d/pStatCollector.h>
 
+# define MAX_PATHFINDING_ITERATIONS 500
+
 using namespace std;
 
 bool Pathfinding::FindPath(std::list<Node>& path, int beg_x, int beg_y, int dest_x, int dest_y)
@@ -10,9 +12,10 @@ bool Pathfinding::FindPath(std::list<Node>& path, int beg_x, int beg_y, int dest
   Node&        beg = GetNode(beg_x, beg_y);
   Node&        end = GetNode(dest_x, dest_y);
   unsigned int state;
+  unsigned int max_iterations = 0;
 
   astar.SetStartAndGoalStates(beg, end);
-  while ((state = astar.SearchStep()) == Astar::Searching);
+  while ((state = astar.SearchStep()) == Astar::Searching && max_iterations++ < MAX_PATHFINDING_ITERATIONS);
 
   if (state == Astar::Succeeded)
   {

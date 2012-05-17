@@ -8,10 +8,16 @@ using namespace std;
 
 Tilemap::Tilemap(WindowFramework* window) : _window(window)
 {
+  _pf          = 0;
   _scale       = WORLD_SCALE;
   _groupSize   = DEFAULT_GROUP_SIZE;
   _groundNode  = window->get_render().attach_new_node("Ground  Main Node");
   _ceilingNode = window->get_render().attach_new_node("Ceiling Main Node");
+}
+
+Tilemap::~Tilemap()
+{
+  if (_pf) delete _pf;
 }
 
 template<class NodeType>
@@ -159,6 +165,10 @@ void Tilemap::Load(Data data)
 
   LoadWalls(data["wallset"], data["hwalls"], true);
   LoadWalls(data["wallset"], data["vwalls"], false);
+  cout << "Tilemap loading done" << endl;
+
+  LoadPathfinding();
+  cout << "Pathfinding loading done" << endl;
 }
 
 const Tilemap::MapTile& Tilemap::GetTile(unsigned int x, unsigned int y) const
@@ -192,65 +202,56 @@ const Tilemap::CeilingTile& Tilemap::GetCeiling(unsigned int x, unsigned int y) 
   return (_ceiling[0]);
 }
 
-// WARNING This is too long as well. And ugly. Optimize please.
-Pathfinding* Tilemap::GeneratePathfinding(MapElement* pathseeker, int max_depth) const
+void Tilemap::LoadPathfinding()
 {
-  std::vector<Pathfinding::Node>  pfNodes(_size.get_x() * _size.get_y());
-  Pathfinding&                    pf = *(new Pathfinding(pfNodes, _size.get_x(), _size.get_y()));
+  std::vector<Pathfinding::Node> pfNodes(_size.get_x() * _size.get_y());
 
-  // if no max_depth specified, build a pathfinder for the whole map  
-  if (max_depth == 0)
-    max_depth = (_size.get_x() > _size.get_y() ? _size.get_x() : _size.get_y());
-
-  // Calculate which part of the map must be built into the pathfinder
-  MapElement::Position seekerPos = pathseeker->GetPosition();
-  int beg_x = seekerPos.x - max_depth;
-  int end_x = seekerPos.x + max_depth + 1; // + 1 because loop will stop at -1
-  int beg_y = seekerPos.y - max_depth;
-  int end_y = seekerPos.y + max_depth + 1; // same here
-
-  if (beg_x <  0)             beg_x = 0;
-  if (end_x >= _size.get_x()) end_x = _size.get_x();
-  if (beg_y <  0)             beg_y = 0;
-  if (end_y >= _size.get_y()) end_y = _size.get_y();
-
-  // Add every needed arc for a given zone of the map to the pathfinder
-  for (unsigned int x = beg_x ; x < end_x ; ++x)
+  _pf = new Pathfinding(pfNodes, _size.get_x(), _size.get_y());
+  for (unsigned int   x = 0 ; x < _size.get_x() ; ++x)
   {
-    for (unsigned int y = beg_y ; y < end_y ; ++y)
+    for (unsigned int y = 0 ; y < _size.get_y() ; ++y)
     {
-      Pathfinding::Node& node = pf.GetNode(x, y);
+      Pathfinding::Node& node = _pf->GetNode(x, y);
       MapTile            tile = GetTile(x, y);
 
       node.x = x;
       node.y = y;
-      
+
       if (x != 0 && !tile.hasHWall) // To the left
-        pf.ConnectNodes(node, pf.GetNode(x - 1, y), 1.f);
+        Pathfinding::ConnectNodes(node, _pf->GetNode(x - 1, y), 1.f);
       if (y != 0 && !tile.hasVWall) // To the top
-        pf.ConnectNodes(node, pf.GetNode(x, y - 1), 1.f);
+        Pathfinding::ConnectNodes(node, _pf->GetNode(x, y - 1), 1.f);
       if ((x != 0) && (y != 0) &&
           (!tile.hasHWall) && (!tile.hasVWall) && (!(GetTile(x - 1, y).hasVWall))) // To the top and left
-        pf.ConnectNodes(node, pf.GetNode(x - 1, y - 1), 1.1f);
+        Pathfinding::ConnectNodes(node, _pf->GetNode(x - 1, y - 1), 1.1f);
       if ((y != 0) && (x + 1 != _size.get_x()) && (!tile.hasVWall))// To the top and right
       {
         MapTile right    = GetTile(x + 1, y);
 
         if ((!right.hasHWall) && (!right.hasVWall))
-          pf.ConnectNodes(node, pf.GetNode(x + 1, y - 1), 1.1f);
+          Pathfinding::ConnectNodes(node, _pf->GetNode(x + 1, y - 1), 1.1f);
       }
     }
   }
+}
 
-  // Check all the MapElement for their own collisions
-  // TODO Optimize by checking if the MapElement is part of the computed zone.
-  //      This will require BoundingBoxes.
-  std::for_each(_mapElements.begin(), _mapElements.end(), [&pf, pathseeker](MapElement* element)
+Pathfinding* Tilemap::SetupPathfinding(MapElement* pathseeker, int max_depth) const
+{
+  std::for_each(_mapElements.begin(), _mapElements.end(), [this, pathseeker](MapElement* element)
   {
     if (element != pathseeker)
-      element->ProcessCollision(&pf);
+      element->ProcessCollision(_pf);
   });
-  return (&pf);
+  return (_pf);
+}
+
+void         Tilemap::SetdownPathfinding(MapElement* pathseeker, int max_depth) const
+{
+  std::for_each(_mapElements.begin(), _mapElements.end(), [this, pathseeker](MapElement* element)
+  {
+    if (element != pathseeker)
+      element->UnprocessCollision(_pf);
+  });
 }
 
 //

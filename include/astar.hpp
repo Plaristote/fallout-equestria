@@ -14,9 +14,12 @@
 
 /*
  * A bit of documentation so you don't have to read this gorgeous piece of code:
- * UserState must 
+ * UserState must implements at least
+ * bool  operator==()                                     : comparaison between two references to a UserState
+ * float GetCost(UserState)                               : the cost to go from a UserState to the one passed as parameter
+ * float GoalDistanceEstimate(UserState)                  : Heuristic between a UserState and another oneç
+ * std::list<UserState*> GetSuccessors(UserState* parent) : All the possible successor to the UserState, considering the parent
  */
-
 template <class UserState>
 class AstarPathfinding
 {
@@ -50,11 +53,11 @@ public:
       bool operator() ( const Node *x, const Node *y ) const { return (x->f > y->f); }
   };
 
-
   AstarPathfinding(void) : _state(NotInitialized), _cancelRequest(false)
   {
-    _start = 0;
-    _goal  = 0;
+    _allocateNodeIt = 0;
+    _start          = 0;
+    _goal           = 0;
   }
 
   ~AstarPathfinding()
@@ -311,6 +314,18 @@ private:
   }
 
 private:
+  inline Node* PedirNode(void)
+  {
+    _allocateNodeIt++;
+    return new Node();
+  }
+  
+  inline void ReleaseNode(Node* node)
+  {
+    delete node;
+    _allocateNodeIt--;
+  }
+  
   NodeList _openList;
   NodeList _closedList;
   State    _state;
@@ -319,6 +334,8 @@ private:
 
   Node*    _start;
   Node*    _goal;
+
+  unsigned int _allocateNodeIt;
 };
 
 #endif

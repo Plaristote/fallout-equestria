@@ -9,7 +9,7 @@ bool Character::IsArcAccessible(int beg_x, int beg_y, int dest_x, int dest_y)
     return (true);
   bool success = false;
 
-  Pathfinding*      pf    = _map.GeneratePathfinding(this, 1);
+  Pathfinding*      pf    = _map.SetupPathfinding(this, 1);
   Pathfinding::Node node1 = pf->GetNode(beg_x,  beg_y);
   Pathfinding::Node node2 = pf->GetNode(dest_x, dest_y);
 
@@ -23,26 +23,31 @@ bool Character::IsArcAccessible(int beg_x, int beg_y, int dest_x, int dest_y)
       break ;
     }
   }
+  _map.SetdownPathfinding(this, 1);
   return (success);
 }
 
+extern PT(ClockObject) globalClock;
+
 bool Character::GoTo(int x, int y)
 {
+  float ftime = globalClock->get_real_time();
   bool success = true;
 
   ForceClosestCase();
 
   _path.clear();
 
-  //int          pf_depth = (fabs(float((_mapPos.get_x() - x))) + fabs(float(((_mapPos.get_y() - y)))));
-  Pathfinding* pf       = _map.GeneratePathfinding(this/*, pf_depth*/);
+  Pathfinding* pf       = _map.SetupPathfinding(this);
 
   if (!(pf->FindPath(_path, _mapPos.get_x(), _mapPos.get_y(), x, y)))
   {
     cout << "Character didn't find any path between " << _mapPos.get_x() << "," << _mapPos.get_y() << " and " << x << "," << y << endl;
     success = false;
   }
-  delete pf;
+  _map.SetdownPathfinding(this);
+  float etime = globalClock->get_real_time();
+  cout << "Pathfinding time: " << (etime - ftime) << endl;
   return (success);
 }
 
