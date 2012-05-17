@@ -19,10 +19,8 @@ void  DroppedObject::InteractUse(Character* c)
   else
   {
     if (c->TryToReach(this))
-      std::cout << "[GameConsole] Can't reach !" << std::endl;
+      c->ReachedCase.Connect(*this, &DroppedObject::InteractUse);
     else
-    {
-      // TODO create a signal for teh character for when he's done moving, connect this method to it
-    }
+      std::cout << "[GameConsole] Can't reach !" << std::endl;
   }
 }

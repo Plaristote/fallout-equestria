@@ -26,18 +26,42 @@ Door::Door(WindowFramework* window, Tilemap& map, Data data) : ObjectNode(window
 
 void  Door::InteractUse(Character* c)
 {
-  if (c->CanReach(this, 1))
+  Position position = c->GetPosition();
+  bool     canReach = false;
+
+  if (_vertical)
+    canReach = (position.y == _mapPos.y || position.y == _mapPos.y - 1) && (position.x >= _mapPos.x - 1 && position.x <= _mapPos.x + 1);
+  else
+    canReach = (position.x == _mapPos.x || position.x == _mapPos.x - 1) && (position.y >= _mapPos.y - 1 && position.y <= _mapPos.y + 1);
+
+  if (canReach)
   {
-    cout << "Opening door" << endl;
+    cout << "[GameConsole] You opened a door" << endl;
     _opened = !_opened;
     this->SetCollisionEnabled(!_opened);
   }
   else
   {
-    bool success = c->TryToReach(this, 1);
+    Position positionToReach1, positionToReach2;
 
+    positionToReach1 = _mapPos;
+    if (_vertical)
+    {
+      positionToReach2.y = _mapPos.y - 1;
+      positionToReach2.x = _mapPos.x;
+    }
+    else
+    {
+      positionToReach2.y = _mapPos.y;
+      positionToReach2.x = _mapPos.x - 1;
+    }
+
+    bool success = c->GoTo(positionToReach1.x, positionToReach1.y);
+
+    if (!success)
+      success    = c->GoTo(positionToReach2.x, positionToReach2.y);
     if (success)
-      ;
+      c->ReachedCase.Connect(*this, &Door::InteractUse);
     else
       std::cout << "[GameConsole] Can't reach" << std::endl;
   }

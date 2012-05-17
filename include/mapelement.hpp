@@ -2,8 +2,7 @@
 # define MAPELEMENT_HPP
 
 # include <list>
-
-class Pathfinding;
+# include "pathfinding.hpp"
 
 class MapElement
 {
@@ -39,15 +38,29 @@ public:
   void     SetCollisionEnabled(bool enable) { _collisionEnabled = enable; }
 
   virtual void    ProcessCollision(Pathfinding* map);
+  void            UnprocessCollision(Pathfinding* map);
 
 protected:
   Position         _mapPos;
+
+  void            WithdrawArc(Pathfinding::Node& node, Pathfinding::Node::Arc arc);
 
 private:
   typedef std::list<Position> Positions;
 
   Positions        _occupedNodes;
   bool             _collisionEnabled;
+
+  struct WithdrawedArc
+  {
+    Pathfinding::Node*     from;
+    Pathfinding::Node*     to;
+    float                  weigth;
+  };
+
+  typedef std::list<WithdrawedArc> WithdrawedArcs;
+
+  WithdrawedArcs _withdrawedArcs;
 };
 
 #endif

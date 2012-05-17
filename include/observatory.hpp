@@ -111,6 +111,15 @@ namespace Observatory
       }
     }
 
+    void       DisconnectAll(void)
+    {
+      typename Observers::iterator toDel = _observers.begin();
+      typename Observers::iterator end   = _observers.end();
+
+      while (_observers.begin() != end)
+        _observers.erase(_observers.begin());
+    }
+
     inline int ObserverCount(void) const
     {
       return (_observers.size());
@@ -208,6 +217,15 @@ namespace Observatory
       }
     }
 
+    void       DisconnectAll(void)
+    {
+      typename Observers::iterator toDel = _observers.begin();
+      typename Observers::iterator end   = _observers.end();
+
+      while (_observers.begin() != end)
+        _observers.erase(_observers.begin());
+    }    
+
     inline int ObserverCount(void) const
     {
       return (_observers.size());
@@ -304,6 +322,15 @@ namespace Observatory
         }
       }
     }
+
+    void       DisconnectAll(void)
+    {
+      typename Observers::iterator toDel = _observers.begin();
+      typename Observers::iterator end   = _observers.end();
+
+      while (_observers.begin() != end)
+        _observers.erase(_observers.begin());
+    }    
 
     inline int ObserverCount(void) const
     {

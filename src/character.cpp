@@ -34,6 +34,8 @@ bool Character::GoTo(int x, int y)
   float ftime = globalClock->get_real_time();
   bool success = true;
 
+  if (_lookingForNewWay == false)
+    ReachedCase.DisconnectAll();
   ForceClosestCase();
 
   _path.clear();
@@ -92,7 +94,9 @@ void Character::DoMovement(float elapsedTime)
     Pathfinding::Node dest = GetCurrentDestination();
     
     ForceCurrentCase(_mapPos.get_x(), _mapPos.get_y());
+    _lookingForNewWay = true;
     GoTo(dest.x, dest.y);
+    _lookingForNewWay = false;
     return ;
   }
   
@@ -130,6 +134,11 @@ void Character::DoMovement(float elapsedTime)
     _mapPos.set_x(next.x);
     _mapPos.set_y(next.y);
     _path.erase(_path.begin());
+    if (!(_path.size()))
+    {
+      std::cout << "ReachedCase" << std::endl;
+      ReachedCase.Emit(this);
+    }
   }
 
   _root.set_pos(pos);
