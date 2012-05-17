@@ -43,6 +43,7 @@ public:
   virtual void  Run(float elapsedTime);
 
   void          ForceCurrentCase(int x, int y);
+  void          ForceClosestCase(void);
 
   Interactions& GetInteractions(void) { return (_interactions); }
   virtual void  InteractUse(Character* c)    { InteractDoesNothing(c); }

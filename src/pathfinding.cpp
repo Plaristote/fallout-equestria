@@ -1,5 +1,6 @@
 #include "pathfinding.hpp"
 #include <iostream>
+#include <panda3d/pStatCollector.h>
 
 using namespace std;
 
@@ -16,10 +17,8 @@ bool Pathfinding::FindPath(std::list<Node>& path, int beg_x, int beg_y, int dest
   if (state == Astar::Succeeded)
   {
     path = astar.GetSolution();
-    cout << "Solution steps " << astar.GetStepCount() << endl;
     return (true);
   }
-  cout << "Didn't find correct path" << endl;
   return (false);
 }
 
@@ -43,6 +42,5 @@ std::list<Pathfinding::Node*> Pathfinding::Node::GetSuccessors(Node* parent)
     successorsCount++;
     successors.push_back(successor);
   }
-  std::cout << "Case " << x << "/" << y << " has " << successorsCount << " successors" << std::endl;
   return (successors);
 }

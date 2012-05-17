@@ -216,7 +216,7 @@ Scene::Scene(WindowFramework* window, const std::string& filename) : _window(win
   _camera(window, window->get_camera_group()), _tilemap(window)
 {
   ceilingCurrentTransparency = 1.f;
-  
+
   if (!(PStatClient::connect("localhost", 5185)))
     cout << "Can't connect to PStat client" << endl;
   

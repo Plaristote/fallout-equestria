@@ -3,8 +3,6 @@
 # define MODEL_TILE_PATH    "models/plane.obj"
 # define TEXTURE_TILE_PATH  "textures/tiles/"
 # define TEXTURE_WALL_PATH  "textures/walls/"
-# define DEFAULT_GROUP_SIZE 45
-# define TILE_UNIT          2
 
 using namespace std;
 
@@ -228,59 +226,21 @@ Pathfinding* Tilemap::GeneratePathfinding(MapElement* pathseeker, int max_depth)
 
       node.x = x;
       node.y = y;
-      // To the left
-      if (x != 0 && !tile.hasHWall)
-      {
-        MapTile            left     = GetTile(x - 1, y);
-        Pathfinding::Node& leftNode = pf.GetNode(x - 1, y);
-
-        leftNode.arcs.push_back(Pathfinding::Node::Arc(&node, 1));
-        node.arcs.push_back(Pathfinding::Node::Arc(&leftNode, 1));
-      }
-
-      // To the top
-      if (y != 0 && !tile.hasVWall)
-      {
-        MapTile             top     = GetTile(x, y - 1);
-        Pathfinding::Node&  topNode = pf.GetNode(x, y - 1);
-
-        topNode.arcs.push_back(Pathfinding::Node::Arc(&node, 1));
-        node.arcs.push_back(Pathfinding::Node::Arc(&topNode, 1));
-      }
-
-      // To the top and left
-      if ((x != 0) && (y != 0) && (!tile.hasHWall) && (!tile.hasVWall) && (!(GetTile(x - 1, y).hasVWall)))
-      {
-        MapTile             topLeft     = GetTile(x - 1, y - 1);
-        Pathfinding::Node&  topLeftNode = pf.GetNode(x - 1, y - 1);
-
-        topLeftNode.arcs.push_back(Pathfinding::Node::Arc(&node, 1.1));
-        node.arcs.push_back(Pathfinding::Node::Arc(&topLeftNode, 1.1));
-      }
-
-      // To the top and right
-      if ((y != 0) && (x + 1 != _size.get_x()) && (!tile.hasVWall))
+      
+      if (x != 0 && !tile.hasHWall) // To the left
+        pf.ConnectNodes(node, pf.GetNode(x - 1, y), 1.f);
+      if (y != 0 && !tile.hasVWall) // To the top
+        pf.ConnectNodes(node, pf.GetNode(x, y - 1), 1.f);
+      if ((x != 0) && (y != 0) &&
+          (!tile.hasHWall) && (!tile.hasVWall) && (!(GetTile(x - 1, y).hasVWall))) // To the top and left
+        pf.ConnectNodes(node, pf.GetNode(x - 1, y - 1), 1.1f);
+      if ((y != 0) && (x + 1 != _size.get_x()) && (!tile.hasVWall))// To the top and right
       {
         MapTile right    = GetTile(x + 1, y);
 
         if ((!right.hasHWall) && (!right.hasVWall))
-        {
-          Pathfinding::Node& topRightNode = pf.GetNode(x + 1, y - 1);
-
-          topRightNode.arcs.push_back(Pathfinding::Node::Arc(&node, 1.1));
-          node.arcs.push_back(Pathfinding::Node::Arc(&topRightNode, 1.1));
-        }
+          pf.ConnectNodes(node, pf.GetNode(x + 1, y - 1), 1.1f);
       }
-    }
-  }
-
-  for (unsigned int x = beg_x ; x < end_x ; ++x)
-  {
-    for (unsigned int y = beg_y ; y < end_y ; ++y)
-    {
-      Pathfinding::Node& node = pf.GetNode(x, y);
-      
-      std::cout << "Node " << node.x << "/" << node.y << " has " << node.arcs.size() << " successors" << std::endl;
     }
   }
 

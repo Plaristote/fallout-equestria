@@ -52,6 +52,19 @@ void ObjectNode::ForceCurrentCase(int x, int y)
   _mapPos.set_y(y);
 }
 
+void ObjectNode::ForceClosestCase(void)
+{
+  LPoint3 currentPos =_root.get_pos();
+  LPoint2 roundedPos;
+
+  roundedPos.set_x(round(currentPos.get_x() / (WORLD_SCALE * TILE_UNIT)));
+  roundedPos.set_y(_map.GetSize().get_y() - round((currentPos.get_y() / (WORLD_SCALE * TILE_UNIT))));
+  Tilemap::Tile& tile = _map.GetTile(roundedPos.get_x(), roundedPos.get_y());
+  _root.set_pos(LPoint3(tile.position.get_x(), tile.position.get_y(), currentPos.get_z()));
+  _mapPos.set_x(roundedPos.get_x());
+  _mapPos.set_y(roundedPos.get_y());
+}
+
 void ObjectNode::Run(float elapsedTime)
 {
 }

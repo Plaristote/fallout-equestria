@@ -9,7 +9,9 @@
 # include "mapelement.hpp"
 # include <algorithm>
 
-# define WORLD_SCALE 2.f
+# define WORLD_SCALE        2.f
+# define DEFAULT_GROUP_SIZE 45
+# define TILE_UNIT          2
 
 class Tilemap
 {

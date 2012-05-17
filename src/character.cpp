@@ -9,8 +9,8 @@ bool Character::GoTo(int x, int y)
 
   // TODO Replace this with something moving the character to the closest case instead of the last one
   //      Or simply delete if future-me finds a better way.
-  ForceCurrentCase(_mapPos.get_x(), _mapPos.get_y());
-  
+  ForceClosestCase();
+
   _path.clear();
 
   //int          pf_depth = (fabs(float((_mapPos.get_x() - x))) + fabs(float(((_mapPos.get_y() - y)))));
