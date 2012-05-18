@@ -1,6 +1,11 @@
 #include "objects/door.hpp"
 #include <character.hpp>
 
+ObjectNode* Door::Factory(WindowFramework* window, Tilemap& map, Characters&, Data data)
+{
+  return (new Door(window, map, data));
+}
+
 Door::Door(WindowFramework* window, Tilemap& map, Data data) : ObjectNode(window, map, data)
 {
   LPoint3 current_pos = _root.get_pos();
@@ -56,14 +61,17 @@ void  Door::InteractUse(Character* c)
       positionToReach2.x = _mapPos.x - 1;
     }
 
-    bool success = c->GoTo(positionToReach1.x, positionToReach1.y);
+    unsigned short len1 = c->GoTo(positionToReach1.x, positionToReach1.y);
+    unsigned short len2 = c->GoTo(positionToReach2.x, positionToReach2.y);
 
-    if (!success)
-      success    = c->GoTo(positionToReach2.x, positionToReach2.y);
-    if (success)
-      c->ReachedCase.Connect(*this, &Door::InteractUse);
-    else
+    if (len1 == 0 && len2 == 0)
       std::cout << "[GameConsole] Can't reach" << std::endl;
+    else
+    {
+      if ((len1 < len2 && len1 != 0) || len2 == 0)
+        c->GoTo(positionToReach1.x, positionToReach1.y);
+      c->ReachedCase.Connect(*this, &Door::InteractUse);
+    }
   }
 }
 
@@ -73,15 +81,43 @@ void  Door::ProcessCollision(Pathfinding* map)
   {
     Pathfinding::Node&                node = map->GetNode(_mapPos.get_x(), _mapPos.get_y());
     Pathfinding::Node*                toDc;
-    Pathfinding::Node::Arcs::iterator it;
+    Pathfinding::Node::Arcs::iterator it1;
+    Pathfinding::Node::Arcs::iterator it2;
 
     if (_vertical)
       toDc = &(map->GetNode(_mapPos.get_x(), _mapPos.get_y() - 1));
     else
       toDc = &(map->GetNode(_mapPos.get_x() - 1, _mapPos.get_y()));
-    it = std::find(node.arcs.begin(), node.arcs.end(), toDc);
+    it1 = std::find(node.arcs.begin(), node.arcs.end(), toDc);
+    it2 = std::find(toDc->arcs.begin(), toDc->arcs.end(), &node);
 
-    if (it != node.arcs.end())
-      WithdrawArc(node, *it);
+    if (it1 != node.arcs.end())
+      (*it1).observer = this;
+    if (it2 != toDc->arcs.end())
+      (*it2).observer = this;
+    //WithdrawArc(node, *it);
   }
+}
+
+bool  Door::CanGoThrough(Character*)
+{
+  if (!_opened)
+  {
+    // If Character points to the Player, return false
+    // Else if the door is locked and the character hasn't the key, return false
+    return (false);
+  }
+  return (true);
+}
+
+bool  Door::GoingThrough(Character* character)
+{
+  bool can = CanGoThrough(character);
+
+  if (!_opened && can)
+  {
+    // TODO: if just closed, open the door. If locked, open and close the door.
+    _opened = true;
+  }
+  return (can);
 }

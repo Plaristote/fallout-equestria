@@ -3,6 +3,14 @@
 
 using namespace std;
 
+ObjectNode* Character::Factory(WindowFramework* window, Tilemap& tilemap, Characters& characters, Data data)
+{
+  Character* character = new Character(window, tilemap, data);
+
+  characters.push_back(character);
+  return (character);
+}
+
 bool Character::IsArcAccessible(int beg_x, int beg_y, int dest_x, int dest_y)
 {
   if (beg_x == dest_x && beg_y == dest_y)

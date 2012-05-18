@@ -4,9 +4,15 @@
 # include "objectnode.hpp"
 # include "inventory.hpp"
 
+class Character;
+
+typedef std::list<Character*> Characters;
+
 class Character : public ObjectNode
 {
 public:
+  static ObjectNode* Factory(WindowFramework*, Tilemap&, Characters&, Data);
+  
   Character(WindowFramework* window, Tilemap& map, Data data) : ObjectNode(window, map, data)
   {
     _lookingForNewWay = false;

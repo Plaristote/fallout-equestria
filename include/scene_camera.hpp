@@ -29,6 +29,14 @@ public:
 
   void            SwapCameraView(void);
 
+  void            SetLimits(unsigned int minX, unsigned int minY, unsigned int maxX, unsigned maxY)
+  {
+    _minPosX = minX;
+    _minPosY = minY;
+    _maxPosX = maxX;
+    _maxPosY = maxY;
+  }
+
 private:
   void            RunScroll(float elapsedTime);
   
@@ -40,6 +48,8 @@ private:
   unsigned char    _currentCameraAngle;
   LPoint3f         _currentHpr;
   LPoint3f         _objectiveHpr;
+
+  unsigned int     _minPosX, _minPosY, _maxPosX, _maxPosY;
 };
 
 #endif

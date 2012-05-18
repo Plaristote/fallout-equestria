@@ -41,6 +41,8 @@ SceneCamera::SceneCamera(WindowFramework* window, NodePath camera) : _window(win
   _currentCameraAngle = 0;
   _currentHpr         = cameraAngles[_currentCameraAngle];
   _objectiveHpr       = _currentHpr;
+
+  _minPosX = _minPosY = _maxPosX = _maxPosY = 0;
 }
 
 void SceneCamera::SwapCameraView(void)
@@ -117,7 +119,7 @@ void SceneCamera::RunScroll(float elapsedTime)
     }
     else if (cameraMotion & motionTop && cameraMotion & motionLeft)
     {
-      cameraPos.set_x(cameraPos.get_x() - cameraMovement);      
+      cameraPos.set_y(cameraPos.get_y() + cameraMovement);
     }
     else if (cameraMotion & motionTop)
     {
@@ -135,7 +137,7 @@ void SceneCamera::RunScroll(float elapsedTime)
     }
     else if (cameraMotion & motionBottom && cameraMotion & motionLeft)
     {
-      cameraPos.set_y(cameraPos.get_y() - cameraMovement);
+      cameraPos.set_x(cameraPos.get_x() - cameraMovement);
     }
     else if (cameraMotion & motionBottom)
     {
@@ -159,6 +161,15 @@ void SceneCamera::RunScroll(float elapsedTime)
     else if (cameraMotion & motionRight)
       cameraPos.set_x(cameraPos.get_x() + cameraMovement);
   }
+
+  if      (cameraPos.get_x() < _minPosX && _minPosX != 0)
+    cameraPos.set_x(_minPosX);
+  else if (cameraPos.get_x() > _maxPosX && _minPosX != 0)
+    cameraPos.set_x(_maxPosX);
+  if      (cameraPos.get_y() < _minPosY && _minPosY != 0)
+    cameraPos.set_y(_minPosY);
+  else if (cameraPos.get_y() > _minPosY && _minPosY != 0)
+    cameraPos.set_y(_maxPosY);
 
   _camera.set_pos(cameraPos);
 }

@@ -3,10 +3,13 @@
 
 # include "objectnode.hpp"
 # include "inventory.hpp"
+# include "character.hpp"
 
 class DroppedObject : public ObjectNode
 {
 public:
+  static ObjectNode* Factory(WindowFramework*, Tilemap&, Characters&, Data);
+
   DroppedObject(WindowFramework* window, Tilemap& map, InventoryObject& object);
 
   virtual void  InteractUse(Character* c);
