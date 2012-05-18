@@ -110,10 +110,10 @@ private:
 class Level : public AsyncTask
 {
 public:
-  Level(WindowFramework* window, const std::string& filename);
-  ~Level();
+	Level(WindowFramework* window, const std::string& filename);
+	~Level() {};
 
-  DoneStatus       do_task(void);
+	DoneStatus       do_task(void) { return DS_cont; };
   void             TaskCeiling(float elapsedTime);
 
   void             CloseInteractMenu(void);
@@ -168,5 +168,9 @@ private:
   GameUi            _gameUi;
   InteractMenu*     _currentInteractMenu;
 };
+
+//HAIL MICROSOFT
+Level::Level(WindowFramework* window, const std::string& filename) : _mouse(window), _camera(window,window->get_camera_group()), _tilemap(window), _gameUi(window)
+{};
 
 #endif

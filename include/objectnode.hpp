@@ -8,6 +8,14 @@
 # include "tilemap.hpp"
 # include "observatory.hpp"
 
+//HAIL MICROSOFT
+#ifdef WIN32
+static inline double round(double val)
+{    
+    return floor(val + 0.5);
+}
+#endif
+
 class Character;
 
 class ObjectNode : public MapElement
