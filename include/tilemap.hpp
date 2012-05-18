@@ -50,51 +50,56 @@ public:
   Tilemap(WindowFramework* window);
   ~Tilemap();
 
-  void                  Load(Data data);
+  void                          Load(Data data);
 
-  LPoint2               GetSize(void) const { return (_size); }
-  const MapTile&        GetTile(unsigned int x, unsigned int y) const;
-  MapTile&              GetTile(unsigned int x, unsigned int y);
-  const CeilingTile&    GetCeiling(unsigned int x, unsigned int y) const;
-  void                  AddMapElement(MapElement* e) { _mapElements.push_back(e); }
-  void                  DelMapElement(MapElement* e)
+  LPoint2                       GetSize(void) const { return (_size); }
+  const MapTile&                GetTile(unsigned int x, unsigned int y) const;
+  MapTile&                      GetTile(unsigned int x, unsigned int y);
+  const CeilingTile&            GetCeiling(unsigned int x, unsigned int y) const;
+  void                          AddMapElement(MapElement* e) { _mapElements.push_back(e); }
+  void                          DelMapElement(MapElement* e)
   {
     std::list<MapElement*>::iterator it = std::find(_mapElements.begin(), _mapElements.end(), e);
 
     if (it != _mapElements.end())
+    {
       _mapElements.erase(it);
+      e->UnprocessCollision(_pf);
+    }
   }
 
-  NodePath              GetCeilingNode(void) const { return (_ceilingNode); }
-  void                  SetCeilingTransparent(float value);
+  NodePath                      GetCeilingNode(void) const { return (_ceilingNode); }
+  void                          SetCeilingTransparent(float value);
 
-  Pathfinding*          SetupPathfinding(MapElement*, int max_depth = 0) const;
-  void                  SetdownPathfinding(MapElement*, int max_depth = 0) const;
+  Pathfinding*                  SetupPathfinding(MapElement*, int max_depth = 0);
+  void                          SetdownPathfinding(MapElement*, int max_depth = 0) const;
+  void                          ResetPathfinding(void);
 
 private:
   template<class NodeType> void LoadTiles(string tileType, Data tileset, Data map, LPoint3 posModificator, NodePath fatherGroup, vector<NodePath>& groups, vector<NodeType>& storage);
   void                          LoadWalls(Data wallset, Data map, bool horizontal);
   void                          LoadPathfinding(void);
   
-  float                    _scale;
-  unsigned                 _groupSize;
-  WindowFramework*         _window;
-  std::vector<MapTile>     _nodes;
-  std::vector<CeilingTile> _ceiling;
+  float                         _scale;
+  unsigned                     _groupSize;
+  WindowFramework*             _window;
+  std::vector<MapTile>         _nodes;
+  std::vector<CeilingTile>     _ceiling;
 
   // Used for grouping tiles before flattening them
-  std::vector<NodePath>    _ceilingGroup;
-  std::vector<NodePath>    _groundGroup;
+  std::vector<NodePath>        _ceilingGroup;
+  std::vector<NodePath>        _groundGroup;
 
   // Groups every ceiling group
-  NodePath                 _ceilingNode;
-  NodePath                 _groundNode;
+  NodePath                     _ceilingNode;
+  NodePath                     _groundNode;
 
-  LPoint2                  _size;
-  std::list<MapElement*>   _mapElements;
+  LPoint2                      _size;
+  std::list<MapElement*>       _mapElements;
 
   // Pathfinding Context
-  Pathfinding*             _pf;
+  Pathfinding*                 _pf;
+  bool                         _pfCollisionSet;
 };
 
 #endif

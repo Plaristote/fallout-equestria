@@ -47,7 +47,7 @@ void MapElement::UnprocessCollision(Pathfinding* map)
   {
     WithdrawedArc withdrawed = *(_withdrawedArcs.begin());
 
-    map->ConnectNodes(*(withdrawed.from), *(withdrawed.to), withdrawed.weigth);
+    map->ConnectNodes(*(withdrawed.from), *(withdrawed.to), withdrawed.weigth, withdrawed.observer);
     _withdrawedArcs.erase(_withdrawedArcs.begin());
   }
 }
@@ -56,9 +56,10 @@ void MapElement::WithdrawArc(Pathfinding::Node& node, Pathfinding::Node::Arc arc
 {
   WithdrawedArc                     withdrawed;
 
-  withdrawed.from   = &node;
-  withdrawed.to     = arc.first;
-  withdrawed.weigth = arc.second;
+  withdrawed.from     = &node;
+  withdrawed.to       = arc.first;
+  withdrawed.weigth   = arc.second;
+  withdrawed.observer = arc.observer;
   Pathfinding::DisconnectNodes(node, *(withdrawed.to));
   _withdrawedArcs.push_back(withdrawed);
 }

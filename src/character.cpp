@@ -5,7 +5,7 @@ using namespace std;
 
 bool Character::IsArcAccessible(int beg_x, int beg_y, int dest_x, int dest_y)
 {
-  if (beg_x == dest_x && dest_y == dest_y)
+  if (beg_x == dest_x && beg_y == dest_y)
     return (true);
   bool success = false;
 
@@ -19,7 +19,10 @@ bool Character::IsArcAccessible(int beg_x, int beg_y, int dest_x, int dest_y)
   {
     if ((*it).first->x == node2.x && (*it).first->y == node2.y)
     {
-      success = true;
+      if ((*it).observer)
+        success = (*it).observer->GoingThrough(this);
+      else
+        success = true;
       break ;
     }
   }
@@ -29,10 +32,10 @@ bool Character::IsArcAccessible(int beg_x, int beg_y, int dest_x, int dest_y)
 
 extern PT(ClockObject) globalClock;
 
-bool Character::GoTo(int x, int y)
+unsigned short Character::GoTo(int x, int y)
 {
-  float ftime = globalClock->get_real_time();
-  bool success = true;
+  float          ftime    = globalClock->get_real_time();
+  unsigned short solution = 0;
 
   if (_lookingForNewWay == false)
     ReachedCase.DisconnectAll();
@@ -42,15 +45,17 @@ bool Character::GoTo(int x, int y)
 
   Pathfinding* pf       = _map.SetupPathfinding(this);
 
-  if (!(pf->FindPath(_path, _mapPos.get_x(), _mapPos.get_y(), x, y)))
+  if (!(pf->FindPath(this, _path, _mapPos.get_x(), _mapPos.get_y(), x, y)))
   {
     cout << "Character didn't find any path between " << _mapPos.get_x() << "," << _mapPos.get_y() << " and " << x << "," << y << endl;
-    success = false;
+    solution = 0;
   }
+  else
+    solution = _path.size();
   _map.SetdownPathfinding(this);
   float etime = globalClock->get_real_time();
   cout << "Pathfinding time: " << (etime - ftime) << endl;
-  return (success);
+  return (solution);
 }
 
 bool Character::CanReach(ObjectNode* node, int min_distance)

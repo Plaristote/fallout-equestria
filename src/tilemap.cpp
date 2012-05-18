@@ -235,23 +235,31 @@ void Tilemap::LoadPathfinding()
   }
 }
 
-Pathfinding* Tilemap::SetupPathfinding(MapElement* pathseeker, int max_depth) const
+Pathfinding* Tilemap::SetupPathfinding(MapElement* pathseeker, int max_depth)
 {
-  std::for_each(_mapElements.begin(), _mapElements.end(), [this, pathseeker](MapElement* element)
+  if (!_pfCollisionSet)
   {
-    if (element != pathseeker)
-      element->ProcessCollision(_pf);
-  });
+    std::for_each(_mapElements.begin(), _mapElements.end(), [this](MapElement* element)
+    { element->ProcessCollision(_pf); });
+    _pfCollisionSet = true;
+  }
+  pathseeker->UnprocessCollision(_pf);
   return (_pf);
 }
 
 void         Tilemap::SetdownPathfinding(MapElement* pathseeker, int max_depth) const
 {
-  std::for_each(_mapElements.begin(), _mapElements.end(), [this, pathseeker](MapElement* element)
+  pathseeker->ProcessCollision(_pf);
+}
+
+void Tilemap::ResetPathfinding(void)
+{
+  if (_pfCollisionSet)
   {
-    if (element != pathseeker)
-      element->UnprocessCollision(_pf);
-  });
+    std::for_each(_mapElements.begin(), _mapElements.end(), [this](MapElement* element)
+    { element->UnprocessCollision(_pf); });
+    _pfCollisionSet = false;
+  }
 }
 
 //

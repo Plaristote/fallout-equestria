@@ -53,9 +53,10 @@ private:
 
   struct WithdrawedArc
   {
-    Pathfinding::Node*     from;
-    Pathfinding::Node*     to;
-    float                  weigth;
+    Pathfinding::Node*                from;
+    Pathfinding::Node*                to;
+    float                             weigth;
+    Pathfinding::Node::Arc::Observer* observer;
   };
 
   typedef std::list<WithdrawedArc> WithdrawedArcs;

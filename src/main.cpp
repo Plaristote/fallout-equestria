@@ -290,7 +290,7 @@ Scene::~Scene()
 AsyncTask::DoneStatus Scene::do_task(void)
 {
   // FPS COUNTER
-  {
+  /*{
     static Timer        fpsTimer;
     static unsigned int fpsCounter = 0;
 
@@ -302,7 +302,7 @@ AsyncTask::DoneStatus Scene::do_task(void)
       fpsCounter = 0;
     }
     fpsCounter++;
-  }
+  }*/
   
   float elapsedTime = _timer.GetElapsedTime();
 
@@ -313,6 +313,7 @@ AsyncTask::DoneStatus Scene::do_task(void)
   {
     object->Run(elapsedTime);
   });
+  _tilemap.ResetPathfinding();
 
   MapElement::Position        playerPos = (*(_characters.begin()))->GetPosition();
   const Tilemap::CeilingTile& ceiling   =_tilemap.GetCeiling(playerPos.x, playerPos.y);

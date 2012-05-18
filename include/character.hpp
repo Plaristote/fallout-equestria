@@ -13,7 +13,7 @@ public:
   }
 
   virtual void      Run(float elapsedTime);
-  bool              GoTo(int x, int y);
+  unsigned short    GoTo(int x, int y);
   bool              TryToReach(ObjectNode*, int min_distance = 0);
   bool              CanReach(ObjectNode*, int min_distance = 0);
 
@@ -26,7 +26,7 @@ public:
 
 protected:
   bool              IsArcAccessible(int beg_x, int beg_y, int dest_x, int dest_y);
-  
+
   typedef std::list<Pathfinding::Node> DirectionPath;
 
   Inventory     _inventory;
