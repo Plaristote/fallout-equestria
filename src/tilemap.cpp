@@ -19,7 +19,7 @@ Tilemap::~Tilemap()
 {
   if (_pf) delete _pf;
 }
-
+#include <panda3d/geomVertexFormat.h>
 template<class NodeType>
 void Tilemap::LoadTiles(string tileType, Data tileset, Data map, LPoint3 posModificator, NodePath fatherGroup, vector<NodePath>& groups, vector<NodeType>& storage)
 {

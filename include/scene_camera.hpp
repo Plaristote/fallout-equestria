@@ -22,13 +22,12 @@ enum
 class SceneCamera
 {
 public:
-  SceneCamera(WindowFramework* window, NodePath camera) : _window(window), _graphicWindow(window->get_graphics_window()), _camera(camera)
-  {
-    _scrollEnabled = true;
-  }
+  SceneCamera(WindowFramework* window, NodePath camera);
 
   void            Run(float elapsedTime);
   void            SetEnabledScroll(bool set) { _scrollEnabled = set; }
+
+  void            SwapCameraView(void);
 
 private:
   void            RunScroll(float elapsedTime);
@@ -37,6 +36,10 @@ private:
   GraphicsWindow*  _graphicWindow;
   NodePath         _camera;
   bool             _scrollEnabled;
+
+  unsigned char    _currentCameraAngle;
+  LPoint3f         _currentHpr;
+  LPoint3f         _objectiveHpr;
 };
 
 #endif

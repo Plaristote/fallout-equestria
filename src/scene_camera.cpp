@@ -2,10 +2,79 @@
 
 using namespace std;
 
+std::vector<LPoint3f> cameraAngles = {
+  LPoint3f(-40, -40, 0),
+  LPoint3f(0, -60, 0),
+  LPoint3f(40, -40, 0),
+  LPoint3f(40 - 180, -40, 0),
+  LPoint3f(-180, -60, 0),
+  LPoint3f(-40 - 180, -40, 0),
+};
+
+std::vector<bool> scrollSwapAngles = {
+  true,
+  false,
+  false,
+  true,
+  false,
+  false,
+};
+
+std::vector<bool> scrollSwapAxis = {
+  false,
+  false,
+  false,
+  true,
+  true,
+  true,
+};
+
+
+SceneCamera::SceneCamera(WindowFramework* window, NodePath camera) : _window(window), _graphicWindow(window->get_graphics_window()), _camera(camera)
+{
+  _scrollEnabled = true;
+
+  camera.set_pos(0, 0, 75);
+  //camera.set_hpr(0, -60, 0);
+  camera.set_hpr(-40, -40, 0);
+
+  _currentCameraAngle = 0;
+  _currentHpr         = cameraAngles[_currentCameraAngle];
+  _objectiveHpr       = _currentHpr;
+}
+
+void SceneCamera::SwapCameraView(void)
+{
+  if (++_currentCameraAngle >= cameraAngles.size())
+    _currentCameraAngle = 0;
+  _objectiveHpr = cameraAngles[_currentCameraAngle];
+}
+
 void SceneCamera::Run(float elapsedTime)
 {
   if (_scrollEnabled)
     RunScroll(elapsedTime);
+  if (_currentHpr != _objectiveHpr)
+  {
+
+    if      (_objectiveHpr.get_x() > _currentHpr.get_x())
+      _currentHpr.set_x(_currentHpr.get_x() + 1);
+    else if (_objectiveHpr.get_x() < _currentHpr.get_x())
+      _currentHpr.set_x(_currentHpr.get_x() - 1);
+
+    if      (_objectiveHpr.get_y() > _currentHpr.get_y())
+      _currentHpr.set_y(_currentHpr.get_y() + 1);
+    else if (_objectiveHpr.get_y() < _currentHpr.get_y())
+      _currentHpr.set_y(_currentHpr.get_y() - 1);
+
+    if      (_objectiveHpr.get_z() > _currentHpr.get_z())
+      _currentHpr.set_z(_currentHpr.get_z() + 1);
+    else if (_objectiveHpr.get_z() < _currentHpr.get_z())
+      _currentHpr.set_z(_currentHpr.get_z() - 1);
+
+    _camera.set_hpr(_currentHpr);
+    cout << "Need to rotate camera" << endl;
+  }
 }
 
 void SceneCamera::RunScroll(float elapsedTime)
@@ -27,14 +96,69 @@ void SceneCamera::RunScroll(float elapsedTime)
   else if (pointer.get_x() >= _graphicWindow->get_x_size() - _mouseBorderMargin)
     cameraMotion |= MotionRight;
 
-  if      (cameraMotion & MotionTop)
-    cameraPos.set_y(cameraPos.get_y() + cameraMovement);
-  else if (cameraMotion & MotionBottom)
-    cameraPos.set_y(cameraPos.get_y() - cameraMovement);
-  if (cameraMotion & MotionLeft)
-    cameraPos.set_x(cameraPos.get_x() - cameraMovement);
-  else if (cameraMotion & MotionRight)
-    cameraPos.set_x(cameraPos.get_x() + cameraMovement);
+  unsigned char motionTop    = MotionTop;
+  unsigned char motionBottom = MotionBottom;
+  unsigned char motionLeft   = MotionLeft;
+  unsigned char motionRight  = MotionRight;
+
+  if (scrollSwapAxis[_currentCameraAngle])
+  {
+    motionTop    = MotionBottom;
+    motionBottom = MotionTop;
+    motionLeft   = MotionRight;
+    motionRight  = MotionLeft;
+  }
+
+  if (scrollSwapAngles[_currentCameraAngle])
+  {
+    if (cameraMotion & motionTop && cameraMotion & motionRight)
+    {
+      cameraPos.set_x(cameraPos.get_x() + cameraMovement);
+    }
+    else if (cameraMotion & motionTop && cameraMotion & motionLeft)
+    {
+      cameraPos.set_x(cameraPos.get_x() - cameraMovement);      
+    }
+    else if (cameraMotion & motionTop)
+    {
+      cameraPos.set_y(cameraPos.get_y() + cameraMovement);
+      cameraPos.set_x(cameraPos.get_x() + cameraMovement);
+    }
+    else if (cameraMotion & motionBottom && cameraMotion & motionRight)
+    {
+      cameraPos.set_y(cameraPos.get_y() - cameraMovement);
+    }
+    else if (cameraMotion & motionRight)
+    {
+      cameraPos.set_y(cameraPos.get_y() - cameraMovement);
+      cameraPos.set_x(cameraPos.get_x() + cameraMovement);
+    }
+    else if (cameraMotion & motionBottom && cameraMotion & motionLeft)
+    {
+      cameraPos.set_y(cameraPos.get_y() - cameraMovement);
+    }
+    else if (cameraMotion & motionBottom)
+    {
+      cameraPos.set_y(cameraPos.get_y() - cameraMovement);
+      cameraPos.set_x(cameraPos.get_x() - cameraMovement);
+    }
+    else if (cameraMotion & motionLeft)
+    {
+      cameraPos.set_y(cameraPos.get_y() + cameraMovement);
+      cameraPos.set_x(cameraPos.get_x() - cameraMovement);
+    }
+  }
+  else
+  {
+    if      (cameraMotion & motionTop)
+      cameraPos.set_y(cameraPos.get_y() + cameraMovement);
+    else if (cameraMotion & motionBottom)
+      cameraPos.set_y(cameraPos.get_y() - cameraMovement);
+    if (cameraMotion & motionLeft)
+      cameraPos.set_x(cameraPos.get_x() - cameraMovement);
+    else if (cameraMotion & motionRight)
+      cameraPos.set_x(cameraPos.get_x() + cameraMovement);
+  }
 
   _camera.set_pos(cameraPos);
 }

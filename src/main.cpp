@@ -7,7 +7,6 @@
 PandaFramework framework;
 PT(AsyncTaskManager) taskMgr = AsyncTaskManager::get_global_ptr();
 PT(ClockObject) globalClock = ClockObject::get_global_clock();
-NodePath camera;
 
 #include "datatree.hpp"
 #include "tilemap.hpp"
@@ -39,6 +38,39 @@ private:
 
 #include "objectnode.hpp"
 #include "character.hpp"
+
+#include <panda3d/pgVirtualFrame.h>
+
+class GameUi
+{
+public:
+  GameUi(WindowFramework* window) : _window(window)
+  {
+    Texture*     texture = TexturePool::load_texture("textures/ingame-ui/main-bar.png");
+
+    PGFrameStyle style;
+    _mainBar = new PGVirtualFrame("GameUi MainBar");
+
+    //_mainBar->setup(1.696f, 0.202f);
+    _mainBar->setup(2.f, 0.3f);
+    
+    style = _mainBar->get_frame_style(0);
+    style.set_type(PGFrameStyle::T_flat);
+    style.set_texture(texture);
+
+    _mainBar->set_frame_style(0, style);
+    _mainBar->set_frame_style(1, style);
+    _mainBar->set_frame_style(2, style);
+    _mainBar->set_frame_style(3, style);
+
+    NodePath defButNp = window->get_aspect_2d().attach_new_node(_mainBar);
+    defButNp.set_pos(-0.7, 0, -1.2 + 0.202f);
+  }
+  
+private:
+  WindowFramework*   _window;
+  PT(PGVirtualFrame) _mainBar;
+};
 
 class Scene : public AsyncTask
 {
@@ -112,6 +144,7 @@ public:
     _mouse.ButtonRight.Connect(*this, &Scene::MouseRightClicked);
     _mouse.CaseHovered.Connect(*this, &Scene::HoveredCase);
     _mouse.UnitHovered.Connect(*this, &Scene::HoveredUnit);
+    _mouse.ButtonMiddle.Connect(_camera, &SceneCamera::SwapCameraView);
   }
   
   void             HoveredUnit(NodePath node)
@@ -195,6 +228,7 @@ private:
   DirectionalLight* _sunLight;
   NodePath          _sunLightNode;
 
+  GameUi            _gameUi;
   InteractMenu*     _currentInteractMenu;
 };
 
@@ -213,7 +247,7 @@ struct LevelObjectLoader
 float ceilingCurrentTransparency;
 
 Scene::Scene(WindowFramework* window, const std::string& filename) : _window(window), _mouse(window),
-  _camera(window, window->get_camera_group()), _tilemap(window)
+  _camera(window, window->get_camera_group()), _tilemap(window), _gameUi(window)
 {
   ceilingCurrentTransparency = 1.f;
 
@@ -345,22 +379,11 @@ int main(int argc, char *argv[])
   framework.set_window_title("Fallout Equestria");
     //open the window
   WindowFramework *window = framework.open_window();
-  
+
   window->enable_keyboard();
-  
-  NodePath root  = window->get_render();
-
-  camera = window->get_camera_group();
-
-  camera.set_pos(0, 0, 75);
-  camera.set_hpr(0, -60, 0);
-
-  camera.set_hpr(-40, -40, 0);
-
-  Scene scene(window, "test");
-
   window->get_render().set_shader_auto();
 
+  Scene scene(window, "test");
 
     //do the main loop, equal to run() in python
   framework.main_loop();

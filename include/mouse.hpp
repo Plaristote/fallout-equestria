@@ -18,6 +18,7 @@ public:
   void                      Run(void);
 
   Observatory::Signal<void>            ButtonLeft;
+  Observatory::Signal<void>            ButtonMiddle;
   Observatory::Signal<void>            ButtonRight;
   Observatory::Signal<void (NodePath)> UnitHovered;
   Observatory::Signal<void (int, int)> CaseHovered;
@@ -28,6 +29,11 @@ public:
   }
 
   static void               CallbackButton2(const Event*, void* ptr)
+  {
+    reinterpret_cast<Mouse*>(ptr)->ButtonMiddle.Emit();
+  }
+
+  static void               CallbackButton3(const Event*, void* ptr)
   {
     reinterpret_cast<Mouse*>(ptr)->ButtonRight.Emit();
   }

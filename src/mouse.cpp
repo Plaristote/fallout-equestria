@@ -21,7 +21,9 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
 
   if (!(events->add_hook("mouse1", &Mouse::CallbackButton1, (void*)this)))
     cerr << "Failed to registrate mouse1 event" << endl;
-  if (!(events->add_hook("mouse3", &Mouse::CallbackButton2, (void*)this)))
+  if (!(events->add_hook("mouse2", &Mouse::CallbackButton2, (void*)this)))
+    cerr << "Failed to registrate mouse2 event" << endl;
+  if (!(events->add_hook("mouse3", &Mouse::CallbackButton3, (void*)this)))
     cerr << "Failed to registrate mouse2 event" << endl;
 }
 
