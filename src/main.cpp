@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 
   Level level(window, "test");
 
-    //do the main loop, equal to run() in python
+  //do the main loop, equal to run() in python
   framework.main_loop();
     //close the window framework
   framework.close_framework();

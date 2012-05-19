@@ -25,17 +25,94 @@
 # include <panda3d/rocketRegion.h>
 # include <Rocket/Core.h>
 # include <panda3d/orthographicLens.h>
+# include <Rocket/Core/XMLParser.h>
+
+struct RocketListener : public Rocket::Core::EventListener
+{
+  void ProcessEvent(Rocket::Core::Event& event) { EventReceived.Emit(event); }
+
+  Observatory::Signal<void (Rocket::Core::Event&)> EventReceived;
+};
 
 class GameUi
 {
   PT(RocketRegion)       _rocket;
   PT(RocketInputHandler) _ih;
+
+  RocketListener         _continueClicked;
+  RocketListener         _exitClicked;
+  RocketListener         _optionsClicked;
 public:
+  Rocket::Core::Element* RocketGetChildren(Rocket::Core::Element* element, const std::string& name)
+  {
+    Rocket::Core::Element* elem;
+
+    for (unsigned int i = 0 ; elem = element->GetChild(i) ; ++i)
+    {
+      if (elem->GetId().CString() == name)
+        return (elem);
+    }
+    return (0);
+  }
+
+  void MenuEventContinue(Rocket::Core::Event& event)
+  {
+    _rocket->set_active(false);
+  }
+
+  void MenuEventExit(Rocket::Core::Event& event);
+
   GameUi(WindowFramework* window) : _window(window)
   {
+    Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Roman.otf");
+    Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Italic.otf");
+    Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Bold.otf");
+    Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-BoldItalic.otf");
+
+    _rocket = RocketRegion::make("pandaRocket", window->get_graphics_output());
+    _rocket->set_active(true);
+
+    Rocket::Core::Context* context = _rocket->get_context();
+
+    //context->LoadDocument("data/background.rml")->Show();
+
+    //Rocket::Core::Element* element = Rocket::Core::Factory::InstanceElement(0, "div", "div", Rocket::Core::XMLAttributes());
+
+    Rocket::Core::ElementDocument* doc = context->LoadDocument("data/main_menu.rml");
+    doc->Show();
+
+    Rocket::Core::Element* elementWindow;
+    Rocket::Core::Element* element;
+
+    elementWindow = RocketGetChildren(doc, "window");
+    elementWindow = RocketGetChildren(elementWindow, "content");
+
+    Rocket::Core::Element* buttonContinue = RocketGetChildren(elementWindow, "continue");
+    Rocket::Core::Element* buttonOptions  = RocketGetChildren(elementWindow, "options");
+    Rocket::Core::Element* buttonExit     = RocketGetChildren(elementWindow, "exit");
+
+    buttonContinue->AddEventListener("click", &_continueClicked);
+    buttonOptions->AddEventListener("click", &_optionsClicked);
+    buttonExit->AddEventListener("click", &_exitClicked);
+
+    _continueClicked.EventReceived.Connect(*this, &GameUi::MenuEventContinue);
+    _exitClicked.EventReceived.Connect(*this, &GameUi::MenuEventExit);
+
+    cout << "Num children" << elementWindow->GetNumChildren() << endl;
+
+    for (unsigned int i = 0 ; element = elementWindow->GetChild(i) ; ++i)
+    {
+      cout << "Element[" << i << "] id: " << element->GetId().CString() << endl;
+    }
+
+    PT(RocketInputHandler) ih = new RocketInputHandler();
+    window->get_mouse().attach_new_node(ih);
+    _rocket->set_input_handler(ih);
+
+    
     /*Rocket::Core::Context*         context;
     Rocket::Core::ElementDocument* document;
-
+    
     _rocket = RocketRegion::make("rocket ui", window->get_graphics_output());
     _ih     = new RocketInputHandler();
     window->get_mouse().attach_new_node(_ih);
@@ -43,10 +120,11 @@ public:
     _rocket->set_active(true);
     context  = _rocket->get_context();
     document = context->LoadDocument("ui/ingame.rml");
+    document->Show();
 
-    NodePath node = window->get_pixel_2d();
+    //NodePath node = window->get_pixel_2d();
 
-    node.reparent_to(window->get_aspect_2d());
+    //node.reparent_to(window->get_aspect_2d());
 
     if (document != 0)
     {

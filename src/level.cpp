@@ -250,3 +250,11 @@ void Level::CallbackActionUse(ObjectNode* object)
   object->InteractUse(*(_characters.begin()));
   CloseInteractMenu();
 }
+
+// EVENT MENU
+extern PandaFramework framework;
+
+void GameUi::MenuEventExit(Rocket::Core::Event& event)
+{
+  framework.close_all_windows();
+}
