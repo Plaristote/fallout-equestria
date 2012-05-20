@@ -3,6 +3,7 @@
 
 # include "objectnode.hpp"
 # include "inventory.hpp"
+# include "timer.hpp"
 # include <panda3d/collisionSphere.h>
 # include <panda3d/collisionTraverser.h>
 # include <panda3d/collisionHandlerQueue.h>
@@ -16,18 +17,35 @@ typedef std::list<Character*> Characters;
 class Character : public ObjectNode
 {
 public:
-  static ObjectNode* Factory(WindowFramework*, Tilemap&, Characters&, Data);
+  static ObjectNode*          Factory(WindowFramework*, Tilemap&, Characters&, Data);
+  static Characters::iterator Find(Characters& list, NodePath character)
+  {
+    Characters::iterator it  = list.begin();
+    Characters::iterator end = list.end();
+
+    for (; it != end ; ++it)
+    {
+      if ((**it) == character)
+        break ;
+    }
+    return (it);
+  }
+
   
   Character(WindowFramework* window, Tilemap& map, Data data, Characters& chars);
-  virtual void      Run(float elapsedTime);
-  unsigned short    GoTo(int x, int y);
-  bool              TryToReach(ObjectNode*, int min_distance = 0);
-  bool              CanReach(ObjectNode*, int min_distance = 0);
 
-  Inventory&        GetInventory(void)       { return (_inventory); }
-  const Inventory&  GetInventory(void) const { return (_inventory); }
+  bool               operator==(NodePath comp) const { return (_root == comp || _root.is_ancestor_of(comp)); }
+
+  virtual void       Run(float elapsedTime);
+  unsigned short     GoTo(int x, int y);
+  bool               TryToReach(ObjectNode*, int min_distance = 0);
+  bool               CanReach(ObjectNode*, int min_distance = 0);
+
+  std::string        GetName(void) const      { return (_root.get_name()); }
+  Inventory&         GetInventory(void)       { return (_inventory);       }
+  const Inventory&   GetInventory(void) const { return (_inventory);       }
   
-  Pathfinding::Node GetCurrentDestination(void) const;
+  Pathfinding::Node  GetCurrentDestination(void) const;
 
   Observatory::Signal<void (Character*)> ReachedCase;
 
@@ -39,7 +57,7 @@ protected:
   Inventory     _inventory;
   DirectionPath _path;
   bool          _lookingForNewWay;
-  Characters    _characters;
+  Characters&   _characters;
 private:
   void DoMovement(float elapsedTime);
 
@@ -49,6 +67,7 @@ private:
   NodePath                  _collisionPath;
   CollisionTraverser        _collisionTraverser;
   PT(CollisionHandlerQueue) _collisionHandlerQueue;
+  Timer                     _timerFov;
 
   // Light
   PT(PointLight) _charLight;
