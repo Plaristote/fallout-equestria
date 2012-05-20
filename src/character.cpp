@@ -1,7 +1,10 @@
 #include "character.hpp"
 #include "scene_camera.hpp"
+#include <panda3d/nodePathCollection.h>
 
 using namespace std;
+
+CollideMask characterCollideMask(MyCollisionMask::Object);
 
 ObjectNode* Character::Factory(WindowFramework* window, Tilemap& tilemap, Characters& characters, Data data)
 {
@@ -42,6 +45,7 @@ extern PT(ClockObject) globalClock;
 
 unsigned short Character::GoTo(int x, int y)
 {
+  cout << "Executing GoTo" << endl;
   float          ftime    = globalClock->get_real_time();
   unsigned short solution = 0;
 
@@ -84,13 +88,18 @@ Character::Character(WindowFramework* window, Tilemap& map, Data data, Character
 {
   _lookingForNewWay = false;
   _root.set_name(data["name"].Value());
+  _root.set_collide_mask(characterCollideMask);
 
-  _collisionHandlerQueue = new CollisionHandlerQueue();
-  _collisionFov          = new CollisionSphere(_root.get_x(), _root.get_y(), _root.get_z(), 1500.f);
-  _collisionNode         = new CollisionNode("FovSphere" + data["name"].Value());
-  _collisionPath         = NodePath(_collisionNode);
+  _collisionNode         = new CollisionNode("characterRange");
+  _collisionPath         = _root.attach_new_node(_collisionNode);
+  _collisionNode->set_from_collide_mask(characterCollideMask);
+  _collisionNode->set_into_collide_mask(0);
+  _collisionFov          = new CollisionSphere(0, 0, 0, 0.f);
   _collisionNode->add_solid(_collisionFov);
+  _collisionHandlerQueue = new CollisionHandlerQueue();
   _collisionTraverser.add_collider(_collisionPath, _collisionHandlerQueue);
+
+  _collisionPath.show();
 
   _charLight = new PointLight("Light" + data["name"].Value());
   _charLight->set_color(LColor(0.8, 0.8, 0.8, 1));
@@ -99,6 +108,46 @@ Character::Character(WindowFramework* window, Tilemap& map, Data data, Character
   _charLightNode.reparent_to(_root);
   _charLightNode.set_pos(0, 0, 0.01);
   _window->get_render().set_light(_charLightNode);
+
+  // Line of sight tools
+  _losNode      = new CollisionNode("losRay");
+  _losNode->set_from_collide_mask(CollideMask(MyCollisionMask::Object | MyCollisionMask::Walls));
+  _losPath      = _root.attach_new_node(_losNode);
+  _losRay       = new CollisionRay();
+  _losRay->set_origin(0, 0, 0);
+  _losRay->set_direction(-10, 0, 0);
+  _losPath.set_pos(0, -0.5, 0);
+  _losPath.show();
+  _losNode->add_solid(_losRay);
+  _losHandlerQueue = new CollisionHandlerQueue();
+  _losTraverser.add_collider(_losPath, _losHandlerQueue);
+}
+
+bool Character::HasLineOfSight(Character* other)
+{
+  bool ret = true;
+
+  LVecBase3 rot = _root.get_hpr();
+  LVector3  dir = _root.get_relative_vector(other->_root, other->_root.get_pos() - _root.get_pos());
+
+  _losPath.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
+  _losRay->set_direction(dir.get_x(), dir.get_y(), dir.get_z());
+  _losTraverser.traverse(_window->get_render());
+
+  _losHandlerQueue->sort_entries();
+
+  for (unsigned int i = 0 ; i < _losHandlerQueue->get_num_entries() ; ++i)
+  {
+    CollisionEntry* entry = _losHandlerQueue->get_entry(i);
+    NodePath        node  = entry->get_into_node_path();
+
+    if (_root.is_ancestor_of(node))
+      continue ;
+    if (!(other->_root.is_ancestor_of(node)))
+      ret = false;
+    break ;
+  }
+  return (ret);
 }
 
 void Character::Run(float elapsedTime)
@@ -106,15 +155,46 @@ void Character::Run(float elapsedTime)
   if (!(_path.empty()))
     DoMovement(elapsedTime);
 
-  _collisionFov->set_center(_root.get_pos());
-  _collisionTraverser.traverse(_window->get_render());
-  for(unsigned int i = 1; i<= _collisionHandlerQueue->get_num_entries();i++)
+  // TEST
+  // Update Field of View
+  if (_timerFov.GetElapsedTime() > 5.f)
   {
-    CollisionEntry* entry = _collisionHandlerQueue->get_entry(i);
-    cout<<entry;
-  }
+    _timerFov.Restart();
+    
+    Characters _fieldOfView;
+    _fieldOfView.clear();
 
-  //PT(CollisionSegment) segment = new CollisionSegment();
+    _collisionFov->set_radius(50.f);
+    _root.set_collide_mask(BitMask32(0));
+    _collisionTraverser.traverse(_window->get_render());
+    _root.set_collide_mask(characterCollideMask);
+    _collisionFov->set_radius(0.f);
+    for(unsigned int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; i++)
+    {
+      CollisionEntry*      entry = _collisionHandlerQueue->get_entry(i);
+      NodePath             into  = entry->get_into_node_path();
+      Characters::iterator it    = Character::Find(_characters, into);
+
+      if (it != _characters.end())
+      {
+        if (Character::Find(_fieldOfView, into) == _fieldOfView.end())
+          _fieldOfView.push_back(*it);
+      }
+    }
+
+    cout << "=> Field of view of " << GetName() << endl;
+    for_each(_fieldOfView.begin(), _fieldOfView.end(), [this](Character* character)
+    {
+      cout << "  -> " << character->GetName();
+      bool lineOfSight = HasLineOfSight(character);
+      if (lineOfSight)
+        cout << " with line of sight" << endl;
+      else
+        cout << " not seeing him" << endl;
+      cout << endl;
+    });
+    cout << endl;
+  }
 }
 
 Pathfinding::Node Character::GetCurrentDestination(void) const

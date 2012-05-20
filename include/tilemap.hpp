@@ -13,6 +13,13 @@
 # define DEFAULT_GROUP_SIZE 45
 # define TILE_UNIT          2
 
+enum MyCollisionMask
+{
+  Object    = 2,
+  Tiles     = 4,
+  Walls     = 8
+};
+
 class Tilemap
 {
 public:

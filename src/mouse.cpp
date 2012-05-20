@@ -1,4 +1,5 @@
 #include "mouse.hpp"
+#include <tilemap.hpp>
 
 using namespace std;
 
@@ -9,7 +10,8 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
   _mouseWatcher = dynamic_cast<MouseWatcher*>(window->get_mouse().node());
   _pickerNode   = new CollisionNode("mouseRay");
   _pickerPath   = _camera.attach_new_node(_pickerNode);
-  _pickerNode->set_from_collide_mask(GeomNode::get_default_collide_mask());
+  //_pickerNode->set_from_collide_mask(GeomNode::get_default_collide_mask());
+  _pickerNode->set_from_collide_mask(CollideMask(MyCollisionMask::Object | MyCollisionMask::Tiles));
   _pickerRay    = new CollisionRay();
   _pickerNode->add_solid(_pickerRay);
   _collisionHandlerQueue = new CollisionHandlerQueue();

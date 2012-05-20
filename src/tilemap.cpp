@@ -69,6 +69,9 @@ void Tilemap::LoadTiles(string tileType, Data tileset, Data map, LPoint3 posModi
         stream2 << y;
         newNode.set_tag("pos_y", stream2.str());
 
+        // Collision Mask
+        newNode.set_collide_mask(CollideMask(MyCollisionMask::Tiles));
+
         // Set Node transformations
         newNode.set_scale(_scale);
         newNode.set_hpr(0, 90, 0);
@@ -119,6 +122,10 @@ void Tilemap::LoadWalls(Data wallset, Data map, bool horizontal)
       Texture*         texture;
 
       newNode.set_scale(_scale);
+      newNode.set_tag("wall", "1");
+
+      // Collision Mask
+      newNode.set_collide_mask(CollideMask(MyCollisionMask::Walls));
 
       if (horizontal)
       {

@@ -11,6 +11,8 @@ ObjectNode::ObjectNode(WindowFramework* window, Tilemap& map, Data data) : _wind
   static unsigned int charId = 0;
   NodePath            root = window->get_render();
 
+  root.set_collide_mask(MyCollisionMask::Object);
+  
   _map.AddMapElement(this);
 
   // Load our panda
