@@ -100,7 +100,6 @@ void SceneCamera::Run(float elapsedTime)
       _currentHpr.set_z(_currentHpr.get_z() - 1);
 
     _camera.set_hpr(_currentHpr);
-    cout << "Need to rotate camera" << endl;
   }
 }
 

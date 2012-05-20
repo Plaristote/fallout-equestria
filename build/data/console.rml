@@ -1,0 +1,24 @@
+<rml>
+	<head>
+		<title>Game Console</title>
+		<link type="text/template" href="tpl_console.rml" />
+		<style>
+body
+{
+  width: 300px;
+  height: 100px;
+  margin: auto;
+}
+
+div#window
+{
+  width:    100px;
+  height:   100%;
+  overflow: auto;
+}
+		</style>
+	</head>
+	<body template="tplconsole">
+          <div id="window">Lorem ipsum dolor sit amet faut toujours que vous veniez foutre votre merde vous hein sire il faudrait vraiment que vous eteniez votre torche maintenant je vous assure avec la potion on y voit tres bien ouais enfin on y voit quand meme carrement miexu avec la torche</div>
+	</body>
+</rml>

@@ -1,0 +1,12 @@
+<template name="tplmainbar" content="content">
+<head>
+  <link type="text/rcss" href="rkt.rcss"/>
+  <link type="text/rcss" href="invader.rcss"/>
+</head>
+<body class="window">
+    <div id="window">
+      <div id="content">
+      </div>
+    </div>
+</body>
+</template>

@@ -39,7 +39,6 @@ void Mouse::Run(void)
     for (int i = 1 ; i < _collisionHandlerQueue->get_num_entries() ; ++i)
     {
       CollisionEntry* entry = _collisionHandlerQueue->get_entry(i);
-      CollisionNode*  node  = entry->get_from_node();
 
       NodePath testNode      = entry->get_from_node_path();
       NodePath testNode2     = entry->get_into_node_path();

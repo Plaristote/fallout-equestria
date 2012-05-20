@@ -3,6 +3,11 @@
 
 # include "objectnode.hpp"
 # include "inventory.hpp"
+# include <panda3d/collisionSphere.h>
+# include <panda3d/collisionTraverser.h>
+# include <panda3d/collisionHandlerQueue.h>
+
+# include <panda3d/pointLight.h>
 
 class Character;
 
@@ -13,11 +18,7 @@ class Character : public ObjectNode
 public:
   static ObjectNode* Factory(WindowFramework*, Tilemap&, Characters&, Data);
   
-  Character(WindowFramework* window, Tilemap& map, Data data) : ObjectNode(window, map, data)
-  {
-    _lookingForNewWay = false;
-  }
-
+  Character(WindowFramework* window, Tilemap& map, Data data, Characters& chars);
   virtual void      Run(float elapsedTime);
   unsigned short    GoTo(int x, int y);
   bool              TryToReach(ObjectNode*, int min_distance = 0);
@@ -38,8 +39,20 @@ protected:
   Inventory     _inventory;
   DirectionPath _path;
   bool          _lookingForNewWay;
+  Characters    _characters;
 private:
   void DoMovement(float elapsedTime);
+
+
+  PT(CollisionSphere)       _collisionFov;
+  PT(CollisionNode)         _collisionNode;
+  NodePath                  _collisionPath;
+  CollisionTraverser        _collisionTraverser;
+  PT(CollisionHandlerQueue) _collisionHandlerQueue;
+
+  // Light
+  PT(PointLight) _charLight;
+  NodePath       _charLightNode;
 };
 
 #endif

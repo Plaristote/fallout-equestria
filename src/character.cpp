@@ -5,7 +5,7 @@ using namespace std;
 
 ObjectNode* Character::Factory(WindowFramework* window, Tilemap& tilemap, Characters& characters, Data data)
 {
-  Character* character = new Character(window, tilemap, data);
+  Character* character = new Character(window, tilemap, data, characters);
 
   characters.push_back(character);
   return (character);
@@ -80,10 +80,41 @@ bool Character::TryToReach(ObjectNode* node, int min_distance)
   return (GoTo(node->GetPosition().x, node->GetPosition().y));
 }
 
+Character::Character(WindowFramework* window, Tilemap& map, Data data, Characters& chars) : ObjectNode(window, map, data), _characters(chars)
+{
+  _lookingForNewWay = false;
+  _root.set_name(data["name"].Value());
+
+  _collisionHandlerQueue = new CollisionHandlerQueue();
+  _collisionFov          = new CollisionSphere(_root.get_x(), _root.get_y(), _root.get_z(), 1500.f);
+  _collisionNode         = new CollisionNode("FovSphere" + data["name"].Value());
+  _collisionPath         = NodePath(_collisionNode);
+  _collisionNode->add_solid(_collisionFov);
+  _collisionTraverser.add_collider(_collisionPath, _collisionHandlerQueue);
+
+  _charLight = new PointLight("Light" + data["name"].Value());
+  _charLight->set_color(LColor(0.8, 0.8, 0.8, 1));
+  _charLight->set_attenuation(LVecBase3(0, 0, 0.1));
+  _charLightNode = _window->get_render().attach_new_node(_charLight);
+  _charLightNode.reparent_to(_root);
+  _charLightNode.set_pos(0, 0, 0.01);
+  _window->get_render().set_light(_charLightNode);
+}
+
 void Character::Run(float elapsedTime)
 {
   if (!(_path.empty()))
     DoMovement(elapsedTime);
+
+  _collisionFov->set_center(_root.get_pos());
+  _collisionTraverser.traverse(_window->get_render());
+  for(unsigned int i = 1; i<= _collisionHandlerQueue->get_num_entries();i++)
+  {
+    CollisionEntry* entry = _collisionHandlerQueue->get_entry(i);
+    cout<<entry;
+  }
+
+  //PT(CollisionSegment) segment = new CollisionSegment();
 }
 
 Pathfinding::Node Character::GetCurrentDestination(void) const

@@ -1,5 +1,7 @@
 #include "level.hpp"
 
+#include "npc.hpp"
+
 using namespace std;
 
 struct LevelObjectLoader
@@ -15,10 +17,10 @@ struct LevelObjectLoader
 vector<LevelObjectLoader> objectLoaders = {
   LevelObjectLoader("door",      &Door::Factory),
   LevelObjectLoader("item",      &DroppedObject::Factory),
-  LevelObjectLoader("character", &Character::Factory)
+  LevelObjectLoader("character", &Character::Factory),
+  LevelObjectLoader("npc",       &Npc::Factory)
 };
 
-float ceilingCurrentTransparency;
 
 Level::Level(WindowFramework* window, const std::string& filename) : _window(window), _mouse(window),
   _camera(window, window->get_camera_group()), _tilemap(window), _gameUi(window)
@@ -62,6 +64,8 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
 
   _sunLight->set_color(LVecBase4f(0.8, 0.8, 0.8, 1));
   _sunLight->set_shadow_caster(true, 512, 512);
+  _sunLight->get_lens()->set_near_far(1.f, 2.f);
+  _sunLight->get_lens()->set_film_size(512);
 
   _sunLightNode = window->get_render().attach_new_node(_sunLight);
   _sunLightNode.set_hpr(-30, -60, 0);
@@ -71,15 +75,9 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   MouseInit();
 }
 
-Level::~Level()
-{
-  for_each(_characters.begin(), _characters.end(), [](Character* character) { delete character; });
-  AsyncTaskManager::get_global_ptr()->remove(this);
-}
-
 AsyncTask::DoneStatus Level::do_task(void)
 {
-  // FPS COUNTER
+  // TEST FPS COUNTER
   /*{
     static Timer        fpsTimer;
     static unsigned int fpsCounter = 0;
@@ -96,6 +94,39 @@ AsyncTask::DoneStatus Level::do_task(void)
 
   float elapsedTime = _timer.GetElapsedTime();
 
+  // TEST SUNLIGHT MOONLIGHT
+  {
+    static Timer         lightTimer;
+    static unsigned char dayStep    = 1;
+    static unsigned int  stepLength = 10;
+
+    LVecBase4f           colorSteps[3];
+
+    colorSteps[0] = LVecBase4f(0.2, 0.2, 0.2, 1);
+    colorSteps[1] = LVecBase4f(0.8, 0.8, 0.8, 1);
+    colorSteps[2] = LVecBase4f(0.6, 0.3, 0.3, 1);
+
+    if (lightTimer.GetElapsedTime() < stepLength)
+    {
+      LVecBase4f toSet = _sunLight->get_color();
+      LVecBase4f dif   = colorSteps[(dayStep == 2 ? 0 : dayStep + 1)] - colorSteps[dayStep];
+
+      //cout << "Dif -> " << dif.get_x() << ", " << dif.get_y() << ", " << dif.get_z() << endl;
+
+      toSet += ((dif * elapsedTime) / stepLength);
+      _sunLight->set_color(toSet);
+    }
+    else
+    {
+      cout << "Next step" << endl;
+      dayStep++;
+      if (dayStep >= 3)
+        dayStep = 0;
+      _sunLight->set_color(colorSteps[dayStep]);
+      lightTimer.Restart();
+    }
+  }
+  
   _mouse.Run();
   _camera.Run(elapsedTime);
 
@@ -249,12 +280,4 @@ void Level::CallbackActionUse(ObjectNode* object)
 {
   object->InteractUse(*(_characters.begin()));
   CloseInteractMenu();
-}
-
-// EVENT MENU
-extern PandaFramework framework;
-
-void GameUi::MenuEventExit(Rocket::Core::Event& event)
-{
-  framework.close_all_windows();
 }
