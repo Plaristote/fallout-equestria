@@ -64,6 +64,8 @@ public:
   void              MouseLeftClicked(void);
   void              MouseRightClicked(void);
 
+  void              StartCombat(void);
+
   MouseState        _mouseState;
   MouseHovering     _mouseHovering;
   NodePath          _hoveredUnit;

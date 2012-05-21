@@ -43,10 +43,24 @@
 	Lorem ipsum dolor sit amet faut toujours que vous veniez foutre votre merde vous hein sire il faudrait vraiment que vous eteniez votre torche maintenant je vous assure avec la potion on y voit tres bien ouais enfin on y voit quand meme carrement miexu avec la torche.
         </div>
       </div>
+
       <div id="first_col">
         <br />
         <button class="francis" id="inv" >INV</button><br />
         <button class="francis" id="menu">Q</button>
       </div>
+
+      <div id="action_points">
+        oooooooooo
+      </div>
+
+      <div id="weapon_one">
+        Weapon One
+      </div>
+
+      <div id="weapon_two">
+        Weapon Two
+      </div>
+
   </body>
 </rml>

@@ -57,7 +57,22 @@ public:
   GameMainBar(WindowFramework* window);
 
   RocketListener         MenuButtonClicked;
+  RocketListener         InventoryButtonClicked;
   
+private:
+  WindowFramework*       _window;
+  PT(RocketRegion)       _rocket;
+  PT(RocketInputHandler) _ih;
+};
+
+class GameInventory
+{
+public:
+  GameInventory(WindowFramework* window);
+
+  void Show(void) { _rocket->set_active(true);  }
+  void Hide(void) { _rocket->set_active(false); }
+
 private:
   WindowFramework*       _window;
   PT(RocketRegion)       _rocket;
@@ -72,11 +87,13 @@ public:
   GameMenu& GetMenu(void) { return (_menu); }
 
   void      OpenMenu(Rocket::Core::Event&);
+  void      OpenInventory(Rocket::Core::Event&);
 
 private:
   WindowFramework* _window;
   GameMenu         _menu;
   GameMainBar      _mainBar;
+  GameInventory    _inventory;
 };
 
 

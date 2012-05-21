@@ -21,7 +21,6 @@ vector<LevelObjectLoader> objectLoaders = {
   LevelObjectLoader("npc",       &Npc::Factory)
 };
 
-
 Level::Level(WindowFramework* window, const std::string& filename) : _window(window), _mouse(window),
   _camera(window, window->get_camera_group()), _tilemap(window), _gameUi(window)
 {
@@ -74,6 +73,12 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
 
   MouseInit();
 }
+
+/*void Level::StartFight(void)
+{
+  Characters::iterator it  = _characters.begin();
+  Characters::iteratir end = _characters.end();
+}*/
 
 AsyncTask::DoneStatus Level::do_task(void)
 {

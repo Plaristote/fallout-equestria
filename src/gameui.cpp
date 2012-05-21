@@ -1,13 +1,14 @@
 #include "gameui.hpp"
 
 using namespace std;
+using namespace Rocket::Core;
 
 extern PandaFramework framework;
 
 /*
  * GameUi
  */
-GameUi::GameUi(WindowFramework* window) : _window(window), _menu(window), _mainBar(window)
+GameUi::GameUi(WindowFramework* window) : _window(window), _menu(window), _mainBar(window), _inventory(window)
 {
   Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Roman.otf");
   Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Italic.otf");
@@ -15,12 +16,56 @@ GameUi::GameUi(WindowFramework* window) : _window(window), _menu(window), _mainB
   Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-BoldItalic.otf");
 
   _mainBar.MenuButtonClicked.EventReceived.Connect(*this, &GameUi::OpenMenu);
+  _mainBar.InventoryButtonClicked.EventReceived.Connect(*this, &GameUi::OpenInventory);
   _menu.Hide();
+  _inventory.Hide();
 }
 
 void GameUi::OpenMenu(Rocket::Core::Event&)
 {
   _menu.Show();
+}
+
+void GameUi::OpenInventory(Rocket::Core::Event&)
+{
+  _inventory.Show();
+}
+
+/*
+ * GameInventory
+ */
+#include <Rocket/Controls.h>
+GameInventory::GameInventory(WindowFramework* window) : _window(window)
+{
+  _rocket = RocketRegion::make("rocketInventory", window->get_graphics_output());
+
+  Rocket::Controls::Initialise();
+  Rocket::Core::Context*         context = _rocket->get_context();
+  Rocket::Core::ElementDocument* doc     = context->LoadDocument("data/inventory.rml");
+
+  if (doc)
+  {
+    ElementDocument* docItemList       = context->LoadDocument("data/inventory-items.rml");
+    Element*         itemListContainer = docItemList->GetElementById("inventory-items");
+
+    doc->AppendChild(docItemList);
+
+    ElementDocument* parentItems = docItemList;
+    for (unsigned short i = 0 ; i < 200 ; ++i)
+    {
+      Rocket::Core::Element* item = parentItems->CreateElement("invitem");
+
+      item->SetInnerRML("<img src=\"item.png\" />");
+      itemListContainer->AppendChild(item);
+    }
+
+    PT(RocketInputHandler) ih = new RocketInputHandler();
+    window->get_mouse().attach_new_node(ih);
+    _rocket->set_input_handler(ih);
+
+    doc->Show();
+    docItemList->Show();
+  }
 }
 
 /*
@@ -112,13 +157,12 @@ GameMainBar::GameMainBar(WindowFramework* window) : _window(window)
     {
       cout << "Element[" << i << "] tag: '" << element->GetChild(i)->GetTagName().CString() << "' id: " << element->GetChild(i)->GetId().CString() << endl;
     }
-    
-    element = MyRocket::GetChildren(element, "menu");
 
-    if (!element)
-      cout << "menu doesn't exisst" << endl;
+    Rocket::Core::Element* button1 = MyRocket::GetChildren(element, "menu");
+    Rocket::Core::Element* button2 = MyRocket::GetChildren(element, "inv");
 
-    element->AddEventListener("click", &MenuButtonClicked);
+    if (button1) button1->AddEventListener("click", &MenuButtonClicked);
+    if (button2) button2->AddEventListener("click", &InventoryButtonClicked);
 
     /*const Rocket::Core::Property* property = elementWindow->GetProperty("height");
 
