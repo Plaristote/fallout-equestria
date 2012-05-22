@@ -4,13 +4,16 @@ set(CMAKE_BUILD_TYPE Debug)
 
 project(FalloutEquestria)
 
-include_directories(include)
+include_directories(include angelscript)
 
 set(CMAKE_CXX_FLAGS "-std=c++0x -Wno-deprecated-declarations")
 
 file(GLOB_RECURSE sourceFiles
-     src/*.cpp)
+     src/*.cpp
+     angelscript/*.cpp)
 
 add_executable(game ${sourceFiles})
 
-target_link_libraries(game -L/usr/lib/panda3d p3framework panda pandafx pandaexpress p3dtoolconfig p3dtool p3pystub p3direct p3rocket RocketCore RocketControls)
+target_link_libraries(game -L/usr/lib/panda3d p3framework panda pandafx pandaexpress p3dtoolconfig p3dtool p3pystub p3direct
+                                              p3rocket RocketCore RocketControls
+                                              angelscript)

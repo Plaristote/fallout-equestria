@@ -64,13 +64,14 @@ def characters
     end
   end
 
-  #def npc
-  #  name: Applejack
-  #  model: horse.obj
-  #  def pos
-  #    y: 10
-  #    x: 10
-  #  end
-  #end
+  def npc
+    name:   Applejack
+    model:  horse.obj
+    script: test.as
+    def pos
+      y: 10
+      x: 10
+    end
+  end
 
 end

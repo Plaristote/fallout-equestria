@@ -12,31 +12,40 @@ ObjectNode* Npc::Factory(WindowFramework* window, Tilemap& tilemap, Characters& 
 
 Npc::Npc(WindowFramework* w, Tilemap& t, Data data, Characters& c) : Character(w, t, data, c)
 {
-  _ia     = &Npc::DummyIa;
-  _iaStep = 0;
+  if (!(data["script"].Nil()))
+  {
+    string prefixName = "IA_";
+    string prefixPath = "scripts/";
+    
+    _scriptContext = Script::Engine::Get()->CreateContext();
+    _scriptModule  = Script::Engine::LoadModule(prefixName + GetName(), prefixPath + data["script"].Value());
+    _scriptMain    = _scriptModule->GetFunctionByDecl("void main(Character@, float)");
+  }
+  else
+  {
+    _scriptContext = 0;
+    _scriptModule  = 0;
+    _scriptMain    = 0;
+  }
+}
+
+Npc::~Npc()
+{
+  if (_scriptContext)
+    _scriptContext->Release();
 }
 
 void Npc::Run(float elapsedTime)
 {
-  if (_ia)
-    (this->*_ia)(elapsedTime);
-  Character::Run(elapsedTime);
-}
-
-void Npc::DummyIa(float)
-{
-  if (_path.empty())
+  if (_scriptMain)
   {
-    if      (_iaStep == 0)
-      GoTo(_mapPos.x + 5, _mapPos.y + 10);
-    else if (_iaStep == 1)
-      GoTo(_mapPos.x + 5, _mapPos.y);
-    else if (_iaStep == 2)
-      GoTo(_mapPos.x - 6, _mapPos.y - 6);
-    else if (_iaStep == 3)
-      GoTo(_mapPos.x - 4, _mapPos.y - 4);
-    _iaStep++;
-    if (_iaStep == 4)
-      _iaStep = 0;
+    _scriptContext->Prepare(_scriptMain);
+    _scriptContext->SetArgObject(0, this);
+    _scriptContext->SetArgFloat(1,  elapsedTime);
+    if ((_scriptContext->Execute()) != asEXECUTION_FINISHED)
+    {
+      cout << "IA Execution failed" << endl;
+    }
   }
+  Character::Run(elapsedTime);
 }

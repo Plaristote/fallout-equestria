@@ -33,8 +33,9 @@ public:
     }
     return (it);
   }
-  
+
   Character(WindowFramework* window, Tilemap& map, Data data, Characters& chars);
+  virtual ~Character() {}
 
   bool               operator==(NodePath comp)           const { return (_root == comp || _root.is_ancestor_of(comp)); }
   bool               operator==(const std::string& name) const { return (_root.get_name() == name);                    }
@@ -44,6 +45,7 @@ public:
   bool               TryToReach(ObjectNode*, int min_distance = 0);
   bool               CanReach(ObjectNode*, int min_distance = 0);
   bool               HasLineOfSight(Character*);
+  bool               IsMoving(void) { return (!(_path.empty())); }
 
   std::string        GetName(void) const      { return (_root.get_name()); }
   Inventory&         GetInventory(void)       { return (_inventory);       }
