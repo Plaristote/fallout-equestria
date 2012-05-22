@@ -10,10 +10,23 @@
                   margin: auto;
                   bottom: 30px;
 		}
+
+                #body-inventory-items
+                {
+                  width:          210px;
+                  height:         90%;
+                  margin-top:     10px;
+                  margin-bottom:  10px;
+                  overflow-y:     scroll;
+                }
 		</style>
 	</head>
   <body id="body" template="tplmainbar">
+  <p>
     <div id="inventory-items">
+      <div id="body-inventory-items">
+      </div>
     </div>
+  </p>
   </body>
 </rml>

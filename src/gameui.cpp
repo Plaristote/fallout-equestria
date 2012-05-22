@@ -29,10 +29,14 @@ GameUi::GameUi(WindowFramework* window) : _window(window)
   _mainBar->InventoryButtonClicked.EventReceived.Connect(*this, &GameUi::OpenInventory);
   _menu->Hide();
   _inventory->Hide();
+  _console->Hide();
 
   _ih = new RocketInputHandler();
   window->get_mouse().attach_new_node(_ih);
   _rocket->set_input_handler(_ih);
+
+  _window->enable_keyboard();
+  framework.define_key("<", "ConsoleHandle", GameConsole::Toggle, (void*)_console);
 }
 
 GameUi::~GameUi()
@@ -172,12 +176,12 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
   _root = doc;
   if (doc)
   {
-    ElementDocument* docItemList       = context->LoadDocument("data/inventory-items.rml");
-    Element*         itemListContainer = docItemList->GetElementById("inventory-items");
+    //ElementDocument* docItemList       = context->LoadDocument("data/inventory-items.rml");
+    Element*         itemListContainer = doc->GetElementById("body-inventory-items");
 
-    doc->AppendChild(docItemList);
+    //doc->AppendChild(docItemList);
 
-    ElementDocument* parentItems = docItemList;
+    ElementDocument* parentItems = doc;
     for (unsigned short i = 0 ; i < 200 ; ++i)
     {
       Rocket::Core::Element* item = parentItems->CreateElement("invitem");
@@ -187,7 +191,7 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
     }
 
     doc->Show();
-    docItemList->Show();
+    //docItemList->Show();
   }
 }
 

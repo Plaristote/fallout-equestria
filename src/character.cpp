@@ -94,11 +94,16 @@ Character::Character(WindowFramework* window, Tilemap& map, Data data, Character
   _collisionPath         = _root.attach_new_node(_collisionNode);
   _collisionNode->set_from_collide_mask(characterCollideMask);
   _collisionNode->set_into_collide_mask(0);
-  _collisionFov          = new CollisionSphere(0, 0, 0, 0.f);
+  _collisionFov          = new CollisionSphere(0, 0, 0, 50.f);
   _collisionNode->add_solid(_collisionFov);
   _collisionHandlerQueue = new CollisionHandlerQueue();
   _collisionTraverser.add_collider(_collisionPath, _collisionHandlerQueue);
 
+  /*PT(CollisionVisualizer) colVisualizer;
+  PandaNode* pn = colVisualizer;
+
+  _root.attach_new_node(pn);*/
+  
   //_collisionPath.show();
 
   _charLight = new PointLight("Light" + data["name"].Value());
@@ -164,15 +169,21 @@ void Character::Run(float elapsedTime)
     Characters _fieldOfView;
     _fieldOfView.clear();
 
-    _collisionFov->set_radius(50.f);
-    _root.set_collide_mask(BitMask32(0));
+    //_collisionFov->set_radius(50.f);
+    //_root.set_collide_mask(BitMask32(0));
+    std::cout << "Range test initialized    in " << _timerFov.GetElapsedTime() << std::endl;
     _collisionTraverser.traverse(_window->get_render());
-    _root.set_collide_mask(characterCollideMask);
-    _collisionFov->set_radius(0.f);
+    std::cout << "Range test executed       in " << _timerFov.GetElapsedTime() << std::endl;
+    //_root.set_collide_mask(characterCollideMask);
+    //_collisionFov->set_radius(0.f);
     for(unsigned int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; i++)
     {
       CollisionEntry*      entry = _collisionHandlerQueue->get_entry(i);
       NodePath             into  = entry->get_into_node_path();
+
+      if (into == _root)
+        continue ;
+      
       Characters::iterator it    = Character::Find(_characters, into);
 
       if (it != _characters.end())
@@ -182,10 +193,14 @@ void Character::Run(float elapsedTime)
       }
     }
 
+    std::cout << "Range ponies   discovered     in " << _timerFov.GetElapsedTime() << std::endl;
+
     for_each(_fieldOfView.begin(), _fieldOfView.end(), [this](Character* character)
     {
       bool lineOfSight = HasLineOfSight(character);
     });
+
+    std::cout << "Line of sights discovered in " << _timerFov.GetElapsedTime() << std::endl;
   }
 }
 

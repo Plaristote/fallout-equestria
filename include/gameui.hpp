@@ -90,6 +90,12 @@ public:
   void Show(void) { _root->Show(); }
   void Hide(void) { _root->Hide(); }
 
+  static void Toggle(const Event*, void* data)
+  {
+    GameConsole* console = reinterpret_cast<GameConsole*>(data);
+    (console->_root->IsVisible() ? console->Hide() : console->Show());
+  }
+
   RocketListener         ConsoleKeyUp;
   RocketListener         ExecuteEvent;
 

@@ -13,8 +13,8 @@
 		}
 		</style>
 	</head>
-  <body id="body-inventory-items" template="tplmainbar">
+  <!--<body id="body-inventory-items" template="tplmainbar">
     <div id="inventory-items">
     </div>
-  </body>
+  </body>-->
 </rml>
