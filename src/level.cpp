@@ -1,11 +1,10 @@
+#include "globals.hpp"
 #include "level.hpp"
 
 #include "npc.hpp"
 
 using namespace std;
 
-//HAIL MICROSOFT!
-#define GET_ARRAY_SIZE(A) sizeof(A)/sizeof(A[0])
 struct LevelObjectLoader
 {
   typedef ObjectNode* (*Loader)(WindowFramework*, Tilemap&, Characters&, Data);
