@@ -1,38 +1,33 @@
+#include "globals.hpp"
 #include "scene_camera.hpp"
 
 using namespace std;
 
 //HAIL MICROSOFT
-
-std::vector<LPoint3f> cameraAngles;
-/*std::vector<LPoint3f> cameraAngles = {
+LPoint3f cameraAngles[] = {
   LPoint3f(-40, -40, 0),
   LPoint3f(0, -60, 0),
   LPoint3f(40, -40, 0),
   LPoint3f(40 - 180, -40, 0),
   LPoint3f(-180, -60, 0),
   LPoint3f(-40 - 180, -40, 0),
-};*/
-
-std::vector<bool> scrollSwapAngles;
-/*std::vector<bool> scrollSwapAngles = {
+};
+bool scrollSwapAngles[] = {
   true,
   false,
   false,
   true,
   false,
   false,
-};*/
-
-std::vector<bool> scrollSwapAxis;
-/*std::vector<bool> scrollSwapAxis = {
+};
+bool scrollSwapAxis[] = {
   false,
   false,
   false,
   true,
   true,
   true,
-};*/
+};
 
 
 SceneCamera::SceneCamera(WindowFramework* window, NodePath camera) : _window(window), _graphicWindow(window->get_graphics_window()), _camera(camera)
@@ -43,26 +38,6 @@ SceneCamera::SceneCamera(WindowFramework* window, NodePath camera) : _window(win
   //camera.set_hpr(0, -60, 0);
   camera.set_hpr(-40, -40, 0);
 
-  //HAIL MICROSOFT
-  //(didn't add a function because I'm tired from all this compilation nonsense right now)
-  cameraAngles.push_back( LPoint3f(-40, -40, 0) );
-  scrollSwapAngles.push_back( true );
-  scrollSwapAxis.push_back( false );
-  cameraAngles.push_back( LPoint3f(-0, -60, 0) );
-  scrollSwapAngles.push_back( false );
-  scrollSwapAxis.push_back( false );
-  cameraAngles.push_back( LPoint3f(40, -40, 0) );
-  scrollSwapAngles.push_back( false );
-  scrollSwapAxis.push_back( false );
-  cameraAngles.push_back( LPoint3f(40 - 180, -40, 0) );
-  scrollSwapAngles.push_back( true );
-  scrollSwapAxis.push_back( true );
-  cameraAngles.push_back( LPoint3f(-180, -60, 0) );
-  scrollSwapAngles.push_back( false );
-  scrollSwapAxis.push_back( true );
-  cameraAngles.push_back( LPoint3f(-40 - 180, -40, 0) );
-  scrollSwapAngles.push_back( false );
-  scrollSwapAxis.push_back( true );
   _currentCameraAngle = 0;
   _currentHpr         = cameraAngles[_currentCameraAngle];
   _objectiveHpr       = _currentHpr;
@@ -72,7 +47,7 @@ SceneCamera::SceneCamera(WindowFramework* window, NodePath camera) : _window(win
 
 void SceneCamera::SwapCameraView(void)
 {
-  if (++_currentCameraAngle >= cameraAngles.size())
+  if (++_currentCameraAngle >= GET_ARRAY_SIZE(cameraAngles))
     _currentCameraAngle = 0;
   _objectiveHpr = cameraAngles[_currentCameraAngle];
 }
