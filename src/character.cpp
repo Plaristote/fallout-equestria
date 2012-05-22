@@ -99,7 +99,7 @@ Character::Character(WindowFramework* window, Tilemap& map, Data data, Character
   _collisionHandlerQueue = new CollisionHandlerQueue();
   _collisionTraverser.add_collider(_collisionPath, _collisionHandlerQueue);
 
-  _collisionPath.show();
+  //_collisionPath.show();
 
   _charLight = new PointLight("Light" + data["name"].Value());
   _charLight->set_color(LColor(0.8, 0.8, 0.8, 1));
@@ -117,7 +117,7 @@ Character::Character(WindowFramework* window, Tilemap& map, Data data, Character
   _losRay->set_origin(0, 0, 0);
   _losRay->set_direction(-10, 0, 0);
   _losPath.set_pos(0, -0.5, 0);
-  _losPath.show();
+  //_losPath.show();
   _losNode->add_solid(_losRay);
   _losHandlerQueue = new CollisionHandlerQueue();
   _losTraverser.add_collider(_losPath, _losHandlerQueue);

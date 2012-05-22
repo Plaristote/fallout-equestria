@@ -35,17 +35,17 @@ struct RocketListener : public Rocket::Core::EventListener
 
 class GameMenu
 {
+  friend class GameUi;
 public:
-  GameMenu(WindowFramework* window);
-  void MenuEventContinue(Rocket::Core::Event& event) { _rocket->set_active(false); }
+  GameMenu(WindowFramework* window, Rocket::Core::Context* context);
+  void MenuEventContinue(Rocket::Core::Event& event) { Hide(); }
   void MenuEventExit(Rocket::Core::Event& event);
-  void Show(void) { _rocket->set_active(true);  }
-  void Hide(void) { _rocket->set_active(false); }
+  void Show(void) { _root->Show(); }
+  void Hide(void) { _root->Hide(); }
 
 private:
-  WindowFramework*       _window;
-  PT(RocketRegion)       _rocket;
-  PT(RocketInputHandler) _ih;
+  WindowFramework*               _window;
+  Rocket::Core::ElementDocument* _root;
 
   RocketListener         _continueClicked;
   RocketListener         _exitClicked;
@@ -54,69 +54,76 @@ private:
 
 class GameMainBar
 {
+  friend class GameUi;
 public:
-  GameMainBar(WindowFramework* window);
+  GameMainBar(WindowFramework* window, Rocket::Core::Context* context);
 
   RocketListener         MenuButtonClicked;
   RocketListener         InventoryButtonClicked;
   
 private:
-  WindowFramework*       _window;
-  PT(RocketRegion)       _rocket;
-  PT(RocketInputHandler) _ih;
+  WindowFramework*               _window;
+  Rocket::Core::ElementDocument* _root;
 };
 
 class GameInventory
 {
+  friend class GameUi;
 public:
-  GameInventory(WindowFramework* window);
+  GameInventory(WindowFramework* window, Rocket::Core::Context* context);
 
-  void Show(void) { _rocket->set_active(true);  }
-  void Hide(void) { _rocket->set_active(false); }
+  void Show(void) { _root->Show(); }
+  void Hide(void) { _root->Hide(); }
 
 private:
-  WindowFramework*       _window;
-  PT(RocketRegion)       _rocket;
-  PT(RocketInputHandler) _ih;
+  WindowFramework*               _window;
+  Rocket::Core::ElementDocument* _root;
 };
 
 class GameConsole
 {
+  friend class GameUi;
 public:
-  GameConsole(WindowFramework* window);
+  GameConsole(WindowFramework* window, Rocket::Core::Context* context);
   ~GameConsole(void);
 
-  void Show(void) { _rocket->set_active(true);  }
-  void Hide(void) { _rocket->set_active(false); }
+  void Show(void) { _root->Show(); }
+  void Hide(void) { _root->Hide(); }
 
   RocketListener         ConsoleKeyUp;
+  RocketListener         ExecuteEvent;
 
 private:
   void KeyUp(Rocket::Core::Event&);
+  void Execute(Rocket::Core::Event&);
+  void Output(const std::string str);
   
-  WindowFramework*       _window;
-  PT(RocketRegion)       _rocket;
-  PT(RocketInputHandler) _ih;
-  std::string            _currentLine;
-  asIScriptContext*      _scriptContext;
+  WindowFramework*               _window;
+  Rocket::Core::ElementDocument* _root;
+  std::string                    _currentLine;
+  asIScriptContext*              _scriptContext;
+  Observatory::ObserverId        _observerError;
 };
 
 class GameUi
 {
 public:
   GameUi(WindowFramework* window);
+  ~GameUi();
 
-  GameMenu& GetMenu(void) { return (_menu); }
+  GameMenu& GetMenu(void) { return (*_menu); }
 
   void      OpenMenu(Rocket::Core::Event&);
   void      OpenInventory(Rocket::Core::Event&);
 
 private:
-  WindowFramework* _window;
-  GameConsole      _console;
-  GameMenu         _menu;
-  GameMainBar      _mainBar;
-  GameInventory    _inventory;
+  WindowFramework*       _window;
+  GameConsole*           _console;
+  GameMenu*              _menu;
+  GameMainBar*           _mainBar;
+  GameInventory*         _inventory;
+  PT(RocketRegion)       _rocket;
+  PT(RocketInputHandler) _ih;
 };
 
 #endif

@@ -17,15 +17,7 @@ using namespace std;
 
 # include "scriptengine.hpp"
 
-void MessageCallback(const asSMessageInfo* msg, void* param)
-{
-  const char *type = "ERR ";
-  if( msg->type == asMSGTYPE_WARNING )
-    type = "WARN";
-  else if( msg->type == asMSGTYPE_INFORMATION )
-    type = "INFO";
-  printf("%s (%d, %d) : %s : %s\n", msg->section, msg->row, msg->col, type, msg->message);  
-}
+Observatory::Signal<void (std::string)> ScriptError;
 
 void AngelCout(const std::string& str)
 {
@@ -37,8 +29,6 @@ std::string scriptTmpString;
 void AngelScriptInitialize(void)
 {
   asIScriptEngine* engine = Script::Engine::Get();
-
-  Script::Engine::Get()->SetMessageCallback(asFUNCTION(MessageCallback), 0, asCALL_CDECL);
 
   engine->RegisterGlobalFunction("void Cout(string)", asFUNCTION(AngelCout), asCALL_CDECL);
 

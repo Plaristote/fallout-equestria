@@ -7,22 +7,32 @@
 		{
 		  width: 100%;
 		  height: 120px;
+                  top: -40px;
 		}
 	
                 #console-container
                 {
                 }
+
+                #console_input
+                {
+                  background-color: #000000;
+                  width: 100%;
+                  height: 20px;
+                }
 		</style>
 	</head>
   <body id="body" template="tplmainbar">
-      <div id="console-container">
-        <div id="console_output">
-          Trololo.<br />
+        <div id="console_input_container">
+          <form id="console_form">
+            <input type="text" id="console_input" value="Type here"/>
+          </form>
         </div>
 
-        <div id="console_input_container">
-          <input type="text" id="console_input" value="trololo"/>
-        </div>
+        <p id="console_output">
+          <b>Welcome to teh Fallout Equestria Debug Console</b>
+        </p>
+
       </div>
   </body>
 </rml>

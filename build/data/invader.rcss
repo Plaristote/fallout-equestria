@@ -130,20 +130,6 @@ input.submit
 	margin-left: 0px;
 }
 
-input
-{
-  display: inline-block;
-  width: 100%;
-  height: 30px;
-
-  font-size: 10;
-  text-align: left;
-  tab-index: auto;
-
-  background-decorator: image;
-  background-image: invader.tga 247px 0px 406px 45px;
-}
-
 button.francis
 {
   display: inline-block;
