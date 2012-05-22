@@ -182,18 +182,10 @@ void Character::Run(float elapsedTime)
       }
     }
 
-    cout << "=> Field of view of " << GetName() << endl;
     for_each(_fieldOfView.begin(), _fieldOfView.end(), [this](Character* character)
     {
-      cout << "  -> " << character->GetName();
       bool lineOfSight = HasLineOfSight(character);
-      if (lineOfSight)
-        cout << " with line of sight" << endl;
-      else
-        cout << " not seeing him" << endl;
-      cout << endl;
     });
-    cout << endl;
   }
 }
 

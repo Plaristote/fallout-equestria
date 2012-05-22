@@ -10,10 +10,7 @@ void             Engine::Initialize(void)
 {
   _engine = asCreateScriptEngine(ANGELSCRIPT_VERSION);
   if (_engine)
-  {
-    //RegisterStdString(_engine);
-    //RegisterStdStringUtils(_engine);
-  }
+    RegisterStdString_Generic(_engine);
 }
 
 void             Engine::Finalize(void)

@@ -8,7 +8,7 @@ extern PandaFramework framework;
 /*
  * GameUi
  */
-GameUi::GameUi(WindowFramework* window) : _window(window), _menu(window), _mainBar(window), _inventory(window)
+GameUi::GameUi(WindowFramework* window) : _window(window), _console(window), _menu(window), _mainBar(window), _inventory(window)
 {
   Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Roman.otf");
   Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Italic.otf");
@@ -29,6 +29,91 @@ void GameUi::OpenMenu(Rocket::Core::Event&)
 void GameUi::OpenInventory(Rocket::Core::Event&)
 {
   _inventory.Show();
+}
+
+/*
+ * GameConsole
+ */
+#include "scriptengine.hpp"
+GameConsole::GameConsole(WindowFramework* window) : _window(window)
+{
+  _scriptContext = Script::Engine::Get()->CreateContext();
+  
+  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Roman.otf");
+  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Italic.otf");
+  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Bold.otf");
+  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-BoldItalic.otf");
+  
+  _rocket = RocketRegion::make("rocketConsole", window->get_graphics_output());
+
+  Rocket::Core::Context*         context = _rocket->get_context();
+  Rocket::Core::ElementDocument* doc     = context->LoadDocument("data/console.rml");
+
+  if (doc)
+  {
+    doc->Show();
+
+    Rocket::Core::Element* input = doc->GetElementById("console_input");
+
+    if (input)
+    {
+      cout << "[UI] Console is ready" << endl;
+      input->AddEventListener("keyup",     &ConsoleKeyUp);
+      input->AddEventListener("textinput", &ConsoleKeyUp);
+      ConsoleKeyUp.EventReceived.Connect(*this, &GameConsole::KeyUp);
+    }
+    else
+      cout << "[UI] No input for the console" << endl;
+
+    PT(RocketInputHandler) ih = new RocketInputHandler();
+    window->get_mouse().attach_new_node(ih);
+    _rocket->set_input_handler(ih);
+  }
+}
+
+GameConsole::~GameConsole()
+{
+  if (_scriptContext)
+    _scriptContext->Release();
+}
+#include <scripthelper/scripthelper.h>
+void GameConsole::KeyUp(Rocket::Core::Event& event)
+{
+  if (event == "keyup")
+  {
+    Rocket::Core::Input::KeyIdentifier keyId = Input::KeyIdentifier::KI_0;
+
+    keyId = (event.GetParameter<Input::KeyIdentifier>("key_identifier", keyId));
+    if (keyId == Input::KeyIdentifier::KI_RETURN)
+    {
+      cout << "Executing command: '" << _currentLine << "'" << endl;
+      _currentLine = "";
+    }
+  }
+  else if (event == "textinput")
+  {
+    Rocket::Core::word defWord;
+    Rocket::Core::word valueKey = event.GetParameter<Rocket::Core::word>("data", defWord);
+
+    if ((char)valueKey == '!')
+    {
+      if (_scriptContext)
+      {
+        int ret = ExecuteString(Script::Engine::Get(), _currentLine.c_str(), 0, _scriptContext);
+        cout << "Command returned value " << ret << " ('" << _currentLine << "')" << endl;
+      }
+      _currentLine = "";
+    }
+    else if ((char)valueKey == '|' && _currentLine.size() >= 1)
+    {
+      _currentLine.erase(_currentLine.size() - 1);
+    }
+    else
+      _currentLine += (char)valueKey;
+    cout << "[Console] " << _currentLine << endl;
+  }
+  else
+    cout << "ERROR ! Wrong type of event" << endl;
 }
 
 /*
@@ -73,11 +158,6 @@ GameInventory::GameInventory(WindowFramework* window) : _window(window)
  */
 GameMenu::GameMenu(WindowFramework* window) : _window(window)
 {
-  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Roman.otf");
-  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Italic.otf");
-  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Bold.otf");
-  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-BoldItalic.otf");
-
   _rocket = RocketRegion::make("pandaRocket", window->get_graphics_output());
 
   Rocket::Core::Context*         context = _rocket->get_context();

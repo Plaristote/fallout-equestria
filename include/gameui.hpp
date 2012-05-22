@@ -9,6 +9,7 @@
 # include <panda3d/pandaFramework.h>
 
 # include "observatory.hpp"
+# include "scriptengine.hpp"
 
 struct MyRocket
 {
@@ -79,6 +80,27 @@ private:
   PT(RocketInputHandler) _ih;
 };
 
+class GameConsole
+{
+public:
+  GameConsole(WindowFramework* window);
+  ~GameConsole(void);
+
+  void Show(void) { _rocket->set_active(true);  }
+  void Hide(void) { _rocket->set_active(false); }
+
+  RocketListener         ConsoleKeyUp;
+
+private:
+  void KeyUp(Rocket::Core::Event&);
+  
+  WindowFramework*       _window;
+  PT(RocketRegion)       _rocket;
+  PT(RocketInputHandler) _ih;
+  std::string            _currentLine;
+  asIScriptContext*      _scriptContext;
+};
+
 class GameUi
 {
 public:
@@ -91,10 +113,10 @@ public:
 
 private:
   WindowFramework* _window;
+  GameConsole      _console;
   GameMenu         _menu;
   GameMainBar      _mainBar;
   GameInventory    _inventory;
 };
-
 
 #endif

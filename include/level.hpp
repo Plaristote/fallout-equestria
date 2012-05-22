@@ -27,12 +27,15 @@ class Level : public AsyncTask
 {
   float ceilingCurrentTransparency;
 public:
+  static Level* CurrentLevel;
+  
   Level(WindowFramework* window, const std::string& filename);
 
   ~Level()
   {
     for_each(_characters.begin(), _characters.end(), [](Character* character) { delete character; });
     AsyncTaskManager::get_global_ptr()->remove(this);
+    CurrentLevel = 0;
   }
 
   DoneStatus       do_task(void);
@@ -41,6 +44,7 @@ public:
   void             CloseInteractMenu(void);
   ObjectNode*      FindObjectFromNode(NodePath node);
   Character*       FindCharacterFromNode(NodePath node);
+  Character*       FindCharacterByName(const std::string& name);
 
   // Interaction Management
   void             CallbackActionUse(ObjectNode* object);

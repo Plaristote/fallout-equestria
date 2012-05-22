@@ -27,10 +27,12 @@ void MessageCallback(const asSMessageInfo* msg, void* param)
   printf("%s (%d, %d) : %s : %s\n", msg->section, msg->row, msg->col, type, msg->message);  
 }
 
-void AngelScriptDebug(int i)
+void AngelCout(const std::string& str)
 {
-  std::cout << "[AngelScript][Debug] " << i << std::endl;
+  std::cout << "[AngelScript][Output] " << str << std::endl;
 }
+
+std::string scriptTmpString;
 
 void AngelScriptInitialize(void)
 {
@@ -38,7 +40,7 @@ void AngelScriptInitialize(void)
 
   Script::Engine::Get()->SetMessageCallback(asFUNCTION(MessageCallback), 0, asCALL_CDECL);
 
-  engine->RegisterGlobalFunction("void debug(int)", asFUNCTION(AngelScriptDebug), asCALL_CDECL);
+  engine->RegisterGlobalFunction("void Cout(string)", asFUNCTION(AngelCout), asCALL_CDECL);
 
   const char* posClass  = "MapPosition";
   engine->RegisterObjectType(posClass,   sizeof(MapElement::Position), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS);
@@ -52,8 +54,16 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "uint16 GoTo(int, int)",           asMETHOD(Character,GoTo),           asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool HasLineOfSight(Character@)", asMETHOD(Character,HasLineOfSight), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool IsMoving()",                 asMETHOD(Character,IsMoving),       asCALL_THISCALL);
-  //engine->RegisterObjectMethod(charClass, "string GetName()",                asMETHOD(Character,GetName),        asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "MapPosition GetPosition()",      asMETHOD(Character,GetPosition),    asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "string GetName()",                asMETHOD(Character,GetName),        asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "MapPosition GetPosition()",       asMETHOD(Character,GetPosition),    asCALL_THISCALL);
+
+  const char* levelClass = "Level";
+  engine->RegisterObjectType(levelClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(levelClass, "Character@ FindCharacterByName(string)", asMETHOD(Level,FindCharacterByName), asCALL_THISCALL);
+
+  engine->RegisterGlobalProperty("Level@ level", &(Level::CurrentLevel));
+
+  engine->RegisterGlobalProperty("string tmpString", &(scriptTmpString));
 }
 
 int main(int argc, char *argv[])

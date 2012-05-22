@@ -21,9 +21,13 @@ vector<LevelObjectLoader> objectLoaders = {
   LevelObjectLoader("npc",       &Npc::Factory)
 };
 
+Level* Level::CurrentLevel = 0;
+
 Level::Level(WindowFramework* window, const std::string& filename) : _window(window), _mouse(window),
   _camera(window, window->get_camera_group()), _tilemap(window), _gameUi(window)
 {
+  CurrentLevel = this;
+
   ceilingCurrentTransparency = 1.f;
 
   ObjectNode::ActionUse.Connect(*this, &Level::CallbackActionUse);
@@ -187,6 +191,19 @@ Character* Level::FindCharacterFromNode(NodePath node)
   while (cur != _characters.end())
   {
     if ((*(*cur)) == node)
+      return (*cur);
+    ++cur;
+  }
+  return (0);
+}
+
+Character* Level::FindCharacterByName(const std::string& name)
+{
+  Characters::iterator cur = _characters.begin();
+
+  while (cur != _characters.end())
+  {
+    if ((*(*cur)) == name)
       return (*cur);
     ++cur;
   }

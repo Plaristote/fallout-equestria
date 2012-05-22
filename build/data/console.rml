@@ -1,24 +1,28 @@
 <rml>
 	<head>
-		<title>Game Console</title>
-		<link type="text/template" href="tpl_console.rml" />
+		<title>Main Menu</title>
+		<link type="text/template" href="tpl_mainbar.rml" />
 		<style>
-body
-{
-  width: 300px;
-  height: 100px;
-  margin: auto;
-}
-
-div#window
-{
-  width:    100px;
-  height:   100%;
-  overflow: auto;
-}
+	        body
+		{
+		  width: 100%;
+		  height: 120px;
+		}
+	
+                #console-container
+                {
+                }
 		</style>
 	</head>
-	<body template="tplconsole">
-          <div id="window">Lorem ipsum dolor sit amet faut toujours que vous veniez foutre votre merde vous hein sire il faudrait vraiment que vous eteniez votre torche maintenant je vous assure avec la potion on y voit tres bien ouais enfin on y voit quand meme carrement miexu avec la torche</div>
-	</body>
+  <body id="body" template="tplmainbar">
+      <div id="console-container">
+        <div id="console_output">
+          Trololo.<br />
+        </div>
+
+        <div id="console_input_container">
+          <input type="text" id="console_input" value="trololo"/>
+        </div>
+      </div>
+  </body>
 </rml>

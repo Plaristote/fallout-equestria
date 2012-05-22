@@ -74,7 +74,7 @@ public:
   Node&        GetNode(int x, int y)
   {
     if (x < 0 || y < 0 || x >= _sizex || y >= _sizey)
-      throw "Pathfinding::GetNode: Index out of bounds";
+      return (_nodes[0]);
     return (_nodes[y * _sizex + x]);
   }
 
