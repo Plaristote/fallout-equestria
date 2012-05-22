@@ -78,6 +78,7 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   window->get_render().set_shader_input("light", _sunLightNode);
 
   MouseInit();
+  _timer.Restart();
 }
 
 /*void Level::StartFight(void)

@@ -47,6 +47,8 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "string GetName()",                asMETHOD(Character,GetName),        asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "MapPosition GetPosition()",       asMETHOD(Character,GetPosition),    asCALL_THISCALL);
 
+  engine->RegisterObjectMethod(charClass, "void ShowCollision(bool)",        asMETHOD(Character,DebugShowCollisionSphere), asCALL_THISCALL);
+
   const char* levelClass = "Level";
   engine->RegisterObjectType(levelClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(levelClass, "Character@ FindCharacterByName(string)", asMETHOD(Level,FindCharacterByName), asCALL_THISCALL);

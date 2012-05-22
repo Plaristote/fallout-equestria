@@ -55,6 +55,8 @@ public:
 
   Observatory::Signal<void (Character*)> ReachedCase;
 
+  void               DebugShowCollisionSphere(bool set) { (set ? _selfSphereNP.show() : _selfSphereNP.hide()); }
+
 protected:
   bool              IsArcAccessible(int beg_x, int beg_y, int dest_x, int dest_y);
 
@@ -67,6 +69,9 @@ protected:
 private:
   void DoMovement(float elapsedTime);
 
+  PT(CollisionSphere)       _selfSphere;
+  PT(CollisionNode)         _selfSphereNode;
+  NodePath                  _selfSphereNP;
 
   PT(CollisionSphere)       _collisionFov;
   PT(CollisionNode)         _collisionNode;

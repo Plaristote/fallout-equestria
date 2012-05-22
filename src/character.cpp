@@ -88,7 +88,15 @@ Character::Character(WindowFramework* window, Tilemap& map, Data data, Character
 {
   _lookingForNewWay = false;
   _root.set_name(data["name"].Value());
-  _root.set_collide_mask(characterCollideMask);
+  _root.set_collide_mask(0);
+
+  _selfSphere     = new CollisionSphere(0, 0, 0, 8.f);
+  _selfSphereNode = new CollisionNode("characterRange");
+  _selfSphereNP   = _root.attach_new_node(_selfSphereNode);
+  _selfSphereNode->set_into_collide_mask(characterCollideMask);
+  _selfSphereNode->set_from_collide_mask(0);
+  _selfSphereNode->add_solid(_selfSphere);
+
 
   _collisionNode         = new CollisionNode("characterRange");
   _collisionPath         = _root.attach_new_node(_collisionNode);
@@ -181,7 +189,7 @@ void Character::Run(float elapsedTime)
       CollisionEntry*      entry = _collisionHandlerQueue->get_entry(i);
       NodePath             into  = entry->get_into_node_path();
 
-      if (into == _root)
+      if (_root.is_ancestor_of(into))
         continue ;
       
       Characters::iterator it    = Character::Find(_characters, into);
