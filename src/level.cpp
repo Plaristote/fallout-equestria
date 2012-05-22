@@ -4,6 +4,8 @@
 
 using namespace std;
 
+//HAIL MICROSOFT!
+#define GET_ARRAY_SIZE(A) sizeof(A)/sizeof(A[0])
 struct LevelObjectLoader
 {
   typedef ObjectNode* (*Loader)(WindowFramework*, Tilemap&, Characters&, Data);
@@ -14,7 +16,7 @@ struct LevelObjectLoader
   Loader func;
 };
 
-vector<LevelObjectLoader> objectLoaders = {
+LevelObjectLoader objectLoaders[] = {
   LevelObjectLoader("door",      &Door::Factory),
   LevelObjectLoader("item",      &DroppedObject::Factory),
   LevelObjectLoader("character", &Character::Factory),
@@ -48,7 +50,7 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
 
     for_each(characters.begin(), characters.end(), [this, window](Data objectData)
     {
-      for (unsigned short i = 0 ; i < objectLoaders.size() ; ++i)
+      for (unsigned short i = 0 ; i < GET_ARRAY_SIZE(objectLoaders) /*objectLoaders.size()*/ ; ++i)
       {
         if (objectLoaders[i].name == objectData.Key())
         {
