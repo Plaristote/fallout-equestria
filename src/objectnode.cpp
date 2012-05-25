@@ -1,3 +1,4 @@
+#include "globals.hpp"
 #include "objectnode.hpp"
 #include <panda3d/nodePathCollection.h>
 
@@ -11,16 +12,21 @@ ObjectNode::ObjectNode(WindowFramework* window, Tilemap& map, Data data) : _wind
   static unsigned int charId = 0;
   NodePath            root = window->get_render();
 
-  root.set_collide_mask(MyCollisionMask::Object);
+  root.set_collide_mask(Object);
   
   _map.AddMapElement(this);
 
-  // Load our panda
+  // Load the model + textures
   _root = window->load_model(_root, "models/" + data["model"].Value());
-  _root.set_hpr(0, 90, 0);
-  _root.set_pos(0, 0, 3.5);
+  if (!(data["texture"].Nil())) {
+	  _tex= TexturePool::load_texture(TEXTURE_PATH + data["texture"].Value());
+	  _root.set_texture(_tex);
+  }
+
+  _root.set_hpr(0, 0, 0);
+  _root.set_pos(0, 0, 0);
   if (data["scale"].Nil())
-    _root.set_scale(0.5);
+    _root.set_scale(WORLD_SCALE);
   else
     _root.set_scale(((float)data["scale"]) * WORLD_SCALE);
   _root.reparent_to(root);
@@ -60,9 +66,9 @@ void ObjectNode::ForceClosestCase(void)
   LPoint2 roundedPos;
 
   roundedPos.set_x(round(currentPos.get_x() / (WORLD_SCALE * TILE_UNIT)));
-  roundedPos.set_y(_map.GetSize().get_y() - round((currentPos.get_y() / (WORLD_SCALE * TILE_UNIT))));
+  roundedPos.set_y(round(currentPos.get_y() / (WORLD_SCALE * TILE_UNIT)));
   Tilemap::Tile& tile = _map.GetTile(roundedPos.get_x(), roundedPos.get_y());
-  _root.set_pos(LPoint3(tile.position.get_x(), tile.position.get_y(), currentPos.get_z()));
+  _root.set_pos(tile.position);
   _mapPos.set_x(roundedPos.get_x());
   _mapPos.set_y(roundedPos.get_y());
 }

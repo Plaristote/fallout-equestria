@@ -64,6 +64,7 @@ protected:
   WindowFramework* _window;
   Tilemap&         _map;
   NodePath         _root;
+  PT(Texture)		_tex;
 
   Interactions _interactions;
 };

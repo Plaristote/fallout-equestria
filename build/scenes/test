@@ -9,8 +9,8 @@ def characters
     texture: objects/padlock.png
     scale: 0.2
     def pos
-      x: 5
-      y: 3
+      x: 2
+      y: 0
     end
     def interactions
       use
@@ -19,10 +19,11 @@ def characters
 
   def character
     name:  Twilight
-    model: horse.obj
+    model: lpip.egg
+	texture: characters/lpip.png
     def pos
-      x: 6
-      y: 3
+      x: 2
+      y: 1
     end
 
     def interactions
@@ -32,26 +33,12 @@ def characters
     end
   end
 
-  def door
-    name: Door
-    model: doorframe.obj
-    scale: 1
-    vertical: 1
-    def pos
-      x: 2
-      y: 5
-    end
 
-    def interactions
-      use
-      use_object
-      use_skill
-    end
-  end
 
   def character
     name: Fluttershy
-    model: horse.obj
+    model: lpip.egg
+	texture: characters/lpip.png
     def pos
       x: 8
       y: 3
@@ -66,7 +53,8 @@ def characters
 
   def npc
     name:   Applejack
-    model:  horse.obj
+    model:  lpip.egg
+	texture: characters/lpip.png
     script: test.as
     def pos
       y: 10

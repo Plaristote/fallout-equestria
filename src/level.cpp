@@ -67,12 +67,12 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   _sunLight = new DirectionalLight("sun_light");
 
   _sunLight->set_color(LVecBase4f(0.8, 0.8, 0.8, 1));
-  _sunLight->set_shadow_caster(true, 512, 512);
+  //_sunLight->set_shadow_caster(true, 512, 512);
   _sunLight->get_lens()->set_near_far(1.f, 2.f);
   _sunLight->get_lens()->set_film_size(512);
 
   _sunLightNode = window->get_render().attach_new_node(_sunLight);
-  _sunLightNode.set_hpr(-30, -60, 0);
+  _sunLightNode.set_hpr(-30, -80, 0);
   window->get_render().set_light(_sunLightNode);
   window->get_render().set_shader_input("light", _sunLightNode);
 

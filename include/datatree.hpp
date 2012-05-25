@@ -171,7 +171,7 @@ public:
     static DataTree* JSON(const std::string& filename);
   };
 
-  friend class Factory;
+  friend struct Factory;
 
   Data operator[](const std::string& string)
   {

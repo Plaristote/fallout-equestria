@@ -1,0 +1,63 @@
+<CoordinateSystem> { Z-up } 
+<Material> World {
+  <Scalar> diffr { 0.800 }
+  <Scalar> diffg { 0.800 }
+  <Scalar> diffb { 0.800 }
+  <Scalar> specr { 0.000 }
+  <Scalar> specg { 0.000 }
+  <Scalar> specb { 0.000 }
+  <Scalar> shininess { 12.5 }
+  <Scalar> emitr { 0.000 }
+  <Scalar> emitg { 0.000 }
+  <Scalar> emitb { 0.000 }
+}
+
+<Texture> Tex1 {
+  ""
+}
+
+  <Group> Plane {
+    <Transform> {
+      <Matrix4> {
+        1.000 0.000 0.000 0.000
+        0.000 1.000 0.000 0.000
+        0.000 0.000 1.000 0.000
+        0.000 0.000 -4.200 1.000
+      }
+    }
+    
+    <VertexPool> Plane {
+      <Vertex> 0 {
+        4.000 4.000 0.000
+        <UV>  {
+          1.000 1.000
+        }
+      }
+      <Vertex> 1 {
+        -4.000 4.000 0.000
+        <UV>  {
+          0.750 1.000
+        }
+      }
+      <Vertex> 2 {
+        -4.000 -4.000 0.000
+        <UV>  {
+          0.750 0.750
+        }
+      }
+      <Vertex> 3 {
+        4.000 -4.000 0.000
+        <UV>  {
+          1.000 0.750
+        }
+      }
+    }
+    
+    
+    <Polygon> {
+      <TRef> { Tex1 }
+      <MRef> { World }
+      <Normal> {0.000 0.000 1.000}
+      <VertexRef> { 0 1 2 3 <Ref> { Plane }}
+    }
+  }

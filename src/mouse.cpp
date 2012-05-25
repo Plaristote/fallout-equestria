@@ -54,7 +54,7 @@ void Mouse::Run(void)
       {
         if (oldPickedUnit.node() != _lastPickedUnit.node())
         {
-          cout << "New unit hovered" << endl;
+			cout << "New unit hovered: " << _lastPickedUnit.get_name() << endl;
           UnitHovered.Emit(_lastPickedUnit);
         }
         break ;

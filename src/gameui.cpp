@@ -6,6 +6,7 @@ using namespace Rocket::Core;
 
 extern PandaFramework framework;
 
+
 /*
  * GameUi
  */
@@ -36,7 +37,7 @@ GameUi::GameUi(WindowFramework* window) : _window(window)
   _rocket->set_input_handler(_ih);
 
   _window->enable_keyboard();
-  framework.define_key("<", "ConsoleHandle", GameConsole::Toggle, (void*)_console);
+  framework.define_key("tab", "ConsoleHandle", GameConsole::Toggle, (void*)_console);
 }
 
 GameUi::~GameUi()
@@ -69,8 +70,11 @@ void GameUi::OpenInventory(Rocket::Core::Event&)
 #include "scriptengine.hpp"
 #include <scripthelper/scripthelper.h>
 #include <sstream>
+GameConsole* GameConsole::GConsole= 0;
 GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context) : _window(window)
 {
+	GConsole= this;
+
   _scriptContext = Script::Engine::Get()->CreateContext();
   _observerError = Script::Engine::ScriptError.Connect(*this, &GameConsole::Output);
   
@@ -82,17 +86,20 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
   Rocket::Core::ElementDocument* doc     = context->LoadDocument("data/console.rml");
 
   _root = doc;
+  _input = doc->GetElementById("console_input");
+  _history.push_back("LF();");
+  _histIter= _history.end();
   if (doc)
   {
     doc->Show();
 
-    Rocket::Core::Element* input = doc->GetElementById("console_input");
     Rocket::Core::Element* form  = doc->GetElementById("console_form");
 
-    if (input)
+    if (_input)
     {
       cout << "[UI] Console is ready" << endl;
-      input->AddEventListener("textinput", &ConsoleKeyUp);
+      _input->AddEventListener("textinput", &ConsoleKeyUp);
+	  _input->AddEventListener("keyup", &ConsoleKeyUp);
       ConsoleKeyUp.EventReceived.Connect(*this, &GameConsole::KeyUp);
       ExecuteEvent.EventReceived.Connect(*this, &GameConsole::Execute);
     }
@@ -110,9 +117,11 @@ GameConsole::~GameConsole()
 
 void GameConsole::Execute(Rocket::Core::Event&)
 {
-  Rocket::Core::Element*                element = _root->GetElementById("console_input");
-  Rocket::Controls::ElementFormControl* control = reinterpret_cast<Rocket::Controls::ElementFormControl*>(element);
+  Rocket::Controls::ElementFormControl* control = reinterpret_cast<Rocket::Controls::ElementFormControl*>(_input);
   Rocket::Core::String string = control->GetValue().CString();
+
+  _history.push_back(string.CString());
+  _histIter= _history.end();
 
   if (_scriptContext)
   {
@@ -139,32 +148,89 @@ void GameConsole::Output(const std::string str)
 
 void GameConsole::KeyUp(Rocket::Core::Event& event)
 {
-  if (event == "keyup")
-  {
-    /*Rocket::Core::Input::KeyIdentifier keyId = Input::KeyIdentifier::KI_0;
+	if (event == "keyup") {
+		Rocket::Controls::ElementFormControl* control = reinterpret_cast<Rocket::Controls::ElementFormControl*>(_input);
+		int keyId= event.GetParameter<int>("key_identifier", 0);
 
-    keyId = (event.GetParameter<Input::KeyIdentifier>("key_identifier", keyId));
-    if (keyId == Input::KeyIdentifier::KI_RETURN)
-    {
-      cout << "Executing command: '" << _currentLine << "'" << endl;
-      _currentLine = "";
-    }
+		if (keyId == Input::KI_RETURN) {
+			Execute(event);
+		};
 
-    Rocket::Controls::ElementFormControl* element = reinterpret_cast<Rocket::Controls::ElementFormControl*>(event.GetCurrentElement());
-    
-    Rocket::Core::String string = element->GetValue().CString();
+		if (!_history.empty()) {
+			if (keyId == Input::KI_DOWN) {
+				if (_histIter!=_history.begin()) {
+					_histIter--;
+					control->SetValue( _histIter->c_str() );
+				};
+			};
+			if (keyId == Input::KI_UP) {
+				if (_histIter!=_history.end()) {
+					control->SetValue( _histIter->c_str() );
+					_histIter++;
+				} else {
+					control->SetValue("");
+				};
+			};
+		};
+	}
 
-    std::cout << "Value is : " << string.CString() << std::endl;*/
-  }
-  else if (event == "textinput")
-  {
-    Rocket::Core::word defWord;
-    Rocket::Core::word valueKey = event.GetParameter<Rocket::Core::word>("data", defWord);
-
-    if ((char)valueKey == ';')
-      Execute(event);
-  }
+	/*else if (event == "textinput") {
+		Rocket::Core::word defWord;
+		Rocket::Core::word valueKey = event.GetParameter<Rocket::Core::word>("data", defWord);
+	}*/
 }
+
+//List all the functions registered inside AngelScript
+void GameConsole::ListFunctions() {
+	asIScriptEngine* engine = Script::Engine::Get();
+
+	for (int i= 0; i<engine->GetGlobalFunctionCount(); i++)
+		cout << "GLOBAL: " << engine->GetGlobalFunctionByIndex(i)->GetName() << endl;
+	for (int i= 0; i<engine->GetFuncdefCount(); i++)
+		cout << "FUNCDEF: " << engine->GetFuncdefByIndex(i)->GetName() << endl;
+	for (int i= 0; i<engine->GetObjectTypeCount(); i++) {
+		asIObjectType* obj = engine->GetObjectTypeByIndex(i);
+		cout << "OBJ: " << obj->GetName() << endl;
+		for (int j= 0; j<obj->GetMethodCount(); j++) 
+			cout << "---->" << obj->GetMethodByIndex(j)->GetName() << endl;
+	};
+};
+
+//Print out the entire scene graph into the console
+void GameConsole::PrintScenegraph() {
+	cout << "PRINTING SCENE GRAPH:" << endl;
+	//render.ls();
+	PrintChildren(GameConsole::Get()._window->get_render(),0);
+	cout << endl;
+};
+
+void GameConsole::PrintChildren(NodePath& n, int lvl) {
+	for (int i= 0; i<lvl; i++)
+		cout << "---";
+	if (n.get_name()!="")
+		cout << n.get_name() << endl;
+	else
+		cout << n << endl;
+
+	if (n.get_num_children()!=0) {
+		if (n.get_num_children()<100)
+			for (int i= 0; i<n.get_num_children(); i++)
+				PrintChildren( n.get_child(i), lvl+1 );
+		else {
+			for (int i= 0; i<lvl; i++)
+				cout << "   ";
+			cout << "(skipping past " << n.get_num_children() << " instances)\n";
+		}
+	}
+	else {
+		//cout << "{";
+		//n.ls();
+		//cout << "}";
+	};
+};
+GameConsole& GameConsole::Get() {
+	return *GConsole;
+};
 
 /*
  * GameInventory

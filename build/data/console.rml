@@ -25,7 +25,7 @@
   <body id="body" template="tplmainbar">
         <div id="console_input_container">
           <form id="console_form">
-            <input type="text" id="console_input" value="Type here"/>
+            <input type="text" id="console_input" value=""/>
           </form>
         </div>
 

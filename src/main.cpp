@@ -31,6 +31,8 @@ void AngelScriptInitialize(void)
   asIScriptEngine* engine = Script::Engine::Get();
 
   engine->RegisterGlobalFunction("void Cout(string)", asFUNCTION(AngelCout), asCALL_CDECL);
+  engine->RegisterGlobalFunction("void LF()", asFUNCTION( GameConsole::ListFunctions ), asCALL_CDECL);
+  engine->RegisterGlobalFunction("void PrintScenegraph()", asFUNCTION( GameConsole::PrintScenegraph ), asCALL_CDECL);
 
   const char* posClass  = "MapPosition";
   engine->RegisterObjectType(posClass,   sizeof(MapElement::Position), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS);
@@ -51,7 +53,7 @@ void AngelScriptInitialize(void)
 
   const char* levelClass = "Level";
   engine->RegisterObjectType(levelClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(levelClass, "Character@ FindCharacterByName(string)", asMETHOD(Level,FindCharacterByName), asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "Character@ FindCharacterByName(const string &in)", asMETHOD(Level,FindCharacterByName), asCALL_THISCALL);
 
   engine->RegisterGlobalProperty("Level@ level", &(Level::CurrentLevel));
 

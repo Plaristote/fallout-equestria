@@ -1,8 +1,5 @@
+#include "globals.hpp"
 #include "tilemap.hpp"
-
-# define MODEL_TILE_PATH    "models/plane.obj"
-# define TEXTURE_TILE_PATH  "textures/tiles/"
-# define TEXTURE_WALL_PATH  "textures/walls/"
 
 using namespace std;
 
@@ -21,7 +18,7 @@ Tilemap::~Tilemap()
 }
 #include <panda3d/geomVertexFormat.h>
 template<class NodeType>
-void Tilemap::LoadTiles(string tileType, Data tileset, Data map, LPoint3 posModificator, NodePath fatherGroup, vector<NodePath>& groups, vector<NodeType>& storage)
+void Tilemap::LoadTiles(string tileType, Data map, LPoint3 posModificator, NodePath fatherGroup, vector<NodePath>& groups, vector<NodeType>& storage)
 {
   vector<string> tilesSrc;
   Data::iterator currentTile = map.begin();
@@ -40,49 +37,42 @@ void Tilemap::LoadTiles(string tileType, Data tileset, Data map, LPoint3 posModi
     }
   }
 
-  // Loading Tileset
-  for_each(tileset.begin(), tileset.end(), [&tilesSrc](Data children) { tilesSrc.push_back(children.Value()); });
-
   // Loading Tiles
   for (unsigned int   y = 0 ; y < _size.get_y() ; ++y)
   {
     for (unsigned int x = 0 ; x < _size.get_x() ; ++x, ++currentTile)
     {
+	  unsigned int tileId  = *currentTile;
       Tile tile;
 
-      tile.position.set_x(x                   * (_scale * TILE_UNIT) + posModificator.get_x());
-      tile.position.set_y((_size.get_y() - y) * (_scale * TILE_UNIT) + posModificator.get_y());
+      tile.position.set_x(x * (_scale * TILE_UNIT) + posModificator.get_x());
+      tile.position.set_y(y * (_scale * TILE_UNIT) + posModificator.get_y());
       tile.position.set_z(posModificator.get_z());
 
       // The tile is defined
       if ((*currentTile).Value() != "-")
       {
         stringstream stream1, stream2;
-        NodePath     newNode = _window->load_model(_window->get_render(), MODEL_TILE_PATH);
-        unsigned int tileId  = *currentTile;
-        Texture*     texture;
+		stream1 << x;
+		stream2 << y;
+        NodePath     newNode= NodePath("Tile" + stream1.str() + stream2.str());
+
+		if (tileId <= _modelArchive.size()) {
+			_modelArchive[tileId].instance_to(newNode);
+			newNode.set_texture(_texmap);
+		};
 
         // Set NodePath tags
         newNode.set_tag(tileType, "1");
-        stream1 << x;
         newNode.set_tag("pos_x", stream1.str());
-        stream2 << y;
         newNode.set_tag("pos_y", stream2.str());
 
         // Collision Mask
-        newNode.set_collide_mask(CollideMask(MyCollisionMask::Tiles));
+        newNode.set_collide_mask(CollideMask(Tiles));
 
         // Set Node transformations
         newNode.set_scale(_scale);
-        newNode.set_hpr(0, 90, 0);
         newNode.set_pos(tile.position);
-
-        // If the texture is defined in the tileset, apply it on the node
-        if (tileId < tilesSrc.size())
-        {
-          texture = TexturePool::load_texture(TEXTURE_TILE_PATH + tilesSrc[tileId]);
-          newNode.set_texture(texture);
-        }
 
         // Add to corresponding group
         newNode.reparent_to(groups[y + (x / _groupSize)]);
@@ -103,75 +93,83 @@ void Tilemap::LoadTiles(string tileType, Data tileset, Data map, LPoint3 posModi
   });
 }
 
-void Tilemap::LoadWalls(Data wallset, Data map, bool horizontal)
+void Tilemap::LoadWalls(Data map)
 {
-  Data::iterator currentWall = map.begin();
-  vector<string> wallsSrc;
+	Data::iterator currentWall = map.begin();
+	for (unsigned int   y = 0 ; y < _size.get_y() ; ++y) {
+		for (unsigned int x = 0 ; x < _size.get_x() ; ++x, ++currentWall) {
 
-  for_each(wallset.begin(), wallset.end(), [&wallsSrc](Data children) { wallsSrc.push_back(children.Value()); });
+			unsigned int tileId  = *currentWall;
+			if (tileId == 0)
+				continue;
 
-  for (unsigned int   y = 0 ; y < _size.get_y() ; ++y)
-  {
-    for (unsigned int x = 0 ; x < _size.get_x() ; ++x, ++currentWall)
-    {
-      unsigned int tileId  = *currentWall;
+			stringstream stream1, stream2;
+			stream1 << x;
+			stream2 << y;
+			NodePath         newNode= NodePath("Wall" + stream1.str() + stream2.str());
+			MapTile& tile = GetTile(x, y);
 
-      if (tileId == 0) continue ;
+			if (tileId <= _modelArchive.size()) {
+				_modelArchive[tileId].instance_to(newNode);
+				newNode.reparent_to(_groundGroup[y + (x / _groupSize)]);
+				newNode.set_texture(_texmap);
+			}
+			//if (horizontal)
+			//{
+			//  //newNode.set_hpr(0, 90, 0);
+			//  // (_scale * (2 / 2) => WorldScale * (half the size of the wall)
+			//  newNode.set_pos(x * (_scale * TILE_UNIT) - (_scale * (TILE_UNIT / 2)), /*(_size.get_y() - y)*/y * (_scale * TILE_UNIT), 0);
+			//} else {
+			//  //newNode.set_hpr(90, 90, 0);
+			//  //newNode.set_pos(x * (_scale * TILE_UNIT),/* ((_size.get_y() - y)*/y * (_scale * TILE_UNIT)) + (_scale * (TILE_UNIT / 2)), 0);
+			//	  newNode.set_pos(x * (_scale * TILE_UNIT), y * (_scale * TILE_UNIT) , 0);
+			//}
+			newNode.set_scale(_scale);
+			newNode.set_tag("wall", "1");
+			// Collision Mask
+			newNode.set_collide_mask(CollideMask(Walls));
+			newNode.set_pos(tile.position);
+			cout << newNode.get_pos() << endl;
 
-      NodePath         newNode = _window->load_model(_window->get_render(), "models/wall.obj");
-      Texture*         texture;
+			/*(horizontal ? tile.hWall    : tile.vWall)    = newNode;
+			(horizontal ? tile.hasHWall : tile.hasVWall) = true;*/
+			tile.hWall = newNode;
+			tile.vWall = newNode;
+			tile.hasHWall = true;
+			tile.hasVWall = true;
 
-      newNode.set_scale(_scale);
-      newNode.set_tag("wall", "1");
-
-      // Collision Mask
-      newNode.set_collide_mask(CollideMask(MyCollisionMask::Walls));
-
-      if (horizontal)
-      {
-        newNode.set_hpr(0, 90, 0);
-        // (_scale * (2 / 2) => WorldScale * (half the size of the wall)
-        newNode.set_pos(x * (_scale * TILE_UNIT) - (_scale * (TILE_UNIT / 2)), (_size.get_y() - y) * (_scale * TILE_UNIT), 0);
-      }
-      else
-      {
-        newNode.set_hpr(90, 90, 0);
-        newNode.set_pos(x * (_scale * TILE_UNIT), ((_size.get_y() - y) * (_scale * TILE_UNIT)) + (_scale * (TILE_UNIT / 2)), 0);
-      }
-
-      if (--tileId < wallsSrc.size())
-      {
-        texture = TexturePool::load_texture(TEXTURE_WALL_PATH + wallsSrc[tileId]);
-        newNode.set_texture(texture);
-      }
-
-      MapTile& tile = GetTile(x, y);
-
-      (horizontal ? tile.hWall    : tile.vWall)    = newNode;
-      (horizontal ? tile.hasHWall : tile.hasVWall) = true;
-
-      newNode.reparent_to(tile.nodePath.get_parent());
-    }
-  }
+			newNode.reparent_to(tile.nodePath.get_parent());
+		}
+	}
 }
 
 void Tilemap::Load(Data data)
 {
   Data tileset = data["tileset"];
-  Data tilemap = data["tilemap"];
 
   //data.Output();
   _size.set_x(data["size_x"]);
   _size.set_y(data["size_y"]);
 
+  
+  for(Data::iterator i= tileset.begin(); i!=tileset.end(); ++i) {
+	  cout << tileset.Value() << " |||LOADING: " << MODEL_TILE_PATH + (*i).Value() << endl;
+	  _modelArchive.push_back( _window->load_model(_window->get_panda_framework()->get_models(),MODEL_TILE_PATH + (*i).Value() ) );
+  };
+
+  //Load the texture archive (one per tilemap!)
+  _texmap= TexturePool::load_texture(TEXTURE_TILE_PATH + data["texmap"].Value());
+  //TODO: throw, if texture bad!
+
   if (!(data["group_size"].Nil()))
     _groupSize = data["group_size"];
   
-  LoadTiles("tile",    tileset, data["tilemap"], LPoint3f(0, 0, 0),                        _groundNode,  _groundGroup,  _nodes);
-  LoadTiles("ceiling", tileset, data["ceiling"], LPoint3f(0, 0, (_scale * TILE_UNIT * 2)), _ceilingNode, _ceilingGroup, _ceiling);
-
-  LoadWalls(data["wallset"], data["hwalls"], true);
-  LoadWalls(data["wallset"], data["vwalls"], false);
+  LoadTiles("tile",   data["tilemap"], LPoint3f(0, 0, 0),                         _groundNode,  _groundGroup,  _nodes);
+  LoadTiles("ceiling",data["ceiling"], LPoint3f(0, 0, (_scale * CEILING_HEIGHT)), _ceilingNode, _ceilingGroup, _ceiling);
+  
+  /*LoadWalls(data["tileset"], data["hwalls"], true);
+  LoadWalls(data["tileset"], data["vwalls"], false);*/
+  LoadWalls(data["walls"]);
   cout << "Tilemap loading done" << endl;
 
   LoadPathfinding();

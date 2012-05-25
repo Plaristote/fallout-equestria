@@ -4,7 +4,7 @@
 
 using namespace std;
 
-CollideMask characterCollideMask(MyCollisionMask::Object);
+CollideMask characterCollideMask(Object);
 
 ObjectNode* Character::Factory(WindowFramework* window, Tilemap& tilemap, Characters& characters, Data data)
 {
@@ -90,7 +90,7 @@ Character::Character(WindowFramework* window, Tilemap& map, Data data, Character
   _root.set_name(data["name"].Value());
   _root.set_collide_mask(0);
 
-  _selfSphere     = new CollisionSphere(0, 0, 0, 8.f);
+  _selfSphere     = new CollisionSphere(0, 0, 0, 5.f);
   _selfSphereNode = new CollisionNode("characterRange");
   _selfSphereNP   = _root.attach_new_node(_selfSphereNode);
   _selfSphereNode->set_into_collide_mask(characterCollideMask);
@@ -114,17 +114,17 @@ Character::Character(WindowFramework* window, Tilemap& map, Data data, Character
   
   //_collisionPath.show();
 
-  _charLight = new PointLight("Light" + data["name"].Value());
+  /*_charLight = new PointLight("Light" + data["name"].Value());
   _charLight->set_color(LColor(0.8, 0.8, 0.8, 1));
   _charLight->set_attenuation(LVecBase3(0, 0, 0.1));
   _charLightNode = _window->get_render().attach_new_node(_charLight);
   _charLightNode.reparent_to(_root);
   _charLightNode.set_pos(0, 0, 0.01);
-  _window->get_render().set_light(_charLightNode);
+  _window->get_render().set_light(_charLightNode);*/
 
   // Line of sight tools
   _losNode      = new CollisionNode("losRay");
-  _losNode->set_from_collide_mask(CollideMask(MyCollisionMask::Object | MyCollisionMask::Walls));
+  _losNode->set_from_collide_mask(CollideMask(Object | Walls));
   _losPath      = _root.attach_new_node(_losNode);
   _losRay       = new CollisionRay();
   _losRay->set_origin(0, 0, 0);
@@ -256,9 +256,9 @@ void Character::DoMovement(float elapsedTime)
   else if (dir & MotionRight)
     pos.set_x(pos.get_x() + movement);
   if (dir & MotionTop)
-    pos.set_y(pos.get_y() + movement);
-  else if (dir & MotionBottom)
     pos.set_y(pos.get_y() - movement);
+  else if (dir & MotionBottom)
+    pos.set_y(pos.get_y() + movement);
 
   Tilemap::MapTile& tile    = _map.GetTile(next.x, next.y);
   LPoint3           tilePos = tile.position;

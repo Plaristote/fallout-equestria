@@ -9,9 +9,10 @@
 # include "mapelement.hpp"
 # include <algorithm>
 
-# define WORLD_SCALE        2.f
+# define WORLD_SCALE        1.f
 # define DEFAULT_GROUP_SIZE 45
-# define TILE_UNIT          2
+# define TILE_UNIT          8
+# define CEILING_HEIGHT     10
 
 enum MyCollisionMask
 {
@@ -83,8 +84,8 @@ public:
   void                          ResetPathfinding(void);
 
 private:
-  template<class NodeType> void LoadTiles(string tileType, Data tileset, Data map, LPoint3 posModificator, NodePath fatherGroup, vector<NodePath>& groups, vector<NodeType>& storage);
-  void                          LoadWalls(Data wallset, Data map, bool horizontal);
+  template<class NodeType> void LoadTiles(string tileType, Data map, LPoint3 posModificator, NodePath fatherGroup, vector<NodePath>& groups, vector<NodeType>& storage);
+  void                          LoadWalls(Data map);
   void                          LoadPathfinding(void);
   
   float                         _scale;
@@ -107,6 +108,13 @@ private:
   // Pathfinding Context
   Pathfinding*                 _pf;
   bool                         _pfCollisionSet;
+
+	//Holds texture map, for all the tiles inside this tilemap
+	PT(Texture)				_texmap;
+
+	//Stores all the models needed for the entire tilemap
+	//(such that they are loaded from the disk only ONCE)
+	std::vector<NodePath>		_modelArchive;
 };
 
 #endif
