@@ -61,7 +61,7 @@ public:
 
   static void ListFunctions();
   static void PrintScenegraph();
-  static void PrintChildren(NodePath& n, int lvl);
+  static void PrintChildren(const NodePath& n, int lvl);
 
   static void Toggle(const Event*, void* data)
   {
