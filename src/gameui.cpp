@@ -211,7 +211,7 @@ void GameConsole::PrintScenegraph() {
 	cout << endl;
 };
 
-void GameConsole::PrintChildren(NodePath& n, int lvl) {
+void GameConsole::PrintChildren(const NodePath& n, int lvl) {
 	for (int i= 0; i<lvl; i++)
 		cout << "---";
 	if (n.get_name()!="")
