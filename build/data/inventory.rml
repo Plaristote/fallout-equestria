@@ -8,7 +8,7 @@
 		  width:  520px;
 		  height: 70%;
                   margin: auto;
-                  bottom: 30px;
+                  margin-top: 10px;
 		}
 
                 #body-inventory-items

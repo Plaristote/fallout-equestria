@@ -12,20 +12,18 @@ ObjectNode* Npc::Factory(WindowFramework* window, Tilemap& tilemap, Characters& 
 
 Npc::Npc(WindowFramework* w, Tilemap& t, Data data, Characters& c) : Character(w, t, data, c)
 {
+  _scriptContext = 0;
+  _scriptModule  = 0;
+  _scriptMain    = 0;
   if (!(data["script"].Nil()))
   {
     string prefixName = "IA_";
     string prefixPath = "scripts/";
-    
+
     _scriptContext = Script::Engine::Get()->CreateContext();
     _scriptModule  = Script::Engine::LoadModule(prefixName + GetName(), prefixPath + data["script"].Value());
-    _scriptMain    = _scriptModule->GetFunctionByDecl("void main(Character@, float)");
-  }
-  else
-  {
-    _scriptContext = 0;
-    _scriptModule  = 0;
-    _scriptMain    = 0;
+    if (_scriptModule)
+      _scriptMain    = _scriptModule->GetFunctionByDecl("void main(Character@, float)");
   }
 }
 

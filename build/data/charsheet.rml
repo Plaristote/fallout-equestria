@@ -1,0 +1,241 @@
+<rml>
+	<head>
+		<title>Main Menu</title>
+		<link type="text/template" href="tpl_mainbar.rml" />
+		<style>
+	        body
+		{
+		  width: 100%;
+		  height: 100%;
+		}
+#general-data
+{
+  position:    absolute;
+  width:       50%;
+  height:      7%;
+}
+
+#char-name
+{
+  position: absolute;
+  width: 46%;
+}
+
+#char-age
+{
+  position: absolute;
+  width: 20%;
+  left:  46%;
+}
+
+#char-gender
+{
+  position: absolute;
+  width: 33%;
+  left:  66%;
+}
+
+#char-state
+{
+  position: absolute;
+  width:    25%;
+  height:   25%;
+  top:      7%;
+  left:     25%;
+}
+
+#char-stats
+{
+  position: absolute;
+  top:       32%;
+  height:    25%;
+  width:     25%;
+  left:      25%;
+}
+
+.char-stats-key
+{
+  left: 0px;
+}
+
+.char-stats-value
+{
+  position: absolute;
+  right:    0px;
+}
+
+#special
+{
+  position:    absolute;
+  width:       25%;
+  height:      40%;
+  top:         7%;
+}
+
+.special-group
+{
+  position: absolute;
+}
+
+.special-title
+{
+  position: absolute;
+  width: 50px;
+}
+
+.special-value
+{
+  position: absolute;
+  left:  50px;
+  width: 50px;
+}
+
+.special-commt
+{
+  position: absolute;
+  left: 100px;
+}
+
+#continue
+{
+  position: absolute;
+  bottom:   20px;
+  right:    25%;
+  width:    25%;
+}
+
+#cancel
+{
+  position: absolute;
+  bottom:   20px;
+  right:    0px;
+  width:    25%;
+}
+		</style>
+	</head>
+  <body id="body" template="tplmainbar">
+    <p>
+
+      <p id="general-data">
+        <p id="char-name">Twilight</p>
+        <p id="char-age">16</p>
+        <p id="char-gender">Mare</p>
+      </p>
+
+      <p id="special">
+
+          <p id="strength" class="special-group" style="top: 0px;">
+            <p class="special-title">ST</p>
+            <p class="special-value">10</p>
+            <p class="special-commt">Great</p>
+          </p>
+
+          <p id="perception" class="special-group" style="top: 40px;">
+            <p class="special-title">PE</p>
+            <p class="special-value">10</p>
+            <p class="special-commt">Great</p>
+          </p>
+
+          <p id="endurance" class="special-group"  style="top: 80px;">
+            <p class="special-title">EN</p>
+            <p class="special-value">10</p>
+            <p class="special-commt">Great</p>
+          </p>
+
+          <p id="charisma" class="special-group"   style="top: 120px;">
+            <p class="special-title">CH</p>
+            <p class="special-value">10</p>
+            <p class="special-commt">Great</p>
+          </p>
+
+          <p id="intelligence" class="special-group"  style="top: 160px;">
+            <p class="special-title">IN</p>
+            <p class="special-value">10</p>
+            <p class="special-commt">Great</p>
+          </p>
+
+          <p id="agility" class="special-group"  style="top: 200px;">
+            <p class="special-title">AG</p>
+            <p class="special-value">10</p>
+            <p class="special-commt">Great</p>
+          </p>
+
+          <p id="luck" class="special-group"  style="top: 240px;">
+            <p class="special-title">LU</p>
+            <p class="special-value">10</p>
+            <p class="special-commt">Great</p>
+          </p>
+
+      </p>
+
+      <p id="char-state">
+        <span id="char-state-hp">Hit Points </span> <span id="char-state-hp-id-value">50</span>/<span id="char-state-hp-id-total">50</span><br />
+        <span id="char-state-poisoned">Poisoned</span><br />
+        <span id="char-state-radiated">Radiated</span><br />
+        <span id="char-state-eye-damage">Eye damage</span><br />
+        <span id="char-state-crippled-front-left-leg">Crippled front left leg</span><br />
+        <span id="char-state-crippled-front-right-leg">Crippled front right leg</span><br />
+        <span id="char-state-crippled-behind-left-leg">Crippled behind left leg</span><br />
+        <span id="char-state-crippled-behind-right-leg">Crippled behind right leg</span><br />
+      </p>
+
+      <p id="char-stats">
+
+        <datagrid>
+          <col width="80%"><span class"char-stats-key">Armor Class</span></col>
+          <col width="20%"><span class"char-stats-value" id="armor-class">10</span></col>
+        </datagrid>
+
+        <datagrid>
+          <col width="80%"><span class"char-stats-key">Action Points</span></col>
+          <col width="20%"><span class"char-stats-value" id="armor-class">10</span></col>
+        </datagrid>
+
+        <datagrid>
+          <col width="80%"><span class"char-stats-key">Carry Weight</span></col>
+          <col width="20%"><span class"char-stats-value" id="carry-weight">275</span></col>
+        </datagrid>
+
+        <datagrid>
+          <col width="80%"><span class"char-stats-key">Melee Damage</span></col>
+          <col width="20%"><span class"char-stats-value" id="melee-damage">1</span></col>
+        </datagrid>
+
+        <datagrid>
+          <col width="80%"><span class"char-stats-key">Damage Res.</span></col>
+          <col width="20%"><span class"char-stats-value" id="damage-res">0%</span></col>
+        </datagrid>
+
+        <datagrid>
+          <col width="80%"><span class"char-stats-key">Poison Res.</span></col>
+          <col width="20%"><span class"char-stats-value" id="poison-res">25%</span></col>
+        </datagrid>
+
+        <datagrid>
+          <col width="80%"><span class"char-stats-key">Radiation Res.</span></col>
+          <col width="20%"><span class"char-stats-value" id="radiation-res">10%</span></col>
+        </datagrid>
+
+        <datagrid>
+          <col width="80%"><span class"char-stats-key">Sequence</span></col>
+          <col width="20%"><span class"char-stats-value" id="sequence">10</span></col>
+        </datagrid>
+
+        <datagrid>
+          <col width="80%"><span class"char-stats-key">Healing Rate</span></col>
+          <col width="20%"><span class"char-stats-value" id="healing-rate">1</span></col>
+        </datagrid>
+
+        <datagrid>
+          <col width="80%"><span class"char-stats-key">Critical Chance</span></col>
+          <col width="20%"><span class"char-stats-value" id="critical-chance">15%</span></col>
+        </datagrid>
+
+      </p>
+
+      <button class="button_menu" id="continue">Done</button>
+      <button class="button_menu" id="cancel">Cancel</button>
+
+    </p>
+  </body>
+</rml>

@@ -13,12 +13,15 @@
 # include "mouse.hpp"
 # include "interact_menu.hpp"
 
+# include "dataengine.hpp"
+
 # include "objectnode.hpp"
 # include "objects/door.hpp"
 # include "objects/dropped_object.hpp"
 # include "character.hpp"
 
 # include "gameui.hpp"
+# include "dialog.hpp"
 
 /*
  * Level
@@ -36,18 +39,25 @@ public:
     for_each(_characters.begin(), _characters.end(), [](Character* character) { delete character; });
     AsyncTaskManager::get_global_ptr()->remove(this);
     CurrentLevel = 0;
+    if (_currentRunningDialog)
+      delete _currentRunningDialog;
+    if (_currentInteractMenu)
+      delete _currentInteractMenu;
   }
 
   DoneStatus       do_task(void);
   void             TaskCeiling(float elapsedTime);
 
   void             CloseInteractMenu(void);
+  void             CloseRunningDialog(void);
   ObjectNode*      FindObjectFromNode(NodePath node);
   Character*       FindCharacterFromNode(NodePath node);
   Character*       FindCharacterByName(const std::string& name);
+  Data             GetDataEngine(void) { return (_dataEngine); }
 
   // Interaction Management
   void             CallbackActionUse(ObjectNode* object);
+  void             CallbackActionTalkTo(ObjectNode* object);
 
   // Mouse Management
   enum MouseState
@@ -95,6 +105,9 @@ private:
 
   GameUi            _gameUi;
   InteractMenu*     _currentInteractMenu;
+  DialogController* _currentRunningDialog;
+
+  DataEngine        _dataEngine;
 };
 
 #endif

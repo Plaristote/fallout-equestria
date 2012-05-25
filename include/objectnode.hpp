@@ -53,9 +53,10 @@ public:
   void          ForceCurrentCase(int x, int y);
   void          ForceClosestCase(void);
 
-  Interactions& GetInteractions(void) { return (_interactions); }
-  virtual void  InteractUse(Character* c)    { InteractDoesNothing(c); }
-  virtual void  InteractTalkTo(Character* c) { InteractDoesNothing(c); }
+  Interactions&      GetInteractions(void)        { return (_interactions); }
+  const std::string& GetDialog(void) const        { return (_dialog);       }
+  virtual void       InteractUse(Character* c)    { InteractDoesNothing(c); }
+  virtual void       InteractTalkTo(Character* c) { InteractDoesNothing(c); }
 
 protected:
   void          InteractDoesNothing(Character* c) { std::cout << "[GameLog] That does nothing" << std::endl; }
@@ -67,6 +68,7 @@ protected:
   PT(Texture)		_tex;
 
   Interactions _interactions;
+  std::string  _dialog;
 };
 
 #endif

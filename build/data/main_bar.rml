@@ -13,54 +13,104 @@
                 #console-container
                 {
                   position: absolute;
-                  width: 200px;
+                  width: 20%;
                   height: 100px;
-                  left: 0px;
-                  bottom: 120px;
                 }
 
                 #console
                 {
-                  position:relative;
+                  position:absolute;
                   float: right;
                   margin: auto;
-                  overflow: hidden;
+                  overflow-y: scroll;
                 }
 
                 #first_col
                 {
                   position: absolute;
-                  width: 50px;
+                  width: 10%;
                   height: 100px;
-                  left: 200px;
-                  top: 60px;
+                  left: 23%;
                 }
+
+#action_points
+{
+  position: absolute;
+  left:     33%;
+  height:   20px;
+}
+
+#weapon_one
+{
+  position:    absolute;
+  left:        33%;
+  width:       20%;
+  padding-top: 20px;
+}
+
+#weapon_two
+{
+  position:    absolute;
+  left:        53%;
+  width:       20%;
+  padding-top: 20px;
+}
+
+#second_col
+{
+  position:    absolute;
+  left:        73%;
+  width:       10%;
+}
+
+#third_col
+{
+  position:    absolute;
+  left:        83%;
+  width:       13%;
+  bottom:      0px;
+}
+                
 		</style>
 	</head>
   <body id="body" template="tplmainbar">
+   <p>
       <div id="console-container">
-        <div id="console">
-	Lorem ipsum dolor sit amet faut toujours que vous veniez foutre votre merde vous hein sire il faudrait vraiment que vous eteniez votre torche maintenant je vous assure avec la potion on y voit tres bien ouais enfin on y voit quand meme carrement miexu avec la torche.
-        </div>
+        <p id="console">
+ 	Lorem ipsum dolor sit amet faut toujours que vous veniez foutre votre merde vous hein sire il faudrait vraiment que vous eteniez votre torche maintenant je vous assure avec la potion on y voit tres bien ouais enfin on y voit quand meme carrement miexu avec la torche.
+        </p>
       </div>
 
-      <div id="first_col">
+      <p id="first_col">
         <br />
         <button class="francis" id="inv" >INV</button><br />
         <button class="francis" id="menu">Q</button>
-      </div>
+      </p>
 
-      <div id="action_points">
+      <p id="action_points">
         oooooooooo
-      </div>
+      </p>
 
-      <div id="weapon_one">
+      <p id="weapon_one">
         Weapon One
-      </div>
+      </p>
 
-      <div id="weapon_two">
+      <p id="weapon_two">
         Weapon Two
-      </div>
+      </p>
 
+      <p id="second_col">
+        <br />
+        99PV<br />
+        50AC<br />
+      </p>
+
+      <p id="third_col">
+        <button class="francis" id="skilldex">Skilldex</button><br />
+        <button class="francis" id="charsheet">Char</button><br />
+        <button class="francis" id="pipbuck">Pip</button>
+      </p>
+
+    </p>
   </body>
 </rml>

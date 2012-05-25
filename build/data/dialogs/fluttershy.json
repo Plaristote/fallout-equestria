@@ -1,0 +1,78 @@
+{
+"Flutterstart": {
+"rainbow": {
+"DefaultAnswer": "Twilightlicious",
+"HookAvailable": "",
+"HookExecute": ""
+}
+,
+"dash": {
+"DefaultAnswer": "Flutterlicious",
+"HookAvailable": "",
+"HookExecute": ""
+}
+,
+"bucks": {
+"HookAvailable": "NotAvailable",
+"DefaultAnswer": "Twilightlicious",
+"HookExecute": ""
+}
+
+}
+,
+"Twilightlicious": {
+"imthet": {
+"DefaultAnswer": "Flutterlicious",
+"HookAvailable": "",
+"HookExecute": ""
+}
+,
+"tothew": {
+"DefaultAnswer": "",
+"HookAvailable": "",
+"HookExecute": ""
+}
+
+}
+,
+"Flutterlicious": {
+"andthe": {
+"DefaultAnswer": "Twilightlicious",
+"HookAvailable": "",
+"HookExecute": ""
+}
+,
+"thoughtof": {
+"DefaultAnswer": "Twilightlicious",
+"HookAvailable": "",
+"HookExecute": ""
+}
+,
+"people": {
+"DefaultAnswer": "Twilightlicious",
+"HookAvailable": "",
+"HookExecute": ""
+}
+,
+"seeingthis": {
+"DefaultAnswer": "Twilightlicious",
+"HookAvailable": "",
+"HookExecute": ""
+}
+,
+"makesme": {
+"DefaultAnswer": "Twilightlicious",
+"HookAvailable": "",
+"HookExecute": ""
+}
+,
+"wannacry": {
+"DefaultAnswer": "Twilightlicious",
+"HookAvailable": "",
+"HookExecute": ""
+}
+
+}
+
+
+}

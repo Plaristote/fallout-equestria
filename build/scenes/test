@@ -27,7 +27,6 @@ def characters
     end
 
     def interactions
-      talk_to
       use_object
       use_skill
     end
@@ -38,14 +37,16 @@ def characters
   def character
     name: Fluttershy
     model: lpip.egg
+    dialog: fluttershy
 	texture: characters/lpip.png
+
     def pos
       x: 8
       y: 3
     end
 
     def interactions
-      use
+      talk_to
       use_object
       use_skill
     end

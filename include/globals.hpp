@@ -12,4 +12,4 @@
 
 
 
-#endif GLOBALS_HPP
+#endif // GLOBALS_HPP
