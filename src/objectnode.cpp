@@ -18,9 +18,16 @@ ObjectNode::ObjectNode(WindowFramework* window, Tilemap& map, Data data) : _wind
 
   // Load the model + textures
   _root = window->load_model(_root, "models/" + data["model"].Value());
-  if (!(data["texture"].Nil())) {
-	  _tex= TexturePool::load_texture(TEXTURE_PATH + data["texture"].Value());
-	  _root.set_texture(_tex);
+  if (!(data["texture"].Nil()))
+  {
+    string texturePath = TEXTURE_PATH;
+    texturePath       += data["texture"].Value();
+    
+    _tex = TexturePool::load_texture(texturePath);
+    if (_tex)
+      _root.set_texture(_tex);
+    else
+      std::cout << "/!\\ WARNING: Can't load texture from path '" << TEXTURE_PATH << data["texture"].Value() << "'" << std::endl;
   }
 
   _root.set_hpr(0, 0, 0);

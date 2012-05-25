@@ -20,7 +20,7 @@ def characters
   def character
     name:  Twilight
     model: lpip.egg
-	texture: characters/lpip.png
+    texture: characters/lpip.png
     def pos
       x: 2
       y: 1
