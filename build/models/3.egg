@@ -12,10 +12,6 @@
   <Scalar> emitb { 0.000 }
 }
 
-<Texture> Tex1 {
-  ""
-}
-
   <Group> Plane {
     <Transform> {
       <Matrix4> {
@@ -55,7 +51,6 @@
     
     
     <Polygon> {
-      <TRef> { Tex1 }
       <MRef> { World }
       <Normal> {0.000 0.000 1.000}
       <VertexRef> { 0 1 2 3 <Ref> { Plane }}
