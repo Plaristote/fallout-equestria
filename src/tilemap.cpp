@@ -1,5 +1,6 @@
 #include "globals.hpp"
 #include "tilemap.hpp"
+#include "timer.hpp"
 
 using namespace std;
 
@@ -20,6 +21,7 @@ Tilemap::~Tilemap()
 template<class NodeType>
 void Tilemap::LoadTiles(string tileType, Data map, LPoint3 posModificator, NodePath fatherGroup, vector<NodePath>& groups, vector<NodeType>& storage)
 {
+	Timer t2= Timer();
   vector<string> tilesSrc;
   Data::iterator currentTile = map.begin();
 
@@ -36,6 +38,7 @@ void Tilemap::LoadTiles(string tileType, Data map, LPoint3 posModificator, NodeP
       groups.push_back(groupNode);
     }
   }
+  t2.Profile("Group loading");
 
   // Loading Tiles
   for (unsigned int   y = 0 ; y < _size.get_y() ; ++y)
@@ -57,10 +60,13 @@ void Tilemap::LoadTiles(string tileType, Data map, LPoint3 posModificator, NodeP
 		stream2 << y;
         NodePath     newNode= NodePath("Tile" + stream1.str() + stream2.str());
 
-		if (tileId <= _modelArchive.size()) {
-			_modelArchive[tileId].instance_to(newNode);
+		//Load information from the archive, and store a pointer to the Prototype
+		if (tileId <= _tileArchive.size()) {
+			tile.proto= &_tileArchive[tileId];
+			_tileArchive[tileId].model.instance_to(newNode);
 			newNode.set_texture(_texmap);
-		};
+		} else
+			throw "Tile not in archive!";
 
         // Set NodePath tags
         newNode.set_tag(tileType, "1");
@@ -84,6 +90,7 @@ void Tilemap::LoadTiles(string tileType, Data map, LPoint3 posModificator, NodeP
       storage.push_back(tile);
     }
   }
+  t2.Profile("Tile loading");
 
   // Flatten each groups separatly
   std::for_each(groups.begin(), groups.end(), [fatherGroup](NodePath node)
@@ -91,88 +98,49 @@ void Tilemap::LoadTiles(string tileType, Data map, LPoint3 posModificator, NodeP
     node.flatten_strong();
     node.reparent_to(fatherGroup);
   });
-}
-
-void Tilemap::LoadWalls(Data map)
-{
-	Data::iterator currentWall = map.begin();
-	for (unsigned int   y = 0 ; y < _size.get_y() ; ++y) {
-		for (unsigned int x = 0 ; x < _size.get_x() ; ++x, ++currentWall) {
-
-			unsigned int tileId  = *currentWall;
-			if (tileId == 0)
-				continue;
-
-			stringstream stream1, stream2;
-			stream1 << x;
-			stream2 << y;
-			NodePath         newNode= NodePath("Wall" + stream1.str() + stream2.str());
-			MapTile& tile = GetTile(x, y);
-
-			if (tileId <= _modelArchive.size()) {
-				_modelArchive[tileId].instance_to(newNode);
-				newNode.reparent_to(_groundGroup[y + (x / _groupSize)]);
-				newNode.set_texture(_texmap);
-			}
-			//if (horizontal)
-			//{
-			//  //newNode.set_hpr(0, 90, 0);
-			//  // (_scale * (2 / 2) => WorldScale * (half the size of the wall)
-			//  newNode.set_pos(x * (_scale * TILE_UNIT) - (_scale * (TILE_UNIT / 2)), /*(_size.get_y() - y)*/y * (_scale * TILE_UNIT), 0);
-			//} else {
-			//  //newNode.set_hpr(90, 90, 0);
-			//  //newNode.set_pos(x * (_scale * TILE_UNIT),/* ((_size.get_y() - y)*/y * (_scale * TILE_UNIT)) + (_scale * (TILE_UNIT / 2)), 0);
-			//	  newNode.set_pos(x * (_scale * TILE_UNIT), y * (_scale * TILE_UNIT) , 0);
-			//}
-			newNode.set_scale(_scale);
-			newNode.set_tag("wall", "1");
-			// Collision Mask
-			newNode.set_collide_mask(CollideMask(Walls));
-			newNode.set_pos(tile.position);
-			cout << newNode.get_pos() << endl;
-
-			/*(horizontal ? tile.hWall    : tile.vWall)    = newNode;
-			(horizontal ? tile.hasHWall : tile.hasVWall) = true;*/
-			tile.hWall = newNode;
-			tile.vWall = newNode;
-			tile.hasHWall = true;
-			tile.hasVWall = true;
-
-			newNode.reparent_to(tile.nodePath.get_parent());
-		}
-	}
+  t2.Profile("Flattening");
 }
 
 void Tilemap::Load(Data data)
 {
+	//Start the profiling timer
+	Timer t1= Timer();
+
   Data tileset = data["tileset"];
 
   //data.Output();
   _size.set_x(data["size_x"]);
   _size.set_y(data["size_y"]);
+  if (!data["group_size"].Nil())
+	_groupSize = data["group_size"];
 
-  
+  //Load our tile prototypes
+  //TODO: Place all the tile+texmap declarations into a SEPARATE FILE!!! (independent from the map file)
   for(Data::iterator i= tileset.begin(); i!=tileset.end(); ++i) {
-	  cout << tileset.Value() << " |||LOADING: " << MODEL_TILE_PATH + (*i).Value() << endl;
-	  _modelArchive.push_back( _window->load_model(_window->get_panda_framework()->get_models(),MODEL_TILE_PATH + (*i).Value() ) );
+	  TilePrototype tp;
+	  tp.model= _window->load_model(_window->get_panda_framework()->get_models(),MODEL_TILE_PATH + (*i)["model"].Value() );
+	  //Sequentially load the access points
+	  int k= 0;
+	  for(Data::iterator j= (*i)["access"].begin(); j!=(*i)["access"].end(); ++j, k++)
+		  tp.access[k]= (*j);
+	  _tileArchive.push_back( tp );
   };
 
   //Load the texture archive (one per tilemap!)
   _texmap= TexturePool::load_texture(TEXTURE_TILE_PATH + data["texmap"].Value());
   //TODO: throw, if texture bad!
 
-  if (!(data["group_size"].Nil()))
-    _groupSize = data["group_size"];
+  t1.Profile("Archive loading");
   
-  LoadTiles("tile",   data["tilemap"], LPoint3f(0, 0, 0),                         _groundNode,  _groundGroup,  _nodes);
+  LoadTiles("tile",   data["maptile"], LPoint3f(0, 0, 0),                         _groundNode,  _groundGroup,  _nodes);
+  t1.Profile("Tile loading");
+
   LoadTiles("ceiling",data["ceiling"], LPoint3f(0, 0, (_scale * CEILING_HEIGHT)), _ceilingNode, _ceilingGroup, _ceiling);
-  
-  /*LoadWalls(data["tileset"], data["hwalls"], true);
-  LoadWalls(data["tileset"], data["vwalls"], false);*/
-  LoadWalls(data["walls"]);
+  t1.Profile("Ceiling loading");
   cout << "Tilemap loading done" << endl;
 
   LoadPathfinding();
+  t1.Profile("Pathfinding loading");
   cout << "Pathfinding loading done" << endl;
 }
 
@@ -222,7 +190,26 @@ void Tilemap::LoadPathfinding()
       node.x = x;
       node.y = y;
 
-      if (x != 0 && !tile.hasHWall) // To the left
+	  if (tile.proto==nullptr)
+		  throw "Tile has undefined prototype!\n";
+
+	  if (x != 0 && tile.proto->access[TilePrototype::left])
+		  if (GetTile(x-1,y  ).proto->access[TilePrototype::right])
+			Pathfinding::ConnectNodes(node, _pf->GetNode(x-1, y  ), 1.0f);
+
+	  if (y != 0 && tile.proto->access[TilePrototype::up])
+		  if (GetTile(x,y-1).proto->access[TilePrototype::down])
+			Pathfinding::ConnectNodes(node, _pf->GetNode(x  , y-1), 1.0f);
+
+	  if (x != 0 && y != 0 && tile.proto->access[TilePrototype::upleft])
+		  if (GetTile(x-1,y-1).proto->access[TilePrototype::downright])
+			Pathfinding::ConnectNodes(node, _pf->GetNode(x-1, y-1), 1.4f);
+
+	  if (y != 0 && tile.proto->access[TilePrototype::upright])
+		  if (GetTile(x+1,y-1).proto->access[TilePrototype::downleft])
+			Pathfinding::ConnectNodes(node, _pf->GetNode(x+1, y-1), 1.4f);
+
+      /*if (x != 0 && !tile.hasHWall) // To the left
         Pathfinding::ConnectNodes(node, _pf->GetNode(x - 1, y), 1.f);
       if (y != 0 && !tile.hasVWall) // To the top
         Pathfinding::ConnectNodes(node, _pf->GetNode(x, y - 1), 1.f);
@@ -235,7 +222,7 @@ void Tilemap::LoadPathfinding()
 
         if ((!right.hasHWall) && (!right.hasVWall))
           Pathfinding::ConnectNodes(node, _pf->GetNode(x + 1, y - 1), 1.1f);
-      }
+      }*/
     }
   }
 }

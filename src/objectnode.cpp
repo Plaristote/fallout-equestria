@@ -17,7 +17,7 @@ ObjectNode::ObjectNode(WindowFramework* window, Tilemap& map, Data data) : _wind
   _map.AddMapElement(this);
 
   // Load the model + textures
-  _root = window->load_model(_root, "models/" + data["model"].Value());
+  _root = window->load_model(_window->get_panda_framework()->get_models(), "models/" + data["model"].Value());
   if (!(data["texture"].Nil())) {
 	  _tex= TexturePool::load_texture(TEXTURE_PATH + data["texture"].Value());
 	  _root.set_texture(_tex);

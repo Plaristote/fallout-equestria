@@ -24,30 +24,44 @@ enum MyCollisionMask
 class Tilemap
 {
 public:
+	//Stored in the tile archive
+	//Used as a building block, from which the entire map is constructed
+	struct TilePrototype {
+		NodePath		model;
+		//Stores from which directions this grid can be accessed
+		//Redundant in terms of data storage, yes - but also far easier to understand, and hence less likely to be buggy ^_^
+		//Also, having ALL these directions defined allows for ROTATION
+		enum direction {upleft, up, upright, right, downright, down, downleft, left};
+		bool			access[8];
+		//bool			access_upleft, access_up, access_upright, access_right, access_downright, access_down, access_downleft, access_left;
+	};
   struct Tile
   {
-    Tile(NodePath nodePath) : nodePath(nodePath), isDefined(true) {}
-    Tile(void)              : isDefined(false)                    {}
+	Tile(NodePath nodePath) : nodePath(nodePath), isDefined(true) {}
+	Tile(void)              : isDefined(false)                    {}
     
-    bool     isDefined;
-    NodePath nodePath;
-    LPoint3  position;
+	bool					isDefined;
+	NodePath				nodePath;
+	LPoint3					position;
+	TilePrototype*			proto;
   };
   
+  //Ground tile: Effect on pathfinding
   struct MapTile : public Tile
   {
-    MapTile(NodePath nodePath) : Tile(nodePath) { hasHWall = false; hasVWall = false; }
-    MapTile(void)              : Tile()         { hasHWall = false; hasVWall = false; }
-    MapTile(const Tile& tile)  : Tile(tile)     { hasHWall = false; hasVWall = false; }
+    MapTile(NodePath nodePath) : Tile(nodePath) { }
+    MapTile(void)              : Tile()         { proto= nullptr; }
+    MapTile(const Tile& tile)  : Tile(tile)     { }
 
-    void                operator=(const NodePath& toSet) { nodePath = toSet; hasHWall = false; hasVWall = false; }
+    void                operator=(const NodePath& toSet) { nodePath = toSet; proto= nullptr; }
 
     operator NodePath() const { return (nodePath); }
 
-    NodePath            hWall, vWall;
-    bool                hasHWall, hasVWall;
+    //NodePath            hWall, vWall;
+    //bool                hasHWall, hasVWall;
   };
 
+  //Ceiling tile: May fade in/out if there are characters under it, no effect on pathfinding
   struct CeilingTile : public Tile
   {
     CeilingTile(NodePath nodePath) : Tile(nodePath) {}
@@ -85,7 +99,6 @@ public:
 
 private:
   template<class NodeType> void LoadTiles(string tileType, Data map, LPoint3 posModificator, NodePath fatherGroup, vector<NodePath>& groups, vector<NodeType>& storage);
-  void                          LoadWalls(Data map);
   void                          LoadPathfinding(void);
   
   float                         _scale;
@@ -112,9 +125,9 @@ private:
 	//Holds texture map, for all the tiles inside this tilemap
 	PT(Texture)				_texmap;
 
-	//Stores all the models needed for the entire tilemap
+	//Stores all the prototypes needed for the entire tilemap
 	//(such that they are loaded from the disk only ONCE)
-	std::vector<NodePath>		_modelArchive;
+	std::vector<TilePrototype> _tileArchive;
 };
 
 #endif
