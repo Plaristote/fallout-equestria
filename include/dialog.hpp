@@ -11,8 +11,9 @@
 struct DialogAnswers
 {
   typedef std::pair<std::string, std::string> KeyValue;
+  typedef std::list<KeyValue>                 AnswerList;
 
-  std::list<KeyValue> answers;
+  AnswerList answers;
 };
 
 class DialogModel
@@ -30,56 +31,45 @@ public:
     if (_tree) delete _tree;
   }
 
-  void               SetCurrentNpcLine(const std::string& id)
+  void               SetCurrentNpcLine(const std::string& id);  
+  const std::string  GetHookAvailable(const std::string& answerId)
   {
-    _currentNpcLine = _data[id];
+    return (_data[_currentNpcLine][answerId]["HookAvailable"].Value());
   }
-  
+
   const std::string  GetExecuteMethod(const std::string& answerId)
   {
-    return (_currentNpcLine[answerId]["HookExecute"].Value());
+    return (_data[_currentNpcLine][answerId]["HookExecute"].Value());
   }
 
   const std::string  GetDefaultNextLine(const std::string& answerId)
   {
-    return (_currentNpcLine[answerId]["DefaultAnswer"].Value());
+    return (_data[_currentNpcLine][answerId]["DefaultAnswer"].Value());
   }
 
   const std::string GetNpcLine(void)
   {
-    return (_currentNpcLine.Key()); // TODO replace this with L18n traduction of the key
+    return (_data[_currentNpcLine].Key()); // TODO replace this with L18n traduction of the key
   }
 
-  DialogAnswers     GetDialogAnswers(void)
-  {
-    DialogAnswers   answers;
-    Data::iterator  it  = _currentNpcLine.begin();
-    Data::iterator  end = _currentNpcLine.end();
-    
-    for (; it != end ; ++it)
-    {
-      DialogAnswers::KeyValue pair;
-
-      pair.first  = _currentNpcLine.Key();
-      pair.second = _currentNpcLine.Key(); // TODO replace this with L18n traduction of the key
-      answers.answers.push_back(pair);
-    }
-    return (answers);
-  }
+  DialogAnswers     GetDialogAnswers(void);
 
 private:
   DataTree*          _tree;
   Data               _data;
-  Data               _currentNpcLine;
+  std::string        _currentNpcLine;
 };
 
 class DialogView : public UiBase
 {
+public:
+  void Destroy(void);
 protected:
   DialogView(WindowFramework* window, Rocket::Core::Context* context);
-  ~DialogView() { if (_root) delete _root; }
+  ~DialogView();
 
   void UpdateView(const std::string& npcLine, const DialogAnswers& answers);
+  void CleanView(const DialogAnswers& answers);
 
   RocketListener AnswerSelected;
 
@@ -97,8 +87,11 @@ public:
     _context->Release();
   }
 
+  Observatory::Signal<void ()> DialogEnded;
+
 private:
   void             ExecuteAnswer(Rocket::Core::Event& event);
+  void             SetCurrentNode(const std::string& nodeName);
 
   asIScriptContext* _context;
   asIScriptModule*  _module;

@@ -51,7 +51,7 @@ def characters
   def character
     name:   Fluttershy
     model:  horse.obj
-    dialog: fluttertalk
+    dialog: fluttershy
 
     def pos
       x: 8

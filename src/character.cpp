@@ -180,9 +180,9 @@ void Character::Run(float elapsedTime)
     _fieldOfView.clear();
 
     _collisionFov->set_radius(50.f);
-    std::cout << "Range test initialized    in " << _timerFov.GetElapsedTime() << std::endl;
+    //std::cout << "Range test initialized    in " << _timerFov.GetElapsedTime() << std::endl;
     _collisionTraverser.traverse(_window->get_render());
-    std::cout << "Range test executed       in " << _timerFov.GetElapsedTime() << std::endl;
+    //std::cout << "Range test executed       in " << _timerFov.GetElapsedTime() << std::endl;
     _collisionFov->set_radius(0.f);
     for(unsigned int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; i++)
     {
@@ -200,15 +200,10 @@ void Character::Run(float elapsedTime)
           _fieldOfView.push_back(*it);
       }
     }
-
-    std::cout << "Range ponies   discovered     in " << _timerFov.GetElapsedTime() << std::endl;
-
     for_each(_fieldOfView.begin(), _fieldOfView.end(), [this](Character* character)
     {
       bool lineOfSight = HasLineOfSight(character);
     });
-
-    std::cout << "Line of sights discovered in " << _timerFov.GetElapsedTime() << std::endl;
   }
 }
 

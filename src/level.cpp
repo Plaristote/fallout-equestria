@@ -34,6 +34,7 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   ObjectNode::ActionUse.Connect(*this, &Level::CallbackActionUse);
   ObjectNode::ActionTalkTo.Connect(*this, &Level::CallbackActionTalkTo);
   _currentInteractMenu = 0;
+  _currentRunningDialog = 0;
 
   DataTree* datafile = DataTree::Factory::ShinyLang("scenes/" + filename);
   DataTree* tilefile = DataTree::Factory::JSON("maps/" + filename + ".json");
@@ -312,5 +313,20 @@ void Level::CallbackActionTalkTo(ObjectNode* object)
   const string& dialog = object->GetDialog();
 
   CloseInteractMenu();
-  DialogController* controller = new DialogController(_window, _gameUi.GetContext(), dialog);
+  if (_currentRunningDialog)
+    delete _currentRunningDialog;
+  _currentRunningDialog = new DialogController(_window, _gameUi.GetContext(), dialog);
+  _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningDialog);
+  _camera.SetEnabledScroll(false);
+}
+
+void Level::CloseRunningDialog(void)
+{
+  if (_currentRunningDialog)
+  {
+    _currentRunningDialog->Destroy();
+    //delete _currentRunningDialog;
+    _currentRunningDialog = 0;
+  }
+  _camera.SetEnabledScroll(true);
 }

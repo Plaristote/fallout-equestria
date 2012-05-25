@@ -39,12 +39,17 @@ public:
     for_each(_characters.begin(), _characters.end(), [](Character* character) { delete character; });
     AsyncTaskManager::get_global_ptr()->remove(this);
     CurrentLevel = 0;
+    if (_currentRunningDialog)
+      delete _currentRunningDialog;
+    if (_currentInteractMenu)
+      delete _currentInteractMenu;
   }
 
   DoneStatus       do_task(void);
   void             TaskCeiling(float elapsedTime);
 
   void             CloseInteractMenu(void);
+  void             CloseRunningDialog(void);
   ObjectNode*      FindObjectFromNode(NodePath node);
   Character*       FindCharacterFromNode(NodePath node);
   Character*       FindCharacterByName(const std::string& name);
@@ -100,6 +105,7 @@ private:
 
   GameUi            _gameUi;
   InteractMenu*     _currentInteractMenu;
+  DialogController* _currentRunningDialog;
 
   DataEngine        _dataEngine;
 };

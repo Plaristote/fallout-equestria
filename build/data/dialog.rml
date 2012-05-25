@@ -23,6 +23,44 @@
                   height: 80%;
                   overflow-x: auto;
                 }
+
+button.dialog-answer
+{
+        display: inline-block;
+
+        width: 159px;
+        height: 37px;
+
+        padding-top: 8px;
+        vertical-align: -18px;
+
+        font-size: 18;
+        text-align: center;
+        tab-index: auto;
+
+        background-decorator: image;
+        background-image: invader.tga 247px 0px 406px 45px;
+}
+
+button.dialog-answer:focus,
+{
+    font-weight: bold;
+
+    shadow-font-effect: shadow;
+    shadow-offset: 1px 1px;
+    shadow-color: black;
+}
+
+button.dialog-answer:hover,
+{
+        background-image-t: 45px 90px;
+}
+
+button.dialog-answer:active,
+{
+        background-image-t: 90px 135px;
+}
+
 		</style>
 	</head>
   <body id="body" template="tplmainbar">
@@ -34,9 +72,6 @@
 
       <p id="answers">
       </p>
-
-      <button class="button_menu" id="continue">Done</button>
-      <button class="button_menu" id="cancel">Cancel</button>
 
     </p>
   </body>

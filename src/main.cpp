@@ -92,8 +92,8 @@ void AngelScriptInitialize(void)
 
   const char* levelClass = "Level";
   engine->RegisterObjectType(levelClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(levelClass, "Character@ FindCharacterByName(string)", asMETHOD(Level,FindCharacterByName), asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "Data       GetDataEngine()",             asMETHOD(Level,GetDataEngine),       asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "Character@ FindCharacterByName(const string &in)", asMETHOD(Level,FindCharacterByName), asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "Data       GetDataEngine()",                       asMETHOD(Level,GetDataEngine),       asCALL_THISCALL);
 
   engine->RegisterGlobalProperty("Level@ level", &(Level::CurrentLevel));
 
