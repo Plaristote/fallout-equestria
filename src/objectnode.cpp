@@ -38,6 +38,7 @@ ObjectNode::ObjectNode(WindowFramework* window, Tilemap& map, Data data) : _wind
 
   if (!(data["interactions"].Nil()))
     LoadInteractions(data["interactions"]);
+  _dialog = data["dialog"].Value();
 }
 
 void ObjectNode::ForceCurrentCase(int x, int y)

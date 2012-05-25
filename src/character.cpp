@@ -90,19 +90,21 @@ Character::Character(WindowFramework* window, Tilemap& map, Data data, Character
   _root.set_name(data["name"].Value());
   _root.set_collide_mask(0);
 
-  _selfSphere     = new CollisionSphere(0, 0, 0, 8.f);
+  _selfSphere     = new CollisionSphere(0, 0, 0, 6.f);
   _selfSphereNode = new CollisionNode("characterRange");
   _selfSphereNP   = _root.attach_new_node(_selfSphereNode);
   _selfSphereNode->set_into_collide_mask(characterCollideMask);
   _selfSphereNode->set_from_collide_mask(0);
   _selfSphereNode->add_solid(_selfSphere);
 
+  _selfSphereNP.show();
+
 
   _collisionNode         = new CollisionNode("characterRange");
   _collisionPath         = _root.attach_new_node(_collisionNode);
   _collisionNode->set_from_collide_mask(characterCollideMask);
   _collisionNode->set_into_collide_mask(0);
-  _collisionFov          = new CollisionSphere(0, 0, 0, 50.f);
+  _collisionFov          = new CollisionSphere(0, 0, 0, 0.f);
   _collisionNode->add_solid(_collisionFov);
   _collisionHandlerQueue = new CollisionHandlerQueue();
   _collisionTraverser.add_collider(_collisionPath, _collisionHandlerQueue);
@@ -112,7 +114,7 @@ Character::Character(WindowFramework* window, Tilemap& map, Data data, Character
 
   _root.attach_new_node(pn);*/
   
-  //_collisionPath.show();
+  _collisionPath.show();
 
   _charLight = new PointLight("Light" + data["name"].Value());
   _charLight->set_color(LColor(0.8, 0.8, 0.8, 1));
@@ -177,13 +179,11 @@ void Character::Run(float elapsedTime)
     Characters _fieldOfView;
     _fieldOfView.clear();
 
-    //_collisionFov->set_radius(50.f);
-    //_root.set_collide_mask(BitMask32(0));
+    _collisionFov->set_radius(50.f);
     std::cout << "Range test initialized    in " << _timerFov.GetElapsedTime() << std::endl;
     _collisionTraverser.traverse(_window->get_render());
     std::cout << "Range test executed       in " << _timerFov.GetElapsedTime() << std::endl;
-    //_root.set_collide_mask(characterCollideMask);
-    //_collisionFov->set_radius(0.f);
+    _collisionFov->set_radius(0.f);
     for(unsigned int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; i++)
     {
       CollisionEntry*      entry = _collisionHandlerQueue->get_entry(i);

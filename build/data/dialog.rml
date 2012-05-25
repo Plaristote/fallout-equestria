@@ -1,0 +1,43 @@
+<rml>
+	<head>
+		<title>Main Menu</title>
+		<link type="text/template" href="tpl_mainbar.rml" />
+		<style>
+	        body
+		{
+		  width: 100%;
+		  height: 60%;
+                  bottom: 0px;
+		}
+
+                #npcLine
+                {
+                  width: 100%;
+                  height: 20%;
+                  overflow-x: scroll;
+                }
+
+                #answers
+                {
+                  width:  100%;
+                  height: 80%;
+                  overflow-x: auto;
+                }
+		</style>
+	</head>
+  <body id="body" template="tplmainbar">
+    <p>
+
+      <p id="npcLine">
+        Foo line from a npc.
+      </p>
+
+      <p id="answers">
+      </p>
+
+      <button class="button_menu" id="continue">Done</button>
+      <button class="button_menu" id="cancel">Cancel</button>
+
+    </p>
+  </body>
+</rml>

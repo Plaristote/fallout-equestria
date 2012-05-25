@@ -48,9 +48,10 @@ public:
   /*! \brief Returns a Data containing the child DataBranch corresponding to key if it exists, or Nil Data otherwise (see the Nil method) */
   Data        operator[](const std::string& key);
   const Data  operator[](const std::string& key) const;
+
   
-  const std::string& Key(void)   const { return (_data->key);   }
-  const std::string& Value(void) const { return (_data->value); }
+  std::string Key(void)   const { return (_data ? _data->key   : ""); }
+  std::string Value(void) const { return (_data ? _data->value : ""); }
 
   const Data& operator=(const Data& var);
 

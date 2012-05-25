@@ -13,12 +13,15 @@
 # include "mouse.hpp"
 # include "interact_menu.hpp"
 
+# include "dataengine.hpp"
+
 # include "objectnode.hpp"
 # include "objects/door.hpp"
 # include "objects/dropped_object.hpp"
 # include "character.hpp"
 
 # include "gameui.hpp"
+# include "dialog.hpp"
 
 /*
  * Level
@@ -45,9 +48,11 @@ public:
   ObjectNode*      FindObjectFromNode(NodePath node);
   Character*       FindCharacterFromNode(NodePath node);
   Character*       FindCharacterByName(const std::string& name);
+  Data             GetDataEngine(void) { return (_dataEngine); }
 
   // Interaction Management
   void             CallbackActionUse(ObjectNode* object);
+  void             CallbackActionTalkTo(ObjectNode* object);
 
   // Mouse Management
   enum MouseState
@@ -95,6 +100,8 @@ private:
 
   GameUi            _gameUi;
   InteractMenu*     _currentInteractMenu;
+
+  DataEngine        _dataEngine;
 };
 
 #endif

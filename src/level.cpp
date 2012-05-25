@@ -32,6 +32,7 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   ceilingCurrentTransparency = 1.f;
 
   ObjectNode::ActionUse.Connect(*this, &Level::CallbackActionUse);
+  ObjectNode::ActionTalkTo.Connect(*this, &Level::CallbackActionTalkTo);
   _currentInteractMenu = 0;
 
   DataTree* datafile = DataTree::Factory::ShinyLang("scenes/" + filename);
@@ -304,4 +305,12 @@ void Level::CallbackActionUse(ObjectNode* object)
 {
   object->InteractUse(*(_characters.begin()));
   CloseInteractMenu();
+}
+
+void Level::CallbackActionTalkTo(ObjectNode* object)
+{
+  const string& dialog = object->GetDialog();
+
+  CloseInteractMenu();
+  DialogController* controller = new DialogController(_window, _gameUi.GetContext(), dialog);
 }

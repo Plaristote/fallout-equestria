@@ -7,7 +7,6 @@
 		{
 		  width: 100%;
 		  height: 120px;
-                  top: -40px;
 		}
 	
                 #console-container
@@ -32,7 +31,5 @@
         <p id="console_output">
           <b>Welcome to teh Fallout Equestria Debug Console</b>
         </p>
-
-      </div>
   </body>
 </rml>

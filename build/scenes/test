@@ -26,7 +26,6 @@ def characters
     end
 
     def interactions
-      talk_to
       use_object
       use_skill
     end
@@ -50,15 +49,17 @@ def characters
   end
 
   def character
-    name: Fluttershy
-    model: horse.obj
+    name:   Fluttershy
+    model:  horse.obj
+    dialog: fluttertalk
+
     def pos
       x: 8
       y: 3
     end
 
     def interactions
-      use
+      talk_to
       use_object
       use_skill
     end

@@ -24,12 +24,15 @@ GameUi::GameUi(WindowFramework* window) : _window(window)
   _menu      = new GameMenu     (window, _rocket->get_context());
   _mainBar   = new GameMainBar  (window, _rocket->get_context());
   _inventory = new GameInventory(window, _rocket->get_context());
+  _pers      = new GamePers     (window, _rocket->get_context());
 
-  _mainBar->MenuButtonClicked.EventReceived.Connect(*this, &GameUi::OpenMenu);
+  _mainBar->MenuButtonClicked.EventReceived.Connect     (*this, &GameUi::OpenMenu);
   _mainBar->InventoryButtonClicked.EventReceived.Connect(*this, &GameUi::OpenInventory);
+  _mainBar->PersButtonClicked.EventReceived.Connect     (*this, &GameUi::OpenPers);
   _menu->Hide();
   _inventory->Hide();
   _console->Hide();
+  _pers->Hide();
 
   _ih = new RocketInputHandler();
   window->get_mouse().attach_new_node(_ih);
@@ -54,13 +57,18 @@ void GameUi::OpenMenu(Rocket::Core::Event&)
 
 void GameUi::OpenInventory(Rocket::Core::Event&)
 {
-  static bool inventoryShown = false;
-
-  if (!inventoryShown)
+  if (!(_inventory->IsVisible()))
     _inventory->Show();
   else
     _inventory->Hide();
-  inventoryShown = !inventoryShown;
+}
+
+void GameUi::OpenPers(Rocket::Core::Event&)
+{
+  if (!(_pers->IsVisible()))
+    _pers->Show();
+  else
+    _pers->Hide();
 }
 
 /*
@@ -69,7 +77,7 @@ void GameUi::OpenInventory(Rocket::Core::Event&)
 #include "scriptengine.hpp"
 #include <scripthelper/scripthelper.h>
 #include <sstream>
-GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context) : _window(window)
+GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window)
 {
   _scriptContext = Script::Engine::Get()->CreateContext();
   _observerError = Script::Engine::ScriptError.Connect(*this, &GameConsole::Output);
@@ -92,7 +100,7 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
     if (input)
     {
       cout << "[UI] Console is ready" << endl;
-      input->AddEventListener("textinput", &ConsoleKeyUp);
+      input->AddEventListener("keyup",     &ConsoleKeyUp);
       ConsoleKeyUp.EventReceived.Connect(*this, &GameConsole::KeyUp);
       ExecuteEvent.EventReceived.Connect(*this, &GameConsole::Execute);
     }
@@ -139,29 +147,11 @@ void GameConsole::Output(const std::string str)
 
 void GameConsole::KeyUp(Rocket::Core::Event& event)
 {
-  if (event == "keyup")
+  if (event.GetType() == "keyup")
   {
-    /*Rocket::Core::Input::KeyIdentifier keyId = Input::KeyIdentifier::KI_0;
-
-    keyId = (event.GetParameter<Input::KeyIdentifier>("key_identifier", keyId));
-    if (keyId == Input::KeyIdentifier::KI_RETURN)
-    {
-      cout << "Executing command: '" << _currentLine << "'" << endl;
-      _currentLine = "";
-    }
-
-    Rocket::Controls::ElementFormControl* element = reinterpret_cast<Rocket::Controls::ElementFormControl*>(event.GetCurrentElement());
+    int keyId = event.GetParameter<int>("key_identifier", 0);
     
-    Rocket::Core::String string = element->GetValue().CString();
-
-    std::cout << "Value is : " << string.CString() << std::endl;*/
-  }
-  else if (event == "textinput")
-  {
-    Rocket::Core::word defWord;
-    Rocket::Core::word valueKey = event.GetParameter<Rocket::Core::word>("data", defWord);
-
-    if ((char)valueKey == ';')
+    if (keyId == Input::KeyIdentifier::KI_RETURN)
       Execute(event);
   }
 }
@@ -169,7 +159,7 @@ void GameConsole::KeyUp(Rocket::Core::Event& event)
 /*
  * GameInventory
  */
-GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* context) : _window(window)
+GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window)
 {
   Rocket::Core::ElementDocument* doc     = context->LoadDocument("data/inventory.rml");
 
@@ -198,7 +188,7 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
 /*
  * GameMenu
  */
-GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : _window(window)
+GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window)
 {
   Rocket::Core::ElementDocument* doc     = context->LoadDocument("data/main_menu.rml");
 
@@ -210,16 +200,15 @@ GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : _w
     Rocket::Core::Element* elementWindow;
     Rocket::Core::Element* element;
 
-    elementWindow = MyRocket::GetChildren(doc,           "window");
-    elementWindow = MyRocket::GetChildren(elementWindow, "content");
+    elementWindow = doc->GetElementById("content");
 
-    Rocket::Core::Element* buttonContinue = MyRocket::GetChildren(elementWindow, "continue");
-    Rocket::Core::Element* buttonOptions  = MyRocket::GetChildren(elementWindow, "options");
-    Rocket::Core::Element* buttonExit     = MyRocket::GetChildren(elementWindow, "exit");
+    Rocket::Core::Element* buttonContinue = elementWindow->GetElementById("continue");
+    Rocket::Core::Element* buttonOptions  = elementWindow->GetElementById("options");
+    Rocket::Core::Element* buttonExit     = elementWindow->GetElementById("exit");
 
     if (buttonContinue) buttonContinue->AddEventListener("click", &_continueClicked);
-    if (buttonOptions)  buttonOptions->AddEventListener("click",  &_optionsClicked);
-    if (buttonExit)     buttonExit->AddEventListener("click",     &_exitClicked);
+    if (buttonOptions)  buttonOptions->AddEventListener ("click", &_optionsClicked);
+    if (buttonExit)     buttonExit->AddEventListener    ("click", &_exitClicked);
 
     _continueClicked.EventReceived.Connect(*this, &GameMenu::MenuEventContinue);
     _exitClicked.EventReceived.Connect(*this,     &GameMenu::MenuEventExit);
@@ -232,9 +221,32 @@ void GameMenu::MenuEventExit(Rocket::Core::Event& event)
 }
 
 /*
+ * GamePers
+ */
+GamePers::GamePers(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window)
+{
+  Rocket::Core::ElementDocument* doc = context->LoadDocument("data/charsheet.rml");
+
+  _root = doc;
+  if (doc)
+  {
+    doc->Show();
+
+    Rocket::Core::Element* button_continue = doc->GetElementById("continue");
+    Rocket::Core::Element* button_cancel   = doc->GetElementById("cancel");
+
+    if (button_continue) button_continue->AddEventListener("click", &DoneButton);
+    if (button_cancel)   button_cancel->AddEventListener  ("click", &CancelButton);
+
+    DoneButton.EventReceived.Connect  (*this, &GamePers::Close);
+    CancelButton.EventReceived.Connect(*this, &GamePers::Close);
+  }
+}
+
+/*
  * GameMainBar
  */
-GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context) : _window(window)
+GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window)
 {
   Rocket::Core::ElementDocument* doc = context->LoadDocument("data/main_bar.rml");
 
@@ -246,7 +258,7 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
     Rocket::Core::Element* elementWindow;
     Rocket::Core::Element* element;
 
-    elementWindow = MyRocket::GetChildren(doc, "window");
+    elementWindow = doc->GetElementById("window");
 
     for (unsigned int i = 0 ; element = elementWindow->GetChild(i) ; ++i)
     {
@@ -259,22 +271,18 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
       return ;
     }
 
-    element = MyRocket::GetChildren(elementWindow, "content");
-    element = MyRocket::GetChildren(element, "first_col");
+    element = doc->GetElementById("first_col");
 
     if (!element)
       cout << "first_col doesn't exist" << endl;
 
-    for (unsigned int i = 0 ; element->GetChild(i) ; ++i)
-    {
-      cout << "Element[" << i << "] tag: '" << element->GetChild(i)->GetTagName().CString() << "' id: " << element->GetChild(i)->GetId().CString() << endl;
-    }
-
-    Rocket::Core::Element* button1 = MyRocket::GetChildren(element, "menu");
-    Rocket::Core::Element* button2 = MyRocket::GetChildren(element, "inv");
+    Rocket::Core::Element* button1 = doc->GetElementById("menu");
+    Rocket::Core::Element* button2 = doc->GetElementById("inv");
+    Rocket::Core::Element* button3 = doc->GetElementById("charsheet");
 
     if (button1) button1->AddEventListener("click", &MenuButtonClicked);
     if (button2) button2->AddEventListener("click", &InventoryButtonClicked);
+    if (button3) button3->AddEventListener("click", &PersButtonClicked);
 
     /*const Rocket::Core::Property* property = elementWindow->GetProperty("height");
 
