@@ -17,20 +17,20 @@ ObjectNode::ObjectNode(WindowFramework* window, Tilemap& map, Data data) : _wind
   _map.AddMapElement(this);
 
   // Load the model + textures
-  std::cout << "Loading model " << "models/" << data["model"].Value() << std::endl;
-  _root = window->load_model(_window->get_panda_framework()->get_models(), "models/horse.obj");
-  //_root = window->load_model(_window->get_panda_framework()->get_models(), "models/" + data["model"].Value());
+
+  // WARNING lpip.egg segfault
+  if (data["model"].Value() == "lpip.egg")
+    data["model"] = "horse.obj";
+  // END lpip.egg segfault
+  
+  _root = window->load_model(_window->get_panda_framework()->get_models(), "models/" + data["model"].Value());
   if (!(data["texture"].Nil()))
   {
-    string texturePath = TEXTURE_PATH;
-    texturePath       += data["texture"].Value();
-
-    _tex = 0;
-    _tex = TexturePool::load_texture(texturePath);
+    _tex = TexturePool::load_texture(TEXTURE_PATH + data["texture"].Value());
     if (_tex)
       _root.set_texture(_tex);
     else
-      std::cout << "/!\\ WARNING: Can't load texture from path '" << TEXTURE_PATH << data["texture"].Value() << "'" << std::endl;
+      cout << "/!\\ WARNING: Can't load texture from path '" << TEXTURE_PATH << data["texture"].Value() << "'" << endl;
   }
 
   _root.set_hpr(0, 0, 0);

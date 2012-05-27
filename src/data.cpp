@@ -46,14 +46,12 @@ Data::Data(DataTree* d) : _data(d)
 
 Data::Data(const std::string& key, DataBranch* father)
 {
-  std::cout << "Created temporary ressource" << std::endl;
   _data = new DataBranch();
   _data->father   = father;
   _data->key      = key;
   _data->pointers = 1;
   _data->nil      = true;
   father->children.push_back(_data);
-  std::cout << "DONE" << std::endl;
 }
 
 Data::~Data()
@@ -62,10 +60,7 @@ Data::~Data()
   {
     _data->pointers--;
     if ((_data->nil || !_data->father) && _data->root == false && _data->pointers == 0)
-    {
-      std::cout << "Deleted temporary ressource" << std::endl;
       delete _data;
-    }
   }
 }
 

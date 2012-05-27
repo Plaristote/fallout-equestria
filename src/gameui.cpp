@@ -300,7 +300,7 @@ GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : Ui
 
 void GameMenu::MenuEventExit(Rocket::Core::Event& event)
 {
-  framework.close_all_windows();
+  framework.set_exit_flag();
 }
 
 /*
