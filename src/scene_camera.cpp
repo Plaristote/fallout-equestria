@@ -35,7 +35,6 @@ SceneCamera::SceneCamera(WindowFramework* window, NodePath camera) : _window(win
   _scrollEnabled = true;
 
   camera.set_pos(0, 0, 75);
-  //camera.set_hpr(0, -60, 0);
   camera.set_hpr(-40, -40, 0);
 
   _currentCameraAngle = 0;

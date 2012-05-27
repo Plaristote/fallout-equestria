@@ -4,7 +4,7 @@ string HookInit()
   return ("Flutterstart");
 }
 
-bool    NotAvailable()
+bool   NotAvailable()
 {
   return (false);
 }

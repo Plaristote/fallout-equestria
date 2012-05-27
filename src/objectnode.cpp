@@ -12,17 +12,20 @@ ObjectNode::ObjectNode(WindowFramework* window, Tilemap& map, Data data) : _wind
   static unsigned int charId = 0;
   NodePath            root = window->get_render();
 
-  root.set_collide_mask(Object);
+  //root.set_collide_mask(Object);
   
   _map.AddMapElement(this);
 
   // Load the model + textures
-  _root = window->load_model(_root, "models/" + data["model"].Value());
+  std::cout << "Loading model " << "models/" << data["model"].Value() << std::endl;
+  _root = window->load_model(_window->get_panda_framework()->get_models(), "models/horse.obj");
+  //_root = window->load_model(_window->get_panda_framework()->get_models(), "models/" + data["model"].Value());
   if (!(data["texture"].Nil()))
   {
     string texturePath = TEXTURE_PATH;
     texturePath       += data["texture"].Value();
-    
+
+    _tex = 0;
     _tex = TexturePool::load_texture(texturePath);
     if (_tex)
       _root.set_texture(_tex);

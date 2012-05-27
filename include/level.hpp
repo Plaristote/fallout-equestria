@@ -36,13 +36,15 @@ public:
 
   ~Level()
   {
-    for_each(_characters.begin(), _characters.end(), [](Character* character) { delete character; });
+    std::for_each(_characters.begin(), _characters.end(), [](Character* character) { delete character; });
     AsyncTaskManager::get_global_ptr()->remove(this);
     CurrentLevel = 0;
     if (_currentRunningDialog)
       delete _currentRunningDialog;
     if (_currentInteractMenu)
       delete _currentInteractMenu;
+    if (_l18n)
+      delete _l18n;
   }
 
   DoneStatus       do_task(void);
@@ -108,6 +110,7 @@ private:
   DialogController* _currentRunningDialog;
 
   DataEngine        _dataEngine;
+  DataTree*         _l18n;
 };
 
 #endif

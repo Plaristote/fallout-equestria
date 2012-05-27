@@ -38,32 +38,29 @@ void Mouse::Run(void)
     _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
     _collisionTraverser.traverse(_window->get_render());
     _collisionHandlerQueue->sort_entries();
-    for (int i = 1 ; i < _collisionHandlerQueue->get_num_entries() ; ++i)
+    for (int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; ++i)
     {
       CollisionEntry* entry = _collisionHandlerQueue->get_entry(i);
 
-      NodePath testNode      = entry->get_from_node_path();
-      NodePath testNode2     = entry->get_into_node_path();
+      NodePath into          = entry->get_into_node_path();
       NodePath oldPickedUnit = _lastPickedUnit;
 
-      if ((_hasPickedUnit = testNode.has_net_tag("character")))
-        _lastPickedUnit = testNode.find_net_tag("character");
-      else if ((_hasPickedUnit = testNode2.has_net_tag("character")))
-        _lastPickedUnit = testNode2.find_net_tag("character");
+      if ((_hasPickedUnit = into.has_net_tag("character")))
+        _lastPickedUnit = into.find_net_tag("character");
       if (_hasPickedUnit)
       {
         if (oldPickedUnit.node() != _lastPickedUnit.node())
         {
-			cout << "New unit hovered: " << _lastPickedUnit.get_name() << endl;
+          cout << "New unit hovered: " << _lastPickedUnit.get_name() << endl;
           UnitHovered.Emit(_lastPickedUnit);
         }
         break ;
       }
 
-      if (testNode2.has_net_tag("tile"))
+      if (into.has_net_tag("tile"))
       {
-        string pos_x = testNode2.get_net_tag("pos_x");
-        string pos_y = testNode2.get_net_tag("pos_y");
+        string pos_x = into.get_net_tag("pos_x");
+        string pos_y = into.get_net_tag("pos_y");
 
         stringstream stream1, stream2;
         int          iposx, iposy;
@@ -79,9 +76,9 @@ void Mouse::Run(void)
           pos_y = iposy;
           CaseHovered.Emit(iposx, iposy);
         }
+        _lastPickedUnit = into;
+        break ;
       }
-
-      _lastPickedUnit = testNode2;
     }
   }
 }

@@ -1,4 +1,4 @@
-#ifndef  OBJECT_NODE_HPP
+  #ifndef  OBJECT_NODE_HPP
 # define OBJECT_NODE_HPP
 
 # include <panda3d/pandaFramework.h>
@@ -11,7 +11,7 @@
 //HAIL MICROSOFT
 #ifdef WIN32
 static inline double round(double val)
-{    
+{
     return floor(val + 0.5);
 }
 #endif

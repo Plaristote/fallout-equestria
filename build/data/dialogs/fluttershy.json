@@ -12,10 +12,11 @@
 "HookExecute": ""
 }
 ,
-"bucks": {
+"npcLine": "flutterbow",
+"buck": {
 "HookAvailable": "NotAvailable",
-"DefaultAnswer": "Twilightlicious",
-"HookExecute": ""
+"HookExecute": "",
+"DefaultAnswer": ""
 }
 
 }
@@ -32,7 +33,8 @@
 "HookAvailable": "",
 "HookExecute": ""
 }
-
+,
+"npcLine": "flutterlight"
 }
 ,
 "Flutterlicious": {
@@ -70,6 +72,16 @@
 "DefaultAnswer": "Twilightlicious",
 "HookAvailable": "",
 "HookExecute": ""
+}
+,
+"npcLine": "flutterlicious"
+}
+,
+"Fluttertest": {
+"bite": {
+"HookAvailable": "en",
+"HookExecute": "nois",
+"DefaultAnswer": ""
 }
 
 }

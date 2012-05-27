@@ -29,6 +29,8 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
 {
   CurrentLevel = this;
 
+  _l18n = DataTree::Factory::JSON("data/l18n/english.json");
+
   ceilingCurrentTransparency = 1.f;
 
   ObjectNode::ActionUse.Connect(*this, &Level::CallbackActionUse);
@@ -315,7 +317,7 @@ void Level::CallbackActionTalkTo(ObjectNode* object)
   CloseInteractMenu();
   if (_currentRunningDialog)
     delete _currentRunningDialog;
-  _currentRunningDialog = new DialogController(_window, _gameUi.GetContext(), dialog);
+  _currentRunningDialog = new DialogController(_window, _gameUi.GetContext(), dialog, _l18n);
   _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningDialog);
   _camera.SetEnabledScroll(false);
 }

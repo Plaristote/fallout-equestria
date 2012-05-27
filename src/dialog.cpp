@@ -94,7 +94,7 @@ void DialogView::CleanView(const DialogAnswers& answers)
 }
 
 // CONTROLLER
-DialogController::DialogController(WindowFramework* window, Rocket::Core::Context* context, const string& dialogId) : DialogView(window, context), _model(dialogId)
+DialogController::DialogController(WindowFramework* window, Rocket::Core::Context* context, const string& dialogId, Data l18n) : DialogView(window, context), _model(dialogId, l18n)
 {
   _context = Script::Engine::Get()->CreateContext();
   _module   = Script::Engine::LoadModule("Dialog-" + dialogId, "scripts/dialogs/" + dialogId + ".as");
@@ -199,10 +199,13 @@ DialogAnswers     DialogModel::GetDialogAnswers(void)
     _data[_currentNpcLine].Output();
     for (; it != end ; ++it)
     {
+      if ((*it).Key() == "npcLine")
+        continue ;
       DialogAnswers::KeyValue pair;
+      Data                    line = _l18n[(*it).Key()];
 
       pair.first  = (*it).Key();
-      pair.second = (*it).Key(); // TODO replace this with L18n traduction of the key
+      pair.second = (line.Nil() ? (*it).Key() : line.Value());
       answers.answers.push_back(pair);
     }
   }

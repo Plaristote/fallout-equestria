@@ -63,7 +63,10 @@ unsigned short Character::GoTo(int x, int y)
     solution = 0;
   }
   else
+  {
+    cout << "Character found a path between " << _mapPos.get_x() << "," << _mapPos.get_y() << " and " << x << "," << y << endl;
     solution = _path.size();
+  }
   _map.SetdownPathfinding(this);
   float etime = globalClock->get_real_time();
   cout << "Pathfinding time: " << (etime - ftime) << endl;

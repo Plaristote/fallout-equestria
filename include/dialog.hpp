@@ -19,7 +19,7 @@ struct DialogAnswers
 class DialogModel
 {
 public:
-  DialogModel(const std::string& dialogId)
+  DialogModel(const std::string& dialogId, Data l18n) : _l18n(l18n)
   {
     _tree = DataTree::Factory::JSON("data/dialogs/" + dialogId + ".json");
     if (_tree)
@@ -49,7 +49,12 @@ public:
 
   const std::string GetNpcLine(void)
   {
-    return (_data[_currentNpcLine].Key()); // TODO replace this with L18n traduction of the key
+    std::string     key  = _data[_currentNpcLine]["npcLine"];
+    Data            line = _l18n[key];
+
+    if (line.Nil())
+      return (key);
+    return (line.Value());
   }
 
   DialogAnswers     GetDialogAnswers(void);
@@ -57,6 +62,7 @@ public:
 private:
   DataTree*          _tree;
   Data               _data;
+  Data               _l18n;
   std::string        _currentNpcLine;
 };
 
@@ -81,7 +87,7 @@ private:
 class DialogController : public DialogView
 {
 public:
-  DialogController(WindowFramework* window, Rocket::Core::Context* context, const std::string& dialogId);
+  DialogController(WindowFramework* window, Rocket::Core::Context* context, const std::string& dialogId, Data l18n);
   ~DialogController()
   {
     _context->Release();
