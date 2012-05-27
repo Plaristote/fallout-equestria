@@ -48,6 +48,7 @@ void Tilemap::LoadTiles(string tileType, Data map, LPoint3 posModificator, NodeP
 	  unsigned int tileId  = *currentTile;
       Tile tile;
 
+	  tile.rotation= 0; //For the time being!!! TODO TODO
       tile.position.set_x(x * (_scale * TILE_UNIT) + posModificator.get_x());
       tile.position.set_y(y * (_scale * TILE_UNIT) + posModificator.get_y());
       tile.position.set_z(posModificator.get_z());
@@ -62,7 +63,7 @@ void Tilemap::LoadTiles(string tileType, Data map, LPoint3 posModificator, NodeP
 
 		//Load information from the archive, and store a pointer to the Prototype
 		if (tileId <= _tileArchive.size()) {
-			tile.proto= &_tileArchive[tileId];
+			tile.SetPrototype(&_tileArchive[tileId]);
 			_tileArchive[tileId].model.instance_to(newNode);
 			newNode.set_texture(_texmap);
 		} else
@@ -190,39 +191,36 @@ void Tilemap::LoadPathfinding()
       node.x = x;
       node.y = y;
 
-	  if (tile.proto==nullptr)
-		  throw "Tile has undefined prototype!\n";
-
-	  if (x != 0 && tile.proto->access[TilePrototype::left])
-		  if (GetTile(x-1,y  ).proto->access[TilePrototype::right])
+	  //Horizontal+Vertical traverse
+	  if (x != 0 && tile.Access(TilePrototype::left))
+		  if (GetTile(x-1,y  ).Access(TilePrototype::right))
 			Pathfinding::ConnectNodes(node, _pf->GetNode(x-1, y  ), 1.0f);
 
-	  if (y != 0 && tile.proto->access[TilePrototype::up])
-		  if (GetTile(x,y-1).proto->access[TilePrototype::down])
+	  if (y != 0 && tile.Access(TilePrototype::up))
+		  if (GetTile(x,y-1).Access(TilePrototype::down))
 			Pathfinding::ConnectNodes(node, _pf->GetNode(x  , y-1), 1.0f);
 
-	  if (x != 0 && y != 0 && tile.proto->access[TilePrototype::upleft])
-		  if (GetTile(x-1,y-1).proto->access[TilePrototype::downright])
-			Pathfinding::ConnectNodes(node, _pf->GetNode(x-1, y-1), 1.4f);
+	  //Diagonal traverse
+	  //Ensures that characters don't take shortcuts across diagonals when there a solid column/etc. in the way
+	  if (x != 0 && y != 0 && tile.Access(TilePrototype::upleft))
+		  if (GetTile(x-1,y-1).Access(TilePrototype::downright))
+			  if (GetTile(x  ,y-1).Access(TilePrototype::downleft))
+				  if (GetTile(x-1,y  ).Access(TilePrototype::upright))
+					Pathfinding::ConnectNodes(node, _pf->GetNode(x-1, y-1), 1.4f);
 
-	  if (y != 0 && tile.proto->access[TilePrototype::upright])
-		  if (GetTile(x+1,y-1).proto->access[TilePrototype::downleft])
-			Pathfinding::ConnectNodes(node, _pf->GetNode(x+1, y-1), 1.4f);
+	  if (y != 0 && tile.Access(TilePrototype::upright))
+		  if (GetTile(x+1,y-1).Access(TilePrototype::downleft))
+			  if (GetTile(x  ,y-1).Access(TilePrototype::upleft))
+				  if (GetTile(x+1,y  ).Access(TilePrototype::downright))
+					Pathfinding::ConnectNodes(node, _pf->GetNode(x+1, y-1), 1.4f);
 
-      /*if (x != 0 && !tile.hasHWall) // To the left
-        Pathfinding::ConnectNodes(node, _pf->GetNode(x - 1, y), 1.f);
-      if (y != 0 && !tile.hasVWall) // To the top
-        Pathfinding::ConnectNodes(node, _pf->GetNode(x, y - 1), 1.f);
-      if ((x != 0) && (y != 0) &&
-          (!tile.hasHWall) && (!tile.hasVWall) && (!(GetTile(x - 1, y).hasVWall))) // To the top and left
-        Pathfinding::ConnectNodes(node, _pf->GetNode(x - 1, y - 1), 1.1f);
-      if ((y != 0) && (x + 1 != _size.get_x()) && (!tile.hasVWall))// To the top and right
-      {
-        MapTile right    = GetTile(x + 1, y);
+	  //if (x != 0 && y != 0 && tile.Access(TilePrototype::upleft))
+		 // if (GetTile(x-1,y-1).Access(TilePrototype::downright))
+			//Pathfinding::ConnectNodes(node, _pf->GetNode(x-1, y-1), 1.4f);
 
-        if ((!right.hasHWall) && (!right.hasVWall))
-          Pathfinding::ConnectNodes(node, _pf->GetNode(x + 1, y - 1), 1.1f);
-      }*/
+	  //if (y != 0 && tile.Access(TilePrototype::upright))
+		 // if (GetTile(x+1,y-1).Access(TilePrototype::downleft))
+			//Pathfinding::ConnectNodes(node, _pf->GetNode(x+1, y-1), 1.4f);
     }
   }
 }

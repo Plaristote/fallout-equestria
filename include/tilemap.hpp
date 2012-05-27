@@ -43,17 +43,25 @@ public:
 	bool					isDefined;
 	NodePath				nodePath;
 	LPoint3					position;
+	int						rotation;
+  private:
 	TilePrototype*			proto;
+  public:
+	bool					Access(TilePrototype::direction dir) {
+								assert( proto!=nullptr );
+								return proto->access[  ((dir)+rotation)%8  ];
+							};
+	void					SetPrototype(TilePrototype* ptr) {proto= ptr; };
   };
   
   //Ground tile: Effect on pathfinding
   struct MapTile : public Tile
   {
     MapTile(NodePath nodePath) : Tile(nodePath) { }
-    MapTile(void)              : Tile()         { proto= nullptr; }
+    MapTile(void)              : Tile()         { SetPrototype(nullptr); }
     MapTile(const Tile& tile)  : Tile(tile)     { }
 
-    void                operator=(const NodePath& toSet) { nodePath = toSet; proto= nullptr; }
+    void                operator=(const NodePath& toSet) { nodePath = toSet; SetPrototype(nullptr); }
 
     operator NodePath() const { return (nodePath); }
 
