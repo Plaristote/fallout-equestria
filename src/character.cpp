@@ -2,7 +2,96 @@
 #include "scene_camera.hpp"
 #include <panda3d/nodePathCollection.h>
 
+#include "level.hpp"
 using namespace std;
+
+ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
+{
+}
+
+void ObjectCharacter::Run(float elapsedTime)
+{
+  if (_path.size() > 0)
+    RunMovement(elapsedTime);
+}
+
+void                ObjectCharacter::GoTo(unsigned int id)
+{
+  Waypoint*         wp = _level->GetWorld()->GetWaypointFromId(id);
+  
+  if (wp) GoTo(wp);
+}
+
+void                ObjectCharacter::GoTo(Waypoint* waypoint)
+{
+  _path.clear();
+  if (_waypointOccupied && waypoint)
+  {
+    if (!(_level->FindPath(_path, *_waypointOccupied, *waypoint)))
+      cout << "Can't find path between the two waypoints" << endl;
+  }
+  else
+    cout << "Character doesn't have a waypointOccupied" << endl;
+}
+
+void                ObjectCharacter::RunMovement(float elapsedTime)
+{
+  Waypoint&         next = *(_path.begin());    
+  // TODO: Speed walking / running / combat
+  float             max_speed = 6.f * elapsedTime;
+  LPoint3           distance;
+  float             max_distance;    
+  LPoint3           speed, axis_speed, dest;
+  LPoint3           pos = _object->nodePath.get_pos();
+  int               dirX, dirY, dirZ;
+
+  distance  = pos - next.nodePath.get_pos();
+
+  if (distance.get_x() == 0 && distance.get_y() == 0 && distance.get_z() == 0)
+  {
+    _waypointOccupied = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
+    _path.erase(_path.begin());
+  }
+  else
+  {
+    dirX = dirY = dirZ = 1;
+    if (distance.get_x() < 0)
+    {
+      distance.set_x(-(distance.get_x()));
+      dirX = -1;
+    }
+    if (distance.get_y() < 0)
+    {
+      distance.set_y(-(distance.get_y()));
+      dirY = -1;
+    }
+    if (distance.get_z() < 0)
+    {
+      distance.set_z(-(distance.get_z()));
+      dirZ = -1;
+    }
+
+    max_distance = (distance.get_x() > distance.get_y() ? distance.get_x() : distance.get_y());
+    max_distance = (distance.get_z() > max_distance     ? distance.get_z() : max_distance);
+    
+    axis_speed.set_x(distance.get_x() / max_distance);
+    axis_speed.set_y(distance.get_y() / max_distance);
+    axis_speed.set_z(distance.get_z() / max_distance);
+    if (max_speed > max_distance)
+      max_speed = max_distance;
+    speed.set_x(max_speed * axis_speed.get_x() * dirX);
+    speed.set_y(max_speed * axis_speed.get_y() * dirY);
+    speed.set_z(max_speed * axis_speed.get_z() * dirZ);
+
+    dest = pos - speed;
+
+    _object->nodePath.set_pos(dest);
+  }
+}
+
+/*
+ * WARNING The following is LEGACY and will disapear soon
+ */
 
 CollideMask characterCollideMask(Object);
 

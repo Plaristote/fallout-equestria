@@ -1,4 +1,5 @@
 #include "pathfinding.hpp"
+#include "globals.hpp"
 #include <iostream>
 #include <panda3d/pStatCollector.h>
 

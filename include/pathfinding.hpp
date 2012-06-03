@@ -3,8 +3,6 @@
 
 # include "astar.hpp"
 
-# define ABS(x) ((x) > 0 ? (x) : -(x))
-
 class Character;
 
 class Pathfinding

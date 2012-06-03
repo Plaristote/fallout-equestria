@@ -84,7 +84,7 @@ public:
     assert((_start != NULL && _goal != NULL));
 
     _start->userNode = Start;
-    _goal->userNode = Goal;
+    _goal->userNode  = Goal;
 
     _state = Searching;
 

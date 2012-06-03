@@ -1,6 +1,7 @@
 #ifndef  CHARACTER_HPP
 # define CHARACTER_HPP
 
+# include "globals.hpp"
 # include "objectnode.hpp"
 # include "inventory.hpp"
 # include "timer.hpp"

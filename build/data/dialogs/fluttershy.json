@@ -21,62 +21,6 @@
 
 }
 ,
-"Twilightlicious": {
-"imthet": {
-"DefaultAnswer": "Flutterlicious",
-"HookAvailable": "",
-"HookExecute": ""
-}
-,
-"tothew": {
-"DefaultAnswer": "",
-"HookAvailable": "",
-"HookExecute": ""
-}
-,
-"npcLine": "flutterlight"
-}
-,
-"Flutterlicious": {
-"andthe": {
-"DefaultAnswer": "Twilightlicious",
-"HookAvailable": "",
-"HookExecute": ""
-}
-,
-"thoughtof": {
-"DefaultAnswer": "Twilightlicious",
-"HookAvailable": "",
-"HookExecute": ""
-}
-,
-"people": {
-"DefaultAnswer": "Twilightlicious",
-"HookAvailable": "",
-"HookExecute": ""
-}
-,
-"seeingthis": {
-"DefaultAnswer": "Twilightlicious",
-"HookAvailable": "",
-"HookExecute": ""
-}
-,
-"makesme": {
-"DefaultAnswer": "Twilightlicious",
-"HookAvailable": "",
-"HookExecute": ""
-}
-,
-"wannacry": {
-"DefaultAnswer": "Twilightlicious",
-"HookAvailable": "",
-"HookExecute": ""
-}
-,
-"npcLine": "flutterlicious"
-}
-,
 "Fluttertest": {
 "bite": {
 "HookAvailable": "en",

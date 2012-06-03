@@ -14,8 +14,6 @@ DroppedObject::DroppedObject(WindowFramework* window, Tilemap& map, InventoryObj
   SetCollisionEnabled(false);
 }
 
-#define ABS(x) ((x) > 0 ? (x) : -(x))
-
 void  DroppedObject::InteractUse(Character* c)
 {
   if (c->CanReach(this, 0))

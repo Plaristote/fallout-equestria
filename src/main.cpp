@@ -31,7 +31,7 @@ namespace asData
 
   void        opAssignInt(Data* obj, int i)                       { obj->operator=(i);                 }
   void        opAssignFloat(Data* obj, float f)                   { obj->operator=(f);                 }
-  void        opAssignString(Data* obj, const std::string& str)   { std::cout << "OP ASSIGN STR" << std::endl; obj->operator=(str); std::cout << "OP ENDED" << std::endl;              }
+  void        opAssignString(Data* obj, const std::string& str)   { obj->operator=(str);               }
 
   bool        opEqualsInt(Data* obj, int i)                       { return (obj->operator==(i));       }
   bool        opEqualsFloat(Data* obj, float f)                   { return (obj->operator==(f));       }
@@ -92,11 +92,18 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "MapPosition GetPosition()",       asMETHOD(Character,GetPosition),    asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void ShowCollision(bool)",        asMETHOD(Character,DebugShowCollisionSphere), asCALL_THISCALL);
 
+  const char* worldClass = "World";
+  engine->RegisterObjectType(worldClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(worldClass, "void SetWaypointsVisible(bool) const",      asMETHOD(World,SetWaypointsVisible),      asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldClass, "void SetMapObjectsVisible(bool) const",     asMETHOD(World,SetMapObjectsVisible),     asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldClass, "void SetDynamicObjectsVisible(bool) const", asMETHOD(World,SetDynamicObjectsVisible), asCALL_THISCALL);  
+  
   const char* levelClass = "Level";
   engine->RegisterObjectType(levelClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(levelClass, "Character@ FindCharacterByName(const string &in)", asMETHOD(Level,FindCharacterByName), asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "Data       GetDataEngine()",                       asMETHOD(Level,GetDataEngine),       asCALL_THISCALL);
-
+  engine->RegisterObjectMethod(levelClass, "Character@   FindCharacterByName(const string &in)", asMETHOD(Level,FindCharacterByName), asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "Data         GetDataEngine()",                       asMETHOD(Level,GetDataEngine),       asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "const World@ GetWorld() const",                      asMETHOD(Level,GetWorld),            asCALL_THISCALL);
+  
   engine->RegisterGlobalProperty("Level@ level", &(Level::CurrentLevel));
 
   engine->RegisterGlobalProperty("string tmpString", &(scriptTmpString));

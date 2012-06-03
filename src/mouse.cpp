@@ -1,5 +1,6 @@
 #include "mouse.hpp"
 #include <tilemap.hpp>
+#include "world.h"
 
 using namespace std;
 
@@ -11,13 +12,11 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
   _pickerNode   = new CollisionNode("mouseRay");
   _pickerPath   = _camera.attach_new_node(_pickerNode);
   //_pickerNode->set_from_collide_mask(GeomNode::get_default_collide_mask());
-  _pickerNode->set_from_collide_mask(CollideMask(MyCollisionMask::Object | MyCollisionMask::Tiles));
+  _pickerNode->set_from_collide_mask(CollideMask(ColMask::Waypoint | ColMask::DynObject));
   _pickerRay    = new CollisionRay();
   _pickerNode->add_solid(_pickerRay);
   _collisionHandlerQueue = new CollisionHandlerQueue();
   _collisionTraverser.add_collider(_pickerPath, _collisionHandlerQueue);
-
-  _posx = _posy = -1;
 
   EventHandler* events = EventHandler::get_global_event_handler();
 
@@ -38,46 +37,23 @@ void Mouse::Run(void)
     _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
     _collisionTraverser.traverse(_window->get_render());
     _collisionHandlerQueue->sort_entries();
+    _hovering.Reset();
     for (int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; ++i)
     {
       CollisionEntry* entry = _collisionHandlerQueue->get_entry(i);
 
       NodePath into          = entry->get_into_node_path();
-      NodePath oldPickedUnit = _lastPickedUnit;
 
-      if ((_hasPickedUnit = into.has_net_tag("character")))
-        _lastPickedUnit = into.find_net_tag("character");
-      if (_hasPickedUnit)
+      switch (into.get_collide_mask().get_word())
       {
-        if (oldPickedUnit.node() != _lastPickedUnit.node())
-        {
-          cout << "New unit hovered: " << _lastPickedUnit.get_name() << endl;
-          UnitHovered.Emit(_lastPickedUnit);
-        }
-        break ;
-      }
-
-      if (into.has_net_tag("tile"))
-      {
-        string pos_x = into.get_net_tag("pos_x");
-        string pos_y = into.get_net_tag("pos_y");
-
-        stringstream stream1, stream2;
-        int          iposx, iposy;
-
-        stream1 << pos_x;
-        stream1 >> iposx;
-        stream2 << pos_y;
-        stream2 >> iposy;
-
-        if (_posx != iposx || _posy != iposy)
-        {
-          pos_x = iposx;
-          pos_y = iposy;
-          CaseHovered.Emit(iposx, iposy);
-        }
-        _lastPickedUnit = into;
-        break ;
+	case ColMask::Waypoint:
+	  if (!(_hovering.hasWaypoint))
+	    _hovering.SetWaypoint(into);
+	  break ;
+	case ColMask::DynObject:
+	  if (!(_hovering.hasDynObject))
+	    _hovering.SetDynObject(into);
+	  break ;
       }
     }
   }

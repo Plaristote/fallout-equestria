@@ -5,11 +5,11 @@
 #define GLOBALS_HPP
 
 # define MODEL_TILE_PATH    "models/"
-# define TEXTURE_PATH		"textures/"
+# define TEXTURE_PATH       "textures/"
 # define TEXTURE_TILE_PATH  "textures/tiles/"
 
-#define GET_ARRAY_SIZE(A) sizeof(A)/sizeof(A[0])
+# define GET_ARRAY_SIZE(A) sizeof(A)/sizeof(A[0])
 
-
+# define ABS(x) ((x) < 0 ? -(x) : (x))
 
 #endif // GLOBALS_HPP

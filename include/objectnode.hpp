@@ -65,7 +65,7 @@ protected:
   WindowFramework* _window;
   Tilemap&         _map;
   NodePath         _root;
-  PT(Texture)		_tex;
+  PT(Texture)      _tex;
 
   Interactions _interactions;
   std::string  _dialog;

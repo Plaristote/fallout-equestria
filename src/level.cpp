@@ -5,27 +5,10 @@
 
 using namespace std;
 
-struct LevelObjectLoader
-{
-  typedef ObjectNode* (*Loader)(WindowFramework*, Tilemap&, Characters&, Data);
-
-  LevelObjectLoader(string name, Loader func) : name(name), func(func) {}
-
-  string name;
-  Loader func;
-};
-
-LevelObjectLoader objectLoaders[] = {
-  LevelObjectLoader("door",      &Door::Factory),
-  LevelObjectLoader("item",      &DroppedObject::Factory),
-  LevelObjectLoader("character", &Character::Factory),
-  LevelObjectLoader("npc",       &Npc::Factory)
-};
-
 Level* Level::CurrentLevel = 0;
 
 Level::Level(WindowFramework* window, const std::string& filename) : _window(window), _mouse(window),
-  _camera(window, window->get_camera_group()), _tilemap(window), _gameUi(window)
+  _camera(window, window->get_camera_group()), _gameUi(window)
 {
   CurrentLevel = this;
 
@@ -38,33 +21,6 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   _currentInteractMenu = 0;
   _currentRunningDialog = 0;
 
-  DataTree* datafile = DataTree::Factory::ShinyLang("scenes/" + filename);
-  DataTree* tilefile = DataTree::Factory::JSON("maps/" + filename + ".json");
-
-  if (tilefile)
-    _tilemap.Load(tilefile);
-  else
-    throw ("Can't load tilemap '" + filename + "'");
-
-  if (datafile)
-  {
-    Data data(datafile);
-    Data characters = data["characters"];
-
-    for_each(characters.begin(), characters.end(), [this, window](Data objectData)
-    {
-      for (unsigned short i = 0 ; i < GET_ARRAY_SIZE(objectLoaders) /*objectLoaders.size()*/ ; ++i)
-      {
-        if (objectLoaders[i].name == objectData.Key())
-        {
-          _objects.push_back(objectLoaders[i].func(window, _tilemap, _characters, objectData));
-          break ;
-        }
-      }
-    });
-  }
-  else
-    throw ("Can't load scene '" + filename + "'");
   _graphicWindow = _window->get_graphics_window();
   AsyncTaskManager::get_global_ptr()->add(this);
 
@@ -82,13 +38,96 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
 
   MouseInit();
   _timer.Restart();
+  
+  // WORLD LOADING
+  _world = new World(window);  
+  std::ifstream file;
+  std::string   fullpath = "maps/" + filename + ".blob";
+
+  file.open(fullpath.c_str());
+  if (file.is_open())
+  {
+    try
+    {
+      long  begin, end;
+      long  size;
+      char* raw;
+
+      begin     = file.tellg();
+      file.seekg(0, std::ios::end);
+      end       = file.tellg();
+      file.seekg(0, std::ios::beg);
+      size      = end - begin;
+      raw       = new char[size + 1];
+      file.read(raw, size);
+      file.close();
+      raw[size] = 0;
+
+      Utils::Packet* packet;
+
+      packet = new Utils::Packet(raw, size);
+
+      _world->UnSerialize(*packet);
+
+      delete   packet;
+      delete[] raw;
+    }
+    catch (unsigned int error)
+    {
+      std::cout << "Failed to load file" << std::endl;
+    }
+  }
+  else
+    std::cout << "Blob file not found" << std::endl;
+  
+  World::DynamicObjects::iterator it  = _world->dynamicObjects.begin();
+  World::DynamicObjects::iterator end = _world->dynamicObjects.end();
+
+  for_each(it, end, [this](DynamicObject& object)
+  {
+    InstanceDynamicObject* instance = 0;
+    
+    switch (object.type)
+    {
+      case DynamicObject::Character:
+        {
+	  ObjectCharacter* character = new ObjectCharacter(this, &object);
+	  
+	  _characters.push_back(character);
+	  instance = character;
+        }
+	break ;
+      case DynamicObject::Door:
+	instance = new ObjectDoor(this, &object);
+	break ;
+      case DynamicObject::Shelf:
+	break ;
+      case DynamicObject::Locker:
+	break ;
+    }
+    if (instance != 0)
+      _objects.push_back(instance);
+  });
+  
+  _world->SetWaypointsVisible(false);
 }
 
-/*void Level::StartFight(void)
+bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
 {
-  Characters::iterator it  = _characters.begin();
-  Characters::iteratir end = _characters.end();
-}*/
+  AstarPathfinding<Waypoint>        astar;
+  int                               max_iterations = 0;
+  AstarPathfinding<Waypoint>::State state;
+  
+  astar.SetStartAndGoalStates(from, to);
+  while ((state = astar.SearchStep()) == AstarPathfinding<Waypoint>::Searching && max_iterations++ < 500);
+
+  if (state == AstarPathfinding<Waypoint>::Succeeded)
+  {
+    path = astar.GetSolution();
+    return (true);
+  }
+  return (false);  
+}
 
 AsyncTask::DoneStatus Level::do_task(void)
 {
@@ -144,12 +183,11 @@ AsyncTask::DoneStatus Level::do_task(void)
   
   _mouse.Run();
   _camera.Run(elapsedTime);
-
-  for_each(_objects.begin(), _objects.end(), [this, elapsedTime](ObjectNode* object)
-  {
-    object->Run(elapsedTime);
-  });
-  _tilemap.ResetPathfinding();
+  
+  //for_each(_characters.begin(), _characters.end(), [](ObjectCharacter* character)               { character->ProcessCollisions(); });
+  for_each(_objects.begin(), _objects.end(),       [elapsedTime](InstanceDynamicObject* object) { object->Run(elapsedTime); });
+  for_each(_characters.begin(), _characters.end(), [](ObjectCharacter* character)               { character->UnprocessCollisions(); });
+  //_tilemap.ResetPathfinding();
   TaskCeiling(elapsedTime);
   _timer.Restart();
   return AsyncTask::DS_cont;
@@ -157,7 +195,7 @@ AsyncTask::DoneStatus Level::do_task(void)
 
 void Level::TaskCeiling(float elapsedTime)
 {
-  MapElement::Position        playerPos = (*(_characters.begin()))->GetPosition();
+  /*MapElement::Position        playerPos = (*(_characters.begin()))->GetPosition();
   const Tilemap::CeilingTile& ceiling   =_tilemap.GetCeiling(playerPos.x, playerPos.y);
 
   if (ceiling.isDefined && ceilingCurrentTransparency >= 0.f)
@@ -171,7 +209,7 @@ void Level::TaskCeiling(float elapsedTime)
   {
     ceilingCurrentTransparency += 1.f * elapsedTime;
     _tilemap.SetCeilingTransparent(ceilingCurrentTransparency);
-  }
+  }*/
 }
 
 /*
@@ -179,40 +217,40 @@ void Level::TaskCeiling(float elapsedTime)
  */
 ObjectNode* Level::FindObjectFromNode(NodePath node)
 {
-  Objects::iterator cur = _objects.begin();
+  /*Objects::iterator cur = _objects.begin();
 
   while (cur != _objects.end())
   {
     if ((*(*cur)) == node)
       return (*cur);
     ++cur;
-  }
+  }*/
   return (0);
 }
 
 Character* Level::FindCharacterFromNode(NodePath node)
 {
-  Characters::iterator cur = _characters.begin();
+  /*Characters::iterator cur = _characters.begin();
 
   while (cur != _characters.end())
   {
     if ((*(*cur)) == node)
       return (*cur);
     ++cur;
-  }
+  }*/
   return (0);
 }
 
 Character* Level::FindCharacterByName(const std::string& name)
 {
-  Characters::iterator cur = _characters.begin();
+  /*Characters::iterator cur = _characters.begin();
 
   while (cur != _characters.end())
   {
     if ((*(*cur)) == name)
       return (*cur);
     ++cur;
-  }
+  }*/
   return (0);
 }
 
@@ -223,49 +261,41 @@ Character* Level::FindCharacterByName(const std::string& name)
 void Level::MouseInit(void)
 {
   _mouseState    = MouseAction;
-  _mouseHovering = HoveringCase;
-  _mouse.ButtonLeft.Connect(*this, &Level::MouseLeftClicked);
-  _mouse.ButtonRight.Connect(*this, &Level::MouseRightClicked);
-  _mouse.CaseHovered.Connect(*this, &Level::HoveredCase);
-  _mouse.UnitHovered.Connect(*this, &Level::HoveredUnit);
+  _mouse.ButtonLeft.Connect  (*this,   &Level::MouseLeftClicked);
+  _mouse.ButtonRight.Connect (*this,   &Level::MouseRightClicked);
   _mouse.ButtonMiddle.Connect(_camera, &SceneCamera::SwapCameraView);
-}
-
-void Level::HoveredUnit(NodePath node)
-{
-  _mouseHovering = HoveringUnit;
-  _hoveredUnit   = node;
-}
-
-void Level::HoveredCase(int x, int y)
-{
-  _mouseHovering = HoveringCase;
-  _hoveredCase.set_x(x);
-  _hoveredCase.set_y(y);
 }
 
 void Level::MouseLeftClicked(void)
 {
+  const MouseHovering& hovering = _mouse.Hovering();
+  
   cout << "Mouse Left Clicked" << endl;
   switch (_mouseState)
   {
     case MouseAction:
       cout << "Mouse Action" << endl;
-      if (_mouseHovering      == HoveringUnit)
+      if (hovering.hasDynObject && false)
       {
         // Do something, or not...
       }
-      else if (_mouseHovering == HoveringCase)
+      else if (hovering.hasWaypoint)
       {
-        // Test stuff
-        (*(_characters.begin()))->GoTo(_hoveredCase.get_x(), _hoveredCase.get_y());
+	Waypoint* toGo = _world->GetWaypointFromNodePath(hovering.waypoint);
+
+	if (toGo)
+	{
+	  if (_characters.size() > 0)
+	    _characters.front()->GoTo(toGo);
+	}
       }
       break ;
     case MouseInteraction:
       cout << "Mouse Interaction" << endl;
-      if (_mouseHovering == HoveringUnit)
+      if (hovering.hasDynObject)
       {
-        cout << "Mouse Interaction : HoveringUnit" << endl;
+	cout << "Interaction with object" << endl;
+        /*cout << "Mouse Interaction : HoveringUnit" << endl;
         if (_currentInteractMenu)
           delete _currentInteractMenu;
         ObjectNode* currentHoveredObject = FindObjectFromNode(_hoveredUnit);
@@ -277,7 +307,7 @@ void Level::MouseLeftClicked(void)
           _camera.SetEnabledScroll(false);
         }
         else
-          cerr << "Error finding hovered unit" << endl;
+          cerr << "Error finding hovered unit" << endl;*/
       }
       break ;
   }
@@ -306,7 +336,7 @@ void Level::CloseInteractMenu(void)
 // Interactions
 void Level::CallbackActionUse(ObjectNode* object)
 {
-  object->InteractUse(*(_characters.begin()));
+  //object->InteractUse(*(_characters.begin()));
   CloseInteractMenu();
 }
 

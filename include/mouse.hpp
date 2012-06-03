@@ -10,18 +10,39 @@
 
 # include "observatory.hpp"
 
+struct MouseHovering
+{
+  void Reset(void)
+  { hasWaypoint = hasDynObject = false; }
+  
+  void SetWaypoint(NodePath np)
+  {
+    hasWaypoint = true;
+    waypoint    = np;
+  }
+  
+  void SetDynObject(NodePath np)
+  {
+    hasDynObject = true;
+    dynObject    = np;
+  }
+  
+  bool     hasWaypoint, hasDynObject;
+  NodePath waypoint;
+  NodePath dynObject;
+};
+
 class Mouse
 {
 public:
   Mouse(WindowFramework* window);
 
   void                      Run(void);
+  const MouseHovering&      Hovering(void) const { return (_hovering); }
 
-  Observatory::Signal<void>            ButtonLeft;
-  Observatory::Signal<void>            ButtonMiddle;
-  Observatory::Signal<void>            ButtonRight;
-  Observatory::Signal<void (NodePath)> UnitHovered;
-  Observatory::Signal<void (int, int)> CaseHovered;
+  Observatory::Signal<void> ButtonLeft;
+  Observatory::Signal<void> ButtonMiddle;
+  Observatory::Signal<void> ButtonRight;
 
   static void               CallbackButton1(const Event*, void* ptr)
   {
@@ -47,10 +68,8 @@ private:
   NodePath                  _pickerPath;
   CollisionTraverser        _collisionTraverser;
   PT(CollisionHandlerQueue) _collisionHandlerQueue;
-  bool                      _hasPickedUnit;
-  NodePath                  _lastPickedUnit;
-
-  int                       _posx, _posy;
+  
+  MouseHovering             _hovering;
 };
 
 #endif
