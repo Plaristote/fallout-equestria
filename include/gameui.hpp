@@ -32,6 +32,8 @@ class GameMainBar : public UiBase
   friend class GameUi;
 public:
   GameMainBar(WindowFramework* window, Rocket::Core::Context* context);
+  
+  void                   AppendToConsole(const std::string& str);
 
   RocketListener         MenuButtonClicked;
   RocketListener         InventoryButtonClicked;
@@ -106,6 +108,7 @@ public:
   GameUi(WindowFramework* window);
   ~GameUi();
 
+  GameMainBar&           GetMainBar(void) { return (*_mainBar); }
   GameMenu&              GetMenu(void) { return (*_menu); }
   Rocket::Core::Context* GetContext() { return (_rocket->get_context()); }
 

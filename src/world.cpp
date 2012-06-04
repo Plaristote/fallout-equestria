@@ -234,6 +234,7 @@ Waypoint::Arc*      Waypoint::GetArcTo(unsigned int id)
   {
     if ((*it).to->id == id)
       return (&(*it));
+    ++it;
   }
   return (0);
 }
@@ -416,9 +417,6 @@ void MapObject::UnSerialize(WindowFramework* window, Utils::Packet& packet)
   packet >> name >> strModel >> strTexture;
   packet >> posX >> posY >> posZ >> rotX >> rotY >> rotZ >> scaleX >> scaleY >> scaleZ;
   
-  /*if (strModel == "lpip.egg")
-    strModel = "horse.obj";*/
-
   nodePath   = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + strModel);
   if (strTexture != "")
   {

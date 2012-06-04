@@ -7,12 +7,44 @@ using namespace std;
 
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
 {
+  // Line of sight tools
+  _losNode      = new CollisionNode("losRay");
+  _losNode->set_from_collide_mask(CollideMask(ColMask::Object | ColMask::DynObject));
+  _losPath      = object->nodePath.attach_new_node(_losNode);
+  _losRay       = new CollisionRay();
+  _losRay->set_origin(0, 0, 0);
+  _losRay->set_direction(-10, 0, 0);
+  _losPath.set_pos(0, -0.5, 0);
+  //_losPath.show();
+  _losNode->add_solid(_losRay);
+  _losHandlerQueue = new CollisionHandlerQueue();
+  _losTraverser.add_collider(_losPath, _losHandlerQueue);  
 }
 
 void ObjectCharacter::Run(float elapsedTime)
 {
   if (_path.size() > 0)
     RunMovement(elapsedTime);
+}
+
+unsigned short      ObjectCharacter::GetPathDistance(InstanceDynamicObject* object)
+{
+  unsigned short ret;
+  
+  object->UnprocessCollisions();
+  ret = GetPathDistance(object->GetOccupiedWaypoint());
+  object->ProcessCollisions();
+  return (ret);
+}
+
+unsigned short      ObjectCharacter::GetPathDistance(Waypoint* waypoint)
+{
+  std::list<Waypoint> path;
+  
+  UnprocessCollisions();
+  _level->FindPath(path, *_waypointOccupied, *waypoint);
+  ProcessCollisions();
+  return (path.size());
 }
 
 void                ObjectCharacter::GoTo(unsigned int id)
@@ -24,21 +56,45 @@ void                ObjectCharacter::GoTo(unsigned int id)
 
 void                ObjectCharacter::GoTo(Waypoint* waypoint)
 {
+  ReachedDestination.DisconnectAll();
+  _goToData.objective = 0;
+
   UnprocessCollisions();
   _path.clear();
   if (_waypointOccupied && waypoint)
   {
     if (!(_level->FindPath(_path, *_waypointOccupied, *waypoint)))
-      cout << "Can't find path between the two waypoints" << endl;
+      _level->ConsoleWrite("No path.");
   }
   else
     cout << "Character doesn't have a waypointOccupied" << endl;
   ProcessCollisions();
 }
 
+void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max_distance)
+{
+  ReachedDestination.DisconnectAll();
+  _goToData              = object->GetGoToData(this);
+  _goToData.max_distance = max_distance;
+
+  UnprocessCollisions();
+  object->UnprocessCollisions();
+
+  _path.clear();
+  if (_waypointOccupied && _goToData.nearest)
+  {
+    if (!(_level->FindPath(_path, *_waypointOccupied, *_goToData.nearest)))
+      _level->ConsoleWrite("Can't reach.");
+  }
+
+  ProcessCollisions();
+  object->ProcessCollisions();
+}
+
 void                ObjectCharacter::RunMovement(float elapsedTime)
 {
-  Waypoint&         next = *(_path.begin());    
+  cout << "lol wtf ?" << endl;
+  Waypoint&         next = *(_path.begin());
   // TODO: Speed walking / running / combat
   float             max_speed = 6.f * elapsedTime;
   LPoint3           distance;
@@ -51,10 +107,61 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
 
   if (distance.get_x() == 0 && distance.get_y() == 0 && distance.get_z() == 0)
   {
+    // Has reached object objective, if there is one ?
+    if (_goToData.objective)
+    {
+      if (_path.size() <= _goToData.max_distance && HasLineOfSight(_goToData.objective))
+      {
+	_path.clear();
+	ReachedDestination.Emit(this);
+	return ;
+      }
+    }
+
     _waypointOccupied = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
     _path.erase(_path.begin());
+
     if (_path.size() > 0)
-      RunMovement(elapsedTime);
+    {
+      bool pathAvailable = true;
+      // Check if the next waypoint is still accessible
+      UnprocessCollisions();
+      Waypoint::Arc* arc = _waypointOccupied->GetArcTo(_path.begin()->id);
+      ProcessCollisions();
+      
+      if (arc)
+      {
+	if (arc->observer)
+	{
+	  if (arc->observer->CanGoThrough(0))
+	    arc->observer->GoingThrough();
+	  else
+	    pathAvailable = false;
+	}
+      }
+      else
+	pathAvailable = false;
+
+      if (pathAvailable)
+        RunMovement(elapsedTime);
+      else
+      {
+	if (_goToData.objective)
+	  GoTo(_goToData.objective);
+	else
+	{
+	  Waypoint* dest = _level->GetWorld()->GetWaypointFromId((*(--(_path.end()))).id);
+	  GoTo(dest);
+	}
+	if (_path.size() == 0)
+	{
+	  _level->ConsoleWrite("Path is obstructed");
+	  ReachedDestination.DisconnectAll();
+	}
+      }
+    }
+    else
+      ReachedDestination.Emit(this);
   }
   else
   {
@@ -91,6 +198,35 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
 
     _object->nodePath.set_pos(dest);
   }
+}
+
+bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* object)
+{
+  NodePath root  = _object->nodePath;
+  NodePath other = object->GetNodePath();
+  bool ret = true;
+
+  LVecBase3 rot = root.get_hpr();
+  LVector3  dir = root.get_relative_vector(other, other.get_pos() - root.get_pos());
+
+  _losPath.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
+  _losRay->set_direction(dir.get_x(), dir.get_y(), dir.get_z());
+  _losTraverser.traverse(_level->GetWorld()->window->get_render());
+
+  _losHandlerQueue->sort_entries();
+
+  for (unsigned int i = 0 ; i < _losHandlerQueue->get_num_entries() ; ++i)
+  {
+    CollisionEntry* entry = _losHandlerQueue->get_entry(i);
+    NodePath        node  = entry->get_into_node_path();
+
+    if (root.is_ancestor_of(node))
+      continue ;
+    if (!(other.is_ancestor_of(node)))
+      ret = false;
+    break ;
+  }
+  return (ret);
 }
 
 /*

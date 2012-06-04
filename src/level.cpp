@@ -289,6 +289,11 @@ void Level::CloseInteractMenu(void)
   _camera.SetEnabledScroll(true);
 }
 
+void Level::ConsoleWrite(const string& str)
+{
+  _gameUi.GetMainBar().AppendToConsole(str);
+}
+
 // Interactions
 void Level::CallbackActionUse(InstanceDynamicObject* object)
 {
@@ -298,16 +303,22 @@ void Level::CallbackActionUse(InstanceDynamicObject* object)
 
 void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 {
-  string dialog = object->GetDialog();
-  
-  dialog = "fluttershy";
-
   CloseInteractMenu();
-  if (_currentRunningDialog)
-    delete _currentRunningDialog;
-  _currentRunningDialog = new DialogController(_window, _gameUi.GetContext(), dialog, _l18n);
-  _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningDialog);
-  _camera.SetEnabledScroll(false);
+  if ((_characters.front()->HasLineOfSight(object)) && _characters.front()->GetPathDistance(object) <= 3)
+  {
+    string dialog = object->GetDialog();
+
+    if (_currentRunningDialog)
+      delete _currentRunningDialog;
+    _currentRunningDialog = new DialogController(_window, _gameUi.GetContext(), dialog, _l18n);
+    _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningDialog);
+    _camera.SetEnabledScroll(false);
+  }
+  else
+  {
+    _characters.front()->GoTo(object, 3);
+    _characters.front()->ReachedDestination.Connect(*this, &Level::CallbackActionTalkTo);
+  }
 }
 
 void Level::CloseRunningDialog(void)

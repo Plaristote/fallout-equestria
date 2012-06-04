@@ -31,9 +31,11 @@
 class Level;
 
 struct WaypointModifier
-{
+{  
   virtual void ProcessCollisions(void);
   void         UnprocessCollisions(void);
+  Waypoint*    GetOccupiedWaypoint(void) const { return (_waypointOccupied); }
+
 protected:
   void         WithdrawAllArcs(unsigned int id);
   void         WithdrawAllArcs(Waypoint* waypoint);
@@ -70,6 +72,13 @@ public:
   };
   typedef std::list<Interaction> InteractionList;
   
+  struct GoToData
+  {
+    Waypoint*              nearest;
+    InstanceDynamicObject* objective;
+    int                    max_distance;
+  };
+  
   InstanceDynamicObject(Level* level, DynamicObject* object) : _object(object)
   {
     _level                = level;
@@ -93,8 +102,19 @@ public:
   bool               operator==(NodePath np)             const { return (_object->nodePath.is_ancestor_of(np)); }
   bool               operator==(const std::string& name) const { return (GetName() == name);                    }
   std::string        GetName(void)                       const { return (_object->nodePath.get_name());         }
+  NodePath           GetNodePath(void)                   const { return (_object->nodePath);                    }
   InteractionList&   GetInteractions(void)                     { return (_interactions);                        }
   const std::string& GetDialog(void)                     const { return (_object->dialog);                      }
+  
+  virtual GoToData   GetGoToData(InstanceDynamicObject* character)
+  {
+    GoToData         ret;
+
+    ret.nearest      = _waypointOccupied;
+    ret.objective    = this;
+    ret.max_distance = 0;
+    return (ret);
+  }
 
 protected:
   DynamicObject*           _object;
@@ -134,14 +154,28 @@ class ObjectCharacter : public InstanceDynamicObject
 public:
   ObjectCharacter(Level* level, DynamicObject* object);
 
+  Observatory::Signal<void (InstanceDynamicObject*)> ReachedDestination;
+  
   void                Run(float elapsedTime);
   void                GoTo(unsigned int id);
   void                GoTo(Waypoint* waypoint);
+  void                GoTo(InstanceDynamicObject* object, int max_distance = 0);
+  unsigned short      GetPathDistance(Waypoint* waypoint);
+  unsigned short      GetPathDistance(InstanceDynamicObject* object);
+  bool                HasLineOfSight(InstanceDynamicObject* object);
 
 private:
   void                RunMovement(float elapsedTime);
 
   std::list<Waypoint> _path;
+  GoToData            _goToData;
+  
+  // Line of Sight Tools
+  NodePath                  _losPath;
+  PT(CollisionRay)          _losRay;
+  PT(CollisionNode)         _losNode;
+  PT(CollisionHandlerQueue) _losHandlerQueue;
+  CollisionTraverser        _losTraverser;
 };
 
 /*
@@ -176,13 +210,11 @@ public:
   World*           GetWorld(void)       { return (_world); }
   //const World*     GetWorld(void) const { return (_world); }
 
-  void             CloseInteractMenu(void);
-  void             CloseRunningDialog(void);
+  void                   CloseInteractMenu(void);
+  void                   CloseRunningDialog(void);
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
-  //ObjectNode*      FindObjectFromNode(NodePath node);
-  //Character*       FindCharacterFromNode(NodePath node);
-  //Character*       FindCharacterByName(const std::string& name);
-  Data             GetDataEngine(void) { return (_dataEngine); }
+  Data                   GetDataEngine(void) { return (_dataEngine); }
+  void                   ConsoleWrite(const std::string& str);
 
   // Interaction Management
   void             CallbackActionUse(InstanceDynamicObject* object);

@@ -387,3 +387,20 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
     }*/
   }
 }
+
+void GameMainBar::AppendToConsole(const std::string& str)
+{
+  Rocket::Core::Element* console = _root->GetElementById("console");
+  
+  if (console)
+  {
+    Rocket::Core::String rml;
+    Rocket::Core::String toAdd;
+
+    console->GetInnerRML(rml);
+    toAdd  = "<li>";
+    toAdd += str.c_str();
+    toAdd += "</li>";
+    console->SetInnerRML(rml + toAdd);
+  }
+}
