@@ -3,6 +3,8 @@
 
 using namespace std;
 
+unsigned char gPathfindingUnitType = 0;
+
 World::World(WindowFramework* window)
 {
     this->window       = window;
@@ -61,8 +63,8 @@ MapObject* World::AddMapObject(const string &name, const string &model, const st
     MapObject object;
     string model2 = model;
 
-    if (model2 == "lpip.egg")
-      model2 = "horse.obj";
+    /*if (model2 == "lpip.egg")
+      model2 = "horse.obj";*/
     object.strModel   = model;
     object.strTexture = texture;
     object.nodePath   = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model2);
@@ -102,12 +104,13 @@ DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type t
     DynamicObject object;
     string model2 = model;
 
-    if (model2 == "lpip.egg")
-      model2 = "horse.obj";
-    object.type       = type;
-    object.strModel   = model;
-    object.strTexture = texture;
-    object.nodePath   = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model2);
+    /*if (model2 == "lpip.egg")
+      model2 = "horse.obj";*/
+    object.type         = type;
+    object.interactions = 0;
+    object.strModel     = model;
+    object.strTexture   = texture;
+    object.nodePath     = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model2);
     if (texture != "")
     {
       object.texture    = TexturePool::load_texture(TEXT_ROOT + texture);
@@ -223,6 +226,18 @@ void                Waypoint::DisconnectAll(void)
     }
 }
 
+Waypoint::Arc*      Waypoint::GetArcTo(unsigned int id)
+{
+  Arcs::iterator it = arcs.begin();
+  
+  while (it != arcs.end())
+  {
+    if ((*it).to->id == id)
+      return (&(*it));
+  }
+  return (0);
+}
+
 float               Waypoint::GetDistanceEstimate(const Waypoint& other) const
 {
     LPoint3 pos_1  = nodePath.get_pos();
@@ -245,7 +260,9 @@ list<Waypoint*> Waypoint::GetSuccessors(Waypoint* parent)
         Arc& arc = *it;
 
         if (parent == arc.to)
-            continue ;
+          continue ;
+        if (arc.observer && arc.observer->CanGoThrough(gPathfindingUnitType))
+          continue ;
         // TODO Add Observer CanGoThrough here
         successors.push_back(arc.to);
     }
@@ -301,16 +318,17 @@ void Waypoint::SetMouseBox(void)
 // WAYPOINTS ARCS
 Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
 {
-    csegment = new CollisionSegment();
-    node     = new CollisionNode("waypointArc");
-    node->set_into_collide_mask(CollideMask(0));
-    node->set_from_collide_mask(CollideMask(0));
-    node->add_solid(csegment);
-    csegment->set_point_a(0, 0, 0);
-    nodePath = from.attach_new_node(node);
-    nodePath.set_pos(0, 0, 0);
-    nodePath.show();
-    UpdateDirection();
+  observer = 0;
+  csegment = new CollisionSegment();
+  node     = new CollisionNode("waypointArc");
+  node->set_into_collide_mask(CollideMask(0));
+  node->set_from_collide_mask(CollideMask(0));
+  node->add_solid(csegment);
+  csegment->set_point_a(0, 0, 0);
+  nodePath = from.attach_new_node(node);
+  nodePath.set_pos(0, 0, 0);
+  nodePath.show();
+  UpdateDirection();
 }
 
 void Waypoint::Arc::UpdateDirection(void)
@@ -398,8 +416,8 @@ void MapObject::UnSerialize(WindowFramework* window, Utils::Packet& packet)
   packet >> name >> strModel >> strTexture;
   packet >> posX >> posY >> posZ >> rotX >> rotY >> rotZ >> scaleX >> scaleY >> scaleZ;
   
-  if (strModel == "lpip.egg")
-    strModel = "horse.obj";
+  /*if (strModel == "lpip.egg")
+    strModel = "horse.obj";*/
 
   nodePath   = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + strModel);
   if (strTexture != "")

@@ -4,7 +4,7 @@
 # include <list>
 # include "pathfinding.hpp"
 
-class MapElement
+/*class MapElement
 {
 public:
   struct Position
@@ -62,6 +62,6 @@ private:
   typedef std::list<WithdrawedArc> WithdrawedArcs;
 
   WithdrawedArcs _withdrawedArcs;
-};
+};*/
 
 #endif

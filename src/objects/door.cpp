@@ -1,7 +1,47 @@
 #include "objects/door.hpp"
 #include <character.hpp>
 
-ObjectNode* Door::Factory(WindowFramework* window, Tilemap& map, Characters&, Data data)
+#include "level.hpp"
+
+void ObjectDoor::ObserveWaypoints(bool doObserver)
+{
+  std::for_each(_waypointDisconnected.begin(), _waypointDisconnected.end(), [this, doObserver](std::pair<int, int> waypoints)
+  {
+    Waypoint*        waypoint = _level->GetWorld()->GetWaypointFromId(waypoints.first);
+
+    if (waypoint)
+    {
+      Waypoint::Arc* arc1 = waypoint->GetArcTo(waypoints.second);
+      Waypoint::Arc* arc2 = 0;
+
+      if (arc1)
+      {
+	arc1->observer = (doObserver ? this : 0);
+	arc2           = arc1->to->GetArcTo(waypoints.first);
+      }
+      if (arc2)
+	arc2->observer = (doObserver ? this : 0);
+    }
+  });
+}
+
+bool ObjectDoor::CanGoThrough(unsigned char id)
+{
+  if (_closed)
+    return (id != 0);
+  return (true);
+}
+
+void ObjectDoor::GoingThrough(void)
+{
+  _closed = false;
+}
+
+/*
+ * WARNING The following is legacy and will have to go away. On est pas à la soupe populaire.
+ */
+
+/*ObjectNode* Door::Factory(WindowFramework* window, Tilemap& map, Characters&, Data data)
 {
   return (new Door(window, map, data));
 }
@@ -120,4 +160,4 @@ bool  Door::GoingThrough(Character* character)
     _opened = true;
   }
   return (can);
-}
+}*/

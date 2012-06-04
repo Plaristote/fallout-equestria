@@ -4,7 +4,7 @@
 
 using namespace std;
 
-Tilemap::Tilemap(WindowFramework* window) : _window(window)
+/*Tilemap::Tilemap(WindowFramework* window) : _window(window)
 {
   _pf          = 0;
   _scale       = WORLD_SCALE;
@@ -259,4 +259,4 @@ void Tilemap::SetCeilingTransparent(float value)
 {
   _ceilingNode.set_transparency(value == 1.f ? TransparencyAttrib::M_none : TransparencyAttrib::M_alpha);
   _ceilingNode.set_color(1, 1, 1, value);
-}
+}*/

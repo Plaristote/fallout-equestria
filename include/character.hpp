@@ -12,7 +12,7 @@
 
 # include <panda3d/pointLight.h>
 
-class Character;
+/*class Character;
 
 typedef std::list<Character*> Characters;
 
@@ -90,6 +90,6 @@ private:
   // Light
   PT(PointLight) _charLight;
   NodePath       _charLightNode;
-};
+};*/
 
 #endif

@@ -76,22 +76,6 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod   (dataClass, "int    AsInt()",                 asFUNCTION(asData::getAsInt),       asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod   (dataClass, "float  AsFloat()",               asFUNCTION(asData::getAsFloat),     asCALL_CDECL_OBJFIRST);
 
-  const char* posClass  = "MapPosition";
-  engine->RegisterObjectType(posClass,   sizeof(MapElement::Position), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS);
-  engine->RegisterObjectMethod(posClass, "int get_x()",     asMETHOD(MapElement::Position,get_x), asCALL_THISCALL);
-  engine->RegisterObjectMethod(posClass, "int get_y()",     asMETHOD(MapElement::Position,get_y), asCALL_THISCALL);
-  engine->RegisterObjectMethod(posClass, "void set_x(int)", asMETHOD(MapElement::Position,set_x), asCALL_THISCALL);
-  engine->RegisterObjectMethod(posClass, "void set_y(int)", asMETHOD(MapElement::Position,set_y), asCALL_THISCALL);
-
-  const char* charClass = "Character";
-  engine->RegisterObjectType(charClass,   0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(charClass, "uint16 GoTo(int, int)",           asMETHOD(Character,GoTo),           asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "bool HasLineOfSight(Character@)", asMETHOD(Character,HasLineOfSight), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "bool IsMoving()",                 asMETHOD(Character,IsMoving),       asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "string GetName()",                asMETHOD(Character,GetName),        asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "MapPosition GetPosition()",       asMETHOD(Character,GetPosition),    asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "void ShowCollision(bool)",        asMETHOD(Character,DebugShowCollisionSphere), asCALL_THISCALL);
-
   const char* worldClass = "World";
   engine->RegisterObjectType(worldClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(worldClass, "void SetWaypointsVisible(bool) const",      asMETHOD(World,SetWaypointsVisible),      asCALL_THISCALL);
@@ -100,7 +84,6 @@ void AngelScriptInitialize(void)
   
   const char* levelClass = "Level";
   engine->RegisterObjectType(levelClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(levelClass, "Character@   FindCharacterByName(const string &in)", asMETHOD(Level,FindCharacterByName), asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Data         GetDataEngine()",                       asMETHOD(Level,GetDataEngine),       asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "const World@ GetWorld() const",                      asMETHOD(Level,GetWorld),            asCALL_THISCALL);
   

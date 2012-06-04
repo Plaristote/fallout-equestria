@@ -3,12 +3,13 @@
 
 # include <panda3d/pandaFramework.h>
 # include <panda3d/pgButton.h>
-# include "objectnode.hpp"
+
+class InstanceDynamicObject;
 
 class InteractMenu
 {
 public:
-  InteractMenu(WindowFramework* window, ObjectNode& object);
+  InteractMenu(WindowFramework* window, InstanceDynamicObject& object);
   ~InteractMenu();
 
 private:

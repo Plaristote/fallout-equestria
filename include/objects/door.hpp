@@ -4,7 +4,7 @@
 # include "objectnode.hpp"
 # include "character.hpp"
 
-class Door : public ObjectNode, public Pathfinding::Node::Arc::Observer
+/*class Door : public ObjectNode, public Pathfinding::Node::Arc::Observer
 {
 public:
   static ObjectNode* Factory(WindowFramework*, Tilemap&, Characters&, Data);
@@ -20,6 +20,6 @@ public:
 private:
   bool _opened;
   bool _vertical;
-};
+};*/
 
 #endif

@@ -1,7 +1,7 @@
 #include "objects/dropped_object.hpp"
 #include "character.hpp"
 
-ObjectNode* DroppedObject::Factory(WindowFramework* window, Tilemap& map, Characters&, Data data)
+/*ObjectNode* DroppedObject::Factory(WindowFramework* window, Tilemap& map, Characters&, Data data)
 {
   InventoryObject* object    = new InventoryObject(data);
 
@@ -28,4 +28,4 @@ void  DroppedObject::InteractUse(Character* c)
     else
       std::cout << "[GameConsole] Can't reach !" << std::endl;
   }
-}
+}*/

@@ -16,7 +16,7 @@ static inline double round(double val)
 }
 #endif
 
-class Character;
+/*class Character;
 
 class ObjectNode : public MapElement
 {
@@ -69,6 +69,6 @@ protected:
 
   Interactions _interactions;
   std::string  _dialog;
-};
+};*/
 
 #endif

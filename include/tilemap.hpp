@@ -14,7 +14,7 @@
 # define TILE_UNIT          8
 # define CEILING_HEIGHT     10
 
-enum MyCollisionMask
+/*enum MyCollisionMask
 {
   Object    = 2,
   Tiles     = 4,
@@ -136,6 +136,6 @@ private:
 	//Stores all the prototypes needed for the entire tilemap
 	//(such that they are loaded from the disk only ONCE)
 	std::vector<TilePrototype> _tileArchive;
-};
+};*/
 
 #endif

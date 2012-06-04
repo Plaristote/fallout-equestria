@@ -2,7 +2,7 @@
 
 using namespace std;
 
-ObjectNode* Npc::Factory(WindowFramework* window, Tilemap& tilemap, Characters& chars, Data data)
+/*ObjectNode* Npc::Factory(WindowFramework* window, Tilemap& tilemap, Characters& chars, Data data)
 {
   Npc* npc = new Npc(window, tilemap, data, chars);
 
@@ -46,4 +46,4 @@ void Npc::Run(float elapsedTime)
     }
   }
   Character::Run(elapsedTime);
-}
+}*/

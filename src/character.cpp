@@ -24,6 +24,7 @@ void                ObjectCharacter::GoTo(unsigned int id)
 
 void                ObjectCharacter::GoTo(Waypoint* waypoint)
 {
+  UnprocessCollisions();
   _path.clear();
   if (_waypointOccupied && waypoint)
   {
@@ -32,6 +33,7 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
   }
   else
     cout << "Character doesn't have a waypointOccupied" << endl;
+  ProcessCollisions();
 }
 
 void                ObjectCharacter::RunMovement(float elapsedTime)
@@ -51,6 +53,8 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
   {
     _waypointOccupied = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
     _path.erase(_path.begin());
+    if (_path.size() > 0)
+      RunMovement(elapsedTime);
   }
   else
   {
@@ -93,120 +97,120 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
  * WARNING The following is LEGACY and will disapear soon
  */
 
-CollideMask characterCollideMask(Object);
-
-ObjectNode* Character::Factory(WindowFramework* window, Tilemap& tilemap, Characters& characters, Data data)
-{
-  Character* character = new Character(window, tilemap, data, characters);
-
-  characters.push_back(character);
-  return (character);
-}
-
-bool Character::IsArcAccessible(int beg_x, int beg_y, int dest_x, int dest_y)
-{
-  if (beg_x == dest_x && beg_y == dest_y)
-    return (true);
-  bool success = false;
-
-  Pathfinding*      pf    = _map.SetupPathfinding(this, 1);
-  Pathfinding::Node node1 = pf->GetNode(beg_x,  beg_y);
-  Pathfinding::Node node2 = pf->GetNode(dest_x, dest_y);
-
-  Pathfinding::Node::Arcs::iterator it, end;
-
-  for (it = node1.arcs.begin(), end = node1.arcs.end() ; it != end ; ++it)
-  {
-    if ((*it).first->x == node2.x && (*it).first->y == node2.y)
-    {
-      if ((*it).observer)
-        success = (*it).observer->GoingThrough(this);
-      else
-        success = true;
-      break ;
-    }
-  }
-  _map.SetdownPathfinding(this, 1);
-  return (success);
-}
-
-extern PT(ClockObject) globalClock;
-
-unsigned short Character::GoTo(int x, int y)
-{
-  cout << "Executing GoTo" << endl;
-  float          ftime    = globalClock->get_real_time();
-  unsigned short solution = 0;
-
-  if (_lookingForNewWay == false)
-    ReachedCase.DisconnectAll();
-  ForceClosestCase();
-
-  _path.clear();
-
-  Pathfinding* pf       = _map.SetupPathfinding(this);
-
-  if (!(pf->FindPath(this, _path, _mapPos.get_x(), _mapPos.get_y(), x, y)))
-  {
-    cout << "Character didn't find any path between " << _mapPos.get_x() << "," << _mapPos.get_y() << " and " << x << "," << y << endl;
-    solution = 0;
-  }
-  else
-  {
-    cout << "Character found a path between " << _mapPos.get_x() << "," << _mapPos.get_y() << " and " << x << "," << y << endl;
-    solution = _path.size();
-  }
-  _map.SetdownPathfinding(this);
-  float etime = globalClock->get_real_time();
-  cout << "Pathfinding time: " << (etime - ftime) << endl;
-  return (solution);
-}
-
-bool Character::CanReach(ObjectNode* node, int min_distance)
-{
-  float dist_x = ABS(node->GetPosition().x - GetPosition().x);
-  float dist_y = ABS(node->GetPosition().y - GetPosition().y);
-
-  return (dist_x <= min_distance && dist_y <= min_distance);
-}
-
-bool Character::TryToReach(ObjectNode* node, int min_distance)
-{
-  // TODO this isn't the real deal. It needs to get character to a certain distance of node, not at node.
-  return (GoTo(node->GetPosition().x, node->GetPosition().y));
-}
-
-Character::Character(WindowFramework* window, Tilemap& map, Data data, Characters& chars) : ObjectNode(window, map, data), _characters(chars)
-{
-  _lookingForNewWay = false;
-  _root.set_name(data["name"].Value());
-  _root.set_collide_mask(0);
-
-  _selfSphere     = new CollisionSphere(0, 0, 0, 5.f);
-  _selfSphereNode = new CollisionNode("characterRange");
-  _selfSphereNP   = _root.attach_new_node(_selfSphereNode);
-  _selfSphereNode->set_into_collide_mask(characterCollideMask);
-  _selfSphereNode->set_from_collide_mask(0);
-  _selfSphereNode->add_solid(_selfSphere);
-
-  _selfSphereNP.show();
-
-
-  _collisionNode         = new CollisionNode("characterRange");
-  _collisionPath         = _root.attach_new_node(_collisionNode);
-  _collisionNode->set_from_collide_mask(characterCollideMask);
-  _collisionNode->set_into_collide_mask(0);
-  _collisionFov          = new CollisionSphere(0, 0, 0, 0.f);
-  _collisionNode->add_solid(_collisionFov);
-  _collisionHandlerQueue = new CollisionHandlerQueue();
-  _collisionTraverser.add_collider(_collisionPath, _collisionHandlerQueue);
-
-  /*PT(CollisionVisualizer) colVisualizer;
-  PandaNode* pn = colVisualizer;
-
-  _root.attach_new_node(pn);*/
-  
-  _collisionPath.show();
+// CollideMask characterCollideMask(Object);
+// 
+// ObjectNode* Character::Factory(WindowFramework* window, Tilemap& tilemap, Characters& characters, Data data)
+// {
+//   Character* character = new Character(window, tilemap, data, characters);
+// 
+//   characters.push_back(character);
+//   return (character);
+// }
+// 
+// bool Character::IsArcAccessible(int beg_x, int beg_y, int dest_x, int dest_y)
+// {
+//   if (beg_x == dest_x && beg_y == dest_y)
+//     return (true);
+//   bool success = false;
+// 
+//   Pathfinding*      pf    = _map.SetupPathfinding(this, 1);
+//   Pathfinding::Node node1 = pf->GetNode(beg_x,  beg_y);
+//   Pathfinding::Node node2 = pf->GetNode(dest_x, dest_y);
+// 
+//   Pathfinding::Node::Arcs::iterator it, end;
+// 
+//   for (it = node1.arcs.begin(), end = node1.arcs.end() ; it != end ; ++it)
+//   {
+//     if ((*it).first->x == node2.x && (*it).first->y == node2.y)
+//     {
+//       if ((*it).observer)
+//         success = (*it).observer->GoingThrough(this);
+//       else
+//         success = true;
+//       break ;
+//     }
+//   }
+//   _map.SetdownPathfinding(this, 1);
+//   return (success);
+// }
+// 
+// extern PT(ClockObject) globalClock;
+// 
+// unsigned short Character::GoTo(int x, int y)
+// {
+//   cout << "Executing GoTo" << endl;
+//   float          ftime    = globalClock->get_real_time();
+//   unsigned short solution = 0;
+// 
+//   if (_lookingForNewWay == false)
+//     ReachedCase.DisconnectAll();
+//   ForceClosestCase();
+// 
+//   _path.clear();
+// 
+//   Pathfinding* pf       = _map.SetupPathfinding(this);
+// 
+//   if (!(pf->FindPath(this, _path, _mapPos.get_x(), _mapPos.get_y(), x, y)))
+//   {
+//     cout << "Character didn't find any path between " << _mapPos.get_x() << "," << _mapPos.get_y() << " and " << x << "," << y << endl;
+//     solution = 0;
+//   }
+//   else
+//   {
+//     cout << "Character found a path between " << _mapPos.get_x() << "," << _mapPos.get_y() << " and " << x << "," << y << endl;
+//     solution = _path.size();
+//   }
+//   _map.SetdownPathfinding(this);
+//   float etime = globalClock->get_real_time();
+//   cout << "Pathfinding time: " << (etime - ftime) << endl;
+//   return (solution);
+// }
+// 
+// bool Character::CanReach(ObjectNode* node, int min_distance)
+// {
+//   float dist_x = ABS(node->GetPosition().x - GetPosition().x);
+//   float dist_y = ABS(node->GetPosition().y - GetPosition().y);
+// 
+//   return (dist_x <= min_distance && dist_y <= min_distance);
+// }
+// 
+// bool Character::TryToReach(ObjectNode* node, int min_distance)
+// {
+//   // TODO this isn't the real deal. It needs to get character to a certain distance of node, not at node.
+//   return (GoTo(node->GetPosition().x, node->GetPosition().y));
+// }
+// 
+// Character::Character(WindowFramework* window, Tilemap& map, Data data, Characters& chars) : ObjectNode(window, map, data), _characters(chars)
+// {
+//   _lookingForNewWay = false;
+//   _root.set_name(data["name"].Value());
+//   _root.set_collide_mask(0);
+// 
+//   _selfSphere     = new CollisionSphere(0, 0, 0, 5.f);
+//   _selfSphereNode = new CollisionNode("characterRange");
+//   _selfSphereNP   = _root.attach_new_node(_selfSphereNode);
+//   _selfSphereNode->set_into_collide_mask(characterCollideMask);
+//   _selfSphereNode->set_from_collide_mask(0);
+//   _selfSphereNode->add_solid(_selfSphere);
+// 
+//   _selfSphereNP.show();
+// 
+// 
+//   _collisionNode         = new CollisionNode("characterRange");
+//   _collisionPath         = _root.attach_new_node(_collisionNode);
+//   _collisionNode->set_from_collide_mask(characterCollideMask);
+//   _collisionNode->set_into_collide_mask(0);
+//   _collisionFov          = new CollisionSphere(0, 0, 0, 0.f);
+//   _collisionNode->add_solid(_collisionFov);
+//   _collisionHandlerQueue = new CollisionHandlerQueue();
+//   _collisionTraverser.add_collider(_collisionPath, _collisionHandlerQueue);
+// 
+//   /*PT(CollisionVisualizer) colVisualizer;
+//   PandaNode* pn = colVisualizer;
+// 
+//   _root.attach_new_node(pn);*/
+//   
+//   _collisionPath.show();
 
   /*_charLight = new PointLight("Light" + data["name"].Value());
   _charLight->set_color(LColor(0.8, 0.8, 0.8, 1));
@@ -214,7 +218,7 @@ Character::Character(WindowFramework* window, Tilemap& map, Data data, Character
   _charLightNode = _window->get_render().attach_new_node(_charLight);
   _charLightNode.reparent_to(_root);
   _charLightNode.set_pos(0, 0, 0.01);
-  _window->get_render().set_light(_charLightNode);*/
+  _window->get_render().set_light(_charLightNode);*//*
 
   // Line of sight tools
   _losNode      = new CollisionNode("losRay");
@@ -368,4 +372,4 @@ void Character::DoMovement(float elapsedTime)
   }
 
   _root.set_pos(pos);
-}
+}*/

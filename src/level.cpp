@@ -5,6 +5,11 @@
 
 using namespace std;
 
+Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUse;
+Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseObjectOn;
+Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSkillOn;
+Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;  
+
 Level* Level::CurrentLevel = 0;
 
 Level::Level(WindowFramework* window, const std::string& filename) : _window(window), _mouse(window),
@@ -16,8 +21,8 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
 
   ceilingCurrentTransparency = 1.f;
 
-  ObjectNode::ActionUse.Connect(*this, &Level::CallbackActionUse);
-  ObjectNode::ActionTalkTo.Connect(*this, &Level::CallbackActionTalkTo);
+  InstanceDynamicObject::ActionUse.Connect   (*this, &Level::CallbackActionUse);
+  InstanceDynamicObject::ActionTalkTo.Connect(*this, &Level::CallbackActionTalkTo);
   _currentInteractMenu = 0;
   _currentRunningDialog = 0;
 
@@ -131,21 +136,6 @@ bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
 
 AsyncTask::DoneStatus Level::do_task(void)
 {
-  // TEST FPS COUNTER
-  /*{
-    static Timer        fpsTimer;
-    static unsigned int fpsCounter = 0;
-
-    if (fpsTimer.GetElapsedTime() > 1.f)
-    {
-      cout << "[FPS Count]" << fpsCounter << endl;
-      cout << "[NodeCount]" << _window->get_render().count_num_descendants() << endl;
-      fpsTimer.Restart();
-      fpsCounter = 0;
-    }
-    fpsCounter++;
-  }*/
-
   float elapsedTime = _timer.GetElapsedTime();
 
   // TEST SUNLIGHT MOONLIGHT
@@ -165,8 +155,6 @@ AsyncTask::DoneStatus Level::do_task(void)
       LVecBase4f toSet = _sunLight->get_color();
       LVecBase4f dif   = colorSteps[(dayStep == 2 ? 0 : dayStep + 1)] - colorSteps[dayStep];
 
-      //cout << "Dif -> " << dif.get_x() << ", " << dif.get_y() << ", " << dif.get_z() << endl;
-
       toSet += ((dif * elapsedTime) / stepLength);
       _sunLight->set_color(toSet);
     }
@@ -183,10 +171,10 @@ AsyncTask::DoneStatus Level::do_task(void)
   
   _mouse.Run();
   _camera.Run(elapsedTime);
-  
-  //for_each(_characters.begin(), _characters.end(), [](ObjectCharacter* character)               { character->ProcessCollisions(); });
+
   for_each(_objects.begin(), _objects.end(),       [elapsedTime](InstanceDynamicObject* object) { object->Run(elapsedTime); });
   for_each(_characters.begin(), _characters.end(), [](ObjectCharacter* character)               { character->UnprocessCollisions(); });
+  for_each(_characters.begin(), _characters.end(), [](ObjectCharacter* character)               { character->ProcessCollisions(); });
   //_tilemap.ResetPathfinding();
   TaskCeiling(elapsedTime);
   _timer.Restart();
@@ -215,45 +203,18 @@ void Level::TaskCeiling(float elapsedTime)
 /*
  * Nodes Management
  */
-ObjectNode* Level::FindObjectFromNode(NodePath node)
+InstanceDynamicObject* Level::FindObjectFromNode(NodePath node)
 {
-  /*Objects::iterator cur = _objects.begin();
-
+  InstanceObjects::iterator cur = _objects.begin();
+  
   while (cur != _objects.end())
   {
-    if ((*(*cur)) == node)
+    if ((**cur) == node)
       return (*cur);
     ++cur;
-  }*/
+  }
   return (0);
 }
-
-Character* Level::FindCharacterFromNode(NodePath node)
-{
-  /*Characters::iterator cur = _characters.begin();
-
-  while (cur != _characters.end())
-  {
-    if ((*(*cur)) == node)
-      return (*cur);
-    ++cur;
-  }*/
-  return (0);
-}
-
-Character* Level::FindCharacterByName(const std::string& name)
-{
-  /*Characters::iterator cur = _characters.begin();
-
-  while (cur != _characters.end())
-  {
-    if ((*(*cur)) == name)
-      return (*cur);
-    ++cur;
-  }*/
-  return (0);
-}
-
 
 /*
  * Level Mouse
@@ -294,20 +255,15 @@ void Level::MouseLeftClicked(void)
       cout << "Mouse Interaction" << endl;
       if (hovering.hasDynObject)
       {
-	cout << "Interaction with object" << endl;
-        /*cout << "Mouse Interaction : HoveringUnit" << endl;
-        if (_currentInteractMenu)
-          delete _currentInteractMenu;
-        ObjectNode* currentHoveredObject = FindObjectFromNode(_hoveredUnit);
+	InstanceDynamicObject* object = FindObjectFromNode(hovering.dynObject);
 
-        if (currentHoveredObject)
-        {
-          cout << "Open contextual menu for unit" << endl;
-          _currentInteractMenu = new InteractMenu(_window, *currentHoveredObject);
-          _camera.SetEnabledScroll(false);
-        }
-        else
-          cerr << "Error finding hovered unit" << endl;*/
+	if (_currentInteractMenu)
+	  delete _currentInteractMenu;
+	if (object && object->GetInteractions().size() != 0)
+	{
+	  _currentInteractMenu = new InteractMenu(_window, *object);	  
+	  _camera.SetEnabledScroll(false);
+	}
       }
       break ;
   }
@@ -334,15 +290,17 @@ void Level::CloseInteractMenu(void)
 }
 
 // Interactions
-void Level::CallbackActionUse(ObjectNode* object)
+void Level::CallbackActionUse(InstanceDynamicObject* object)
 {
   //object->InteractUse(*(_characters.begin()));
   CloseInteractMenu();
 }
 
-void Level::CallbackActionTalkTo(ObjectNode* object)
+void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 {
-  const string& dialog = object->GetDialog();
+  string dialog = object->GetDialog();
+  
+  dialog = "fluttershy";
 
   CloseInteractMenu();
   if (_currentRunningDialog)

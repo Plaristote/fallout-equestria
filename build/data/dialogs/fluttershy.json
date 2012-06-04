@@ -28,7 +28,16 @@
 "DefaultAnswer": ""
 }
 
-}
+},
+
+"Twilightlicious": {
+  "npcLine": "Tu pue du cul",
+  "buck": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "Fluttertest"
+  }
+},
 
 
 }

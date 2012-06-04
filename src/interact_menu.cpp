@@ -1,14 +1,15 @@
 #include "interact_menu.hpp"
 #include <panda3d/mouseButton.h>
 #include <panda3d/mouseWatcher.h>
+#include "level.hpp"
 
 using namespace std;
 
 extern PandaFramework framework;
 
-InteractMenu::InteractMenu(WindowFramework* window, ObjectNode& object)
+InteractMenu::InteractMenu(WindowFramework* window, InstanceDynamicObject& object)
 {
-  ObjectNode::Interactions& interactions = object.GetInteractions();
+  InstanceDynamicObject::InteractionList& interactions = object.GetInteractions();
 
   LPoint3       position;
   MouseWatcher* mouseWatcher = dynamic_cast<MouseWatcher*>(window->get_mouse().node());
@@ -18,7 +19,7 @@ InteractMenu::InteractMenu(WindowFramework* window, ObjectNode& object)
   position.set_y(cursorPoint.get_y());
   cout << position.get_x() << "/" << position.get_y() << endl;
 
-  for_each(interactions.begin(), interactions.end(), [this, window, &position](ObjectNode::Interaction& interaction)
+  for_each(interactions.begin(), interactions.end(), [this, window, &position](InstanceDynamicObject::Interaction& interaction)
   {
     PGButton*    button = new PGButton("ButtonInteraction" + interaction.name);
     PGFrameStyle style;
@@ -64,8 +65,8 @@ InteractMenu::~InteractMenu()
 
 void InteractMenu::ButtonClicked(const Event*, void* data)
 {
-  ObjectNode::Interaction* interaction = reinterpret_cast<ObjectNode::Interaction*>(data);
+  InstanceDynamicObject::Interaction* interaction = reinterpret_cast<InstanceDynamicObject::Interaction*>(data);
 
-  interaction->triggered->Emit(interaction->objectNode);
+  interaction->signal->Emit(interaction->instance);
   cout << "Signal emitted" << endl;
 }

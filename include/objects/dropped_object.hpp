@@ -5,7 +5,7 @@
 # include "inventory.hpp"
 # include "character.hpp"
 
-class DroppedObject : public ObjectNode
+/*class DroppedObject : public ObjectNode
 {
 public:
   static ObjectNode* Factory(WindowFramework*, Tilemap&, Characters&, Data);
@@ -16,6 +16,6 @@ public:
   
 private:
   InventoryObject& _object;
-};
+};*/
 
 #endif

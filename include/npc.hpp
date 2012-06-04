@@ -4,7 +4,7 @@
 # include "character.hpp"
 # include "scriptengine.hpp"
 
-class Npc : public Character
+/*class Npc : public Character
 {
 public:
   static ObjectNode* Factory(WindowFramework*, Tilemap&, Characters&, Data);
@@ -18,6 +18,6 @@ private:
   asIScriptContext*  _scriptContext;
   asIScriptModule*   _scriptModule;
   asIScriptFunction* _scriptMain;
-};
+};*/
 
 #endif

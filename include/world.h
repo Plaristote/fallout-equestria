@@ -62,6 +62,12 @@ struct BoundingBox
 
 struct Waypoint
 {
+    struct ArcObserver
+    {
+      virtual bool CanGoThrough(unsigned char type) = 0;
+      virtual void GoingThrough(void)               = 0;
+    };
+
     struct Arc
     {
         Arc(NodePath from, Waypoint* to);
@@ -73,7 +79,9 @@ struct Waypoint
         PT(CollisionSegment) csegment;
         PT(CollisionNode)    node;
         NodePath             nodePath;
-        Waypoint* to;
+        Waypoint*            to;
+
+        ArcObserver*         observer;
     };
 
     typedef std::list<Arc> Arcs;
@@ -85,13 +93,14 @@ struct Waypoint
 
     Waypoint(NodePath root);
     Waypoint(void) {}
-    
+
     bool                 operator==(const Waypoint& other) const;
     bool                 operator==(const Waypoint* other) const;
     bool                 operator==(unsigned int id)       const { return (this->id == id); }
     void                 Connect(Waypoint* other);
     Arcs::iterator       Disconnect(Waypoint* other);
     void                 DisconnectAll(void);
+    Arc*                 GetArcTo(unsigned int id);
     void                 PositionChanged(void);
     void                 UpdateArcDirection(Waypoint*);
 

@@ -54,32 +54,79 @@ private:
 class InstanceDynamicObject : public WaypointModifier
 {
 public:
+  static Observatory::Signal<void (InstanceDynamicObject*)> ActionUse;
+  static Observatory::Signal<void (InstanceDynamicObject*)> ActionUseObjectOn;
+  static Observatory::Signal<void (InstanceDynamicObject*)> ActionUseSkillOn;
+  static Observatory::Signal<void (InstanceDynamicObject*)> ActionTalkTo;  
+  
+  struct Interaction
+  {
+    Interaction(const std::string& name, InstanceDynamicObject* instance, Observatory::Signal<void (InstanceDynamicObject*)>* signal)
+    : name(name), instance(instance), signal(signal) {}
+
+    std::string                                         name;
+    InstanceDynamicObject*                              instance;
+    Observatory::Signal<void (InstanceDynamicObject*)>* signal;
+  };
+  typedef std::list<Interaction> InteractionList;
+  
   InstanceDynamicObject(Level* level, DynamicObject* object) : _object(object)
   {
     _level                = level;
     _waypointDisconnected = object->lockedArcs;
     _waypointOccupied     = object->waypoint;
+    
+    if (object->interactions & Interactions::TalkTo)
+      _interactions.push_back(Interaction("talk_to",    this, &ActionTalkTo));
+    if (object->interactions & Interactions::Use)
+      _interactions.push_back(Interaction("use",        this, &ActionUse));
+    if (object->interactions & Interactions::UseObject)
+      _interactions.push_back(Interaction("use_object", this, &ActionUseObjectOn));
+    if (object->interactions & Interactions::UseSkill)
+      _interactions.push_back(Interaction("use_skill",  this, &ActionUseSkillOn));
   }
 
   virtual ~InstanceDynamicObject() {}
 
   virtual void       Run(float elapsedTime) {};
 
-  bool               operator==(const std::string& name) const { return (GetName() == name);            }
-  std::string        GetName(void)                       const { return (_object->nodePath.get_name()); }
+  bool               operator==(NodePath np)             const { return (_object->nodePath.is_ancestor_of(np)); }
+  bool               operator==(const std::string& name) const { return (GetName() == name);                    }
+  std::string        GetName(void)                       const { return (_object->nodePath.get_name());         }
+  InteractionList&   GetInteractions(void)                     { return (_interactions);                        }
+  const std::string& GetDialog(void)                     const { return (_object->dialog);                      }
 
 protected:
-  DynamicObject* _object;
+  DynamicObject*           _object;
+  
+private:
+  InteractionList          _interactions;
 };
 
-class ObjectDoor : public InstanceDynamicObject
+class ObjectDoor : public InstanceDynamicObject, public Waypoint::ArcObserver
 {
 public:
   ObjectDoor(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
   {
+    _locked = object->locked;
+    ObserveWaypoints(true);
   }
+  
+  ~ObjectDoor()
+  {
+    ObserveWaypoints(false);
+  }
+  
+  void ObserveWaypoints(bool doObserver);
+  
+  void ProcessCollisions(void) {}
+
+  bool CanGoThrough(unsigned char id);
+  void GoingThrough(void);
 
 private:
+  bool _closed;
+  bool _locked;
 };
 
 class ObjectCharacter : public InstanceDynamicObject
@@ -87,7 +134,7 @@ class ObjectCharacter : public InstanceDynamicObject
 public:
   ObjectCharacter(Level* level, DynamicObject* object);
 
-  void Run(float elapsedTime);
+  void                Run(float elapsedTime);
   void                GoTo(unsigned int id);
   void                GoTo(Waypoint* waypoint);
 
@@ -96,7 +143,6 @@ private:
 
   std::list<Waypoint> _path;
 };
-
 
 /*
  * Level
@@ -132,14 +178,15 @@ public:
 
   void             CloseInteractMenu(void);
   void             CloseRunningDialog(void);
-  ObjectNode*      FindObjectFromNode(NodePath node);
-  Character*       FindCharacterFromNode(NodePath node);
-  Character*       FindCharacterByName(const std::string& name);
+  InstanceDynamicObject* FindObjectFromNode(NodePath node);
+  //ObjectNode*      FindObjectFromNode(NodePath node);
+  //Character*       FindCharacterFromNode(NodePath node);
+  //Character*       FindCharacterByName(const std::string& name);
   Data             GetDataEngine(void) { return (_dataEngine); }
 
   // Interaction Management
-  void             CallbackActionUse(ObjectNode* object);
-  void             CallbackActionTalkTo(ObjectNode* object);
+  void             CallbackActionUse(InstanceDynamicObject* object);
+  void             CallbackActionTalkTo(InstanceDynamicObject* object);
 
   // Mouse Management
   enum MouseState
@@ -156,7 +203,6 @@ public:
   MouseState        _mouseState;
 
 private:
-  typedef std::list<ObjectNode*> Objects;
   typedef std::list<InstanceDynamicObject*> InstanceObjects;
   typedef std::list<ObjectCharacter*>       Characters;
 

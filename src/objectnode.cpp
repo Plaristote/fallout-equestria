@@ -7,7 +7,7 @@ using namespace Observatory;
 
 extern PandaFramework framework;
 
-ObjectNode::ObjectNode(WindowFramework* window, Tilemap& map, Data data) : _window(window), _map(map)
+/*ObjectNode::ObjectNode(WindowFramework* window, Tilemap& map, Data data) : _window(window), _map(map)
 {
   static unsigned int charId = 0;
   NodePath            root = window->get_render();
@@ -134,4 +134,4 @@ void ObjectNode::LoadInteractions(Data data)
 
     _interactions.push_back(interaction);
   });
-}
+}*/

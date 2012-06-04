@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void    MapElement::UnocccupyPosition(int x, int y)
+/*void    MapElement::UnocccupyPosition(int x, int y)
 {
   Positions::iterator cur = _occupedNodes.begin();
   Positions::iterator end = _occupedNodes.end();
@@ -62,4 +62,4 @@ void MapElement::WithdrawArc(Pathfinding::Node& node, Pathfinding::Node::Arc arc
   withdrawed.observer = arc.observer;
   Pathfinding::DisconnectNodes(node, *(withdrawed.to));
   _withdrawedArcs.push_back(withdrawed);
-}
+}*/
