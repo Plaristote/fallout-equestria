@@ -317,8 +317,14 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
   else
   {
     _characters.front()->GoTo(object, 3);
-    _characters.front()->ReachedDestination.Connect(*this, &Level::CallbackActionTalkTo);
+    _characters.front()->ReachedDestination.Connect(*this, &Level::PendingActionTalkTo);
+    _characters.front()->pendingActionOn = object;
   }
+}
+
+void Level::PendingActionTalkTo(InstanceDynamicObject* object)
+{
+  CallbackActionTalkTo(object->pendingActionOn);
 }
 
 void Level::CloseRunningDialog(void)
@@ -326,7 +332,6 @@ void Level::CloseRunningDialog(void)
   if (_currentRunningDialog)
   {
     _currentRunningDialog->Destroy();
-    //delete _currentRunningDialog;
     _currentRunningDialog = 0;
   }
   _camera.SetEnabledScroll(true);

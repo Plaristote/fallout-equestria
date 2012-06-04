@@ -115,10 +115,12 @@ public:
     ret.max_distance = 0;
     return (ret);
   }
+  
+  InstanceDynamicObject*   pendingActionOn;
 
 protected:
   DynamicObject*           _object;
-  
+
 private:
   InteractionList          _interactions;
 };
@@ -219,6 +221,8 @@ public:
   // Interaction Management
   void             CallbackActionUse(InstanceDynamicObject* object);
   void             CallbackActionTalkTo(InstanceDynamicObject* object);
+
+  void             PendingActionTalkTo(InstanceDynamicObject* fromObject);
 
   // Mouse Management
   enum MouseState

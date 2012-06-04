@@ -43,6 +43,8 @@ unsigned short      ObjectCharacter::GetPathDistance(Waypoint* waypoint)
   
   UnprocessCollisions();
   _level->FindPath(path, *_waypointOccupied, *waypoint);
+  if (path.size() > 0)
+    path.erase(path.begin());
   ProcessCollisions();
   return (path.size());
 }
@@ -93,10 +95,9 @@ void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max
 
 void                ObjectCharacter::RunMovement(float elapsedTime)
 {
-  cout << "lol wtf ?" << endl;
   Waypoint&         next = *(_path.begin());
   // TODO: Speed walking / running / combat
-  float             max_speed = 6.f * elapsedTime;
+  float             max_speed = 30.f * elapsedTime;
   LPoint3           distance;
   float             max_distance;    
   LPoint3           speed, axis_speed, dest;
@@ -114,6 +115,7 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
       {
 	_path.clear();
 	ReachedDestination.Emit(this);
+	ReachedDestination.DisconnectAll();
 	return ;
       }
     }
@@ -161,7 +163,10 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
       }
     }
     else
+    {
       ReachedDestination.Emit(this);
+      ReachedDestination.DisconnectAll();
+    }
   }
   else
   {
@@ -202,6 +207,8 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
 
 bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* object)
 {
+  if (object == this)
+    return (true);
   NodePath root  = _object->nodePath;
   NodePath other = object->GetNodePath();
   bool ret = true;
