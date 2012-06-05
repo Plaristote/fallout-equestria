@@ -25,6 +25,7 @@ Waypoint* World::AddWayPoint(float x, float y, float z)
 
   waypoint.nodePath.set_pos(x, y, z);
   waypoints.push_back(waypoint);
+  nodePath.reparent_to(rootWaypoints);
   ptr = &(*(--(waypoints.end())));
   return (ptr);
 }
