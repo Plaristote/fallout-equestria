@@ -1,9 +1,13 @@
 #include "world.h"
-#include "globals.hpp"
+#ifndef GAME_EDITOR
+# include "globals.hpp"
+#else
+# define ABS(x) (x > 0 ? x : -x)
+#endif
 
 using namespace std;
 
-unsigned char gPathfindingUnitType = 0;
+unsigned char         gPathfindingUnitType = 0;
 
 World::World(WindowFramework* window)
 {
@@ -15,13 +19,14 @@ World::World(WindowFramework* window)
 
 Waypoint* World::AddWayPoint(float x, float y, float z)
 {
-    Waypoint  waypoint(rootWaypoints);
-    Waypoint* ptr;
+  NodePath nodePath = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
+  Waypoint  waypoint(nodePath);
+  Waypoint* ptr;
 
-    waypoint.nodePath.set_pos(x, y, z);
-    waypoints.push_back(waypoint);
-    ptr = &(*(--(waypoints.end())));
-    return (ptr);
+  waypoint.nodePath.set_pos(x, y, z);
+  waypoints.push_back(waypoint);
+  ptr = &(*(--(waypoints.end())));
+  return (ptr);
 }
 
 void World::DeleteWayPoint(Waypoint* toDel)
@@ -145,24 +150,29 @@ Waypoint*      World::GetWaypointAt(LPoint2f point)
   Waypoint*    nearest =  0;
   float        min     = -1;
 
-  for_each(waypoints.begin(), waypoints.end(), [this, &nearest, &min, point](Waypoint& waypoint)
-  {
-    if ((waypoint.mouseBox.Intersects(point.get_x(), point.get_y())))
-    {
-      float x        = waypoint.mouseBox.left + waypoint.mouseBox.width  / 2;
-      float y        = waypoint.mouseBox.top  + waypoint.mouseBox.height / 2;
-      float distance;
+  Waypoints::iterator it  = waypoints.begin();
+  Waypoints::iterator end = waypoints.end();
 
-      x        = ABS(x - point.get_x());
-      y        = ABS(y - point.get_y());
-      distance = (x < y ? x : y);
-      if (min == -1 || distance < min)
+  for (; it != end ; ++it)
+  {
+      Waypoint& waypoint = *it;
+
+      if ((waypoint.mouseBox.Intersects(point.get_x(), point.get_y())))
       {
-	min     = distance;
-	nearest = &waypoint;
+        float x        = waypoint.mouseBox.left + waypoint.mouseBox.width  / 2;
+        float y        = waypoint.mouseBox.top  + waypoint.mouseBox.height / 2;
+        float distance;
+
+        x        = ABS(x - point.get_x());
+        y        = ABS(y - point.get_y());
+        distance = (x < y ? x : y);
+        if (min == -1 || distance < min)
+        {
+          min     = distance;
+          nearest = &waypoint;
+        }
       }
-    }
-  });
+  }
   return (nearest);
 }
 
@@ -170,13 +180,21 @@ Waypoint*      World::GetWaypointAt(LPoint2f point)
 
 Waypoint::Waypoint(NodePath root)
 {
-    csphere  = new CollisionSphere(0, 0, 0, 2.f);
-    node     = new CollisionNode("waypoint");
-    nodePath = root.attach_new_node(node);
-    node->set_into_collide_mask(CollideMask(ColMask::Waypoint));
-    node->set_from_collide_mask(CollideMask(ColMask::None));
-    node->add_solid(csphere);
+    nodePath = root;
+    nodePath.set_collide_mask(CollideMask(ColMask::Waypoint));
+    nodePath.set_scale(2.f);
     nodePath.show();
+
+    nodePath.set_transparency(TransparencyAttrib::M_alpha);
+    nodePath.set_color(0, 0, 0, 0.5);
+}
+
+void                Waypoint::SetSelected(bool selected)
+{
+  if (selected)
+    nodePath.set_color(0, 1.0, 0, 0.5);
+  else
+    nodePath.set_color(0, 0, 0, 0.5);
 }
 
 bool                Waypoint::operator==(const Waypoint& other) const
@@ -229,7 +247,7 @@ void                Waypoint::DisconnectAll(void)
 Waypoint::Arc*      Waypoint::GetArcTo(unsigned int id)
 {
   Arcs::iterator it = arcs.begin();
-  
+
   while (it != arcs.end())
   {
     if ((*it).to->id == id)
@@ -299,7 +317,7 @@ void Waypoint::SetMouseBox(void)
 
     LVector3f      pos_a  = nodePath.get_pos();
     LVector3f      pos_b;
-    
+
     for (; it != end ; ++it)
     {
       float dist_x, dist_y;
@@ -339,6 +357,7 @@ void Waypoint::Arc::UpdateDirection(void)
     LVecBase3 rot    = parent.get_hpr();
     LVector3  dir    = parent.get_relative_vector(other, other.get_pos() - parent.get_pos());
 
+    nodePath.set_scale(1 / parent.get_scale().get_x());
     nodePath.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
     csegment->set_point_b(dir);
 }
@@ -381,7 +400,7 @@ void Waypoint::UnserializeLoadArcs(World* world)
       Waypoint* waypoint = world->GetWaypointFromId((*it));
 
       if (waypoint)
-	Connect(waypoint);
+    Connect(waypoint);
   }
   tmpArcs.clear();
 }
@@ -416,7 +435,7 @@ void MapObject::UnSerialize(WindowFramework* window, Utils::Packet& packet)
 
   packet >> name >> strModel >> strTexture;
   packet >> posX >> posY >> posZ >> rotX >> rotY >> rotZ >> scaleX >> scaleY >> scaleZ;
-  
+
   nodePath   = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + strModel);
   if (strTexture != "")
   {
@@ -465,7 +484,7 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
     if (type == Door || type == Locker)
       packet >> iLocked >> key;
     locked = iLocked;
-    
+
     packet >> iWaypoint;
     waypoint = world->GetWaypointFromId(iWaypoint);
 
@@ -499,7 +518,7 @@ void DynamicObject::Serialize(Utils::Packet& packet)
       packet << script << charsheet << dialog;
     if (type == Door || type == Locker)
       packet << iLocked << key;
-    
+
     if (waypoint)
       iWaypoint = waypoint->id;
     packet << iWaypoint;
@@ -527,9 +546,11 @@ void           World::UnSerialize(Utils::Packet& packet)
     packet >> size;
     for (int it = 0 ; it < size ; ++it)
     {
-      Waypoint waypoint(rootWaypoints);
+      NodePath sphere = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
+      Waypoint waypoint(sphere);
 
       waypoint.Unserialize(packet);
+      sphere.reparent_to(rootWaypoints);
       waypoints.push_back(waypoint);
     }
 

@@ -168,6 +168,7 @@ public:
 
 private:
   void                RunMovement(float elapsedTime);
+  void                RunMovementNext(float elaspedTime);
 
   std::list<Waypoint> _path;
   GoToData            _goToData;
@@ -178,6 +179,11 @@ private:
   PT(CollisionNode)         _losNode;
   PT(CollisionHandlerQueue) _losHandlerQueue;
   CollisionTraverser        _losTraverser;
+  
+  // Script
+  asIScriptContext*  _scriptContext;
+  asIScriptModule*   _scriptModule;
+  asIScriptFunction* _scriptMain;
 };
 
 /*

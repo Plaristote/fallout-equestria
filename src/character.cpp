@@ -19,10 +19,35 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _losNode->add_solid(_losRay);
   _losHandlerQueue = new CollisionHandlerQueue();
   _losTraverser.add_collider(_losPath, _losHandlerQueue);  
+  
+  // Script
+  _scriptContext = 0;
+  _scriptModule  = 0;
+  _scriptMain    = 0;
+  if (object->script != "")
+  {
+    string prefixName = "IA_";
+    string prefixPath = "scripts/";
+
+    _scriptContext = Script::Engine::Get()->CreateContext();
+    if (_scriptContext)
+    {
+      _scriptModule  = Script::Engine::LoadModule(prefixName + GetName(), prefixPath + object->script);
+      if (_scriptModule)
+        _scriptMain    = _scriptModule->GetFunctionByDecl("void main(Character@, float)");
+    }
+  }
 }
 
 void ObjectCharacter::Run(float elapsedTime)
 {
+  if (_scriptMain)
+  {
+    _scriptContext->Prepare(_scriptMain);
+    _scriptContext->SetArgObject(0, this);
+    _scriptContext->SetArgFloat(1, elapsedTime);
+    _scriptContext->Execute();
+  }
   if (_path.size() > 0)
     RunMovement(elapsedTime);
 }
@@ -93,6 +118,71 @@ void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max
   object->ProcessCollisions();
 }
 
+void                ObjectCharacter::RunMovementNext(float elapsedTime)
+{
+  _waypointOccupied = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
+
+  // Has reached object objective, if there is one ?
+  if (_goToData.objective)
+  {
+    if (_path.size() <= _goToData.max_distance && HasLineOfSight(_goToData.objective))
+    {
+      _path.clear();
+      ReachedDestination.Emit(this);
+      ReachedDestination.DisconnectAll();
+      return ;
+    }
+  }
+  
+  _path.erase(_path.begin());  
+
+  if (_path.size() > 0)
+  {
+    bool pathAvailable = true;
+    // Check if the next waypoint is still accessible
+    UnprocessCollisions();
+    Waypoint::Arc* arc = _waypointOccupied->GetArcTo(_path.begin()->id);
+
+    if (arc)
+    {
+      if (arc->observer)
+      {
+	if (arc->observer->CanGoThrough(0))
+	  arc->observer->GoingThrough();
+	else
+	  pathAvailable = false;
+      }
+    }
+    else
+      pathAvailable = false;
+    ProcessCollisions();
+    // End check if the next waypoint is still accessible
+
+    if (pathAvailable)
+      RunMovement(elapsedTime);
+    else
+    {
+      if (_goToData.objective)
+	GoTo(_goToData.objective);
+      else
+      {
+	Waypoint* dest = _level->GetWorld()->GetWaypointFromId((*(--(_path.end()))).id);
+	GoTo(dest);
+      }
+      if (_path.size() == 0)
+      {
+	_level->ConsoleWrite("Path is obstructed");
+	ReachedDestination.DisconnectAll();
+      }
+    }
+  }
+  else
+  {
+    ReachedDestination.Emit(this);
+    ReachedDestination.DisconnectAll();
+  }
+}
+
 void                ObjectCharacter::RunMovement(float elapsedTime)
 {
   Waypoint&         next = *(_path.begin());
@@ -107,67 +197,7 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
   distance  = pos - next.nodePath.get_pos();
 
   if (distance.get_x() == 0 && distance.get_y() == 0 && distance.get_z() == 0)
-  {
-    // Has reached object objective, if there is one ?
-    if (_goToData.objective)
-    {
-      if (_path.size() <= _goToData.max_distance && HasLineOfSight(_goToData.objective))
-      {
-	_path.clear();
-	ReachedDestination.Emit(this);
-	ReachedDestination.DisconnectAll();
-	return ;
-      }
-    }
-
-    _waypointOccupied = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
-    _path.erase(_path.begin());
-
-    if (_path.size() > 0)
-    {
-      bool pathAvailable = true;
-      // Check if the next waypoint is still accessible
-      UnprocessCollisions();
-      Waypoint::Arc* arc = _waypointOccupied->GetArcTo(_path.begin()->id);
-      ProcessCollisions();
-      
-      if (arc)
-      {
-	if (arc->observer)
-	{
-	  if (arc->observer->CanGoThrough(0))
-	    arc->observer->GoingThrough();
-	  else
-	    pathAvailable = false;
-	}
-      }
-      else
-	pathAvailable = false;
-
-      if (pathAvailable)
-        RunMovement(elapsedTime);
-      else
-      {
-	if (_goToData.objective)
-	  GoTo(_goToData.objective);
-	else
-	{
-	  Waypoint* dest = _level->GetWorld()->GetWaypointFromId((*(--(_path.end()))).id);
-	  GoTo(dest);
-	}
-	if (_path.size() == 0)
-	{
-	  _level->ConsoleWrite("Path is obstructed");
-	  ReachedDestination.DisconnectAll();
-	}
-      }
-    }
-    else
-    {
-      ReachedDestination.Emit(this);
-      ReachedDestination.DisconnectAll();
-    }
-  }
+    RunMovementNext(elapsedTime);
   else
   {
     dirX = dirY = dirZ = 1;

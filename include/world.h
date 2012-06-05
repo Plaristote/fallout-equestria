@@ -53,7 +53,7 @@ struct BoundingBox
   float top;
   float width;
   float height;
-  
+
   bool  Intersects(float x, float y)
   {
     return (x >= left && x <= left + width && y >= top && y <= top + height);
@@ -103,6 +103,7 @@ struct Waypoint
     Arc*                 GetArcTo(unsigned int id);
     void                 PositionChanged(void);
     void                 UpdateArcDirection(Waypoint*);
+    void                 SetSelected(bool);
 
     // Pathfinding features
     float                GoalDistanceEstimate(const Waypoint& goal) const { return (GetDistanceEstimate(goal)); }
@@ -114,14 +115,11 @@ struct Waypoint
     void                 Unserialize(Utils::Packet& packet);
     void                 UnserializeLoadArcs(World*);
     void                 Serialize(Utils::Packet& packet);
-    
+
     void                 SetMouseBox(void);
 
 private:
     friend struct World;
-    PT(CollisionSphere)  csphere;
-    PT(CollisionNode)    node;
-
     // unserialize tmp
     std::vector<int>     tmpArcs;
 };
@@ -269,7 +267,7 @@ struct World
     DynamicObject* GetDynamicObjectFromNodePath(NodePath path);
     void           SetDynamicObjectsVisible(bool v)
     { if (v) { rootDynamicObjects.show(); } else { rootDynamicObjects.hide(); } }
-    
+
     Waypoint*      GetWaypointAt(LPoint2f);
 
     void           UnSerialize(Utils::Packet& packet);

@@ -12,6 +12,7 @@ PT(ClockObject)      globalClock = ClockObject::get_global_clock();
 
 using namespace std;
 
+#include <panda3d/load_prc_file.h>
 #include <panda3d/graphicsStateGuardianBase.h>
 #include <panda3d/pStatClient.h>
 
@@ -88,12 +89,12 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(levelClass, "const World@ GetWorld() const",                      asMETHOD(Level,GetWorld),            asCALL_THISCALL);
   
   engine->RegisterGlobalProperty("Level@ level", &(Level::CurrentLevel));
-
-  engine->RegisterGlobalProperty("string tmpString", &(scriptTmpString));
 }
 
 int main(int argc, char *argv[])
 {
+  ConfigPage* config = load_prc_file("config.prc");
+
   //open a new window framework
   framework.open_framework(argc, argv);
   //set the window title to My Panda3D Window
@@ -118,15 +119,6 @@ int main(int argc, char *argv[])
   AngelScriptInitialize();
 
   Level level(window, "test");
-  /*Widget widget(window, "inventory");
-
-  widget.SetBackground("data/inventory.png");
-  widget.SetPosition(LVector2f(50.f, 100.f));
-
-  Widget widget2(&widget, "inventory-items");
-
-  widget2.SetBackground("data/inventory-items.png");
-  widget2.SetPosition(LVector2f(10.f, 10.f));*/
 
 //   MeshDrawer2D mesh2d;
 // 
@@ -144,10 +136,11 @@ int main(int argc, char *argv[])
 //   node.set_texture(_background);
 //   node.set_scale(10, 10, 10);
 
-  //do the main loop, equal to run() in python
   framework.main_loop();
-    //close the window framework
   framework.close_framework();
+  
+  unload_prc_file(config);
+  
   Script::Engine::Finalize();
   return (0);
 }

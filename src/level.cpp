@@ -1,8 +1,6 @@
 #include "globals.hpp"
 #include "level.hpp"
 
-#include "npc.hpp"
-
 using namespace std;
 
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUse;
@@ -136,6 +134,20 @@ bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
 
 AsyncTask::DoneStatus Level::do_task(void)
 {
+  // FPS COUNTER NO PSTAT
+  {
+    static Timer          timer;
+    static unsigned short fps = 0;
+
+    if (timer.GetElapsedTime() > 1.f)
+    {
+      cout << "[FPS] " << fps << endl;
+      fps = 0;
+      timer.Restart();
+    }
+    fps++;
+  }
+  
   float elapsedTime = _timer.GetElapsedTime();
 
   // TEST SUNLIGHT MOONLIGHT
