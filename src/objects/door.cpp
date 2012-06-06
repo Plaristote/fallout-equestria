@@ -9,7 +9,6 @@ void ObjectDoor::ObserveWaypoints(bool doObserver)
   std::cout << "Observe Waypoints " << _waypointDisconnected.size() << std::endl;
   std::for_each(_waypointDisconnected.begin(), _waypointDisconnected.end(), [this, doObserver](std::pair<int, int> waypoints)
   {
-    std::cout << "TROLOLOOOOL" << std::endl;
     Waypoint*        waypoint = _level->GetWorld()->GetWaypointFromId(waypoints.first);
 
     if (waypoint)
@@ -28,11 +27,53 @@ void ObjectDoor::ObserveWaypoints(bool doObserver)
   });
 }
 
+InstanceDynamicObject::GoToData ObjectDoor::GetGoToData(InstanceDynamicObject* character)
+{
+  Waypoint* waypoint = character->GetOccupiedWaypoint();
+  GoToData  ret;
+
+  ret.nearest = 0;
+  if (waypoint)
+  {
+    character->UnprocessCollisions();
+    std::for_each(_waypointDisconnected.begin(), _waypointDisconnected.end(), [this, waypoint, &ret](std::pair<int, int> waypoints)
+    {
+      Waypoint* waypoint1 = _level->GetWorld()->GetWaypointFromId(waypoints.first);
+      Waypoint* waypoint2 = _level->GetWorld()->GetWaypointFromId(waypoints.second);
+
+      std::list<Waypoint> path;
+
+      if (waypoint1 && (_level->FindPath(path, *waypoint, *waypoint1)))
+      {
+	if (ret.max_distance > path.size())
+	{
+	  ret.nearest      = waypoint1;
+	  ret.max_distance = path.size();
+	}
+      }
+
+      if (waypoint2 && (_level->FindPath(path, *waypoint, *waypoint2)))
+      {
+	if (ret.max_distance > path.size())
+	{
+	  ret.nearest      = waypoint2;
+	  ret.max_distance = path.size();
+	}
+      }
+    });
+    character->ProcessCollisions();
+  }
+
+  ret.objective    = this;
+  ret.max_distance = 0;
+  return (ret);
+}
+
+
 bool ObjectDoor::CanGoThrough(unsigned char id)
 {
   if (_closed)
   {
-    std::cout << "Returning value != 0" << std::endl;
     return (id != 0);
   }
   return (true);
@@ -42,6 +83,15 @@ void ObjectDoor::GoingThrough(void)
 {
   _closed = false;
 }
+
+void ObjectDoor::CallbackActionUse(InstanceDynamicObject* object)
+{
+  if (!_locked)
+    _closed = !_closed;
+  else
+    _level->ConsoleWrite("It's locked !");
+}
+
 
 /*
  * WARNING The following is legacy and will have to go away. On est pas à la soupe populaire.

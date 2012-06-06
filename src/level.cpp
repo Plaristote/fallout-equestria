@@ -309,8 +309,10 @@ void Level::ConsoleWrite(const string& str)
 // Interactions
 void Level::CallbackActionUse(InstanceDynamicObject* object)
 {
-  //object->InteractUse(*(_characters.begin()));
   CloseInteractMenu();
+  _characters.front()->GoTo(object, 0);
+  _characters.front()->ReachedDestination.Connect(*object, &InstanceDynamicObject::CallbackActionUse);
+  _characters.front()->pendingActionOn = object;
 }
 
 void Level::CallbackActionTalkTo(InstanceDynamicObject* object)

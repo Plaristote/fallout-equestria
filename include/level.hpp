@@ -120,11 +120,14 @@ public:
     ret.max_distance = 0;
     return (ret);
   }
-  
+
   InstanceDynamicObject*   pendingActionOn;
+  virtual void             CallbackActionUse(InstanceDynamicObject* object) { ThatDoesNothing(); }
 
 protected:
   DynamicObject*           _object;
+  
+  void                     ThatDoesNothing();
 
 private:
   InteractionList          _interactions;
@@ -145,6 +148,8 @@ public:
     ObserveWaypoints(false);
   }
   
+  void CallbackActionUse(InstanceDynamicObject* object);
+  GoToData GetGoToData(InstanceDynamicObject* character);  
   void ObserveWaypoints(bool doObserver);
   
   void ProcessCollisions(void) {}

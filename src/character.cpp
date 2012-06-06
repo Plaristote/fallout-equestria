@@ -5,6 +5,8 @@
 #include "level.hpp"
 using namespace std;
 
+void InstanceDynamicObject::ThatDoesNothing() { _level->ConsoleWrite("That does nothing"); }
+
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
 {
   // Line of sight tools

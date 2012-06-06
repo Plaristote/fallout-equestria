@@ -398,9 +398,9 @@ void GameMainBar::AppendToConsole(const std::string& str)
     Rocket::Core::String toAdd;
 
     console->GetInnerRML(rml);
-    toAdd  = "<li>";
+    toAdd  = "<li>- ";
     toAdd += str.c_str();
-    toAdd += "</li>";
+    toAdd += "</li><br />";
     console->SetInnerRML(rml + toAdd);
   }
 }
