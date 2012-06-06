@@ -49,8 +49,6 @@ signals:
     void Closed(void);
 
 public slots:
-    void CaseHovered(int, int);
-    void UnitHovered(NodePath);
     //void WaypointHovered(NodePath);
     void PandaButtonPressed(QMouseEvent*);
     void PandaButtonRelease(QMouseEvent*);
@@ -63,6 +61,11 @@ private slots:
     // MAPS
     void LoadMap(const QString&);
     void SaveMap();
+
+    void CameraMoveTop(void);
+    void CameraMoveLeft(void);
+    void CameraMoveRight(void);
+    void CameraMoveBottom(void);
 
     // WAYPOINTS
     void WaypointVisible(void);

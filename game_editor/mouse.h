@@ -17,6 +17,7 @@ public:
 
     void                      Run(void);
     LPoint2f                  GetPosition(void) const;
+    void                      GetHoveredAt(LPoint2f);
 
 signals:
     void WaypointHovered(NodePath);
@@ -32,10 +33,6 @@ signals:
     NodePath                  _pickerPath;
     CollisionTraverser        _collisionTraverser;
     PT(CollisionHandlerQueue) _collisionHandlerQueue;
-    bool                      _hasPickedUnit;
-    NodePath                  _lastPickedUnit;
-
-    int                       _posx, _posy;
 };
 
 #endif // MOUSE_H

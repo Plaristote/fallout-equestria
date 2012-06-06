@@ -78,6 +78,22 @@ void SceneCamera::Run(float elapsedTime)
   }
 }
 
+void SceneCamera::MoveH(float value)
+{
+    LPoint3 cameraPos = _camera.get_pos();
+
+    cameraPos.set_x(cameraPos.get_x() + value);
+    _camera.set_pos(cameraPos);
+}
+
+void SceneCamera::MoveV(float value)
+{
+    LPoint3 cameraPos = _camera.get_pos();
+
+    cameraPos.set_y(cameraPos.get_y() + value);
+    _camera.set_pos(cameraPos);
+}
+
 void SceneCamera::RunScroll(float elapsedTime)
 {
   MouseData     pointer      = _graphicWindow->get_pointer(0);

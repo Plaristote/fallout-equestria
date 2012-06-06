@@ -15,8 +15,6 @@ Mouse::Mouse(WindowFramework* window, QObject *parent) : QObject(parent), _windo
   _pickerNode->add_solid(_pickerRay);
   _collisionHandlerQueue = new CollisionHandlerQueue();
   _collisionTraverser.add_collider(_pickerPath, _collisionHandlerQueue);
-
-  _posx = _posy = -1;
 }
 
 LPoint2f Mouse::GetPosition(void) const
@@ -24,12 +22,8 @@ LPoint2f Mouse::GetPosition(void) const
     return (_mouseWatcher->get_mouse());
 }
 
-void Mouse::Run(void)
+void Mouse::GetHoveredAt(LPoint2f cursorPos)
 {
-  if (_mouseWatcher->has_mouse())
-  {
-    LPoint2f cursorPos = _mouseWatcher->get_mouse();
-
     _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
     _collisionTraverser.traverse(_window->get_render());
     _collisionHandlerQueue->sort_entries();
@@ -51,5 +45,14 @@ void Mouse::Run(void)
           break ;
       }
     }
+}
+
+void Mouse::Run(void)
+{
+  if (_mouseWatcher->has_mouse())
+  {
+    LPoint2f cursorPos = _mouseWatcher->get_mouse();
+
+    GetHoveredAt(cursorPos);
   }
 }

@@ -35,8 +35,11 @@ public:
     _maxPosY = maxY;
   }
 
+  void             MoveV(float);
+  void             MoveH(float);
+
 private:
-  void            RunScroll(float elapsedTime);
+  void             RunScroll(float elapsedTime);
 
   WindowFramework* _window;
   GraphicsWindow*  _graphicWindow;

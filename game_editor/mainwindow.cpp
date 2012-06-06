@@ -229,23 +229,24 @@ void MainWindow::FilterInit()
         ui->dialogSearch->setText("");
 }
 
-void MainWindow::UnitHovered(NodePath)
+void MainWindow::CameraMoveBottom()
 {
+    my_task.camera->MoveV(-15.f);
 }
 
-void MainWindow::CaseHovered(int x, int y)
+void MainWindow::CameraMoveTop()
 {
-    QString str("Hovering case (");
+    my_task.camera->MoveV(15.f);
+}
 
-    str += QString::number(x);
-    str += ", ";
-    str += QString::number(y);
-    str += ")";
-    ui->labelStatus->setText(str);
-    currentHoveredCaseX = x;
-    currentHoveredCaseY = y;
-    my_task.brushTileX  = currentHoveredCaseX;
-    my_task.brushTileY  = currentHoveredCaseY;
+void MainWindow::CameraMoveLeft()
+{
+    my_task.camera->MoveH(-15.f);
+}
+
+void MainWindow::CameraMoveRight()
+{
+    my_task.camera->MoveH(15.f);
 }
 
 void MainWindow::DrawMap()
@@ -269,11 +270,15 @@ void MainWindow::PandaButtonPressed(QMouseEvent*)
 
 void MainWindow::PandaButtonRelease(QMouseEvent*)
 {
+    waypointHovered      = 0;
+    mapobjectHovered     = 0;
+    dynamicObjectHovered = 0;
+    my_task.mouse->GetHoveredAt(my_task.mouse->GetPosition());
     if      (waypointHovered)
       WaypointSelect(waypointHovered);
-    else if (mapobjectHovered)
+    if (mapobjectHovered)
       MapObjectSelect();
-    else if (dynamicObjectHovered)
+    if (dynamicObjectHovered)
       DynamicObjectSelect();
 }
 
@@ -287,39 +292,17 @@ void MainWindow::PandaInitialized()
     my_task.camera  = new SceneCamera(window, window->get_camera_group());
     my_task.mouse   = new Mouse(window);
 
-    connect(my_task.mouse, SIGNAL(CaseHovered(int,int)), this, SLOT(CaseHovered(int,int)));
-    connect(my_task.mouse, SIGNAL(UnitHovered(NodePath)), this, SLOT(UnitHovered(NodePath)));
-
     connect(ui->widget, SIGNAL(MousePressed(QMouseEvent*)), this, SLOT(PandaButtonPressed(QMouseEvent*)));
     connect(ui->widget, SIGNAL(MouseRelease(QMouseEvent*)), this, SLOT(PandaButtonRelease(QMouseEvent*)));
 
+    connect(ui->mapMoveLeft,   SIGNAL(clicked()), this, SLOT(CameraMoveLeft()));
+    connect(ui->mapMoveBottom, SIGNAL(clicked()), this, SLOT(CameraMoveBottom()));
+    connect(ui->mapMoveTop,    SIGNAL(clicked()), this, SLOT(CameraMoveTop()));
+    connect(ui->mapMoveRight,  SIGNAL(clicked()), this, SLOT(CameraMoveRight()));
+
     window->enable_keyboard();
 
-     //PandaFramework& framework = QPandaApplication::Framework();
-
-     //set the window title to my Panda3D window
-
-     // here is room for your own code
-     // load the environment model,  basic Panda land demo
-     /*NodePath environ=window->load_model(framework.get_models(),"models/environment");
-
-     // reparent the model to render
-     environ.reparent_to(window->get_render());
-
-     //apply scale and position transforms to the model
-     environ.set_scale(0.25, 0.25, 0.25);
-     environ.set_pos(-8, 42, 0);*/
-
      world = new World(window);
-
-     std::string tmp = "/home/plaristote/Work/fallout-equestria/build";
-
-     NodePath test = window->load_model(window->get_render(), tmp + "/models/horse.obj");
-     test.reparent_to(window->get_render());
-     test.set_scale(1, 1, 1);
-     test.set_pos(0, -10, 0);
-
-     test.set_color(255, 100, 255, 0.5);
 
 // WAYPOINTS
      connect(ui->waypointAdd, SIGNAL(clicked()), this, SLOT(WaypointAdd()));
@@ -389,7 +372,7 @@ void MainWindow::PandaInitialized()
      waypointHovered  = 0;
 
     my_task.timer.start();
-    AsyncTaskManager::get_global_ptr()->add(&my_task);
+    //AsyncTaskManager::get_global_ptr()->add(&my_task);
 
     wizardDynObject = false;
     wizardMapObject = false;
@@ -441,8 +424,6 @@ void MainWindow::DynamicObjectHovered(NodePath np)
 {
     if (ui->interObjVisible->isChecked())
     {
-      waypointHovered      = 0;
-      mapobjectHovered     = 0;
       dynamicObjectHovered = world->GetDynamicObjectFromNodePath(np);
       ui->labelStatus->setText(QString::fromStdString(dynamicObjectHovered->nodePath.get_name()));
     }
@@ -638,8 +619,6 @@ void MainWindow::MapObjectHovered(NodePath path)
 {
     if (ui->mapObjectVisible->isChecked())
     {
-      waypointHovered      = 0;
-      dynamicObjectHovered = 0;
       mapobjectHovered     = world->GetMapObjectFromNodePath(path);
       ui->labelStatus->setText(QString::fromStdString(mapobjectHovered->nodePath.get_name()));
     }
@@ -799,8 +778,6 @@ void MainWindow::WaypointHovered(NodePath path)
 {
     if (ui->waypointVisible->isChecked())
     {
-      mapobjectHovered     = 0;
-      dynamicObjectHovered = 0;
       waypointHovered      = world->GetWaypointFromNodePath(path);
       ui->labelStatus->setText("Hovering a waypoint");
     }
