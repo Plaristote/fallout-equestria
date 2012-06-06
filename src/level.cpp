@@ -135,7 +135,7 @@ bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
 AsyncTask::DoneStatus Level::do_task(void)
 {
   // FPS COUNTER NO PSTAT
-  {
+  /*{
     static Timer          timer;
     static unsigned short fps = 0;
 
@@ -146,7 +146,7 @@ AsyncTask::DoneStatus Level::do_task(void)
       timer.Restart();
     }
     fps++;
-  }
+  }*/
   
   float elapsedTime = _timer.GetElapsedTime();
 

@@ -47,7 +47,12 @@ protected:
   std::list<std::pair<int, int> > _waypointDisconnected;
 
 private:
-  typedef std::pair<Waypoint*, Waypoint*> WithdrawedArc;
+  struct WithdrawedArc
+  {
+    WithdrawedArc(Waypoint* first, Waypoint* second, Waypoint::ArcObserver* observer) : first(first), second(second), observer(observer) {}
+    Waypoint              *first, *second;
+    Waypoint::ArcObserver *observer;
+  };
   typedef std::list<WithdrawedArc>        WithdrawedArcs;
 
   WithdrawedArcs                          _withdrawedArcs;
@@ -130,6 +135,7 @@ class ObjectDoor : public InstanceDynamicObject, public Waypoint::ArcObserver
 public:
   ObjectDoor(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
   {
+    _closed = true;
     _locked = object->locked;
     ObserveWaypoints(true);
   }

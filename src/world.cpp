@@ -281,9 +281,8 @@ list<Waypoint*> Waypoint::GetSuccessors(Waypoint* parent)
 
         if (parent == arc.to)
           continue ;
-        if (arc.observer && arc.observer->CanGoThrough(gPathfindingUnitType))
+        if (arc.observer && arc.observer->CanGoThrough(gPathfindingUnitType) == false)
           continue ;
-        // TODO Add Observer CanGoThrough here
         successors.push_back(arc.to);
     }
     return (successors);
@@ -499,6 +498,7 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
             int id1, id2;
 
             packet >> id1 >> id2;
+	    lockedArcs.push_back(std::pair<int, int>(id1, id2));
         }
     }
 

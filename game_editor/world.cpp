@@ -19,12 +19,13 @@ World::World(WindowFramework* window)
 
 Waypoint* World::AddWayPoint(float x, float y, float z)
 {
-  NodePath nodePath = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
+  NodePath  nodePath = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
   Waypoint  waypoint(nodePath);
   Waypoint* ptr;
 
   waypoint.nodePath.set_pos(x, y, z);
   waypoints.push_back(waypoint);
+  nodePath.reparent_to(rootWaypoints);
   ptr = &(*(--(waypoints.end())));
   return (ptr);
 }
@@ -113,6 +114,7 @@ DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type t
       model2 = "horse.obj";*/
     object.type         = type;
     object.interactions = 0;
+    object.waypoint     = 0;
     object.strModel     = model;
     object.strTexture   = texture;
     object.nodePath     = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model2);
@@ -280,9 +282,8 @@ list<Waypoint*> Waypoint::GetSuccessors(Waypoint* parent)
 
         if (parent == arc.to)
           continue ;
-        if (arc.observer && arc.observer->CanGoThrough(gPathfindingUnitType))
+        if (arc.observer && arc.observer->CanGoThrough(gPathfindingUnitType) == false)
           continue ;
-        // TODO Add Observer CanGoThrough here
         successors.push_back(arc.to);
     }
     return (successors);
@@ -498,6 +499,7 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
             int id1, id2;
 
             packet >> id1 >> id2;
+            lockedArcs.push_back(std::pair<int, int>(id1, id2));
         }
     }
 
@@ -666,8 +668,6 @@ void           World::CompileWaypoints(void)
             NodePath          other  = (*itArc).to->nodePath;
             NodePath          parent = (*it).nodePath;
             LVecBase3         rot    = parent.get_hpr();
-            other.get_pos();
-            parent.get_pos();
             LPoint3           tmp = other.get_pos() - parent.get_pos();
             LPoint3           dir    = parent.get_relative_vector(other, tmp);
 
@@ -687,6 +687,8 @@ void           World::CompileWaypoints(void)
             PT(CollisionHandlerQueue) handlerQueue = new CollisionHandlerQueue();
             CollisionTraverser        traverser;
 
+            np.set_scale(1.f / parent.get_scale().get_x());
+
             traverser.add_collider(np, handlerQueue);
 
             traverser.traverse(window->get_render());
@@ -695,7 +697,6 @@ void           World::CompileWaypoints(void)
               itArc = (*it).Disconnect((*itArc).to);
             else
               ++itArc;
-            //np.show();
             np.remove_node();
         }
     }
@@ -717,24 +718,31 @@ void World::CompileDoors(void)
             NodePath          other  = (*itArc).to->nodePath;
             NodePath          parent = (*it).nodePath;
             LVecBase3         rot    = parent.get_hpr();
-            PT(CollisionTube) ctube  = new CollisionTube(LPoint3(0, 0, 0),
-                                                         parent.get_relative_vector(other, other.get_pos() - parent.get_pos()),
-                                                         2.f);
+            LPoint3           tmp = other.get_pos() - parent.get_pos();
+            LPoint3           dir    = parent.get_relative_vector(other, tmp);
+
             PT(CollisionNode) cnode  = new CollisionNode("compileWaypointsNode");
-            cnode->set_into_collide_mask(CollideMask(ColMask::DynObject));
-            cnode->set_from_collide_mask(CollideMask(ColMask::None));
+            //cnode->set_into_collide_mask(ColMask::Object);
+            cnode->set_from_collide_mask(CollideMask(ColMask::DynObject));
+            np = (*it).nodePath.attach_new_node(cnode);
+
+            PT(CollisionSegment) ctube  = new CollisionSegment(LPoint3(0, 0, 0),
+                                                         dir/*,
+                                                         2.f*/);
             cnode->add_solid(ctube);
 
-            np.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
-            np.set_pos(0, 0, 0);
-
-            np = (*it).nodePath.attach_new_node(cnode);
+            //np.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
+            //np.set_pos(0, 0, 0);
 
             PT(CollisionHandlerQueue) handlerQueue = new CollisionHandlerQueue();
             CollisionTraverser        traverser;
 
+            np.set_scale(1.f / parent.get_scale().get_x());
+
             traverser.add_collider(np, handlerQueue);
+
             traverser.traverse(window->get_render());
+            handlerQueue->sort_entries();
             for (int i = 0 ; i < handlerQueue->get_num_entries() ; ++i)
             {
               CollisionEntry* entry  = handlerQueue->get_entry(i);
@@ -744,8 +752,8 @@ void World::CompileDoors(void)
               if (object->type != DynamicObject::Character)
                 object->lockedArcs.push_back(pair<int, int>((*it).id, (*itArc).to->id));
             }
-            ++itArc;
             np.remove_node();
+            ++itArc;
         }
     }
 }

@@ -18,6 +18,8 @@ void         WaypointModifier::UnprocessCollisions(void)
   {
     arcs.first->Connect(arcs.second);
     arcs.second->Connect(arcs.first);
+    arcs.first->GetArcTo(arcs.second->id)->observer = arcs.observer;
+    arcs.second->GetArcTo(arcs.first->id)->observer = arcs.observer;
   });
   _withdrawedArcs.clear();
 }
@@ -34,7 +36,7 @@ void        WaypointModifier::WithdrawAllArcs(Waypoint* waypoint)
 {
   for_each(waypoint->arcs.begin(), waypoint->arcs.end(), [this, waypoint](Waypoint::Arc& arc)
   {
-    _withdrawedArcs.push_back(WithdrawedArc(waypoint, arc.to));
+    _withdrawedArcs.push_back(WithdrawedArc(waypoint, arc.to, arc.observer));
   });
   waypoint->DisconnectAll();
 }
@@ -50,7 +52,9 @@ void        WaypointModifier::WithdrawArc(unsigned int id1, unsigned int id2)
 
 void        WaypointModifier::WithdrawArc(Waypoint* first, Waypoint* second)
 {
+  Waypoint::Arc* arc = first->GetArcTo(second->id);
+
   first->Disconnect(second);
   second->Disconnect(first);
-  _withdrawedArcs.push_back(WithdrawedArc(first, second));
+  _withdrawedArcs.push_back(WithdrawedArc(first, second, arc->observer));
 }

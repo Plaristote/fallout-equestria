@@ -5,8 +5,11 @@
 
 void ObjectDoor::ObserveWaypoints(bool doObserver)
 {
+  _waypointDisconnected = _object->lockedArcs;
+  std::cout << "Observe Waypoints " << _waypointDisconnected.size() << std::endl;
   std::for_each(_waypointDisconnected.begin(), _waypointDisconnected.end(), [this, doObserver](std::pair<int, int> waypoints)
   {
+    std::cout << "TROLOLOOOOL" << std::endl;
     Waypoint*        waypoint = _level->GetWorld()->GetWaypointFromId(waypoints.first);
 
     if (waypoint)
@@ -28,7 +31,10 @@ void ObjectDoor::ObserveWaypoints(bool doObserver)
 bool ObjectDoor::CanGoThrough(unsigned char id)
 {
   if (_closed)
+  {
+    std::cout << "Returning value != 0" << std::endl;
     return (id != 0);
+  }
   return (true);
 }
 
