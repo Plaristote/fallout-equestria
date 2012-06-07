@@ -6,12 +6,14 @@
 #endif
 #include <iostream>
 #include "qpandaapplication.h"
+#include <QMessageBox>
 
 QPandaWidget::QPandaWidget(QWidget *parent) : QWidget(parent)
 {
     EventHandler& events = QPandaApplication::Framework().get_event_handler();
 
-    _window = 0;
+    _window        = 0;
+    _loadingFailed = false;
     setAttribute(Qt::WA_PaintOnScreen);
     setAttribute(Qt::WA_NoSystemBackground);
     setAttribute(Qt::WA_OpaquePaintEvent);
@@ -55,7 +57,7 @@ void QPandaWidget::resizeEvent(QResizeEvent* event)
 
 void QPandaWidget::showEvent(QShowEvent* event)
 {
-    if (_window == 0)
+    if (_window == 0 && !_loadingFailed)
     {
         WindowProperties wp;
 
@@ -65,8 +67,16 @@ void QPandaWidget::showEvent(QShowEvent* event)
         QPandaApplication::Framework().get_default_window_props(wp);
         wp.set_parent_window((size_t)this->winId());
         _window = QPandaApplication::Framework().open_window(wp, 0);
-        UpdateSize();
-        Initialized();
+        if (_window == 0)
+        {
+          UpdateSize();
+          Initialized();
+        }
+        else
+        {
+          _loadingFailed = true;
+          QMessageBox::warning(this, "Panda3D Fatal Error", "PandaFramework couldn't open a window");
+        }
     }
     QWidget::showEvent(event);
 }
