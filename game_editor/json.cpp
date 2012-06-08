@@ -196,7 +196,7 @@ DataTree* DataTree::Factory::JSON(const std::string& filename)
 
 static bool isNumeric(const std::string& str)
 {
-    int i = 0;
+    unsigned int i = 0;
 
     for (i = 0 ; i < str.size() ; ++i)
     {

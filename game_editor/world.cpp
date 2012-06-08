@@ -541,6 +541,9 @@ void DynamicObject::Serialize(Utils::Packet& packet)
 
 void           World::UnSerialize(Utils::Packet& packet)
 {
+  if (!window)
+    return ;
+
   // Waypoints
   {
     int size;

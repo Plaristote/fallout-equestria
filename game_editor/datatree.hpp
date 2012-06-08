@@ -185,7 +185,7 @@ public:
       static bool JSON(Data, const std::string& filename);
   };
 
-  friend class Factory;
+  friend struct Factory;
 
   Data operator[](const std::string& string)
   {

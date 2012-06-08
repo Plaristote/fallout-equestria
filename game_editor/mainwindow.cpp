@@ -66,6 +66,8 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     objectFile    = 0;
     ui->setupUi(this);
 
+    ui->tabWidget->setVisible(false);
+
     ui->waypointAdd->setIcon(iconAdd);
     ui->waypointRemove->setIcon(iconDelete);
     ui->waypointConnect->setIcon(iconConnect);
