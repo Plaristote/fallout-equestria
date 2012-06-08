@@ -1,6 +1,7 @@
 #ifndef  LEVEL_HPP
 # define LEVEL_HPP
 
+# include <panda3d/cmath.h>
 # include <panda3d/pandaFramework.h>
 # include <panda3d/pandaSystem.h>
 # include <panda3d/texturePool.h>
@@ -58,14 +59,22 @@ private:
   WithdrawedArcs                          _withdrawedArcs;
 };
 
+enum ObjectType
+{
+  Character, Door, Other
+};
+
+template<class C>
+struct ObjectType2Code { enum { Type = ObjectType::Other }; };
+
 class InstanceDynamicObject : public WaypointModifier
 {
 public:
   static Observatory::Signal<void (InstanceDynamicObject*)> ActionUse;
   static Observatory::Signal<void (InstanceDynamicObject*)> ActionUseObjectOn;
   static Observatory::Signal<void (InstanceDynamicObject*)> ActionUseSkillOn;
-  static Observatory::Signal<void (InstanceDynamicObject*)> ActionTalkTo;  
-  
+  static Observatory::Signal<void (InstanceDynamicObject*)> ActionTalkTo;
+
   struct Interaction
   {
     Interaction(const std::string& name, InstanceDynamicObject* instance, Observatory::Signal<void (InstanceDynamicObject*)>* signal)
@@ -86,6 +95,7 @@ public:
   
   InstanceDynamicObject(Level* level, DynamicObject* object) : _object(object)
   {
+    _type                 = Other;
     _level                = level;
     _waypointDisconnected = object->lockedArcs;
     _waypointOccupied     = object->waypoint;
@@ -110,7 +120,7 @@ public:
   NodePath           GetNodePath(void)                   const { return (_object->nodePath);                    }
   InteractionList&   GetInteractions(void)                     { return (_interactions);                        }
   const std::string& GetDialog(void)                     const { return (_object->dialog);                      }
-  
+
   virtual GoToData   GetGoToData(InstanceDynamicObject* character)
   {
     GoToData         ret;
@@ -120,11 +130,22 @@ public:
     ret.max_distance = 0;
     return (ret);
   }
+  
+  template<class C>
+  C*                 Get(void)
+  {
+    if (ObjectType2Code<C>::Type == _type)
+      return (reinterpret_cast<C*>(this));
+    return (0);
+  }
 
   InstanceDynamicObject*   pendingActionOn;
+  InventoryObject*         pendingActionObject;
+
   virtual void             CallbackActionUse(InstanceDynamicObject* object) { ThatDoesNothing(); }
 
 protected:
+  unsigned char            _type;
   DynamicObject*           _object;
   
   void                     ThatDoesNothing();
@@ -138,6 +159,7 @@ class ObjectDoor : public InstanceDynamicObject, public Waypoint::ArcObserver
 public:
   ObjectDoor(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
   {
+    _type   = Door;
     _closed = true;
     _locked = object->locked;
     ObserveWaypoints(true);
@@ -148,14 +170,14 @@ public:
     ObserveWaypoints(false);
   }
   
-  void CallbackActionUse(InstanceDynamicObject* object);
+  void     CallbackActionUse(InstanceDynamicObject* object);
   GoToData GetGoToData(InstanceDynamicObject* character);  
-  void ObserveWaypoints(bool doObserver);
+  void     ObserveWaypoints(bool doObserver);
   
-  void ProcessCollisions(void) {}
+  void     ProcessCollisions(void) {}
 
-  bool CanGoThrough(unsigned char id);
-  void GoingThrough(void);
+  bool     CanGoThrough(unsigned char id);
+  void     GoingThrough(void);
 
 private:
   bool _closed;
@@ -197,6 +219,9 @@ private:
   asIScriptFunction* _scriptMain;
 };
 
+template<> struct ObjectType2Code<ObjectDoor>      { enum { Type = ObjectType::Door      }; };
+template<> struct ObjectType2Code<ObjectCharacter> { enum { Type = ObjectType::Character }; };
+
 /*
  * Level
  */
@@ -221,25 +246,33 @@ public:
       delete _l18n;
   }
 
-  DoneStatus       do_task(void);
-  void             TaskCeiling(float elapsedTime);
+  DoneStatus              do_task(void);
+  void                    TaskCeiling(float elapsedTime);
   
   // World Interactions
-  bool             FindPath(std::list<Waypoint>&, Waypoint&, Waypoint&);
-  World*           GetWorld(void)       { return (_world); }
-  //const World*     GetWorld(void) const { return (_world); }
+  bool                   FindPath(std::list<Waypoint>&, Waypoint&, Waypoint&);
+  World*                 GetWorld(void)       { return (_world); }
+  ObjectCharacter*       GetCharacter(const std::string& name);
+  ObjectCharacter*       GetPlayer(void);
 
   void                   CloseInteractMenu(void);
   void                   CloseRunningDialog(void);
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
+  InstanceDynamicObject* GetObject(const std::string& name);
   Data                   GetDataEngine(void) { return (_dataEngine); }
   void                   ConsoleWrite(const std::string& str);
 
   // Interaction Management
-  void             CallbackActionUse(InstanceDynamicObject* object);
-  void             CallbackActionTalkTo(InstanceDynamicObject* object);
+  void                   CallbackActionUse(InstanceDynamicObject* object);
+  void                   CallbackActionTalkTo(InstanceDynamicObject* object);
+  void                   CallbackActionUseObjectOn(InstanceDynamicObject* object);
+  
+  void                   ActionUse(ObjectCharacter* user, InstanceDynamicObject* target);
+  void                   ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object);
 
-  void             PendingActionTalkTo(InstanceDynamicObject* fromObject);
+  void                   PendingActionTalkTo(InstanceDynamicObject* fromObject);
+  void                   PendingActionUse(InstanceDynamicObject* fromObject);
+  void                   PendingActionUseObjectOn(InstanceDynamicObject* fromObject);
 
   // Mouse Management
   enum MouseState

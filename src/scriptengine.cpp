@@ -7,6 +7,7 @@ using namespace Script;
 
 asIScriptEngine*                        Engine::_engine;
 Observatory::Signal<void (std::string)> Engine::ScriptError;
+ModuleManager::Modules                  ModuleManager::_modules;
 
 void             Engine::Initialize(void)
 {
@@ -61,3 +62,39 @@ void Engine::MessageCallback(const asSMessageInfo* msg, void* param)
 
   ScriptError.Emit(stream.str());
 }
+
+asIScriptModule* ModuleManager::Require(const std::string& name, const std::string& filepath)
+{
+  Modules::iterator existing = std::find(_modules.begin(), _modules.end(), filepath);
+  
+  if (existing == _modules.end())
+  {
+    LoadedModule module;
+    
+    module.users    = 1;
+    module.filepath = filepath;
+    module.ptr      = Engine::LoadModule(name, filepath);
+    if (module.ptr == 0)
+      return (0);
+    _modules.push_back(module);
+    return (module.ptr);
+  }
+  existing->users += 1;
+  return (existing->ptr);
+}
+
+void             ModuleManager::Release(asIScriptModule* ptr)
+{
+  Modules::iterator existing = std::find(_modules.begin(), _modules.end(), ptr);
+  
+  if (existing != _modules.end())
+  {
+    existing->users -= 1;
+    if (existing->users == 0)
+    {
+      Engine::Get()->DiscardModule(existing->ptr->GetName());
+      _modules.erase(existing);
+    }
+  }
+}
+

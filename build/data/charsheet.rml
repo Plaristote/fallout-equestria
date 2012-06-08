@@ -35,6 +35,14 @@
   left:  66%;
 }
 
+#char-bottom-box
+{
+  position: absolute;
+  width:  50%;
+  top:    67%;
+  height: 33%;
+}
+
 #char-state
 {
   position: absolute;
@@ -236,6 +244,22 @@
       <button class="button_menu" id="continue">Done</button>
       <button class="button_menu" id="cancel">Cancel</button>
 
+    </p>
+
+    <p id="char-bottom-box">
+     <tabset>
+      <tab id="tab-perks">Perks</tab>
+      <panel>Nada</panel>
+
+      <tab id="tab-traits">Traits</tab>
+      <panel>Rien</panel>
+
+      <tab id="tab-reputation">Reputation</tab>
+      <panel>Nothing</panel>
+
+      <tab id="tab-kills">Kills</tab>
+      <panel>Keine nicht ich spreche deutsh</panel>
+     </tabset>
     </p>
   </body>
 </rml>

@@ -1,6 +1,7 @@
 #ifndef  OBSERVATORY_HPP
 # define OBSERVATORY_HPP
 
+# include <panda3d/cmath.h>
 # include <list>
 # include <algorithm>
 # include <iostream>

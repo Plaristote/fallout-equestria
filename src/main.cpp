@@ -77,6 +77,18 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod   (dataClass, "int    AsInt()",                 asFUNCTION(asData::getAsInt),       asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod   (dataClass, "float  AsFloat()",               asFUNCTION(asData::getAsFloat),     asCALL_CDECL_OBJFIRST);
 
+  const char* dynObjectClass = "DynamicObject";
+  const char* charClass      = "Character";
+  const char* doorClass      = "Door";
+  engine->RegisterObjectType(dynObjectClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectType(charClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectType(doorClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
+
+  engine->RegisterObjectMethod(dynObjectClass, "string GetName()", asMETHOD(InstanceDynamicObject,GetName), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "bool HasLineOfSight(DynamicObject@)", asMETHOD(ObjectCharacter,HasLineOfSight), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "void GoTo(int)",                      asMETHODPR(ObjectCharacter,GoTo, (unsigned int), void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "void GoTo(DynamicObject@, int)",      asMETHODPR(ObjectCharacter,GoTo, (InstanceDynamicObject*, int), void), asCALL_THISCALL);
+
   const char* worldClass = "World";
   engine->RegisterObjectType(worldClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(worldClass, "void SetWaypointsVisible(bool) const",      asMETHOD(World,SetWaypointsVisible),      asCALL_THISCALL);
@@ -85,9 +97,13 @@ void AngelScriptInitialize(void)
   
   const char* levelClass = "Level";
   engine->RegisterObjectType(levelClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(levelClass, "Data         GetDataEngine()",                       asMETHOD(Level,GetDataEngine),       asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "const World@ GetWorld() const",                      asMETHOD(Level,GetWorld),            asCALL_THISCALL);
-  
+  engine->RegisterObjectMethod(levelClass, "Data           GetDataEngine()",                       asMETHOD(Level,GetDataEngine),       asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "const World@   GetWorld() const",                      asMETHOD(Level,GetWorld),            asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "Character@     GetCharacter(string)",                  asMETHOD(Level,GetCharacter),        asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "Character@     GetPlayer()",                           asMETHOD(Level,GetPlayer),           asCALL_THISCALL);  
+  engine->RegisterObjectMethod(levelClass, "DynamicObject@ GetObject(string)",                     asMETHOD(Level,GetObject),           asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "void           ActionUse(Character@, DynamicObject@)", asMETHOD(Level,ActionUse),           asCALL_THISCALL);
+
   engine->RegisterGlobalProperty("Level@ level", &(Level::CurrentLevel));
 }
 

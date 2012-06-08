@@ -19,8 +19,9 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
 
   ceilingCurrentTransparency = 1.f;
 
-  InstanceDynamicObject::ActionUse.Connect   (*this, &Level::CallbackActionUse);
-  InstanceDynamicObject::ActionTalkTo.Connect(*this, &Level::CallbackActionTalkTo);
+  InstanceDynamicObject::ActionUse.Connect        (*this, &Level::CallbackActionUse);
+  InstanceDynamicObject::ActionTalkTo.Connect     (*this, &Level::CallbackActionTalkTo);
+  InstanceDynamicObject::ActionUseObjectOn.Connect(*this, &Level::CallbackActionUseObjectOn);
   _currentInteractMenu = 0;
   _currentRunningDialog = 0;
 
@@ -130,6 +131,37 @@ bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
     return (true);
   }
   return (false);  
+}
+
+InstanceDynamicObject* Level::GetObject(const string& name)
+{
+  InstanceObjects::iterator it  = _objects.begin();
+  InstanceObjects::iterator end = _objects.end();
+
+  for (; it != end ; ++it)
+  {
+    if ((*(*it)) == name)
+      return (*it);
+  }
+  return (0);
+}
+
+ObjectCharacter* Level::GetCharacter(const string& name)
+{
+  Characters::iterator it  = _characters.begin();
+  Characters::iterator end = _characters.end();
+
+  for (; it != end ; ++it)
+  {
+    if ((*(*it)) == name)
+      return (*it);
+  }
+  return (0);
+}
+
+ObjectCharacter* Level::GetPlayer(void)
+{
+  return (_characters.front());
 }
 
 AsyncTask::DoneStatus Level::do_task(void)
@@ -259,7 +291,7 @@ void Level::MouseLeftClicked(void)
 	if (toGo)
 	{
 	  if (_characters.size() > 0)
-	    _characters.front()->GoTo(toGo);
+	    GetPlayer()->GoTo(toGo);
 	}
       }
       break ;
@@ -310,15 +342,13 @@ void Level::ConsoleWrite(const string& str)
 void Level::CallbackActionUse(InstanceDynamicObject* object)
 {
   CloseInteractMenu();
-  _characters.front()->GoTo(object, 0);
-  _characters.front()->ReachedDestination.Connect(*object, &InstanceDynamicObject::CallbackActionUse);
-  _characters.front()->pendingActionOn = object;
+  ActionUse(GetPlayer(), object);
 }
 
 void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 {
   CloseInteractMenu();
-  if ((_characters.front()->HasLineOfSight(object)) && _characters.front()->GetPathDistance(object) <= 3)
+  if ((GetPlayer()->HasLineOfSight(object)) && GetPlayer()->GetPathDistance(object) <= 3)
   {
     string dialog = object->GetDialog();
 
@@ -330,15 +360,61 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
   }
   else
   {
-    _characters.front()->GoTo(object, 3);
-    _characters.front()->ReachedDestination.Connect(*this, &Level::PendingActionTalkTo);
-    _characters.front()->pendingActionOn = object;
+    GetPlayer()->GoTo(object, 3);
+    GetPlayer()->ReachedDestination.Connect(*this, &Level::PendingActionTalkTo);
+    GetPlayer()->pendingActionOn = object;
   }
+}
+
+void Level::CallbackActionUseObjectOn(InstanceDynamicObject* target)
+{
+  InventoryObject* object;
+  
+  CloseInteractMenu();
+  // prompt for an object to use
+  object = 0;
+  if (object)
+    ActionUseObjectOn(GetPlayer(), target, object);
 }
 
 void Level::PendingActionTalkTo(InstanceDynamicObject* object)
 {
   CallbackActionTalkTo(object->pendingActionOn);
+}
+
+void Level::PendingActionUseObjectOn(InstanceDynamicObject* object)
+{
+  ActionUseObjectOn(object->Get<ObjectCharacter>(), object->pendingActionOn, object->pendingActionObject);
+}
+
+void Level::PendingActionUse(InstanceDynamicObject* object)
+{
+  object->pendingActionOn->CallbackActionUse(object);
+}
+
+void Level::ActionUse(ObjectCharacter* user, InstanceDynamicObject* target)
+{
+  user->GoTo(target, 0);
+  user->ReachedDestination.Connect(*this, &Level::PendingActionUse);
+  user->pendingActionOn = target;
+}
+
+void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object)
+{
+  if (user->HasLineOfSight(target) && user->GetPathDistance(target) <= 1)
+  {
+    const string toOutput = object->UseOn(user, target);
+  
+    if (toOutput != "")
+      ConsoleWrite(toOutput);
+  }
+  else
+  {
+    user->GoTo(target, 1);
+    user->ReachedDestination.Connect(*this, &Level::PendingActionUseObjectOn);
+    user->pendingActionOn     = target;
+    user->pendingActionObject = object;
+  }
 }
 
 void Level::CloseRunningDialog(void)
