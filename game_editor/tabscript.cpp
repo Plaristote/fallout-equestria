@@ -182,8 +182,8 @@ void TabScript::SwapScript(QTreeWidgetItem* first)
                 break ;
             }
         }
+        UpdateFilename();
     }
-    UpdateFilename();
 }
 
 void TabScript::CloseScript(bool forced)

@@ -57,7 +57,7 @@ void QPandaWidget::resizeEvent(QResizeEvent* event)
 
 void QPandaWidget::showEvent(QShowEvent* event)
 {
-    if (_window == 0 && !_loadingFailed)
+    if (_window == 0)
     {
         WindowProperties wp;
 
@@ -67,7 +67,7 @@ void QPandaWidget::showEvent(QShowEvent* event)
         QPandaApplication::Framework().get_default_window_props(wp);
         wp.set_parent_window((size_t)this->winId());
         _window = QPandaApplication::Framework().open_window(wp, 0);
-        if (_window == 0)
+        if (_window != 0)
         {
           UpdateSize();
           Initialized();

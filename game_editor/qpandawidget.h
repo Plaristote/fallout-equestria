@@ -39,8 +39,8 @@ private:
     static void      CallbackMouse(const Event* event, void* ptr);
 
     WindowFramework* _window;
-    bool             _loadingFailed;
     QSize            _size;
+    bool             _loadingFailed;
 
     PT(MouseWatcher) _mouseWatcher;
 };
