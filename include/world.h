@@ -47,7 +47,7 @@ namespace ColMask
 
 struct World;
 
-struct BoundingBox
+struct FBoundingBox
 {
   float left;
   float top;
@@ -89,7 +89,7 @@ struct Waypoint
     unsigned int        id;
     Arcs                arcs;
     NodePath            nodePath;
-    BoundingBox         mouseBox;
+    FBoundingBox        mouseBox;
 
     Waypoint(NodePath root);
     Waypoint(void) {}

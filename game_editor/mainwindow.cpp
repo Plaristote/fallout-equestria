@@ -958,7 +958,7 @@ void MainWindow::LoadMap(const QString& path)
     std::ifstream file;
     std::string   fullpath = (QDir::currentPath() + "/maps/" + levelName + ".blob").toStdString();
 
-    file.open(fullpath.c_str());
+	file.open(fullpath.c_str(),ios::binary);
     if (file.is_open())
     {
         try
@@ -1002,7 +1002,7 @@ void MainWindow::SaveMap()
     std::ofstream file;
     std::string   path = (QDir::currentPath() + "/maps/" + levelName + ".blob").toStdString();
 
-    file.open(path.c_str());
+    file.open(path.c_str(),ios::binary);
     if (file.is_open())
     {
       Utils::Packet packet;

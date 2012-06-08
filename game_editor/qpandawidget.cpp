@@ -65,6 +65,7 @@ void QPandaWidget::showEvent(QShowEvent* event)
         XFlush(QX11Info::display());
 #endif
         QPandaApplication::Framework().get_default_window_props(wp);
+		wp.set_foreground(false);
         wp.set_parent_window((size_t)this->winId());
         _window = QPandaApplication::Framework().open_window(wp, 0);
         if (_window != 0)

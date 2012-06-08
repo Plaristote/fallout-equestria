@@ -48,7 +48,7 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   std::ifstream file;
   std::string   fullpath = "maps/" + filename + ".blob";
 
-  file.open(fullpath.c_str());
+  file.open(fullpath.c_str(),ios::binary);
   if (file.is_open())
   {
     try

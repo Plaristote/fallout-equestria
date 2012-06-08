@@ -36,7 +36,7 @@ void        WaypointModifier::WithdrawAllArcs(Waypoint* waypoint)
 {
   for_each(waypoint->arcs.begin(), waypoint->arcs.end(), [this, waypoint](Waypoint::Arc& arc)
   {
-    _withdrawedArcs.push_back(WithdrawedArc(waypoint, arc.to, arc.observer));
+    _withdrawedArcs.push_back(WaypointModifier::WithdrawedArc::WithdrawedArc(waypoint, arc.to, arc.observer));
   });
   waypoint->DisconnectAll();
 }
