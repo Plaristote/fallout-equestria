@@ -10,18 +10,11 @@ class InstanceDynamicObject;
 class InventoryObject : public Data
 {
 public:
-  enum Type
-  {
-    Weapon,
-    Armor,
-    Key,
-    Consummible
-  };
-
   InventoryObject(Data);
   ~InventoryObject();
 
   const std::string UseOn(ObjectCharacter* user, InstanceDynamicObject* target);
+  const std::string GetName(void) const { return (this->Key()); }
 
 private:
   
@@ -29,7 +22,6 @@ private:
   const std::string ExecuteHook(asIScriptFunction* hook, ObjectCharacter* user, C* target);
   
   DataTree           _dataTree;
-  Type               _type;
 
   asIScriptContext*  _scriptContext;
   asIScriptModule*   _scriptModule;
@@ -47,6 +39,7 @@ public:
   void             DelObject(InventoryObject*);
   const Content&   GetContent(void) const { return (_content); }
   Content&         GetContent(void)       { return (_content); }
+  InventoryObject* GetObject(const std::string& name);
 
 private:
   Content _content;

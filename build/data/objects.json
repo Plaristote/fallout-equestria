@@ -1,0 +1,14 @@
+{
+
+"Key": {
+         "icon":    "key.png",
+         "texture": "key.png",
+         "model":   "lockpad.obj",
+         "scale":   1,
+         "script": {
+                     "file": "objectsMain.as",
+                     "hookDoors": "UseKeyOnDoor"
+                   }
+       }
+
+}

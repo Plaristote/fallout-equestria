@@ -121,6 +121,8 @@ void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max
     if (!(_level->FindPath(_path, *_waypointOccupied, *_goToData.nearest)))
       _level->ConsoleWrite("Can't reach.");
   }
+  else
+    _level->ConsoleWrite("Can't reach.");
 
   ProcessCollisions();
   object->ProcessCollisions();

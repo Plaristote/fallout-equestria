@@ -4,6 +4,7 @@
 # include <list>
 # include <string>
 # include <sstream>
+# include <iostream>
 
 /*! \class DataBranch
  * \brief Structure containing every data assigned to a branch of a DataTree. Best used wrapped in the Data class. */
@@ -48,10 +49,15 @@ public:
   /*! \brief Returns a Data containing the child DataBranch corresponding to key if it exists, or Nil Data otherwise (see the Nil method) */
   Data        operator[](const std::string& key);
   const Data  operator[](const std::string& key) const;
+  Data        operator[](int it);
 
-  
   std::string Key(void)   const { return (_data ? _data->key   : ""); }
   std::string Value(void) const { return (_data ? _data->value : ""); }
+
+  void        MoveUp();
+  void        MoveDown();
+
+  void SetKey(const std::string& newKey) { if (_data) _data->key = newKey; }
 
   const Data& operator=(const Data& var);
 
@@ -90,6 +96,8 @@ public:
     return (out);
   }
 
+  /*! \brief Sets the DataBranch to nil, thus removing it cleanly when Data is destroyed */
+  void Remove(void)     { if (_data) _data->nil = true; }
   /*! \brief Checks if the current Data is attached to a DataBranch */
   bool Nil(void) const { return (!_data || _data->nil);          }
   Data Parent(void)    { return (_data ? _data->father : _data); }
@@ -172,6 +180,11 @@ public:
     static DataTree* JSON(const std::string& filename);
   };
 
+  struct Writers
+  {
+      static bool JSON(Data, const std::string& filename);
+  };
+
   friend struct Factory;
 
   Data operator[](const std::string& string)
@@ -185,6 +198,8 @@ public:
   bool Save(void) { return (Save(source)); }
   /*! \brief Saves the modification to the datas from this DataTree to the file specified as a parameter  */
   bool Save(const std::string& path);
+
+  const std::string& GetSourceFile(void) { return (source); }
 
 private:
   std::string source;

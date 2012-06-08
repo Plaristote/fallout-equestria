@@ -15,7 +15,8 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
 {
   CurrentLevel = this;
 
-  _l18n = DataTree::Factory::JSON("data/l18n/english.json");
+  _l18n  = DataTree::Factory::JSON("data/l18n/english.json");
+  _items = DataTree::Factory::JSON("data/objects.json");
 
   ceilingCurrentTransparency = 1.f;
 
@@ -114,6 +115,10 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   });
   
   _world->SetWaypointsVisible(false);
+  
+  InventoryObject* object = new InventoryObject(Data(_items)["Key"]);
+  
+  GetPlayer()->GetInventory().AddObject(object);
 }
 
 bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
@@ -280,6 +285,8 @@ void Level::MouseLeftClicked(void)
   {
     case MouseAction:
       cout << "Mouse Action" << endl;
+      if (_currentInteractMenu || _currentRunningDialog)
+	return ;
       if (hovering.hasDynObject && false)
       {
         // Do something, or not...
@@ -384,7 +391,9 @@ void Level::PendingActionTalkTo(InstanceDynamicObject* object)
 
 void Level::PendingActionUseObjectOn(InstanceDynamicObject* object)
 {
-  ActionUseObjectOn(object->Get<ObjectCharacter>(), object->pendingActionOn, object->pendingActionObject);
+  const string toOutput = object->pendingActionObject->UseOn(object->Get<ObjectCharacter>(), object->pendingActionOn);
+  
+  ConsoleWrite(toOutput);
 }
 
 void Level::PendingActionUse(InstanceDynamicObject* object)
@@ -394,6 +403,8 @@ void Level::PendingActionUse(InstanceDynamicObject* object)
 
 void Level::ActionUse(ObjectCharacter* user, InstanceDynamicObject* target)
 {
+  if (!user || !target)
+    return ;
   user->GoTo(target, 0);
   user->ReachedDestination.Connect(*this, &Level::PendingActionUse);
   user->pendingActionOn = target;
@@ -401,20 +412,22 @@ void Level::ActionUse(ObjectCharacter* user, InstanceDynamicObject* target)
 
 void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object)
 {
-  if (user->HasLineOfSight(target) && user->GetPathDistance(target) <= 1)
+  if (!object || !target || !user)
   {
-    const string toOutput = object->UseOn(user, target);
-  
-    if (toOutput != "")
-      ConsoleWrite(toOutput);
+    if (!object)
+      std::cerr << "ActionUseObjectOn:: unexisting object" << std::endl;
+    if (!target)
+      std::cerr << "ActionUseObjectOn:: unexisting target" << std::endl;
+    if (!user)
+      std::cerr << "ActionUseObjectOn:: unexisting user" << std::endl;
+    return ;
   }
-  else
-  {
-    user->GoTo(target, 1);
-    user->ReachedDestination.Connect(*this, &Level::PendingActionUseObjectOn);
-    user->pendingActionOn     = target;
-    user->pendingActionObject = object;
-  }
+
+  user->GoTo(target, 0);
+  user->ReachedDestination.Connect(*this, &Level::PendingActionUseObjectOn);
+  user->pendingActionOn     = target;
+  user->pendingActionObject = object;
+  std::cerr << "ActionUseObjectOn executed" << std::endl;
 }
 
 void Level::CloseRunningDialog(void)

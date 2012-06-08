@@ -19,6 +19,7 @@ namespace Json
     void          ParseObject(DataBranch*);
     void          ParseArray(DataBranch*);
 
+    std::string   _source;
     std::string   _str;
     unsigned int  _it;
     bool          _fileLoaded;

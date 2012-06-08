@@ -4,6 +4,8 @@
 
 InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
 {
+  this->SetKey(data.Key());
+  (*this)["icon"]     = data["icon"].Value();
   (*this)["texture"]  = data["texture"].Value();
   (*this)["model"]    = data["model"].Value();
   (*this)["scale"]    = data["scale"].Value();
@@ -11,36 +13,39 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
   (*this)["pos"]["y"] = data["pos"]["y"].Value();
   (*this)["interactions"]["use"] = "1";
 
-  _scriptContext = 0;
+  _scriptContext = Script::Engine::Get()->CreateContext();
   _scriptModule  = 0;
   _hookUseOnCharacter = _hookUseOnDoor = _hookUseOnOthers = 0;
   
   Data script = data["script"];
-  
-  if (!(script.Nil()))
+
+  if (!(script.Nil()) && _scriptContext)
   {
     Data hookCharacter = script["hookCharacters"];
     Data hookDoor      = script["hookDoors"];
     Data hookOthers    = script["hookOthers"];
 
-    _scriptModule       = Script::ModuleManager::Require("item" + data["name"].Value(), script["file"]);
-    if (!(hookCharacter.Nil()))
+    _scriptModule       = Script::ModuleManager::Require("item" + data.Key(), "scripts/objects/" + script["file"].Value());
+    if (_scriptModule)
     {
-      std::string decl = "string " + hookCharacter.Value() + "(Character@, Character@)";
-      
-      _hookUseOnCharacter = _scriptModule->GetFunctionByDecl(decl.c_str());
-    }
-    if (!(hookDoor.Nil()))
-    {
-      std::string decl = "string " + hookDoor.Value() + "(Character@, Door@)";
-      
-      _hookUseOnDoor      = _scriptModule->GetFunctionByDecl(decl.c_str());
-    }
-    if (!(hookOthers.Nil()))
-    {
-      std::string decl = "string " + hookOthers.Value() + "(Character@, DynamicObject@)";
-      
-      _hookUseOnOthers    = _scriptModule->GetFunctionByDecl(decl.c_str());
+      if (!(hookCharacter.Nil()))
+      {
+	std::string decl = "string " + hookCharacter.Value() + "(Item@, Character@, Character@)";
+	
+	_hookUseOnCharacter = _scriptModule->GetFunctionByDecl(decl.c_str());
+      }
+      if (!(hookDoor.Nil()))
+      {
+	std::string decl = "string " + hookDoor.Value() + "(Item@, Character@, Door@)";
+	
+	_hookUseOnDoor      = _scriptModule->GetFunctionByDecl(decl.c_str());
+      }
+      if (!(hookOthers.Nil()))
+      {
+	std::string decl = "string " + hookOthers.Value() + "(Item@, Character@, DynamicObject@)";
+	
+	_hookUseOnOthers    = _scriptModule->GetFunctionByDecl(decl.c_str());
+      }
     }
   }
 }
@@ -48,6 +53,8 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
 InventoryObject::~InventoryObject()
 {
   Script::ModuleManager::Release(_scriptModule);
+  if (_scriptContext)
+    _scriptContext->Release();
 }
 
 const std::string InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target)
@@ -58,7 +65,10 @@ const std::string InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicO
   if (_hookUseOnCharacter && (charTarget = target->Get<ObjectCharacter>()) != 0)
     return (ExecuteHook(_hookUseOnCharacter, user, charTarget));
   if (_hookUseOnDoor      && (doorTarget = target->Get<ObjectDoor>())      != 0)
+  {
+    std::cout << "Door key = " << doorTarget->GetKeyName() << std::endl;
     return (ExecuteHook(_hookUseOnDoor, user, doorTarget));
+  }
   if (_hookUseOnOthers)
     return (ExecuteHook(_hookUseOnOthers, user, target));
   return ("That does nothing");
@@ -68,8 +78,9 @@ template<class C>
 const std::string InventoryObject::ExecuteHook(asIScriptFunction* hook, ObjectCharacter* user, C* target)
 {
   _scriptContext->Prepare(hook);
-  _scriptContext->SetArgObject(0, user);
-  _scriptContext->SetArgObject(1, target);
+  _scriptContext->SetArgObject(0, this);
+  _scriptContext->SetArgObject(1, user);
+  _scriptContext->SetArgObject(2, target);
   _scriptContext->Execute();
   return (*(reinterpret_cast<std::string*>(_scriptContext->GetReturnObject())));
 }
@@ -85,4 +96,19 @@ void Inventory::DelObject(InventoryObject* toDel)
 
   if (it != _content.end())
     _content.erase(it);
+}
+
+InventoryObject* Inventory::GetObject(const std::string& name)
+{
+  Content::iterator it  = _content.begin();
+  Content::iterator end = _content.end();
+  
+  std::cout << "GetObjects" << std::endl;
+  for (; it != end ; ++it)
+  {
+    std::cout << "Object: " << (*it)->GetName() << std::endl;
+    if ((*(*it)).GetName() == name)
+      return (*it);
+  }
+  return (0);
 }

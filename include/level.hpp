@@ -169,6 +169,11 @@ public:
   {
     ObserveWaypoints(false);
   }
+
+  string   GetKeyName() const { return (_object->key); }
+  void     Unlock(void)   { _locked = !_locked; }
+  bool     IsLocked(void) { return (_locked);   }
+  bool     IsOpen(void)   { return (!_closed);  }
   
   void     CallbackActionUse(InstanceDynamicObject* object);
   GoToData GetGoToData(InstanceDynamicObject* character);  
@@ -198,6 +203,7 @@ public:
   unsigned short      GetPathDistance(Waypoint* waypoint);
   unsigned short      GetPathDistance(InstanceDynamicObject* object);
   bool                HasLineOfSight(InstanceDynamicObject* object);
+  Inventory&          GetInventory(void) { return (_inventory); }
 
 private:
   void                RunMovement(float elapsedTime);
@@ -205,6 +211,8 @@ private:
 
   std::list<Waypoint> _path;
   GoToData            _goToData;
+  
+  Inventory           _inventory;
   
   // Line of Sight Tools
   NodePath                  _losPath;
@@ -313,6 +321,7 @@ private:
 
   DataEngine        _dataEngine;
   DataTree*         _l18n;
+  DataTree*         _items;
 };
 
 #endif

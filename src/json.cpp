@@ -157,6 +157,7 @@ Parser::Parser(const string& filename)
   }
   else
     std::cerr << filename << ": can't open file." << std::endl;
+  _source = filename;
 }
 
 DataTree* Parser::Run()
@@ -165,6 +166,7 @@ DataTree* Parser::Run()
   {
     DataTree* data = new DataTree;
 
+    data->source = _source;
     try
     {
       _it            = 0;
@@ -186,4 +188,150 @@ DataTree* DataTree::Factory::JSON(const std::string& filename)
   Parser parser(filename);
 
   return (parser.Run());
+}
+
+//
+// File Writer
+//
+
+static bool isNumeric(const std::string& str)
+{
+    unsigned int i = 0;
+
+    for (i = 0 ; i < str.size() ; ++i)
+    {
+        if ((str[i] < '0' || str[i] > '9') && str[i] != '.')
+            return (false);
+    }
+    return (true);
+}
+
+static std::string appendArray(Data data);
+static std::string appendObject(Data data);
+
+static std::string appendValue(Data data)
+{
+    std::string toWrite;
+
+    if (data.begin() != data.end())
+    {
+        // Object or Array
+        bool isArray = true;
+
+        Data::iterator arrChkIt  = data.begin();
+        Data::iterator arrChkEnd = data.end();
+
+        for (; arrChkIt != arrChkEnd ; ++arrChkIt)
+        {
+            if ((*arrChkIt).Key() != "")
+            {
+              isArray = false;
+              break ;
+            }
+        }
+        if (isArray)
+          toWrite += appendArray(data);
+        else
+          toWrite += appendObject(data);
+    }
+    else
+    {
+        // String or numeric or char
+        std::string value = data.Value();
+
+        if (value.size() == 0)
+          value = "\"\"";
+        else if (!(isNumeric(value)))
+          value = "\"" + value + "\"";
+        toWrite += value;
+    }
+    return (toWrite);
+}
+
+static std::string appendArray(Data data)
+{
+    std::string toWrite;
+    Data::iterator it  = data.begin();
+    Data::iterator end = data.end();
+
+    toWrite = "[\n";
+    while (it != end)
+    {
+        if ((*it).Nil())
+        {
+          ++it;
+          continue ;
+        }
+        toWrite += appendValue(*it);
+        ++it;
+        if (it  != end)
+          toWrite += ", ";
+    }
+    toWrite += "\n]\n";
+    return (toWrite);
+}
+
+static std::string appendObject(Data data)
+{
+    std::string toWrite;
+    Data::iterator it  = data.begin();
+    Data::iterator end = data.end();
+
+    toWrite = "{\n";
+    while (it != end)
+    {
+        if ((*it).Nil())
+        {
+          ++it;
+          continue ;
+        }
+        toWrite += "\"" + (*it).Key() + "\": ";
+        toWrite += appendValue(*it);
+        ++it;
+        if (it  != end)
+            toWrite += ",";
+        toWrite += "\n";
+    }
+    toWrite += "}\n";
+    return (toWrite);
+}
+
+bool DataTree::Writers::JSON(Data data, const string &filename)
+{
+    std::ofstream file(filename.c_str());
+
+    if (file.is_open())
+    {
+      std::string toWrite;
+
+      toWrite = "{\n";
+
+      appendValue(data);
+
+      Data::iterator it  = data.begin();
+      Data::iterator end = data.end();
+
+      while (it != end)
+      {
+          if ((*it).Nil())
+          {
+            ++it;
+            continue ;
+          }
+          toWrite += "\"" + (*it).Key() + "\": ";
+          toWrite += appendValue(*it);
+          ++it;
+          if (it  != end)
+              toWrite += ",";
+          toWrite += "\n";
+      }
+
+      toWrite += "\n}\n";
+
+      file.write(toWrite.c_str(), toWrite.size());
+      file.close();
+    }
+    else
+      return (false);
+    return (true);
 }

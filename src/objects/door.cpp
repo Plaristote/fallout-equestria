@@ -32,7 +32,8 @@ InstanceDynamicObject::GoToData ObjectDoor::GetGoToData(InstanceDynamicObject* c
   Waypoint* waypoint = character->GetOccupiedWaypoint();
   GoToData  ret;
 
-  ret.nearest = 0;
+  ret.nearest      = 0;
+  ret.max_distance = -1;
   if (waypoint)
   {
     character->UnprocessCollisions();
@@ -45,7 +46,7 @@ InstanceDynamicObject::GoToData ObjectDoor::GetGoToData(InstanceDynamicObject* c
 
       if (waypoint1 && (_level->FindPath(path, *waypoint, *waypoint1)))
       {
-	if (ret.max_distance > path.size())
+	if (ret.max_distance > path.size() || ret.max_distance == -1)
 	{
 	  ret.nearest      = waypoint1;
 	  ret.max_distance = path.size();
@@ -54,7 +55,7 @@ InstanceDynamicObject::GoToData ObjectDoor::GetGoToData(InstanceDynamicObject* c
 
       if (waypoint2 && (_level->FindPath(path, *waypoint, *waypoint2)))
       {
-	if (ret.max_distance > path.size())
+	if (ret.max_distance > path.size() || ret.max_distance == -1)
 	{
 	  ret.nearest      = waypoint2;
 	  ret.max_distance = path.size();
