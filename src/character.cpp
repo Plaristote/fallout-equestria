@@ -195,7 +195,7 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
 
 void                ObjectCharacter::RunMovement(float elapsedTime)
 {
-  std::cout << "Running Movement" << std::endl;
+  //std::cout << "Running Movement" << std::endl;
   
   Waypoint&         next = *(_path.begin());
   // TODO: Speed walking / running / combat

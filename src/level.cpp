@@ -23,8 +23,10 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   InstanceDynamicObject::ActionUse.Connect        (*this, &Level::CallbackActionUse);
   InstanceDynamicObject::ActionTalkTo.Connect     (*this, &Level::CallbackActionTalkTo);
   InstanceDynamicObject::ActionUseObjectOn.Connect(*this, &Level::CallbackActionUseObjectOn);
-  _currentInteractMenu = 0;
+  _currentInteractMenu  = 0;
   _currentRunningDialog = 0;
+  _currentUseObjectOn   = 0;
+  _mouseActionBlocked   = false;
 
   _graphicWindow = _window->get_graphics_window();
   AsyncTaskManager::get_global_ptr()->add(this);
@@ -281,11 +283,13 @@ void Level::MouseLeftClicked(void)
   const MouseHovering& hovering = _mouse.Hovering();
   
   cout << "Mouse Left Clicked" << endl;
+  if (_mouseActionBlocked)
+    return ;
   switch (_mouseState)
   {
     case MouseAction:
       cout << "Mouse Action" << endl;
-      if (_currentInteractMenu || _currentRunningDialog)
+      if (_currentInteractMenu)
 	return ;
       if (hovering.hasDynObject && false)
       {
@@ -363,6 +367,7 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
       delete _currentRunningDialog;
     _currentRunningDialog = new DialogController(_window, _gameUi.GetContext(), dialog, _l18n);
     _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningDialog);
+    _mouseActionBlocked = true;
     _camera.SetEnabledScroll(false);
   }
   else
@@ -378,10 +383,19 @@ void Level::CallbackActionUseObjectOn(InstanceDynamicObject* target)
   InventoryObject* object;
   
   CloseInteractMenu();
-  // prompt for an object to use
-  object = 0;
-  if (object)
-    ActionUseObjectOn(GetPlayer(), target, object);
+  if (_currentUseObjectOn)
+    delete _currentUseObjectOn;
+  _currentUseObjectOn = new UiUseObjectOn(_window, _gameUi.GetContext(), GetPlayer()->GetInventory());
+  _currentUseObjectOn->ActionCanceled.Connect(*this, &Level::CloseUseObjectOn);
+  _currentUseObjectOn->ObjectSelected.Connect(*this, &Level::SelectedUseObjectOn);
+  _mouseActionBlocked = true;
+  _camera.SetEnabledScroll(false);
+  GetPlayer()->pendingActionOn = target;
+}
+
+void Level::SelectedUseObjectOn(InventoryObject* object)
+{
+  ActionUseObjectOn(GetPlayer(), GetPlayer()->pendingActionOn, object);
 }
 
 void Level::PendingActionTalkTo(InstanceDynamicObject* object)
@@ -428,14 +442,23 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
   user->pendingActionOn     = target;
   user->pendingActionObject = object;
   std::cerr << "ActionUseObjectOn executed" << std::endl;
+  if (user == GetPlayer())
+    CloseUseObjectOn();
+  std::cerr << "CloseUseObjectOn destroyed" << std::endl;
 }
 
 void Level::CloseRunningDialog(void)
 {
   if (_currentRunningDialog)
-  {
     _currentRunningDialog->Destroy();
-    _currentRunningDialog = 0;
-  }
   _camera.SetEnabledScroll(true);
+  _mouseActionBlocked = false;
+}
+
+void Level::CloseUseObjectOn(void)
+{
+  if (_currentUseObjectOn)
+    _currentUseObjectOn->Destroy();
+  _camera.SetEnabledScroll(true);
+  _mouseActionBlocked = false;
 }

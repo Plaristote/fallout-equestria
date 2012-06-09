@@ -1,0 +1,47 @@
+<rml>
+  <head>
+    <title>Iventory</title>
+    <link type="text/template" href="tpl_mainbar.rml" />
+    <style>
+      #body
+      {
+        width:  520px;
+        height: 70%;
+        margin: auto;
+        margin-top: 10px;
+      }
+
+      #body-inventory-items
+      {
+        width:          90%;
+        height:         80%;
+        margin-left:    10px;
+        margin-right:   10px;
+        margin-top:     10px;
+        margin-bottom:  10px;
+        overflow-y:     scroll;
+      }
+
+      #inventory
+      {
+        drag: clone;
+      }         
+
+      #cancel
+      {
+        position:       absolute;
+        bottom:         5px;
+        right:          5px;
+      }
+    </style>
+  </head>
+  <body id="body" template="tplmainbar">
+  <p>
+    <div id="inventory-items">
+      <div id="inventory">
+      </div>
+    </div>
+    <button class="button_menu" id="button_cancel">Cancel</button>
+  </p>
+  </body>
+</rml>

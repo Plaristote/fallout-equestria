@@ -23,6 +23,7 @@
 
 # include "gameui.hpp"
 # include "dialog.hpp"
+# include "inventory_ui.hpp"
 
 # include "world.h"
 
@@ -265,6 +266,7 @@ public:
 
   void                   CloseInteractMenu(void);
   void                   CloseRunningDialog(void);
+  void                   CloseUseObjectOn(void);
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);
   Data                   GetDataEngine(void) { return (_dataEngine); }
@@ -274,6 +276,7 @@ public:
   void                   CallbackActionUse(InstanceDynamicObject* object);
   void                   CallbackActionTalkTo(InstanceDynamicObject* object);
   void                   CallbackActionUseObjectOn(InstanceDynamicObject* object);
+  void                   SelectedUseObjectOn(InventoryObject* object);
   
   void                   ActionUse(ObjectCharacter* user, InstanceDynamicObject* target);
   void                   ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object);
@@ -318,6 +321,8 @@ private:
   GameUi            _gameUi;
   InteractMenu*     _currentInteractMenu;
   DialogController* _currentRunningDialog;
+  UiUseObjectOn*    _currentUseObjectOn;
+  bool              _mouseActionBlocked;
 
   DataEngine        _dataEngine;
   DataTree*         _l18n;

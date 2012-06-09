@@ -249,22 +249,18 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
   _root = doc;
   if (doc)
   {
-    //ElementDocument* docItemList       = context->LoadDocument("data/inventory-items.rml");
     Element*         itemListContainer = doc->GetElementById("body-inventory-items");
-
-    //doc->AppendChild(docItemList);
 
     ElementDocument* parentItems = doc;
     for (unsigned short i = 0 ; i < 200 ; ++i)
     {
       Rocket::Core::Element* item = parentItems->CreateElement("invitem");
 
-      item->SetInnerRML("<img src=\"item.png\" />");
+      item->SetInnerRML("<img src=\"item.png\" class='inventory-item' />");
       itemListContainer->AppendChild(item);
     }
 
     doc->Show();
-    //docItemList->Show();
   }
 }
 

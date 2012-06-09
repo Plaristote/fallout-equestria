@@ -94,7 +94,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectType(charClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(doorClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
 
-  engine->RegisterObjectMethod(dynObjectClass, "string GetName()", asMETHOD(InstanceDynamicObject,GetName), asCALL_THISCALL);
+  engine->RegisterObjectMethod(dynObjectClass, "string GetName()",               asMETHOD(InstanceDynamicObject,GetName), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "string GetName()",                    asMETHOD(ObjectCharacter,GetName), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool HasLineOfSight(DynamicObject@)", asMETHOD(ObjectCharacter,HasLineOfSight), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void GoTo(int)",                      asMETHODPR(ObjectCharacter,GoTo, (unsigned int), void), asCALL_THISCALL);
