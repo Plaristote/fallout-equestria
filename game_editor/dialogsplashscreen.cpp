@@ -55,7 +55,7 @@ void DialogSplashscreen::PickHistory(QString item)
   ui->path->setText(item);
 }
 
-const QString& DialogSplashscreen::GetProjectPath(void) const
+const QString DialogSplashscreen::GetProjectPath(void) const
 {
     return (ui->path->text());
 }

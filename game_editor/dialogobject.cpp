@@ -89,6 +89,7 @@ void DialogObject::Apply()
     object->script     = ui->script->text().toStdString();
     object->strModel   = ui->model->text().toStdString();
     object->strTexture = ui->texture->text().toStdString();
+    object->key        = ui->doorKey->text().toStdString();
 
     unsigned char interactionFlag = 0;
     interactionFlag |= (ui->interactionTalkTo->isChecked()    ? Interactions::TalkTo    : 0);

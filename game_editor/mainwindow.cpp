@@ -66,8 +66,6 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     objectFile    = 0;
     ui->setupUi(this);
 
-    ui->tabWidget->setVisible(false);
-
     ui->waypointAdd->setIcon(iconAdd);
     ui->waypointRemove->setIcon(iconDelete);
     ui->waypointConnect->setIcon(iconConnect);
@@ -135,7 +133,6 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(ui->dialogNew,    SIGNAL(clicked()), &tabDialog, SLOT(NewDialog()));
     connect(ui->dialogList,   SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), &tabDialog, SLOT(SwapDialog(QListWidgetItem*)));
     connect(ui->dialogSearch, SIGNAL(textChanged(QString)), &tabDialog, SLOT(FilterDialog(QString)));
-    connect(ui->dialogSearch, SIGNAL(cursorPositionChanged(int,int)), &tabDialog, SLOT(FilterInit()));
 
     connect(ui->languageDelete, SIGNAL(clicked()), &tabL18n, SLOT(RemoveLanguage()));
     connect(ui->languageNew, SIGNAL(clicked()), &tabL18n, SLOT(NewLanguage()));
@@ -156,7 +153,8 @@ MainWindow::~MainWindow()
 void MainWindow::LoadProject()
 {
     bool    success = true;
-    QString path = splashScreen.GetProjectPath();
+    QString path    = splashScreen.GetProjectPath();
+    //QString path = "/home/plaristote/Work/fallout-equestria/build";
     QDir    root(path);
 
     if (!(QDir::setCurrent(path)))
@@ -981,7 +979,10 @@ void MainWindow::LoadMap(const QString& path)
 
             packet = new Utils::Packet(raw, size);
 
-            world->UnSerialize(*packet);
+            if (world)
+              world->UnSerialize(*packet);
+            else
+              QMessageBox::warning(this, "Fatal Error", "World class not created. This whole thing's about to crash");
 
             delete   packet;
             delete[] raw;

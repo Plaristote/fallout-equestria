@@ -15,7 +15,7 @@ public:
     explicit DialogSplashscreen(QWidget *parent = 0);
     ~DialogSplashscreen();
 
-    const QString& GetProjectPath(void) const;
+    const QString GetProjectPath(void) const;
     
 private slots:
     void PickFolder(void);
