@@ -8,6 +8,7 @@
 # include <iostream>
 
 # ifndef WIN_32
+ #include <cstdint>
  typedef int32_t	my_int32;
 # else
  typedef int            my_int32; // TODO: Finding out why __int32 fuck that shit up.
