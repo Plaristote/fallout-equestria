@@ -3,6 +3,7 @@
 
 # include "datatree.hpp"
 # include "scriptengine.hpp"
+#include "world.h"
 
 class ObjectCharacter;
 class InstanceDynamicObject;
@@ -15,6 +16,7 @@ public:
 
   const std::string UseOn(ObjectCharacter* user, InstanceDynamicObject* target);
   const std::string GetName(void) const { return (this->Key()); }
+  DynamicObject*    CreateDynamicObject(World* world) const;
 
 private:
   

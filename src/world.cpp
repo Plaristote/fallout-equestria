@@ -107,33 +107,30 @@ MapObject* World::GetMapObjectFromNodePath(NodePath path)
 // DYNAMIC OBJECTS
 DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type type, const string &model, const string &texture)
 {
-    DynamicObject object;
-    string model2 = model;
+  DynamicObject object;
 
-    /*if (model2 == "lpip.egg")
-      model2 = "horse.obj";*/
-    object.type         = type;
-    object.interactions = 0;
-    object.strModel     = model;
-    object.strTexture   = texture;
-    object.nodePath     = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model2);
-    if (texture != "")
-    {
-      object.texture    = TexturePool::load_texture(TEXT_ROOT + texture);
-      if (object.texture)
-        object.nodePath.set_texture(object.texture);
-    }
+  object.type         = type;
+  object.interactions = 0;
+  object.strModel     = model;
+  object.strTexture   = texture;
+  object.nodePath     = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model);
+  if (texture != "")
+  {
+    object.texture    = TexturePool::load_texture(TEXT_ROOT + texture);
+    if (object.texture)
+      object.nodePath.set_texture(object.texture);
+  }
 
-    object.nodePath.set_name(name);
-    object.nodePath.reparent_to(rootDynamicObjects);
-    object.nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
-    dynamicObjects.push_back(object);
-    return (&(*(--(dynamicObjects.end()))));
+  object.nodePath.set_name(name);
+  object.nodePath.reparent_to(rootDynamicObjects);
+  object.nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
+  dynamicObjects.push_back(object);
+  return (&(*(--(dynamicObjects.end()))));
 }
 
 void World::DeleteDynamicObject(DynamicObject* ptr)
 {
-    DeleteObject(ptr, dynamicObjects);
+  DeleteObject(ptr, dynamicObjects);
 }
 
 DynamicObject* World::GetDynamicObjectFromName(const string &name)

@@ -155,7 +155,8 @@ struct DynamicObject : public MapObject
         Door,
         Shelf,
         Locker,
-        Character
+        Character,
+	Item
     };
 
     Waypoint* waypoint;

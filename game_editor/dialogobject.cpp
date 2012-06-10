@@ -49,6 +49,7 @@ void DialogObject::SetCurrentObject(DynamicObject* object)
     ui->texture->setText(QString::fromStdString(object->strTexture));
     ui->script->setText(QString::fromStdString(object->script));
     ui->dialog->setText(QString::fromStdString(object->dialog));
+    ui->statistsics->setText(QString::fromStdString(object->charsheet));
 
     ui->interactionUse->setChecked(object->interactions & Interactions::Use);
     ui->interactionTalkTo->setChecked(object->interactions & Interactions::TalkTo);
@@ -90,6 +91,7 @@ void DialogObject::Apply()
     object->strModel   = ui->model->text().toStdString();
     object->strTexture = ui->texture->text().toStdString();
     object->key        = ui->doorKey->text().toStdString();
+    object->charsheet  = ui->statistsics->text().toStdString();
 
     unsigned char interactionFlag = 0;
     interactionFlag |= (ui->interactionTalkTo->isChecked()    ? Interactions::TalkTo    : 0);

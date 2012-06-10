@@ -57,6 +57,16 @@ InventoryObject::~InventoryObject()
     _scriptContext->Release();
 }
 
+DynamicObject* InventoryObject::CreateDynamicObject(World* world) const
+{
+  DynamicObject* object;
+  Data           self = *this;
+
+  object               = world->AddDynamicObject("item" + Key(), DynamicObject::Item, self["model"], self["texture"]);
+  object->interactions = Interactions::Use;
+  return (object);
+}
+
 const std::string InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target)
 {
   ObjectCharacter* charTarget;
@@ -112,3 +122,4 @@ InventoryObject* Inventory::GetObject(const std::string& name)
   }
   return (0);
 }
+

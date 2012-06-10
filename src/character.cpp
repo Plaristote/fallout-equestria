@@ -23,6 +23,9 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _losHandlerQueue = new CollisionHandlerQueue();
   _losTraverser.add_collider(_losPath, _losHandlerQueue);  
   
+  // Statistics
+  _statistics = DataTree::Factory::JSON("data/charsheets/" + object->charsheet + ".json");
+  
   // Script
   _scriptContext = 0;
   _scriptModule  = 0;
@@ -120,6 +123,11 @@ void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max
   {
     if (!(_level->FindPath(_path, *_waypointOccupied, *_goToData.nearest)))
       _level->ConsoleWrite("Can't reach.");
+    while (_goToData.min_distance && _path.size() > 1)
+    {
+      _path.erase(--(_path.end()));
+      _goToData.min_distance--;
+    }
   }
   else
     _level->ConsoleWrite("Can't reach.");

@@ -267,6 +267,18 @@ InstanceDynamicObject* Level::FindObjectFromNode(NodePath node)
   return (0);
 }
 
+void                   Level::RemoveObject(InstanceDynamicObject* object)
+{
+  InstanceObjects::iterator it = std::find(_objects.begin(), _objects.end(), object);
+  
+  if (it != _objects.end())
+  {
+    _world->DeleteDynamicObject((*it)->GetDynamicObject());
+    delete (*it);
+    _objects.erase(it);
+  }
+}
+
 /*
  * Level Mouse
  */
@@ -428,12 +440,7 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
 {
   if (!object || !target || !user)
   {
-    if (!object)
-      std::cerr << "ActionUseObjectOn:: unexisting object" << std::endl;
-    if (!target)
-      std::cerr << "ActionUseObjectOn:: unexisting target" << std::endl;
-    if (!user)
-      std::cerr << "ActionUseObjectOn:: unexisting user" << std::endl;
+    cout << "[ActionUseObjectOn] Aborted: NullPointer Error" << endl;
     return ;
   }
 
@@ -445,6 +452,24 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
   if (user == GetPlayer())
     CloseUseObjectOn();
   std::cerr << "CloseUseObjectOn destroyed" << std::endl;
+}
+
+void Level::ActionDropObject(ObjectCharacter* user, InventoryObject* object)
+{
+  ObjectItem* item;
+  Waypoint*   waypoint;
+  
+  if (!user || !object)
+  {
+    cout << "[ActionDropObject] Aborted: NullPointer Error" << endl;
+    return ;
+  }
+  user->GetInventory().DelObject(object);
+  waypoint = user->GetOccupiedWaypoint();
+  item     = new ObjectItem(this, object->CreateDynamicObject(_world), object);
+  item->SetOccupiedWaypoint(waypoint);
+  item->GetDynamicObject()->nodePath.set_pos(waypoint->nodePath.get_pos());
+  _objects.push_back(item);
 }
 
 void Level::CloseRunningDialog(void)

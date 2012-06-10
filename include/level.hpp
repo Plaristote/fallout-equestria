@@ -36,7 +36,8 @@ struct WaypointModifier
 {  
   virtual void ProcessCollisions(void);
   void         UnprocessCollisions(void);
-  Waypoint*    GetOccupiedWaypoint(void) const { return (_waypointOccupied); }
+  Waypoint*    GetOccupiedWaypoint(void) const   { return (_waypointOccupied); }
+  void         SetOccupiedWaypoint(Waypoint* wp) { _waypointOccupied = wp;     }
 
 protected:
   void         WithdrawAllArcs(unsigned int id);
@@ -92,6 +93,7 @@ public:
     Waypoint*              nearest;
     InstanceDynamicObject* objective;
     int                    max_distance;
+    int                    min_distance;
   };
   
   InstanceDynamicObject(Level* level, DynamicObject* object) : _object(object)
@@ -100,7 +102,7 @@ public:
     _level                = level;
     _waypointDisconnected = object->lockedArcs;
     _waypointOccupied     = object->waypoint;
-    
+
     if (object->interactions & Interactions::TalkTo)
       _interactions.push_back(Interaction("talk_to",    this, &ActionTalkTo));
     if (object->interactions & Interactions::Use)
@@ -121,6 +123,7 @@ public:
   NodePath           GetNodePath(void)                   const { return (_object->nodePath);                    }
   InteractionList&   GetInteractions(void)                     { return (_interactions);                        }
   const std::string& GetDialog(void)                     const { return (_object->dialog);                      }
+  DynamicObject*     GetDynamicObject(void)                    { return (_object);                              }
 
   virtual GoToData   GetGoToData(InstanceDynamicObject* character)
   {
@@ -129,9 +132,10 @@ public:
     ret.nearest      = _waypointOccupied;
     ret.objective    = this;
     ret.max_distance = 0;
+    ret.min_distance = 0;
     return (ret);
   }
-  
+
   template<class C>
   C*                 Get(void)
   {
@@ -197,6 +201,17 @@ public:
 
   Observatory::Signal<void (InstanceDynamicObject*)> ReachedDestination;
   
+  virtual GoToData   GetGoToData(InstanceDynamicObject* character)
+  {
+    GoToData         ret;
+
+    ret.nearest      = _waypointOccupied;
+    ret.objective    = this;
+    ret.max_distance = 0;
+    ret.min_distance = 1;
+    return (ret);
+  }
+
   void                Run(float elapsedTime);
   void                GoTo(unsigned int id);
   void                GoTo(Waypoint* waypoint);
@@ -204,16 +219,18 @@ public:
   unsigned short      GetPathDistance(Waypoint* waypoint);
   unsigned short      GetPathDistance(InstanceDynamicObject* object);
   bool                HasLineOfSight(InstanceDynamicObject* object);
-  Inventory&          GetInventory(void) { return (_inventory); }
+  Inventory&          GetInventory(void)  { return (_inventory);  }
+  Data                GetStatistics(void) { return (_statistics); }
 
 private:
   void                RunMovement(float elapsedTime);
   void                RunMovementNext(float elaspedTime);
 
-  std::list<Waypoint> _path;
-  GoToData            _goToData;
+  std::list<Waypoint>       _path;
+  GoToData                  _goToData;
   
-  Inventory           _inventory;
+  Inventory                 _inventory;
+  DataTree*                 _statistics;
   
   // Line of Sight Tools
   NodePath                  _losPath;
@@ -226,6 +243,18 @@ private:
   asIScriptContext*  _scriptContext;
   asIScriptModule*   _scriptModule;
   asIScriptFunction* _scriptMain;
+};
+
+class ObjectItem : public InstanceDynamicObject
+{
+public:
+  ObjectItem(Level* level, DynamicObject* object, InventoryObject* item);
+
+  void     CallbackActionUse(InstanceDynamicObject* object);
+  void     ProcessCollisions(void) {}
+
+private:
+  InventoryObject*  _item;
 };
 
 template<> struct ObjectType2Code<ObjectDoor>      { enum { Type = ObjectType::Door      }; };
@@ -271,6 +300,8 @@ public:
   InstanceDynamicObject* GetObject(const std::string& name);
   Data                   GetDataEngine(void) { return (_dataEngine); }
   void                   ConsoleWrite(const std::string& str);
+  
+  void                   RemoveObject(InstanceDynamicObject* object);
 
   // Interaction Management
   void                   CallbackActionUse(InstanceDynamicObject* object);
@@ -280,6 +311,7 @@ public:
   
   void                   ActionUse(ObjectCharacter* user, InstanceDynamicObject* target);
   void                   ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object);
+  void                   ActionDropObject(ObjectCharacter* user, InventoryObject* object);
 
   void                   PendingActionTalkTo(InstanceDynamicObject* fromObject);
   void                   PendingActionUse(InstanceDynamicObject* fromObject);

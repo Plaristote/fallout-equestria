@@ -100,6 +100,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "void GoTo(int)",                      asMETHODPR(ObjectCharacter,GoTo, (unsigned int), void), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void GoTo(DynamicObject@, int)",      asMETHODPR(ObjectCharacter,GoTo, (InstanceDynamicObject*, int), void), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "Inventory@ GetInventory()",           asMETHOD(ObjectCharacter,GetInventory), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "Data GetStatistics()",                asMETHOD(ObjectCharacter,GetStatistics), asCALL_THISCALL);
   
   engine->RegisterObjectMethod(doorClass, "void Unlock()",       asMETHOD(ObjectDoor,Unlock), asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "bool IsLocked()",     asMETHOD(ObjectDoor,IsLocked), asCALL_THISCALL);
@@ -121,6 +122,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(levelClass, "DynamicObject@ GetObject(string)",                     asMETHOD(Level,GetObject),           asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           ActionUse(Character@, DynamicObject@)", asMETHOD(Level,ActionUse),           asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           ActionUseObjectOn(Character@, DynamicObject@, Item@)", asMETHOD(Level,ActionUseObjectOn), asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "void           ActionDropObject(Character@, Item@)", asMETHOD(Level,ActionDropObject), asCALL_THISCALL);
 
   engine->RegisterGlobalProperty("Level@ level", &(Level::CurrentLevel));
 }

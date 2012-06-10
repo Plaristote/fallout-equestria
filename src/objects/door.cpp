@@ -34,6 +34,7 @@ InstanceDynamicObject::GoToData ObjectDoor::GetGoToData(InstanceDynamicObject* c
 
   ret.nearest      = 0;
   ret.max_distance = -1;
+  ret.min_distance = 0;
   if (waypoint)
   {
     character->UnprocessCollisions();
