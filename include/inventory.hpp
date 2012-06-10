@@ -19,7 +19,6 @@ public:
   DynamicObject*    CreateDynamicObject(World* world) const;
 
 private:
-  
   template<class C>
   const std::string ExecuteHook(asIScriptFunction* hook, ObjectCharacter* user, C* target);
   
@@ -36,6 +35,8 @@ class Inventory
 {
 public:
   typedef std::list<InventoryObject*> Content;
+  
+  Inventory(void) { _currentWeight = _capacity = 0; }
 
   void             AddObject(InventoryObject*);
   void             DelObject(InventoryObject*);
@@ -43,8 +44,15 @@ public:
   Content&         GetContent(void)       { return (_content); }
   InventoryObject* GetObject(const std::string& name);
 
+  unsigned short   GetCurrentWeight(void) const      { return (_currentWeight); }
+  unsigned short   GetCapacity(void)      const      { return (_capacity);      }
+  void             SetCapacity(unsigned short value) { _capacity = value;       }
+  bool             CanCarry(InventoryObject*);
+
 private:
-  Content _content;
+  Content          _content;
+  unsigned short   _currentWeight;
+  unsigned short   _capacity;
 };
 
 #endif

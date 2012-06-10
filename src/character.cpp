@@ -25,7 +25,11 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   
   // Statistics
   _statistics = DataTree::Factory::JSON("data/charsheets/" + object->charsheet + ".json");
-  
+  if (_statistics)
+  {
+    _inventory.SetCapacity(GetStatistics()["Statistics"]["Carry Weight"]);
+  }
+
   // Script
   _scriptContext = 0;
   _scriptModule  = 0;

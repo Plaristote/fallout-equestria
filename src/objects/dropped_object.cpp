@@ -12,8 +12,15 @@ void ObjectItem::CallbackActionUse(InstanceDynamicObject* user)
   
   if (character)
   {
-    character->GetInventory().AddObject(_item);
-    _level->RemoveObject(this);
+    Inventory& inventory = character->GetInventory();
+    
+    if (inventory.CanCarry(_item))
+    {
+      inventory.AddObject(_item);
+      _level->RemoveObject(this);
+    }
+    else
+      _level->ConsoleWrite(character->GetName() + " can't carry this");
   }
 }
 

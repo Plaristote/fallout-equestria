@@ -440,7 +440,7 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
 {
   if (!object || !target || !user)
   {
-    cout << "[ActionUseObjectOn] Aborted: NullPointer Error" << endl;
+    Script::Engine::ScriptError.Emit("<span class='console-error'>[ActionUseObjectOn] Aborted: NullPointer Error</span>");
     return ;
   }
 
@@ -448,10 +448,8 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
   user->ReachedDestination.Connect(*this, &Level::PendingActionUseObjectOn);
   user->pendingActionOn     = target;
   user->pendingActionObject = object;
-  std::cerr << "ActionUseObjectOn executed" << std::endl;
   if (user == GetPlayer())
     CloseUseObjectOn();
-  std::cerr << "CloseUseObjectOn destroyed" << std::endl;
 }
 
 void Level::ActionDropObject(ObjectCharacter* user, InventoryObject* object)
@@ -461,7 +459,7 @@ void Level::ActionDropObject(ObjectCharacter* user, InventoryObject* object)
   
   if (!user || !object)
   {
-    cout << "[ActionDropObject] Aborted: NullPointer Error" << endl;
+    Script::Engine::ScriptError.Emit("<span class='console-error'>[ActionDropObject] Aborted: NullPointer Error</span>");
     return ;
   }
   user->GetInventory().DelObject(object);

@@ -61,6 +61,7 @@ public:
 
   static GameConsole& Get();
 
+  static void WriteOn(const std::string& string);
   static void ListFunctions();
   static void PrintScenegraph();
   static void PrintChildren(const NodePath& n, int lvl);
