@@ -5,17 +5,18 @@
 # include "inventory.hpp"
 # include "character.hpp"
 
-/*class DroppedObject : public ObjectNode
+class ObjectItem : public InstanceDynamicObject
 {
 public:
-  static ObjectNode* Factory(WindowFramework*, Tilemap&, Characters&, Data);
+  ObjectItem(Level* level, DynamicObject* object, InventoryObject* item);
 
-  DroppedObject(WindowFramework* window, Tilemap& map, InventoryObject& object);
+  void     CallbackActionUse(InstanceDynamicObject* object);
+  void     ProcessCollisions(void) {}
 
-  virtual void  InteractUse(Character* c);
-  
 private:
-  InventoryObject& _object;
-};*/
+  InventoryObject*  _item;
+};
+
+template<> struct ObjectType2Code<ObjectItem> { enum { Type = ObjectType::Item }; };
 
 #endif

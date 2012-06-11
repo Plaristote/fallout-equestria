@@ -9,7 +9,6 @@
 
 # include "timer.hpp"
 # include "datatree.hpp"
-# include "tilemap.hpp"
 # include "scene_camera.hpp"
 # include "mouse.hpp"
 # include "interact_menu.hpp"
@@ -27,242 +26,6 @@
 
 # include "world.h"
 
-/*
- * WARNING This needs to move. C'est pas l'auspice ici.
- */
-class Level;
-
-struct WaypointModifier
-{  
-  virtual void ProcessCollisions(void);
-  void         UnprocessCollisions(void);
-  Waypoint*    GetOccupiedWaypoint(void) const   { return (_waypointOccupied); }
-  void         SetOccupiedWaypoint(Waypoint* wp) { _waypointOccupied = wp;     }
-
-protected:
-  void         WithdrawAllArcs(unsigned int id);
-  void         WithdrawAllArcs(Waypoint* waypoint);
-  void         WithdrawArc(unsigned int id1, unsigned int id2);
-  void         WithdrawArc(Waypoint* first, Waypoint* second);
-
-  Level*                          _level;
-  Waypoint*                       _waypointOccupied;
-  std::list<std::pair<int, int> > _waypointDisconnected;
-
-private:
-  struct WithdrawedArc
-  {
-    WithdrawedArc(Waypoint* first, Waypoint* second, Waypoint::ArcObserver* observer) : first(first), second(second), observer(observer) {}
-    Waypoint              *first, *second;
-    Waypoint::ArcObserver *observer;
-  };
-  typedef std::list<WithdrawedArc>        WithdrawedArcs;
-
-  WithdrawedArcs                          _withdrawedArcs;
-};
-
-enum ObjectType
-{
-  Character, Door, Other
-};
-
-template<class C>
-struct ObjectType2Code { enum { Type = ObjectType::Other }; };
-
-class InstanceDynamicObject : public WaypointModifier
-{
-public:
-  static Observatory::Signal<void (InstanceDynamicObject*)> ActionUse;
-  static Observatory::Signal<void (InstanceDynamicObject*)> ActionUseObjectOn;
-  static Observatory::Signal<void (InstanceDynamicObject*)> ActionUseSkillOn;
-  static Observatory::Signal<void (InstanceDynamicObject*)> ActionTalkTo;
-
-  struct Interaction
-  {
-    Interaction(const std::string& name, InstanceDynamicObject* instance, Observatory::Signal<void (InstanceDynamicObject*)>* signal)
-    : name(name), instance(instance), signal(signal) {}
-
-    std::string                                         name;
-    InstanceDynamicObject*                              instance;
-    Observatory::Signal<void (InstanceDynamicObject*)>* signal;
-  };
-  typedef std::list<Interaction> InteractionList;
-  
-  struct GoToData
-  {
-    Waypoint*              nearest;
-    InstanceDynamicObject* objective;
-    int                    max_distance;
-    int                    min_distance;
-  };
-  
-  InstanceDynamicObject(Level* level, DynamicObject* object) : _object(object)
-  {
-    _type                 = Other;
-    _level                = level;
-    _waypointDisconnected = object->lockedArcs;
-    _waypointOccupied     = object->waypoint;
-
-    if (object->interactions & Interactions::TalkTo)
-      _interactions.push_back(Interaction("talk_to",    this, &ActionTalkTo));
-    if (object->interactions & Interactions::Use)
-      _interactions.push_back(Interaction("use",        this, &ActionUse));
-    if (object->interactions & Interactions::UseObject)
-      _interactions.push_back(Interaction("use_object", this, &ActionUseObjectOn));
-    if (object->interactions & Interactions::UseSkill)
-      _interactions.push_back(Interaction("use_skill",  this, &ActionUseSkillOn));
-  }
-
-  virtual ~InstanceDynamicObject() {}
-
-  virtual void       Run(float elapsedTime) {};
-
-  bool               operator==(NodePath np)             const { return (_object->nodePath.is_ancestor_of(np)); }
-  bool               operator==(const std::string& name) const { return (GetName() == name);                    }
-  std::string        GetName(void)                       const { return (_object->nodePath.get_name());         }
-  NodePath           GetNodePath(void)                   const { return (_object->nodePath);                    }
-  InteractionList&   GetInteractions(void)                     { return (_interactions);                        }
-  const std::string& GetDialog(void)                     const { return (_object->dialog);                      }
-  DynamicObject*     GetDynamicObject(void)                    { return (_object);                              }
-
-  virtual GoToData   GetGoToData(InstanceDynamicObject* character)
-  {
-    GoToData         ret;
-
-    ret.nearest      = _waypointOccupied;
-    ret.objective    = this;
-    ret.max_distance = 0;
-    ret.min_distance = 0;
-    return (ret);
-  }
-
-  template<class C>
-  C*                 Get(void)
-  {
-    if (ObjectType2Code<C>::Type == _type)
-      return (reinterpret_cast<C*>(this));
-    return (0);
-  }
-
-  InstanceDynamicObject*   pendingActionOn;
-  InventoryObject*         pendingActionObject;
-
-  virtual void             CallbackActionUse(InstanceDynamicObject* object) { ThatDoesNothing(); }
-
-protected:
-  unsigned char            _type;
-  DynamicObject*           _object;
-  
-  void                     ThatDoesNothing();
-
-private:
-  InteractionList          _interactions;
-};
-
-class ObjectDoor : public InstanceDynamicObject, public Waypoint::ArcObserver
-{
-public:
-  ObjectDoor(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
-  {
-    _type   = Door;
-    _closed = true;
-    _locked = object->locked;
-    ObserveWaypoints(true);
-  }
-  
-  ~ObjectDoor()
-  {
-    ObserveWaypoints(false);
-  }
-
-  string   GetKeyName() const { return (_object->key); }
-  void     Unlock(void)   { _locked = !_locked; }
-  bool     IsLocked(void) { return (_locked);   }
-  bool     IsOpen(void)   { return (!_closed);  }
-  
-  void     CallbackActionUse(InstanceDynamicObject* object);
-  GoToData GetGoToData(InstanceDynamicObject* character);  
-  void     ObserveWaypoints(bool doObserver);
-  
-  void     ProcessCollisions(void) {}
-
-  bool     CanGoThrough(unsigned char id);
-  void     GoingThrough(void);
-
-private:
-  bool _closed;
-  bool _locked;
-};
-
-class ObjectCharacter : public InstanceDynamicObject
-{
-public:
-  ObjectCharacter(Level* level, DynamicObject* object);
-
-  Observatory::Signal<void (InstanceDynamicObject*)> ReachedDestination;
-  
-  virtual GoToData   GetGoToData(InstanceDynamicObject* character)
-  {
-    GoToData         ret;
-
-    ret.nearest      = _waypointOccupied;
-    ret.objective    = this;
-    ret.max_distance = 0;
-    ret.min_distance = 1;
-    return (ret);
-  }
-
-  void                Run(float elapsedTime);
-  void                GoTo(unsigned int id);
-  void                GoTo(Waypoint* waypoint);
-  void                GoTo(InstanceDynamicObject* object, int max_distance = 0);
-  unsigned short      GetPathDistance(Waypoint* waypoint);
-  unsigned short      GetPathDistance(InstanceDynamicObject* object);
-  bool                HasLineOfSight(InstanceDynamicObject* object);
-  Inventory&          GetInventory(void)  { return (_inventory);  }
-  Data                GetStatistics(void) { return (_statistics); }
-
-private:
-  void                RunMovement(float elapsedTime);
-  void                RunMovementNext(float elaspedTime);
-
-  std::list<Waypoint>       _path;
-  GoToData                  _goToData;
-  
-  Inventory                 _inventory;
-  DataTree*                 _statistics;
-  
-  // Line of Sight Tools
-  NodePath                  _losPath;
-  PT(CollisionRay)          _losRay;
-  PT(CollisionNode)         _losNode;
-  PT(CollisionHandlerQueue) _losHandlerQueue;
-  CollisionTraverser        _losTraverser;
-  
-  // Script
-  asIScriptContext*  _scriptContext;
-  asIScriptModule*   _scriptModule;
-  asIScriptFunction* _scriptMain;
-};
-
-class ObjectItem : public InstanceDynamicObject
-{
-public:
-  ObjectItem(Level* level, DynamicObject* object, InventoryObject* item);
-
-  void     CallbackActionUse(InstanceDynamicObject* object);
-  void     ProcessCollisions(void) {}
-
-private:
-  InventoryObject*  _item;
-};
-
-template<> struct ObjectType2Code<ObjectDoor>      { enum { Type = ObjectType::Door      }; };
-template<> struct ObjectType2Code<ObjectCharacter> { enum { Type = ObjectType::Character }; };
-
-/*
- * Level
- */
 class Level : public AsyncTask
 {
   float ceilingCurrentTransparency;
@@ -273,8 +36,8 @@ public:
 
   ~Level()
   {
-    //std::for_each(_characters.begin(), _characters.end(), [](Character* character) { delete character; });
     AsyncTaskManager::get_global_ptr()->remove(this);
+    std::for_each(_objects.begin(), _objects.end(), [](InstanceDynamicObject* obj) { delete obj; });
     CurrentLevel = 0;
     if (_currentRunningDialog)
       delete _currentRunningDialog;
@@ -284,7 +47,17 @@ public:
       delete _l18n;
   }
 
+  enum State
+  {
+    Normal,
+    Fight,
+    Interrupted
+  };
+
   DoneStatus              do_task(void);
+  void                    SetState(State);
+  State                   GetState(void) const { return (_state); }
+  void                    SetInterrupted(bool);
   void                    TaskCeiling(float elapsedTime);
   
   // World Interactions
@@ -317,11 +90,17 @@ public:
   void                   PendingActionUse(InstanceDynamicObject* fromObject);
   void                   PendingActionUseObjectOn(InstanceDynamicObject* fromObject);
 
+  Observatory::Signal<void (Inventory&)> SignalShelfOpened;
+  
+  // Fight Management
+  void                   StartFigth(ObjectCharacter* starter);
+  void                   NextTurn(void);
+
   // Mouse Management
   enum MouseState
   {
     MouseAction,
-    MouseInteraction,
+    MouseInteraction
   };
 
   void              MouseLeftClicked(void);
@@ -342,10 +121,12 @@ private:
   Mouse             _mouse;
   SceneCamera       _camera;
   Timer             _timer;
-  
-  World*            _world;
-  InstanceObjects   _objects;
-  Characters        _characters;
+  State             _state;
+
+  World*               _world;
+  InstanceObjects      _objects;
+  Characters           _characters;
+  Characters::iterator _itCharacter;
 
   DirectionalLight* _sunLight;
   NodePath          _sunLightNode;

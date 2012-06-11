@@ -202,7 +202,13 @@ bool                Waypoint::operator==(const Waypoint& other) const
 
 bool                Waypoint::operator==(const Waypoint* other) const { return (*this == *other); }
 
-void                Waypoint::Connect(Waypoint* other)
+Waypoint::Arcs::iterator Waypoint::ConnectUnsafe(Waypoint* other)
+{
+  arcs.push_back(Arc(nodePath, other));
+  return (--(arcs.end()));
+}
+
+Waypoint::Arcs::iterator Waypoint::Connect(Waypoint* other)
 {
     Arcs::iterator  it = find(arcs.begin(), arcs.end(), other);
 
@@ -210,7 +216,9 @@ void                Waypoint::Connect(Waypoint* other)
     {
       arcs.push_back(Arc(nodePath, other));
       other->arcs.push_back(Arc(other->nodePath, this));
+      return (--(arcs.end()));
     }
+    return (it);
 }
 
 Waypoint::Arcs::iterator Waypoint::Disconnect(Waypoint* other)
@@ -335,6 +343,7 @@ void Waypoint::SetMouseBox(void)
 Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
 {
   observer = 0;
+#ifdef WAYPOINT_DEBUG
   csegment = new CollisionSegment();
   node     = new CollisionNode("waypointArc");
   node->set_into_collide_mask(CollideMask(0));
@@ -345,6 +354,7 @@ Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
   nodePath.set_pos(0, 0, 0);
   nodePath.show();
   UpdateDirection();
+#endif
 }
 
 void Waypoint::Arc::UpdateDirection(void)
@@ -361,7 +371,9 @@ void Waypoint::Arc::UpdateDirection(void)
 
 void Waypoint::Arc::Destroy(void)
 {
+#ifdef WAYPOINT_DEBUG
     nodePath.remove_node();
+#endif
 }
 
 /* MySqrt */

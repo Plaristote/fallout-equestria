@@ -26,6 +26,9 @@ GameUi::GameUi(WindowFramework* window) : _window(window)
   _mainBar   = new GameMainBar  (window, _rocket->get_context());
   _inventory = new GameInventory(window, _rocket->get_context());
   _pers      = new GamePers     (window, _rocket->get_context());
+  
+  _inventory->VisibilityToggled.Connect(InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  _menu->VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
 
   _mainBar->MenuButtonClicked.EventReceived.Connect     (*this, &GameUi::OpenMenu);
   _mainBar->InventoryButtonClicked.EventReceived.Connect(*this, &GameUi::OpenInventory);

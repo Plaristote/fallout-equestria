@@ -37,12 +37,12 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   if (object->script != "")
   {
     string prefixName = "IA_";
-    string prefixPath = "scripts/";
+    string prefixPath = "scripts/ai/";
 
     _scriptContext = Script::Engine::Get()->CreateContext();
     if (_scriptContext)
     {
-      _scriptModule  = Script::Engine::LoadModule(prefixName + GetName(), prefixPath + object->script);
+      _scriptModule  = Script::Engine::LoadModule(prefixName + GetName(), prefixPath + object->script + ".as");
       if (_scriptModule)
         _scriptMain    = _scriptModule->GetFunctionByDecl("void main(Character@, float)");
     }
@@ -51,12 +51,25 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 
 void ObjectCharacter::Run(float elapsedTime)
 {
-  if (_scriptMain)
+  Level::State state = _level->GetState();
+  
+  if (state == Level::Normal && _scriptMain)
   {
     _scriptContext->Prepare(_scriptMain);
     _scriptContext->SetArgObject(0, this);
     _scriptContext->SetArgFloat(1, elapsedTime);
     _scriptContext->Execute();
+  }
+  else if (state == Level::Fight)
+  {
+    if (!(_scriptFight))
+      _level->NextTurn();
+    else if (!(IsMoving())) // replace with something more appropriate
+    {
+      _scriptContext->Prepare(_scriptFight);
+      _scriptContext->SetArgObject(0, this);
+      _scriptContext->Execute();
+    }
   }
   if (_path.size() > 0)
     RunMovement(elapsedTime);
@@ -101,7 +114,10 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
   if (_waypointOccupied && waypoint)
   {
     if (!(_level->FindPath(_path, *_waypointOccupied, *waypoint)))
-      _level->ConsoleWrite("No path.");
+    {
+      if (_level->GetPlayer() == this)
+        _level->ConsoleWrite("No path.");
+    }
   }
   else
     cout << "Character doesn't have a waypointOccupied" << endl;
@@ -112,7 +128,7 @@ void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max
 {
   if (object == 0)
   {
-    std::cout << "GoTo: NULL pointer to object" << std::endl;
+    Script::Engine::ScriptError.Emit("Character::GoTo: NullPointer Error");
     return ;
   }
   ReachedDestination.DisconnectAll();
@@ -126,18 +142,39 @@ void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max
   if (_waypointOccupied && _goToData.nearest)
   {
     if (!(_level->FindPath(_path, *_waypointOccupied, *_goToData.nearest)))
-      _level->ConsoleWrite("Can't reach.");
+    {
+      if (_level->GetPlayer() == this)
+        _level->ConsoleWrite("Can't reach.");
+    }
     while (_goToData.min_distance && _path.size() > 1)
     {
       _path.erase(--(_path.end()));
       _goToData.min_distance--;
     }
   }
-  else
-    _level->ConsoleWrite("Can't reach.");
 
   ProcessCollisions();
   object->ProcessCollisions();
+}
+
+void                ObjectCharacter::GoToRandomWaypoint(void)
+{
+  if (_waypointOccupied)
+  {
+    _goToData.objective = 0;
+    _path.clear();
+    ReachedDestination.DisconnectAll();
+    UnprocessCollisions();
+    {
+      std::list<Waypoint*>           list = _waypointOccupied->GetSuccessors(0);
+      int                            rit  = rand() % list.size();
+      std::list<Waypoint*>::iterator it   = list.begin();
+
+      for (it = list.begin() ; rit ; --rit, ++it);
+      _path.push_back(**it);
+    }
+    ProcessCollisions();
+  }
 }
 
 void                ObjectCharacter::RunMovementNext(float elapsedTime)

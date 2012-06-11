@@ -12,84 +12,60 @@
 
 # include <panda3d/pointLight.h>
 
-/*class Character;
-
-typedef std::list<Character*> Characters;
-
-class Character : public ObjectNode
+class ObjectCharacter : public InstanceDynamicObject
 {
 public:
-  static ObjectNode*          Factory(WindowFramework*, Tilemap&, Characters&, Data);
+  ObjectCharacter(Level* level, DynamicObject* object);
 
-  template<class T>
-  static Characters::iterator Find(Characters& list, T compare)
+  Observatory::Signal<void (InstanceDynamicObject*)> ReachedDestination;
+  
+  virtual GoToData   GetGoToData(InstanceDynamicObject* character)
   {
-    Characters::iterator it  = list.begin();
-    Characters::iterator end = list.end();
+    GoToData         ret;
 
-    for (; it != end ; ++it)
-    {
-      if ((**it) == compare)
-        break ;
-    }
-    return (it);
+    ret.nearest      = _waypointOccupied;
+    ret.objective    = this;
+    ret.max_distance = 0;
+    ret.min_distance = 1;
+    return (ret);
   }
 
-  Character(WindowFramework* window, Tilemap& map, Data data, Characters& chars);
-  virtual ~Character() {}
+  void                Run(float elapsedTime);
+  void                GoTo(unsigned int id);
+  void                GoTo(Waypoint* waypoint);
+  void                GoTo(InstanceDynamicObject* object, int max_distance = 0);
+  void                GoToRandomWaypoint(void);
+  unsigned short      GetPathDistance(Waypoint* waypoint);
+  unsigned short      GetPathDistance(InstanceDynamicObject* object);
+  bool                HasLineOfSight(InstanceDynamicObject* object);
+  bool                IsMoving(void) const { return (_path.size()); }
+  Inventory&          GetInventory(void)   { return (_inventory);   }
+  Data                GetStatistics(void)  { return (_statistics);  }
 
-  bool               operator==(NodePath comp)           const { return (_root == comp || _root.is_ancestor_of(comp)); }
-  bool               operator==(const std::string& name) const { return (_root.get_name() == name);                    }
-
-  virtual void       Run(float elapsedTime);
-  unsigned short     GoTo(int x, int y);
-  bool               TryToReach(ObjectNode*, int min_distance = 0);
-  bool               CanReach(ObjectNode*, int min_distance = 0);
-  bool               HasLineOfSight(Character*);
-  bool               IsMoving(void) { return (!(_path.empty())); }
-
-  std::string        GetName(void) const      { return (_root.get_name()); }
-  Inventory&         GetInventory(void)       { return (_inventory);       }
-  const Inventory&   GetInventory(void) const { return (_inventory);       }
-  
-  Pathfinding::Node  GetCurrentDestination(void) const;
-
-  Observatory::Signal<void (Character*)> ReachedCase;
-
-  void               DebugShowCollisionSphere(bool set) { (set ? _selfSphereNP.show() : _selfSphereNP.hide()); }
-
-protected:
-  bool              IsArcAccessible(int beg_x, int beg_y, int dest_x, int dest_y);
-
-  typedef std::list<Pathfinding::Node> DirectionPath;
-
-  Inventory     _inventory;
-  DirectionPath _path;
-  bool          _lookingForNewWay;
-  Characters&   _characters;
 private:
-  void DoMovement(float elapsedTime);
+  void                RunMovement(float elapsedTime);
+  void                RunMovementNext(float elaspedTime);
 
-  PT(CollisionSphere)       _selfSphere;
-  PT(CollisionNode)         _selfSphereNode;
-  NodePath                  _selfSphereNP;
-
-  PT(CollisionSphere)       _collisionFov;
-  PT(CollisionNode)         _collisionNode;
-  NodePath                  _collisionPath;
-  CollisionTraverser        _collisionTraverser;
-  PT(CollisionHandlerQueue) _collisionHandlerQueue;
-  Timer                     _timerFov;
-
+  std::list<Waypoint>       _path;
+  GoToData                  _goToData;
+  
+  Inventory                 _inventory;
+  DataTree*                 _statistics;
+  
+  // Line of Sight Tools
+  NodePath                  _losPath;
   PT(CollisionRay)          _losRay;
   PT(CollisionNode)         _losNode;
-  NodePath                  _losPath;
-  CollisionTraverser        _losTraverser;
   PT(CollisionHandlerQueue) _losHandlerQueue;
+  CollisionTraverser        _losTraverser;
+  
+  // Script
+  asIScriptContext*  _scriptContext;
+  asIScriptModule*   _scriptModule;
+  asIScriptFunction* _scriptMain;
+  asIScriptFunction* _scriptFight;
+};
 
-  // Light
-  PT(PointLight) _charLight;
-  NodePath       _charLightNode;
-};*/
+template<> struct ObjectType2Code<ObjectCharacter> { enum { Type = ObjectType::Character }; };
 
 #endif

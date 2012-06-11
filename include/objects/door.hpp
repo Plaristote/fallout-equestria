@@ -2,24 +2,42 @@
 # define OBJECT_DOOR_HPP
 
 # include "objectnode.hpp"
-# include "character.hpp"
 
-/*class Door : public ObjectNode, public Pathfinding::Node::Arc::Observer
+class ObjectDoor : public InstanceDynamicObject, public Waypoint::ArcObserver
 {
 public:
-  static ObjectNode* Factory(WindowFramework*, Tilemap&, Characters&, Data);
+  ObjectDoor(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
+  {
+    _type   = Door;
+    _closed = true;
+    _locked = object->locked;
+    ObserveWaypoints(true);
+  }
   
-  Door(WindowFramework* window, Tilemap& map, Data data);
+  ~ObjectDoor()
+  {
+    ObserveWaypoints(false);
+  }
 
-  virtual void  InteractUse(Character* c);
-  virtual void  ProcessCollision(Pathfinding* map);
+  string   GetKeyName() const { return (_object->key); }
+  void     Unlock(void)   { _locked = !_locked; }
+  bool     IsLocked(void) { return (_locked);   }
+  bool     IsOpen(void)   { return (!_closed);  }
+  
+  void     CallbackActionUse(InstanceDynamicObject* object);
+  GoToData GetGoToData(InstanceDynamicObject* character);  
+  void     ObserveWaypoints(bool doObserver);
+  
+  void     ProcessCollisions(void) {}
 
-  virtual bool  CanGoThrough(Character*);
-  virtual bool  GoingThrough(Character*);
+  bool     CanGoThrough(unsigned char id);
+  void     GoingThrough(void);
 
 private:
-  bool _opened;
-  bool _vertical;
-};*/
+  bool _closed;
+  bool _locked;
+};
+
+template<> struct ObjectType2Code<ObjectDoor>      { enum { Type = ObjectType::Door      }; };
 
 #endif
