@@ -197,16 +197,30 @@ void Level::SetInterrupted(bool set)
   }
 }
 
-void Level::StartFigth(ObjectCharacter* starter)
+void Level::StartFight(ObjectCharacter* starter)
 {
   _itCharacter = std::find(_characters.begin(), _characters.end(), starter);
+  (*_itCharacter)->RestartActionPoints();
   SetState(Fight);
+}
+
+void Level::StopFight(void)
+{
+  if (_state == Fight)
+  {
+    // Check if no hostiles are around
+    SetState(Normal);
+  }
 }
 
 void Level::NextTurn(void)
 {
+  if (_state != Fight)
+    return ;
+  std::cout << "Next Turn" << std::endl;
   if ((++_itCharacter) == _characters.end())
     _itCharacter = _characters.begin();
+  (*_itCharacter)->RestartActionPoints();
 }
 
 AsyncTask::DoneStatus Level::do_task(void)

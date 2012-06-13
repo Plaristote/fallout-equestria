@@ -41,6 +41,9 @@ public:
   bool                IsMoving(void) const { return (_path.size()); }
   Inventory&          GetInventory(void)   { return (_inventory);   }
   Data                GetStatistics(void)  { return (_statistics);  }
+  
+  unsigned short      GetActionPoints() const { return (_actionPoints); }
+  void                RestartActionPoints();
 
 private:
   void                RunMovement(float elapsedTime);
@@ -51,6 +54,8 @@ private:
   
   Inventory                 _inventory;
   DataTree*                 _statistics;
+  
+  unsigned short            _actionPoints;
   
   // Line of Sight Tools
   NodePath                  _losPath;

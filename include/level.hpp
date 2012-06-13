@@ -93,7 +93,8 @@ public:
   Observatory::Signal<void (Inventory&)> SignalShelfOpened;
   
   // Fight Management
-  void                   StartFigth(ObjectCharacter* starter);
+  void                   StartFight(ObjectCharacter* starter);
+  void                   StopFight(void);
   void                   NextTurn(void);
 
   // Mouse Management

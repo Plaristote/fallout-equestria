@@ -10,6 +10,7 @@ void InstanceDynamicObject::ThatDoesNothing() { _level->ConsoleWrite("That does 
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
 {
   _type         = Character;
+  _actionPoints = 0;
   // Line of sight tools
   _losNode      = new CollisionNode("losRay");
   _losNode->set_from_collide_mask(CollideMask(ColMask::Object | ColMask::DynObject));
@@ -34,6 +35,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _scriptContext = 0;
   _scriptModule  = 0;
   _scriptMain    = 0;
+  _scriptFight   = 0;
   if (object->script != "")
   {
     string prefixName = "IA_";
@@ -44,9 +46,24 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
     {
       _scriptModule  = Script::Engine::LoadModule(prefixName + GetName(), prefixPath + object->script + ".as");
       if (_scriptModule)
+      {
         _scriptMain    = _scriptModule->GetFunctionByDecl("void main(Character@, float)");
+	_scriptFight   = _scriptModule->GetFunctionByDecl("void combat(Character@)");
+      }
     }
   }
+}
+
+void ObjectCharacter::RestartActionPoints(void)
+{
+  if (_statistics)
+  {
+    Data stats(_statistics);
+
+    _actionPoints = stats["Statistics"]["Action Points"];
+  }
+  else
+    _actionPoints = 10;
 }
 
 void ObjectCharacter::Run(float elapsedTime)
@@ -62,9 +79,10 @@ void ObjectCharacter::Run(float elapsedTime)
   }
   else if (state == Level::Fight)
   {
-    if (!(_scriptFight))
+    std::cout << "ActionPoints: " << _actionPoints << std::endl;
+    if (_actionPoints == 0)
       _level->NextTurn();
-    else if (!(IsMoving())) // replace with something more appropriate
+    else if (!(IsMoving()) && _scriptFight) // replace with something more appropriate
     {
       _scriptContext->Prepare(_scriptFight);
       _scriptContext->SetArgObject(0, this);
@@ -179,7 +197,11 @@ void                ObjectCharacter::GoToRandomWaypoint(void)
 
 void                ObjectCharacter::RunMovementNext(float elapsedTime)
 {
-  _waypointOccupied = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
+  Waypoint* wp = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
+
+  if (wp != _waypointOccupied)
+    _actionPoints--;
+  _waypointOccupied = wp;
 
   // Has reached object objective, if there is one ?
   if (_goToData.objective)
