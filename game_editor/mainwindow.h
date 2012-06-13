@@ -54,6 +54,7 @@ public slots:
     void PandaButtonRelease(QMouseEvent*);
 
 private slots:
+	void SetDefaultLocalization(void);
     void PandaInitialized(void);
     void LoadProject(void);
     void FilterInit(void);

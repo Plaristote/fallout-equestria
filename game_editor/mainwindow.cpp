@@ -129,10 +129,14 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(ui->scriptDelete,   SIGNAL(clicked()), &tabScript, SLOT(RemoveScript()));
     connect(ui->scriptSearch,   SIGNAL(cursorPositionChanged(int,int)), this, SLOT(FilterInit()));
 
+	connect(&tabDialog, SIGNAL(RequestLocale()), this, SLOT(SetDefaultLocalization()) );
+
     connect(ui->dialogDelete, SIGNAL(clicked()), &tabDialog, SLOT(RemoveDialog()));
     connect(ui->dialogNew,    SIGNAL(clicked()), &tabDialog, SLOT(NewDialog()));
-    connect(ui->dialogList,   SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), &tabDialog, SLOT(SwapDialog(QListWidgetItem*)));
-    connect(ui->dialogSearch, SIGNAL(textChanged(QString)), &tabDialog, SLOT(FilterDialog(QString)));
+    connect(ui->dialogList,   SIGNAL(currentIndexChanged(QString)), &tabDialog, SLOT(SwapDialog(QString)));
+	//connect(ui->dialogEditor, SIGNAL(UpdateLocale()), &tabL18n, SLOT(UpdateLocale()));
+	connect(ui->dialogList,   SIGNAL(currentIndexChanged(QString)), &tabDialog, SLOT(SwapDialog(QString)));
+    //connect(ui->dialogSearch, SIGNAL(textChanged(QString)), &tabDialog, SLOT(FilterDialog(QString)));
 
     connect(ui->languageDelete, SIGNAL(clicked()), &tabL18n, SLOT(RemoveLanguage()));
     connect(ui->languageNew, SIGNAL(clicked()), &tabL18n, SLOT(NewLanguage()));
@@ -197,8 +201,8 @@ void MainWindow::LoadProject()
     if (success)
     {
         tabScript.LoadAllScript();
+		tabL18n.LoadAllLanguages();
         tabDialog.LoadAllDialogs();
-        tabL18n.LoadAllLanguages();
         LoadAllMaps();
     }
     else
@@ -225,8 +229,8 @@ void MainWindow::FilterInit()
 {
     if (ui->scriptSearch->text() == "Search...")
         ui->scriptSearch->setText("");
-    if (ui->dialogSearch->text() == "Search...")
-        ui->dialogSearch->setText("");
+    /*if (ui->dialogSearch->text() == "Search...")
+        ui->dialogSearch->setText("");*/
 }
 
 void MainWindow::CameraMoveBottom()
@@ -281,6 +285,11 @@ void MainWindow::PandaButtonRelease(QMouseEvent*)
     if (dynamicObjectHovered)
       DynamicObjectSelect();
 }
+
+//Pass the locale data from the localization manager to the dialog editor
+void MainWindow::SetDefaultLocalization() {
+	tabDialog.LoadLocale( tabL18n.GetDefaultLanguage() );
+};
 
 void MainWindow::PandaInitialized()
 {

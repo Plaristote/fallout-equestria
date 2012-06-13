@@ -1,6 +1,38 @@
 {
 "rainbow": "Rainbow Dash is clearly the awesomest pony in all of Equestria.",
 "dash": "They don't call her rainbow and dash for nothin' !",
-"flutterbow": "My good sir, would you please state your opinion about Rainbow Dash ?"
+"buck": "Meep! This is a LONG LINE + SHARED LOCALE TEST.  NOTE TO SELF = JSON parser needs some way of escaping quote signs! Right now, that shit gets fucked up. As in, SERIOUSLY a lot.",
+"bite": "A-ha! I am GENIOUS!!!",
+"10000": "My good sir, would you please state your opinion about Rainbow Dash ?",
+"10001": "I don't think you should be able to see this line...",
+"10002": "WHEEEEEE!!!! IT WORKSES !!!!! (????)",
+"10003": "Holla holla get dolla!",
+"10004": "WOOOOOOOT SO FAR IT'S WORKING AND THE DIALOGUE FILE ISN'T EVEN CORRUPT! THIS IS AWESOME!
+
+YEAH!!
+
+YEAH!!!!!!
+
+I wonder what newlines will do???",
+"10006": "Ap ap ap ap ap ap!!!! HELP! HELP! HEEEEELP!
+[locale sharing test]",
+"10007": "Can't hear your question! Life is awesome! That is, as long as no nuclear bombs suddenly start-",
+"10008": "Not a good day?",
+"10009": "What? Isn't burning hair usually a good sign?",
+"10010": "HOLY MOLY IT WORKS!!!",
+"10012": "'k",
+"10013": "lololol",
+"a": "A is the best!",
+"b": "B is the best!",
+"c": "C is the best!",
+"10014": "BOOKS BOOKS BOOKS!!!
+I LOVE BOOKS!
+Don't you love books, too? They're awesome!!! Aren't they? Aren't they? Say they're awesome! Say it! SAY IT!!!",
+"10015": "Heh, yeah, sure. Whatever you say, Twilight...",
+"10016": "YES YES YES! Here, have a book! No, have two! THREE BOOKS! All just for you!",
+"books": "[Stare blankly] ...books, you say?",
+"10018": "Actually, I think they're pretty boring!",
+"10019": "WHAT DID YOU SAY???",
+"10020": "Ahhhh fuck..."
 
 }

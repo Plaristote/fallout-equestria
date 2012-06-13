@@ -25,22 +25,25 @@ class TabDialog : public QObject
 public:
     explicit TabDialog(QObject *parent, Ui::MainWindow* ui);
 
+	void LoadLocale(DataTree* tree) { locale= tree;};
     void LoadAllDialogs(void);
     
 signals:
+	void RequestLocale(void);
     
 private slots:
     void NewDialog(void);
     void LoadDialog(QString filepath);
-    void SwapDialog(QListWidgetItem*);
+    void SwapDialog(QString);
     void RemoveDialog(void);
-    void FilterDialog(QString);
+    //void FilterDialog(QString);
     
 private:
     typedef QMultiMap<QString, DataTree*>         DialogFiles;
 
     Ui::MainWindow*          ui;
     DialogFiles              dialogs;
+	DataTree*				 locale;
 };
 
 #endif // TABDIALOG_H
