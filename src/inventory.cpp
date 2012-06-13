@@ -11,6 +11,7 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
   (*this)["scale"]    = data["scale"].Value();
   (*this)["pos"]["x"] = data["pos"]["x"].Value();
   (*this)["pos"]["y"] = data["pos"]["y"].Value();
+  (*this)["weight"]   = data["weight"].Value();
   (*this)["interactions"]["use"] = "1";
 
   _scriptContext = Script::Engine::Get()->CreateContext();
@@ -57,6 +58,16 @@ InventoryObject::~InventoryObject()
     _scriptContext->Release();
 }
 
+DynamicObject* InventoryObject::CreateDynamicObject(World* world) const
+{
+  DynamicObject* object;
+  Data           self = *this;
+
+  object               = world->AddDynamicObject("item" + Key(), DynamicObject::Item, self["model"], self["texture"]);
+  object->interactions = Interactions::Use;
+  return (object);
+}
+
 const std::string InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target)
 {
   ObjectCharacter* charTarget;
@@ -87,6 +98,7 @@ const std::string InventoryObject::ExecuteHook(asIScriptFunction* hook, ObjectCh
 
 void Inventory::AddObject(InventoryObject* toAdd)
 {
+  _currentWeight += (unsigned short)((*toAdd)["weight"]);
   _content.push_back(toAdd);
 }
 
@@ -95,7 +107,10 @@ void Inventory::DelObject(InventoryObject* toDel)
   Content::iterator it = std::find(_content.begin(), _content.end(), toDel);
 
   if (it != _content.end())
+  {
+    _currentWeight -= (unsigned short)((*toDel)["weight"]);
     _content.erase(it);
+  }
 }
 
 InventoryObject* Inventory::GetObject(const std::string& name)
@@ -103,7 +118,6 @@ InventoryObject* Inventory::GetObject(const std::string& name)
   Content::iterator it  = _content.begin();
   Content::iterator end = _content.end();
   
-  std::cout << "GetObjects" << std::endl;
   for (; it != end ; ++it)
   {
     std::cout << "Object: " << (*it)->GetName() << std::endl;
@@ -111,4 +125,9 @@ InventoryObject* Inventory::GetObject(const std::string& name)
       return (*it);
   }
   return (0);
+}
+
+bool Inventory::CanCarry(InventoryObject* object)
+{
+  return (_capacity >= _currentWeight + (unsigned short)((*object)["weight"]));
 }

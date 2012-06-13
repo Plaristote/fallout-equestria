@@ -1,5 +1,9 @@
 #include "globals.hpp"
 #include "level.hpp"
+#include "astar.hpp"
+
+#include "objects/door.hpp"
+#include "objects/shelf.hpp"
 
 using namespace std;
 
@@ -14,6 +18,9 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   _camera(window, window->get_camera_group()), _gameUi(window)
 {
   CurrentLevel = this;
+  _state       = Normal;
+  
+  _gameUi.InterfaceOpened.Connect(*this, &Level::SetInterrupted);
 
   _l18n  = DataTree::Factory::JSON("data/l18n/english.json");
   _items = DataTree::Factory::JSON("data/objects.json");
@@ -51,14 +58,15 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   std::ifstream file;
   std::string   fullpath = "maps/" + filename + ".blob";
 
-  file.open(fullpath.c_str(),ios::binary);
+  file.open(fullpath.c_str(), ios::binary);
   if (file.is_open())
   {
     try
     {
-      long  begin, end;
-      long  size;
-      char* raw;
+      Utils::Packet* packet;
+      long           begin, end;
+      long           size;
+      char*          raw;
 
       begin     = file.tellg();
       file.seekg(0, std::ios::end);
@@ -70,10 +78,7 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
       file.close();
       raw[size] = 0;
 
-      Utils::Packet* packet;
-
       packet = new Utils::Packet(raw, size);
-
       _world->UnSerialize(*packet);
 
       delete   packet;
@@ -86,7 +91,7 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   }
   else
     std::cout << "Blob file not found" << std::endl;
-  
+
   World::DynamicObjects::iterator it  = _world->dynamicObjects.begin();
   World::DynamicObjects::iterator end = _world->dynamicObjects.end();
 
@@ -101,13 +106,13 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
 	  ObjectCharacter* character = new ObjectCharacter(this, &object);
 	  
 	  _characters.push_back(character);
-	  instance = character;
         }
 	break ;
       case DynamicObject::Door:
 	instance = new ObjectDoor(this, &object);
 	break ;
       case DynamicObject::Shelf:
+	instance = new ObjectShelf(this, &object);
 	break ;
       case DynamicObject::Locker:
 	break ;
@@ -115,11 +120,12 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
     if (instance != 0)
       _objects.push_back(instance);
   });
-  
+  _itCharacter = _characters.end();
+
   _world->SetWaypointsVisible(false);
-  
+
   InventoryObject* object = new InventoryObject(Data(_items)["Key"]);
-  
+
   GetPlayer()->GetInventory().AddObject(object);
 }
 
@@ -171,10 +177,56 @@ ObjectCharacter* Level::GetPlayer(void)
   return (_characters.front());
 }
 
+void Level::SetState(State state)
+{
+  _state = state;
+  if (state == Normal)
+    _itCharacter = _characters.end();
+}
+
+void Level::SetInterrupted(bool set)
+{
+  if (set)
+    SetState(Interrupted);
+  else
+  {
+    if (_itCharacter == _characters.end())
+      SetState(Normal);
+    else
+      SetState(Fight);
+  }
+}
+
+void Level::StartFight(ObjectCharacter* starter)
+{
+  _itCharacter = std::find(_characters.begin(), _characters.end(), starter);
+  (*_itCharacter)->RestartActionPoints();
+  SetState(Fight);
+}
+
+void Level::StopFight(void)
+{
+  if (_state == Fight)
+  {
+    // Check if no hostiles are around
+    SetState(Normal);
+  }
+}
+
+void Level::NextTurn(void)
+{
+  if (_state != Fight)
+    return ;
+  std::cout << "Next Turn" << std::endl;
+  if ((++_itCharacter) == _characters.end())
+    _itCharacter = _characters.begin();
+  (*_itCharacter)->RestartActionPoints();
+}
+
 AsyncTask::DoneStatus Level::do_task(void)
 {
   // FPS COUNTER NO PSTAT
-  /*{
+  {
     static Timer          timer;
     static unsigned short fps = 0;
 
@@ -185,12 +237,12 @@ AsyncTask::DoneStatus Level::do_task(void)
       timer.Restart();
     }
     fps++;
-  }*/
+  }
   
   float elapsedTime = _timer.GetElapsedTime();
 
   // TEST SUNLIGHT MOONLIGHT
-  {
+  /*{
     static Timer         lightTimer;
     static unsigned char dayStep    = 1;
     static unsigned int  stepLength = 10;
@@ -218,15 +270,29 @@ AsyncTask::DoneStatus Level::do_task(void)
       _sunLight->set_color(colorSteps[dayStep]);
       lightTimer.Restart();
     }
-  }
+  }*/
   
   _mouse.Run();
   _camera.Run(elapsedTime);
 
-  for_each(_objects.begin(), _objects.end(),       [elapsedTime](InstanceDynamicObject* object) { object->Run(elapsedTime); });
-  for_each(_characters.begin(), _characters.end(), [](ObjectCharacter* character)               { character->UnprocessCollisions(); });
-  for_each(_characters.begin(), _characters.end(), [](ObjectCharacter* character)               { character->ProcessCollisions(); });
-  //_tilemap.ResetPathfinding();
+  switch (_state)
+  {
+    case Fight:
+      for_each(_objects.begin(), _objects.end(),       [elapsedTime](InstanceDynamicObject* object) { object->Run(elapsedTime); });
+      (*_itCharacter)->Run(elapsedTime);
+      break ;
+    case Normal:
+      for_each(_objects.begin(), _objects.end(),       [elapsedTime](InstanceDynamicObject* object) { object->Run(elapsedTime); });
+      for_each(_characters.begin(), _characters.end(), [elapsedTime](ObjectCharacter* character)
+      {
+	character->Run(elapsedTime);
+	character->UnprocessCollisions();
+	character->ProcessCollisions();
+      });
+      break ;
+    case Interrupted:
+      break ;
+  }
   TaskCeiling(elapsedTime);
   _timer.Restart();
   return AsyncTask::DS_cont;
@@ -256,15 +322,39 @@ void Level::TaskCeiling(float elapsedTime)
  */
 InstanceDynamicObject* Level::FindObjectFromNode(NodePath node)
 {
-  InstanceObjects::iterator cur = _objects.begin();
-  
-  while (cur != _objects.end())
   {
-    if ((**cur) == node)
-      return (*cur);
-    ++cur;
+    InstanceObjects::iterator cur = _objects.begin();
+    
+    while (cur != _objects.end())
+    {
+      if ((**cur) == node)
+	return (*cur);
+      ++cur;
+    }
+  }
+  {
+    Characters::iterator      cur = _characters.begin();
+    
+    while (cur != _characters.end())
+    {
+      if ((**cur) == node)
+	return (*cur);
+      ++cur;
+    }
   }
   return (0);
+}
+
+void                   Level::RemoveObject(InstanceDynamicObject* object)
+{
+  InstanceObjects::iterator it = std::find(_objects.begin(), _objects.end(), object);
+  
+  if (it != _objects.end())
+  {
+    _world->DeleteDynamicObject((*it)->GetDynamicObject());
+    delete (*it);
+    _objects.erase(it);
+  }
 }
 
 /*
@@ -283,7 +373,7 @@ void Level::MouseLeftClicked(void)
   const MouseHovering& hovering = _mouse.Hovering();
   
   cout << "Mouse Left Clicked" << endl;
-  if (_mouseActionBlocked)
+  if (_mouseActionBlocked || _state == Interrupted)
     return ;
   switch (_mouseState)
   {
@@ -313,11 +403,23 @@ void Level::MouseLeftClicked(void)
 	InstanceDynamicObject* object = FindObjectFromNode(hovering.dynObject);
 
 	if (_currentInteractMenu)
+	{
 	  delete _currentInteractMenu;
+	  _currentInteractMenu = 0;
+	}
 	if (object && object->GetInteractions().size() != 0)
 	{
 	  _currentInteractMenu = new InteractMenu(_window, *object);	  
 	  _camera.SetEnabledScroll(false);
+	}
+	else
+	{
+	  if (!object)
+	    cout << "Object does not exist" << endl;
+	  else if (object->GetInteractions().size() == 0)
+	    cout << "Object has no interactions" << endl;
+	  else
+	    cout << "This is impossible" << endl;
 	}
       }
       break ;
@@ -369,6 +471,7 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
     _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningDialog);
     _mouseActionBlocked = true;
     _camera.SetEnabledScroll(false);
+    SetInterrupted(true);
   }
   else
   {
@@ -390,6 +493,7 @@ void Level::CallbackActionUseObjectOn(InstanceDynamicObject* target)
   _currentUseObjectOn->ObjectSelected.Connect(*this, &Level::SelectedUseObjectOn);
   _mouseActionBlocked = true;
   _camera.SetEnabledScroll(false);
+  SetInterrupted(true);
   GetPlayer()->pendingActionOn = target;
 }
 
@@ -428,12 +532,7 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
 {
   if (!object || !target || !user)
   {
-    if (!object)
-      std::cerr << "ActionUseObjectOn:: unexisting object" << std::endl;
-    if (!target)
-      std::cerr << "ActionUseObjectOn:: unexisting target" << std::endl;
-    if (!user)
-      std::cerr << "ActionUseObjectOn:: unexisting user" << std::endl;
+    Script::Engine::ScriptError.Emit("<span class='console-error'>[ActionUseObjectOn] Aborted: NullPointer Error</span>");
     return ;
   }
 
@@ -441,10 +540,26 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
   user->ReachedDestination.Connect(*this, &Level::PendingActionUseObjectOn);
   user->pendingActionOn     = target;
   user->pendingActionObject = object;
-  std::cerr << "ActionUseObjectOn executed" << std::endl;
   if (user == GetPlayer())
     CloseUseObjectOn();
-  std::cerr << "CloseUseObjectOn destroyed" << std::endl;
+}
+
+void Level::ActionDropObject(ObjectCharacter* user, InventoryObject* object)
+{
+  ObjectItem* item;
+  Waypoint*   waypoint;
+  
+  if (!user || !object)
+  {
+    Script::Engine::ScriptError.Emit("<span class='console-error'>[ActionDropObject] Aborted: NullPointer Error</span>");
+    return ;
+  }
+  user->GetInventory().DelObject(object);
+  waypoint = user->GetOccupiedWaypoint();
+  item     = new ObjectItem(this, object->CreateDynamicObject(_world), object);
+  item->SetOccupiedWaypoint(waypoint);
+  item->GetDynamicObject()->nodePath.set_pos(waypoint->nodePath.get_pos());
+  _objects.push_back(item);
 }
 
 void Level::CloseRunningDialog(void)
@@ -453,6 +568,7 @@ void Level::CloseRunningDialog(void)
     _currentRunningDialog->Destroy();
   _camera.SetEnabledScroll(true);
   _mouseActionBlocked = false;
+  SetInterrupted(false);
 }
 
 void Level::CloseUseObjectOn(void)
@@ -461,4 +577,5 @@ void Level::CloseUseObjectOn(void)
     _currentUseObjectOn->Destroy();
   _camera.SetEnabledScroll(true);
   _mouseActionBlocked = false;
+  SetInterrupted(false);
 }

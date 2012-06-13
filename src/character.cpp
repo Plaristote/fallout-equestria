@@ -10,6 +10,7 @@ void InstanceDynamicObject::ThatDoesNothing() { _level->ConsoleWrite("That does 
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
 {
   _type         = Character;
+  _actionPoints = 0;
   // Line of sight tools
   _losNode      = new CollisionNode("losRay");
   _losNode->set_from_collide_mask(CollideMask(ColMask::Object | ColMask::DynObject));
@@ -23,33 +24,70 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _losHandlerQueue = new CollisionHandlerQueue();
   _losTraverser.add_collider(_losPath, _losHandlerQueue);  
   
+  // Statistics
+  _statistics = DataTree::Factory::JSON("data/charsheets/" + object->charsheet + ".json");
+  if (_statistics)
+  {
+    _inventory.SetCapacity(GetStatistics()["Statistics"]["Carry Weight"]);
+  }
+
   // Script
   _scriptContext = 0;
   _scriptModule  = 0;
   _scriptMain    = 0;
+  _scriptFight   = 0;
   if (object->script != "")
   {
     string prefixName = "IA_";
-    string prefixPath = "scripts/";
+    string prefixPath = "scripts/ai/";
 
     _scriptContext = Script::Engine::Get()->CreateContext();
     if (_scriptContext)
     {
-      _scriptModule  = Script::Engine::LoadModule(prefixName + GetName(), prefixPath + object->script);
+      _scriptModule  = Script::Engine::LoadModule(prefixName + GetName(), prefixPath + object->script + ".as");
       if (_scriptModule)
+      {
         _scriptMain    = _scriptModule->GetFunctionByDecl("void main(Character@, float)");
+	_scriptFight   = _scriptModule->GetFunctionByDecl("void combat(Character@)");
+      }
     }
   }
 }
 
+void ObjectCharacter::RestartActionPoints(void)
+{
+  if (_statistics)
+  {
+    Data stats(_statistics);
+
+    _actionPoints = stats["Statistics"]["Action Points"];
+  }
+  else
+    _actionPoints = 10;
+}
+
 void ObjectCharacter::Run(float elapsedTime)
 {
-  if (_scriptMain)
+  Level::State state = _level->GetState();
+  
+  if (state == Level::Normal && _scriptMain)
   {
     _scriptContext->Prepare(_scriptMain);
     _scriptContext->SetArgObject(0, this);
     _scriptContext->SetArgFloat(1, elapsedTime);
     _scriptContext->Execute();
+  }
+  else if (state == Level::Fight)
+  {
+    std::cout << "ActionPoints: " << _actionPoints << std::endl;
+    if (_actionPoints == 0)
+      _level->NextTurn();
+    else if (!(IsMoving()) && _scriptFight) // replace with something more appropriate
+    {
+      _scriptContext->Prepare(_scriptFight);
+      _scriptContext->SetArgObject(0, this);
+      _scriptContext->Execute();
+    }
   }
   if (_path.size() > 0)
     RunMovement(elapsedTime);
@@ -94,7 +132,10 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
   if (_waypointOccupied && waypoint)
   {
     if (!(_level->FindPath(_path, *_waypointOccupied, *waypoint)))
-      _level->ConsoleWrite("No path.");
+    {
+      if (_level->GetPlayer() == this)
+        _level->ConsoleWrite("No path.");
+    }
   }
   else
     cout << "Character doesn't have a waypointOccupied" << endl;
@@ -105,7 +146,7 @@ void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max
 {
   if (object == 0)
   {
-    std::cout << "GoTo: NULL pointer to object" << std::endl;
+    Script::Engine::ScriptError.Emit("Character::GoTo: NullPointer Error");
     return ;
   }
   ReachedDestination.DisconnectAll();
@@ -119,18 +160,48 @@ void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max
   if (_waypointOccupied && _goToData.nearest)
   {
     if (!(_level->FindPath(_path, *_waypointOccupied, *_goToData.nearest)))
-      _level->ConsoleWrite("Can't reach.");
+    {
+      if (_level->GetPlayer() == this)
+        _level->ConsoleWrite("Can't reach.");
+    }
+    while (_goToData.min_distance && _path.size() > 1)
+    {
+      _path.erase(--(_path.end()));
+      _goToData.min_distance--;
+    }
   }
-  else
-    _level->ConsoleWrite("Can't reach.");
 
   ProcessCollisions();
   object->ProcessCollisions();
 }
 
+void                ObjectCharacter::GoToRandomWaypoint(void)
+{
+  if (_waypointOccupied)
+  {
+    _goToData.objective = 0;
+    _path.clear();
+    ReachedDestination.DisconnectAll();
+    UnprocessCollisions();
+    {
+      std::list<Waypoint*>           list = _waypointOccupied->GetSuccessors(0);
+      int                            rit  = rand() % list.size();
+      std::list<Waypoint*>::iterator it   = list.begin();
+
+      for (it = list.begin() ; rit ; --rit, ++it);
+      _path.push_back(**it);
+    }
+    ProcessCollisions();
+  }
+}
+
 void                ObjectCharacter::RunMovementNext(float elapsedTime)
 {
-  _waypointOccupied = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
+  Waypoint* wp = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
+
+  if (wp != _waypointOccupied)
+    _actionPoints--;
+  _waypointOccupied = wp;
 
   // Has reached object objective, if there is one ?
   if (_goToData.objective)

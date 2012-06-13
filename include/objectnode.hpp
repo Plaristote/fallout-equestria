@@ -5,8 +5,9 @@
 # include <panda3d/pandaSystem.h>
 # include <panda3d/texturePool.h>
 # include "datatree.hpp"
-# include "tilemap.hpp"
 # include "observatory.hpp"
+# include "world.h"
+# include "inventory.hpp"
 
 //HAIL MICROSOFT
 #ifdef WIN32
@@ -16,59 +17,109 @@ static inline double round(double val)
 }
 #endif
 
-/*class Character;
+class Level;
 
-class ObjectNode : public MapElement
+struct WaypointModifier
+{  
+  virtual void ProcessCollisions(void);
+  void         UnprocessCollisions(void);
+  int          GetOccupiedWaypointAsInt(void) const { return (_waypointOccupied->id); }
+  Waypoint*    GetOccupiedWaypoint(void)     const  { return (_waypointOccupied);     }
+  void         SetOccupiedWaypoint(Waypoint* wp)    { _waypointOccupied = wp;         }
+
+protected:
+  void         WithdrawAllArcs(unsigned int id);
+  void         WithdrawAllArcs(Waypoint* waypoint);
+  void         WithdrawArc(unsigned int id1, unsigned int id2);
+  void         WithdrawArc(Waypoint* first, Waypoint* second);
+
+  Level*                          _level;
+  Waypoint*                       _waypointOccupied;
+  std::list<std::pair<int, int> > _waypointDisconnected;
+
+private:
+  struct WithdrawedArc
+  {
+    WithdrawedArc(Waypoint* first, Waypoint* second, Waypoint::ArcObserver* observer) : first(first), second(second), observer(observer) {}
+    Waypoint              *first, *second;
+    Waypoint::ArcObserver *observer;
+  };
+  typedef std::list<WithdrawedArc>        WithdrawedArcs;
+
+  WithdrawedArcs                          _withdrawedArcs;
+};
+
+enum ObjectType
+{
+  Character, Door, Shelf, Locker, Item, Other
+};
+
+template<class C>
+struct ObjectType2Code { enum { Type = ObjectType::Other }; };
+
+class InstanceDynamicObject : public WaypointModifier
 {
 public:
-  static Observatory::Signal<void (ObjectNode*)> ActionUse;
-  static Observatory::Signal<void (ObjectNode*)> ActionUseObjectOn;
-  static Observatory::Signal<void (ObjectNode*)> ActionUseSkillOn;
-  static Observatory::Signal<void (ObjectNode*)> ActionTalkTo;
+  static Observatory::Signal<void (InstanceDynamicObject*)> ActionUse;
+  static Observatory::Signal<void (InstanceDynamicObject*)> ActionUseObjectOn;
+  static Observatory::Signal<void (InstanceDynamicObject*)> ActionUseSkillOn;
+  static Observatory::Signal<void (InstanceDynamicObject*)> ActionTalkTo;
 
   struct Interaction
   {
-    std::string                              name;
-    ObjectNode*                              objectNode;
-    Observatory::Signal<void (ObjectNode*)>* triggered;
+    Interaction(const std::string& name, InstanceDynamicObject* instance, Observatory::Signal<void (InstanceDynamicObject*)>* signal)
+    : name(name), instance(instance), signal(signal) {}
+
+    std::string                                         name;
+    InstanceDynamicObject*                              instance;
+    Observatory::Signal<void (InstanceDynamicObject*)>* signal;
   };
-  typedef std::list<Interaction> Interactions;
+  typedef std::list<Interaction> InteractionList;
   
-  ObjectNode(WindowFramework* window, Tilemap& map, Data data);
-  ObjectNode(WindowFramework* window, Tilemap& map) : _window(window), _map(map)
+  struct GoToData
   {
-    _map.AddMapElement(this);
+    Waypoint*              nearest;
+    InstanceDynamicObject* objective;
+    int                    max_distance;
+    int                    min_distance;
+  };
+  
+  InstanceDynamicObject(Level* level, DynamicObject* object);
+  virtual ~InstanceDynamicObject() {}
+
+  virtual void       Run(float elapsedTime) {};
+
+  bool               operator==(NodePath np)             const { return (_object->nodePath.is_ancestor_of(np)); }
+  bool               operator==(const std::string& name) const { return (GetName() == name);                    }
+  std::string        GetName(void)                       const { return (_object->nodePath.get_name());         }
+  NodePath           GetNodePath(void)                   const { return (_object->nodePath);                    }
+  InteractionList&   GetInteractions(void)                     { return (_interactions);                        }
+  const std::string& GetDialog(void)                     const { return (_object->dialog);                      }
+  DynamicObject*     GetDynamicObject(void)                    { return (_object);                              }
+  virtual GoToData   GetGoToData(InstanceDynamicObject* character);
+
+  template<class C>
+  C*                 Get(void)
+  {
+    if (ObjectType2Code<C>::Type == _type)
+      return (reinterpret_cast<C*>(this));
+    return (0);
   }
 
-  ~ObjectNode()
-  {
-    _map.DelMapElement(this);
-  }
+  InstanceDynamicObject*   pendingActionOn;
+  InventoryObject*         pendingActionObject;
 
-  bool          operator==(NodePath comp) const  { return (_root == comp);                    }
-  bool          HasUnitId(const std::string& id) { return (_root.get_tag("character") == id); }
-
-  virtual void  Run(float elapsedTime);
-
-  void          ForceCurrentCase(int x, int y);
-  void          ForceClosestCase(void);
-
-  Interactions&      GetInteractions(void)        { return (_interactions); }
-  const std::string& GetDialog(void) const        { return (_dialog);       }
-  virtual void       InteractUse(Character* c)    { InteractDoesNothing(c); }
-  virtual void       InteractTalkTo(Character* c) { InteractDoesNothing(c); }
+  virtual void             CallbackActionUse(InstanceDynamicObject* object) { ThatDoesNothing(); }
 
 protected:
-  void          InteractDoesNothing(Character* c) { std::cout << "[GameLog] That does nothing" << std::endl; }
-  void          LoadInteractions(Data);
+  unsigned char            _type;
+  DynamicObject*           _object;
+  
+  void                     ThatDoesNothing();
 
-  WindowFramework* _window;
-  Tilemap&         _map;
-  NodePath         _root;
-  PT(Texture)      _tex;
+private:
+  InteractionList          _interactions;
+};
 
-  Interactions _interactions;
-  std::string  _dialog;
-};*/
 
 #endif

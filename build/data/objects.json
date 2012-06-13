@@ -2,9 +2,10 @@
 
 "Key": {
          "icon":    "key.png",
-         "texture": "key.png",
-         "model":   "lockpad.obj",
+         "texture": "lpip.png",
+         "model":   "horse.obj",
          "scale":   1,
+         "weight":  5,
          "script": {
                      "file": "objectsMain.as",
                      "hookDoors": "UseKeyOnDoor"

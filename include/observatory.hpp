@@ -119,6 +119,7 @@ namespace Observatory
 
       while (_observers.begin() != end)
         _observers.erase(_observers.begin());
+      _iterator = _observers.end();
     }
 
     inline int ObserverCount(void) const
@@ -225,6 +226,7 @@ namespace Observatory
 
       while (_observers.begin() != end)
         _observers.erase(_observers.begin());
+      _iterator = _observers.end();
     }    
 
     inline int ObserverCount(void) const
@@ -331,6 +333,7 @@ namespace Observatory
 
       while (_observers.begin() != end)
         _observers.erase(_observers.begin());
+      _iterator = _observers.end();
     }    
 
     inline int ObserverCount(void) const

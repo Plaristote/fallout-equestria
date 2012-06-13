@@ -43,6 +43,11 @@ namespace asData
   float       getAsFloat(Data* obj)                               { return (*obj);                     }
 }
 
+namespace asUtils
+{
+  InstanceDynamicObject* CharacterAsObject(ObjectCharacter* character) { return (character); }
+}
+
 struct asConsoleOutput
 {
   void OutputError(std::string str) { std::cout << str << std::endl; }
@@ -58,7 +63,15 @@ void AngelScriptInitialize(void)
   engine->RegisterGlobalFunction("void Cout(string)", asFUNCTION(AngelCout), asCALL_CDECL);
   engine->RegisterGlobalFunction("void LF()", asFUNCTION( GameConsole::ListFunctions ), asCALL_CDECL);
   engine->RegisterGlobalFunction("void PrintScenegraph()", asFUNCTION( GameConsole::PrintScenegraph ), asCALL_CDECL);
+  engine->RegisterGlobalFunction("void Write(string)", asFUNCTION(GameConsole::WriteOn), asCALL_CDECL);
 
+  const char* timerClass = "Timer";
+  engine->RegisterObjectType     (timerClass, sizeof(Timer), asOBJ_VALUE | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_DESTRUCTOR);
+  engine->RegisterObjectBehaviour(timerClass, asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Timer::asConstructor), asCALL_CDECL_OBJLAST);
+  engine->RegisterObjectBehaviour(timerClass, asBEHAVE_DESTRUCT,  "void f()", asFUNCTION(Timer::asDestructor),  asCALL_CDECL_OBJLAST);
+  engine->RegisterObjectMethod   (timerClass, "float GetElapsedTime()",       asMETHOD(Timer,GetElapsedTime), asCALL_THISCALL);
+  engine->RegisterObjectMethod   (timerClass, "void  Restart()",              asMETHOD(Timer,Restart),        asCALL_THISCALL);
+  
   const char* dataClass = "Data";
   engine->RegisterObjectType     (dataClass, sizeof(Data), asOBJ_VALUE | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_DESTRUCTOR | asOBJ_APP_CLASS_ASSIGNMENT);
   engine->RegisterObjectBehaviour(dataClass, asBEHAVE_CONSTRUCT, "void f()",   asFUNCTION(asData::Constructor),    asCALL_CDECL_OBJLAST);
@@ -86,7 +99,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(inventoryClass, "Item@ GetObject(string)",  asMETHODPR(Inventory,GetObject, (const string&), InventoryObject*), asCALL_THISCALL);
   
   engine->RegisterObjectMethod(itemClass, "string GetName()", asMETHOD(InventoryObject,GetName), asCALL_THISCALL);
-  
+
   const char* dynObjectClass = "DynamicObject";
   const char* charClass      = "Character";
   const char* doorClass      = "Door";
@@ -99,8 +112,14 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "bool HasLineOfSight(DynamicObject@)", asMETHOD(ObjectCharacter,HasLineOfSight), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void GoTo(int)",                      asMETHODPR(ObjectCharacter,GoTo, (unsigned int), void), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void GoTo(DynamicObject@, int)",      asMETHODPR(ObjectCharacter,GoTo, (InstanceDynamicObject*, int), void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "void GoToRandomWaypoint()",           asMETHOD(ObjectCharacter,GoToRandomWaypoint), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "int  GetPathDistance(DynamicObject@)",asMETHODPR(ObjectCharacter,GetPathDistance, (InstanceDynamicObject*), unsigned short), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "Inventory@ GetInventory()",           asMETHOD(ObjectCharacter,GetInventory), asCALL_THISCALL);
-  
+  engine->RegisterObjectMethod(charClass, "Data GetStatistics()",                asMETHOD(ObjectCharacter,GetStatistics), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "int  GetCurrentWaypoint() const",     asMETHOD(ObjectCharacter,GetOccupiedWaypointAsInt), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "bool IsMoving() const",               asMETHOD(ObjectCharacter,IsMoving), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "DynamicObject@ AsObject()",           asFUNCTION(asUtils::CharacterAsObject), asCALL_CDECL_OBJLAST);
+
   engine->RegisterObjectMethod(doorClass, "void Unlock()",       asMETHOD(ObjectDoor,Unlock), asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "bool IsLocked()",     asMETHOD(ObjectDoor,IsLocked), asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "bool IsOpen()",       asMETHOD(ObjectDoor,IsOpen), asCALL_THISCALL);
@@ -121,6 +140,10 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(levelClass, "DynamicObject@ GetObject(string)",                     asMETHOD(Level,GetObject),           asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           ActionUse(Character@, DynamicObject@)", asMETHOD(Level,ActionUse),           asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           ActionUseObjectOn(Character@, DynamicObject@, Item@)", asMETHOD(Level,ActionUseObjectOn), asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "void           ActionDropObject(Character@, Item@)",   asMETHOD(Level,ActionDropObject),    asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "void           StartFight(Character@)",                asMETHOD(Level,StartFight),          asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "void           StopFight()",                           asMETHOD(Level,StopFight),           asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "void           NextTurn()",                            asMETHOD(Level,NextTurn),            asCALL_THISCALL);
 
   engine->RegisterGlobalProperty("Level@ level", &(Level::CurrentLevel));
 }

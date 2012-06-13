@@ -7,12 +7,10 @@
 # include <algorithm>
 # include <iostream>
 
-# ifndef WIN32
- typedef int32_t	my_int32;
-# else
+# ifdef WIN32
 #  include <cstdint>
- typedef int            my_int32; // TODO: Finding out why __int32 fuck that shit up.
 # endif
+typedef int32_t	my_int32;
 
 /*! \namespace Utils
  * \brief Various essentials utilities for all-purpose programming

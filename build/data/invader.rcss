@@ -116,7 +116,35 @@ h1
 	shadow-color: black;
 }
 
+#console_output
+{
+  shadow-font-effect: shadow;
+  shadow-offset: 1px 1px;
+  shadow-color: black;
+  font-weight: bold;
+  color: rgb(0%, 100%, 0%);
+}
 
+.console-error
+{
+  font-weight: bold;
+  color: rgb(100%, 0%, 0%);
+}
+
+.console-as-error
+{
+  color: rgb(20%, 20%, 100%);
+}
+
+.console-write
+{
+  color: rgb(100%, 100%, 100%);
+}
+
+.console-write-output
+{
+  font-weight: normal;
+}
 
 input,
 select,

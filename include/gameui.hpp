@@ -61,6 +61,7 @@ public:
 
   static GameConsole& Get();
 
+  static void WriteOn(const std::string& string);
   static void ListFunctions();
   static void PrintScenegraph();
   static void PrintChildren(const NodePath& n, int lvl);
@@ -79,12 +80,12 @@ private:
   void Execute(Rocket::Core::Event&);
   void Output(const std::string str);
 
-  std::vector<std::string>		_history;
+  std::vector<std::string>      _history;
   vector<std::string>::iterator _histIter;
-  
+
   WindowFramework*               _window;
   Rocket::Core::ElementDocument* _root;
-  Rocket::Core::Element*		 _input;
+  Rocket::Core::Element*         _input;
   std::string                    _currentLine;
   asIScriptContext*              _scriptContext;
   Observatory::ObserverId        _observerError;
@@ -112,9 +113,11 @@ public:
   GameMenu&              GetMenu(void) { return (*_menu); }
   Rocket::Core::Context* GetContext() { return (_rocket->get_context()); }
 
-  void      OpenMenu(Rocket::Core::Event&);
-  void      OpenInventory(Rocket::Core::Event&);
-  void      OpenPers(Rocket::Core::Event&);
+  Observatory::Signal<void (bool)> InterfaceOpened;
+  
+  void                   OpenMenu(Rocket::Core::Event&);
+  void                   OpenInventory(Rocket::Core::Event&);
+  void                   OpenPers(Rocket::Core::Event&);
 
 private:
   WindowFramework*       _window;

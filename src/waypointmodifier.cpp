@@ -14,14 +14,24 @@ void         WaypointModifier::ProcessCollisions(void)
 
 void         WaypointModifier::UnprocessCollisions(void)
 {
+  static float average = 0;
+  Timer timer;
+
   std::for_each(_withdrawedArcs.begin(), _withdrawedArcs.end(), [this](WithdrawedArc& arcs)
   {
-    arcs.first->Connect(arcs.second);
-    arcs.second->Connect(arcs.first);
-    arcs.first->GetArcTo(arcs.second->id)->observer = arcs.observer;
-    arcs.second->GetArcTo(arcs.first->id)->observer = arcs.observer;
+    Waypoint::Arcs::iterator it;
+
+    it = arcs.first->ConnectUnsafe(arcs.second);
+    it->observer = arcs.observer;
+    it = arcs.second->ConnectUnsafe(arcs.first);
+    it->observer = arcs.observer;
   });
   _withdrawedArcs.clear();
+
+  if (average == 0)
+    average = timer.GetElapsedTime();
+  else
+    average = (average + timer.GetElapsedTime()) / 2;
 }
 
 void        WaypointModifier::WithdrawAllArcs(unsigned int id)

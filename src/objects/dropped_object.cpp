@@ -1,31 +1,25 @@
 #include "objects/dropped_object.hpp"
 #include "character.hpp"
+#include "level.hpp"
 
-/*ObjectNode* DroppedObject::Factory(WindowFramework* window, Tilemap& map, Characters&, Data data)
+ObjectItem::ObjectItem(Level* level, DynamicObject* object, InventoryObject* item) : InstanceDynamicObject(level, object), _item(item)
 {
-  InventoryObject* object    = new InventoryObject(data);
-
-  return (new DroppedObject(window, map, *object));
 }
 
-DroppedObject::DroppedObject(WindowFramework* window, Tilemap& map, InventoryObject& object) :
-  ObjectNode(window, map, object), _object(object)
+void ObjectItem::CallbackActionUse(InstanceDynamicObject* user)
 {
-  SetCollisionEnabled(false);
-}
-
-void  DroppedObject::InteractUse(Character* c)
-{
-  if (c->CanReach(this, 0))
+  ObjectCharacter* character = user->Get<ObjectCharacter>();
+  
+  if (character)
   {
-    c->GetInventory().AddObject(&_object);
-    _root.remove_node();
-  }
-  else
-  {
-    if (c->TryToReach(this))
-      c->ReachedCase.Connect(*this, &DroppedObject::InteractUse);
+    Inventory& inventory = character->GetInventory();
+    
+    if (inventory.CanCarry(_item))
+    {
+      inventory.AddObject(_item);
+      _level->RemoveObject(this);
+    }
     else
-      std::cout << "[GameConsole] Can't reach !" << std::endl;
+      _level->ConsoleWrite(character->GetName() + " can't carry this");
   }
-}*/
+}

@@ -1,37 +1,41 @@
 <rml>
-	<head>
-		<title>Main Menu</title>
-		<link type="text/template" href="tpl_mainbar.rml" />
-		<style>
-	        body
-		{
-		  width: 100%;
-		  height: 120px;
-                  bottom: 0px;
-		}
-	
-                #console-container
-                {
-                  position: absolute;
-                  width: 20%;
-                  height: 100px;
-                }
+  <head>
+    <title>Main Menu</title>
+    <link type="text/template" href="tpl_mainbar.rml" />
+    <style>
+body
+{
+  width: 100%;
+  height: 120px;
+  bottom: 0px;
+}
 
-                #console
-                {
-                  position:absolute;
-                  float: right;
-                  margin: auto;
-                  overflow-y: scroll;
-                }
+#console-container
+{
+  position: absolute;
+  width: 20%;
+  height: 110px;
+  //overflow-y: scroll;
+  margin-top: 5px;
+}
 
-                #first_col
-                {
-                  position: absolute;
-                  width: 10%;
-                  height: 100px;
-                  left: 23%;
-                }
+#console
+{
+  width: 100%;
+  height: 100%;
+  position:absolute;
+  float: right;
+  margin: auto;
+  overflow-y: scroll;
+}
+
+#first_col
+{
+  position: absolute;
+  width: 10%;
+  height: 100px;
+  left: 23%;
+}
 
 #action_points
 {
@@ -71,8 +75,8 @@
   bottom:      0px;
 }
                 
-		</style>
-	</head>
+    </style>
+  </head>
   <body id="body" template="tplmainbar">
    <p>
       <div id="console-container">

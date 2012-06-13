@@ -107,33 +107,30 @@ MapObject* World::GetMapObjectFromNodePath(NodePath path)
 // DYNAMIC OBJECTS
 DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type type, const string &model, const string &texture)
 {
-    DynamicObject object;
-    string model2 = model;
+  DynamicObject object;
 
-    /*if (model2 == "lpip.egg")
-      model2 = "horse.obj";*/
-    object.type         = type;
-    object.interactions = 0;
-    object.strModel     = model;
-    object.strTexture   = texture;
-    object.nodePath     = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model2);
-    if (texture != "")
-    {
-      object.texture    = TexturePool::load_texture(TEXT_ROOT + texture);
-      if (object.texture)
-        object.nodePath.set_texture(object.texture);
-    }
+  object.type         = type;
+  object.interactions = 0;
+  object.strModel     = model;
+  object.strTexture   = texture;
+  object.nodePath     = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model);
+  if (texture != "")
+  {
+    object.texture    = TexturePool::load_texture(TEXT_ROOT + texture);
+    if (object.texture)
+      object.nodePath.set_texture(object.texture);
+  }
 
-    object.nodePath.set_name(name);
-    object.nodePath.reparent_to(rootDynamicObjects);
-    object.nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
-    dynamicObjects.push_back(object);
-    return (&(*(--(dynamicObjects.end()))));
+  object.nodePath.set_name(name);
+  object.nodePath.reparent_to(rootDynamicObjects);
+  object.nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
+  dynamicObjects.push_back(object);
+  return (&(*(--(dynamicObjects.end()))));
 }
 
 void World::DeleteDynamicObject(DynamicObject* ptr)
 {
-    DeleteObject(ptr, dynamicObjects);
+  DeleteObject(ptr, dynamicObjects);
 }
 
 DynamicObject* World::GetDynamicObjectFromName(const string &name)
@@ -205,7 +202,13 @@ bool                Waypoint::operator==(const Waypoint& other) const
 
 bool                Waypoint::operator==(const Waypoint* other) const { return (*this == *other); }
 
-void                Waypoint::Connect(Waypoint* other)
+Waypoint::Arcs::iterator Waypoint::ConnectUnsafe(Waypoint* other)
+{
+  arcs.push_back(Arc(nodePath, other));
+  return (--(arcs.end()));
+}
+
+Waypoint::Arcs::iterator Waypoint::Connect(Waypoint* other)
 {
     Arcs::iterator  it = find(arcs.begin(), arcs.end(), other);
 
@@ -213,7 +216,9 @@ void                Waypoint::Connect(Waypoint* other)
     {
       arcs.push_back(Arc(nodePath, other));
       other->arcs.push_back(Arc(other->nodePath, this));
+      return (--(arcs.end()));
     }
+    return (it);
 }
 
 Waypoint::Arcs::iterator Waypoint::Disconnect(Waypoint* other)
@@ -338,6 +343,7 @@ void Waypoint::SetMouseBox(void)
 Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
 {
   observer = 0;
+#ifdef WAYPOINT_DEBUG
   csegment = new CollisionSegment();
   node     = new CollisionNode("waypointArc");
   node->set_into_collide_mask(CollideMask(0));
@@ -348,6 +354,7 @@ Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
   nodePath.set_pos(0, 0, 0);
   nodePath.show();
   UpdateDirection();
+#endif
 }
 
 void Waypoint::Arc::UpdateDirection(void)
@@ -364,7 +371,9 @@ void Waypoint::Arc::UpdateDirection(void)
 
 void Waypoint::Arc::Destroy(void)
 {
+#ifdef WAYPOINT_DEBUG
     nodePath.remove_node();
+#endif
 }
 
 /* MySqrt */

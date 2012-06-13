@@ -57,7 +57,7 @@ void Engine::MessageCallback(const asSMessageInfo* msg, void* param)
   else if (msg->type == asMSGTYPE_INFORMATION)
     errorType = "Information";
 
-  stream << "[AngelScript][" << errorType << "] " << msg->section << " (" << msg->row << ", " << msg->col << ")";
+  stream << "<span class='console-as-error'>[AngelScript][" << errorType << "]</span> " << msg->section << " (" << msg->row << ", " << msg->col << ")";
   stream << " " << msg->message;
 
   ScriptError.Emit(stream.str());

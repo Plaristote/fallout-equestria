@@ -26,6 +26,9 @@ GameUi::GameUi(WindowFramework* window) : _window(window)
   _mainBar   = new GameMainBar  (window, _rocket->get_context());
   _inventory = new GameInventory(window, _rocket->get_context());
   _pers      = new GamePers     (window, _rocket->get_context());
+  
+  _inventory->VisibilityToggled.Connect(InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  _menu->VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
 
   _mainBar->MenuButtonClicked.EventReceived.Connect     (*this, &GameUi::OpenMenu);
   _mainBar->InventoryButtonClicked.EventReceived.Connect(*this, &GameUi::OpenInventory);
@@ -125,22 +128,37 @@ GameConsole::~GameConsole()
 void GameConsole::Execute(Rocket::Core::Event&)
 {
   Rocket::Controls::ElementFormControl* control = reinterpret_cast<Rocket::Controls::ElementFormControl*>(_input);
-  Rocket::Core::String string = control->GetValue().CString();
+  Rocket::Core::String string = control->GetValue();
 
-  _history.push_back(string.CString());
-  _histIter= _history.end();
-
-  if (_scriptContext)
+  if (string != "")
   {
-    stringstream stream;
+    _history.push_back(string.CString());
+    _histIter= _history.end();
 
-    _currentLine = string.CString();
-    int ret = ExecuteString(Script::Engine::Get(), _currentLine.c_str(), 0, _scriptContext);
-    stream << "<i>" << _currentLine << "</i>" << ": Returned value " << ret;
-    Output(stream.str());
+    if (_scriptContext)
+    {
+      stringstream stream;
+
+      _currentLine = string.CString();
+      int ret = ExecuteString(Script::Engine::Get(), _currentLine.c_str(), 0, _scriptContext);
+      if (ret == asEXECUTION_ABORTED || ret == asEXECUTION_EXCEPTION)
+      {
+	stream << "<span class='console-as-error'>[AngelScript]</span> ";
+        if (ret == asEXECUTION_ABORTED)
+	  stream << "Execution Aborted";
+	else if (ret == asEXECUTION_EXCEPTION)
+	  stream << "NullPointer error";
+        Output(stream.str());
+      }
+    }
+    _currentLine = "";
+    control->SetValue("");
   }
-  _currentLine = "";
-  control->SetValue("");
+}
+
+void GameConsole::WriteOn(const std::string& str)
+{
+  GConsole->Output("<span class='console-write'>[Write]</span><span class='console-write-output'> " + str + "</span>");
 }
 
 void GameConsole::Output(const std::string str)

@@ -20,9 +20,11 @@ class UiBase
 public:
   UiBase(WindowFramework* window) : _window(window), _root(0) {}
 
-  void Show(void)            { _root->Show();               }
-  void Hide(void)            { _root->Hide();               }
+  void Show(void)            { _root->Show(); VisibilityToggled.Emit(true);  }
+  void Hide(void)            { _root->Hide(); VisibilityToggled.Emit(false); }
   bool IsVisible(void) const { return (_root->IsVisible()); }
+  
+  Observatory::Signal<void (bool)> VisibilityToggled;
 
 protected:
   WindowFramework*               _window;

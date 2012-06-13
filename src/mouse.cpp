@@ -1,5 +1,4 @@
 #include "mouse.hpp"
-#include <tilemap.hpp>
 #include "world.h"
 
 using namespace std;
@@ -34,6 +33,9 @@ void Mouse::Run(void)
   {
     LPoint2f cursorPos = _mouseWatcher->get_mouse();
 
+    if (cursorPos == _lastMousePos)
+      return ;
+    _lastMousePos = cursorPos;
     _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
     _collisionTraverser.traverse(_window->get_render());
     _collisionHandlerQueue->sort_entries();

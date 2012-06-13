@@ -62,6 +62,7 @@ public:
 private:
   WindowFramework*          _window;
   NodePath                  _camera;
+  LPoint2f                  _lastMousePos;
   PT(MouseWatcher)          _mouseWatcher;
   PT(CollisionRay)          _pickerRay;
   PT(CollisionNode)         _pickerNode;

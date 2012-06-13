@@ -23,6 +23,7 @@
 //# define GAME_EDITOR
 
 # ifdef GAME_EDITOR
+#  define WAYPOINT_DEBUG
 #  include <QDir>
 #  define MODEL_ROOT QDir::currentPath().toStdString() + "/models/"
 #  define TEXT_ROOT  QDir::currentPath().toStdString() + "/textures/"
@@ -97,7 +98,8 @@ struct Waypoint
     bool                 operator==(const Waypoint& other) const;
     bool                 operator==(const Waypoint* other) const;
     bool                 operator==(unsigned int id)       const { return (this->id == id); }
-    void                 Connect(Waypoint* other);
+    Arcs::iterator       ConnectUnsafe(Waypoint* other);
+    Arcs::iterator       Connect(Waypoint* other);
     Arcs::iterator       Disconnect(Waypoint* other);
     void                 DisconnectAll(void);
     Arc*                 GetArcTo(unsigned int id);
@@ -155,7 +157,8 @@ struct DynamicObject : public MapObject
         Door,
         Shelf,
         Locker,
-        Character
+        Character,
+	Item
     };
 
     Waypoint* waypoint;
