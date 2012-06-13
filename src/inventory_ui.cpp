@@ -33,18 +33,22 @@ void InventoryView::UpdateView(void)
   for (count = 0 ; it != end ; ++it, ++count)
   {
     InventoryObject&  item = *(*it);
-    std::stringstream stream;
+    
+    if ((item["hidden"].Nil() || item["hidden"].Value() != "1") && !(item.IsEquiped()))
+    {
+      std::stringstream stream;
 
-    stream << "<img id='" << count << "' src='../textures/itemIcons/" << item["icon"].Value() << "' />";
-    rml += stream.str();
+      stream << "<img id='" << count << "' src='../textures/itemIcons/" << item["icon"].Value() << "' />";
+      rml += stream.str();
+    }
   }
   _element.SetInnerRML(rml.c_str());
   
   for (unsigned short i = 0 ; i < _element.GetNumChildren() ; ++i)
   {
     _element.GetChild(i)->AddEventListener("dblclick",  this);
-    /*_element.GetChild(i)->AddEventListener("mouseover", this);
-    _element.GetChild(i)->AddEventListener("click",     this);*/
+    _element.GetChild(i)->AddEventListener("mouseover", this);
+    _element.GetChild(i)->AddEventListener("click",     this);
   }
 }
 

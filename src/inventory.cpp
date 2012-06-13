@@ -12,7 +12,12 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
   (*this)["pos"]["x"] = data["pos"]["x"].Value();
   (*this)["pos"]["y"] = data["pos"]["y"].Value();
   (*this)["weight"]   = data["weight"].Value();
+  (*this)["hidden"]   = data["hidden"].Value();
+  (*this)["combat"]   = data["combat"].Value();
+  (*this)["range"]    = data["range"].Value();
   (*this)["interactions"]["use"] = "1";
+
+  _equiped = false;
 
   _scriptContext = Script::Engine::Get()->CreateContext();
   _scriptModule  = 0;
@@ -25,6 +30,7 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
     Data hookCharacter = script["hookCharacters"];
     Data hookDoor      = script["hookDoors"];
     Data hookOthers    = script["hookOthers"];
+    Data hookWeapon    = script["hookWeapon"];
 
     _scriptModule       = Script::ModuleManager::Require("item" + data.Key(), "scripts/objects/" + script["file"].Value());
     if (_scriptModule)
@@ -47,6 +53,12 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
 	
 	_hookUseOnOthers    = _scriptModule->GetFunctionByDecl(decl.c_str());
       }
+      if (!(hookWeapon.Nil()))
+      {
+	std::string decl = "string " + hookWeapon.Value() + "(Item@, Character@, Character@)";
+	
+	_hookUseAsWeapon    = _scriptModule->GetFunctionByDecl(decl.c_str());
+      }
     }
   }
 }
@@ -66,6 +78,11 @@ DynamicObject* InventoryObject::CreateDynamicObject(World* world) const
   object               = world->AddDynamicObject("item" + Key(), DynamicObject::Item, self["model"], self["texture"]);
   object->interactions = Interactions::Use;
   return (object);
+}
+
+const std::string InventoryObject::UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target)
+{
+  return (ExecuteHook(_hookUseOnCharacter, user, target));
 }
 
 const std::string InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target)

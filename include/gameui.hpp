@@ -27,6 +27,7 @@ private:
   RocketListener         _optionsClicked;  
 };
 
+class InventoryObject;
 class GameMainBar : public UiBase
 {
   friend class GameUi;
@@ -34,10 +35,28 @@ public:
   GameMainBar(WindowFramework* window, Rocket::Core::Context* context);
   
   void                   AppendToConsole(const std::string& str);
+  
+  void                   SetCurrentAP(unsigned short ap);
+  void                   SetMaxAP(unsigned short ap);
+  void                   SetEnabledAP(bool);
+  
+  void                   SetEquipedItem(unsigned short it, InventoryObject* item);
 
   RocketListener         MenuButtonClicked;
   RocketListener         InventoryButtonClicked;
   RocketListener         PersButtonClicked;
+  
+  Observatory::Signal<void (unsigned short)> UseEquipedItem;
+  
+private:
+  RocketListener         EquipedItem1Clicked;
+  RocketListener         EquipedItem2Clicked;
+  
+  void                   CallbackEquipedItem1Clicked(Rocket::Core::Event&) { UseEquipedItem.Emit(0); }
+  void                   CallbackEquipedItem2Clicked(Rocket::Core::Event&) { UseEquipedItem.Emit(1); }
+  
+  unsigned short         _apMax;
+  bool                   _apEnabled;
 };
 
 class GameInventory : public UiBase

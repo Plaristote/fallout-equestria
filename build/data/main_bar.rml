@@ -44,7 +44,7 @@ body
   height:   20px;
 }
 
-#weapon_one
+#equiped_1
 {
   position:    absolute;
   left:        33%;
@@ -52,7 +52,7 @@ body
   padding-top: 20px;
 }
 
-#weapon_two
+#equiped_2
 {
   position:    absolute;
   left:        53%;
@@ -94,12 +94,12 @@ body
         oooooooooo
       </p>
 
-      <p id="weapon_one">
-        Weapon One
+      <p id="equiped_1">
+        Equiped One
       </p>
 
-      <p id="weapon_two">
-        Weapon Two
+      <p id="equiped_2">
+        Equiped Two
       </p>
 
       <p id="second_col">

@@ -1,0 +1,46 @@
+{
+  "Race": "Unicorn",
+  "Special":    {
+                  "STR": 3,
+                  "PER": 6,
+                  "END": 3,
+                  "CHA": 9,
+                  "INT": 7,
+                  "AGI": 5,
+                  "LUC": 7
+                },
+  "Statistics": {
+                  "Action Points":        5,
+                  "Armor Class":          5,
+                  "Bonus Damage":         0,
+                  "Carry Weight":         100,
+                  "Critical Chance":      7,
+                  "Damage Resistance":    0,
+                  "Healing Rate":         1,
+                  "Hit Points":           26,
+                  "Melee Damage":         1,
+                  "Perk Rate":            3,
+                  "Poison Resistance":    15,
+                  "Radiation Resistance": 6,
+                  "Skill Rate":           19
+                },
+  "Skills":     {
+                  "Small Guns":    50,
+                  "Big Guns":      50,
+                  "Energy Guns":   50,
+                  "Explosives":    50,
+                  "Unarmed":       50,
+                  "Lockpick":      50,
+                  "Melee Weapons": 50,
+                  "Medicine":      50,
+                  "Repair":        50,
+                  "Science":       50,
+                  "Sneak":         50,
+                  "Spellcasting":  50,
+                  "Steal":         50,
+                  "Barter":        50,
+                  "Outdoorspony":  50,
+                  "Speech":        50,
+                  "Gambling":      50
+                }
+}

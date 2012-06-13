@@ -5,6 +5,8 @@
 #include "objects/door.hpp"
 #include "objects/shelf.hpp"
 
+#define AP_COST_USE 2
+
 using namespace std;
 
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUse;
@@ -127,6 +129,19 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   InventoryObject* object = new InventoryObject(Data(_items)["Key"]);
 
   GetPlayer()->GetInventory().AddObject(object);
+  GetPlayer()->SetEquipedItem(0, object);
+  if (GetPlayer()->GetStatistics())
+  {
+    Data stats(GetPlayer()->GetStatistics());
+    
+    if (!(stats["Statistics"]["Action Points"].Nil()))
+      _gameUi.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
+    GetPlayer()->ActionPointChanged.Connect(_gameUi.GetMainBar(), &GameMainBar::SetCurrentAP);
+    GetPlayer()->EquipedItemChanged.Connect(_gameUi.GetMainBar(), &GameMainBar::SetEquipedItem);
+    GetPlayer()->EquipedItemChanged.Emit(0, GetPlayer()->GetEquipedItem(0));
+    GetPlayer()->EquipedItemChanged.Emit(1, GetPlayer()->GetEquipedItem(1));
+    _gameUi.GetMainBar().UseEquipedItem.Connect(*this, &Level::CallbackActionTargetUse);
+  }
 }
 
 bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
@@ -202,6 +217,7 @@ void Level::StartFight(ObjectCharacter* starter)
   _itCharacter = std::find(_characters.begin(), _characters.end(), starter);
   (*_itCharacter)->RestartActionPoints();
   SetState(Fight);
+  _gameUi.GetMainBar().SetEnabledAP(true);
 }
 
 void Level::StopFight(void)
@@ -210,6 +226,7 @@ void Level::StopFight(void)
   {
     // Check if no hostiles are around
     SetState(Normal);
+    _gameUi.GetMainBar().SetEnabledAP(false);
   }
 }
 
@@ -423,6 +440,29 @@ void Level::MouseLeftClicked(void)
 	}
       }
       break ;
+    case MouseTarget:
+      cout << "Mouse Target" << endl;
+      if (hovering.hasDynObject)
+      {
+	InstanceDynamicObject* dynObject = FindObjectFromNode(hovering.dynObject);
+	
+	if (dynObject)
+	{
+	  ObjectCharacter*     player    = GetPlayer();
+	  InventoryObject*     item      = player->pendingActionObject;
+
+	  if ((*item)["combat"] == "1")
+	  {
+	    ObjectCharacter*   target = dynObject->Get<ObjectCharacter>();
+
+	    if (!target)
+	      return ;
+	    ActionUseWeaponOn(player, target, item);
+	  }
+	  else
+	    ActionUseObjectOn(player, dynObject, item);
+	}
+      }
   }
 }
 
@@ -430,7 +470,7 @@ void Level::MouseRightClicked(void)
 {
   cout << "Changed mouse state" << endl;
   CloseInteractMenu();
-  _mouseState = (_mouseState == MouseAction ? MouseInteraction : MouseAction);
+  _mouseState = (_mouseState == MouseInteraction || _mouseState == MouseTarget ? MouseAction : MouseInteraction);
 }
 
 /*
@@ -497,6 +537,20 @@ void Level::CallbackActionUseObjectOn(InstanceDynamicObject* target)
   GetPlayer()->pendingActionOn = target;
 }
 
+void Level::CallbackActionTargetUse(unsigned short it)
+{
+  ObjectCharacter* player = GetPlayer();
+  InventoryObject* object = player->GetEquipedItem(it);
+  
+  if (object)
+  {
+    if ((*object)["combat"].Value() == "1" && _state != Fight)
+      StartFight(player);
+    player->pendingActionObject = object;
+    _mouseState = MouseTarget;
+  }
+}
+
 void Level::SelectedUseObjectOn(InventoryObject* object)
 {
   ActionUseObjectOn(GetPlayer(), GetPlayer()->pendingActionOn, object);
@@ -509,13 +563,24 @@ void Level::PendingActionTalkTo(InstanceDynamicObject* object)
 
 void Level::PendingActionUseObjectOn(InstanceDynamicObject* object)
 {
-  const string toOutput = object->pendingActionObject->UseOn(object->Get<ObjectCharacter>(), object->pendingActionOn);
-  
-  ConsoleWrite(toOutput);
+  InventoryObject* item        = object->pendingActionObject;
+  Data             dataUseCost = (*item)["use_cost"];
+  unsigned short   useCost     = AP_COST_USE;
+
+  if (!(dataUseCost.Nil()))
+    useCost = dataUseCost;
+  if (UseActionPoints(useCost))
+  {
+    const string toOutput = item->UseOn(object->Get<ObjectCharacter>(), object->pendingActionOn);
+
+    ConsoleWrite(toOutput);
+  }
 }
 
 void Level::PendingActionUse(InstanceDynamicObject* object)
 {
+  if (!(UseActionPoints(AP_COST_USE)))
+    return ;
   object->pendingActionOn->CallbackActionUse(object);
 }
 
@@ -535,7 +600,6 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
     Script::Engine::ScriptError.Emit("<span class='console-error'>[ActionUseObjectOn] Aborted: NullPointer Error</span>");
     return ;
   }
-
   user->GoTo(target, 0);
   user->ReachedDestination.Connect(*this, &Level::PendingActionUseObjectOn);
   user->pendingActionOn     = target;
@@ -544,22 +608,60 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
     CloseUseObjectOn();
 }
 
+void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* item)
+{
+  std::string output;
+  
+  if (target->GetDistance(user) > (float)((*item)["range"]))
+    output = ("Out of range");
+  else if (!(user->HasLineOfSight(target)))
+    output = ("No line of sight");
+  else
+  {
+    output = (item->UseAsWeapon(user, target));
+    MouseRightClicked();
+  }
+  if (user == GetPlayer())
+    ConsoleWrite(output);
+}
+
 void Level::ActionDropObject(ObjectCharacter* user, InventoryObject* object)
 {
   ObjectItem* item;
   Waypoint*   waypoint;
-  
+
   if (!user || !object)
   {
     Script::Engine::ScriptError.Emit("<span class='console-error'>[ActionDropObject] Aborted: NullPointer Error</span>");
     return ;
   }
+  if (!(UseActionPoints(AP_COST_USE)))
+    return ;
   user->GetInventory().DelObject(object);
   waypoint = user->GetOccupiedWaypoint();
   item     = new ObjectItem(this, object->CreateDynamicObject(_world), object);
   item->SetOccupiedWaypoint(waypoint);
   item->GetDynamicObject()->nodePath.set_pos(waypoint->nodePath.get_pos());
   _objects.push_back(item);
+}
+
+bool Level::UseActionPoints(unsigned short ap)
+{
+  if (_state == Fight)
+  {
+    ObjectCharacter& character = (**_itCharacter);
+    unsigned short   charAp    = character.GetActionPoints();
+
+    if (charAp >= ap)
+      character.SetActionPoints(charAp - ap);
+    else
+    {
+      if (&character == GetPlayer())
+        ConsoleWrite("Not enough action points");
+      return (false);
+    }
+  }
+  return (true);
 }
 
 void Level::CloseRunningDialog(void)

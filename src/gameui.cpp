@@ -2,10 +2,9 @@
 #include <Rocket/Controls.h>
 
 using namespace std;
-using namespace Rocket::Core;
+using namespace Rocket;
 
 extern PandaFramework framework;
-
 
 /*
  * GameUi
@@ -177,18 +176,18 @@ void GameConsole::KeyUp(Rocket::Core::Event& event)
 		Rocket::Controls::ElementFormControl* control = reinterpret_cast<Rocket::Controls::ElementFormControl*>(_input);
 		int keyId= event.GetParameter<int>("key_identifier", 0);
 
-		if (keyId == Input::KI_RETURN) {
+		if (keyId == Core::Input::KI_RETURN) {
 			Execute(event);
 		};
 
 		if (!_history.empty()) {
-			if (keyId == Input::KI_DOWN) {
+			if (keyId == Core::Input::KI_DOWN) {
 				if (_histIter!=_history.begin()) {
 					_histIter--;
 					control->SetValue( _histIter->c_str() );
 				};
 			};
-			if (keyId == Input::KI_UP) {
+			if (keyId == Core::Input::KI_UP) {
 				if (_histIter!=_history.end()) {
 					control->SetValue( _histIter->c_str() );
 					_histIter++;
@@ -267,9 +266,9 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
   _root = doc;
   if (doc)
   {
-    Element*         itemListContainer = doc->GetElementById("body-inventory-items");
+    Core::Element*         itemListContainer = doc->GetElementById("body-inventory-items");
 
-    ElementDocument* parentItems = doc;
+    Core::ElementDocument* parentItems = doc;
     for (unsigned short i = 0 ; i < 200 ; ++i)
     {
       Rocket::Core::Element* item = parentItems->CreateElement("invitem");
@@ -380,6 +379,17 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
     if (button1) button1->AddEventListener("click", &MenuButtonClicked);
     if (button2) button2->AddEventListener("click", &InventoryButtonClicked);
     if (button3) button3->AddEventListener("click", &PersButtonClicked);
+    
+    _apEnabled = false;
+    _apMax     = 0;
+    
+    Rocket::Core::Element* equipedItem1 = doc->GetElementById("equiped_1");
+    Rocket::Core::Element* equipedItem2 = doc->GetElementById("equiped_2");
+    
+    equipedItem1->AddEventListener("click", &EquipedItem1Clicked);
+    equipedItem2->AddEventListener("click", &EquipedItem2Clicked);
+    EquipedItem1Clicked.EventReceived.Connect(*this, &GameMainBar::CallbackEquipedItem1Clicked);
+    EquipedItem2Clicked.EventReceived.Connect(*this, &GameMainBar::CallbackEquipedItem2Clicked);
 
     /*const Rocket::Core::Property* property = elementWindow->GetProperty("height");
 
@@ -416,5 +426,63 @@ void GameMainBar::AppendToConsole(const std::string& str)
     toAdd += str.c_str();
     toAdd += "</li><br />";
     console->SetInnerRML(rml + toAdd);
+  }
+}
+
+void GameMainBar::SetCurrentAP(unsigned short ap)
+{
+  if (_apEnabled)
+  {
+    Rocket::Core::Element* apbar = _root->GetElementById("action_points");
+    string                 rml;
+
+    if (apbar)
+    {
+      for (unsigned short i = 0  ; i < ap ; ++i)
+	rml += "<img src='../textures/ap-active.png' /> ";
+      for (unsigned short i = ap ; i < _apMax ; ++i)
+	rml += "<img src='../textures/ap-inactive.png' /> ";
+      apbar->SetInnerRML(rml.c_str());
+    }
+  }
+}
+
+void GameMainBar::SetMaxAP(unsigned short ap)
+{
+  Rocket::Core::Element* apbar = _root->GetElementById("action_points");
+  string                 rml;
+
+  _apMax = ap;
+  if (apbar)
+  {
+    for (unsigned short i = 0 ; i < ap ; ++i)
+      rml += "<img src='../textures/ap-inactive.png' /> ";
+    apbar->SetInnerRML(rml.c_str());
+  }
+}
+
+void GameMainBar::SetEnabledAP(bool enabled)
+{
+  _apEnabled = enabled;
+  SetMaxAP(_apMax);
+}
+
+#include "inventory.hpp"
+void GameMainBar::SetEquipedItem(unsigned short it, InventoryObject* item)
+{
+  if (item)
+  {
+    Rocket::Core::Element* elem;
+    stringstream           stream;
+    
+    stream << "equiped_" << (it + 1);
+    elem = _root->GetElementById(stream.str().c_str());
+    if (elem)
+    {
+      stringstream rml;
+
+      rml << "<img src='../textures/itemIcons/" << (*item)["icon"].Value() << "' />";
+      elem->SetInnerRML(rml.str().c_str());
+    }
   }
 }

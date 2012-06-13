@@ -3,7 +3,7 @@
 
 # include "datatree.hpp"
 # include "scriptengine.hpp"
-#include "world.h"
+# include "world.h"
 
 class ObjectCharacter;
 class InstanceDynamicObject;
@@ -14,21 +14,28 @@ public:
   InventoryObject(Data);
   ~InventoryObject();
 
+  const std::string UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target);
   const std::string UseOn(ObjectCharacter* user, InstanceDynamicObject* target);
   const std::string GetName(void) const { return (this->Key()); }
   DynamicObject*    CreateDynamicObject(World* world) const;
+
+  void              SetEquiped(bool set)  { _equiped = set;    }
+  bool              IsEquiped(void) const { return (_equiped); }
 
 private:
   template<class C>
   const std::string ExecuteHook(asIScriptFunction* hook, ObjectCharacter* user, C* target);
   
   DataTree           _dataTree;
+  
+  bool               _equiped;
 
   asIScriptContext*  _scriptContext;
   asIScriptModule*   _scriptModule;
   asIScriptFunction* _hookUseOnCharacter;
   asIScriptFunction* _hookUseOnDoor;
   asIScriptFunction* _hookUseOnOthers;
+  asIScriptFunction* _hookUseAsWeapon;
 };
 
 class Inventory

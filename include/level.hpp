@@ -72,6 +72,7 @@ public:
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);
   Data                   GetDataEngine(void) { return (_dataEngine); }
+  Data                   GetItems(void)      { return (_items);      }
   void                   ConsoleWrite(const std::string& str);
   
   void                   RemoveObject(InstanceDynamicObject* object);
@@ -80,11 +81,14 @@ public:
   void                   CallbackActionUse(InstanceDynamicObject* object);
   void                   CallbackActionTalkTo(InstanceDynamicObject* object);
   void                   CallbackActionUseObjectOn(InstanceDynamicObject* object);
+  void                   CallbackActionTargetUse(unsigned short it);
   void                   SelectedUseObjectOn(InventoryObject* object);
+
   
   void                   ActionUse(ObjectCharacter* user, InstanceDynamicObject* target);
   void                   ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object);
   void                   ActionDropObject(ObjectCharacter* user, InventoryObject* object);
+  void                   ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* object);
 
   void                   PendingActionTalkTo(InstanceDynamicObject* fromObject);
   void                   PendingActionUse(InstanceDynamicObject* fromObject);
@@ -96,12 +100,14 @@ public:
   void                   StartFight(ObjectCharacter* starter);
   void                   StopFight(void);
   void                   NextTurn(void);
+  bool                   UseActionPoints(unsigned short ap);
 
   // Mouse Management
   enum MouseState
   {
     MouseAction,
-    MouseInteraction
+    MouseInteraction,
+    MouseTarget
   };
 
   void              MouseLeftClicked(void);

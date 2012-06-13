@@ -107,18 +107,24 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectType(charClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(doorClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
 
-  engine->RegisterObjectMethod(dynObjectClass, "string GetName()",               asMETHOD(InstanceDynamicObject,GetName), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "string GetName()",                    asMETHOD(ObjectCharacter,GetName), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "bool HasLineOfSight(DynamicObject@)", asMETHOD(ObjectCharacter,HasLineOfSight), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "void GoTo(int)",                      asMETHODPR(ObjectCharacter,GoTo, (unsigned int), void), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "void GoTo(DynamicObject@, int)",      asMETHODPR(ObjectCharacter,GoTo, (InstanceDynamicObject*, int), void), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "void GoToRandomWaypoint()",           asMETHOD(ObjectCharacter,GoToRandomWaypoint), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "int  GetPathDistance(DynamicObject@)",asMETHODPR(ObjectCharacter,GetPathDistance, (InstanceDynamicObject*), unsigned short), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "Inventory@ GetInventory()",           asMETHOD(ObjectCharacter,GetInventory), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "Data GetStatistics()",                asMETHOD(ObjectCharacter,GetStatistics), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "int  GetCurrentWaypoint() const",     asMETHOD(ObjectCharacter,GetOccupiedWaypointAsInt), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "bool IsMoving() const",               asMETHOD(ObjectCharacter,IsMoving), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "DynamicObject@ AsObject()",           asFUNCTION(asUtils::CharacterAsObject), asCALL_CDECL_OBJLAST);
+  engine->RegisterObjectMethod(dynObjectClass, "string GetName()",                    asMETHOD(InstanceDynamicObject,GetName), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "string GetName()",                         asMETHOD(ObjectCharacter,GetName), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "bool HasLineOfSight(DynamicObject@)",      asMETHOD(ObjectCharacter,HasLineOfSight), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "void GoTo(int)",                           asMETHODPR(ObjectCharacter,GoTo, (unsigned int), void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "void GoTo(DynamicObject@, int)",           asMETHODPR(ObjectCharacter,GoTo, (InstanceDynamicObject*, int), void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "void GoToRandomWaypoint()",                asMETHOD(ObjectCharacter,GoToRandomWaypoint), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "void TruncatePath(int)",                   asMETHOD(ObjectCharacter,TruncatePath), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "int  GetNearestWaypoint(DynamicObject@)",  asMETHOD(ObjectCharacter,GetNearestWaypoint), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "int  GetFarthestWaypoint(DynamicObject@)", asMETHOD(ObjectCharacter,GetFarthestWaypoint), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "int  GetPathDistance(DynamicObject@)",     asMETHODPR(ObjectCharacter,GetPathDistance, (InstanceDynamicObject*), unsigned short), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "float GetDistance(DynamicObject@)",        asMETHOD(ObjectCharacter,GetDistance), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "Inventory@ GetInventory()",                asMETHOD(ObjectCharacter,GetInventory), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "Data GetStatistics()",                     asMETHOD(ObjectCharacter,GetStatistics), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "int  GetCurrentWaypoint() const",          asMETHOD(ObjectCharacter,GetOccupiedWaypointAsInt), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "bool IsMoving() const",                    asMETHOD(ObjectCharacter,IsMoving), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "DynamicObject@ AsObject()",                asFUNCTION(asUtils::CharacterAsObject), asCALL_CDECL_OBJLAST);
+  engine->RegisterObjectMethod(charClass, "int  GetActionPoints()",                   asMETHOD(ObjectCharacter,GetActionPoints), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "void SetActionPoints(int)",                asMETHOD(ObjectCharacter,SetActionPoints), asCALL_THISCALL);
 
   engine->RegisterObjectMethod(doorClass, "void Unlock()",       asMETHOD(ObjectDoor,Unlock), asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "bool IsLocked()",     asMETHOD(ObjectDoor,IsLocked), asCALL_THISCALL);

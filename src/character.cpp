@@ -3,12 +3,19 @@
 #include <panda3d/nodePathCollection.h>
 
 #include "level.hpp"
+
+#define DEFAULT_WEAPON_1 "hooves"
+#define DEFAULT_WEAPON_2 "buck"
+
 using namespace std;
 
 void InstanceDynamicObject::ThatDoesNothing() { _level->ConsoleWrite("That does nothing"); }
 
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
 {
+  Data   items = _level->GetItems();  
+  string defEquiped[2];
+
   _type         = Character;
   _actionPoints = 0;
   // Line of sight tools
@@ -30,6 +37,11 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   {
     _inventory.SetCapacity(GetStatistics()["Statistics"]["Carry Weight"]);
   }
+  
+  _equiped[0] = 0;
+  _equiped[1] = 0;
+  defEquiped[0] = DEFAULT_WEAPON_1;
+  defEquiped[1] = DEFAULT_WEAPON_2;
 
   // Script
   _scriptContext = 0;
@@ -47,11 +59,55 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
       _scriptModule  = Script::Engine::LoadModule(prefixName + GetName(), prefixPath + object->script + ".as");
       if (_scriptModule)
       {
+	// Get the running functions
         _scriptMain    = _scriptModule->GetFunctionByDecl("void main(Character@, float)");
 	_scriptFight   = _scriptModule->GetFunctionByDecl("void combat(Character@)");
+
+	// Get Default Weapons from script
+	asIScriptFunction* funcGetDefWeapon[2];
+
+	funcGetDefWeapon[0] = _scriptModule->GetFunctionByDecl("string default_weapon_1()");
+	funcGetDefWeapon[1] = _scriptModule->GetFunctionByDecl("string default_weapon_2()");
+	for (int i = 0 ; i < 2 ; ++i)
+	{
+	  if (funcGetDefWeapon[i])
+	  {
+	    _scriptContext->Prepare(funcGetDefWeapon[i]);
+	    _scriptContext->Execute();
+	    defEquiped[i] = *(reinterpret_cast<string*>(_scriptContext->GetReturnAddress()));
+	  }
+	}
       }
     }
   }
+
+  for (int i = 0 ; i < 2 ; ++i)
+  {
+    if (items[defEquiped[i]].Nil())
+      continue ;
+    _defEquiped[i] = new InventoryObject(items[defEquiped[i]]);
+    _equiped[i] = _defEquiped[i];
+    _equiped[i]->SetEquiped(true);
+    _inventory.AddObject(_equiped[i]);
+  }
+}
+
+InventoryObject* ObjectCharacter::GetEquipedItem(unsigned short it)
+{
+  return (_equiped[it]);
+}
+
+void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item)
+{
+  _equiped[it]->SetEquiped(false);
+  _equiped[it] = item;
+  item->SetEquiped(true);
+  EquipedItemChanged.Emit(it, item);
+}
+
+void ObjectCharacter::UnequipItem(unsigned short it)
+{
+  SetEquipedItem(it, _defEquiped[it]);
 }
 
 void ObjectCharacter::RestartActionPoints(void)
@@ -64,6 +120,7 @@ void ObjectCharacter::RestartActionPoints(void)
   }
   else
     _actionPoints = 10;
+  ActionPointChanged.Emit(_actionPoints);
 }
 
 void ObjectCharacter::Run(float elapsedTime)
@@ -79,7 +136,7 @@ void ObjectCharacter::Run(float elapsedTime)
   }
   else if (state == Level::Fight)
   {
-    std::cout << "ActionPoints: " << _actionPoints << std::endl;
+    //std::cout << "ActionPoints: " << _actionPoints << std::endl;
     if (_actionPoints == 0)
       _level->NextTurn();
     else if (!(IsMoving()) && _scriptFight) // replace with something more appropriate
@@ -91,6 +148,54 @@ void ObjectCharacter::Run(float elapsedTime)
   }
   if (_path.size() > 0)
     RunMovement(elapsedTime);
+}
+
+int                 ObjectCharacter::GetBestWaypoint(InstanceDynamicObject* object, bool farthest)
+{
+  Waypoint* self  = GetOccupiedWaypoint();
+  Waypoint* other = object->GetOccupiedWaypoint();
+  Waypoint* wp    = self;
+  float     currentDistance;
+  
+  if (other)
+  {
+    currentDistance = wp->GetDistanceEstimate(*other);
+    UnprocessCollisions();
+    {
+      std::list<Waypoint*> list = self->GetSuccessors(other);
+      
+      for_each(list.begin(), list.end(), [&wp, &currentDistance, other, farthest](Waypoint* waypoint)
+      {
+	float compDistance = waypoint->GetDistanceEstimate(*other);
+	bool  comp         = (farthest ? currentDistance < compDistance : currentDistance > compDistance);
+
+	if (currentDistance < compDistance)
+	  wp = waypoint;
+      });
+    }
+    ProcessCollisions();
+  }
+  return (wp->id);
+}
+
+int                 ObjectCharacter::GetFarthestWaypoint(InstanceDynamicObject* object)
+{
+  return (GetBestWaypoint(object, true));
+}
+
+int                 ObjectCharacter::GetNearestWaypoint(InstanceDynamicObject* object)
+{
+  return (GetBestWaypoint(object, false));
+}
+
+float               ObjectCharacter::GetDistance(InstanceDynamicObject* object)
+{
+    LPoint3 pos_1  = _object->nodePath.get_pos();
+    LPoint3 pos_2  = object->GetDynamicObject()->nodePath.get_pos();
+    float   dist_x = pos_1.get_x() - pos_2.get_x();
+    float   dist_y = pos_1.get_y() - pos_2.get_y();
+
+    return (SQRT(dist_x * dist_x + dist_y * dist_y));
 }
 
 unsigned short      ObjectCharacter::GetPathDistance(InstanceDynamicObject* object)
@@ -195,12 +300,20 @@ void                ObjectCharacter::GoToRandomWaypoint(void)
   }
 }
 
+void                ObjectCharacter::TruncatePath(unsigned short max_size)
+{
+  if ((*_path.begin()).id == GetOccupiedWaypointAsInt())
+    max_size++;
+  if (_path.size() > max_size)
+    _path.resize(max_size);
+}
+
 void                ObjectCharacter::RunMovementNext(float elapsedTime)
 {
   Waypoint* wp = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
 
   if (wp != _waypointOccupied)
-    _actionPoints--;
+    SetActionPoints(_actionPoints - 1);
   _waypointOccupied = wp;
 
   // Has reached object objective, if there is one ?
@@ -214,7 +327,7 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
       return ;
     }
   }
-  
+
   _path.erase(_path.begin());  
 
   if (_path.size() > 0)

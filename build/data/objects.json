@@ -1,5 +1,27 @@
 {
 
+"hooves": {
+            "icon":   "hooves.png",
+            "script": {
+                        "file":           "objectsUnarmed.as",
+                        "hookCharacters": "HoovesHit"
+                      },
+            "combat": "1",
+            "range":  "10",
+            "hidden": "1"
+          },
+
+"buck":   {
+            "icon":   "buck.png",
+            "script": {
+                        "file":           "objectsUnarmed.as",
+                        "hookCharacters": "BuckHit"
+                      },
+            "combat": "1",
+            "range":  "20",
+            "hidden": "1"
+          },
+
 "Key": {
          "icon":    "key.png",
          "texture": "lpip.png",
