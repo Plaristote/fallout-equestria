@@ -24,6 +24,19 @@ QPandaWidget::QPandaWidget(QWidget *parent) : QWidget(parent)
     events.add_hook("mouse1-up", QPandaWidget::CallbackMouse, this);
     events.add_hook("mouse2-up", QPandaWidget::CallbackMouse, this);
     events.add_hook("mouse3-up", QPandaWidget::CallbackMouse, this);
+
+	//WTF to the power of a million
+	if (_window == 0) {
+        WindowProperties wp;
+
+#ifdef Q_WS_X11
+        XFlush(QX11Info::display());
+#endif
+        QPandaApplication::Framework().get_default_window_props(wp);
+		wp.set_foreground(false);
+        wp.set_parent_window((size_t)this->winId());
+        _window = QPandaApplication::Framework().open_window(wp, 0);
+	}
 }
 
 QPandaWidget::~QPandaWidget()
@@ -57,17 +70,6 @@ void QPandaWidget::resizeEvent(QResizeEvent* event)
 
 void QPandaWidget::showEvent(QShowEvent* event)
 {
-    if (_window == 0)
-    {
-        WindowProperties wp;
-
-#ifdef Q_WS_X11
-        XFlush(QX11Info::display());
-#endif
-        QPandaApplication::Framework().get_default_window_props(wp);
-		wp.set_foreground(false);
-        wp.set_parent_window((size_t)this->winId());
-        _window = QPandaApplication::Framework().open_window(wp, 0);
         if (_window != 0)
         {
           UpdateSize();
@@ -78,7 +80,6 @@ void QPandaWidget::showEvent(QShowEvent* event)
           _loadingFailed = true;
           QMessageBox::warning(this, "Panda3D Fatal Error", "PandaFramework couldn't open a window");
         }
-    }
     QWidget::showEvent(event);
 }
 

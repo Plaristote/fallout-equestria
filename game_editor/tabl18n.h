@@ -24,7 +24,7 @@ class TabL18n : public QObject
 public:
     explicit TabL18n(QObject *parent, Ui::MainWindow* ui);
     void LoadAllLanguages(void);
-signals:
+	DataTree* GetDefaultLanguage(void);
 
 private slots:
     void NewLanguage(void);
@@ -37,6 +37,7 @@ private:
 
     Ui::MainWindow*          ui;
     DialogFiles              languages;
+	DataTree*				 lang_default;
 };
 
 #endif // TABL18N_H

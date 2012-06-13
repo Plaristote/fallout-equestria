@@ -5,12 +5,14 @@ extern QString pathScriptCategories[];
 
 TabDialog::TabDialog(QObject *parent, Ui::MainWindow* ui) : QObject(parent), ui(ui)
 {
+	locale= nullptr;
 }
 
 void TabDialog::LoadAllDialogs()
 {
     QDir        dir("data/" + pathScriptCategories[0]);
     QStringList fileList = dir.entryList();
+	bool		loaded= false;
 
     foreach (QString string, fileList)
     {
@@ -21,8 +23,13 @@ void TabDialog::LoadAllDialogs()
         QString name     = string.replace(regexp, "");
         QString filepath = dir.path() + "/" + string + ".json";
 
-        new QListWidgetItem(name, ui->dialogList);
+		ui->dialogList->addItem(name);
         dialogs.insert(filepath, 0);
+
+		if (!loaded) {
+			LoadDialog(filepath);
+			ui->dialogList->setCurrentIndex( ui->dialogList->count()-1 );
+		};
     }
 }
 
@@ -49,8 +56,9 @@ void TabDialog::NewDialog()
 
                 file.close();
                 dialogs.insert(filepath, newDialog);
-                LoadDialog(filepath);
-                new QListWidgetItem(str, ui->dialogList);
+				ui->dialogList->addItem(str);
+				LoadDialog(filepath);
+				ui->dialogList->setCurrentIndex( ui->dialogList->count()-1 );
             }
         }
     }
@@ -60,6 +68,13 @@ void TabDialog::LoadDialog(QString filepath)
 {
     DialogFiles::Iterator it  = dialogs.begin();
     DialogFiles::Iterator end = dialogs.end();
+
+	RequestLocale();
+
+	if (locale==nullptr) {
+		QMessageBox::warning((QWidget*)parent(), "Fatal Error", "Locale file not loaded");
+        return;
+	};
 
     for (; it != end ; ++it)
     {
@@ -74,39 +89,42 @@ void TabDialog::LoadDialog(QString filepath)
                 return ;
               }
             }
-            ui->dialogEditor->LoadDialog(*it);
+            ui->dialogEditor->LoadDialog(*it,locale);
             break ;
         }
     }
 }
 
-void TabDialog::SwapDialog(QListWidgetItem* item)
+void TabDialog::SwapDialog(QString name)
 {
-    QString filepath = "data/" + pathScriptCategories[0] + "/" + item->text() + ".json";
+	if (name!="") {
+		QString filepath = "data/" + pathScriptCategories[0] + "/" + name + ".json";
 
-    LoadDialog(filepath);
+		LoadDialog(filepath);
+	};
 }
 
 void TabDialog::RemoveDialog()
 {
-    QListWidgetItem* item = ui->dialogList->currentItem();
+	QString name= ui->dialogList->currentText();
+	int		index= ui->dialogList->currentIndex();
 
-    if (item)
+	if (!(name.isEmpty()))
     {
         int     ret;
-        QString message = "Are you sure you want to definitly remove '" + item->text() + "' ?";
+        QString message = "Are you sure you want to definitly remove '" + name + "' ?";
 
         ret = QMessageBox::warning((QWidget*)parent(), "Remove Dialog", message, QMessageBox::Yes, QMessageBox::No);
         if (ret == QMessageBox::Yes)
         {
-            QString path = "data/dialogs/" + item->text() + ".json";
+            QString path = "data/dialogs/" + name + ".json";
             QFile  file(path);
 
             if (file.remove())
             {
                 ui->dialogEditor->setEnabled(false);
                 dialogs.remove(path);
-                delete item;
+				ui->dialogList->removeItem(index);
             }
             else
               QMessageBox::warning((QWidget*)parent(), "Fatal Error", "Can't remove file");
@@ -114,7 +132,7 @@ void TabDialog::RemoveDialog()
     }
 }
 
-void TabDialog::FilterDialog(QString string)
+/*void TabDialog::FilterDialog(QString string)
 {
     QRegExp regexp(string);
 
@@ -134,4 +152,4 @@ void TabDialog::FilterDialog(QString string)
                 item->setHidden(true);
         }
     }
-}
+}*/

@@ -12,32 +12,98 @@
 "HookExecute": ""
 }
 ,
-"npcLine": "flutterbow",
+"npcLine": 10000,
 "buck": {
 "HookAvailable": "NotAvailable",
 "HookExecute": "",
 "DefaultAnswer": ""
+}
+,
+"10007": {
+"HookAvailable": "",
+"HookExecute": "",
+"DefaultAnswer": "TestD"
 }
 
 }
 ,
 "Fluttertest": {
 "bite": {
-"HookAvailable": "en",
+"HookAvailable": "ena",
 "HookExecute": "nois",
 "DefaultAnswer": ""
 }
-
-},
-
+,
+"npcLine": 10001
+}
+,
 "Twilightlicious": {
-  "npcLine": "Tu pue du cul",
-  "buck": {
-    "HookAvailable": "",
-    "HookExecute": "",
-    "DefaultAnswer": "Fluttertest"
-  }
-},
+"npcLine": 10002,
+"buck": {
+"HookAvailable": "",
+"HookExecute": "",
+"DefaultAnswer": "Fluttertest"
+}
+
+}
+,
+"supaevil": {
+"npcLine": 10006,
+"10003": {
+"HookAvailable": "TestB",
+"HookExecute": "TestC",
+"DefaultAnswer": "TestD"
+}
+
+}
+,
+"TestD": {
+"npcLine": 10006,
+"10008": {
+"HookAvailable": "A",
+"HookExecute": "B",
+"DefaultAnswer": "death"
+}
+,
+"10009": {
+"HookAvailable": "",
+"HookExecute": "",
+"DefaultAnswer": "GGGG"
+}
+
+}
+,
+"GGGG": {
+"npcLine": 10010,
+"10013": {
+"HookAvailable": "",
+"HookExecute": "",
+"DefaultAnswer": "Flutterstart"
+}
+
+}
+,
+"DDDD": {
+"npcLine": 10013,
+"a": {
+"HookAvailable": "",
+"HookExecute": "",
+"DefaultAnswer": "GGGG"
+}
+,
+"b": {
+"HookAvailable": "",
+"HookExecute": "",
+"DefaultAnswer": ""
+}
+,
+"c": {
+"HookAvailable": "",
+"HookExecute": "",
+"DefaultAnswer": "DDDD"
+}
+,
+}
 
 
 }

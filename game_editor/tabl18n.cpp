@@ -3,7 +3,20 @@
 
 TabL18n::TabL18n(QObject *parent, Ui::MainWindow* ui) : QObject(parent), ui(ui)
 {
+	lang_default= nullptr;
 }
+
+DataTree* TabL18n::GetDefaultLanguage()
+{
+	//If default langauge is already set, we're go
+	if (lang_default!=nullptr)
+		return lang_default;
+	else {
+		//Otherwise, we load the first language on the list
+		LoadLanguage( languages.begin().key() );
+		return lang_default;
+	};
+};
 
 void TabL18n::LoadAllLanguages()
 {
@@ -72,6 +85,7 @@ void TabL18n::LoadLanguage(QString filepath)
               }
             }
             ui->languageEditor->LoadLanguage(*it);
+			lang_default = *it; //Make new language the default for the Dialogue editor
             break ;
         }
     }
