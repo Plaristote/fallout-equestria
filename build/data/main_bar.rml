@@ -71,10 +71,17 @@ body
 {
   position:    absolute;
   left:        83%;
-  width:       13%;
+  width:       8%;
   bottom:      0px;
 }
-                
+
+#fourth_col
+{
+  position: absolute;
+  left:     91%;
+  bottom:   0px;
+}
+ 
     </style>
   </head>
   <body id="body" template="tplmainbar">
@@ -112,6 +119,11 @@ body
         <button class="francis" id="skilldex">Skilldex</button><br />
         <button class="francis" id="charsheet">Char</button><br />
         <button class="francis" id="pipbuck">Pip</button>
+      </p>
+
+      <p id="fourth_col">
+        <button class="francis" id="pass_turn">Turn</button><br />
+        <button class="francis" id="stop_fight">Cmbt</button><br />
       </p>
 
     </p>

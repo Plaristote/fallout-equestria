@@ -97,7 +97,7 @@ public:
   const std::string& GetDialog(void)                     const { return (_object->dialog);                      }
   DynamicObject*     GetDynamicObject(void)                    { return (_object);                              }
   virtual GoToData   GetGoToData(InstanceDynamicObject* character);
-
+  
   template<class C>
   C*                 Get(void)
   {
@@ -115,9 +115,9 @@ protected:
   unsigned char            _type;
   DynamicObject*           _object;
   
+  void                     ResetInteractions(void) { _interactions.clear(); }
   void                     ThatDoesNothing();
 
-private:
   InteractionList          _interactions;
 };
 

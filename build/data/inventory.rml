@@ -9,7 +9,6 @@
 		  height: 70%;
                   margin: auto;
                   margin-top: 10px;
-                  drag: clone;
 		}
 
                 #body-inventory-items
@@ -21,6 +20,31 @@
                   overflow-y:     scroll;
                   drag: clone;
                 }
+
+                #inventory-capacity
+                {
+                  position:absolute;
+                  bottom: 0;
+                  left: 20px;
+                }
+
+                #item-description
+                {
+                  position: absolute;
+                  width: 250px;
+                  height: 80%;
+                  right: 10px;
+                  top: 10px;
+                }
+
+                #item-actions
+                {
+                  position: absolute;
+                  width: 250px;
+                  height: 20%;
+                  right: 10px;
+                  bottom: 10px;
+                }
 		</style>
 	</head>
   <body id="body" template="tplmainbar">
@@ -30,6 +54,20 @@
         <img src="../textures/itemIcons/key.png" class='inventory-item' />
       </div>
     </div>
+  </p>
+  <p id="item-description">
+    Item description goes here
+  </p>
+  <div id="item-actions">
+    <button id="button_use"     class="francis">Use</button>
+    <button id="button_drop"    class="francis">Drop</button>
+    <button id="button_equip_1" class="francis">Equip 1</button>
+    <button id="button_equip_2" class="francis">Equip 2</button>
+    <br />
+    <button id="button_unequip_1" class="francis">Unequip 1</button>
+    <button id="button_unequip_2" class="francis">Unequip 2</button>
+  </div>
+  <p id="inventory-capacity">
   </p>
   </body>
 </rml>

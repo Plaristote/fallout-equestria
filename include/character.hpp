@@ -29,6 +29,8 @@ public:
     ret.min_distance = 1;
     return (ret);
   }
+  
+  void                ProcessCollisions() { if (_hitPoints > 0) InstanceDynamicObject::ProcessCollisions(); }
 
   void                Run(float elapsedTime);
   void                GoTo(unsigned int id);
@@ -52,6 +54,24 @@ public:
   void                RestartActionPoints(void);
   Observatory::Signal<void (unsigned short)> ActionPointChanged;
   
+  short               GetHitPoints(void) const        { return (_hitPoints); }
+  void                SetHitPoints(short hp)
+  {
+    std::cout << "HitPoints are now " << hp << std::endl;
+    _hitPoints = hp;
+    HitPointsChanged.Emit(_hitPoints);
+    if (hp <= 0)
+      CharacterDied.Emit();
+  }
+  Observatory::Signal<void (unsigned short)> HitPointsChanged;
+  Observatory::Signal<void>                  CharacterDied;
+  
+  short               GetArmorClass(void) const        { return (_armorClass); }
+  void                SetArmorClass(short ac)          { _armorClass = ac; ArmorClassChanged.Emit(_armorClass); }
+  void                RestartArmorClass(void)          { _armorClass -= _tmpArmorClass; _tmpArmorClass = 0;     }
+  void                SetBonusAC(short ac)             { _armorClass += ac; _tmpArmorClass += ac;               }
+  Observatory::Signal<void (short)>          ArmorClassChanged;
+  
   void                SetEquipedItem(unsigned short it, InventoryObject* object);
   InventoryObject*    GetEquipedItem(unsigned short it);
   void                UnequipItem(unsigned short it);
@@ -60,6 +80,7 @@ public:
 private:
   void                RunMovement(float elapsedTime);
   void                RunMovementNext(float elaspedTime);
+  void                RunDeath(void);
 
   std::list<Waypoint>       _path;
   GoToData                  _goToData;
@@ -70,6 +91,7 @@ private:
   DataTree*                 _statistics;
 
   unsigned short            _actionPoints;
+  short                     _hitPoints, _armorClass, _tmpArmorClass;
   
   // Line of Sight Tools
   NodePath                  _losPath;

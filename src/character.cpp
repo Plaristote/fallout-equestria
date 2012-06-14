@@ -33,9 +33,14 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   
   // Statistics
   _statistics = DataTree::Factory::JSON("data/charsheets/" + object->charsheet + ".json");
+  _hitPoints = _armorClass = 5;
   if (_statistics)
   {
-    _inventory.SetCapacity(GetStatistics()["Statistics"]["Carry Weight"]);
+    Data stats = GetStatistics();
+    
+    _inventory.SetCapacity(stats["Statistics"]["Carry Weight"]);
+    _armorClass = stats["Statistics"]["Armor Class"].Nil() ? 5  : (int)(stats["Statistics"]["Armor Class"]);
+    _hitPoints  = stats["Statistics"]["Hit Points"].Nil()  ? 15 : (int)(stats["Statistics"]["Hit Points"]);
   }
   
   _equiped[0] = 0;
@@ -90,6 +95,8 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
     _equiped[i]->SetEquiped(true);
     _inventory.AddObject(_equiped[i]);
   }
+  
+  CharacterDied.Connect(*this, &ObjectCharacter::RunDeath);
 }
 
 InventoryObject* ObjectCharacter::GetEquipedItem(unsigned short it)
@@ -127,8 +134,8 @@ void ObjectCharacter::RestartActionPoints(void)
 void ObjectCharacter::Run(float elapsedTime)
 {
   Level::State state = _level->GetState();
-  
-  if (state == Level::Normal && _scriptMain)
+
+  if (state == Level::Normal && _scriptMain && _hitPoints > 0)
   {
     _scriptContext->Prepare(_scriptMain);
     _scriptContext->SetArgObject(0, this);
@@ -137,8 +144,9 @@ void ObjectCharacter::Run(float elapsedTime)
   }
   else if (state == Level::Fight)
   {
-    //std::cout << "ActionPoints: " << _actionPoints << std::endl;
-    if (_actionPoints == 0)
+    if (_hitPoints <= 0)
+      _level->NextTurn();
+    else if (_actionPoints == 0)
       _level->NextTurn();
     else if (!(IsMoving()) && _scriptFight) // replace with something more appropriate
     {
@@ -462,4 +470,13 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
     break ;
   }
   return (ret);
+}
+
+void                ObjectCharacter::RunDeath()
+{
+  ResetInteractions();
+  _interactions.push_back(Interaction("use", this, &ActionUse));
+  
+  GetNodePath().set_hpr(0, 0, 90);
+  UnprocessCollisions();
 }
