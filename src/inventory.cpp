@@ -11,7 +11,7 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
   (*this)["scale"]    = data["scale"].Value();
   (*this)["pos"]["x"] = data["pos"]["x"].Value();
   (*this)["pos"]["y"] = data["pos"]["y"].Value();
-  (*this)["weight"]   = data["weight"].Value();
+  (*this)["weight"]   = (data["weight"].Nil()) ? "0" : data["weight"].Value();
   (*this)["hidden"]   = data["hidden"].Value();
   (*this)["combat"]   = data["combat"].Value();
   (*this)["range"]    = data["range"].Value();
@@ -115,8 +115,14 @@ const std::string InventoryObject::ExecuteHook(asIScriptFunction* hook, ObjectCh
 
 void Inventory::AddObject(InventoryObject* toAdd)
 {
-  _currentWeight += (unsigned short)((*toAdd)["weight"]);
+  std::cout << "Weight is " << _currentWeight << ", adding object " << toAdd->GetName() << std::endl;
+  Data weight = (*toAdd)["weight"];
+  
+  if (!(weight.Nil()))
+    _currentWeight += (unsigned short)((*toAdd)["weight"]);
   _content.push_back(toAdd);
+  ContentChanged.Emit();
+  std::cout << "Weight is now " << _currentWeight << std::endl;
 }
 
 void Inventory::DelObject(InventoryObject* toDel)
@@ -125,8 +131,12 @@ void Inventory::DelObject(InventoryObject* toDel)
 
   if (it != _content.end())
   {
-    _currentWeight -= (unsigned short)((*toDel)["weight"]);
+    Data weight = (*toDel)["weight"];
+  
+    if (!(weight.Nil()))
+      _currentWeight -= (unsigned short)((*toDel)["weight"]);
     _content.erase(it);
+    ContentChanged.Emit();
   }
 }
 

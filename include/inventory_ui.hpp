@@ -38,11 +38,12 @@ class InventoryViewController
 public:
   Observatory::Signal<void (InventoryObject*)> ObjectSelected;
   Observatory::Signal<void (InventoryObject*)> ObjectMenuRequested;
-  Observatory::Signal<void (InventoryObject*)> ObjectFocused;  
+  Observatory::Signal<void (InventoryObject*)> ObjectFocused;
   
   void AddView(Rocket::Core::Element* element, Inventory& inventory);
   void DragObserver(InventoryView* container, Rocket::Core::Element* element);
   void Destroy(void);
+  void Update(void);
 
 private:
   std::vector<InventoryView*> _views;

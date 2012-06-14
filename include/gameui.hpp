@@ -28,6 +28,8 @@ private:
 };
 
 class InventoryObject;
+class Inventory;
+
 class GameMainBar : public UiBase
 {
   friend class GameUi;
@@ -65,11 +67,36 @@ private:
   bool                   _apEnabled;
 };
 
+#include "inventory_ui.hpp"
 class GameInventory : public UiBase
 {
   friend class GameUi;
 public:
   GameInventory(WindowFramework* window, Rocket::Core::Context* context);
+
+  void                     SetInventory(Inventory&);
+  void                     UpdateInventory(void);
+
+  Observatory::Signal<void (unsigned short, InventoryObject*)> EquipItem;
+  Observatory::Signal<void (unsigned short)>                   UnequipItem;
+  Observatory::Signal<void (InventoryObject*)>                 UseObject;
+  Observatory::Signal<void (InventoryObject*)>                 DropObject;
+
+private:
+  void                     UpdateInventoryCapacity(void);
+  void                     SetSelectedObject(InventoryObject*);
+  
+  RocketListener           ButtonUseClicked, ButtonDropClicked, ButtonEquip1Clicked, ButtonEquip2Clicked, ButtonUnequip1, ButtonUnequip2;
+  void                     CallbackButtonUse(Rocket::Core::Event&)      { if (_selectedObject) UseObject.Emit (_selectedObject);    }
+  void                     CallbackButtonDrop(Rocket::Core::Event&)     { if (_selectedObject) DropObject.Emit(_selectedObject);    }
+  void                     CallbackButtonEquip1(Rocket::Core::Event&)   { if (_selectedObject) EquipItem.Emit (0, _selectedObject); }
+  void                     CallbackButtonEquip2(Rocket::Core::Event&)   { if (_selectedObject) EquipItem.Emit (1, _selectedObject); }
+  void                     CallbackButtonUnequip1(Rocket::Core::Event&) { UnequipItem.Emit(0); }
+  void                     CallbackButtonUnequip2(Rocket::Core::Event&) { UnequipItem.Emit(1); }
+
+  Inventory*               _inventory;
+  InventoryViewController  _inventoryView;
+  InventoryObject*         _selectedObject;
 };
 
 class GameConsole : public UiBase
@@ -134,9 +161,10 @@ public:
   GameUi(WindowFramework* window);
   ~GameUi();
 
-  GameMainBar&           GetMainBar(void) { return (*_mainBar); }
-  GameMenu&              GetMenu(void) { return (*_menu); }
-  Rocket::Core::Context* GetContext() { return (_rocket->get_context()); }
+  GameMainBar&           GetMainBar(void)   { return (*_mainBar); }
+  GameMenu&              GetMenu(void)      { return (*_menu); }
+  GameInventory&         GetInventory(void) { return (*_inventory); }
+  Rocket::Core::Context* GetContext()       { return (_rocket->get_context()); }
 
   Observatory::Signal<void (bool)> InterfaceOpened;
   

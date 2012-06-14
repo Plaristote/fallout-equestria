@@ -92,6 +92,10 @@ public:
   void                   PendingActionTalkTo(InstanceDynamicObject* fromObject);
   void                   PendingActionUse(InstanceDynamicObject* fromObject);
   void                   PendingActionUseObjectOn(InstanceDynamicObject* fromObject);
+  
+  // Interace Interactions
+  void                   PlayerDropObject(InventoryObject*);
+  void                   PlayerUseObject(InventoryObject*);
 
   Observatory::Signal<void (Inventory&)> SignalShelfOpened;
   

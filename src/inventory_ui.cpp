@@ -147,6 +147,11 @@ void InventoryViewController::Destroy(void)
   _views.clear();
 }
 
+void InventoryViewController::Update(void)
+{
+  std::for_each(_views.begin(), _views.end(), [](InventoryView* view) { view->UpdateView(); });
+}
+
 /*
  * UiUseObjectOn
  */

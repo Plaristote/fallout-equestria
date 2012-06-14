@@ -129,7 +129,8 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   InventoryObject* object = new InventoryObject(Data(_items)["Key"]);
 
   GetPlayer()->GetInventory().AddObject(object);
-  GetPlayer()->SetEquipedItem(0, object);
+//   GetPlayer()->SetEquipedItem(0, object);
+//   GetPlayer()->UnequipItem(0);
   if (GetPlayer()->GetStatistics())
   {
     Data stats(GetPlayer()->GetStatistics());
@@ -144,6 +145,11 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   _gameUi.GetMainBar().UseEquipedItem.Connect(*this, &Level::CallbackActionTargetUse);
   _gameUi.GetMainBar().CombatEnd.Connect     (*this, &Level::StopFight);
   _gameUi.GetMainBar().CombatPassTurn.Connect(*this, &Level::NextTurn);
+  _gameUi.GetInventory().SetInventory(GetPlayer()->GetInventory());
+  _gameUi.GetInventory().EquipItem.Connect   (*GetPlayer(), &ObjectCharacter::SetEquipedItem);
+  _gameUi.GetInventory().UnequipItem.Connect (*GetPlayer(), &ObjectCharacter::UnequipItem);
+  _gameUi.GetInventory().DropObject.Connect  (*this, &Level::PlayerDropObject);
+  _gameUi.GetInventory().UseObject.Connect   (*this, &Level::PlayerUseObject);
 }
 
 bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
@@ -658,6 +664,16 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
   }
   if (user == GetPlayer())
     ConsoleWrite(output);
+}
+
+void Level::PlayerDropObject(InventoryObject* object)
+{
+  ActionDropObject(GetPlayer(), object);
+}
+
+void Level::PlayerUseObject(InventoryObject* object)
+{
+  ActionUseObjectOn(GetPlayer(), GetPlayer(), object);
 }
 
 void Level::ActionDropObject(ObjectCharacter* user, InventoryObject* object)

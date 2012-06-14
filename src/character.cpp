@@ -103,6 +103,7 @@ void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item)
   _equiped[it] = item;
   item->SetEquiped(true);
   EquipedItemChanged.Emit(it, item);
+  _inventory.ContentChanged.Emit();
 }
 
 void ObjectCharacter::UnequipItem(unsigned short it)

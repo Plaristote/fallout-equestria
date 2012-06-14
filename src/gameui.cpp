@@ -276,8 +276,84 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
       item->SetInnerRML("<img src=\"item.png\" class='inventory-item' />");
       itemListContainer->AppendChild(item);
     }
+    
+    Core::Element* buttonUse    = _root->GetElementById("button_use");
+    Core::Element* buttonDrop   = _root->GetElementById("button_drop");
+    Core::Element* buttonEquip1 = _root->GetElementById("button_equip_1");
+    Core::Element* buttonEquip2 = _root->GetElementById("button_equip_2");
+    Core::Element* buttonUneuip1= _root->GetElementById("button_unequip_1");
+    Core::Element* buttonUneuip2= _root->GetElementById("button_unequip_2");
+    
+    if (buttonUse)
+      buttonUse->AddEventListener("click", &ButtonUseClicked);
+    if (buttonDrop)
+      buttonDrop->AddEventListener("click", &ButtonDropClicked);
+    if (buttonEquip1)
+      buttonEquip1->AddEventListener("click", &ButtonEquip1Clicked);
+    if (buttonEquip2)
+      buttonEquip2->AddEventListener("click", &ButtonEquip2Clicked);    
+    if (buttonUneuip1)
+      buttonUneuip1->AddEventListener("click", &ButtonUnequip1);
+    if (buttonUneuip2)
+      buttonUneuip2->AddEventListener("click", &ButtonUnequip2);
+    ButtonUseClicked.EventReceived.Connect   (*this, &GameInventory::CallbackButtonUse);
+    ButtonDropClicked.EventReceived.Connect  (*this, &GameInventory::CallbackButtonDrop);
+    ButtonEquip1Clicked.EventReceived.Connect(*this, &GameInventory::CallbackButtonEquip1);
+    ButtonEquip2Clicked.EventReceived.Connect(*this, &GameInventory::CallbackButtonEquip2);
+    
+    ButtonUnequip1.EventReceived.Connect(*this, &GameInventory::CallbackButtonUnequip1);
+    ButtonUnequip2.EventReceived.Connect(*this, &GameInventory::CallbackButtonUnequip2);
 
     doc->Show();
+  }
+  _inventoryView.ObjectSelected.Connect(*this, &GameInventory::SetSelectedObject);
+  _selectedObject = 0;  
+}
+
+void GameInventory::SetInventory(Inventory& inventory)
+{
+  Core::Element* itemListContainer = _root->GetElementById("body-inventory-items");
+
+  if (itemListContainer)
+  {
+    _inventory = &inventory;
+    _inventoryView.AddView(itemListContainer, *_inventory);
+  }
+  inventory.ContentChanged.Connect(*this, &GameInventory::UpdateInventory);
+  UpdateInventoryCapacity();
+}
+
+void GameInventory::UpdateInventory(void)
+{
+  _inventoryView.Update();
+  UpdateInventoryCapacity();
+  SetSelectedObject(0);
+}
+
+void GameInventory::UpdateInventoryCapacity(void)
+{
+  Core::Element* capacity = _root->GetElementById("inventory-capacity");
+  
+  if (capacity)
+  {
+    stringstream stream;
+    
+    stream << "Weight: " << (int)(_inventory->GetCurrentWeight()) << " / " << (int)(_inventory->GetCapacity()) << "kg";
+    capacity->SetInnerRML(stream.str().c_str());
+  }
+}
+
+void GameInventory::SetSelectedObject(InventoryObject* inventory)
+{
+  Core::Element* itemDescription = _root->GetElementById("item-description");
+
+  _selectedObject = inventory;
+  if (itemDescription)
+  {
+    if (_selectedObject == 0)
+      itemDescription->SetInnerRML("Seleccionar objeto");
+    else
+      itemDescription->SetInnerRML(_selectedObject->GetName().c_str());
   }
 }
 

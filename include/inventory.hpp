@@ -55,6 +55,8 @@ public:
   unsigned short   GetCapacity(void)      const      { return (_capacity);      }
   void             SetCapacity(unsigned short value) { _capacity = value;       }
   bool             CanCarry(InventoryObject*);
+  
+  Observatory::Signal<void> ContentChanged;
 
 private:
   Content          _content;
