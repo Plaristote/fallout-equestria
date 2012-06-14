@@ -1,5 +1,6 @@
 #include "mouse.hpp"
 #include "world.h"
+#include <panda3d/cardMaker.h>
 
 using namespace std;
 
@@ -25,6 +26,54 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
     cerr << "Failed to registrate mouse2 event" << endl;
   if (!(events->add_hook("mouse3", &Mouse::CallbackButton3, (void*)this)))
     cerr << "Failed to registrate mouse2 event" << endl;
+  
+  CardMaker cardMaker("cursorCardMaker");
+  
+  _cursorAction      = TexturePool::load_texture("textures/cursor-action.png");
+  _cursorInteraction = TexturePool::load_texture("textures/cursor-interaction.png");
+  _cursorTarget      = TexturePool::load_texture("textures/cursor-target.png");
+
+  _cursorAction->set_magfilter(Texture::FT_nearest); 
+  _cursorAction->set_minfilter(Texture::FT_nearest);
+
+  _cursor = NodePath(cardMaker.generate());
+  _cursor.set_scale(0.1, 1, 0.1);
+  _cursor.reparent_to(window->get_render_2d());
+  _cursor.set_transparency(TransparencyAttrib::M_alpha);
+  SetMouseState('a');
+  
+  // Hiding the regular cursor
+  WindowProperties props = window->get_graphics_window()->get_properties();
+  props.set_cursor_hidden(true);
+  window->get_graphics_window()->request_properties(props);
+}
+
+void Mouse::SetMouseState(char i)
+{
+  switch (i)
+  {
+    case 'a':
+      _cursor.set_texture(_cursorAction);
+      _cursorDecalage.set_x(-0.05);
+      _cursorDecalage.set_y(-0.05);
+      break ;
+    case 'i':
+      _cursor.set_texture(_cursorInteraction);
+      _cursorDecalage.set_x(0);
+      _cursorDecalage.set_y(-0.1);
+      break ;
+    case 't':
+      _cursor.set_texture(_cursorTarget);
+      _cursorDecalage.set_x(-0.05);
+      _cursorDecalage.set_y(-0.05);
+      break ;
+  }
+  if (_mouseWatcher->has_mouse())
+  {
+    LPoint2f cursorPos = _mouseWatcher->get_mouse();
+    
+    _cursor.set_pos(cursorPos.get_x() + _cursorDecalage.get_x(), 0, cursorPos.get_y() + _cursorDecalage.get_y());    
+  }
 }
 
 void Mouse::Run(void)
@@ -35,6 +84,8 @@ void Mouse::Run(void)
 
     if (cursorPos == _lastMousePos)
       return ;
+    _cursor.set_pos(cursorPos.get_x() + _cursorDecalage.get_x(), 0, cursorPos.get_y() + _cursorDecalage.get_y());
+    //_cursor.set_pos(data.get_x(), 0, data.get_y());
     _lastMousePos = cursorPos;
     _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
     _collisionTraverser.traverse(_window->get_render());

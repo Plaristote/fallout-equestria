@@ -39,6 +39,8 @@ public:
 
   void                      Run(void);
   const MouseHovering&      Hovering(void) const { return (_hovering); }
+  
+  void                      SetMouseState(char);
 
   Observatory::Signal<void> ButtonLeft;
   Observatory::Signal<void> ButtonMiddle;
@@ -71,6 +73,10 @@ private:
   PT(CollisionHandlerQueue) _collisionHandlerQueue;
   
   MouseHovering             _hovering;
+  
+  LPoint2f                  _cursorDecalage;
+  NodePath                  _cursor;
+  PT(Texture)               _cursorAction, _cursorInteraction, _cursorTarget;
 };
 
 #endif

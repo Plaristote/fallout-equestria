@@ -379,10 +379,27 @@ void                   Level::RemoveObject(InstanceDynamicObject* object)
  */
 void Level::MouseInit(void)
 {
-  _mouseState    = MouseAction;
+  SetMouseState(MouseAction);
   _mouse.ButtonLeft.Connect  (*this,   &Level::MouseLeftClicked);
   _mouse.ButtonRight.Connect (*this,   &Level::MouseRightClicked);
   _mouse.ButtonMiddle.Connect(_camera, &SceneCamera::SwapCameraView);
+}
+
+void Level::SetMouseState(MouseState state)
+{
+  _mouseState = state;
+  switch (state)
+  {
+    case MouseAction:
+      _mouse.SetMouseState('a');
+      break ;
+    case MouseInteraction:
+      _mouse.SetMouseState('i');
+      break ;
+    case MouseTarget:
+      _mouse.SetMouseState('t');
+      break ;
+  }
 }
 
 void Level::MouseLeftClicked(void)
@@ -470,7 +487,7 @@ void Level::MouseRightClicked(void)
 {
   cout << "Changed mouse state" << endl;
   CloseInteractMenu();
-  _mouseState = (_mouseState == MouseInteraction || _mouseState == MouseTarget ? MouseAction : MouseInteraction);
+  SetMouseState(_mouseState == MouseInteraction || _mouseState == MouseTarget ? MouseAction : MouseInteraction);
 }
 
 /*
@@ -551,7 +568,7 @@ void Level::CallbackActionTargetUse(unsigned short it)
     if ((*object)["combat"].Value() == "1" && _state != Fight)
       StartFight(player);
     player->pendingActionObject = object;
-    _mouseState = MouseTarget;
+    SetMouseState(MouseTarget);
   }
 }
 
@@ -562,7 +579,6 @@ void Level::SelectedUseObjectOn(InventoryObject* object)
 
 void Level::PendingActionTalkTo(InstanceDynamicObject* object)
 {
-  std::cout << "PendingActionTalkTo Called" << std::endl;
   CallbackActionTalkTo(object->pendingActionOn);
 }
 
@@ -574,19 +590,23 @@ void Level::PendingActionUseObjectOn(InstanceDynamicObject* object)
 
   if (!(dataUseCost.Nil()))
     useCost = dataUseCost;
+  object->GetNodePath().look_at(object->pendingActionOn->GetNodePath());
   if (UseActionPoints(useCost))
   {
     const string toOutput = item->UseOn(object->Get<ObjectCharacter>(), object->pendingActionOn);
 
     ConsoleWrite(toOutput);
   }
+  SetMouseState(MouseAction);
 }
 
 void Level::PendingActionUse(InstanceDynamicObject* object)
 {
+  object->GetNodePath().look_at(object->pendingActionOn->GetNodePath());
   if (!(UseActionPoints(AP_COST_USE)))
     return ;
   object->pendingActionOn->CallbackActionUse(object);
+  SetMouseState(MouseAction);
 }
 
 void Level::ActionUse(ObjectCharacter* user, InstanceDynamicObject* target)

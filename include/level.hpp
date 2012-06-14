@@ -84,7 +84,6 @@ public:
   void                   CallbackActionTargetUse(unsigned short it);
   void                   SelectedUseObjectOn(InventoryObject* object);
 
-  
   void                   ActionUse(ObjectCharacter* user, InstanceDynamicObject* target);
   void                   ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object);
   void                   ActionDropObject(ObjectCharacter* user, InventoryObject* object);
@@ -110,6 +109,7 @@ public:
     MouseTarget
   };
 
+  void              SetMouseState(MouseState);
   void              MouseLeftClicked(void);
   void              MouseRightClicked(void);
 
