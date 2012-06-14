@@ -35,6 +35,7 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   _currentInteractMenu  = 0;
   _currentRunningDialog = 0;
   _currentUseObjectOn   = 0;
+  _currentUiLoot        = 0;
   _mouseActionBlocked   = false;
 
   _graphicWindow = _window->get_graphics_window();
@@ -150,6 +151,23 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   _gameUi.GetInventory().UnequipItem.Connect (*GetPlayer(), &ObjectCharacter::UnequipItem);
   _gameUi.GetInventory().DropObject.Connect  (*this, &Level::PlayerDropObject);
   _gameUi.GetInventory().UseObject.Connect   (*this, &Level::PlayerUseObject);
+}
+
+Level::~Level()
+{
+  AsyncTaskManager::get_global_ptr()->remove(this);
+  std::for_each(_objects.begin(), _objects.end(), [](InstanceDynamicObject* obj) { delete obj; });
+  CurrentLevel = 0;
+  if (_currentRunningDialog)
+    delete _currentRunningDialog;
+  if (_currentUiLoot)
+    delete _currentUiLoot;
+  if (_currentUseObjectOn)
+    delete _currentUseObjectOn;
+  if (_currentInteractMenu)
+    delete _currentInteractMenu;
+  if (_l18n)
+    delete _l18n;
 }
 
 bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
@@ -566,6 +584,24 @@ void Level::CallbackActionUseObjectOn(InstanceDynamicObject* target)
   GetPlayer()->pendingActionOn = target;
 }
 
+void Level::PlayerLoot(Inventory* inventory)
+{
+  if (!inventory)
+  {
+    Script::Engine::ScriptError.Emit("<span class='console-error'>[PlayerLoot] Aborted: NullPointer Error</span>");
+    return ;
+  }
+  CloseInteractMenu();
+  if (_currentUiLoot)
+    delete _currentUiLoot;
+  _currentUiLoot = new UiLoot(_window, _gameUi.GetContext(), GetPlayer()->GetInventory(), *inventory);
+  _currentUiLoot->Done.Connect(*_currentUiLoot, &UiLoot::Destroy);
+  _currentUiLoot->Done.Connect(*this, &Level::CloseUiLoot);
+  _mouseActionBlocked = true;
+  _camera.SetEnabledScroll(false);
+  SetInterrupted(true);
+}
+
 void Level::CallbackActionTargetUse(unsigned short it)
 {
   ObjectCharacter* player = GetPlayer();
@@ -730,5 +766,12 @@ void Level::CloseUseObjectOn(void)
     _currentUseObjectOn->Destroy();
   _camera.SetEnabledScroll(true);
   _mouseActionBlocked = false;
+  SetInterrupted(false);
+}
+
+void Level::CloseUiLoot(void)
+{
+  _mouseActionBlocked = false;
+  _camera.SetEnabledScroll(true);
   SetInterrupted(false);
 }

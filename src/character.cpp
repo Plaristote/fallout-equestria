@@ -456,6 +456,7 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
   _losRay->set_direction(dir.get_x(), dir.get_y(), dir.get_z());
   _losTraverser.traverse(_level->GetWorld()->window->get_render());
 
+  _losPath.show();
   _losHandlerQueue->sort_entries();
 
   for (unsigned int i = 0 ; i < _losHandlerQueue->get_num_entries() ; ++i)
@@ -474,9 +475,16 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
 
 void                ObjectCharacter::RunDeath()
 {
+  UnequipItem(0);
+  UnequipItem(1);
   ResetInteractions();
   _interactions.push_back(Interaction("use", this, &ActionUse));
-  
+
   GetNodePath().set_hpr(0, 0, 90);
   UnprocessCollisions();
+}
+
+void                ObjectCharacter::CallbackActionUse(InstanceDynamicObject*)
+{
+  _level->PlayerLoot(&(GetInventory()));
 }

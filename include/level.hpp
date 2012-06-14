@@ -34,18 +34,7 @@ public:
   
   Level(WindowFramework* window, const std::string& filename);
 
-  ~Level()
-  {
-    AsyncTaskManager::get_global_ptr()->remove(this);
-    std::for_each(_objects.begin(), _objects.end(), [](InstanceDynamicObject* obj) { delete obj; });
-    CurrentLevel = 0;
-    if (_currentRunningDialog)
-      delete _currentRunningDialog;
-    if (_currentInteractMenu)
-      delete _currentInteractMenu;
-    if (_l18n)
-      delete _l18n;
-  }
+  ~Level();
 
   enum State
   {
@@ -69,6 +58,7 @@ public:
   void                   CloseInteractMenu(void);
   void                   CloseRunningDialog(void);
   void                   CloseUseObjectOn(void);
+  void                   CloseUiLoot(void);
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);
   Data                   GetDataEngine(void) { return (_dataEngine); }
@@ -92,10 +82,11 @@ public:
   void                   PendingActionTalkTo(InstanceDynamicObject* fromObject);
   void                   PendingActionUse(InstanceDynamicObject* fromObject);
   void                   PendingActionUseObjectOn(InstanceDynamicObject* fromObject);
-  
+
   // Interace Interactions
   void                   PlayerDropObject(InventoryObject*);
   void                   PlayerUseObject(InventoryObject*);
+  void                   PlayerLoot(Inventory*);
 
   Observatory::Signal<void (Inventory&)> SignalShelfOpened;
   
@@ -146,6 +137,7 @@ private:
   InteractMenu*     _currentInteractMenu;
   DialogController* _currentRunningDialog;
   UiUseObjectOn*    _currentUseObjectOn;
+  UiLoot*           _currentUiLoot;
   bool              _mouseActionBlocked;
 
   DataEngine        _dataEngine;

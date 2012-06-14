@@ -69,5 +69,6 @@ InstanceDynamicObject::GoToData ObjectShelf::GetGoToData(InstanceDynamicObject* 
 void ObjectShelf::CallbackActionUse(InstanceDynamicObject* object)
 {
   if (object == _level->GetPlayer())
-    _level->SignalShelfOpened.Emit(_inventory);
+    _level->PlayerLoot(&_inventory);
+    //_level->SignalShelfOpened.Emit(_inventory);
 }

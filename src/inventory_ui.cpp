@@ -118,7 +118,6 @@ void InventoryViewController::AddView(Rocket::Core::Element* element, Inventory&
 
 void InventoryViewController::DragObserver(InventoryView* container, Rocket::Core::Element* element)
 {
-  
   std::vector<InventoryView*>::iterator itView = _views.begin();
   std::vector<InventoryView*>::iterator end    = _views.end();
 
@@ -188,4 +187,99 @@ void UiUseObjectOn::Destroy(void)
 {
   if (_root)
     _root->Hide();
+}
+
+/*
+ * UiLoot
+ */
+UiLoot::UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventory& looter, Inventory& looted) : UiBase(window), _looter(looter), _looted(looted)
+{
+  _root = context->LoadDocument("data/looting.rml");
+  if (_root)
+  {
+    Rocket::Core::Element* eDone      = _root->GetElementById("button_done");
+    Rocket::Core::Element* eTakeAll   = _root->GetElementById("button_take_all");
+    Rocket::Core::Element* eInvLooter = _root->GetElementById("self-inventory");
+    Rocket::Core::Element* eInvLooted = _root->GetElementById("other-inventory");
+    
+    if (eDone)
+    {
+      eDone->AddEventListener("click", &DoneClicked);
+      DoneClicked.EventReceived.Connect(*this, &UiLoot::RocketDoneClicked);
+    }
+    if (eTakeAll)
+    {
+      eTakeAll->AddEventListener("click", &TakeAllClicked);
+      TakeAllClicked.EventReceived.Connect(*this, &UiLoot::RocketTakeAllClicked);
+    }
+    if (eInvLooter)
+      _viewController.AddView(eInvLooter, looter);
+    if (eInvLooted)
+      _viewController.AddView(eInvLooted, looted);
+
+    _viewController.ObjectSelected.Connect(*this, &UiLoot::SwapObjects);
+    
+    _root->Show();
+  }
+}
+
+UiLoot::~UiLoot()
+{
+  _viewController.Destroy();
+  if (_root)
+    _root->RemoveReference();
+}
+
+void UiLoot::Destroy(void)
+{
+  if (_root)
+    _root->Hide();
+}
+
+void UiLoot::SwapObjects(InventoryObject* object)
+{
+  bool fromLooted = false;
+
+  std::for_each(_looted.GetContent().begin(), _looted.GetContent().end(), [&fromLooted, object](InventoryObject* ptr)
+  {
+    if (object == ptr)
+      fromLooted = true;
+  });
+  
+  Inventory& looted = (fromLooted ? _looted : _looter);
+  Inventory& looter = (fromLooted ? _looter : _looted);
+  
+  if (looter.CanCarry(object))
+  {
+    looter.AddObject(object);
+    looted.DelObject(object);
+  }
+  _viewController.Update();
+}
+
+void UiLoot::RocketTakeAllClicked(Rocket::Core::Event&)
+{
+  Inventory::Content::iterator it  = _looted.GetContent().begin();
+  Inventory::Content::iterator end = _looted.GetContent().end();
+
+  for (; it != end ; ++it)
+  {
+    InventoryObject* object = *it;
+    bool             hidden = (*object)["hidden"] == "1";
+
+    if (!hidden && _looter.CanCarry(object))
+    {
+      _looter.AddObject(object);
+      _looted.DelObject(object);
+    }
+  }
+//   std::for_each(_looted.GetContent().begin(), _looted.GetContent().end(), [this](InventoryObject* object)
+//   {
+//     if (_looter.CanCarry(object))
+//     {
+//       _looter.AddObject(object);
+//       _looted.DelObject(object);
+//     }
+//   });
+  _viewController.Update();
 }

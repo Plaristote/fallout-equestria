@@ -44,7 +44,7 @@ public:
   void DragObserver(InventoryView* container, Rocket::Core::Element* element);
   void Destroy(void);
   void Update(void);
-
+  
 private:
   std::vector<InventoryView*> _views;
 };
@@ -65,6 +65,28 @@ private:
 
   RocketListener                               CancelClicked;
   InventoryViewController                      _viewController;
+};
+
+class UiLoot : public UiBase
+{
+public:
+  UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventory& looter, Inventory& looted);
+  ~UiLoot();
+
+  void Destroy(void);
+  
+  Observatory::Signal<void> Done;
+
+private:
+  void SwapObjects(InventoryObject* object);
+  void RocketDoneClicked(Rocket::Core::Event&)    { Done.Emit(); }
+  void RocketTakeAllClicked(Rocket::Core::Event&);
+
+  RocketListener                               DoneClicked, TakeAllClicked;
+  InventoryViewController                      _viewController;
+
+  Inventory& _looter;
+  Inventory& _looted;
 };
 
 #endif

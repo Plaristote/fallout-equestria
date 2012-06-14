@@ -3,7 +3,7 @@ string HoovesHit(Item@ item, Character@ user, Character@ target)
 {
   int ap = user.GetActionPoints();
 
-  if (ap > 3)
+  if (ap >= 3)
   {
     int damage = 5;
 
@@ -18,7 +18,7 @@ string BuckHit(Item@ item, Character@ user, Character@ target)
 {
   int ap = user.GetActionPoints();
 
-  if (ap > 3)
+  if (ap >= 3)
   {
     int damage = 10;
 

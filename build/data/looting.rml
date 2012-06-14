@@ -1,0 +1,66 @@
+<rml>
+  <head>
+    <title>Iventory</title>
+    <link type="text/template" href="tpl_mainbar.rml" />
+    <style>
+      #body
+      {
+        width:  520px;
+        height: 70%;
+        margin: auto;
+        margin-top: 10px;
+      }
+
+      #body-inventory-items
+      {
+        width:          90%;
+        height:         80%;
+        //margin-left:    10px;
+        //margin-right:   10px;
+        margin-top:     10px;
+        margin-bottom:  10px;
+      }
+
+      #self-inventory
+      {
+        position: absolute;
+        drag:  clone;
+        width: 40%;
+        left:  0px;
+        height: 80%;
+        overflow-y: scroll;
+      }
+
+      #other-inventory
+      {
+        position: absolute;
+        drag:  clone;
+        width: 40%;
+        right: 0px;
+        height: 80%;
+        overflow-y: scroll;
+      }
+
+      #buttons
+      {
+        position:       absolute;
+        bottom:         5px;
+        right:          5px;
+      }
+    </style>
+  </head>
+  <body id="body" template="tplmainbar">
+  <p>
+    <div id="inventory-items">
+      <p id="self-inventory">
+      </p>
+      <p id="other-inventory">
+      </p>
+    </div>
+    <div id="buttons">
+      <button class="button_menu" id="button_take_all">Take all</button>
+      <button class="button_menu" id="button_done">Done</button>
+    </div>
+  </p>
+  </body>
+</rml>

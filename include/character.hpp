@@ -45,9 +45,10 @@ public:
   int                 GetNearestWaypoint(InstanceDynamicObject* object);
   int                 GetFarthestWaypoint(InstanceDynamicObject* object);
   bool                HasLineOfSight(InstanceDynamicObject* object);
-  bool                IsMoving(void) const { return (_path.size()); }
-  Inventory&          GetInventory(void)   { return (_inventory);   }
-  Data                GetStatistics(void)  { return (_statistics);  }
+  bool                IsMoving(void) const { return (_path.size());   }
+  bool                IsAlive(void) const  { return (_hitPoints > 0); }
+  Inventory&          GetInventory(void)   { return (_inventory);     }
+  Data                GetStatistics(void)  { return (_statistics);    }
 
   unsigned short      GetActionPoints(void) const        { return (_actionPoints); }
   void                SetActionPoints(unsigned short ap) { _actionPoints = ap; ActionPointChanged.Emit(_actionPoints); }
@@ -81,6 +82,8 @@ private:
   void                RunMovement(float elapsedTime);
   void                RunMovementNext(float elaspedTime);
   void                RunDeath(void);
+  
+  void                CallbackActionUse(InstanceDynamicObject* object);
 
   std::list<Waypoint>       _path;
   GoToData                  _goToData;
