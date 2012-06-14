@@ -1,6 +1,7 @@
 #ifndef  TABSCRIPT_H
 # define TABSCRIPT_H
 
+# include <panda3d/cmath.h>
 # include <QObject>
 # include <qangelscriptedit.h>
 # include <QTreeWidgetItem>

@@ -1,6 +1,7 @@
 #ifndef DIALOGOBJECT_H
 #define DIALOGOBJECT_H
 
+# include <panda3d/cmath.h>
 #include <QDialog>
 #include "world.h"
 

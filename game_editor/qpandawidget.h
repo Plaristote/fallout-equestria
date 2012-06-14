@@ -1,6 +1,7 @@
 #ifndef QPANDAWIDGET_H
 # define QPANDAWIDGET_H
 
+# include <panda3d/cmath.h>
 # include <QWidget>
 # include <panda3d/pandaFramework.h>
 # include <panda3d/pandaSystem.h>

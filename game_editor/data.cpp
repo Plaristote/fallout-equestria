@@ -61,7 +61,10 @@ Data::~Data()
   {
     _data->pointers--;
     if ((_data->nil || !_data->father) && _data->root == false && _data->pointers == 0)
+    {
       delete _data;
+      _data = 0;
+    }
   }
 }
 
@@ -106,22 +109,15 @@ const Data Data::operator[](const std::string& key) const
 
 const Data& Data::operator=(const Data& var)
 {
-  if (var.Nil() && !Nil())
+  if (_data)
   {
     _data->pointers--;
-    delete _data;
-    _data = 0;
-  }
-  else if (Nil())
-  {
-    if (_data && _data->pointers == 1)
+    if (Nil() && _data->pointers == 0)
       delete _data;
-    _data = var._data;
-    if (_data)
-      _data->pointers++;
   }
-  else
-    _data->value = var.Value();
+  _data = var._data;
+  if (_data)
+    _data->pointers++;
   return (*this);
 }
 

@@ -1,6 +1,7 @@
 #ifndef  TABDIALOG_H
 # define TABDIALOG_H
 
+# include <panda3d/cmath.h>
 # include <QObject>
 # include <qangelscriptedit.h>
 # include <QTreeWidgetItem>

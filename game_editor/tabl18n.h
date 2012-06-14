@@ -1,6 +1,7 @@
 #ifndef TABL18N_H
 #define TABL18N_H
 
+# include <panda3d/cmath.h>
 # include <QObject>
 # include <qangelscriptedit.h>
 # include <QTreeWidgetItem>

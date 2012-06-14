@@ -176,12 +176,15 @@ void DialogEditor::NpcLineLocaleChanged()
 		SaveData(true);
 	};
 };
-
+#include <QMessageBox>
 void DialogEditor::SuccessorChanged(QTreeWidgetItem* item, int column)
 {
 	//First column is ignored, as it is non-editable anyway
 	if (column==0)
 		return;
+    if (!tree)
+        QMessageBox::warning(this, "SuccessorChanged", "Null pointer to DataTree");
+    else
     {
         Data        data(tree);
 		Data		loc(locale);
@@ -206,15 +209,16 @@ void DialogEditor::SuccessorChanged(QTreeWidgetItem* item, int column)
 			Data        successor     = node[ qkey.toStdString() ];
 			//successor.SetKey( qkey.toStdString() );
 
+            Data successorValue;
+
 			if (row=="HookShow")
-				successor["HookAvailable"]= item->text(1).toStdString();
+                successorValue = successor["HookAvailable"];
 			if (row=="HookExec")
-				successor["HookExecute"]= item->text(1).toStdString();
+                successorValue = successor["HookExecute"];
 			if (row=="Goto")
-				successor["DefaultAnswer"]= item->text(1).toStdString();
-
+                successorValue = successor["DefaultAnswer"];
+            successorValue = item->text(1).toStdString();
 			SaveData();
-
 		};
     }
 }
@@ -249,7 +253,7 @@ void DialogEditor::SwapNode(QString str)
 			continue;
 		};
 
-		auto a= (*it).Key();
+        auto a= (*it).Key();
 
 		AddSuccessor( str.toStdString(), (*it).Key() );
 
@@ -324,22 +328,25 @@ std::string  DialogEditor::GetIntTag(DataTree* tree)
 
 void DialogEditor::LoadDialog(DataTree* tree, DataTree* locale)
 {
-    Data           data(tree);
-    Data::iterator it  = data.begin();
-    Data::iterator end = data.end();
-
-    this->tree = tree;
-	this->locale= locale;
-    ui->nodeList->clear();
-    ui->successorList->clear();
-	ui->npcLine->clear();
-	ui->localePreview->clear();
-    for (; it != end ; ++it)
+    if (tree && locale)
     {
-		if ( !((*it).Nil()) )
-			AddNode( QString::fromStdString((*it).Key()) );
+      Data           data(tree);
+      Data::iterator it  = data.begin();
+      Data::iterator end = data.end();
+
+      this->tree = tree;
+      this->locale= locale;
+      ui->nodeList->clear();
+      ui->successorList->clear();
+      ui->npcLine->clear();
+      ui->localePreview->clear();
+      for (; it != end ; ++it)
+      {
+          if ( !((*it).Nil()) )
+              AddNode( QString::fromStdString((*it).Key()) );
+      }
+      this->setEnabled(true);
     }
-    this->setEnabled(true);
 }
 
 //Set up the widgets/etc. for a new node

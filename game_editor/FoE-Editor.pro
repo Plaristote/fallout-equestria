@@ -11,6 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = FoE-Editor
 TEMPLATE = app
 
+QMAKE_CXXFLAGS += -std=c++0x
+
 LIBS      += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3pystub -lp3direct
 unix:LIBS += -lX11
 

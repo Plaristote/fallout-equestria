@@ -1,6 +1,7 @@
 #ifndef WORLD_H
 # define WORLD_H
 
+# include <panda3d/cmath.h>
 # include <panda3d/pandaFramework.h>
 # include <panda3d/pandaSystem.h>
 # include <panda3d/texturePool.h>

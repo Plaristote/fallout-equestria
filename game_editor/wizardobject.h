@@ -1,6 +1,7 @@
 #ifndef WIZARDOBJECT_H
 #define WIZARDOBJECT_H
 
+# include <panda3d/cmath.h>
 #include <QWizard>
 
 namespace Ui {

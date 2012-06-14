@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <panda3d/cmath.h>
 #include <QMainWindow>
 #include <qpandaapplication.h>
 #include <QTreeWidgetItem>

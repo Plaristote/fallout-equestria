@@ -1,6 +1,7 @@
 #ifndef QPANDAAPPLICATION_H
 # define QPANDAAPPLICATION_H
 
+# include <panda3d/cmath.h>
 # include <QApplication>
 # include <panda3d/pandaFramework.h>
 # include <panda3d/pandaSystem.h>

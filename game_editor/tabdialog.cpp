@@ -5,7 +5,7 @@ extern QString pathScriptCategories[];
 
 TabDialog::TabDialog(QObject *parent, Ui::MainWindow* ui) : QObject(parent), ui(ui)
 {
-	locale= nullptr;
+    locale= nullptr;
 }
 
 void TabDialog::LoadAllDialogs()
@@ -71,7 +71,7 @@ void TabDialog::LoadDialog(QString filepath)
 
 	RequestLocale();
 
-	if (locale==nullptr) {
+    if (locale==nullptr) {
 		QMessageBox::warning((QWidget*)parent(), "Fatal Error", "Locale file not loaded");
         return;
 	};

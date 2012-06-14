@@ -3,13 +3,13 @@
 
 TabL18n::TabL18n(QObject *parent, Ui::MainWindow* ui) : QObject(parent), ui(ui)
 {
-	lang_default= nullptr;
+    lang_default= nullptr;
 }
 
 DataTree* TabL18n::GetDefaultLanguage()
 {
 	//If default langauge is already set, we're go
-	if (lang_default!=nullptr)
+    if (lang_default!=nullptr)
 		return lang_default;
 	else {
 		//Otherwise, we load the first language on the list

@@ -1,3 +1,4 @@
+#include <panda3d/cmath.h>
 #include <QApplication>
 #include "mainwindow.h"
 #include <panda3d/pandaFramework.h>
