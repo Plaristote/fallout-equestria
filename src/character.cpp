@@ -25,7 +25,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _losRay       = new CollisionRay();
   _losRay->set_origin(0, 0, 0);
   _losRay->set_direction(-10, 0, 0);
-  _losPath.set_pos(0, -0.5, 0);
+  _losPath.set_pos(0, 0, 5);
   //_losPath.show();
   _losNode->add_solid(_losRay);
   _losHandlerQueue = new CollisionHandlerQueue();
@@ -415,7 +415,7 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
 
     max_distance = (distance.get_x() > distance.get_y() ? distance.get_x() : distance.get_y());
     max_distance = (distance.get_z() > max_distance     ? distance.get_z() : max_distance);
-    
+
     axis_speed.set_x(distance.get_x() / max_distance);
     axis_speed.set_y(distance.get_y() / max_distance);
     axis_speed.set_z(distance.get_z() / max_distance);
@@ -427,6 +427,7 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
 
     dest = pos - speed;
 
+    _object->nodePath.look_at(dest);
     _object->nodePath.set_pos(dest);
   }
 }

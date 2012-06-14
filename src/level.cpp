@@ -215,9 +215,9 @@ void Level::SetInterrupted(bool set)
 void Level::StartFight(ObjectCharacter* starter)
 {
   _itCharacter = std::find(_characters.begin(), _characters.end(), starter);
+  _gameUi.GetMainBar().SetEnabledAP(true);
   (*_itCharacter)->RestartActionPoints();
   SetState(Fight);
-  _gameUi.GetMainBar().SetEnabledAP(true);
 }
 
 void Level::StopFight(void)
@@ -507,6 +507,10 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 
     if (_currentRunningDialog)
       delete _currentRunningDialog;
+    
+    GetPlayer()->GetNodePath().look_at(object->GetNodePath());
+    object->GetNodePath().look_at(GetPlayer()->GetNodePath());
+    
     _currentRunningDialog = new DialogController(_window, _gameUi.GetContext(), dialog, _l18n);
     _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningDialog);
     _mouseActionBlocked = true;
@@ -558,6 +562,7 @@ void Level::SelectedUseObjectOn(InventoryObject* object)
 
 void Level::PendingActionTalkTo(InstanceDynamicObject* object)
 {
+  std::cout << "PendingActionTalkTo Called" << std::endl;
   CallbackActionTalkTo(object->pendingActionOn);
 }
 
@@ -612,6 +617,14 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
 {
   std::string output;
   
+  if (user == target && target == GetPlayer())
+  {
+    ConsoleWrite("Stop hitting yourself !");
+    return ;
+  }
+  
+  user->GetNodePath().look_at(target->GetNodePath());
+
   if (target->GetDistance(user) > (float)((*item)["range"]))
     output = ("Out of range");
   else if (!(user->HasLineOfSight(target)))
