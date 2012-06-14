@@ -140,8 +140,10 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
     GetPlayer()->EquipedItemChanged.Connect(_gameUi.GetMainBar(), &GameMainBar::SetEquipedItem);
     GetPlayer()->EquipedItemChanged.Emit(0, GetPlayer()->GetEquipedItem(0));
     GetPlayer()->EquipedItemChanged.Emit(1, GetPlayer()->GetEquipedItem(1));
-    _gameUi.GetMainBar().UseEquipedItem.Connect(*this, &Level::CallbackActionTargetUse);
   }
+  _gameUi.GetMainBar().UseEquipedItem.Connect(*this, &Level::CallbackActionTargetUse);
+  _gameUi.GetMainBar().CombatEnd.Connect     (*this, &Level::StopFight);
+  _gameUi.GetMainBar().CombatPassTurn.Connect(*this, &Level::NextTurn);
 }
 
 bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)

@@ -1,5 +1,6 @@
 #include "mouse.hpp"
 #include "world.h"
+#include "globals.hpp"
 #include <panda3d/cardMaker.h>
 
 using namespace std;
@@ -8,6 +9,7 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
 {
   MouseWatcher::init_type();
   _camera       = window->get_camera_group();
+  _hovering.Reset();
   _mouseWatcher = dynamic_cast<MouseWatcher*>(window->get_mouse().node());
   _pickerNode   = new CollisionNode("mouseRay");
   _pickerPath   = _camera.attach_new_node(_pickerNode);
@@ -80,12 +82,14 @@ void Mouse::Run(void)
 {
   if (_mouseWatcher->has_mouse())
   {
-    LPoint2f cursorPos = _mouseWatcher->get_mouse();
+    LPoint2f cursorPos   = _mouseWatcher->get_mouse();
+    bool     hadWaypoint = _hovering.hasWaypoint;
 
     if (cursorPos == _lastMousePos)
       return ;
+
     _cursor.set_pos(cursorPos.get_x() + _cursorDecalage.get_x(), 0, cursorPos.get_y() + _cursorDecalage.get_y());
-    //_cursor.set_pos(data.get_x(), 0, data.get_y());
+
     _lastMousePos = cursorPos;
     _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
     _collisionTraverser.traverse(_window->get_render());
@@ -108,6 +112,13 @@ void Mouse::Run(void)
 	    _hovering.SetDynObject(into);
 	  break ;
       }
+    }
+    if (!_hovering.hasWaypoint && hadWaypoint)
+    {
+      LPoint2f dist = _hovering.waypoint.get_pos().get_xy() - cursorPos;
+
+      if (ABS(dist.get_x()) < 0.5f && ABS(dist.get_y()) < 0.5f)
+	_hovering.hasWaypoint = true;
     }
   }
 }

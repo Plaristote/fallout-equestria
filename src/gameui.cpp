@@ -390,7 +390,10 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
     equipedItem2->AddEventListener("click", &EquipedItem2Clicked);
     EquipedItem1Clicked.EventReceived.Connect(*this, &GameMainBar::CallbackEquipedItem1Clicked);
     EquipedItem2Clicked.EventReceived.Connect(*this, &GameMainBar::CallbackEquipedItem2Clicked);
-
+    
+    CombatEndClicked.EventReceived.Connect(*this, &GameMainBar::CallbackCombatEndClicked);
+    PassTurnClicked.EventReceived.Connect (*this, &GameMainBar::CallbackPassTurnClicked);
+    
     /*const Rocket::Core::Property* property = elementWindow->GetProperty("height");
 
     cout << "Property bottom " << property->ToString().CString() << endl;*/
@@ -465,6 +468,21 @@ void GameMainBar::SetEnabledAP(bool enabled)
 {
   _apEnabled = enabled;
   SetMaxAP(_apMax);
+  
+  Rocket::Core::Element* passTurn  = _root->GetElementById("pass_turn");
+  Rocket::Core::Element* combatEnd = _root->GetElementById("stop_fight");
+
+  if (enabled)
+  {
+    std::cout << "ENABLED" << std::endl;
+    passTurn->AddEventListener("click", &PassTurnClicked);
+    combatEnd->AddEventListener("click", &CombatEndClicked);  
+  }
+  else
+  {
+    passTurn->RemoveEventListener("click", &PassTurnClicked);
+    combatEnd->RemoveEventListener("click", &CombatEndClicked);  
+  }
 }
 
 #include "inventory.hpp"

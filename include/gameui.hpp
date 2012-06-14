@@ -47,13 +47,19 @@ public:
   RocketListener         PersButtonClicked;
   
   Observatory::Signal<void (unsigned short)> UseEquipedItem;
+  Observatory::Signal<void>                  CombatPassTurn;
+  Observatory::Signal<void>                  CombatEnd;
   
 private:
   RocketListener         EquipedItem1Clicked;
   RocketListener         EquipedItem2Clicked;
+  RocketListener         PassTurnClicked;
+  RocketListener         CombatEndClicked;
   
   void                   CallbackEquipedItem1Clicked(Rocket::Core::Event&) { UseEquipedItem.Emit(0); }
   void                   CallbackEquipedItem2Clicked(Rocket::Core::Event&) { UseEquipedItem.Emit(1); }
+  void                   CallbackPassTurnClicked(Rocket::Core::Event&)  { CombatPassTurn.Emit(); std::cout << "GENIUS" << std::endl; }
+  void                   CallbackCombatEndClicked(Rocket::Core::Event&) { CombatEnd.Emit();      }
   
   unsigned short         _apMax;
   bool                   _apEnabled;
