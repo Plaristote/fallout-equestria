@@ -5,7 +5,9 @@
 #include "objects/door.hpp"
 #include "objects/shelf.hpp"
 
-#define AP_COST_USE 2
+#define AP_COST_USE             2
+#define WORLDTIME_TURN          10
+#define WORLDTIME_DAYLIGHT_STEP 3
 
 using namespace std;
 
@@ -151,6 +153,9 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   _gameUi.GetInventory().UnequipItem.Connect (*GetPlayer(), &ObjectCharacter::UnequipItem);
   _gameUi.GetInventory().DropObject.Connect  (*this, &Level::PlayerDropObject);
   _gameUi.GetInventory().UseObject.Connect   (*this, &Level::PlayerUseObject);
+  
+  TimeManager::Task* daylightTask = _timeManager.AddTask(true, 3);
+  daylightTask->Interval.Connect(*this, &Level::RunDaylight);
 }
 
 Level::~Level()
@@ -168,6 +173,7 @@ Level::~Level()
     delete _currentInteractMenu;
   if (_l18n)
     delete _l18n;
+  CurrentLevel = 0;
 }
 
 bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
@@ -262,8 +268,43 @@ void Level::NextTurn(void)
     return ;
   std::cout << "Next Turn" << std::endl;
   if ((++_itCharacter) == _characters.end())
+  {
     _itCharacter = _characters.begin();
+    _timeManager.AddElapsedTime(WORLDTIME_TURN);
+  }
   (*_itCharacter)->RestartActionPoints();
+}
+
+void Level::RunDaylight(void)
+{
+  static Timer         lightTimer;
+  static unsigned char dayStep    = 1;
+  static unsigned int  stepLength = 60;
+
+  std::cout << "RunDaylight" << std::endl;
+  LVecBase4f           colorSteps[3];
+
+  colorSteps[0] = LVecBase4f(0.2, 0.2, 0.2, 1);
+  colorSteps[1] = LVecBase4f(0.8, 0.8, 0.8, 1);
+  colorSteps[2] = LVecBase4f(0.6, 0.3, 0.3, 1);
+
+  if (lightTimer.GetElapsedTime() < stepLength)
+  {
+    LVecBase4f toSet = _sunLight->get_color();
+    LVecBase4f dif   = colorSteps[(dayStep == 2 ? 0 : dayStep + 1)] - colorSteps[dayStep];
+
+    toSet += ((dif * WORLDTIME_DAYLIGHT_STEP) / stepLength);
+    _sunLight->set_color(toSet);
+  }
+  else
+  {
+    cout << "Daylight Next step" << endl;
+    dayStep++;
+    if (dayStep >= 3)
+      dayStep = 0;
+    _sunLight->set_color(colorSteps[dayStep]);
+    lightTimer.Restart();
+  }
 }
 
 AsyncTask::DoneStatus Level::do_task(void)
@@ -278,46 +319,17 @@ AsyncTask::DoneStatus Level::do_task(void)
       cout << "[FPS] " << fps << endl;
       fps = 0;
       timer.Restart();
+      std::cout << _timeManager.GetHour() << ":" << _timeManager.GetMinute() << ":" << _timeManager.GetSecond() << std::endl;
     }
     fps++;
   }
   
   float elapsedTime = _timer.GetElapsedTime();
-
-  // TEST SUNLIGHT MOONLIGHT
-  /*{
-    static Timer         lightTimer;
-    static unsigned char dayStep    = 1;
-    static unsigned int  stepLength = 10;
-
-    LVecBase4f           colorSteps[3];
-
-    colorSteps[0] = LVecBase4f(0.2, 0.2, 0.2, 1);
-    colorSteps[1] = LVecBase4f(0.8, 0.8, 0.8, 1);
-    colorSteps[2] = LVecBase4f(0.6, 0.3, 0.3, 1);
-
-    if (lightTimer.GetElapsedTime() < stepLength)
-    {
-      LVecBase4f toSet = _sunLight->get_color();
-      LVecBase4f dif   = colorSteps[(dayStep == 2 ? 0 : dayStep + 1)] - colorSteps[dayStep];
-
-      toSet += ((dif * elapsedTime) / stepLength);
-      _sunLight->set_color(toSet);
-    }
-    else
-    {
-      cout << "Next step" << endl;
-      dayStep++;
-      if (dayStep >= 3)
-        dayStep = 0;
-      _sunLight->set_color(colorSteps[dayStep]);
-      lightTimer.Restart();
-    }
-  }*/
   
   _mouse.Run();
   _camera.Run(elapsedTime);
-
+  _timeManager.ExecuteTasks();
+  
   switch (_state)
   {
     case Fight:
@@ -325,6 +337,7 @@ AsyncTask::DoneStatus Level::do_task(void)
       (*_itCharacter)->Run(elapsedTime);
       break ;
     case Normal:
+      _timeManager.AddElapsedSeconds(elapsedTime);
       for_each(_objects.begin(), _objects.end(),       [elapsedTime](InstanceDynamicObject* object) { object->Run(elapsedTime); });
       for_each(_characters.begin(), _characters.end(), [elapsedTime](ObjectCharacter* character)
       {
@@ -698,8 +711,7 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
     output = (item->UseAsWeapon(user, target));
     MouseRightClicked();
   }
-  if (user == GetPlayer())
-    ConsoleWrite(output);
+  ConsoleWrite(output);
 }
 
 void Level::PlayerDropObject(InventoryObject* object)

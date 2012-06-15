@@ -61,8 +61,9 @@ public:
   void                   CloseUiLoot(void);
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);
-  Data                   GetDataEngine(void) { return (_dataEngine); }
-  Data                   GetItems(void)      { return (_items);      }
+  TimeManager&           GetTimeManager(void) { return (_timeManager); }
+  Data                   GetDataEngine(void)  { return (_dataEngine);  }
+  Data                   GetItems(void)       { return (_items);       }
   void                   ConsoleWrite(const std::string& str);
   
   void                   RemoveObject(InstanceDynamicObject* object);
@@ -116,6 +117,7 @@ private:
   typedef std::list<InstanceDynamicObject*> InstanceObjects;
   typedef std::list<ObjectCharacter*>       Characters;
 
+  void              RunDaylight(void);
   void              MouseInit(void);
 
   WindowFramework*  _window;
@@ -123,6 +125,7 @@ private:
   Mouse             _mouse;
   SceneCamera       _camera;
   Timer             _timer;
+  TimeManager       _timeManager;
   State             _state;
 
   World*               _world;
