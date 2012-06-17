@@ -84,14 +84,15 @@ void                     InstanceDynamicObject::PlayAnimation(const std::string&
 
   if (anim)
   {
-    AnimationEnded.DisconnectAll();
+    std::cout << "Playing animation " << name << " now." << std::endl;
     if (anim->is_playing() && loop)
       return ;
-    anim->loop(loop);
+    anim->loop(true);
     anim->play();
     _anim     = anim;
     _animLoop = loop;
     pendingAnimationDone = false;
+    AnimationEnded.Connect(*this, &InstanceDynamicObject::PlayIdleAnimation);
   }
   else if (!loop && name != ANIMATION_DEFAULT)
     PlayAnimation(ANIMATION_DEFAULT, loop);
@@ -102,6 +103,12 @@ void                     InstanceDynamicObject::PlayAnimation(const std::string&
   }
 }
 
+void                      InstanceDynamicObject::PlayIdleAnimation(InstanceDynamicObject*)
+{
+  AnimationEnded.DisconnectAll();
+  PlayAnimation("idle");
+}
+
 void                      InstanceDynamicObject::TaskAnimation(void)
 {
   if (_anim && _anim->is_playing() == false)
@@ -110,8 +117,10 @@ void                      InstanceDynamicObject::TaskAnimation(void)
       _anim->play();
     else
     {
+      std::cout << "Animation is over" << std::endl;
       pendingAnimationDone = true;
       AnimationEnded.Emit(this);
+      AnimationEnded.DisconnectAll();
       _anim = 0;
     }
   }

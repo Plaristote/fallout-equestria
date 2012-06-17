@@ -660,6 +660,7 @@ void Level::PendingActionUseObjectOn(InstanceDynamicObject* object)
 {
   if (!object->pendingAnimationDone)
   {
+    object->AnimationEnded.DisconnectAll();
     object->AnimationEnded.Connect(*this, &Level::PendingActionUseObjectOn);
     object->PlayAnimation("use");
   }
@@ -686,6 +687,7 @@ void Level::PendingActionUse(InstanceDynamicObject* object)
 {
   if (!object->pendingAnimationDone)
   {
+    object->AnimationEnded.DisconnectAll();    
     object->AnimationEnded.Connect(*this, &Level::PendingActionUse);
     object->PlayAnimation("use");
   }

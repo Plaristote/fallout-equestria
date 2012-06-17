@@ -124,7 +124,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   CharacterDied.Connect(*this, &ObjectCharacter::RunDeath);
   
   // Animations
-  vector<string> anims = { "walk", "run", "use" };
+  vector<string> anims = { "idle", "walk", "run", "use" };
   for_each(anims.begin(), anims.end(), [this](string anim)
   { LoadAnimation(anim); });
 }
@@ -367,9 +367,8 @@ void                ObjectCharacter::StopRunAnimation(InstanceDynamicObject*)
 {
   if (_anim)
   {
-    std::cout << "ANIMATION STOPED !" << std::endl;
-    _anim->stop();
-    _anim = 0;
+    _animLoop = false;
+    AnimationEnded.Connect(*this, &ObjectCharacter::PlayIdleAnimation);
   }
 }
 
@@ -510,9 +509,10 @@ void                ObjectCharacter::LookAt(LVecBase3 pos)
 void                ObjectCharacter::LookAt(InstanceDynamicObject* object)
 {
   LVecBase3 pos = object->GetNodePath().get_pos();
-  
+
   pos.set_z(_object->nodePath.get_pos().get_z());
-  LookAt(pos);
+  _object->nodePath.look_at(pos);
+  //LookAt(pos);
 }
 
 

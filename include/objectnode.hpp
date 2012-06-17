@@ -134,6 +134,7 @@ protected:
 
   void                     LoadAnimation(const std::string& name);
   void                     TaskAnimation(void);
+  void                     PlayIdleAnimation(InstanceDynamicObject*);
   
   std::string               _modelName;
   AnimControlCollection     _anims;
