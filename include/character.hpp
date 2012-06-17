@@ -15,6 +15,27 @@
 class ObjectCharacter : public InstanceDynamicObject
 {
 public:
+  struct Faction
+  {
+    unsigned int flag;
+    unsigned int enemyMask;
+  };
+
+  class Diplomacy
+  {
+  public:
+    void     SetEnemyMask(unsigned int m) { _enemyMask = m;     }
+    void     SetFaction(Faction* faction) { _faction = faction; }
+    Faction* GetFaction(void) const       { return (_faction);  }
+    bool     IsEnemyWith(Diplomacy& other) const;
+    bool     IsAlly(Diplomacy& other)      const;
+    void     SetAsEnemy(Diplomacy& other, bool enemy = true);
+
+  private:
+    Faction*     _faction;
+    unsigned int _enemyMask;
+  };
+  
   ObjectCharacter(Level* level, DynamicObject* object);
 
   Observatory::Signal<void (InstanceDynamicObject*)> ReachedDestination;
@@ -49,6 +70,7 @@ public:
   bool                IsAlive(void) const  { return (_hitPoints > 0); }
   Inventory&          GetInventory(void)   { return (_inventory);     }
   Data                GetStatistics(void)  { return (_statistics);    }
+  Diplomacy&          GetDiplomacy(void)   { return (_diplomacy);     }
 
   unsigned short      GetActionPoints(void) const        { return (_actionPoints); }
   void                SetActionPoints(unsigned short ap) { _actionPoints = ap; ActionPointChanged.Emit(_actionPoints); }
@@ -77,11 +99,20 @@ public:
   InventoryObject*    GetEquipedItem(unsigned short it);
   void                UnequipItem(unsigned short it);
   Observatory::Signal<void (unsigned short, InventoryObject*)> EquipedItemChanged;
+  
+  void                CheckFieldOfView(void);
+
+  void                SetAsEnemy(ObjectCharacter*, bool);
+  bool                IsEnemy(ObjectCharacter*) const;
+  bool                IsAlly(ObjectCharacter*)  const;
 
 private:
   void                RunMovement(float elapsedTime);
   void                RunMovementNext(float elaspedTime);
   void                RunDeath(void);
+  
+  void                StartRunAnimation(void);
+  void                StopRunAnimation(InstanceDynamicObject*);
   
   void                CallbackActionUse(InstanceDynamicObject* object);
 
@@ -92,16 +123,39 @@ private:
   InventoryObject*          _equiped[2];
   InventoryObject*          _defEquiped[2];
   DataTree*                 _statistics;
+  Diplomacy                 _diplomacy;
 
   unsigned short            _actionPoints;
   short                     _hitPoints, _armorClass, _tmpArmorClass;
-  
+
   // Line of Sight Tools
   NodePath                  _losPath;
   PT(CollisionRay)          _losRay;
   PT(CollisionNode)         _losNode;
   PT(CollisionHandlerQueue) _losHandlerQueue;
   CollisionTraverser        _losTraverser;
+  
+  // Field of view
+  PT(CollisionSphere)       _fovTargetSphere;
+  PT(CollisionNode)         _fovTargetNode;
+  NodePath                  _fovTargetNp;
+  
+  PT(CollisionSphere)       _fovSphere;
+  PT(CollisionNode)         _fovNode;
+  NodePath                  _fovNp;
+  PT(CollisionHandlerQueue) _fovHandlerQueue;
+  CollisionTraverser        _fovTraverser;
+  
+  struct FovEnemy
+  {
+    FovEnemy(ObjectCharacter* enemy, unsigned char ttl) : enemy(enemy), ttl(ttl) {}
+    bool operator==(ObjectCharacter* comp) const { return (enemy == comp); }
+    ObjectCharacter* enemy;
+    unsigned char    ttl;
+  };
+  
+  std::list<FovEnemy>         _fovEnemies;
+  std::list<ObjectCharacter*> _fovAllies;
   
   // Script
   asIScriptContext*  _scriptContext;

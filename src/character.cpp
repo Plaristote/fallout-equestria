@@ -9,8 +9,6 @@
 
 using namespace std;
 
-void InstanceDynamicObject::ThatDoesNothing() { _level->ConsoleWrite("That does nothing"); }
-
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
 {
   Data   items = _level->GetItems();  
@@ -18,9 +16,14 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 
   _type         = Character;
   _actionPoints = 0;
+  
+  //_object->nodePath.set_collide_mask(CollideMask(ColMask::DynObject | ColMask::FovTarget), CollideMask::all_on(), _object->nodePath.get_class_type());
+  _object->nodePath.set_collide_mask(CollideMask(ColMask::DynObject | ColMask::FovTarget), 0);
+
   // Line of sight tools
   _losNode      = new CollisionNode("losRay");
   _losNode->set_from_collide_mask(CollideMask(ColMask::Object | ColMask::DynObject));
+  _losNode->set_into_collide_mask(0);
   _losPath      = object->nodePath.attach_new_node(_losNode);
   _losRay       = new CollisionRay();
   _losRay->set_origin(0, 0, 0);
@@ -30,7 +33,29 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _losNode->add_solid(_losRay);
   _losHandlerQueue = new CollisionHandlerQueue();
   _losTraverser.add_collider(_losPath, _losHandlerQueue);  
+
+  // Fov tools
+  _fovTargetNode    = new CollisionNode("fovTargetSphere");
+  _fovTargetNode->set_from_collide_mask(CollideMask(0));
+  _fovTargetNode->set_into_collide_mask(CollideMask(ColMask::FovTarget));
+  _fovTargetSphere  = new CollisionSphere(0, 0, 0, 2.5f);
+  _fovTargetNp      = _object->nodePath.attach_new_node(_fovTargetNode);
+  _fovTargetNode->add_solid(_fovTargetSphere);
+  _fovTargetNp.show();
   
+  _fovNode   = new CollisionNode("fovSphere");
+  _fovNode->set_from_collide_mask(CollideMask(ColMask::FovTarget));
+  _fovNode->set_into_collide_mask(CollideMask(0));
+  _fovNp     = _object->nodePath.attach_new_node(_fovNode);
+  _fovSphere = new CollisionSphere(0, 0, 0, 0);
+  _fovHandlerQueue = new CollisionHandlerQueue();
+  _fovNode->add_solid(_fovSphere);
+  _fovTraverser.add_collider(_fovNp, _fovHandlerQueue);
+  
+  // Faction
+  _diplomacy.SetFaction(0);
+  _diplomacy.SetEnemyMask(0);
+
   // Statistics
   _statistics = DataTree::Factory::JSON("data/charsheets/" + object->charsheet + ".json");
   _hitPoints = _armorClass = 5;
@@ -97,6 +122,11 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   }
   
   CharacterDied.Connect(*this, &ObjectCharacter::RunDeath);
+  
+  // Animations
+  vector<string> anims = { "walk", "run", "use" };
+  for_each(anims.begin(), anims.end(), [this](string anim)
+  { LoadAnimation(anim); });
 }
 
 InventoryObject* ObjectCharacter::GetEquipedItem(unsigned short it)
@@ -157,6 +187,7 @@ void ObjectCharacter::Run(float elapsedTime)
   }
   if (_path.size() > 0)
     RunMovement(elapsedTime);
+  InstanceDynamicObject::Run(elapsedTime);
 }
 
 int                 ObjectCharacter::GetBestWaypoint(InstanceDynamicObject* object, bool farthest)
@@ -250,6 +281,8 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
       if (_level->GetPlayer() == this)
         _level->ConsoleWrite("No path.");
     }
+    else
+      StartRunAnimation();
   }
   else
     cout << "Character doesn't have a waypointOccupied" << endl;
@@ -278,6 +311,8 @@ void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max
       if (_level->GetPlayer() == this)
         _level->ConsoleWrite("Can't reach.");
     }
+    else
+      StartRunAnimation();
     while (_goToData.min_distance && _path.size() > 1)
     {
       _path.erase(--(_path.end()));
@@ -299,11 +334,16 @@ void                ObjectCharacter::GoToRandomWaypoint(void)
     UnprocessCollisions();
     {
       std::list<Waypoint*>           list = _waypointOccupied->GetSuccessors(0);
-      int                            rit  = rand() % list.size();
-      std::list<Waypoint*>::iterator it   = list.begin();
+      
+      if (list.size() > 0)
+      {
+	int                            rit  = rand() % list.size();
+	std::list<Waypoint*>::iterator it   = list.begin();
 
-      for (it = list.begin() ; rit ; --rit, ++it);
-      _path.push_back(**it);
+	for (it = list.begin() ; rit ; --rit, ++it);
+	_path.push_back(**it);
+	StartRunAnimation();
+      }
     }
     ProcessCollisions();
   }
@@ -315,6 +355,21 @@ void                ObjectCharacter::TruncatePath(unsigned short max_size)
     max_size++;
   if (_path.size() > max_size)
     _path.resize(max_size);
+}
+
+void                ObjectCharacter::StartRunAnimation(void)
+{
+  ReachedDestination.Connect(*this, &ObjectCharacter::StopRunAnimation);
+  PlayAnimation("run", true);
+}
+
+void                ObjectCharacter::StopRunAnimation(InstanceDynamicObject*)
+{
+  if (_anim)
+  {
+    _anim->stop();
+    _anim = 0;
+  }
 }
 
 void                ObjectCharacter::RunMovementNext(float elapsedTime)
@@ -487,4 +542,137 @@ void                ObjectCharacter::RunDeath()
 void                ObjectCharacter::CallbackActionUse(InstanceDynamicObject*)
 {
   _level->PlayerLoot(&(GetInventory()));
+}
+
+/*
+ * Field of View
+ */
+# define FOV_TTL 5
+
+void     ObjectCharacter::CheckFieldOfView(void)
+{
+  if (_hitPoints <= 0)
+    return ;
+  CollisionTraverser fovTraverser;
+  float              fovRadius = 45;
+  
+  // Prepare all the FOV data
+  {
+    std::list<FovEnemy>::iterator it = _fovEnemies.begin();
+
+    while (it != _fovEnemies.end())
+    {
+      it->ttl--;
+      if (it->ttl == 0)
+	it = _fovEnemies.erase(it);
+      else
+	++it;
+    }
+    _fovAllies.clear();
+    // Decrement TTL of nearby enemies
+  }
+
+  Timer timer;
+  
+  _fovSphere->set_radius(fovRadius);
+  _fovTraverser.traverse(_level->GetWorld()->window->get_render());
+
+  //_fovNp.show();
+
+  for (unsigned short i = 0 ; i < _fovHandlerQueue->get_num_entries() ; ++i)
+  {
+    CollisionEntry*        entry  = _fovHandlerQueue->get_entry(i);
+    NodePath               node   = entry->get_into_node_path();
+    InstanceDynamicObject* object = _level->FindObjectFromNode(node);
+
+    if (object && object != this)
+    {
+      ObjectCharacter* character = object->Get<ObjectCharacter>();
+
+      if (character)
+      {
+	std::cout << "Character detected" << std::endl;
+	if (!(character->IsAlive()))
+	  continue ;
+	if      (IsAlly(character))
+	  _fovAllies.push_back(character);
+	else if (IsEnemy(character) && HasLineOfSight(character))
+	{
+	  std::cout << "Is enemy" << std::endl;
+	  std::list<FovEnemy>::iterator enemyIt = std::find(_fovEnemies.begin(), _fovEnemies.end(), character);
+
+	  if (enemyIt != _fovEnemies.end())
+	    enemyIt->ttl = FOV_TTL;
+	  else
+	    _fovEnemies.push_back(FovEnemy(character, FOV_TTL));
+	}
+      }
+    }
+  }
+  if (_fovEnemies.size() > 0 && _level->GetState() != Level::Fight)
+    _level->StartFight(this);
+  timer.Profile("Field of view");
+}
+
+/*
+ * Diplomacy
+ */
+void     ObjectCharacter::SetAsEnemy(ObjectCharacter* other, bool enemy)
+{
+  _diplomacy.SetAsEnemy(other->GetDiplomacy(), enemy);
+}
+
+bool     ObjectCharacter::IsEnemy(ObjectCharacter* other) const
+{
+  return (true);
+  return (_diplomacy.IsEnemyWith(other->GetDiplomacy()));
+}
+
+bool     ObjectCharacter::IsAlly(ObjectCharacter* other) const
+{
+  return (_diplomacy.IsAlly(other->GetDiplomacy()));
+}
+
+bool     ObjectCharacter::Diplomacy::IsEnemyWith(Diplomacy& other) const
+{
+  Faction*     otherFaction   = other.GetFaction();
+  unsigned int selfEnemyFlag  = (_faction ? _faction->enemyMask : _enemyMask);
+
+  if (otherFaction)
+    return (selfEnemyFlag & otherFaction->flag);
+  return (false);
+}
+
+bool     ObjectCharacter::Diplomacy::IsAlly(Diplomacy& other) const
+{
+  return (_faction != 0 && other.GetFaction() == _faction);
+}
+
+void     ObjectCharacter::Diplomacy::SetAsEnemy(Diplomacy& other, bool enemy)
+{
+  Faction* otherFaction = other.GetFaction();
+  
+  if (otherFaction)
+  {
+    if (_faction)
+    {
+      if (enemy)
+      {
+	_faction->enemyMask     |= otherFaction->flag;
+	otherFaction->enemyMask |= _faction->flag;
+      }
+      else
+      {
+	if (_faction->enemyMask & otherFaction->flag) { _faction->enemyMask -= otherFaction->flag; }
+	if (otherFaction->enemyMask & _faction->flag) { otherFaction->enemyMask -= _faction->flag; }
+      }
+    }
+    else
+    {
+      if (enemy)
+        _enemyMask |= otherFaction->flag;
+      else if (_enemyMask & otherFaction->flag)
+	_enemyMask - otherFaction->flag;
+    }
+  }
 }

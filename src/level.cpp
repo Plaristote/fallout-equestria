@@ -156,6 +156,19 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   
   TimeManager::Task* daylightTask = _timeManager.AddTask(true, 3);
   daylightTask->Interval.Connect(*this, &Level::RunDaylight);
+
+  unsigned int taskIt = 0;
+  std::for_each(_characters.begin(), _characters.end(), [this, &taskIt](ObjectCharacter* character)
+  {
+    if (character != GetPlayer())
+    {
+      TimeManager::Task* task = _timeManager.AddTask(true, 3);
+
+      task->lastS += (taskIt % 3);
+      ++taskIt;
+      task->Interval.Connect(*character, &ObjectCharacter::CheckFieldOfView);
+    }
+  });
 }
 
 Level::~Level()
@@ -641,29 +654,45 @@ void Level::PendingActionTalkTo(InstanceDynamicObject* object)
 
 void Level::PendingActionUseObjectOn(InstanceDynamicObject* object)
 {
-  InventoryObject* item        = object->pendingActionObject;
-  Data             dataUseCost = (*item)["use_cost"];
-  unsigned short   useCost     = AP_COST_USE;
-
-  if (!(dataUseCost.Nil()))
-    useCost = dataUseCost;
-  object->GetNodePath().look_at(object->pendingActionOn->GetNodePath());
-  if (UseActionPoints(useCost))
+  if (!object->pendingAnimationDone)
   {
-    const string toOutput = item->UseOn(object->Get<ObjectCharacter>(), object->pendingActionOn);
-
-    ConsoleWrite(toOutput);
+    object->AnimationEnded.Connect(*this, &Level::PendingActionUseObjectOn);
+    object->PlayAnimation("use");
   }
-  SetMouseState(MouseAction);
+  else
+  {
+    InventoryObject* item        = object->pendingActionObject;
+    Data             dataUseCost = (*item)["use_cost"];
+    unsigned short   useCost     = AP_COST_USE;
+
+    if (!(dataUseCost.Nil()))
+      useCost = dataUseCost;
+    object->GetNodePath().look_at(object->pendingActionOn->GetNodePath());
+    if (UseActionPoints(useCost))
+    {
+      const string toOutput = item->UseOn(object->Get<ObjectCharacter>(), object->pendingActionOn);
+
+      ConsoleWrite(toOutput);
+    }
+    SetMouseState(MouseAction);
+  }
 }
 
 void Level::PendingActionUse(InstanceDynamicObject* object)
 {
-  object->GetNodePath().look_at(object->pendingActionOn->GetNodePath());
-  if (!(UseActionPoints(AP_COST_USE)))
-    return ;
-  object->pendingActionOn->CallbackActionUse(object);
-  SetMouseState(MouseAction);
+  if (!object->pendingAnimationDone)
+  {
+    object->AnimationEnded.Connect(*this, &Level::PendingActionUse);
+    object->PlayAnimation("use");
+  }
+  else
+  {
+    object->GetNodePath().look_at(object->pendingActionOn->GetNodePath());
+    if (!(UseActionPoints(AP_COST_USE)))
+      return ;
+    object->pendingActionOn->CallbackActionUse(object);
+    SetMouseState(MouseAction);
+  }
 }
 
 void Level::ActionUse(ObjectCharacter* user, InstanceDynamicObject* target)

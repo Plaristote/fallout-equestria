@@ -43,7 +43,14 @@ void combat(Character@ self)
   if (self.GetPathDistance(level.GetPlayer().AsObject()) <= 1)
   {
     if (!(self.IsMoving()))
-      level.NextTurn();
+    {
+      Character@ target = level.GetPlayer();
+
+      if (self.GetActionPoints() >= 3)
+        level.ActionUseWeaponOn(self, target, self.GetEquipedItem(0));
+      else
+        level.NextTurn();
+    }
     return ;
   }
   self.GoTo(level.GetPlayer().AsObject(), 1);

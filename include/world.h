@@ -42,7 +42,8 @@ namespace ColMask
       Waypoint   = 1,
       Tile       = 2,
       DynObject  = 4,
-      Object     = 8
+      Object     = 8,
+      FovTarget  = 16
   };
 }
 

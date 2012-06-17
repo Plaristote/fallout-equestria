@@ -4,6 +4,7 @@
 # include <panda3d/pandaFramework.h>
 # include <panda3d/pandaSystem.h>
 # include <panda3d/texturePool.h>
+# include <panda3d/animControlCollection.h>
 # include "datatree.hpp"
 # include "observatory.hpp"
 # include "world.h"
@@ -87,7 +88,10 @@ public:
   InstanceDynamicObject(Level* level, DynamicObject* object);
   virtual ~InstanceDynamicObject() {}
 
-  virtual void       Run(float elapsedTime) {};
+  virtual void       Run(float elapsedTime)
+  {
+    TaskAnimation();
+  };
 
   bool               operator==(NodePath np)             const { return (_object->nodePath.is_ancestor_of(np)); }
   bool               operator==(const std::string& name) const { return (GetName() == name);                    }
@@ -106,19 +110,32 @@ public:
     return (0);
   }
 
+  bool                     pendingAnimationDone;
   InstanceDynamicObject*   pendingActionOn;
   InventoryObject*         pendingActionObject;
 
   virtual void             CallbackActionUse(InstanceDynamicObject* object) { ThatDoesNothing(); }
+  
+  void                     PlayAnimation(const std::string& name, bool loop = false);
+  Observatory::Signal<void (InstanceDynamicObject*)> AnimationEnded;
 
 protected:
   unsigned char            _type;
   DynamicObject*           _object;
   
+  // Interactions
   void                     ResetInteractions(void) { _interactions.clear(); }
   void                     ThatDoesNothing();
 
   InteractionList          _interactions;
+
+  // Animations
+  void                     LoadAnimation(const std::string& name);
+  void                     TaskAnimation(void);
+  
+  std::string               _modelName;
+  AnimControlCollection     _anims;
+  AnimControl*              _anim;
 };
 
 
