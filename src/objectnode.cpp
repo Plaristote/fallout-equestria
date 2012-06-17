@@ -15,6 +15,7 @@ InstanceDynamicObject::InstanceDynamicObject(Level* level, DynamicObject* object
 {
   _type                 = Other;
   _anim                 = 0;
+  _animLoop             = true;
   _level                = level;
   _waypointDisconnected = object->lockedArcs;
   _waypointOccupied     = object->waypoint;
@@ -63,35 +64,33 @@ InstanceDynamicObject::GoToData   InstanceDynamicObject::GetGoToData(InstanceDyn
 void                     InstanceDynamicObject::LoadAnimation(const std::string& name)
 {
   NodePath np = _level->GetWorld()->window->load_model(_object->nodePath, ANIMATION_PATH(_modelName, name));
+  string   controlName;
 
   if (np.get_error_type() != NodePath::ET_ok)
   {
     std::cout << "Can't load anim " << name << " for " << _modelName << std::endl;
     return ;
   }
-  auto_bind(_object->nodePath.node(), _anims, 0);
+  auto_bind(_object->nodePath.node(), _anims, 0xf);
   np.detach_node();
-  int nanim = _anims.get_num_anims();
-  std::cout << "nanim is " << nanim << std::endl;
-  string animname = _anims.get_anim_name(nanim - 1);
-  std::cout << "Anim name is " << animname << std::endl;
+  controlName = _anims.get_anim_name(_anims.get_num_anims() - 1);
+  _mapAnims.insert(_mapAnims.end(), pair<string, AnimControl*>(name, _anims.find_anim(controlName)));
 }
 
 void                     InstanceDynamicObject::PlayAnimation(const std::string& name, bool loop)
 {
-  const std::string key  = ANIMATION_PATH(_modelName, name);
-  AnimControl*      anim = _anims.find_anim(key);
-  
-  std::cout << "Animation not playing" << std::endl;
+  MapAnims::iterator     it   = _mapAnims.find(name);
+  AnimControl*           anim = (it != _mapAnims.end() ? it->second : 0);
+
   if (anim)
   {
-    std::cout << "Animation playing correctly" << std::endl;
     AnimationEnded.DisconnectAll();
     if (anim->is_playing() && loop)
       return ;
     anim->loop(loop);
     anim->play();
-    _anim = anim;
+    _anim     = anim;
+    _animLoop = loop;
     pendingAnimationDone = false;
   }
   else if (!loop && name != ANIMATION_DEFAULT)
@@ -107,8 +106,13 @@ void                      InstanceDynamicObject::TaskAnimation(void)
 {
   if (_anim && _anim->is_playing() == false)
   {
-    pendingAnimationDone = true;
-    AnimationEnded.Emit(this);
-    _anim = 0;
+    if (_animLoop)
+      _anim->play();
+    else
+    {
+      pendingAnimationDone = true;
+      AnimationEnded.Emit(this);
+      _anim = 0;
+    }
   }
 }

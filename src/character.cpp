@@ -22,13 +22,13 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 
   // Line of sight tools
   _losNode      = new CollisionNode("losRay");
-  _losNode->set_from_collide_mask(CollideMask(ColMask::Object | ColMask::DynObject));
+  _losNode->set_from_collide_mask(CollideMask(ColMask::Object | ColMask::FovTarget));
   _losNode->set_into_collide_mask(0);
   _losPath      = object->nodePath.attach_new_node(_losNode);
-  _losRay       = new CollisionRay();
-  _losRay->set_origin(0, 0, 0);
-  _losRay->set_direction(-10, 0, 0);
-  _losPath.set_pos(0, 0, 5);
+  _losRay       = new CollisionSegment();
+  _losRay->set_point_a(0, 0, 0);
+  _losRay->set_point_b(-10, 0, 0);
+  _losPath.set_pos(0, 0, 0);
   //_losPath.show();
   _losNode->add_solid(_losRay);
   _losHandlerQueue = new CollisionHandlerQueue();
@@ -41,7 +41,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _fovTargetSphere  = new CollisionSphere(0, 0, 0, 2.5f);
   _fovTargetNp      = _object->nodePath.attach_new_node(_fovTargetNode);
   _fovTargetNode->add_solid(_fovTargetSphere);
-  _fovTargetNp.show();
+  //_fovTargetNp.show();
   
   _fovNode   = new CollisionNode("fovSphere");
   _fovNode->set_from_collide_mask(CollideMask(ColMask::FovTarget));
@@ -367,6 +367,7 @@ void                ObjectCharacter::StopRunAnimation(InstanceDynamicObject*)
 {
   if (_anim)
   {
+    std::cout << "ANIMATION STOPED !" << std::endl;
     _anim->stop();
     _anim = 0;
   }
@@ -491,10 +492,29 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
 
     dest = pos - speed;
 
-    _object->nodePath.look_at(dest);
+    LookAt(dest);
     _object->nodePath.set_pos(dest);
   }
 }
+
+void                ObjectCharacter::LookAt(LVecBase3 pos)
+{
+   LVecBase3 rot;
+
+   _object->nodePath.look_at(pos);
+   rot = _object->nodePath.get_hpr();
+   rot.set_x(rot.get_x() - 180);
+   _object->nodePath.set_hpr(rot);  
+}
+
+void                ObjectCharacter::LookAt(InstanceDynamicObject* object)
+{
+  LVecBase3 pos = object->GetNodePath().get_pos();
+  
+  pos.set_z(_object->nodePath.get_pos().get_z());
+  LookAt(pos);
+}
+
 
 bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* object)
 {
@@ -508,10 +528,10 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
   LVector3  dir = root.get_relative_vector(other, other.get_pos() - root.get_pos());
 
   _losPath.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
-  _losRay->set_direction(dir.get_x(), dir.get_y(), dir.get_z());
+  _losRay->set_point_b(dir.get_x(), dir.get_y(), dir.get_z());
   _losTraverser.traverse(_level->GetWorld()->window->get_render());
 
-  _losPath.show();
+  //_losPath.show();
   _losHandlerQueue->sort_entries();
 
   for (unsigned int i = 0 ; i < _losHandlerQueue->get_num_entries() ; ++i)
@@ -572,13 +592,13 @@ void     ObjectCharacter::CheckFieldOfView(void)
     // Decrement TTL of nearby enemies
   }
 
-  Timer timer;
   
   _fovSphere->set_radius(fovRadius);
   _fovTraverser.traverse(_level->GetWorld()->window->get_render());
 
   //_fovNp.show();
 
+  Timer timer;
   for (unsigned short i = 0 ; i < _fovHandlerQueue->get_num_entries() ; ++i)
   {
     CollisionEntry*        entry  = _fovHandlerQueue->get_entry(i);
@@ -591,14 +611,12 @@ void     ObjectCharacter::CheckFieldOfView(void)
 
       if (character)
       {
-	std::cout << "Character detected" << std::endl;
 	if (!(character->IsAlive()))
 	  continue ;
 	if      (IsAlly(character))
 	  _fovAllies.push_back(character);
 	else if (IsEnemy(character) && HasLineOfSight(character))
 	{
-	  std::cout << "Is enemy" << std::endl;
 	  std::list<FovEnemy>::iterator enemyIt = std::find(_fovEnemies.begin(), _fovEnemies.end(), character);
 
 	  if (enemyIt != _fovEnemies.end())

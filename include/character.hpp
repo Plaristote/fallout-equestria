@@ -6,6 +6,7 @@
 # include "inventory.hpp"
 # include "timer.hpp"
 # include <panda3d/collisionRay.h>
+# include <panda3d/collisionSegment.h>
 # include <panda3d/collisionSphere.h>
 # include <panda3d/collisionTraverser.h>
 # include <panda3d/collisionHandlerQueue.h>
@@ -36,6 +37,14 @@ public:
     unsigned int _enemyMask;
   };
   
+  struct FovEnemy
+  {
+    FovEnemy(ObjectCharacter* enemy, unsigned char ttl) : enemy(enemy), ttl(ttl) {}
+    bool operator==(ObjectCharacter* comp) const { return (enemy == comp); }
+    ObjectCharacter* enemy;
+    unsigned char    ttl;
+  };  
+  
   ObjectCharacter(Level* level, DynamicObject* object);
 
   Observatory::Signal<void (InstanceDynamicObject*)> ReachedDestination;
@@ -54,6 +63,8 @@ public:
   void                ProcessCollisions() { if (_hitPoints > 0) InstanceDynamicObject::ProcessCollisions(); }
 
   void                Run(float elapsedTime);
+  void                LookAt(LVecBase3);
+  void                LookAt(InstanceDynamicObject*);
   void                GoTo(unsigned int id);
   void                GoTo(Waypoint* waypoint);
   void                GoTo(InstanceDynamicObject* object, int max_distance = 0);
@@ -105,6 +116,9 @@ public:
   void                SetAsEnemy(ObjectCharacter*, bool);
   bool                IsEnemy(ObjectCharacter*) const;
   bool                IsAlly(ObjectCharacter*)  const;
+  
+  std::list<FovEnemy>&         GetNearbyEnemies(void) { return (_fovEnemies); }
+  std::list<ObjectCharacter*>& GetNearbyAllies(void)  { return (_fovAllies);  }
 
 private:
   void                RunMovement(float elapsedTime);
@@ -130,7 +144,7 @@ private:
 
   // Line of Sight Tools
   NodePath                  _losPath;
-  PT(CollisionRay)          _losRay;
+  PT(CollisionSegment)      _losRay;
   PT(CollisionNode)         _losNode;
   PT(CollisionHandlerQueue) _losHandlerQueue;
   CollisionTraverser        _losTraverser;
@@ -145,14 +159,6 @@ private:
   NodePath                  _fovNp;
   PT(CollisionHandlerQueue) _fovHandlerQueue;
   CollisionTraverser        _fovTraverser;
-  
-  struct FovEnemy
-  {
-    FovEnemy(ObjectCharacter* enemy, unsigned char ttl) : enemy(enemy), ttl(ttl) {}
-    bool operator==(ObjectCharacter* comp) const { return (enemy == comp); }
-    ObjectCharacter* enemy;
-    unsigned char    ttl;
-  };
   
   std::list<FovEnemy>         _fovEnemies;
   std::list<ObjectCharacter*> _fovAllies;

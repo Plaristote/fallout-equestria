@@ -130,12 +130,16 @@ protected:
   InteractionList          _interactions;
 
   // Animations
+  typedef std::map<std::string, AnimControl*> MapAnims;
+
   void                     LoadAnimation(const std::string& name);
   void                     TaskAnimation(void);
   
   std::string               _modelName;
   AnimControlCollection     _anims;
+  MapAnims                  _mapAnims;
   AnimControl*              _anim;
+  bool                      _animLoop;
 };
 
 

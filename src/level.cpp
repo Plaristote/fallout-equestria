@@ -34,6 +34,8 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   InstanceDynamicObject::ActionUse.Connect        (*this, &Level::CallbackActionUse);
   InstanceDynamicObject::ActionTalkTo.Connect     (*this, &Level::CallbackActionTalkTo);
   InstanceDynamicObject::ActionUseObjectOn.Connect(*this, &Level::CallbackActionUseObjectOn);
+  for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
+    _currentUis[i] = 0;
   _currentInteractMenu  = 0;
   _currentRunningDialog = 0;
   _currentUseObjectOn   = 0;
@@ -176,12 +178,11 @@ Level::~Level()
   AsyncTaskManager::get_global_ptr()->remove(this);
   std::for_each(_objects.begin(), _objects.end(), [](InstanceDynamicObject* obj) { delete obj; });
   CurrentLevel = 0;
-  if (_currentRunningDialog)
-    delete _currentRunningDialog;
-  if (_currentUiLoot)
-    delete _currentUiLoot;
-  if (_currentUseObjectOn)
-    delete _currentUseObjectOn;
+  for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
+  {
+    if (_currentUis[i] != 0)
+      delete _currentUis[i];
+  }
   if (_currentInteractMenu)
     delete _currentInteractMenu;
   if (_l18n)
@@ -269,7 +270,19 @@ void Level::StopFight(void)
 {
   if (_state == Fight)
   {
-    // Check if no hostiles are around
+    Characters::iterator it  = _characters.begin();
+    Characters::iterator end = _characters.end();
+    
+    for (; it != end ; ++it)
+    {
+      list<ObjectCharacter::FovEnemy>& listEnemies = (*it)->GetNearbyEnemies();
+
+      if (listEnemies.size() > 0 && (*it)->IsAlive())
+      {
+	ConsoleWrite("You can't leave combat mode if enemies are nearby");
+	return ;
+      }
+    }
     SetState(Normal);
     _gameUi.GetMainBar().SetEnabledAP(false);
   }
@@ -362,28 +375,12 @@ AsyncTask::DoneStatus Level::do_task(void)
     case Interrupted:
       break ;
   }
-  TaskCeiling(elapsedTime);
   _timer.Restart();
-  return AsyncTask::DS_cont;
+  return (AsyncTask::DS_cont);
 }
 
 void Level::TaskCeiling(float elapsedTime)
 {
-  /*MapElement::Position        playerPos = (*(_characters.begin()))->GetPosition();
-  const Tilemap::CeilingTile& ceiling   =_tilemap.GetCeiling(playerPos.x, playerPos.y);
-
-  if (ceiling.isDefined && ceilingCurrentTransparency >= 0.f)
-  {
-    if (ceilingCurrentTransparency >= 1.f)
-      ceilingCurrentTransparency = 1.f;
-    ceilingCurrentTransparency -= 1.f * elapsedTime;
-    _tilemap.SetCeilingTransparent(ceilingCurrentTransparency);
-  }
-  else if (!ceiling.isDefined && ceilingCurrentTransparency <= 1.f)
-  {
-    ceilingCurrentTransparency += 1.f * elapsedTime;
-    _tilemap.SetCeilingTransparent(ceilingCurrentTransparency);
-  }*/
 }
 
 /*
@@ -574,17 +571,22 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
   {
     string dialog = object->GetDialog();
 
-    if (_currentRunningDialog)
-      delete _currentRunningDialog;
-    
-    GetPlayer()->GetNodePath().look_at(object->GetNodePath());
-    object->GetNodePath().look_at(GetPlayer()->GetNodePath());
+    if (_currentUis[UiItRunningDialog])
+      delete _currentUis[UiItRunningDialog];
+
+    // Player must look at its target
+    GetPlayer()->LookAt(object);
+    // If target is a character, then it must look back
+    ObjectCharacter* talkTo = object->Get<ObjectCharacter>();
+    if (talkTo)
+      talkTo->LookAt(GetPlayer());
     
     _currentRunningDialog = new DialogController(_window, _gameUi.GetContext(), dialog, _l18n);
-    _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningDialog);
+    _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningUi<UiItRunningDialog>);
     _mouseActionBlocked = true;
     _camera.SetEnabledScroll(false);
     SetInterrupted(true);
+    _currentUis[UiItRunningDialog] = _currentRunningDialog;
   }
   else
   {
@@ -599,15 +601,16 @@ void Level::CallbackActionUseObjectOn(InstanceDynamicObject* target)
   InventoryObject* object;
   
   CloseInteractMenu();
-  if (_currentUseObjectOn)
-    delete _currentUseObjectOn;
+  if (_currentUis[UiItUseObjectOn])
+    delete _currentUis[UiItUseObjectOn];
   _currentUseObjectOn = new UiUseObjectOn(_window, _gameUi.GetContext(), GetPlayer()->GetInventory());
-  _currentUseObjectOn->ActionCanceled.Connect(*this, &Level::CloseUseObjectOn);
+  _currentUseObjectOn->ActionCanceled.Connect(*this, &Level::CloseRunningUi<UiItUseObjectOn>);
   _currentUseObjectOn->ObjectSelected.Connect(*this, &Level::SelectedUseObjectOn);
   _mouseActionBlocked = true;
   _camera.SetEnabledScroll(false);
   SetInterrupted(true);
   GetPlayer()->pendingActionOn = target;
+  _currentUis[UiItUseObjectOn] = _currentUseObjectOn;
 }
 
 void Level::PlayerLoot(Inventory* inventory)
@@ -618,14 +621,15 @@ void Level::PlayerLoot(Inventory* inventory)
     return ;
   }
   CloseInteractMenu();
-  if (_currentUiLoot)
-    delete _currentUiLoot;
+  if (_currentUis[UiItLoot])
+    delete _currentUis[UiItLoot];
   _currentUiLoot = new UiLoot(_window, _gameUi.GetContext(), GetPlayer()->GetInventory(), *inventory);
   _currentUiLoot->Done.Connect(*_currentUiLoot, &UiLoot::Destroy);
-  _currentUiLoot->Done.Connect(*this, &Level::CloseUiLoot);
+  _currentUiLoot->Done.Connect(*this, &Level::CloseRunningUi<UiItLoot>);
   _mouseActionBlocked = true;
   _camera.SetEnabledScroll(false);
   SetInterrupted(true);
+  _currentUis[UiItLoot] = _currentUiLoot;
 }
 
 void Level::CallbackActionTargetUse(unsigned short it)
@@ -716,7 +720,7 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
   user->pendingActionOn     = target;
   user->pendingActionObject = object;
   if (user == GetPlayer())
-    CloseUseObjectOn();
+    CloseRunningUi<UiItUseObjectOn>();
 }
 
 void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* item)
@@ -729,7 +733,7 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
     return ;
   }
   
-  user->GetNodePath().look_at(target->GetNodePath());
+  user->LookAt(target);
 
   if (target->GetDistance(user) > (float)((*item)["range"]))
     output = ("Out of range");
@@ -790,29 +794,4 @@ bool Level::UseActionPoints(unsigned short ap)
     }
   }
   return (true);
-}
-
-void Level::CloseRunningDialog(void)
-{
-  if (_currentRunningDialog)
-    _currentRunningDialog->Destroy();
-  _camera.SetEnabledScroll(true);
-  _mouseActionBlocked = false;
-  SetInterrupted(false);
-}
-
-void Level::CloseUseObjectOn(void)
-{
-  if (_currentUseObjectOn)
-    _currentUseObjectOn->Destroy();
-  _camera.SetEnabledScroll(true);
-  _mouseActionBlocked = false;
-  SetInterrupted(false);
-}
-
-void Level::CloseUiLoot(void)
-{
-  _mouseActionBlocked = false;
-  _camera.SetEnabledScroll(true);
-  SetInterrupted(false);
 }

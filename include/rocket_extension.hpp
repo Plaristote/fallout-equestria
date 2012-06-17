@@ -19,11 +19,14 @@ class UiBase
   friend class GameUi;
 public:
   UiBase(WindowFramework* window) : _window(window), _root(0) {}
+  virtual ~UiBase() {}
 
   void Show(void)            { _root->Show(); VisibilityToggled.Emit(true);  }
   void Hide(void)            { _root->Hide(); VisibilityToggled.Emit(false); }
   bool IsVisible(void) const { return (_root->IsVisible()); }
   
+  virtual void Destroy(void) { }
+
   Observatory::Signal<void (bool)> VisibilityToggled;
 
 protected:

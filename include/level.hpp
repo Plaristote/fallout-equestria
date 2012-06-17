@@ -56,9 +56,6 @@ public:
   ObjectCharacter*       GetPlayer(void);
 
   void                   CloseInteractMenu(void);
-  void                   CloseRunningDialog(void);
-  void                   CloseUseObjectOn(void);
-  void                   CloseUiLoot(void);
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);
   TimeManager&           GetTimeManager(void) { return (_timeManager); }
@@ -136,8 +133,26 @@ private:
   DirectionalLight* _sunLight;
   NodePath          _sunLightNode;
 
+  enum UiIterator
+  {
+    UiItRunningDialog,
+    UiItUseObjectOn,
+    UiItLoot,
+    UiTotalIt
+  };
+  
+  template<UiIterator it> void CloseRunningUi(void)
+  {
+    if (_currentUis[it])
+      _currentUis[it]->Destroy();
+    _camera.SetEnabledScroll(true);
+    _mouseActionBlocked = false;
+    SetInterrupted(false);
+  }
+  
   GameUi            _gameUi;
   InteractMenu*     _currentInteractMenu;
+  UiBase*           _currentUis[UiTotalIt];
   DialogController* _currentRunningDialog;
   UiUseObjectOn*    _currentUseObjectOn;
   UiLoot*           _currentUiLoot;
