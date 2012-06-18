@@ -660,9 +660,16 @@ void Level::PendingActionUseObjectOn(InstanceDynamicObject* object)
 {
   if (!object->pendingAnimationDone)
   {
-    object->AnimationEnded.DisconnectAll();
-    object->AnimationEnded.Connect(*this, &Level::PendingActionUseObjectOn);
-    object->PlayAnimation("use");
+    ObjectCharacter* user      = object->Get<ObjectCharacter>();
+    unsigned short   equipedIt = 0;
+    
+    user->AnimationEnded.DisconnectAll();
+    user->AnimationEnded.Connect(*this, &Level::PendingActionUseObjectOn);
+    if (user->GetEquipedItem(0) == user->pendingActionObject)
+      equipedIt = 0;
+    else
+      equipedIt = 1;
+    user->PlayEquipedItemAnimation(equipedIt, "use");
   }
   else
   {
