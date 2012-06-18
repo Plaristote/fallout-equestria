@@ -2,16 +2,15 @@
 #include "objectnode.hpp"
 #include <panda3d/nodePathCollection.h>
 #include <panda3d/auto_bind.h>
-#define ANIMATION_PATH(model, str) ("models/anims/" + model + "-" + str + ".egg") 
-#define ANIMATION_DEFAULT "use"
 #include "level.hpp"
 
 using namespace std;
 using namespace Observatory;
+using namespace ObjectTypes;
 
 void InstanceDynamicObject::ThatDoesNothing() { _level->ConsoleWrite("That does nothing"); }
 
-InstanceDynamicObject::InstanceDynamicObject(Level* level, DynamicObject* object) : _object(object)
+InstanceDynamicObject::InstanceDynamicObject(Level* level, DynamicObject* object) : AnimatedObject(level->GetWorld()->window), _object(object)
 {
   _type                 = Other;
   _anim                 = 0;
@@ -47,6 +46,8 @@ InstanceDynamicObject::InstanceDynamicObject(Level* level, DynamicObject* object
     _interactions.push_back(Interaction("use_object", this, &ActionUseObjectOn));
   if (object->interactions & Interactions::UseSkill)
     _interactions.push_back(Interaction("use_skill",  this, &ActionUseSkillOn));
+  
+  AnimationEnd.Connect(*this, &InstanceDynamicObject::CallbackAnimationEnded);
 }
 
 InstanceDynamicObject::GoToData   InstanceDynamicObject::GetGoToData(InstanceDynamicObject* character)
@@ -61,9 +62,16 @@ InstanceDynamicObject::GoToData   InstanceDynamicObject::GetGoToData(InstanceDyn
 }
 
 // Animations
-void                     InstanceDynamicObject::LoadAnimation(const std::string& name)
+AnimatedObject::AnimatedObject(WindowFramework* window) : _window(window)
 {
-  NodePath np = _level->GetWorld()->window->load_model(_object->nodePath, ANIMATION_PATH(_modelName, name));
+  pendingAnimationDone = true;
+  AnimationEnd.Connect(*this, &AnimatedObject::PlayIdleAnimation);
+}
+
+void                     AnimatedObject::LoadAnimation(const std::string& name)
+{
+  NodePath root = GetNodePath();
+  NodePath np   = _window->load_model(root, ANIMATION_PATH(_modelName, name));
   string   controlName;
 
   if (np.get_error_type() != NodePath::ET_ok)
@@ -71,13 +79,13 @@ void                     InstanceDynamicObject::LoadAnimation(const std::string&
     std::cout << "Can't load anim " << name << " for " << _modelName << std::endl;
     return ;
   }
-  auto_bind(_object->nodePath.node(), _anims, 0xf);
+  auto_bind(root.node(), _anims, 0xf);
   np.detach_node();
   controlName = _anims.get_anim_name(_anims.get_num_anims() - 1);
   _mapAnims.insert(_mapAnims.end(), pair<string, AnimControl*>(name, _anims.find_anim(controlName)));
 }
 
-void                     InstanceDynamicObject::PlayAnimation(const std::string& name, bool loop)
+void                     AnimatedObject::PlayAnimation(const std::string& name, bool loop)
 {
   MapAnims::iterator     it   = _mapAnims.find(name);
   AnimControl*           anim = (it != _mapAnims.end() ? it->second : 0);
@@ -91,25 +99,17 @@ void                     InstanceDynamicObject::PlayAnimation(const std::string&
     anim->play();
     _anim     = anim;
     _animLoop = loop;
-    pendingAnimationDone = false;
-    AnimationEnded.Connect(*this, &InstanceDynamicObject::PlayIdleAnimation);
   }
   else if (!loop && name != ANIMATION_DEFAULT)
     PlayAnimation(ANIMATION_DEFAULT, loop);
   else
   {
     pendingAnimationDone = true;
-    AnimationEnded.Emit(this);
+    AnimationEnd.Emit();
   }
 }
 
-void                      InstanceDynamicObject::PlayIdleAnimation(InstanceDynamicObject*)
-{
-  AnimationEnded.DisconnectAll();
-  PlayAnimation("idle");
-}
-
-void                      InstanceDynamicObject::TaskAnimation(void)
+void                      AnimatedObject::TaskAnimation(void)
 {
   if (_anim && _anim->is_playing() == false)
   {
@@ -119,9 +119,15 @@ void                      InstanceDynamicObject::TaskAnimation(void)
     {
       std::cout << "Animation is over" << std::endl;
       pendingAnimationDone = true;
-      AnimationEnded.Emit(this);
-      AnimationEnded.DisconnectAll();
+      AnimationEnd.Emit();
+      ResetAnimation();
+      pendingAnimationDone = false;
       _anim = 0;
     }
   }
+}
+
+void                      AnimatedObject::PlayIdleAnimation(void)
+{
+  PlayAnimation("idle");
 }

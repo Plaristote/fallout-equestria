@@ -4,6 +4,7 @@
 
 ObjectItem::ObjectItem(Level* level, DynamicObject* object, InventoryObject* item) : InstanceDynamicObject(level, object), _item(item)
 {
+  _type = ObjectTypes::Item;
 }
 
 void ObjectItem::CallbackActionUse(InstanceDynamicObject* user)

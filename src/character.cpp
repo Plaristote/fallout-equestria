@@ -14,7 +14,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   Data   items = _level->GetItems();  
   string defEquiped[2];
 
-  _type         = Character;
+  _type         = ObjectTypes::Character;
   _actionPoints = 0;
   
   //_object->nodePath.set_collide_mask(CollideMask(ColMask::DynObject | ColMask::FovTarget), CollideMask::all_on(), _object->nodePath.get_class_type());
@@ -68,11 +68,6 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
     _hitPoints  = stats["Statistics"]["Hit Points"].Nil()  ? 15 : (int)(stats["Statistics"]["Hit Points"]);
   }
   
-  _equiped[0] = 0;
-  _equiped[1] = 0;
-  defEquiped[0] = DEFAULT_WEAPON_1;
-  defEquiped[1] = DEFAULT_WEAPON_2;
-
   // Script
   _scriptContext = 0;
   _scriptModule  = 0;
@@ -111,33 +106,86 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
     }
   }
 
+  // Equiped Items
+  defEquiped[0] = DEFAULT_WEAPON_1;
+  defEquiped[1] = DEFAULT_WEAPON_2;  
+  
   for (int i = 0 ; i < 2 ; ++i)
   {
     if (items[defEquiped[i]].Nil())
       continue ;
-    _defEquiped[i] = new InventoryObject(items[defEquiped[i]]);
-    _equiped[i] = _defEquiped[i];
-    _equiped[i]->SetEquiped(true);
-    _inventory.AddObject(_equiped[i]);
+    _equiped[i].default_ = new InventoryObject(items[defEquiped[i]]);
+    _equiped[i].equiped  = _equiped[i].default_;
+    _equiped[i].equiped->SetEquiped(true);
+    _inventory.AddObject(_equiped[i].equiped);
   }
-  
-  CharacterDied.Connect(*this, &ObjectCharacter::RunDeath);
   
   // Animations
   vector<string> anims = { "idle", "walk", "run", "use" };
   for_each(anims.begin(), anims.end(), [this](string anim)
   { LoadAnimation(anim); });
+  
+  // Others
+  CharacterDied.Connect(*this, &ObjectCharacter::RunDeath);  
+}
+
+void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& name)
+{
+  if (_equiped[it].equiped)
+  {
+    InventoryObject& item           = *(_equiped[it].equiped);
+    Data             playerAnim     = item["animations"]["player"][name];
+    const string     playerAnimName = (playerAnim.Nil() ? ANIMATION_DEFAULT : playerAnim.Value());
+
+    if (_equiped[it].graphics)
+      _equiped[it].graphics->PlayAnimation(name);
+    PlayAnimation(playerAnimName);
+  }
 }
 
 InventoryObject* ObjectCharacter::GetEquipedItem(unsigned short it)
 {
-  return (_equiped[it]);
+  return (_equiped[it].equiped);
 }
-
-void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item)
+#include <panda3d/character.h>
+void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, EquipedMode mode)
 {
-  _equiped[it]->SetEquiped(false);
-  _equiped[it] = item;
+  if (_equiped[it].graphics)
+    delete _equiped[it].graphics;
+  _equiped[it].equiped->SetEquiped(false);
+  _equiped[it].equiped  = item;
+  _equiped[it].mode     = mode;
+
+  _equiped[it].graphics = item->CreateEquipedModel(_level->GetWorld());
+  if (_equiped[it].graphics)
+  {
+//     AnimControl* control = _anims.get_anim(0);
+//     
+//     PartGroup*  group      = control->get_part()->find_child("Horn");
+// 
+//     if (group)
+//       std::cout << "Success" << std::endl;
+//     else
+//       std::cout << "Failure" << std::endl;
+// 
+//     LMatrix4f matrix = control->get_part()->get_root_xform();
+//     
+//     PT(PartBundleNode) bundleNode = new PartBundleNode("hornNode", control->get_part());
+//     NodePath           npjoint(bundleNode);
+// 
+// //     _object->nodePath.get_child(0).get_child(0).ls();
+// //     NodePath npjoint = _object->nodePath.find("Main");
+    
+//     npjoint.reparent_to(_object->nodePath);
+// 
+//     if (npjoint.get_error_type() == NodePath::ET_ok)
+//     {
+//       _equipedNp[it]->np.reparent_to(npjoint);
+//     }
+//     else
+//       std::cout << "Failed to connect item to joint" << std::endl;
+  }
+  
   item->SetEquiped(true);
   EquipedItemChanged.Emit(it, item);
   _inventory.ContentChanged.Emit();
@@ -145,7 +193,7 @@ void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item)
 
 void ObjectCharacter::UnequipItem(unsigned short it)
 {
-  SetEquipedItem(it, _defEquiped[it]);
+  SetEquipedItem(it, _equiped[it].default_);
 }
 
 void ObjectCharacter::RestartActionPoints(void)
@@ -163,30 +211,33 @@ void ObjectCharacter::RestartActionPoints(void)
 
 void ObjectCharacter::Run(float elapsedTime)
 {
-  Level::State state = _level->GetState();
+  if (!(IsInterrupted()))
+  {
+    Level::State state = _level->GetState();
 
-  if (state == Level::Normal && _scriptMain && _hitPoints > 0)
-  {
-    _scriptContext->Prepare(_scriptMain);
-    _scriptContext->SetArgObject(0, this);
-    _scriptContext->SetArgFloat(1, elapsedTime);
-    _scriptContext->Execute();
-  }
-  else if (state == Level::Fight)
-  {
-    if (_hitPoints <= 0)
-      _level->NextTurn();
-    else if (_actionPoints == 0)
-      _level->NextTurn();
-    else if (!(IsMoving()) && _scriptFight) // replace with something more appropriate
+    if (state == Level::Normal && _scriptMain && _hitPoints > 0)
     {
-      _scriptContext->Prepare(_scriptFight);
+      _scriptContext->Prepare(_scriptMain);
       _scriptContext->SetArgObject(0, this);
+      _scriptContext->SetArgFloat(1, elapsedTime);
       _scriptContext->Execute();
     }
+    else if (state == Level::Fight)
+    {
+      if (_hitPoints <= 0)
+	_level->NextTurn();
+      else if (_actionPoints == 0)
+	_level->NextTurn();
+      else if (!(IsMoving()) && _scriptFight) // replace with something more appropriate
+      {
+	_scriptContext->Prepare(_scriptFight);
+	_scriptContext->SetArgObject(0, this);
+	_scriptContext->Execute();
+      }
+    }
+    if (_path.size() > 0)
+      RunMovement(elapsedTime);
   }
-  if (_path.size() > 0)
-    RunMovement(elapsedTime);
   InstanceDynamicObject::Run(elapsedTime);
 }
 
@@ -202,7 +253,7 @@ int                 ObjectCharacter::GetBestWaypoint(InstanceDynamicObject* obje
     currentDistance = wp->GetDistanceEstimate(*other);
     UnprocessCollisions();
     {
-      std::list<Waypoint*> list = self->GetSuccessors(other);
+      list<Waypoint*> list = self->GetSuccessors(other);
       
       for_each(list.begin(), list.end(), [&wp, &currentDistance, other, farthest](Waypoint* waypoint)
       {
@@ -250,7 +301,7 @@ unsigned short      ObjectCharacter::GetPathDistance(InstanceDynamicObject* obje
 
 unsigned short      ObjectCharacter::GetPathDistance(Waypoint* waypoint)
 {
-  std::list<Waypoint> path;
+  list<Waypoint> path;
   
   UnprocessCollisions();
   _level->FindPath(path, *_waypointOccupied, *waypoint);
@@ -333,14 +384,14 @@ void                ObjectCharacter::GoToRandomWaypoint(void)
     ReachedDestination.DisconnectAll();
     UnprocessCollisions();
     {
-      std::list<Waypoint*>           list = _waypointOccupied->GetSuccessors(0);
+      list<Waypoint*>             wplist = _waypointOccupied->GetSuccessors(0);
       
-      if (list.size() > 0)
+      if (wplist.size() > 0)
       {
-	int                            rit  = rand() % list.size();
-	std::list<Waypoint*>::iterator it   = list.begin();
+	int                       rit    = rand() % wplist.size();
+	list<Waypoint*>::iterator it     = wplist.begin();
 
-	for (it = list.begin() ; rit ; --rit, ++it);
+	for (it = wplist.begin() ; rit ; --rit, ++it);
 	_path.push_back(**it);
 	StartRunAnimation();
       }
@@ -368,7 +419,7 @@ void                ObjectCharacter::StopRunAnimation(InstanceDynamicObject*)
   if (_anim)
   {
     _animLoop = false;
-    AnimationEnded.Connect(*this, &ObjectCharacter::PlayIdleAnimation);
+    PlayIdleAnimation();
   }
 }
 
@@ -578,7 +629,7 @@ void     ObjectCharacter::CheckFieldOfView(void)
   
   // Prepare all the FOV data
   {
-    std::list<FovEnemy>::iterator it = _fovEnemies.begin();
+    list<FovEnemy>::iterator it = _fovEnemies.begin();
 
     while (it != _fovEnemies.end())
     {
@@ -592,13 +643,17 @@ void     ObjectCharacter::CheckFieldOfView(void)
     // Decrement TTL of nearby enemies
   }
 
+  Timer timer;
   
   _fovSphere->set_radius(fovRadius);
   _fovTraverser.traverse(_level->GetWorld()->window->get_render());
 
   //_fovNp.show();
-
-  Timer timer;
+    
+  // Optimization of FOV
+  //if (!(IsEnemy(_level->GetPlayer())) && _level->GetState() != Level::Fight)
+  //  return ;
+  
   for (unsigned short i = 0 ; i < _fovHandlerQueue->get_num_entries() ; ++i)
   {
     CollisionEntry*        entry  = _fovHandlerQueue->get_entry(i);
@@ -617,7 +672,7 @@ void     ObjectCharacter::CheckFieldOfView(void)
 	  _fovAllies.push_back(character);
 	else if (IsEnemy(character) && HasLineOfSight(character))
 	{
-	  std::list<FovEnemy>::iterator enemyIt = std::find(_fovEnemies.begin(), _fovEnemies.end(), character);
+	  list<FovEnemy>::iterator enemyIt = find(_fovEnemies.begin(), _fovEnemies.end(), character);
 
 	  if (enemyIt != _fovEnemies.end())
 	    enemyIt->ttl = FOV_TTL;

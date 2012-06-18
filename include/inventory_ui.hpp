@@ -7,6 +7,7 @@
 # include <Rocket/Core/EventListener.h>
 # include <Rocket/Core/Element.h>
 # include "rocket_extension.hpp"
+#include "character.hpp"
 # include <sstream>
 
 class InventoryView : public Rocket::Core::EventListener
@@ -87,6 +88,30 @@ private:
 
   Inventory& _looter;
   Inventory& _looted;
+};
+
+class UiEquipMode : public UiBase
+{
+public:
+  UiEquipMode(WindowFramework* window, Rocket::Core::Context* context, unsigned short it, InventoryObject* object);
+  ~UiEquipMode();
+
+  void Destroy(void);
+  Observatory::Signal<void (unsigned short, InventoryObject*, EquipedMode)> EquipModeSelected;
+  Observatory::Signal<void> Closed;
+  
+  void             DisableMode(EquipedMode);
+
+private:
+  RocketListener   MouthClicked, MagicClicked, BattleSaddleClicked, CancelClicked;
+  
+  template<EquipedMode mode>
+  void CallbackButton(Rocket::Core::Event&) { EquipModeSelected.Emit(_it, &_object, mode); Closed.Emit(); }
+  
+  void CallbackCancel(Rocket::Core::Event&) { Closed.Emit(); }
+  
+  unsigned short   _it;
+  InventoryObject& _object;
 };
 
 #endif

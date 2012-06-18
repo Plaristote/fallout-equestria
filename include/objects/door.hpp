@@ -8,7 +8,7 @@ class ObjectDoor : public InstanceDynamicObject, public Waypoint::ArcObserver
 public:
   ObjectDoor(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
   {
-    _type   = Door;
+    _type   = ObjectTypes::Door;
     _closed = true;
     _locked = object->locked;
     ObserveWaypoints(true);
@@ -38,6 +38,6 @@ private:
   bool _locked;
 };
 
-template<> struct ObjectType2Code<ObjectDoor>      { enum { Type = ObjectType::Door      }; };
+template<> struct ObjectType2Code<ObjectDoor>      { enum { Type = ObjectTypes::ObjectType::Door      }; };
 
 #endif

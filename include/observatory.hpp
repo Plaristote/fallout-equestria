@@ -352,6 +352,113 @@ namespace Observatory
 
     typename Observers::iterator _iterator;
     Observers                    _observers;
+  };
+  
+  template<class P1, class P2, class P3, class P4>
+  class Signal<P1 (P2, P3, P4)>
+  {
+    struct InterfaceObserver
+    {
+      virtual ~InterfaceObserver() {}
+      virtual void operator()(P2 p2, P3 p3, P4 p4) = 0;
+
+      ObserverId id;
+    };
+
+    template<typename ObserverClass>
+    class Observer : public InterfaceObserver
+    {
+    public:
+      typedef void (ObserverClass::*Method)(P2, P3, P4);
+
+      Observer(ObserverClass& observer, Method method) : _observer(observer), _method(method) {}
+
+      void operator()(P2 p2, P3 p3, P4 p4) { (_observer.*_method)(p2, p3, p4); }
+
+    private:
+      ObserverClass& _observer;
+      Method         _method;
+    };
+
+    typedef std::list<InterfaceObserver*> Observers;
+  public:
+    ~Signal()
+    {
+      typename Observers::iterator it  = _observers.begin();
+      typename Observers::iterator end = _observers.end();
+
+      for (; it != end ; ++it)
+        delete *it;
+    }
+
+    void       Emit(P2 p2, P3 p3, P4 p4)
+    {
+      _iterator = _observers.begin();
+      while (_iterator != _observers.end())
+      {
+        typename Observers::iterator trace = _iterator;
+
+        (**_iterator)(p2, p3, p4);
+        if (trace == _iterator)
+          _iterator++;
+      }
+    }
+
+    template<typename ObserverClass>
+    ObserverId Connect(ObserverClass& observerInstance, typename Observer<ObserverClass>::Method method)
+    {
+      InterfaceObserver* observer = new Observer<ObserverClass>(observerInstance, method);
+
+      return (AddObserver(observer));
+    }
+
+    void       Disconnect(ObserverId id)
+    {
+      typename Observers::iterator toDel = _observers.begin();
+      typename Observers::iterator end   = _observers.end();
+
+      for (; toDel != end ; ++toDel)
+      {
+        if (*toDel == id)
+        {
+          InterfaceObserver* observer = *toDel;
+
+          if (toDel == _iterator)
+            _iterator = _observers.erase(toDel);
+          else
+            _observers.erase(toDel);
+          delete observer;
+          break ;
+        }
+      }
+    }
+
+    void       DisconnectAll(void)
+    {
+      typename Observers::iterator toDel = _observers.begin();
+      typename Observers::iterator end   = _observers.end();
+
+      while (_observers.begin() != end)
+        _observers.erase(_observers.begin());
+      _iterator = _observers.end();
+    }    
+
+    inline int ObserverCount(void) const
+    {
+      return (_observers.size());
+    }
+
+  private:
+    ObserverId AddObserver(InterfaceObserver* observer)
+    {
+      ObserverId id = observer;
+
+      _observers.push_back(observer);
+      return (id);
+    }
+
+    typename Observers::iterator _iterator;
+    Observers                    _observers;
   };  
 }
 

@@ -4,13 +4,34 @@
 # include "datatree.hpp"
 # include "scriptengine.hpp"
 # include "world.h"
+# include "animatedobject.hpp"
 
 class ObjectCharacter;
 class InstanceDynamicObject;
 
+enum EquipedMode
+{
+  EquipedMouth,
+  EquipedMagic,
+  EquipedBattleSaddle
+};
+
 class InventoryObject : public Data
 {
 public:
+  struct EquipedModel : public AnimatedObject
+  {
+    EquipedModel(WindowFramework* win, InventoryObject* pObject);
+    ~EquipedModel();
+    
+    NodePath GetNodePath(void) const { return (np); }
+    void     ResetAnimation(void)    {}
+
+    NodePath np;
+    InventoryObject& object;
+  };
+  
+  
   InventoryObject(Data);
   ~InventoryObject();
 
@@ -18,7 +39,9 @@ public:
   const std::string UseOn(ObjectCharacter* user, InstanceDynamicObject* target);
   const std::string GetName(void) const { return (this->Key()); }
   DynamicObject*    CreateDynamicObject(World* world) const;
+  EquipedModel*     CreateEquipedModel(World* world);
 
+  bool              CanWeild(ObjectCharacter*, EquipedMode);
   void              SetEquiped(bool set)  { _equiped = set;    }
   bool              IsEquiped(void) const { return (_equiped); }
 
@@ -36,6 +59,8 @@ private:
   asIScriptFunction* _hookUseOnDoor;
   asIScriptFunction* _hookUseOnOthers;
   asIScriptFunction* _hookUseAsWeapon;
+  
+  asIScriptFunction* _hookCanWeildMouth, *_hookCanWeildMagic, *_hookCanWeildBattleSaddle;
 };
 
 class Inventory

@@ -43,12 +43,15 @@ public:
     bool operator==(ObjectCharacter* comp) const { return (enemy == comp); }
     ObjectCharacter* enemy;
     unsigned char    ttl;
-  };  
+  };
   
   ObjectCharacter(Level* level, DynamicObject* object);
 
   Observatory::Signal<void (InstanceDynamicObject*)> ReachedDestination;
-  
+  Observatory::Signal<void (unsigned short)>         ActionPointChanged;
+  Observatory::Signal<void (unsigned short)>         HitPointsChanged;
+  Observatory::Signal<void>                          CharacterDied;
+
   virtual GoToData   GetGoToData(InstanceDynamicObject* character)
   {
     GoToData         ret;
@@ -77,16 +80,16 @@ public:
   int                 GetNearestWaypoint(InstanceDynamicObject* object);
   int                 GetFarthestWaypoint(InstanceDynamicObject* object);
   bool                HasLineOfSight(InstanceDynamicObject* object);
-  bool                IsMoving(void) const { return (_path.size());   }
-  bool                IsAlive(void) const  { return (_hitPoints > 0); }
-  Inventory&          GetInventory(void)   { return (_inventory);     }
-  Data                GetStatistics(void)  { return (_statistics);    }
-  Diplomacy&          GetDiplomacy(void)   { return (_diplomacy);     }
+  bool                IsMoving(void) const      { return (_path.size());          }
+  bool                IsAlive(void) const       { return (_hitPoints > 0);        }
+  bool                IsInterrupted(void) const { return (AnimationEnded.ObserverCount() > 0); }
+  Inventory&          GetInventory(void)        { return (_inventory);            }
+  Data                GetStatistics(void)       { return (_statistics);           }
+  Diplomacy&          GetDiplomacy(void)        { return (_diplomacy);            }
 
   unsigned short      GetActionPoints(void) const        { return (_actionPoints); }
   void                SetActionPoints(unsigned short ap) { _actionPoints = ap; ActionPointChanged.Emit(_actionPoints); }
   void                RestartActionPoints(void);
-  Observatory::Signal<void (unsigned short)> ActionPointChanged;
   
   short               GetHitPoints(void) const        { return (_hitPoints); }
   void                SetHitPoints(short hp)
@@ -97,16 +100,15 @@ public:
     if (hp <= 0)
       CharacterDied.Emit();
   }
-  Observatory::Signal<void (unsigned short)> HitPointsChanged;
-  Observatory::Signal<void>                  CharacterDied;
   
   short               GetArmorClass(void) const        { return (_armorClass); }
   void                SetArmorClass(short ac)          { _armorClass = ac; ArmorClassChanged.Emit(_armorClass); }
   void                RestartArmorClass(void)          { _armorClass -= _tmpArmorClass; _tmpArmorClass = 0;     }
   void                SetBonusAC(short ac)             { _armorClass += ac; _tmpArmorClass += ac;               }
   Observatory::Signal<void (short)>          ArmorClassChanged;
-  
-  void                SetEquipedItem(unsigned short it, InventoryObject* object);
+
+  void                PlayEquipedItemAnimation(unsigned short it, const std::string& name);
+  void                SetEquipedItem(unsigned short it, InventoryObject* object, EquipedMode mode = EquipedMouth);
   InventoryObject*    GetEquipedItem(unsigned short it);
   void                UnequipItem(unsigned short it);
   Observatory::Signal<void (unsigned short, InventoryObject*)> EquipedItemChanged;
@@ -132,10 +134,18 @@ private:
 
   std::list<Waypoint>       _path;
   GoToData                  _goToData;
+  
+  struct ItemEquiped
+  {
+    ItemEquiped(void) : equiped(0), default_(0), graphics(0) {}
+    EquipedMode                    mode;
+    InventoryObject*               equiped;
+    InventoryObject*               default_;
+    InventoryObject::EquipedModel* graphics;
+  };
 
   Inventory                 _inventory;
-  InventoryObject*          _equiped[2];
-  InventoryObject*          _defEquiped[2];
+  ItemEquiped               _equiped[2];
   DataTree*                 _statistics;
   Diplomacy                 _diplomacy;
 
@@ -170,6 +180,6 @@ private:
   asIScriptFunction* _scriptFight;
 };
 
-template<> struct ObjectType2Code<ObjectCharacter> { enum { Type = ObjectType::Character }; };
+template<> struct ObjectType2Code<ObjectCharacter> { enum { Type = ObjectTypes::ObjectType::Character }; };
 
 #endif

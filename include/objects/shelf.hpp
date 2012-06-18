@@ -9,7 +9,7 @@ class ObjectShelf : public InstanceDynamicObject
 public:
   ObjectShelf(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
   {
-    _type   = Shelf;
+    _type   = ObjectTypes::Shelf;
     LockWaypoints(true);
   }
   
@@ -29,6 +29,6 @@ private:
   Inventory   _inventory;
 };
 
-template<> struct ObjectType2Code<ObjectShelf>      { enum { Type = ObjectType::Shelf }; };
+template<> struct ObjectType2Code<ObjectShelf>      { enum { Type = ObjectTypes::ObjectType::Shelf }; };
 
 #endif

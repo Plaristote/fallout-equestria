@@ -151,7 +151,7 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   _gameUi.GetMainBar().CombatEnd.Connect     (*this, &Level::StopFight);
   _gameUi.GetMainBar().CombatPassTurn.Connect(*this, &Level::NextTurn);
   _gameUi.GetInventory().SetInventory(GetPlayer()->GetInventory());
-  _gameUi.GetInventory().EquipItem.Connect   (*GetPlayer(), &ObjectCharacter::SetEquipedItem);
+  _gameUi.GetInventory().EquipItem.Connect   (*this, &Level::PlayerEquipObject);
   _gameUi.GetInventory().UnequipItem.Connect (*GetPlayer(), &ObjectCharacter::UnequipItem);
   _gameUi.GetInventory().DropObject.Connect  (*this, &Level::PlayerDropObject);
   _gameUi.GetInventory().UseObject.Connect   (*this, &Level::PlayerUseObject);
@@ -689,10 +689,12 @@ void Level::PendingActionUse(InstanceDynamicObject* object)
   {
     object->AnimationEnded.DisconnectAll();    
     object->AnimationEnded.Connect(*this, &Level::PendingActionUse);
+    std::cout << "AnimationEnded. Observers: " << object->AnimationEnded.ObserverCount() << std::endl;
     object->PlayAnimation("use");
   }
   else
   {
+    std::cout << "PendingAvtionUseAnimationDone" << std::endl;
     object->GetNodePath().look_at(object->pendingActionOn->GetNodePath());
     if (!(UseActionPoints(AP_COST_USE)))
       return ;
@@ -727,26 +729,81 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
 
 void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* item)
 {
-  std::string output;
-  
-  if (user == target && target == GetPlayer())
+  if (!(user->pendingAnimationDone))
   {
-    ConsoleWrite("Stop hitting yourself !");
-    return ;
-  }
-  
-  user->LookAt(target);
+    if (user == target && target == GetPlayer())
+    {
+      ConsoleWrite("Stop hitting yourself !");
+      return ;
+    }
 
-  if (target->GetDistance(user) > (float)((*item)["range"]))
-    output = ("Out of range");
-  else if (!(user->HasLineOfSight(target)))
-    output = ("No line of sight");
+    user->LookAt(target);
+
+    if (target->GetDistance(user) > (float)((*item)["range"]))
+      ConsoleWrite("Out of range");
+    else if (!(user->HasLineOfSight(target)))
+      ConsoleWrite("No line of sight");
+    else
+    {
+      unsigned int equipedIt = 0;
+
+      user->pendingActionObject = item;
+      user->pendingActionOn     = target;
+      user->AnimationEnded.DisconnectAll();
+      user->AnimationEnded.Connect(*this, &Level::PendingActionUseWeaponOn);
+      if (user->GetEquipedItem(0))
+	equipedIt = 0;
+      else if (user->GetEquipedItem(1))
+	equipedIt = 1;
+      user->PlayEquipedItemAnimation(equipedIt, "attack");
+    }
+  }
   else
   {
+    string output;
+    
     output = (item->UseAsWeapon(user, target));
     MouseRightClicked();
+    ConsoleWrite(output);
   }
-  ConsoleWrite(output);
+}
+
+void Level::PendingActionUseWeaponOn(InstanceDynamicObject* fromObject)
+{
+  std::cout << "PendingActionUseWeaponOn" << std::endl;
+  ActionUseWeaponOn(fromObject->Get<ObjectCharacter>(),
+		    fromObject->pendingActionOn->Get<ObjectCharacter>(),
+		    fromObject->pendingActionObject);
+}
+
+void Level::PlayerEquipObject(unsigned short it, InventoryObject* object)
+{
+  bool canWeildMouth        = object->CanWeild(GetPlayer(), EquipedMouth);
+  bool canWeildMagic        = object->CanWeild(GetPlayer(), EquipedMagic);
+  bool canWeildBattleSaddle = object->CanWeild(GetPlayer(), EquipedBattleSaddle);
+  int  canWeildTotal        = (canWeildMouth ? 1 : 0) + (canWeildMagic ? 1 : 0) + (canWeildBattleSaddle ? 1 : 0);
+
+  if (canWeildTotal >= 2)
+  {
+    UiEquipMode* ui = new UiEquipMode(_window, _gameUi.GetContext(), it, object);
+
+    if (_currentUis[UiItEquipMode])
+      delete _currentUis[UiItEquipMode];
+    _currentUis[UiItEquipMode] = ui;
+    ui->Closed.Connect(*this, &Level::CloseRunningUi<UiItEquipMode>);
+    ui->EquipModeSelected.Connect(*GetPlayer(), &ObjectCharacter::SetEquipedItem);
+
+    if (!canWeildMouth)        ui->DisableMode(EquipedMouth);
+    if (!canWeildMagic)        ui->DisableMode(EquipedMagic);
+    if (!canWeildBattleSaddle) ui->DisableMode(EquipedBattleSaddle);
+  }
+  else if (canWeildTotal)
+  {
+    GetPlayer()->SetEquipedItem(it, object, (canWeildMouth ? EquipedMouth :
+                                            (canWeildMagic ? EquipedMagic : EquipedBattleSaddle)));
+  }
+  else
+    ConsoleWrite("You can't equip " + object->GetName());
 }
 
 void Level::PlayerDropObject(InventoryObject* object)

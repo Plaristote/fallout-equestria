@@ -1,4 +1,4 @@
-  #ifndef  OBJECT_NODE_HPP
+#ifndef  OBJECT_NODE_HPP
 # define OBJECT_NODE_HPP
 
 # include <panda3d/pandaFramework.h>
@@ -9,6 +9,8 @@
 # include "observatory.hpp"
 # include "world.h"
 # include "inventory.hpp"
+
+# include "animatedobject.hpp"
 
 //HAIL MICROSOFT
 #ifdef WIN32
@@ -50,15 +52,18 @@ private:
   WithdrawedArcs                          _withdrawedArcs;
 };
 
-enum ObjectType
+namespace ObjectTypes
 {
-  Character, Door, Shelf, Locker, Item, Other
-};
+  enum ObjectType
+  {
+    Character, Door, Shelf, Locker, Item, Other
+  };
+}
 
 template<class C>
-struct ObjectType2Code { enum { Type = ObjectType::Other }; };
+struct ObjectType2Code { enum { Type = ObjectTypes::ObjectType::Other }; };
 
-class InstanceDynamicObject : public WaypointModifier
+class InstanceDynamicObject : public WaypointModifier, public AnimatedObject
 {
 public:
   static Observatory::Signal<void (InstanceDynamicObject*)> ActionUse;
@@ -110,37 +115,31 @@ public:
     return (0);
   }
 
-  bool                     pendingAnimationDone;
   InstanceDynamicObject*   pendingActionOn;
   InventoryObject*         pendingActionObject;
+  
+  Observatory::Signal<void (InstanceDynamicObject*)> AnimationEnded;
 
   virtual void             CallbackActionUse(InstanceDynamicObject* object) { ThatDoesNothing(); }
   
-  void                     PlayAnimation(const std::string& name, bool loop = false);
-  Observatory::Signal<void (InstanceDynamicObject*)> AnimationEnded;
+  void                     ResetAnimation(void)
+  {
+    std::cout << "ResetAnimation. Observers: " << AnimationEnded.ObserverCount() << std::endl;
+    AnimationEnded.DisconnectAll();
+  }
 
 protected:
   unsigned char            _type;
   DynamicObject*           _object;
-  
+
   // Interactions
   void                     ResetInteractions(void) { _interactions.clear(); }
   void                     ThatDoesNothing();
 
   InteractionList          _interactions;
 
-  // Animations
-  typedef std::map<std::string, AnimControl*> MapAnims;
-
-  void                     LoadAnimation(const std::string& name);
-  void                     TaskAnimation(void);
-  void                     PlayIdleAnimation(InstanceDynamicObject*);
-  
-  std::string               _modelName;
-  AnimControlCollection     _anims;
-  MapAnims                  _mapAnims;
-  AnimControl*              _anim;
-  bool                      _animLoop;
+private:
+  void CallbackAnimationEnded(void) { std::cout << "CallbackAnimationEnded. Observers: " << AnimationEnded.ObserverCount() << std::endl; AnimationEnded.Emit(this); }
 };
 
 

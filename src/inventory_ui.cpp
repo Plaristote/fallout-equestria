@@ -273,13 +273,94 @@ void UiLoot::RocketTakeAllClicked(Rocket::Core::Event&)
       _looted.DelObject(object);
     }
   }
-//   std::for_each(_looted.GetContent().begin(), _looted.GetContent().end(), [this](InventoryObject* object)
-//   {
-//     if (_looter.CanCarry(object))
-//     {
-//       _looter.AddObject(object);
-//       _looted.DelObject(object);
-//     }
-//   });
   _viewController.Update();
 }
+
+/*
+ * Dialog Equip Mode
+ */
+UiEquipMode::UiEquipMode(WindowFramework* window, Rocket::Core::Context* context, unsigned short it, InventoryObject* object)
+  : UiBase(window), _it(it), _object(*object)
+{
+  _root = context->LoadDocument("data/dialog_equiped_mode.rml");
+  if (_root)
+  {
+    Rocket::Core::Element* eDialog       = _root->GetElementById("dialog-actions");
+    Rocket::Core::Element* eMouth        = _root->GetElementById("mode_mouth");
+    Rocket::Core::Element* eMagic        = _root->GetElementById("mode_magic");
+    Rocket::Core::Element* eBattleSaddle = _root->GetElementById("mode_battlesaddle");
+    Rocket::Core::Element* eCancel       = _root->GetElementById("cancel");
+
+    if (eDialog)
+    {
+      if (eMouth)
+      {
+	if (_object["mode-mouth"].Value() != "1")
+	  eDialog->RemoveChild(eMouth);
+	else
+	  eMouth->AddEventListener("click", &MouthClicked);
+      }
+      if (eMagic)
+      {
+	if (_object["mode-magic"].Value() != "1")
+	  eDialog->RemoveChild(eMagic);
+	else
+	  eMagic->AddEventListener("click", &MagicClicked);
+      }
+      if (eBattleSaddle)
+      {
+	if (_object["mode-battlesaddle"].Value() != "1")
+	  eDialog->RemoveChild(eBattleSaddle);
+	else
+	  eBattleSaddle->AddEventListener("click", &BattleSaddleClicked);
+      }
+    }
+    if (eCancel)
+    {
+      eCancel->AddEventListener("click", &CancelClicked);
+    }
+    
+    MouthClicked.EventReceived.Connect(*this, &UiEquipMode::CallbackButton<EquipedMouth>);
+    MagicClicked.EventReceived.Connect(*this, &UiEquipMode::CallbackButton<EquipedMagic>);
+    BattleSaddleClicked.EventReceived.Connect(*this, &UiEquipMode::CallbackButton<EquipedBattleSaddle>);
+    CancelClicked.EventReceived.Connect(*this, &UiEquipMode::CallbackCancel);
+    
+    _root->Show();
+  }
+}
+
+void UiEquipMode::DisableMode(EquipedMode mode)
+{
+  Rocket::Core::Element* eDialog = _root->GetElementById("dialog-actions");
+  Rocket::Core::Element* element;
+  
+  if (!eDialog)
+    return ;
+  switch (mode)
+  {
+    case EquipedMouth:
+      element = _root->GetElementById("mode-mouth");
+      break ;
+    case EquipedMagic:
+      element = _root->GetElementById("mode-magic");
+      break ;
+    case EquipedBattleSaddle:
+      element = _root->GetElementById("mode-battlesaddle");
+      break ;
+  }
+  if (element)
+    eDialog->RemoveChild(element);
+}
+
+UiEquipMode::~UiEquipMode()
+{
+  if (_root)
+    _root->RemoveReference();
+}
+
+void UiEquipMode::Destroy(void)
+{
+  if (_root)
+    _root->Hide();
+}
+

@@ -17,20 +17,28 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
   (*this)["range"]    = data["range"].Value();
   (*this)["interactions"]["use"] = "1";
 
+  (*this)["mode-mouth"]        = (data["mode-mouth"].Nil())        ? "1" : data["mode-mouth"].Value();
+  (*this)["mode-magic"]        = (data["mode-magic"].Nil())        ? "1" : data["mode-magic"].Value();
+  (*this)["mode-battlesaddle"] = (data["mode-battlesaddle"].Nil()) ? "1" : data["mode-battlesaddle"].Value();
+
   _equiped = false;
 
   _scriptContext = Script::Engine::Get()->CreateContext();
   _scriptModule  = 0;
   _hookUseOnCharacter = _hookUseOnDoor = _hookUseOnOthers = 0;
+  _hookCanWeildBattleSaddle = _hookCanWeildMagic = _hookCanWeildMouth = 0;
   
   Data script = data["script"];
 
   if (!(script.Nil()) && _scriptContext)
   {
-    Data hookCharacter = script["hookCharacters"];
-    Data hookDoor      = script["hookDoors"];
-    Data hookOthers    = script["hookOthers"];
-    Data hookWeapon    = script["hookWeapon"];
+    Data hookCharacter  = script["hookCharacters"];
+    Data hookDoor       = script["hookDoors"];
+    Data hookOthers     = script["hookOthers"];
+    Data hookWeapon     = script["hookWeapon"];
+    Data hookWeildMouth = script["hookWeildMouth"];
+    Data hookWeildMagic = script["hookWeildMagic"];
+    Data hookWeildBS    = script["hookWeildBattleSaddle"];
 
     _scriptModule       = Script::ModuleManager::Require("item" + data.Key(), "scripts/objects/" + script["file"].Value());
     if (_scriptModule)
@@ -59,6 +67,24 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
 	
 	_hookUseAsWeapon    = _scriptModule->GetFunctionByDecl(decl.c_str());
       }
+      if (!(hookWeildMouth.Nil()))
+      {
+	std::string decl = "bool " + hookWeildMouth.Value() + "(Item@, Character@)";
+	
+	_hookCanWeildMouth  = _scriptModule->GetFunctionByDecl(decl.c_str());
+      }
+      if (!(hookWeildMagic.Nil()))
+      {
+	std::string decl = "bool " + hookWeildMagic.Value() + "(Item@, Character@)";
+	
+	_hookCanWeildMagic  = _scriptModule->GetFunctionByDecl(decl.c_str());
+      }
+      if (!(hookWeildBS.Nil()))
+      {
+	std::string decl = "bool " + hookWeildBS.Value() + "(Item@, Character@)";
+	
+	_hookCanWeildBattleSaddle  = _scriptModule->GetFunctionByDecl(decl.c_str());
+      }
     }
   }
 }
@@ -68,6 +94,97 @@ InventoryObject::~InventoryObject()
   Script::ModuleManager::Release(_scriptModule);
   if (_scriptContext)
     _scriptContext->Release();
+}
+
+bool InventoryObject::CanWeild(ObjectCharacter* character, EquipedMode mode)
+{
+  std::string        modeStr;
+  asIScriptFunction* hook = 0;
+  
+  switch (mode)
+  {
+    case EquipedMouth:
+      modeStr = "mode-mouth";
+      hook    = _hookCanWeildMouth;
+      break ;
+    case EquipedMagic:
+      modeStr = "mode-magic";
+      hook    = _hookCanWeildMagic;
+      break ;
+    case EquipedBattleSaddle:
+      modeStr = "mode-battlesaddle";
+      hook    = _hookCanWeildBattleSaddle;
+      break ;
+  }
+  if (_scriptContext && hook)
+  {
+    _scriptContext->Prepare(hook);
+    _scriptContext->SetArgObject(0, this);
+    _scriptContext->SetArgObject(1, character);
+    _scriptContext->Execute();
+    return (_scriptContext->GetReturnByte());
+  }
+  return ((*this)[modeStr].Value() == "1");
+}
+
+InventoryObject::EquipedModel* InventoryObject::CreateEquipedModel(World* world)
+{
+  if ((*this)["model"].Value() != "")
+  {
+    EquipedModel* equipedModel = new EquipedModel(world->window, this);
+
+    return (equipedModel);
+  }
+  return (0);
+}
+
+InventoryObject::EquipedModel::EquipedModel(WindowFramework* window, InventoryObject* p) : AnimatedObject(window), object(*p)
+{
+  Data        anims   = object["animations"];
+  std::string texture = object["texture"].Value();
+  Texture*    texfile;
+
+  _modelName   = object["model"].Value();
+  for (short i = 0 ; i < _modelName.size() ; ++i)
+  {
+    if (_modelName[i] == '/' || _modelName[i] == '\\')
+    {
+      _modelName.erase(0, i);
+      i = 0;
+    }
+  }
+  for (short i = _modelName.size() - 1 ; i >= 0 ; --i)
+  {
+    if (_modelName[i] == '.')
+    {
+      _modelName.erase(i);
+      break ;
+    }
+  }
+  _modelName   = "items/" + _modelName;
+
+  np = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + object["model"].Value());
+  if (texture != "")
+  {
+    texfile    = TexturePool::load_texture(TEXT_ROOT + texture);
+    if (texfile)
+      np.set_texture(texfile);
+  }
+  if (!(anims.Nil()))
+  {
+    std::for_each(anims.begin(), anims.end(), [this](Data animation)
+    {
+      if (animation.Key() == "player")
+	return ;
+      LoadAnimation(animation.Value());
+    });
+  }
+  np.set_name("Equiped" + object.GetName());
+}
+
+InventoryObject::EquipedModel::~EquipedModel()
+{
+  np.detach_node();
 }
 
 DynamicObject* InventoryObject::CreateDynamicObject(World* world) const
@@ -112,6 +229,10 @@ const std::string InventoryObject::ExecuteHook(asIScriptFunction* hook, ObjectCh
   _scriptContext->Execute();
   return (*(reinterpret_cast<std::string*>(_scriptContext->GetReturnObject())));
 }
+
+/*
+ * Inventory
+ */
 
 void Inventory::AddObject(InventoryObject* toAdd)
 {

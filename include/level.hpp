@@ -80,14 +80,17 @@ public:
   void                   PendingActionTalkTo(InstanceDynamicObject* fromObject);
   void                   PendingActionUse(InstanceDynamicObject* fromObject);
   void                   PendingActionUseObjectOn(InstanceDynamicObject* fromObject);
+  void                   PendingActionUseWeaponOn(InstanceDynamicObject* fromObject);
 
   // Interace Interactions
   void                   PlayerDropObject(InventoryObject*);
   void                   PlayerUseObject(InventoryObject*);
   void                   PlayerLoot(Inventory*);
 
+  void                   PlayerEquipObject(unsigned short it, InventoryObject* object);
+
   Observatory::Signal<void (Inventory&)> SignalShelfOpened;
-  
+
   // Fight Management
   void                   StartFight(ObjectCharacter* starter);
   void                   StopFight(void);
@@ -138,6 +141,7 @@ private:
     UiItRunningDialog,
     UiItUseObjectOn,
     UiItLoot,
+    UiItEquipMode,
     UiTotalIt
   };
   
