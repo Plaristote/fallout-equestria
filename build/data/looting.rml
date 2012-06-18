@@ -26,7 +26,7 @@
         position: absolute;
         drag:  clone;
         width: 40%;
-        left:  0px;
+        left:  20px;
         height: 80%;
         overflow-y: scroll;
       }
@@ -36,7 +36,7 @@
         position: absolute;
         drag:  clone;
         width: 40%;
-        right: 0px;
+        right: 20px;
         height: 80%;
         overflow-y: scroll;
       }
@@ -52,9 +52,9 @@
   <body id="body" template="tplmainbar">
   <p>
     <div id="inventory-items">
-      <p id="self-inventory">
+      <p id="self-inventory"  class="window-inventory">
       </p>
-      <p id="other-inventory">
+      <p id="other-inventory" class="window-inventory">
       </p>
     </div>
     <div id="buttons">

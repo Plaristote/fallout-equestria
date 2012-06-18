@@ -10,7 +10,7 @@
 # include <panda3d/collisionSphere.h>
 # include <panda3d/collisionTraverser.h>
 # include <panda3d/collisionHandlerQueue.h>
-
+# include <panda3d/character.h>
 # include <panda3d/pointLight.h>
 
 class ObjectCharacter : public InstanceDynamicObject
@@ -132,9 +132,17 @@ private:
   
   void                CallbackActionUse(InstanceDynamicObject* object);
 
+  PT(Character)             _character;
   std::list<Waypoint>       _path;
   GoToData                  _goToData;
+
+  DataTree*                 _statistics;
+  Diplomacy                 _diplomacy;
+  unsigned short            _actionPoints;
+  short                     _hitPoints, _armorClass, _tmpArmorClass;
   
+
+  // Inventory and Equiped Items
   struct ItemEquiped
   {
     ItemEquiped(void) : equiped(0), default_(0), graphics(0) {}
@@ -142,15 +150,11 @@ private:
     InventoryObject*               equiped;
     InventoryObject*               default_;
     InventoryObject::EquipedModel* graphics;
+    NodePath                       jointHorn, jointBattleSaddle, jointMouth;
   };
 
   Inventory                 _inventory;
   ItemEquiped               _equiped[2];
-  DataTree*                 _statistics;
-  Diplomacy                 _diplomacy;
-
-  unsigned short            _actionPoints;
-  short                     _hitPoints, _armorClass, _tmpArmorClass;
 
   // Line of Sight Tools
   NodePath                  _losPath;

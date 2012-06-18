@@ -13,6 +13,45 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 {
   Data   items = _level->GetItems();  
   string defEquiped[2];
+  
+  NodePath bodyNP = object->nodePath.find("**/+Character");
+  _character      = dynamic_cast<Character*>(bodyNP.node());
+
+  CharacterJoint* joint = _character->find_joint("Horn");
+
+  PT(CharacterJointBundle) bodyBundle = _character->get_bundle(0);
+
+  vector<string> listJoints = { "Horn", "Mouth", "BattleSaddle" };
+  
+  for_each(listJoints.begin(), listJoints.end(), [this, bodyNP, bodyBundle](string name)
+  {
+    for (unsigned short it = 0 ; it < 2 ; ++it)
+    {
+      stringstream       jointName;
+      stringstream       npName;
+      PT(CharacterJoint) joint;
+      NodePath           tmp;
+
+      jointName << "attach_"  << name << "_" << (it + 1);
+      npName    << "equiped_" << name << "_" << (it + 1);
+      joint     = _character->find_joint(jointName.str());
+
+      if (joint)
+      {
+        tmp     = bodyNP.attach_new_node(npName.str());
+        bodyBundle->control_joint(jointName.str(), tmp.node());
+
+        if (name == "Horn")
+          _equiped[it].jointHorn         = tmp;
+        else if (name == "Mouth")
+          _equiped[it].jointMouth        = tmp;
+        else
+          _equiped[it].jointBattleSaddle = tmp;
+      }
+      else
+	cout << "/!\\ Joint " << jointName.str() << " doesn't exist for Character " << _object->nodePath.get_name() << endl;
+    }
+  });
 
   _type         = ObjectTypes::Character;
   _actionPoints = 0;
@@ -67,6 +106,8 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
     _armorClass = stats["Statistics"]["Armor Class"].Nil() ? 5  : (int)(stats["Statistics"]["Armor Class"]);
     _hitPoints  = stats["Statistics"]["Hit Points"].Nil()  ? 15 : (int)(stats["Statistics"]["Hit Points"]);
   }
+  else
+    _inventory.SetCapacity(275);
   
   // Script
   _scriptContext = 0;
@@ -108,7 +149,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 
   // Equiped Items
   defEquiped[0] = DEFAULT_WEAPON_1;
-  defEquiped[1] = DEFAULT_WEAPON_2;  
+  defEquiped[1] = DEFAULT_WEAPON_2;
   
   for (int i = 0 ; i < 2 ; ++i)
   {
@@ -147,7 +188,7 @@ InventoryObject* ObjectCharacter::GetEquipedItem(unsigned short it)
 {
   return (_equiped[it].equiped);
 }
-#include <panda3d/character.h>
+
 void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, EquipedMode mode)
 {
   if (_equiped[it].graphics)
@@ -159,31 +200,21 @@ void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, E
   _equiped[it].graphics = item->CreateEquipedModel(_level->GetWorld());
   if (_equiped[it].graphics)
   {
-//     AnimControl* control = _anims.get_anim(0);
-//     
-//     PartGroup*  group      = control->get_part()->find_child("Horn");
-// 
-//     if (group)
-//       std::cout << "Success" << std::endl;
-//     else
-//       std::cout << "Failure" << std::endl;
-// 
-//     LMatrix4f matrix = control->get_part()->get_root_xform();
-//     
-//     PT(PartBundleNode) bundleNode = new PartBundleNode("hornNode", control->get_part());
-//     NodePath           npjoint(bundleNode);
-// 
-// //     _object->nodePath.get_child(0).get_child(0).ls();
-// //     NodePath npjoint = _object->nodePath.find("Main");
-    
-//     npjoint.reparent_to(_object->nodePath);
-// 
-//     if (npjoint.get_error_type() == NodePath::ET_ok)
-//     {
-//       _equipedNp[it]->np.reparent_to(npjoint);
-//     }
-//     else
-//       std::cout << "Failed to connect item to joint" << std::endl;
+    NodePath itemParentNode;
+
+    switch (mode)
+    {
+      case EquipedMouth:
+	itemParentNode = _equiped[it].jointMouth;
+	break ;
+      case EquipedMagic:
+	itemParentNode = _equiped[it].jointHorn;
+	break ;
+      case EquipedBattleSaddle:
+	itemParentNode = _equiped[it].jointBattleSaddle;
+	break ;
+    }
+    _equiped[it].graphics->GetNodePath().reparent_to(itemParentNode);
   }
   
   item->SetEquiped(true);
@@ -198,6 +229,7 @@ void ObjectCharacter::UnequipItem(unsigned short it)
 
 void ObjectCharacter::RestartActionPoints(void)
 {
+  _path.clear();
   if (_statistics)
   {
     Data stats(_statistics);

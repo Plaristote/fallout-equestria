@@ -82,6 +82,20 @@ div#window
 	background-center-image: invader.tga stretch 11px 139px 12px 140px;
 }
 
+.window-inventory
+{
+	background-decorator: tiled-box;
+	background-top-left-image:     invader.tga         0px   275px 10px  300px;
+	background-top-right-image:    invader.tga         130px 275px 140px 300px;
+	background-top-image:          invader.tga         10px  275px 130px 300px;
+	background-bottom-left-image:  invader.tga         0px   410px 10px  420px;
+	background-bottom-right-image: invader.tga         130px 410px 140px 420px;
+	background-bottom-image:       invader.tga         10px  410px 130px 420px;
+	background-left-image:         invader.tga         0px   300px 10px  410px;
+	background-right-image:        invater.tga         130px 300px 140px 410px;
+	background-center-image:       invader.tga stretch 10px  410px 130px 410px;
+}
+
 div#content
 {
 	z-index: 2;

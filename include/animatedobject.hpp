@@ -35,6 +35,8 @@ protected:
   MapAnims                  _mapAnims;
   AnimControl*              _anim;
   bool                      _animLoop;  
+  
+  bool                      _idleSemaphore;
 };
 
 #endif

@@ -293,6 +293,7 @@ void Level::NextTurn(void)
   if (_state != Fight)
     return ;
   std::cout << "Next Turn" << std::endl;
+  (*_itCharacter)->PlayAnimation("idle");
   if ((++_itCharacter) == _characters.end())
   {
     _itCharacter = _characters.begin();
@@ -567,6 +568,8 @@ void Level::CallbackActionUse(InstanceDynamicObject* object)
 void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 {
   CloseInteractMenu();
+  if (GetState() == Fight)
+    return ;
   if ((GetPlayer()->HasLineOfSight(object)) && GetPlayer()->GetPathDistance(object) <= 3)
   {
     string dialog = object->GetDialog();

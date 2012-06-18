@@ -49,10 +49,8 @@
 	</head>
   <body id="body" template="tplmainbar">
   <p>
-    <div id="inventory-items">
-      <div id="body-inventory-items">
-        <img src="../textures/itemIcons/key.png" class='inventory-item' />
-      </div>
+    <div id="body-inventory-items" class="window-inventory">
+      <img src="../textures/itemIcons/key.png" class='inventory-item' />
     </div>
   </p>
   <p id="item-description">

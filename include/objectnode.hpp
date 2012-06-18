@@ -124,7 +124,6 @@ public:
   
   void                     ResetAnimation(void)
   {
-    std::cout << "ResetAnimation. Observers: " << AnimationEnded.ObserverCount() << std::endl;
     AnimationEnded.DisconnectAll();
   }
 
@@ -139,7 +138,7 @@ protected:
   InteractionList          _interactions;
 
 private:
-  void CallbackAnimationEnded(void) { std::cout << "CallbackAnimationEnded. Observers: " << AnimationEnded.ObserverCount() << std::endl; AnimationEnded.Emit(this); }
+  void CallbackAnimationEnded(void) { AnimationEnded.Emit(this); }
 };
 
 

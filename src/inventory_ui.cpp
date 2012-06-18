@@ -82,7 +82,6 @@ InventoryObject* InventoryView::GetObjectFromId(const std::string& id)
 
 void InventoryView::ProcessEvent(Rocket::Core::Event& event)
 {
-  std::cout << "PROCESS EVENT" << std::endl;
   if (event == "dragdrop")
   {
     Rocket::Core::Element* drag_element   = static_cast<Rocket::Core::Element*>(event.GetParameter< void* >("drag_element", NULL));
@@ -260,9 +259,8 @@ void UiLoot::SwapObjects(InventoryObject* object)
 void UiLoot::RocketTakeAllClicked(Rocket::Core::Event&)
 {
   Inventory::Content::iterator it  = _looted.GetContent().begin();
-  Inventory::Content::iterator end = _looted.GetContent().end();
 
-  for (; it != end ; ++it)
+  while (it != _looted.GetContent().end())
   {
     InventoryObject* object = *it;
     bool             hidden = (*object)["hidden"] == "1";
@@ -271,7 +269,10 @@ void UiLoot::RocketTakeAllClicked(Rocket::Core::Event&)
     {
       _looter.AddObject(object);
       _looted.DelObject(object);
+      it = _looted.GetContent().begin();
     }
+    else
+      ++it;
   }
   _viewController.Update();
 }

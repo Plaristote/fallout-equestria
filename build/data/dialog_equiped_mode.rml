@@ -1,0 +1,23 @@
+<rml>
+	<head>
+		<title>Iventory</title>
+		<link type="text/template" href="tpl_mainbar.rml" />
+		<style>
+	        #body
+		{
+		  width:  600px;
+		  height: 100px;
+                  margin: auto;
+		}
+		</style>
+	</head>
+  <body id="body" template="tplmainbar">
+  <div id="dialog-actions">
+    <button id="mode_mouth"        class="button_menu">Mouth</button>
+    <button id="mode_magic"        class="button_menu">Magic</button>
+    <button id="mode_battlesaddle" class="button_menu">BattleSaddle</button>
+    <br />
+    <button id="cancel" class="button_menu">Cancel</button>
+  </div>
+  </body>
+</rml>
