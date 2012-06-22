@@ -9,6 +9,86 @@
 
 using namespace std;
 
+CharacterBuff::CharacterBuff(Level* level, ObjectCharacter* character, Data buff)
+  : _timeManager(level->GetTimeManager()), _character(character)
+{
+  Data dataGraphics = buff["graphics"];
+  
+  _name     = buff.Key();
+  _duration = buff["duration"];
+  _begin    = _end = 0;
+  _module   = 0;
+  _task     = 0;
+  _context  = Script::Engine::Get()->CreateContext();
+  if (_context)
+  {
+    Data scriptName = buff["script"]["source"];
+
+    if (!(scriptName.Nil()))
+    {
+      _module  = Script::ModuleManager::Require(scriptName.Value(), "scripts/buffs/" + scriptName.Value());
+      if (_module)
+      {
+	Data   scriptBegin = buff["script"]["hookBegin"];
+	Data   scriptEnd   = buff["script"]["hookEnd"];
+	string declBegin   = "bool " + scriptBegin.Value() + "(Character@, Character@)";
+	string declEnd     = "void " + scriptEnd.Value()   + "(Character@)";
+
+	_begin = _module->GetFunctionByDecl(declBegin.c_str());
+	_end   = _module->GetFunctionByDecl(declEnd.c_str());
+      }
+    }
+  }
+  if (!(dataGraphics.Nil()))
+  {
+    WindowFramework* window = level->GetWorld()->window;
+    
+    _graphicalEffect = window->load_model(window->get_panda_framework()->get_models(), "models/" + dataGraphics["model"].Value());
+    if (!(dataGraphics["scale"].Nil()))
+      _graphicalEffect.set_scale((float)dataGraphics["scale"]);
+  }
+}
+
+void CharacterBuff::Begin(ObjectCharacter* from)
+{
+  if (_begin)
+  {
+    TimeManager::Task* task;
+
+    _context->Prepare(_begin);
+    _context->SetArgAddress(0, _character);
+    _context->SetArgAddress(1, from);
+    _context->Execute();
+    task = _timeManager.AddTask(false, _duration);
+    task->Interval.Connect(*this, &CharacterBuff::End);
+    
+    if (_graphicalEffect.node())
+      _graphicalEffect.reparent_to(_character->GetNodePath());
+  }
+}
+
+void CharacterBuff::End(void)
+{
+  if (_end)
+  {
+    _context->Prepare(_end);
+    _context->SetArgAddress(0, _character);
+    _context->Execute();
+
+    if (_graphicalEffect.node())
+      _graphicalEffect.remove_node();
+  }
+}
+
+void ObjectCharacter::PushBuff(Data data, ObjectCharacter* caster)
+{
+  CharacterBuff* buff = new CharacterBuff(_level, this, data);
+
+  buff->Begin(caster);
+}
+
+using namespace std;
+
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
 {
   Data   items = _level->GetItems();  
@@ -114,6 +194,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _scriptModule  = 0;
   _scriptMain    = 0;
   _scriptFight   = 0;
+  _scriptRequestAttack = _scriptRequestFollow = _scriptRequestHeal = _scriptRequestStopFollowing = _scriptSendMessage = _scriptAskMorale = 0;
   if (object->script != "")
   {
     string prefixName = "IA_";
@@ -128,6 +209,14 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 	// Get the running functions
         _scriptMain    = _scriptModule->GetFunctionByDecl("void main(Character@, float)");
 	_scriptFight   = _scriptModule->GetFunctionByDecl("void combat(Character@)");
+	
+	// Get the communication functions
+	_scriptRequestStopFollowing = _scriptModule->GetFunctionByDecl("void RequestStopFollowing(Character@, Character@)");
+	_scriptRequestFollow        = _scriptModule->GetFunctionByDecl("void RequestFollow(Character@, Character@)");
+	_scriptRequestAttack        = _scriptModule->GetFunctionByDecl("void RequestAttack(Character@, Character@)");
+	_scriptRequestHeal          = _scriptModule->GetFunctionByDecl("void RequestHeal(Character@, Character@)");
+	_scriptAskMorale            = _scriptModule->GetFunctionByDecl("int  AskMorale()");
+	_scriptSendMessage          = _scriptModule->GetFunctionByDecl("void ReceiveMessage(string)");
 
 	// Get Default Weapons from script
 	asIScriptFunction* funcGetDefWeapon[2];
@@ -593,9 +682,7 @@ void                ObjectCharacter::LookAt(InstanceDynamicObject* object)
 {
   LVecBase3 pos = object->GetNodePath().get_pos();
 
-  pos.set_z(_object->nodePath.get_pos().get_z());
-  _object->nodePath.look_at(pos);
-  //LookAt(pos);
+  LookAt(pos);
 }
 
 
@@ -717,6 +804,63 @@ void     ObjectCharacter::CheckFieldOfView(void)
   if (_fovEnemies.size() > 0 && _level->GetState() != Level::Fight)
     _level->StartFight(this);
   timer.Profile("Field of view");
+}
+
+/*
+ * Script Communication
+ */
+void     ObjectCharacter::SendMessage(const string& str)
+{
+  if (_scriptSendMessage)
+  {
+    string cpy = str;
+
+    _scriptContext->Prepare(_scriptSendMessage);
+    _scriptContext->SetArgObject(0, &cpy);
+    _scriptContext->Execute();
+  }
+}
+
+int      ObjectCharacter::AskMorale(void)
+{
+  if (_scriptAskMorale)
+  {
+    _scriptContext->Prepare(_scriptAskMorale);
+    _scriptContext->Execute();
+    return (_scriptContext->GetReturnByte());
+  }
+  return (0);
+}
+
+void     ObjectCharacter::RequestAttack(ObjectCharacter* f, ObjectCharacter* s)
+{
+  RequestCharacter(f, s, _scriptRequestAttack);
+}
+
+void     ObjectCharacter::RequestHeal(ObjectCharacter* f, ObjectCharacter* s)
+{
+  RequestCharacter(f, s, _scriptRequestHeal);
+}
+
+void     ObjectCharacter::RequestFollow(ObjectCharacter* f, ObjectCharacter* s)
+{
+  RequestCharacter(f, s, _scriptRequestFollow);
+}
+
+void     ObjectCharacter::RequestStopFollowing(ObjectCharacter* f, ObjectCharacter* s)
+{
+  RequestCharacter(f, s, _scriptRequestStopFollowing);
+}
+
+void     ObjectCharacter::RequestCharacter(ObjectCharacter* f, ObjectCharacter* s, asIScriptFunction* func)
+{
+  if (func)
+  {
+    _scriptContext->Prepare(func);
+    _scriptContext->SetArgObject(0, f);
+    _scriptContext->SetArgObject(1, s);
+    _scriptContext->Execute();
+  }
 }
 
 /*

@@ -17,6 +17,8 @@ body
   height: 110px;
   //overflow-y: scroll;
   margin-top: 5px;
+  font-family: JH_Fallout;
+  font-size:   8px;
 }
 
 #console

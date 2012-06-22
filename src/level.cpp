@@ -18,9 +18,10 @@ Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::Action
 
 Level* Level::CurrentLevel = 0;
 
-Level::Level(WindowFramework* window, const std::string& filename) : _window(window), _mouse(window),
+Level::Level(WindowFramework* window, AsyncTask& task, Utils::Packet& packet) : _window(window), _asyncTask(task), _mouse(window),
   _camera(window, window->get_camera_group()), _gameUi(window)
 {
+  AsyncTaskManager::get_global_ptr()->add(&_asyncTask);  
   CurrentLevel = this;
   _state       = Normal;
   
@@ -43,7 +44,6 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   _mouseActionBlocked   = false;
 
   _graphicWindow = _window->get_graphics_window();
-  AsyncTaskManager::get_global_ptr()->add(this);
 
   _sunLight = new DirectionalLight("sun_light");
 
@@ -62,42 +62,14 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   
   // WORLD LOADING
   _world = new World(window);  
-  std::ifstream file;
-  std::string   fullpath = "maps/" + filename + ".blob";
-
-  file.open(fullpath.c_str(), ios::binary);
-  if (file.is_open())
+  try
   {
-    try
-    {
-      Utils::Packet* packet;
-      long           begin, end;
-      long           size;
-      char*          raw;
-
-      begin     = file.tellg();
-      file.seekg(0, std::ios::end);
-      end       = file.tellg();
-      file.seekg(0, std::ios::beg);
-      size      = end - begin;
-      raw       = new char[size + 1];
-      file.read(raw, size);
-      file.close();
-      raw[size] = 0;
-
-      packet = new Utils::Packet(raw, size);
-      _world->UnSerialize(*packet);
-
-      delete   packet;
-      delete[] raw;
-    }
-    catch (unsigned int error)
-    {
-      std::cout << "Failed to load file" << std::endl;
-    }
+    _world->UnSerialize(packet);
   }
-  else
-    std::cout << "Blob file not found" << std::endl;
+  catch (unsigned int error)
+  {
+    std::cout << "Failed to load file" << std::endl;
+  }
 
   World::DynamicObjects::iterator it  = _world->dynamicObjects.begin();
   World::DynamicObjects::iterator end = _world->dynamicObjects.end();
@@ -175,7 +147,7 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
 
 Level::~Level()
 {
-  AsyncTaskManager::get_global_ptr()->remove(this);
+  AsyncTaskManager::get_global_ptr()->remove(&_asyncTask);
   std::for_each(_objects.begin(), _objects.end(), [](InstanceDynamicObject* obj) { delete obj; });
   CurrentLevel = 0;
   for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
@@ -275,7 +247,7 @@ void Level::StopFight(void)
     
     for (; it != end ; ++it)
     {
-      list<ObjectCharacter::FovEnemy>& listEnemies = (*it)->GetNearbyEnemies();
+      list<ObjectCharacter::FovEnemy> listEnemies = (*it)->GetNearbyEnemies();
 
       if (listEnemies.size() > 0 && (*it)->IsAlive())
       {
@@ -308,7 +280,6 @@ void Level::RunDaylight(void)
   static unsigned char dayStep    = 1;
   static unsigned int  stepLength = 60;
 
-  std::cout << "RunDaylight" << std::endl;
   LVecBase4f           colorSteps[3];
 
   colorSteps[0] = LVecBase4f(0.2, 0.2, 0.2, 1);
@@ -335,28 +306,13 @@ void Level::RunDaylight(void)
 }
 
 AsyncTask::DoneStatus Level::do_task(void)
-{
-  // FPS COUNTER NO PSTAT
-  {
-    static Timer          timer;
-    static unsigned short fps = 0;
-
-    if (timer.GetElapsedTime() > 1.f)
-    {
-      cout << "[FPS] " << fps << endl;
-      fps = 0;
-      timer.Restart();
-      std::cout << _timeManager.GetHour() << ":" << _timeManager.GetMinute() << ":" << _timeManager.GetSecond() << std::endl;
-    }
-    fps++;
-  }
-  
+{ 
   float elapsedTime = _timer.GetElapsedTime();
-  
+
   _mouse.Run();
   _camera.Run(elapsedTime);
   _timeManager.ExecuteTasks();
-  
+
   switch (_state)
   {
     case Fight:
@@ -422,6 +378,18 @@ void                   Level::RemoveObject(InstanceDynamicObject* object)
     delete (*it);
     _objects.erase(it);
   }
+}
+
+void                   Level::UnprocessAllCollisions(void)
+{
+  ForEach(_objects,    [](InstanceDynamicObject* object) { object->UnprocessCollisions(); });
+  ForEach(_characters, [](ObjectCharacter*       object) { object->UnprocessCollisions(); });
+}
+
+void                   Level::ProcessAllCollisions(void)
+{
+  ForEach(_objects,    [](InstanceDynamicObject* object) { object->ProcessCollisions(); });
+  ForEach(_characters, [](ObjectCharacter*       object) { object->ProcessCollisions(); });
 }
 
 /*
@@ -682,7 +650,7 @@ void Level::PendingActionUseObjectOn(InstanceDynamicObject* object)
 
     if (!(dataUseCost.Nil()))
       useCost = dataUseCost;
-    object->GetNodePath().look_at(object->pendingActionOn->GetNodePath());
+    object->Get<ObjectCharacter>()->LookAt(object->pendingActionOn);
     if (UseActionPoints(useCost))
     {
       const string toOutput = item->UseOn(object->Get<ObjectCharacter>(), object->pendingActionOn);
@@ -705,7 +673,7 @@ void Level::PendingActionUse(InstanceDynamicObject* object)
   else
   {
     std::cout << "PendingAvtionUseAnimationDone" << std::endl;
-    object->GetNodePath().look_at(object->pendingActionOn->GetNodePath());
+    object->Get<ObjectCharacter>()->LookAt(object->pendingActionOn);
     if (!(UseActionPoints(AP_COST_USE)))
       return ;
     object->pendingActionOn->CallbackActionUse(object);

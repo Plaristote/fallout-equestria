@@ -26,13 +26,18 @@
 
 # include "world.h"
 
-class Level : public AsyncTask
+class Level
 {
   float ceilingCurrentTransparency;
 public:
   static Level* CurrentLevel;
   
-  Level(WindowFramework* window, const std::string& filename);
+  Level(WindowFramework* window, AsyncTask& task, Utils::Packet& data);
+
+  // Saving/Loading
+  void SetDataEngine(DataEngine* de) { _dataEngine = de; }
+  void Save(Utils::Packet&);
+  void Load(Utils::Packet&);
 
   ~Level();
 
@@ -43,7 +48,7 @@ public:
     Interrupted
   };
 
-  DoneStatus              do_task(void);
+  AsyncTask::DoneStatus   do_task(void);
   void                    SetState(State);
   State                   GetState(void) const { return (_state); }
   void                    SetInterrupted(bool);
@@ -54,15 +59,17 @@ public:
   World*                 GetWorld(void)       { return (_world); }
   ObjectCharacter*       GetCharacter(const std::string& name);
   ObjectCharacter*       GetPlayer(void);
+  void                   UnprocessAllCollisions(void);
+  void                   ProcessAllCollisions(void);
 
   void                   CloseInteractMenu(void);
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);
-  TimeManager&           GetTimeManager(void) { return (_timeManager); }
-  Data                   GetDataEngine(void)  { return (_dataEngine);  }
-  Data                   GetItems(void)       { return (_items);       }
+  TimeManager&           GetTimeManager(void) { return (_timeManager);  }
+  Data                   GetDataEngine(void)  { return (*_dataEngine);  }
+  Data                   GetItems(void)       { return (_items);        }
   void                   ConsoleWrite(const std::string& str);
-  
+
   void                   RemoveObject(InstanceDynamicObject* object);
 
   // Interaction Management
@@ -122,6 +129,7 @@ private:
 
   WindowFramework*  _window;
   GraphicsWindow*   _graphicWindow;
+  AsyncTask&        _asyncTask;
   Mouse             _mouse;
   SceneCamera       _camera;
   Timer             _timer;
@@ -162,7 +170,7 @@ private:
   UiLoot*           _currentUiLoot;
   bool              _mouseActionBlocked;
 
-  DataEngine        _dataEngine;
+  DataEngine*       _dataEngine;
   DataTree*         _l18n;
   DataTree*         _items;
 };

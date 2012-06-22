@@ -93,6 +93,9 @@ public:
   InstanceDynamicObject(Level* level, DynamicObject* object);
   virtual ~InstanceDynamicObject() {}
 
+  virtual void       Load(Utils::Packet&);
+  virtual void       Save(Utils::Packet&);
+
   virtual void       Run(float elapsedTime)
   {
     TaskAnimation();

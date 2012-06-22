@@ -11,7 +11,8 @@ extern PandaFramework framework;
  */
 GameUi::GameUi(WindowFramework* window) : _window(window)
 {
-  Rocket::Controls::Initialise();  
+  Rocket::Controls::Initialise();
+  Rocket::Core::FontDatabase::LoadFontFace("assets/JH_FALLOUT.TTF");
   Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Roman.otf");
   Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Italic.otf");
   Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Bold.otf");

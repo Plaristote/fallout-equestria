@@ -13,6 +13,33 @@
 # include <panda3d/character.h>
 # include <panda3d/pointLight.h>
 
+class ObjectCharacter;
+
+class CharacterBuff
+{
+public:
+  CharacterBuff(Level*, ObjectCharacter* character, Data buff);
+
+  bool               operator==(const std::string& comp) const { return (_name == comp); }
+  const std::string& GetName(void)                       const { return (_name);         }
+
+  void Begin(ObjectCharacter* from);
+  void End(void);
+
+private:
+  TimeManager&       _timeManager;
+  ObjectCharacter*   _character;
+  unsigned short     _duration;
+  TimeManager::Task* _task;
+  std::string        _name;
+  asIScriptContext*  _context;
+  asIScriptModule*   _module;
+  asIScriptFunction* _begin;
+  asIScriptFunction* _end;
+
+  NodePath           _graphicalEffect;
+};
+
 class ObjectCharacter : public InstanceDynamicObject
 {
 public:
@@ -40,12 +67,16 @@ public:
   struct FovEnemy
   {
     FovEnemy(ObjectCharacter* enemy, unsigned char ttl) : enemy(enemy), ttl(ttl) {}
-    bool operator==(ObjectCharacter* comp) const { return (enemy == comp); }
+    operator ObjectCharacter*() const { return (enemy); }
+    bool             operator==(ObjectCharacter* comp) const { return (enemy == comp); }
     ObjectCharacter* enemy;
     unsigned char    ttl;
   };
   
   ObjectCharacter(Level* level, DynamicObject* object);
+  
+  void Load(Utils::Packet&);
+  void Save(Utils::Packet&);
 
   Observatory::Signal<void (InstanceDynamicObject*)> ReachedDestination;
   Observatory::Signal<void (unsigned short)>         ActionPointChanged;
@@ -113,15 +144,24 @@ public:
   void                UnequipItem(unsigned short it);
   Observatory::Signal<void (unsigned short, InventoryObject*)> EquipedItemChanged;
   
-  void                CheckFieldOfView(void);
+  void                PushBuff(Data, ObjectCharacter* caster);
 
+  void                CheckFieldOfView(void);
   void                SetAsEnemy(ObjectCharacter*, bool);
   bool                IsEnemy(ObjectCharacter*) const;
   bool                IsAlly(ObjectCharacter*)  const;
   
-  std::list<FovEnemy>&         GetNearbyEnemies(void) { return (_fovEnemies); }
-  std::list<ObjectCharacter*>& GetNearbyAllies(void)  { return (_fovAllies);  }
-
+  Script::StdList<FovEnemy>         GetNearbyEnemies(void) { return (_fovEnemies); }
+  Script::StdList<ObjectCharacter*> GetNearbyAllies(void)  { return (_fovAllies);  }
+  
+  // Script Communication Tools
+  void                RequestAttack(ObjectCharacter* attack, ObjectCharacter* from);
+  void                RequestHeal(ObjectCharacter* heal, ObjectCharacter* from);
+  void                RequestFollow(ObjectCharacter* follow, ObjectCharacter* from);
+  void                RequestStopFollowing(ObjectCharacter* follow, ObjectCharacter* from);
+  int                 AskMorale(void);
+  void                SendMessage(const std::string&);
+  
 private:
   void                RunMovement(float elapsedTime);
   void                RunMovementNext(float elaspedTime);
@@ -129,6 +169,8 @@ private:
   
   void                StartRunAnimation(void);
   void                StopRunAnimation(InstanceDynamicObject*);
+  
+  void                RequestCharacter(ObjectCharacter*, ObjectCharacter*, asIScriptFunction*);
   
   void                CallbackActionUse(InstanceDynamicObject* object);
 
@@ -182,6 +224,10 @@ private:
   asIScriptModule*   _scriptModule;
   asIScriptFunction* _scriptMain;
   asIScriptFunction* _scriptFight;
+
+  asIScriptFunction *_scriptRequestAttack, *_scriptRequestHeal, *_scriptRequestFollow, *_scriptRequestStopFollowing;
+  asIScriptFunction *_scriptAskMorale;
+  asIScriptFunction* _scriptSendMessage;
 };
 
 template<> struct ObjectType2Code<ObjectCharacter> { enum { Type = ObjectTypes::ObjectType::Character }; };

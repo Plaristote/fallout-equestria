@@ -5,22 +5,38 @@ using namespace std;
 namespace Utils
 {
   // Sweet metaprog shit
-  template<> struct Packet::TypeToCode<string> { enum { TypeCode = Packet::String }; };
-  template<> struct Packet::TypeToCode<int>    { enum { TypeCode = Packet::Int    }; };
-  template<> struct Packet::TypeToCode<float>  { enum { TypeCode = Packet::Float  }; };
-  template<> struct Packet::TypeToCode<short>  { enum { TypeCode = Packet::Short  }; };
-  template<> struct Packet::TypeToCode<char>   { enum { TypeCode = Packet::Char   }; };
+  template<> struct Packet::TypeToCode<string>         { enum { TypeCode = Packet::String }; };
+  template<> struct Packet::TypeToCode<int>            { enum { TypeCode = Packet::Int    }; };
+  template<> struct Packet::TypeToCode<float>          { enum { TypeCode = Packet::Float  }; };
+  template<> struct Packet::TypeToCode<short>          { enum { TypeCode = Packet::Short  }; };
+  template<> struct Packet::TypeToCode<char>           { enum { TypeCode = Packet::Char   }; };
+  template<> struct Packet::TypeToCode<unsigned int>   { enum { TypeCode = Packet::UInt }; };
+  template<> struct Packet::TypeToCode<unsigned short> { enum { TypeCode = Packet::UShort }; };
+  template<> struct Packet::TypeToCode<unsigned char>  { enum { TypeCode = Packet::UChar  }; };
 
   template Packet& Packet::operator<< <my_int32>(my_int32& i);
   template Packet& Packet::operator<< <float>(float& i);
   template Packet& Packet::operator<< <short>(short& i);
   template Packet& Packet::operator<< <char>(char& i);
+  template Packet& Packet::operator<< <unsigned int>(unsigned int& i);
+  template Packet& Packet::operator<< <unsigned short>(unsigned short& i);
+  template Packet& Packet::operator<< <unsigned char>(unsigned char& i);
+  template Packet& Packet::operator<< <my_int32>(const my_int32& i);
+  template Packet& Packet::operator<< <float>(const float& i);
+  template Packet& Packet::operator<< <short>(const short& i);
+  template Packet& Packet::operator<< <char>(const char& i);
+  template Packet& Packet::operator<< <unsigned int>(const unsigned int& i);
+  template Packet& Packet::operator<< <unsigned short>(const unsigned short& i);
+  template Packet& Packet::operator<< <unsigned char>(const unsigned char& i);  
   // => There's also a String specialization.
 
   template Packet& Packet::operator>> <int>(int& i);
   template Packet& Packet::operator>> <short>(short& i);
   template Packet& Packet::operator>> <char>(char& i);
   template Packet& Packet::operator>> <float>(float& i);
+  template Packet& Packet::operator>> <unsigned int>(unsigned int& i);
+  template Packet& Packet::operator>> <unsigned short>(unsigned short& i);
+  template Packet& Packet::operator>> <unsigned char>(unsigned char& i);
   // => Same shit. Also a String specialization.
 
   template Packet& Packet::operator<< <int>(list<int>& list);
@@ -57,6 +73,27 @@ namespace Utils
     reading     = 0;
     isDuplicate = true;
     *this << (my_int32&)sizeBuffer;
+  }
+  
+  Packet::Packet(std::ifstream& file)
+  {
+    long           begin, end;
+    long           size;
+    char*          raw;
+
+    begin      = file.tellg();
+    file.seekg(0, std::ios::end);
+    end        = file.tellg();
+    file.seekg(0, std::ios::beg);
+    size       = end - begin;
+    raw        = new char[size + 1];
+    file.read(raw, size);
+    file.close();
+    raw[size]  = 0;
+    buffer     = raw;
+    sizeBuffer = size;
+    realloc(size);
+    updateHeader();
   }
 
   Packet::Packet(char* raw, size_t size, bool duplicate) : isDuplicate(duplicate)
@@ -125,9 +162,27 @@ namespace Utils
     updateHeader();
     return (*this);
   }
+  
+  template<typename T>
+  Packet&		Packet::operator<<(const T& i)
+  {
+    int	    newSize = sizeBuffer;
+    char*   typeCode;
+    T*	    copy;
+
+    newSize += sizeof(T) + sizeof(char);
+    realloc(newSize);
+    typeCode = reinterpret_cast<char*>((int)buffer + sizeBuffer);
+    copy = reinterpret_cast<T*>((int)typeCode + sizeof(char));
+    *typeCode = TypeToCode<T>::TypeCode;
+    *copy = i;
+    sizeBuffer = newSize;
+    updateHeader();
+    return (*this);
+  }
 
   template<>
-  Packet& Packet::operator<< <const string>(const string& str)
+  Packet& Packet::operator<< <string>(const string& str)
   {
     int		newSize = sizeBuffer;
     char*         typeCode;
@@ -154,7 +209,7 @@ namespace Utils
   {
     const string& ref = str;
     
-    this->operator<< <const string>(ref);
+    this->operator<< <string>(ref);
     return (*this);
   }
 

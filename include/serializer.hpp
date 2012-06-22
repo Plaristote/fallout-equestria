@@ -6,6 +6,7 @@
 # include <vector>
 # include <algorithm>
 # include <iostream>
+# include <fstream>
 
 # ifdef WIN32
 #  include <cstdint>
@@ -30,7 +31,10 @@ public:
     Float  = 3,
     Short  = 4,
     Char   = 5,
-    Array  = 6
+    Array  = 6,
+    UInt   = 7,
+    UShort = 8,
+    UChar  = 9
   };
 
   enum Errors
@@ -41,6 +45,8 @@ public:
 
   /*! \brief Use to create an empty Packet. */
   Packet(void);
+  /*! \brief Use to create a packet from a file */
+  Packet(std::ifstream&);
   /*! \brief Use to create a packet from some raw data.
    * \param raw : The raw data in the state of a char string.
    * \param size : The size of that same char string.
