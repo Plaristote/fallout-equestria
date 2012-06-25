@@ -1,6 +1,7 @@
 #ifndef  OBJECT_NODE_HPP
 # define OBJECT_NODE_HPP
 
+# include "globals.hpp"
 # include <panda3d/pandaFramework.h>
 # include <panda3d/pandaSystem.h>
 # include <panda3d/texturePool.h>

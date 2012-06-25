@@ -173,10 +173,17 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(worldClass, "void SetMapObjectsVisible(bool) const",     asMETHOD(World,SetMapObjectsVisible),     asCALL_THISCALL);
   engine->RegisterObjectMethod(worldClass, "void SetDynamicObjectsVisible(bool) const", asMETHOD(World,SetDynamicObjectsVisible), asCALL_THISCALL);  
   
+  const char* cameraClass = "Camera";
+  engine->RegisterObjectType(cameraClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(cameraClass, "void CenterOn(DynamicObject@)", asMETHOD(SceneCamera,CenterOnObject), asCALL_THISCALL);
+  engine->RegisterObjectMethod(cameraClass, "void Follow(DynamicObject@)",   asMETHOD(SceneCamera,FollowObject),   asCALL_THISCALL);
+  engine->RegisterObjectMethod(cameraClass, "void StopFollowing()",          asMETHOD(SceneCamera,StopFollowingNodePath), asCALL_THISCALL);
+  
   const char* levelClass = "Level";
   engine->RegisterObjectType(levelClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(levelClass, "Data           GetDataEngine()",                       asMETHOD(Level,GetDataEngine),       asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "const World@   GetWorld() const",                      asMETHOD(Level,GetWorld),            asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "Camera@        GetCamera()",                           asMETHOD(Level,GetCamera),           asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Character@     GetCharacter(string)",                  asMETHOD(Level,GetCharacter),        asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Character@     GetPlayer()",                           asMETHOD(Level,GetPlayer),           asCALL_THISCALL);  
   engine->RegisterObjectMethod(levelClass, "DynamicObject@ GetObject(string)",                     asMETHOD(Level,GetObject),           asCALL_THISCALL);
@@ -195,15 +202,16 @@ void AngelScriptInitialize(void)
 class LevelTask;
 
 bool   SaveLevel(Level* level, const std::string& name);
-Level* LoadLevel(WindowFramework* window, LevelTask& asyncTask, const std::string& name, bool isSaveFile = false);
+Level* LoadLevel(WindowFramework* window, GameUi& gameUi, LevelTask& asyncTask, const std::string& name, bool isSaveFile = false);
 
 class LevelTask : public AsyncTask
 {
 public:
-  LevelTask(WindowFramework* window)
+  LevelTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi(window, rocket)
   {
-    _window = window;
-    _level  = 0;
+    _window   = window;
+    _level    = 0;
+    _savePath = "saves";
   }
 
   void       SetLevel(Level* level)
@@ -214,8 +222,17 @@ public:
   DoneStatus do_task()
   {
     if (_level)
-      return (_level->do_task());
-    return (AsyncTask::DoneStatus::DS_done);
+    {
+      if (_level->do_task() == AsyncTask::DoneStatus::DS_done)
+      {
+	const string nextZone = _level->GetNextZone();
+
+	ExitLevel(_savePath);
+	if (nextZone != "")
+	  OpenLevel(_savePath, nextZone);
+      }
+    }
+    return (AsyncTask::DoneStatus::DS_cont);
   }
   
   bool SaveGame(const std::string& savepath)
@@ -238,7 +255,7 @@ public:
     currentLevel = _dataEngine["system"]["current-level"];
     if (!(currentLevel.Nil()) && currentLevel.Value() != "0")
     {
-      LoadLevel(_window, *this, savepath + "/" + currentLevel.Value() + ".blob", true);
+      LoadLevel(_window, _gameUi, *this, savepath + "/" + currentLevel.Value() + ".blob", true);
     }
   }
   
@@ -250,12 +267,15 @@ public:
     if (fileTest.is_open())
     {
       fileTest.close();
-      _level = LoadLevel(_window, *this, savepath + "/" + level + ".blob", true);
+      _level = LoadLevel(_window, _gameUi, *this, savepath + "/" + level + ".blob", true);
     }
     else
-      _level = LoadLevel(_window, *this, "maps/" + level + ".blob", false);
+      _level = LoadLevel(_window, _gameUi, *this, "maps/" + level + ".blob", false);
     if (_level)
     {
+      // WARNING This is only temporary
+      _dataEngine.Load(savepath + "/dataengine.json");
+
       _levelName = level;
       _level->SetDataEngine(&_dataEngine);
       SetLevel(_level);
@@ -269,10 +289,11 @@ public:
   {
     if (!(SaveGame(savepath)))
     {
-      // Couldn't make a game save
+      cerr << "¡¡ Couldn't save level state on ExitLevel !!" << endl;
     }
     delete _level;
     _level = 0;
+    cout << "Exited Level" << endl;
   }
 
   bool CopySave(const std::string& savepath, const std::string& slotPath)
@@ -311,10 +332,11 @@ public:
 
 private:
   WindowFramework* _window;
+  GameUi           _gameUi;
   DataEngine       _dataEngine;
   std::string      _levelName;
   Level*           _level;
-  
+
   std::string      _savePath;
 };
 
@@ -332,13 +354,13 @@ bool   SaveLevel(Level* level, const std::string& name)
     file.write(packet.raw(), packet.size());
   else
   {
-    std::cerr << "¡¡ Failed top open file, save failed !!" << std::endl;
+    std::cerr << "¡¡ Failed to open file '" << name << "', save failed !!" << std::endl;
     return (false);
   }
   return (true);
 }
 
-Level* LoadLevel(WindowFramework* window, LevelTask& asyncTask, const std::string& name, bool isSaveFile)
+Level* LoadLevel(WindowFramework* window, GameUi& gameUi, LevelTask& asyncTask, const std::string& name, bool isSaveFile)
 {
   Level*        level = 0;
   std::ifstream file;
@@ -350,7 +372,7 @@ Level* LoadLevel(WindowFramework* window, LevelTask& asyncTask, const std::strin
 
     try
     {
-      level = new Level(window, asyncTask, packet);
+      level = new Level(window, gameUi, asyncTask, packet);
       if (isSaveFile)
 	level->Load(packet);
       file.close();
@@ -387,14 +409,16 @@ int main(int argc, char *argv[])
 
   AngelScriptInitialize();
 
-  LevelTask      levelTask(window);
+  GeneralUi      generalUi(window);
+  LevelTask      levelTask(window, generalUi.GetRocketRegion());
   std::string    filename = "test";
   std::string    fullpath = "maps/" + filename + ".blob";  
   Level*         level;
-
+  
   //level = LoadLevel(window, levelTask,  fullpath);  
-  level = LoadLevel(window, levelTask, "saves/slot01.blob", true);
-  levelTask.SetLevel(level);
+  levelTask.OpenLevel("saves", "test");
+//   level = LoadLevel(window, levelTask, "saves/slot01.blob", true);
+//   levelTask.SetLevel(level);
 
   framework.main_loop();
   framework.close_framework();

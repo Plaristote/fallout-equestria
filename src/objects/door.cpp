@@ -3,6 +3,19 @@
 
 #include "level.hpp"
 
+void LevelExitZone::GoingThrough(void* character)
+{
+  if (character == _level->GetPlayer())
+  {
+    if (_destinations.size() == 0)
+      ExitZone.Emit();
+    else if (_destinations.size() == 1)
+      GoToNextZone.Emit(_destinations.front());
+    else
+      SelectNextZone.Emit(_destinations);
+  }
+}
+
 void ObjectDoor::ObserveWaypoints(bool doObserver)
 {
   _waypointDisconnected = _object->lockedArcs;
@@ -80,7 +93,7 @@ bool ObjectDoor::CanGoThrough(unsigned char id)
   return (true);
 }
 
-void ObjectDoor::GoingThrough(void)
+void ObjectDoor::GoingThrough(void*)
 {
   _closed = false;
 }

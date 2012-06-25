@@ -9,10 +9,14 @@
 namespace Observatory
 {
   typedef void* ObserverId;
-
+  
+  class ObserverHandler;
+  
   template<class p1 = void>
   class Signal
   {
+    friend class ObserverHandler;
+    
     struct InterfaceObserver
     {
       virtual ~InterfaceObserver() {}
@@ -143,6 +147,8 @@ namespace Observatory
   template<class P1, class P2>
   class Signal<P1 (P2)>
   {
+    friend class ObserverHandler;
+    
     struct InterfaceObserver
     {
       virtual ~InterfaceObserver() {}
@@ -250,6 +256,8 @@ namespace Observatory
   template<class P1, class P2, class P3>
   class Signal<P1 (P2, P3)>
   {
+    friend class ObserverHandler;
+    
     struct InterfaceObserver
     {
       virtual ~InterfaceObserver() {}
@@ -357,6 +365,8 @@ namespace Observatory
   template<class P1, class P2, class P3, class P4>
   class Signal<P1 (P2, P3, P4)>
   {
+    friend class ObserverHandler;
+    
     struct InterfaceObserver
     {
       virtual ~InterfaceObserver() {}
@@ -459,7 +469,59 @@ namespace Observatory
 
     typename Observers::iterator _iterator;
     Observers                    _observers;
-  };  
+  };
+  
+  class ObserverHandler
+  {
+    struct IObserverPair
+    {
+      virtual ~IObserverPair() {};
+      virtual void Disconnect(void) = 0;
+    };
+
+    template<class C>
+    struct ObserverPair : public IObserverPair
+    {
+      ObserverPair(C& signal, ObserverId id) : signal(signal), id(id) {}
+      void Disconnect(void) { signal.Disconnect(id); }
+      C&         signal;
+      ObserverId id;
+    };
+    
+    typedef std::list<IObserverPair*> Observers;
+  public:
+    ~ObserverHandler()
+    {
+      DisconnectAll();
+    }
+    
+    void       DisconnectAll(void)
+    {
+      std::for_each(_observers.begin(), _observers.end(), [](IObserverPair* observer)
+      {
+	observer->Disconnect();
+	delete observer;
+      });
+      _observers.clear();
+    }
+    
+    template<class C>
+    inline void Add(C& signal, ObserverId id)
+    {
+      _observers.push_back(new ObserverPair<C>(signal, id));
+    }
+    
+    template<class C, typename ObserverClass>
+    inline void Connect(C& signal, ObserverClass& observerInstance, typename C::template Observer<ObserverClass>::Method method)
+    {
+      ObserverId id = signal.Connect(observerInstance, method);
+      
+      Add(signal, id);
+    }
+
+  private:
+    Observers _observers;
+  };
 }
 
 #endif

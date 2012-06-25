@@ -95,6 +95,9 @@ void ObjectCharacter::Load(Utils::Packet& packet)
     else
       std::cerr << "/!\\ FATAL ERROR: " << this->GetName() << "'s Script Load function couldn't be loaded, and the whole loading will screw up starting now.";
   }
+  
+  if (_hitPoints <= 0)
+    RunDeath();
 }
 
 void ObjectCharacter::Save(Utils::Packet& packet)

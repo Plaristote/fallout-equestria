@@ -7,51 +7,84 @@ using namespace Rocket;
 extern PandaFramework framework;
 
 /*
- * GameUi
+ * GeneralUi
  */
-GameUi::GameUi(WindowFramework* window) : _window(window)
+#define PATH_FONTS "assets"
+
+GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
 {
-  Rocket::Controls::Initialise();
-  Rocket::Core::FontDatabase::LoadFontFace("assets/JH_FALLOUT.TTF");
-  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Roman.otf");
-  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Italic.otf");
-  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Bold.otf");
-  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-BoldItalic.otf");
+  vector<string> fonts = { "JH_FALLOUT.TTF",
+                           "Delicious-Roman.otf",
+                           "Delicious-Italic.otf",
+                           "Delicious-Bold.otf",
+                           "Delicious-BoldItalic.otf" };
 
-  _rocket = RocketRegion::make("rocketConsole", window->get_graphics_output());
+  ForEach(fonts, [](string path) { Core::FontDatabase::LoadFontFace(Core::String(PATH_FONTS) + "/" + path.c_str()); });
+  _rocket = RocketRegion::make("interface", window->get_graphics_output());
   _rocket->set_active(true);
-
-  _console   = new GameConsole  (window, _rocket->get_context());
-  _menu      = new GameMenu     (window, _rocket->get_context());
-  _mainBar   = new GameMainBar  (window, _rocket->get_context());
-  _inventory = new GameInventory(window, _rocket->get_context());
-  _pers      = new GamePers     (window, _rocket->get_context());
   
-  _inventory->VisibilityToggled.Connect(InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
-  _menu->VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  Rocket::Controls::Initialise();
 
-  _mainBar->MenuButtonClicked.EventReceived.Connect     (*this, &GameUi::OpenMenu);
-  _mainBar->InventoryButtonClicked.EventReceived.Connect(*this, &GameUi::OpenInventory);
-  _mainBar->PersButtonClicked.EventReceived.Connect     (*this, &GameUi::OpenPers);
-  _menu->Hide();
-  _inventory->Hide();
-  _console->Hide();
-  _pers->Hide();
-
-  _ih = new RocketInputHandler();
+  _ih      = new RocketInputHandler();
   window->get_mouse().attach_new_node(_ih);
   _rocket->set_input_handler(_ih);
+  
+  _console = new GameConsole  (window, _rocket->get_context());
+  _console->Hide();
 
   _window->enable_keyboard();
-  framework.define_key("tab", "ConsoleHandle", GameConsole::Toggle, (void*)_console);
+  framework.define_key("tab", "ConsoleHandle", GameConsole::Toggle, (void*)_console);  
 }
 
-GameUi::~GameUi()
+GeneralUi::~GeneralUi(void)
 {
+  framework.define_key("tab", "ConsoleHandle", 0, 0);
   delete _console;
-  delete _menu;
+}
+
+/*
+ * LevelUi
+ */
+LevelUi::LevelUi(WindowFramework* window, GameUi& gameUi) : _gameUi(gameUi)
+{
+  _mainBar = new GameMainBar(window, _gameUi.GetRocketRegion()->get_context());
+  
+  _observers[0] = _mainBar->MenuButtonClicked.EventReceived.Connect     (_gameUi, &GameUi::OpenMenu);
+  _observers[1] = _mainBar->InventoryButtonClicked.EventReceived.Connect(_gameUi, &GameUi::OpenInventory);
+  _observers[2] = _mainBar->PersButtonClicked.EventReceived.Connect     (_gameUi, &GameUi::OpenPers);
+
+  _gameUi.GetInventory().VisibilityToggled.Connect(InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  _gameUi.GetMenu().VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);  
+  _gameUi.GetPers().VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+}
+
+LevelUi::~LevelUi(void)
+{
+  _gameUi.GetInventory().VisibilityToggled.Disconnect(_observers[0]);
+  _gameUi.GetMenu().VisibilityToggled.Disconnect     (_observers[1]);
+  _gameUi.GetPers().VisibilityToggled.Disconnect     (_observers[2]);
   delete _mainBar;
+}
+
+/*
+ * GameUi
+ */
+GameUi::GameUi(WindowFramework* window, PT(RocketRegion) rocket) : _rocket(rocket)
+{
+  _menu      = new GameMenu     (window, _rocket->get_context());
+  _inventory = new GameInventory(window, _rocket->get_context());
+  _pers      = new GamePers     (window, _rocket->get_context());
+
+  _menu->Hide();
+  _inventory->Hide();
+  _pers->Hide();
+}
+
+GameUi::~GameUi(void)
+{
+  delete _menu;
   delete _inventory;
+  delete _pers;
 }
 
 void GameUi::OpenMenu(Rocket::Core::Event&)

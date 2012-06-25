@@ -365,3 +365,60 @@ void UiEquipMode::Destroy(void)
     _root->Hide();
 }
 
+/*
+ * UiNextZone
+ */
+using namespace std;
+
+UiNextZone::UiNextZone(WindowFramework* window, Rocket::Core::Context* context, const std::vector<std::string> zones)
+  : UiBase(window)
+{
+  _root = context->LoadDocument("data/zone_selector.rml");
+  if (_root)
+  {
+    Rocket::Core::Element*         eContainer = _root->GetElementById("choices");
+    vector<string>::const_iterator it         = zones.begin();
+    vector<string>::const_iterator end        = zones.end();
+    
+    for(short n = 1 ; it != end ; ++it, ++n)
+    {
+      Rocket::Core::String lastRml;
+      stringstream         rml;
+
+      rml << "<button id='choice-" << n << "' zone='" << *it << "'>";
+      rml << *it;
+      rml << "</button>";
+
+      rml << "<br />";
+      eContainer->GetInnerRML(lastRml);
+      eContainer->SetInnerRML(lastRml + rml.str().c_str());
+    }
+
+    for (short n = 1 ; n <= zones.size() ; ++n)
+    {
+      stringstream           name;
+      Rocket::Core::Element* zoneButton;
+
+      name << "choice-" << n;
+      zoneButton = _root->GetElementById(name.str().c_str());
+      zoneButton->AddEventListener("click", &LevelSelected);
+    }
+    LevelSelected.EventReceived.Connect(*this, &UiNextZone::CallbackLevelSelected);
+  }
+}
+
+void UiNextZone::CallbackLevelSelected(Rocket::Core::Event& event)
+{
+  Rocket::Core::String name = event.GetCurrentElement()->GetId();
+  stringstream         id;
+  Rocket::Core::String str  = event.GetCurrentElement()->GetAttribute("zone")->Get<Rocket::Core::String>();
+  std::string          tmp = str.CString();
+
+  NextZoneSelected.Emit(tmp);
+}
+
+UiNextZone::~UiNextZone()
+{
+  if (_root)
+    delete _root;
+}

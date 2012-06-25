@@ -158,29 +158,63 @@ private:
 class GameUi
 {
 public:
-  GameUi(WindowFramework* window);
-  ~GameUi();
-
-  GameMainBar&           GetMainBar(void)   { return (*_mainBar); }
+  GameUi(WindowFramework* window, PT(RocketRegion) rocket);
+  ~GameUi(void);
+  
+  Rocket::Core::Context* GetContext()       { return (_rocket->get_context()); }
   GameMenu&              GetMenu(void)      { return (*_menu); }
   GameInventory&         GetInventory(void) { return (*_inventory); }
-  Rocket::Core::Context* GetContext()       { return (_rocket->get_context()); }
-
-  Observatory::Signal<void (bool)> InterfaceOpened;
+  GamePers&              GetPers(void)      { return (*_pers); }
   
   void                   OpenMenu(Rocket::Core::Event&);
   void                   OpenInventory(Rocket::Core::Event&);
   void                   OpenPers(Rocket::Core::Event&);
+  
+  PT(RocketRegion)       GetRocketRegion(void) { return (_rocket); }
+
+private:
+  PT(RocketRegion) _rocket;
+  GameConsole*     _console;
+  GameMenu*        _menu;
+  GameInventory*   _inventory;
+  GamePers*        _pers;
+};
+
+class LevelUi
+{
+public:
+  LevelUi(WindowFramework* window, GameUi& gameUi);
+  ~LevelUi(void);
+
+  Rocket::Core::Context* GetContext() { return (_gameUi.GetRocketRegion()->get_context()); }  
+  GameMainBar&     GetMainBar(void)   { return (*_mainBar);              }
+  GameMenu&        GetMenu(void)      { return (_gameUi.GetMenu());      }
+  GameInventory&   GetInventory(void) { return (_gameUi.GetInventory()); }
+  GamePers&        GetPers(void)      { return (_gameUi.GetPers());      }
+
+  Observatory::Signal<void (bool)> InterfaceOpened;  
+
+private:
+  GameUi&          _gameUi;
+  GameMainBar*     _mainBar;
+  
+  Observatory::ObserverId _observers[3];
+};
+
+class GeneralUi
+{
+public:
+  GeneralUi(WindowFramework*);
+  ~GeneralUi();
+
+  PT(RocketRegion)       GetRocketRegion(void) const { return (_rocket); }
 
 private:
   WindowFramework*       _window;
-  GameConsole*           _console;
-  GameMenu*              _menu;
-  GameMainBar*           _mainBar;
-  GameInventory*         _inventory;
-  GamePers*              _pers;
   PT(RocketRegion)       _rocket;
   PT(RocketInputHandler) _ih;
+  
+  GameConsole*           _console;
 };
 
 #endif

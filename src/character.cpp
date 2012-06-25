@@ -13,7 +13,7 @@ CharacterBuff::CharacterBuff(Level* level, ObjectCharacter* character, Data buff
   : _timeManager(level->GetTimeManager()), _character(character)
 {
   Data dataGraphics = buff["graphics"];
-  
+
   _name     = buff.Key();
   _duration = buff["duration"];
   _begin    = _end = 0;
@@ -93,6 +93,8 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 {
   Data   items = _level->GetItems();  
   string defEquiped[2];
+  
+  _goToData.objective = 0;  
   
   NodePath bodyNP = object->nodePath.find("**/+Character");
   _character      = dynamic_cast<Character*>(bodyNP.node());
@@ -578,7 +580,7 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
       if (arc->observer)
       {
 	if (arc->observer->CanGoThrough(0))
-	  arc->observer->GoingThrough();
+	  arc->observer->GoingThrough(this);
 	else
 	  pathAvailable = false;
       }
@@ -690,6 +692,10 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
 {
   if (object == this)
     return (true);
+  std::cout << GetName() << std::endl;
+  std::cout << "Trololo" << std::endl;
+  std::cout << object->GetName() << std::endl;
+  std::cout << "Trololo" << std::endl;
   NodePath root  = _object->nodePath;
   NodePath other = object->GetNodePath();
   bool ret = true;

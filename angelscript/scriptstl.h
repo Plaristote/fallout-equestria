@@ -37,7 +37,7 @@
 #include <angelscript.h>
 
 #ifndef SCRIPT_ASSERT
-#define SCRIPT_ASSERT(expr, format, ...) { int r; if ((r = (expr)) < 0){ std::fprintf(stderr, "SCRIPT ERROR (%i) "format, r, __VA_ARGS__); return false; } }
+#define SCRIPT_ASSERT(expr, format, ...) { int r; if ((r = (expr)) < 0){ std::fprintf(stderr, "SCRIPT ERROR (%i) "); return false; } }
 #endif
 
 #include <cstdlib>
@@ -233,9 +233,9 @@ template <typename T> bool RegisterScriptVector(const char *arraytype, const cha
 		asFUNCTION((STLAddAssign<typename std::vector<T>::iterator, int>)), asCALL_CDECL_OBJFIRST),
 			"Failed to register += operator for %s\n", dtype);
 
-	SCRIPT_ASSERT(engine->RegisterObjectBehaviour(dtype = arraytype, asBEHAVE_INDEX, (std::string(type) + " &f(int)").c_str(),
+	/*SCRIPT_ASSERT(engine->RegisterObjectBehaviour(dtype = arraytype, asBEHAVE_INDEX, (std::string(type) + " &f(int)").c_str(),
 		asMETHODPR(VT, at, (size_t), T &), asCALL_THISCALL),
-			"Failed to register [] operator for %s\n", dtype);
+			"Failed to register [] operator for %s\n", dtype);*/
 
 	// Functions
 
@@ -605,7 +605,7 @@ template <typename T> bool RegisterScriptList(const char *arraytype, const char 
 
 	SCRIPT_ASSERT(engine->RegisterObjectMethod(dtype = itarraytype, decl = (std::string(citarraytype) + " &cdec()").c_str(),
 		asMETHODPR(LTCI, operator--, (), LTCI &), asCALL_THISCALL),
-			"Failed to register %s for %s\n", decl, dtype);
+			"Failed to register %d for %d\n", decl, dtype);
 
 	return true;
 }

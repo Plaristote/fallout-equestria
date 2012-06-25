@@ -4,8 +4,10 @@
 
 void      DataEngine::Load(const std::string& filepath)
 {
+  if (_dataTree)
+    delete _dataTree;
   _dataTree = DataTree::Factory::JSON(filepath);
-  (Data)(*this) = Data(_dataTree);
+  _data     = _dataTree;
 }
 
 void      DataEngine::Save(const std::string& filepath)

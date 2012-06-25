@@ -8,6 +8,7 @@
 using namespace std;
 
 unsigned char         gPathfindingUnitType = 0;
+void*                 gPathfindingData     = 0;
 
 World::World(WindowFramework* window)
 {
@@ -17,12 +18,19 @@ World::World(WindowFramework* window)
     rootDynamicObjects = window->get_render().attach_new_node("dynamicobjects");
 }
 
+World::~World()
+{
+  ForEach(waypoints,      [](Waypoint& wp)      { wp.nodePath.remove_node(); });
+  ForEach(objects,        [](MapObject& mo)     { mo.nodePath.remove_node(); });
+  ForEach(dynamicObjects, [](DynamicObject& dy) { dy.nodePath.remove_node(); });
+}
+
 Waypoint* World::AddWayPoint(float x, float y, float z)
 {
   NodePath nodePath = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
   Waypoint  waypoint(nodePath);
   Waypoint* ptr;
-
+  
   waypoint.nodePath.set_pos(x, y, z);
   waypoints.push_back(waypoint);
   nodePath.reparent_to(rootWaypoints);
@@ -172,6 +180,24 @@ Waypoint*      World::GetWaypointAt(LPoint2f point)
       }
   }
   return (nearest);
+}
+
+// EXIT ZONES
+void World::AddExitZone(const std::string& name)
+{
+  ExitZone exitZone;
+  
+  exitZone.name = name;
+  exitZones.push_back(exitZone);
+}
+
+ExitZone* World::GetExitZoneByName(const std::string& name)
+{
+  ExitZones::iterator it = std::find(exitZones.begin(), exitZones.end(), name);
+  
+  if (it != exitZones.end())
+    return (&(*it));
+  return (0);
 }
 
 // WAYPOINTS
@@ -604,59 +630,109 @@ void           World::UnSerialize(Utils::Packet& packet)
       dynamicObjects.push_back(object);
     }
   }
+  
+  // ExitZones
+  {
+    int size;
+    
+    packet >> size;
+    for (int it = 0 ; it < size ; ++it)
+    {
+      ExitZone       zone;
+      std::list<int> waypointsId;
+
+      packet >> zone.name;
+      packet >> zone.destinations;
+      packet >> waypointsId;
+      
+      std::list<int>::iterator begin = waypointsId.begin();
+      std::list<int>::iterator end   = waypointsId.end();
+      
+      for (; begin != end ; ++begin)
+      {
+	Waypoint* wp = GetWaypointFromId(*begin);
+	
+	if (wp)
+	  zone.waypoints.push_back(wp);
+      }
+      exitZones.push_back(zone);
+    }
+  }
 }
 
 void           World::Serialize(Utils::Packet& packet)
 {
-    // Compile Step
-    CompileWaypoints();
+  // Compile Step
+  CompileWaypoints();
 
-    // Waypoints
+  // Waypoints
+  {
+      Waypoints::iterator it  = waypoints.begin();
+      Waypoints::iterator end = waypoints.end();
+      unsigned int        id  = 0;
+      int                 size;
+
+      while (it != end)
+      {
+	if ((*it).arcs.size() == 0)
+	  it = waypoints.erase(it);
+	else
+	{
+	  (*it).id = ++id;
+	  ++it;
+	}
+      }
+      size = waypoints.size();
+      packet << size;
+      for (it = waypoints.begin() ; it != end ; ++it)
+	(*it).Serialize(packet);
+  }
+
+  // MapObjects
+  {
+      int size = objects.size();
+
+      packet << size;
+      MapObjects::iterator it  = objects.begin();
+      MapObjects::iterator end = objects.end();
+
+      for (; it != end ; ++it) { (*it).Serialize(packet); }
+  }
+
+  CompileDoors();
+
+  // DynamicObjects
+  {
+      int size = dynamicObjects.size();
+
+      packet << size;
+      DynamicObjects::iterator it  = dynamicObjects.begin();
+      DynamicObjects::iterator end = dynamicObjects.end();
+
+      for (; it != end ; ++it) { (*it).Serialize(packet); }
+  }
+    
+  // ExitZones
+  {
+    ExitZones::iterator it   = exitZones.begin();
+    ExitZones::iterator end  = exitZones.end();
+    int                 size = exitZones.size();
+
+    packet << size;
+    for (; it != end ; ++it)
     {
-        Waypoints::iterator it  = waypoints.begin();
-        Waypoints::iterator end = waypoints.end();
-        unsigned int        id  = 0;
-        int                 size;
+      ExitZone&                      zone = *it;
+      std::list<int>                 waypointsId;
+      std::list<Waypoint*>::iterator wpIt  = zone.waypoints.begin();
+      std::list<Waypoint*>::iterator wpEnd = zone.waypoints.end();
 
-        while (it != end)
-        {
-          if ((*it).arcs.size() == 0)
-            it = waypoints.erase(it);
-          else
-          {
-            (*it).id = ++id;
-            ++it;
-          }
-        }
-        size = waypoints.size();
-        packet << size;
-        for (it = waypoints.begin() ; it != end ; ++it)
-          (*it).Serialize(packet);
+      for (; wpIt != wpEnd ; ++wpIt)
+	waypointsId.push_back((*wpIt)->id);
+      packet << zone.name;
+      packet << zone.destinations;
+      packet << waypointsId;
     }
-
-    // MapObjects
-    {
-        int size = objects.size();
-
-        packet << size;
-        MapObjects::iterator it  = objects.begin();
-        MapObjects::iterator end = objects.end();
-
-        for (; it != end ; ++it) { (*it).Serialize(packet); }
-    }
-
-    CompileDoors();
-
-    // DynamicObjects
-    {
-        int size = dynamicObjects.size();
-
-        packet << size;
-        DynamicObjects::iterator it  = dynamicObjects.begin();
-        DynamicObjects::iterator end = dynamicObjects.end();
-
-        for (; it != end ; ++it) { (*it).Serialize(packet); }
-    }
+  }    
 }
 
 // MAP COMPILING

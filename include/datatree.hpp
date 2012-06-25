@@ -137,7 +137,7 @@ public:
   iterator       end()               { return (iterator(_data->children.end()));         }
   const_iterator const_end() const   { return (const_iterator(_data->children.end()));   }
 
-private:
+protected:
   DataBranch* _data;
 };
 
@@ -158,7 +158,7 @@ namespace Json
 
 /*! \class DataTree
  * \brief Represents the root DataBranch */
-class DataTree : private DataBranch
+class DataTree : public DataBranch
 {
   friend class Data;
   friend class Yaml::Parser;

@@ -32,7 +32,7 @@ class Level
 public:
   static Level* CurrentLevel;
   
-  Level(WindowFramework* window, AsyncTask& task, Utils::Packet& data);
+  Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Packet& data);
 
   // Saving/Loading
   void SetDataEngine(DataEngine* de) { _dataEngine = de; }
@@ -57,6 +57,7 @@ public:
   // World Interactions
   bool                   FindPath(std::list<Waypoint>&, Waypoint&, Waypoint&);
   World*                 GetWorld(void)       { return (_world); }
+  SceneCamera&           GetCamera(void)      { return (_camera); }
   ObjectCharacter*       GetCharacter(const std::string& name);
   ObjectCharacter*       GetPlayer(void);
   void                   UnprocessAllCollisions(void);
@@ -71,6 +72,11 @@ public:
   void                   ConsoleWrite(const std::string& str);
 
   void                   RemoveObject(InstanceDynamicObject* object);
+  
+  void                   CallbackExitZone(void);
+  void                   CallbackGoToZone(const std::string& name);
+  void                   CallbackSelectNextZone(const std::vector<std::string>& zones);
+  const std::string&     GetNextZone(void) const;
 
   // Interaction Management
   void                   CallbackActionUse(InstanceDynamicObject* object);
@@ -123,9 +129,12 @@ public:
 private:
   typedef std::list<InstanceDynamicObject*> InstanceObjects;
   typedef std::list<ObjectCharacter*>       Characters;
+  typedef std::list<LevelExitZone*>         ExitZones;
 
   void              RunDaylight(void);
   void              MouseInit(void);
+  
+  Observatory::ObserverHandler obs;
 
   WindowFramework*  _window;
   GraphicsWindow*   _graphicWindow;
@@ -140,6 +149,10 @@ private:
   InstanceObjects      _objects;
   Characters           _characters;
   Characters::iterator _itCharacter;
+  
+  ExitZones            _exitZones;
+  bool                 _exitingZone;
+  std::string          _exitingZoneTo;
 
   DirectionalLight* _sunLight;
   NodePath          _sunLightNode;
@@ -150,6 +163,7 @@ private:
     UiItUseObjectOn,
     UiItLoot,
     UiItEquipMode,
+    UiItNextZone,
     UiTotalIt
   };
   
@@ -162,7 +176,7 @@ private:
     SetInterrupted(false);
   }
   
-  GameUi            _gameUi;
+  LevelUi           _levelUi;
   InteractMenu*     _currentInteractMenu;
   UiBase*           _currentUis[UiTotalIt];
   DialogController* _currentRunningDialog;

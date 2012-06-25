@@ -67,9 +67,9 @@ struct Waypoint
     struct ArcObserver
     {
       virtual bool CanGoThrough(unsigned char type) = 0;
-      virtual void GoingThrough(void)               = 0;
+      virtual void GoingThrough(void*)              = 0;
     };
-
+    
     struct Arc
     {
         Arc(NodePath from, Waypoint* to);
@@ -187,11 +187,21 @@ struct DynamicObject : public MapObject
     void Serialize(Utils::Packet& packet);
 };
 
+struct ExitZone
+{
+  bool operator==(const std::string& comp) { return (name == comp); }
+  
+  std::string            name;
+  std::list<Waypoint*>   waypoints;
+  std::list<std::string> destinations;
+};
+
 struct World
 {
     typedef std::list<Waypoint>      Waypoints;
     typedef std::list<MapObject>     MapObjects;
     typedef std::list<DynamicObject> DynamicObjects;
+    typedef std::list<ExitZone>      ExitZones;
 
     WindowFramework* window;
 
@@ -203,8 +213,11 @@ struct World
 
     NodePath         rootDynamicObjects;
     DynamicObjects   dynamicObjects;
+    
+    ExitZones        exitZones;
 
     World(WindowFramework* window);
+    ~World(void);
 
     Waypoint* AddWayPoint(float x, float y, float z);
     void      DeleteWayPoint(Waypoint*);
@@ -271,6 +284,9 @@ struct World
     DynamicObject* GetDynamicObjectFromNodePath(NodePath path);
     void           SetDynamicObjectsVisible(bool v)
     { if (v) { rootDynamicObjects.show(); } else { rootDynamicObjects.hide(); } }
+    
+    void           AddExitZone(const std::string&);
+    ExitZone*      GetExitZoneByName(const std::string&);
 
     Waypoint*      GetWaypointAt(LPoint2f);
 

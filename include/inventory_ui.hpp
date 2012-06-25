@@ -114,4 +114,18 @@ private:
   InventoryObject& _object;
 };
 
+class UiNextZone : public UiBase
+{
+public:
+  UiNextZone(WindowFramework* window, Rocket::Core::Context* context, const std::vector<std::string> zones);
+  ~UiNextZone();
+  
+  Observatory::Signal<void (const std::string&)> NextZoneSelected;
+
+private:
+  RocketListener LevelSelected;
+  
+  void CallbackLevelSelected(Rocket::Core::Event&);
+};
+
 #endif

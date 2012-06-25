@@ -9,6 +9,13 @@ class DataEngine : public Data
 public:
   DataEngine(void)
   {
+    _dataTree = 0;
+  }
+  
+  ~DataEngine(void)
+  {
+    if (_dataTree)
+      delete _dataTree;
   }
   
   void      Load(const std::string& filepath);
