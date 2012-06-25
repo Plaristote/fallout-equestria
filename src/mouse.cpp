@@ -50,6 +50,11 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
   window->get_graphics_window()->request_properties(props);
 }
 
+Mouse::~Mouse()
+{
+  _cursor.remove_node();
+}
+
 void Mouse::SetMouseState(char i)
 {
   switch (i)

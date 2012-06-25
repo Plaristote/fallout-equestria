@@ -225,11 +225,16 @@ public:
     {
       if (_level->do_task() == AsyncTask::DoneStatus::DS_done)
       {
-	const string nextZone = _level->GetNextZone();
+	const string nextZone  = _level->GetNextZone();
+	const string exitPoint = _level->GetExitZone();
 
 	ExitLevel(_savePath);
 	if (nextZone != "")
+	{
 	  OpenLevel(_savePath, nextZone);
+	  if (_level)
+	    _level->SetEntryZone(exitPoint);
+	}
       }
     }
     return (AsyncTask::DoneStatus::DS_cont);

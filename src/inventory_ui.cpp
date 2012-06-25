@@ -373,7 +373,7 @@ using namespace std;
 UiNextZone::UiNextZone(WindowFramework* window, Rocket::Core::Context* context, const std::vector<std::string> zones)
   : UiBase(window)
 {
-  _root = context->LoadDocument("data/zone_selector.rml");
+  _root = context->LoadDocument("data/dialog_zone_selector.rml");
   if (_root)
   {
     Rocket::Core::Element*         eContainer = _root->GetElementById("choices");
@@ -385,7 +385,7 @@ UiNextZone::UiNextZone(WindowFramework* window, Rocket::Core::Context* context, 
       Rocket::Core::String lastRml;
       stringstream         rml;
 
-      rml << "<button id='choice-" << n << "' zone='" << *it << "'>";
+      rml << "<button id='choice-" << n << "' class='button_menu' zone='" << *it << "'>";
       rml << *it;
       rml << "</button>";
 
@@ -404,6 +404,7 @@ UiNextZone::UiNextZone(WindowFramework* window, Rocket::Core::Context* context, 
       zoneButton->AddEventListener("click", &LevelSelected);
     }
     LevelSelected.EventReceived.Connect(*this, &UiNextZone::CallbackLevelSelected);
+    _root->Show();
   }
 }
 
@@ -420,5 +421,5 @@ void UiNextZone::CallbackLevelSelected(Rocket::Core::Event& event)
 UiNextZone::~UiNextZone()
 {
   if (_root)
-    delete _root;
+    _root->RemoveReference();
 }

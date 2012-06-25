@@ -187,14 +187,20 @@ struct DynamicObject : public MapObject
     void Serialize(Utils::Packet& packet);
 };
 
-struct ExitZone
+struct Zone
 {
   bool operator==(const std::string& comp) { return (name == comp); }
-  
-  std::string            name;
-  std::list<Waypoint*>   waypoints;
+
+  std::string          name;
+  std::list<Waypoint*> waypoints;
+};
+
+struct ExitZone : public Zone
+{
   std::list<std::string> destinations;
 };
+
+typedef Zone EntryZone;
 
 struct World
 {
@@ -202,6 +208,7 @@ struct World
     typedef std::list<MapObject>     MapObjects;
     typedef std::list<DynamicObject> DynamicObjects;
     typedef std::list<ExitZone>      ExitZones;
+    typedef std::list<EntryZone>     EntryZones;
 
     WindowFramework* window;
 
@@ -215,6 +222,7 @@ struct World
     DynamicObjects   dynamicObjects;
     
     ExitZones        exitZones;
+    EntryZones       entryZones;
 
     World(WindowFramework* window);
     ~World(void);
@@ -286,8 +294,13 @@ struct World
     { if (v) { rootDynamicObjects.show(); } else { rootDynamicObjects.hide(); } }
     
     void           AddExitZone(const std::string&);
+    void           DeleteExitZone(const std::string&);
     ExitZone*      GetExitZoneByName(const std::string&);
-
+    
+    void           AddEntryZone(const std::string&);
+    void           DeleteEntryZone(const std::string&);
+    EntryZone*     GetEntryZoneByName(const std::string&);
+    
     Waypoint*      GetWaypointAt(LPoint2f);
 
     void           UnSerialize(Utils::Packet& packet);

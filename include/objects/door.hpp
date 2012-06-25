@@ -11,6 +11,9 @@ public:
     ForEach(destinations, [this](std::string dest) { _destinations.push_back(dest); });
   }
   
+  void               SetName(const std::string& name) { _name = name;   }
+  const std::string& GetName(void) const              { return (_name); }
+  
   bool CanGoThrough(unsigned char id) { return (true); }
   void GoingThrough(void* character);
   
@@ -19,6 +22,7 @@ public:
   Observatory::Signal<void (const std::vector<std::string>&)> SelectNextZone;
 
 private:
+  std::string              _name;
   Level*                   _level;
   std::vector<std::string> _destinations;
 };

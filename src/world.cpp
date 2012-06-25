@@ -191,11 +191,45 @@ void World::AddExitZone(const std::string& name)
   exitZones.push_back(exitZone);
 }
 
+void World::DeleteExitZone(const std::string& name)
+{
+  ExitZones::iterator it = std::find(exitZones.begin(), exitZones.end(), name);
+  
+  if (it != exitZones.end())
+    exitZones.erase(it);
+}
+
 ExitZone* World::GetExitZoneByName(const std::string& name)
 {
   ExitZones::iterator it = std::find(exitZones.begin(), exitZones.end(), name);
   
   if (it != exitZones.end())
+    return (&(*it));
+  return (0);
+}
+
+// ENTRY ZONES
+void World::AddEntryZone(const std::string& name)
+{
+  EntryZone entryZone;
+  
+  entryZone.name = name;
+  entryZones.push_back(entryZone);
+}
+
+void World::DeleteEntryZone(const std::string& name)
+{
+  EntryZones::iterator it = std::find(entryZones.begin(), entryZones.end(), name);
+
+  if (it != entryZones.end())
+    entryZones.erase(it);
+}
+
+EntryZone* World::GetEntryZoneByName(const std::string& name)
+{
+  EntryZones::iterator it = std::find(entryZones.begin(), entryZones.end(), name);
+
+  if (it != entryZones.end())
     return (&(*it));
   return (0);
 }

@@ -77,6 +77,8 @@ public:
   void                   CallbackGoToZone(const std::string& name);
   void                   CallbackSelectNextZone(const std::vector<std::string>& zones);
   const std::string&     GetNextZone(void) const;
+  const std::string&     GetExitZone(void) const;
+  void                   SetEntryZone(const std::string&);
 
   // Interaction Management
   void                   CallbackActionUse(InstanceDynamicObject* object);
@@ -152,7 +154,7 @@ private:
   
   ExitZones            _exitZones;
   bool                 _exitingZone;
-  std::string          _exitingZoneTo;
+  std::string          _exitingZoneTo, _exitingZoneName;
 
   DirectionalLight* _sunLight;
   NodePath          _sunLightNode;

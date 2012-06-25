@@ -67,11 +67,12 @@ Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Pa
   {
     std::cout << "Failed to load file" << std::endl;
   }
-  
+
   ForEach(_world->exitZones, [this](ExitZone& zone)
   {
     LevelExitZone* exitZone = new LevelExitZone(this, zone.destinations);
     
+    exitZone->SetName(zone.name);
     ForEach(zone.waypoints, [exitZone](Waypoint* wp)
     {
       ForEach(wp->arcs, [exitZone](Waypoint::Arc& arc)
@@ -859,26 +860,67 @@ bool Level::UseActionPoints(unsigned short ap)
  */
 void Level::CallbackExitZone(void)
 {
+  if (_currentUis[UiItNextZone])
+    _currentUis[UiItNextZone]->Destroy();
   _exitingZone   = true;
 }
 
 void Level::CallbackGoToZone(const string& nextZone)
 {
-  _exitingZone   = true;
-  _exitingZoneTo = nextZone;
+  LevelExitZone* zone = reinterpret_cast<LevelExitZone*>(GetPlayer()->GetOccupiedWaypoint()->arcs.front().observer);  
+  
+  if (_currentUis[UiItNextZone])
+    _currentUis[UiItNextZone]->Destroy();
+  _exitingZone     = true;
+  _exitingZoneTo   = nextZone;
+  if (zone)
+    _exitingZoneName = zone->GetName();
 }
 
 void Level::CallbackSelectNextZone(const vector<string>& nextZoneChoices)
 {
-  UiNextZone* uiNextZone = new UiNextZone(_window, _levelUi.GetContext(), nextZoneChoices);
+  if (_currentUis[UiItNextZone] && _currentUis[UiItNextZone]->IsVisible())
+    return ;
+  else
+  {
+    UiNextZone* uiNextZone = new UiNextZone(_window, _levelUi.GetContext(), nextZoneChoices);
 
-  if (_currentUis[UiItNextZone])
-    delete _currentUis[UiItNextZone];
-  _currentUis[UiItNextZone] = uiNextZone;
-  uiNextZone->NextZoneSelected.Connect(*this, &Level::CallbackGoToZone);
+    if (_currentUis[UiItNextZone])
+      delete _currentUis[UiItNextZone];
+    _currentUis[UiItNextZone] = uiNextZone;
+    uiNextZone->NextZoneSelected.Connect(*this, &Level::CallbackGoToZone);
+  }
 }
 
 const string& Level::GetNextZone(void) const
 {
   return (_exitingZoneTo);
+}
+
+const string& Level::GetExitZone(void) const
+{
+  return (_exitingZoneName);
+}
+
+void Level::SetEntryZone(const std::string& name)
+{
+  EntryZone* zone               = _world->GetEntryZoneByName(name);
+
+  if (!zone && _world->entryZones.size() > 0)
+    zone = &(_world->entryZones.front());
+  if (zone)
+  {
+    list<Waypoint*>::iterator it  = zone->waypoints.begin();
+    list<Waypoint*>::iterator end = zone->waypoints.end();
+
+    for (; it != end ; ++it)
+    {
+      // TODO if something
+      {
+        GetPlayer()->SetOccupiedWaypoint(*it);
+	GetPlayer()->GetNodePath().set_pos((*it)->nodePath.get_pos());
+        break ;
+      }
+    }
+  }
 }
