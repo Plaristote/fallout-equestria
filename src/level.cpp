@@ -161,6 +161,21 @@ Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Pa
   });
   
   _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
+  
+  _world->AddLight(WorldLight::Point, "toto");
+  WorldLight* light = _world->GetLightByName("toto");
+  
+  light->zoneSize = 20;
+  light->SetColor(255, 50, 50, 125);
+  light->nodePath.reparent_to(GetPlayer()->GetNodePath());
+  _world->CompileLight(light);
+
+  PointLight* plight = dynamic_cast<PointLight*>(light->nodePath.node());
+  plight->set_shadow_caster(true, 512, 512);
+  plight->get_lens()->set_near_far(1.f, 2.f);
+  plight->get_lens()->set_film_size(512);
+  
+  window->get_render().set_shader_auto();
 }
 
 Level::~Level()

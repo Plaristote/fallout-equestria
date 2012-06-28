@@ -1,9 +1,4 @@
 #include "world.h"
-#ifndef GAME_EDITOR
-# include "globals.hpp"
-#else
-# define ABS(x) (x > 0 ? x : -x)
-#endif
 
 using namespace std;
 
@@ -16,6 +11,7 @@ World::World(WindowFramework* window)
     rootWaypoints      = window->get_render().attach_new_node("waypoints");
     rootMapObjects     = window->get_render().attach_new_node("mapobjects");
     rootDynamicObjects = window->get_render().attach_new_node("dynamicobjects");
+    rootLights         = window->get_render().attach_new_node("lights");
 }
 
 World::~World()
@@ -234,6 +230,96 @@ EntryZone* World::GetEntryZoneByName(const std::string& name)
   return (0);
 }
 
+// Lights
+void World::AddLight(WorldLight::Type type, const std::string& name)
+{
+  lights.push_back(WorldLight(type, rootLights, name));
+}
+
+void World::DeleteLight(const std::string& name)
+{
+  WorldLights::iterator it = std::find(lights.begin(), lights.end(), name);
+  
+  if (it != lights.end())
+  {
+    it->nodePath.detach_node();
+    lights.erase(it);
+  }
+}
+
+WorldLight* World::GetLightByName(const std::string& name)
+{
+  WorldLights::iterator it = std::find(lights.begin(), lights.end(), name);
+  
+  if (it != lights.end())
+    return (&(*it));
+  return (0);
+}
+
+void        World::CompileLight(WorldLight* light, unsigned char colmask)
+{
+  PT(CollisionSphere)       colSphere = new CollisionSphere(light->nodePath.get_x(),
+							   light->nodePath.get_y(),
+							   light->nodePath.get_z(),
+							   light->zoneSize);
+  PT(CollisionNode)         colNode       = new CollisionNode("compileLightSphere");
+  NodePath                  colNp         = rootLights.attach_new_node(colNode);
+  PT(CollisionHandlerQueue) handlerQueue  = new CollisionHandlerQueue();
+  CollisionTraverser        traverser;
+  list<NodePath>::iterator  it            = light->enlightened.begin();
+  list<NodePath>::iterator  end           = light->enlightened.end();
+
+  colNode->add_solid(colSphere);
+  traverser.add_collider(colNp, handlerQueue);
+
+  // Reseting the objects corresponding to the collision mask
+  while (it != end)
+  {
+    NodePath     np     = *it;
+    unsigned int npmask = np.get_collide_mask().get_word();
+    
+    if (npmask & colmask)
+    {
+      np.set_light_off(light->nodePath);
+      it = light->enlightened.erase(it);
+    }
+    else
+      ++it;
+  }
+  
+  // Detecting the new collisions with colmask, and setting the light
+  colNode->set_into_collide_mask(colmask);
+  colNode->set_from_collide_mask(colmask);
+  traverser.traverse(window->get_render());
+  for (unsigned short i = 0 ; i < handlerQueue->get_num_entries() ; ++i)
+  {
+    NodePath        node  = handlerQueue->get_entry(i)->get_into_node_path();
+
+    if (node.is_empty())
+      continue ;
+    
+    MapObject*     object    = GetMapObjectFromNodePath(node);
+    DynamicObject* dynObject = (object ? 0 : GetDynamicObjectFromNodePath(node));
+
+    if (object || dynObject)
+    {
+      list<NodePath>::iterator alreadyRegistered;
+
+      node = (object ? object->nodePath : dynObject->nodePath);
+      alreadyRegistered = find(light->enlightened.begin(), light->enlightened.end(), node);
+      if (alreadyRegistered == light->enlightened.end())
+      {
+	light->enlightened.push_back(node);
+	node.set_light(light->nodePath);
+      }
+    }
+  }
+  
+  cout << "Number of enlightened objects -> " << light->enlightened.size() << endl;
+  
+  colNp.detach_node();
+}
+
 // WAYPOINTS
 
 Waypoint::Waypoint(NodePath root)
@@ -249,6 +335,7 @@ Waypoint::Waypoint(NodePath root)
 
 void                Waypoint::SetSelected(bool selected)
 {
+  this->selected = selected;
   if (selected)
     nodePath.set_color(0, 1.0, 0, 0.5);
   else
@@ -692,6 +779,32 @@ void           World::UnSerialize(Utils::Packet& packet)
       exitZones.push_back(zone);
     }
   }
+
+  // EntryZone
+  {
+    int size;
+
+    packet >> size;
+    for (int it = 0 ; it < size ; ++it)
+    {
+      EntryZone      zone;
+      std::list<int> waypointsId;
+
+      packet >> zone.name;
+      packet >> waypointsId;
+      std::list<int>::iterator begin = waypointsId.begin();
+      std::list<int>::iterator end   = waypointsId.end();
+
+      for (; begin != end ; ++begin)
+      {
+        Waypoint* wp = GetWaypointFromId(*begin);
+
+        if (wp)
+          zone.waypoints.push_back(wp);
+      }
+      entryZones.push_back(zone);
+    }
+  }
 }
 
 void           World::Serialize(Utils::Packet& packet)
@@ -766,7 +879,28 @@ void           World::Serialize(Utils::Packet& packet)
       packet << zone.destinations;
       packet << waypointsId;
     }
-  }    
+  }
+
+  // EntryZone
+  {
+      EntryZones::iterator it   = entryZones.begin();
+      EntryZones::iterator end  = entryZones.end();
+      int                  size = entryZones.size();
+
+      packet << size;
+      for (; it != end ; ++it)
+      {
+        EntryZone&                     zone  = *it;
+        std::list<int>                 waypointsId;
+        std::list<Waypoint*>::iterator wpIt  = zone.waypoints.begin();
+        std::list<Waypoint*>::iterator wpEnd = zone.waypoints.end();
+
+        for (; wpIt != wpEnd ; ++wpIt)
+          waypointsId.push_back((*wpIt)->id);
+        packet << zone.name;
+        packet << waypointsId;
+      }
+  }
 }
 
 // MAP COMPILING

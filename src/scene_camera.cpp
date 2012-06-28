@@ -158,13 +158,13 @@ void SceneCamera::RunScroll(float elapsedTime)
   if (cameraMotion != MotionNone)
     _cameraPos += movement;
 
-  float zoom = 1.f;
+  /*float zoom = 1.f;
 
   _camera.set_pos(_cameraPos.get_x() - cos(cameraRot.get_x()) * zoom,
                   _cameraPos.get_y() - sin(cameraRot.get_y()) * zoom,
-                  _cameraPos.get_z() + sin(cameraRot.get_z()) * zoom + CAMERA_HEIGHT);
+                  _cameraPos.get_z() + sin(cameraRot.get_z()) * zoom + CAMERA_HEIGHT);*/
   
-  /*if (scrollSwapAxis[_currentCameraAngle])
+  if (scrollSwapAxis[_currentCameraAngle])
   {
     motionTop    = MotionBottom;
     motionBottom = MotionTop;
@@ -230,9 +230,9 @@ void SceneCamera::RunScroll(float elapsedTime)
   if      (cameraPos.get_y() < _minPosY && _minPosY != 0)
     cameraPos.set_y(_minPosY);
   else if (cameraPos.get_y() > _minPosY && _minPosY != 0)
-    cameraPos.set_y(_maxPosY);*/
+    cameraPos.set_y(_maxPosY);
 
-  //_camera.set_pos(cameraPos);
+  _camera.set_pos(cameraPos);
 }
 
 /*
@@ -241,7 +241,7 @@ void SceneCamera::RunScroll(float elapsedTime)
 void SceneCamera::CenterCameraInstant(LPoint3f pos)
 {
   _cameraPos = pos;
-  /*if (_currentCameraAngle == 0)
+  if (_currentCameraAngle == 0)
   {
     _camera.set_y(pos.get_y() - 65);
     _camera.set_x(pos.get_x() - 60);
@@ -250,7 +250,7 @@ void SceneCamera::CenterCameraInstant(LPoint3f pos)
   {
     _camera.set_y(pos.get_y() - 40);
     _camera.set_x(pos.get_x());
-  }*/
+  }
 }
 
 void SceneCamera::FollowObject(InstanceDynamicObject* object)
@@ -270,7 +270,7 @@ void SceneCamera::CenterCameraOn(NodePath np)
   _objectivePos.set_z(_objectivePos.get_z() + CAMERA_HEIGHT);
   
   // take in account camera decalage
-  /*if (_currentCameraAngle == 0)
+  if (_currentCameraAngle == 0)
   {
     _objectivePos.set_y(_objectivePos.get_y() - 65);
     _objectivePos.set_x(_objectivePos.get_x() - 60);
@@ -279,7 +279,7 @@ void SceneCamera::CenterCameraOn(NodePath np)
   {
     _objectivePos.set_y(_objectivePos.get_y() - 40);
     _objectivePos.set_x(_objectivePos.get_x());
-  }*/
+  }
 }
 
 void SceneCamera::FollowNodePath(NodePath np)
@@ -335,29 +335,3 @@ void SceneCamera::RunFollow(float elapsedTime)
     std::cout << "Centering camera Done" << std::endl;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

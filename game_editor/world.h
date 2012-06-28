@@ -1,7 +1,8 @@
 #ifndef WORLD_H
 # define WORLD_H
 
-# include <panda3d/cmath.h>
+# include "globals.hpp"
+
 # include <panda3d/pandaFramework.h>
 # include <panda3d/pandaSystem.h>
 # include <panda3d/texturePool.h>
@@ -12,6 +13,12 @@
 # include <panda3d/collisionNode.h>
 # include <panda3d/collisionHandlerQueue.h>
 # include <panda3d/collisionTraverser.h>
+
+# include <panda3d/pointLight.h>
+# include <panda3d/directionalLight.h>
+# include <panda3d/ambientLight.h>
+# include <panda3d/spotlight.h>
+
 # include <algorithm>
 # include "serializer.hpp"
 
@@ -43,7 +50,8 @@ namespace ColMask
       Waypoint   = 1,
       Tile       = 2,
       DynObject  = 4,
-      Object     = 8
+      Object     = 8,
+      FovTarget  = 16
   };
 }
 
@@ -67,9 +75,9 @@ struct Waypoint
     struct ArcObserver
     {
       virtual bool CanGoThrough(unsigned char type) = 0;
-      virtual void GoingThrough(void)               = 0;
+      virtual void GoingThrough(void*)              = 0;
     };
-
+    
     struct Arc
     {
         Arc(NodePath from, Waypoint* to);
@@ -107,6 +115,7 @@ struct Waypoint
     void                 PositionChanged(void);
     void                 UpdateArcDirection(Waypoint*);
     void                 SetSelected(bool);
+    bool                 IsSelected(void) const { return (selected); }
 
     // Pathfinding features
     float                GoalDistanceEstimate(const Waypoint& goal) const { return (GetDistanceEstimate(goal)); }
@@ -123,6 +132,7 @@ struct Waypoint
 
 private:
     friend struct World;
+    bool                 selected;
     // unserialize tmp
     std::vector<int>     tmpArcs;
 };
@@ -187,11 +197,102 @@ struct DynamicObject : public MapObject
     void Serialize(Utils::Packet& packet);
 };
 
+struct Zone
+{
+  bool operator==(const std::string& comp) { return (name == comp); }
+
+  std::string          name;
+  std::list<Waypoint*> waypoints;
+};
+
+struct ExitZone : public Zone
+{
+  std::list<std::string> destinations;
+};
+
+typedef Zone EntryZone;
+
+struct WorldLight
+{
+  enum Type
+  {
+    Point,
+    Directional,
+    Ambient,
+    Spot
+  };
+
+  WorldLight(Type type, NodePath parent, const std::string& name) : name(name)
+  {
+    switch (type)
+    {
+      case Point:
+      {
+	PT(PointLight) pLight = new PointLight(name);
+
+	light    = pLight;
+	nodePath = parent.attach_new_node(pLight);
+      }
+	break ;
+      case Directional:
+      {
+	PT(DirectionalLight) pLight = new DirectionalLight(name);
+
+	light    = pLight;
+	nodePath = parent.attach_new_node(pLight);
+      }
+	break ;
+      case Ambient:
+      {
+	PT(AmbientLight) pLight = new AmbientLight(name);
+
+	light    = pLight;
+	nodePath = parent.attach_new_node(pLight);
+      }
+	break ;
+      case Spot:
+      {
+	PT(Spotlight) pLight = new Spotlight(name);
+
+	light    = pLight;
+	nodePath = parent.attach_new_node(pLight);
+      }
+	break ;
+    }
+  }
+  
+  LColor GetColor(void) const
+  {
+    return (light->get_color());
+  }
+
+  void   SetColor(float r, float g, float b, float a)
+  {
+    LColor color(r, g, b, a);
+    
+    light->set_color(color);
+  }
+  
+  bool operator==(const std::string& comp) { return (name == comp); }
+
+  std::string name;
+  NodePath    nodePath;
+  Type        types;
+  PT(Light)   light;
+  Lens*       lens;
+  float       zoneSize;
+
+  std::list<NodePath> enlightened;
+};
+
 struct World
 {
     typedef std::list<Waypoint>      Waypoints;
     typedef std::list<MapObject>     MapObjects;
     typedef std::list<DynamicObject> DynamicObjects;
+    typedef std::list<WorldLight>    WorldLights;
+    typedef std::list<ExitZone>      ExitZones;
+    typedef std::list<EntryZone>     EntryZones;
 
     WindowFramework* window;
 
@@ -203,8 +304,15 @@ struct World
 
     NodePath         rootDynamicObjects;
     DynamicObjects   dynamicObjects;
+    
+    NodePath         rootLights;
+    WorldLights      lights;
+    
+    ExitZones        exitZones;
+    EntryZones       entryZones;
 
     World(WindowFramework* window);
+    ~World(void);
 
     Waypoint* AddWayPoint(float x, float y, float z);
     void      DeleteWayPoint(Waypoint*);
@@ -250,8 +358,12 @@ struct World
         typename std::list<OBJTYPE>::iterator it  = list.begin();
         typename std::list<OBJTYPE>::iterator end = list.end();
 
+	if (path.is_empty())
+	  return (0);
         for (; it != end ; ++it)
         {
+	  if ((*it).nodePath.is_empty())
+	    continue ;
           if ((*it).nodePath.is_ancestor_of(path))
             return (&(*it));
         }
@@ -271,7 +383,20 @@ struct World
     DynamicObject* GetDynamicObjectFromNodePath(NodePath path);
     void           SetDynamicObjectsVisible(bool v)
     { if (v) { rootDynamicObjects.show(); } else { rootDynamicObjects.hide(); } }
-
+    
+    void           AddExitZone(const std::string&);
+    void           DeleteExitZone(const std::string&);
+    ExitZone*      GetExitZoneByName(const std::string&);
+    
+    void           AddEntryZone(const std::string&);
+    void           DeleteEntryZone(const std::string&);
+    EntryZone*     GetEntryZoneByName(const std::string&);
+    
+    void           AddLight(WorldLight::Type, const std::string&);
+    void           DeleteLight(const std::string&);
+    WorldLight*    GetLightByName(const std::string&);
+    void           CompileLight(WorldLight*, unsigned char = ColMask::Object | ColMask::DynObject);
+    
     Waypoint*      GetWaypointAt(LPoint2f);
 
     void           UnSerialize(Utils::Packet& packet);

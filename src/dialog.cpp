@@ -1,6 +1,6 @@
 #include "dialog.hpp"
 
-using namespace Rocket::Core;
+using namespace Rocket;
 using namespace std;
 
 // VIEW
@@ -20,7 +20,7 @@ DialogView::~DialogView()
   {
     if (_containerAnswers)
     {
-      Element* element = 0;
+      Core::Element* element = 0;
       
       for (int i = 0 ; (element = _containerAnswers->GetChild(i)) != 0 ; ++i)
       {
@@ -38,7 +38,7 @@ void DialogView::Destroy()
   {
     if (_containerAnswers)
     {
-      Element* element = 0;
+      Core::Element* element = 0;
 
       for (int i = 0 ; (element = _containerAnswers->GetChild(i)) != 0 ; ++i)
       {
@@ -69,7 +69,7 @@ void DialogView::UpdateView(const std::string& npcLine, const DialogAnswers& ans
     _containerAnswers->SetInnerRML(answersRml.c_str());
     std::for_each(answers.answers.begin(), answers.answers.end(), [this](DialogAnswers::KeyValue data)
     {
-      Rocket::Core::Element* element;
+      Core::Element* element;
 
       element = _containerAnswers->GetElementById(data.first.c_str());
       element->AddEventListener("click", &AnswerSelected);
@@ -82,7 +82,7 @@ void DialogView::CleanView(const DialogAnswers& answers)
 {
   std::for_each(answers.answers.begin(), answers.answers.end(), [this](DialogAnswers::KeyValue data)
   {
-    Rocket::Core::Element* element;
+    Core::Element* element;
 
     element = _containerAnswers->GetElementById(data.first.c_str());
     if (element)

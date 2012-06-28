@@ -86,6 +86,19 @@ private slots:
     void WaypointSelect(Waypoint*);
     void UpdateSelection(void);
 
+    // ENTRY/EXIT ZONES
+    void EntryZoneAdd(void);
+    void EntryZoneDelete(void);
+    void EntryZoneSetAsSelection(void);
+    void EntryZoneChanged(QString);
+
+    void ExitZoneAdd(void);
+    void ExitZoneDelete(void);
+    void ExitZoneSetAsSelection(void);
+    void ExitZoneChanged(QString);
+    void ExitZoneDestinationAdd(void);
+    void ExitZoneDestinationDelete(void);
+
     // OBJECTS
     void ObjectAdd(void);
 
