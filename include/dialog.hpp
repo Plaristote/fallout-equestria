@@ -49,7 +49,7 @@ public:
 
   const std::string GetNpcLine(void)
   {
-    std::string     key  = _data[_currentNpcLine]["npcLine"];
+    std::string     key  = _data[_currentNpcLine]["npcLine"].Value();
     Data            line = _l18n[key];
 
     if (line.Nil())
