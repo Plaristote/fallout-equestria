@@ -30,13 +30,13 @@ public:
     NodePath np;
     InventoryObject& object;
   };
-  
-  
+
   InventoryObject(Data);
   ~InventoryObject();
 
-  const std::string UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target);
-  const std::string UseOn(ObjectCharacter* user, InstanceDynamicObject* target);
+  const std::string UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType);
+  const std::string UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType);
+  const std::string Use(ObjectCharacter* user, unsigned char useType);
   const std::string GetName(void) const { return (this->Key()); }
   DynamicObject*    CreateDynamicObject(World* world) const;
   EquipedModel*     CreateEquipedModel(World* world);
@@ -44,10 +44,11 @@ public:
   bool              CanWeild(ObjectCharacter*, EquipedMode);
   void              SetEquiped(bool set)  { _equiped = set;    }
   bool              IsEquiped(void) const { return (_equiped); }
+  bool              IsGroupableWith(const InventoryObject*) const;
 
 private:
   template<class C>
-  const std::string ExecuteHook(asIScriptFunction* hook, ObjectCharacter* user, C* target);
+  const std::string ExecuteHook(asIScriptFunction* hook, ObjectCharacter* user, C* target, unsigned char actionIt);
   
   DataTree           _dataTree;
   
@@ -55,6 +56,21 @@ private:
 
   asIScriptContext*  _scriptContext;
   asIScriptModule*   _scriptModule;
+  
+  struct ActionHooks
+  {
+    ActionHooks() : Use(0), UseOnCharacter(0), UseOnDoor(0), UseOnOthers(0), UseAsWeapon(0) {}
+
+    asIScriptFunction* Use;
+    asIScriptFunction* UseOnCharacter;
+    asIScriptFunction* UseOnDoor;
+    asIScriptFunction* UseOnOthers;
+    asIScriptFunction* UseAsWeapon;
+  };
+  typedef std::vector<ActionHooks> ActionsHooks;
+  
+  ActionsHooks       _actionHooks;
+
   asIScriptFunction* _hookUseOnCharacter;
   asIScriptFunction* _hookUseOnDoor;
   asIScriptFunction* _hookUseOnOthers;

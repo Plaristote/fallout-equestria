@@ -88,9 +88,10 @@ public:
   void                   SelectedUseObjectOn(InventoryObject* object);
 
   void                   ActionUse(ObjectCharacter* user, InstanceDynamicObject* target);
-  void                   ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object);
+  void                   ActionUseObject(ObjectCharacter* user, InventoryObject* object, unsigned char actionIt);
+  void                   ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object, unsigned char actionIt);
   void                   ActionDropObject(ObjectCharacter* user, InventoryObject* object);
-  void                   ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* object);
+  void                   ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* object, unsigned char actionIt);
 
   void                   PendingActionTalkTo(InstanceDynamicObject* fromObject);
   void                   PendingActionUse(InstanceDynamicObject* fromObject);

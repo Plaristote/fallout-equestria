@@ -34,10 +34,6 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
 
   if (!(script.Nil()) && _scriptContext)
   {
-    Data hookCharacter  = script["hookCharacters"];
-    Data hookDoor       = script["hookDoors"];
-    Data hookOthers     = script["hookOthers"];
-    Data hookWeapon     = script["hookWeapon"];
     Data hookWeildMouth = script["hookWeildMouth"];
     Data hookWeildMagic = script["hookWeildMagic"];
     Data hookWeildBS    = script["hookWeildBattleSaddle"];
@@ -45,30 +41,6 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
     _scriptModule       = Script::ModuleManager::Require("item" + data.Key(), "scripts/objects/" + script["file"].Value());
     if (_scriptModule)
     {
-      if (!(hookCharacter.Nil()))
-      {
-	std::string decl = "string " + hookCharacter.Value() + "(Item@, Character@, Character@)";
-	
-	_hookUseOnCharacter = _scriptModule->GetFunctionByDecl(decl.c_str());
-      }
-      if (!(hookDoor.Nil()))
-      {
-	std::string decl = "string " + hookDoor.Value() + "(Item@, Character@, Door@)";
-	
-	_hookUseOnDoor      = _scriptModule->GetFunctionByDecl(decl.c_str());
-      }
-      if (!(hookOthers.Nil()))
-      {
-	std::string decl = "string " + hookOthers.Value() + "(Item@, Character@, DynamicObject@)";
-	
-	_hookUseOnOthers    = _scriptModule->GetFunctionByDecl(decl.c_str());
-      }
-      if (!(hookWeapon.Nil()))
-      {
-	std::string decl = "string " + hookWeapon.Value() + "(Item@, Character@, Character@)";
-	
-	_hookUseAsWeapon    = _scriptModule->GetFunctionByDecl(decl.c_str());
-      }
       if (!(hookWeildMouth.Nil()))
       {
 	std::string decl = "bool " + hookWeildMouth.Value() + "(Item@, Character@)";
@@ -89,6 +61,32 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
       }
     }
   }
+  
+  ForEach(data["actions"], [this](Data action)
+  {
+    Data        copy = (*this)["actions"][action.Key()];
+    ActionHooks hooks;
+    
+    copy["ap-cost"]        = action["ap-cost"].Value();
+    copy["targeted"]       = (action["targeted"].Nil() ? "1" : action["targeted"].Value());
+    copy["range"]          = action["range"].Value();
+    copy["combat"]         = action["combat"].Value();
+    
+    if (_scriptModule)
+    {
+      if (action["hookUse"].Nil() == false)
+	hooks.Use             = _scriptModule->GetFunctionByDecl(("string " + action["hookUse"].Value() + "(Item@, Character@)").c_str());
+      if (action["hookCharacters"].Nil() == false)
+	hooks.UseOnCharacter  = _scriptModule->GetFunctionByDecl(("string " + action["hookCharacters"].Value() + "(Item@, Character@, Character@)").c_str());
+      if (action["hookDoors"].Nil() == false)
+	hooks.UseOnDoor       = _scriptModule->GetFunctionByDecl(("string " + action["hookDoors"].Value() + "(Item@, Character@, Door@)").c_str());
+      if (action["hookOthers"].Nil() == false)
+	hooks.UseOnOthers     = _scriptModule->GetFunctionByDecl(("string " + action["hookOthers"].Value() + "(Item@, Character@, DynamicObject@)").c_str());
+      if (action["hookWeapon"].Nil() == false)
+	hooks.UseAsWeapon     = _scriptModule->GetFunctionByDecl(("string " + action["hookWeapon"].Value() + "(Item@, Character@, Character@)").c_str());
+    }
+    _actionHooks.push_back(hooks);
+  });
 }
 
 InventoryObject::~InventoryObject()
@@ -96,6 +94,11 @@ InventoryObject::~InventoryObject()
   Script::ModuleManager::Release(_scriptModule);
   if (_scriptContext)
     _scriptContext->Release();
+}
+
+bool InventoryObject::IsGroupableWith(const InventoryObject* other) const
+{
+  return (GetName() == other->GetName());
 }
 
 bool InventoryObject::CanWeild(ObjectCharacter* character, EquipedMode mode)
@@ -199,37 +202,68 @@ DynamicObject* InventoryObject::CreateDynamicObject(World* world) const
   return (object);
 }
 
-const std::string InventoryObject::UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target)
+const std::string InventoryObject::UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType)
 {
-  return (ExecuteHook(_hookUseOnCharacter, user, target));
+  return (ExecuteHook(_actionHooks[useType].UseAsWeapon, user, target, useType));
 }
 
-const std::string InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target)
+const std::string InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType)
 {
   ObjectCharacter* charTarget;
   ObjectDoor*      doorTarget;
-  
-  if (_hookUseOnCharacter && (charTarget = target->Get<ObjectCharacter>()) != 0)
-    return (ExecuteHook(_hookUseOnCharacter, user, charTarget));
-  if (_hookUseOnDoor      && (doorTarget = target->Get<ObjectDoor>())      != 0)
-  {
-    std::cout << "Door key = " << doorTarget->GetKeyName() << std::endl;
-    return (ExecuteHook(_hookUseOnDoor, user, doorTarget));
-  }
-  if (_hookUseOnOthers)
-    return (ExecuteHook(_hookUseOnOthers, user, target));
+  ActionHooks&     hooks = _actionHooks[useType];
+
+  if (hooks.UseOnCharacter && (charTarget = target->Get<ObjectCharacter>()) != 0)
+    return (ExecuteHook(hooks.UseOnCharacter, user, charTarget, useType));
+  if (hooks.UseOnDoor      && (doorTarget = target->Get<ObjectDoor>())      != 0)
+    return (ExecuteHook(hooks.UseOnDoor, user, doorTarget, useType));
+  if (hooks.UseOnOthers)
+    return (ExecuteHook(hooks.UseOnOthers, user, target, useType));
   return ("That does nothing");
 }
 
-template<class C>
-const std::string InventoryObject::ExecuteHook(asIScriptFunction* hook, ObjectCharacter* user, C* target)
+const std::string InventoryObject::Use(ObjectCharacter* user, unsigned char useType)
 {
-  _scriptContext->Prepare(hook);
-  _scriptContext->SetArgObject(0, this);
-  _scriptContext->SetArgObject(1, user);
-  _scriptContext->SetArgObject(2, target);
-  _scriptContext->Execute();
-  return (*(reinterpret_cast<std::string*>(_scriptContext->GetReturnObject())));
+  return (ExecuteHook(_actionHooks[useType].Use, user, (ObjectCharacter*)0, useType));
+}
+
+template<class C>
+const std::string InventoryObject::ExecuteHook(asIScriptFunction* hook, ObjectCharacter* user, C* target, unsigned char useType)
+{
+  if (hook)
+  {
+    int ret;
+
+    _scriptContext = Script::Engine::Get()->CreateContext();
+    ret = _scriptContext->Prepare(hook);
+    
+    switch (ret)
+    {
+      case asCONTEXT_ACTIVE:
+	return ("/!\\ Script Context still active");
+      default:
+	break ;
+    }
+    
+    _scriptContext->SetArgObject(0, this);
+    _scriptContext->SetArgObject(1, user);
+    if (target != nullptr)
+      _scriptContext->SetArgObject(2, target);
+    ret = _scriptContext->Execute();
+    switch (ret)
+    {
+      case asEXECUTION_FINISHED:
+	break ;
+      case asERROR:
+	return ("/!\\ Failed to execute script (Invalid Context) !");
+      case asEXECUTION_EXCEPTION:
+	return ("/!\\ Failed to execute script (Exception) !");
+      default:
+	return ("/!\\ Failed to execute script !");
+    }
+    return (*(reinterpret_cast<std::string*>(_scriptContext->GetReturnObject())));
+  }
+  return ("That does nothing");
 }
 
 /*

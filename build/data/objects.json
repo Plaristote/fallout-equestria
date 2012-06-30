@@ -3,27 +3,35 @@
 "hooves": {
             "icon":   "hooves.png",
             "script": {
-                        "file":           "objectsUnarmed.as",
-                        "hookCharacters": "HoovesHit"
+                        "file":           "objectsUnarmed.as"
                       },
-            "combat": "1",
-            "range":  "10",
             "hidden": "1",
-            "ap-cost": "3",
-            "damage":  "5"
+            "actions": {
+                         "hooves": {
+                                     "ap-cost": 3,
+                                     "combat":  1,
+                                     "range":   10,
+                                     "danage":  5,
+                                     "hookWeapon": "HoovesHit"
+                                   }
+                       }
           },
 
 "buck":   {
             "icon":   "buck.png",
             "script": {
-                        "file":           "objectsUnarmed.as",
-                        "hookCharacters": "BuckHit"
+                        "file":           "objectsUnarmed.as"
                       },
-            "combat": "1",
-            "range":  "20",
             "hidden": "1",
-            "ap-cost": "4",
-            "damage": "10"
+            "actions": {
+                         "buck": {
+                                   "ap-cost": 4,
+                                   "combat":  1,
+                                   "range":   15,
+                                   "damage":  10,
+                                   "hookWeapon": "BuckHit"
+                                 }
+                       }
           },
 
 "Key": {
@@ -33,9 +41,14 @@
          "scale":   1,
          "weight":  5,
          "script": {
-                     "file": "objectsMain.as",
-                     "hookDoors": "UseKeyOnDoor"
-                   }
+                     "file": "objectsMain.as"
+                   },
+         "actions": {
+                      "use on": {
+                                  "ap-cost": 2,
+                                  "hookDoors": "UseKeyOnDoor"
+                                }
+                    }
        }
 
 }

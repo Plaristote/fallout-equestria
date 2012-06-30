@@ -28,8 +28,8 @@ void CastShield(Character@ self)
 
 void main(Character@ self, float elaspedTime)
 {
-  if (myTimer.GetElapsedTime() > 2.5)
-    CastShield(self);
+  //if (myTimer.GetElapsedTime() > 2.5)
+  //  CastShield(self);
   /*if (!(self.IsMoving()) && myTimer.GetElapsedTime() > 2.5)
   {
     if (initWaypoint == 0)
@@ -107,56 +107,69 @@ void combat(Character@ self)
       bool  suitable1,  suitable2;
       int   distance = currentTarget.GetDistance(self.AsObject());
 
-      suitable1 = data1["range"].AsFloat() > distance;
-      suitable2 = data2["range"].AsFloat() > distance;
-      if (suitable1 && suitable2)
-      {
-        int firstNShots = data1["ap-cost"].AsInt() / actionPoints;
-        int secndNShots = data2["ap-cost"].AsInt() / actionPoints;
+      Item@  bestEquipedItem;
+      int    bestAction = -1;
 
-        if (firstNShots * data1["damage"].AsInt() > secndNShots * data2["damage"].AsInt())
-          suitable2 = false;
-        else
-          suitable1 = false;
-      }
-      if (suitable1)
-        actionPointsCost = data1["ap-cost"].AsInt();
-      else if (suitable2)
-        actionPointsCost = data2["ap-cost"].AsInt();
-      if (suitable1 || suitable2)
+      int    nActions = data1["actions"].Count();
+      int    cAction  = 0;
+      Data   cData    = data1;
+      Item@  cItem    = @equiped1;
+
+      while (cAction < nActions)
       {
-        Write("IA can hit if haz action points");
-        Write("Action point cost: " + actionPointsCost);
+        Data action   = cData["actions"][cAction];
+
+        // If it's a combative action
+        if (action["combat"].AsInt() == 1)
+        {
+          // If we're in range
+          if (action["range"].AsFloat() > distance)
+          {
+            bool setAsBest = true;
+
+            // If there's an action to compare this one to
+            if (bestAction >= 0)
+            {
+              Data dataBestAction   = bestEquipedItem.AsData()["actions"][bestAction];
+              int  bestActionNShots = dataBestAction["ap-cost"].AsInt() / actionPoints;
+              int  curActionNShots  = action["ap-cost"].AsInt()         / actionPoints;
+
+              if (bestActionNShots * dataBestAction["damage"].AsInt() >= curActionNShots * action["damage"].AsInt())
+                setAsBest = false;
+            }
+            if (setAsBest)
+            {
+              @bestEquipedItem = @cItem;
+              bestAction       = cAction;
+            }
+          }
+        }
+        cAction++;
+      }
+
+      if (@bestEquipedItem != null)
+      {
+        actionPointsCost = bestEquipedItem.AsData()["actions"][bestAction]["ap-cost"].AsInt();
         if (actionPoints >= actionPointsCost)
-          level.ActionUseWeaponOn(self, currentTarget, (suitable1 ? equiped1 : equiped2));
+          level.ActionUseWeaponOn(self, currentTarget, bestEquipedItem, bestAction);
         else
           level.NextTurn();
       }
       else
       {
-        self.GoTo(level.GetPlayer().AsObject(), 1);
-        self.TruncatePath(1);
+        if (currentTarget.GetPathDistance(self.AsObject()) <= 1)
+          level.NextTurn();
+        else
+        {
+          self.GoTo(level.GetPlayer().AsObject(), 1);
+          self.TruncatePath(1);
+        }
       }
     }
     else
-      self.GoTo(level.GetPlayer().AsObject(), 1); 
+    {
+      self.GoTo(level.GetPlayer().AsObject(), 1);
+      self.TruncatePath(1);
+    }
   }
 }
-
-/*void combat(Character@ self)
-{
-  if (self.GetPathDistance(level.GetPlayer().AsObject()) <= 1)
-  {
-    if (!(self.IsMoving()))
-    {
-      Character@ target = level.GetPlayer();
-
-      if (self.GetActionPoints() >= 3)
-        level.ActionUseWeaponOn(self, target, self.GetEquipedItem(0));
-      else
-        level.NextTurn();
-    }
-    return ;
-  }
-  self.GoTo(level.GetPlayer().AsObject(), 1);
-}*/

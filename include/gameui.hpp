@@ -43,12 +43,14 @@ public:
   void                   SetEnabledAP(bool);
   
   void                   SetEquipedItem(unsigned short it, InventoryObject* item);
+  void                   SetEquipedItemAction(unsigned short it, InventoryObject* item, unsigned char actionIt);
 
   RocketListener         MenuButtonClicked;
   RocketListener         InventoryButtonClicked;
   RocketListener         PersButtonClicked;
   
   Observatory::Signal<void (unsigned short)> UseEquipedItem;
+  Observatory::Signal<void (unsigned short)> EquipedItemNextAction;
   Observatory::Signal<void>                  CombatPassTurn;
   Observatory::Signal<void>                  CombatEnd;
   
@@ -58,8 +60,8 @@ private:
   RocketListener         PassTurnClicked;
   RocketListener         CombatEndClicked;
   
-  void                   CallbackEquipedItem1Clicked(Rocket::Core::Event&) { UseEquipedItem.Emit(0); }
-  void                   CallbackEquipedItem2Clicked(Rocket::Core::Event&) { UseEquipedItem.Emit(1); }
+  void                   CallbackEquipedItem1Clicked(Rocket::Core::Event&);
+  void                   CallbackEquipedItem2Clicked(Rocket::Core::Event&);
   void                   CallbackPassTurnClicked(Rocket::Core::Event&)  { CombatPassTurn.Emit(); std::cout << "GENIUS" << std::endl; }
   void                   CallbackCombatEndClicked(Rocket::Core::Event&) { CombatEnd.Emit();      }
   

@@ -117,32 +117,36 @@ Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Pa
 
   _world->SetWaypointsVisible(false);
 
-  InventoryObject* object = new InventoryObject(Data(_items)["Key"]);
+  InventoryObject* object1 = new InventoryObject(Data(_items)["Key"]);
+  InventoryObject* object2 = new InventoryObject(Data(_items)["Key"]);
 
-  GetPlayer()->GetInventory().AddObject(object);
+  GetPlayer()->GetInventory().AddObject(object1);
+  GetPlayer()->GetInventory().AddObject(object2);
   if (GetPlayer()->GetStatistics())
   {
     Data stats(GetPlayer()->GetStatistics());
     
     if (!(stats["Statistics"]["Action Points"].Nil()))
       _levelUi.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
-    GetPlayer()->ActionPointChanged.Connect(_levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
-    GetPlayer()->EquipedItemChanged.Connect(_levelUi.GetMainBar(), &GameMainBar::SetEquipedItem);
+    GetPlayer()->ActionPointChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
+    GetPlayer()->EquipedItemActionChanged.Connect(_levelUi.GetMainBar(), &GameMainBar::SetEquipedItemAction);
+    GetPlayer()->EquipedItemChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetEquipedItem);
     GetPlayer()->EquipedItemChanged.Emit(0, GetPlayer()->GetEquipedItem(0));
     GetPlayer()->EquipedItemChanged.Emit(1, GetPlayer()->GetEquipedItem(1));
   }
-  _levelUi.GetMainBar().UseEquipedItem.Connect(*this, &Level::CallbackActionTargetUse);
-  _levelUi.GetMainBar().CombatEnd.Connect     (*this, &Level::StopFight);
-  _levelUi.GetMainBar().CombatPassTurn.Connect(*this, &Level::NextTurn);
+  _levelUi.GetMainBar().EquipedItemNextAction.Connect(*GetPlayer(), &ObjectCharacter::ItemNextUseType);
+  _levelUi.GetMainBar().UseEquipedItem.Connect       (*this, &Level::CallbackActionTargetUse);
+  _levelUi.GetMainBar().CombatEnd.Connect            (*this, &Level::StopFight);
+  _levelUi.GetMainBar().CombatPassTurn.Connect       (*this, &Level::NextTurn);
   _levelUi.GetInventory().SetInventory(GetPlayer()->GetInventory());
   obs.Connect(_levelUi.GetInventory().EquipItem,   *this,        &Level::PlayerEquipObject);
   obs.Connect(_levelUi.GetInventory().UnequipItem, *GetPlayer(), &ObjectCharacter::UnequipItem);
   obs.Connect(_levelUi.GetInventory().DropObject,  *this,        &Level::PlayerDropObject);
   obs.Connect(_levelUi.GetInventory().UseObject,   *this,        &Level::PlayerUseObject);
-  
+
   obs.Connect(InstanceDynamicObject::ActionUse,         *this, &Level::CallbackActionUse);
   obs.Connect(InstanceDynamicObject::ActionTalkTo,      *this, &Level::CallbackActionTalkTo);
-  obs.Connect(InstanceDynamicObject::ActionUseObjectOn, *this, &Level::CallbackActionUseObjectOn);  
+  obs.Connect(InstanceDynamicObject::ActionUseObjectOn, *this, &Level::CallbackActionUseObjectOn);
 
   TimeManager::Task* daylightTask = _timeManager.AddTask(true, 3);
   daylightTask->Interval.Connect(*this, &Level::RunDaylight);
@@ -353,17 +357,23 @@ AsyncTask::DoneStatus Level::do_task(void)
   switch (_state)
   {
     case Fight:
-      for_each(_objects.begin(), _objects.end(),       [elapsedTime](InstanceDynamicObject* object) { object->Run(elapsedTime); });
-      (*_itCharacter)->Run(elapsedTime);
+      ForEach(_objects,    [elapsedTime]      (InstanceDynamicObject* object) { object->Run(elapsedTime); });
+      for_each(_characters.begin(), _characters.end(), [this, elapsedTime](ObjectCharacter* character)
+      {
+	if (character == (*_itCharacter))
+	  character->Run(elapsedTime);
+        character->UnprocessCollisions();
+        character->ProcessCollisions();
+      });
       break ;
     case Normal:
       _timeManager.AddElapsedSeconds(elapsedTime);
-      for_each(_objects.begin(), _objects.end(),       [elapsedTime](InstanceDynamicObject* object) { object->Run(elapsedTime); });
-      for_each(_characters.begin(), _characters.end(), [elapsedTime](ObjectCharacter* character)
+      ForEach(_objects,    [elapsedTime](InstanceDynamicObject* object) { object->Run(elapsedTime); });
+      ForEach(_characters, [elapsedTime](ObjectCharacter* character)
       {
-	character->Run(elapsedTime);
-	character->UnprocessCollisions();
-	character->ProcessCollisions();
+        character->Run(elapsedTime);
+        character->UnprocessCollisions();
+        character->ProcessCollisions();
       });
       break ;
     case Interrupted:
@@ -522,17 +532,18 @@ void Level::MouseLeftClicked(void)
 	{
 	  ObjectCharacter*     player    = GetPlayer();
 	  InventoryObject*     item      = player->pendingActionObject;
+	  unsigned char        actionIt  = player->pendingActionObjectActionIt;
 
-	  if ((*item)["combat"] == "1")
+	  if ((*item)["actions"][actionIt]["combat"] == "1")
 	  {
 	    ObjectCharacter*   target = dynObject->Get<ObjectCharacter>();
 
 	    if (!target)
 	      return ;
-	    ActionUseWeaponOn(player, target, item);
+	    ActionUseWeaponOn(player, target, item, actionIt);
 	  }
 	  else
-	    ActionUseObjectOn(player, dynObject, item);
+	    ActionUseObjectOn(player, dynObject, item, actionIt);
 	}
       }
   }
@@ -642,21 +653,29 @@ void Level::PlayerLoot(Inventory* inventory)
 
 void Level::CallbackActionTargetUse(unsigned short it)
 {
-  ObjectCharacter* player = GetPlayer();
-  InventoryObject* object = player->GetEquipedItem(it);
-  
+  ObjectCharacter* player   = GetPlayer();
+  InventoryObject* object   = player->GetEquipedItem(it);
+  unsigned char    actionIt = player->GetequipedAction(it);
+
+  std::cout << "ActionTargetUse" << std::endl;
   if (object)
   {
-    if ((*object)["combat"].Value() == "1" && _state != Fight)
-      StartFight(player);
-    player->pendingActionObject = object;
-    SetMouseState(MouseTarget);
+    if ((*object)["actions"][actionIt]["targeted"] == "1")
+    {
+      if ((*object)["actions"][actionIt]["combat"].Value() == "1" && _state != Fight)
+	StartFight(player);
+      player->pendingActionObject         = object;
+      player->pendingActionObjectActionIt = actionIt;
+      SetMouseState(MouseTarget);
+    }
+    else
+      ActionUseObject(player, object, actionIt);
   }
 }
 
 void Level::SelectedUseObjectOn(InventoryObject* object)
 {
-  ActionUseObjectOn(GetPlayer(), GetPlayer()->pendingActionOn, object);
+  ActionUseObjectOn(GetPlayer(), GetPlayer()->pendingActionOn, object, 0); // Action is default action: zero
 }
 
 void Level::PendingActionTalkTo(InstanceDynamicObject* object)
@@ -690,7 +709,7 @@ void Level::PendingActionUseObjectOn(InstanceDynamicObject* object)
     object->Get<ObjectCharacter>()->LookAt(object->pendingActionOn);
     if (UseActionPoints(useCost))
     {
-      const string toOutput = item->UseOn(object->Get<ObjectCharacter>(), object->pendingActionOn);
+      const string toOutput = item->UseOn(object->Get<ObjectCharacter>(), object->pendingActionOn, object->pendingActionObjectActionIt);
 
       ConsoleWrite(toOutput);
     }
@@ -704,12 +723,10 @@ void Level::PendingActionUse(InstanceDynamicObject* object)
   {
     object->AnimationEnded.DisconnectAll();    
     object->AnimationEnded.Connect(*this, &Level::PendingActionUse);
-    std::cout << "AnimationEnded. Observers: " << object->AnimationEnded.ObserverCount() << std::endl;
     object->PlayAnimation("use");
   }
   else
   {
-    std::cout << "PendingAvtionUseAnimationDone" << std::endl;
     object->Get<ObjectCharacter>()->LookAt(object->pendingActionOn);
     if (!(UseActionPoints(AP_COST_USE)))
       return ;
@@ -727,22 +744,52 @@ void Level::ActionUse(ObjectCharacter* user, InstanceDynamicObject* target)
   user->pendingActionOn = target;
 }
 
-void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object)
+void Level::ActionUseObject(ObjectCharacter* user, InventoryObject* object, unsigned char actionIt)
+{
+  if (!user || !object)
+  {
+    Script::Engine::ScriptError.Emit("<span class='console-error'>[ActionUseObject] Aborted: NullPointer Error</span>");
+    return ;
+  }
+  if ((*object)["actions"].Count() <= actionIt)
+  {
+    Script::Engine::ScriptError.Emit("<span class='console-error'>[ActionUseObject] Invalid action iterator</span>");
+    return ;
+  }
+
+  std::cout << "ActionUseObject" << std::endl;
+  // Use the object naow
+//   if (!(user->pendingAnimationDone))
+//   {
+//     user->pendingActionObject         = object;
+//     user->pendingActionObjectActionIt = actionIt;
+//     user->AnimationEnded.Connect(*this, &Level::PendingActionUseWeaponOn);
+//     user->PlayEquipedItemAnimation(user->GetEquipedItem(0) == object ? 0 : 1);
+//   }
+}
+
+void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object, unsigned char actionIt)
 {
   if (!object || !target || !user)
   {
     Script::Engine::ScriptError.Emit("<span class='console-error'>[ActionUseObjectOn] Aborted: NullPointer Error</span>");
     return ;
   }
+  if ((*object)["actions"].Count() <= actionIt)
+  {
+    Script::Engine::ScriptError.Emit("<span class='console-error'>[ActionUseObject] Invalid action iterator</span>");
+    return ;
+  }
   user->GoTo(target, 0);
   user->ReachedDestination.Connect(*this, &Level::PendingActionUseObjectOn);
-  user->pendingActionOn     = target;
-  user->pendingActionObject = object;
+  user->pendingActionOn             = target;
+  user->pendingActionObject         = object;
+  user->pendingActionObjectActionIt = actionIt;
   if (user == GetPlayer())
     CloseRunningUi<UiItUseObjectOn>();
 }
 
-void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* item)
+void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* item, unsigned char actionIt)
 {
   if (!(user->pendingAnimationDone))
   {
@@ -754,16 +801,17 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
 
     user->LookAt(target);
 
-    if (target->GetDistance(user) > (float)((*item)["range"]))
+    if (target->GetDistance(user) > (float)((*item)["actions"][actionIt]["range"]))
       ConsoleWrite("Out of range");
     else if (!(user->HasLineOfSight(target)))
       ConsoleWrite("No line of sight");
     else
     {
-      unsigned int equipedIt = 0;
+      unsigned int equipedIt            = 0;
 
-      user->pendingActionObject = item;
-      user->pendingActionOn     = target;
+      user->pendingActionObject         = item;
+      user->pendingActionOn             = target;
+      user->pendingActionObjectActionIt = actionIt;
       user->AnimationEnded.DisconnectAll();
       user->AnimationEnded.Connect(*this, &Level::PendingActionUseWeaponOn);
       if (user->GetEquipedItem(0))
@@ -777,7 +825,7 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
   {
     string output;
     
-    output = (item->UseAsWeapon(user, target));
+    output = (item->UseAsWeapon(user, target, user->pendingActionObjectActionIt));
     MouseRightClicked();
     ConsoleWrite(output);
   }
@@ -788,7 +836,8 @@ void Level::PendingActionUseWeaponOn(InstanceDynamicObject* fromObject)
   std::cout << "PendingActionUseWeaponOn" << std::endl;
   ActionUseWeaponOn(fromObject->Get<ObjectCharacter>(),
 		    fromObject->pendingActionOn->Get<ObjectCharacter>(),
-		    fromObject->pendingActionObject);
+		    fromObject->pendingActionObject,
+		    fromObject->pendingActionObjectActionIt);
 }
 
 void Level::PlayerEquipObject(unsigned short it, InventoryObject* object)
@@ -828,7 +877,7 @@ void Level::PlayerDropObject(InventoryObject* object)
 
 void Level::PlayerUseObject(InventoryObject* object)
 {
-  ActionUseObjectOn(GetPlayer(), GetPlayer(), object);
+  ActionUseObjectOn(GetPlayer(), GetPlayer(), object, 0); // Default action is 0
 }
 
 void Level::ActionDropObject(ObjectCharacter* user, InventoryObject* object)

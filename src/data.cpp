@@ -64,6 +64,17 @@ Data::~Data()
   }
 }
 
+Data Data::operator[](unsigned int n)
+{
+  DataBranch::Children::iterator it  = _data->children.begin();
+  DataBranch::Children::iterator end = _data->children.end();
+  
+  for (unsigned int nIt = 0 ; it != end && nIt < n ; ++it, ++nIt);
+  if (it != end)
+    return (Data((*it)));
+  return (Data());
+}
+
 Data Data::operator[](const std::string& key)
 {
   DataBranch::Children::iterator it  = _data->children.begin();

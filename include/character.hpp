@@ -141,9 +141,12 @@ public:
   void                PlayEquipedItemAnimation(unsigned short it, const std::string& name);
   void                SetEquipedItem(unsigned short it, InventoryObject* object, EquipedMode mode = EquipedMouth);
   InventoryObject*    GetEquipedItem(unsigned short it);
+  unsigned char       GetequipedAction(unsigned short it) const { return (_equiped[it].actionIt); }
   void                UnequipItem(unsigned short it);
-  Observatory::Signal<void (unsigned short, InventoryObject*)> EquipedItemChanged;
-  
+  void                ItemNextUseType(unsigned short it);
+  Observatory::Signal<void (unsigned short, InventoryObject*)>                EquipedItemChanged;
+  Observatory::Signal<void (unsigned short, InventoryObject*, unsigned char)> EquipedItemActionChanged;
+
   void                PushBuff(Data, ObjectCharacter* caster);
 
   void                CheckFieldOfView(void);
@@ -187,7 +190,8 @@ private:
   // Inventory and Equiped Items
   struct ItemEquiped
   {
-    ItemEquiped(void) : equiped(0), default_(0), graphics(0) {}
+    ItemEquiped(void) : equiped(0), default_(0), graphics(0), actionIt(0) {}
+    unsigned char                  actionIt;
     EquipedMode                    mode;
     InventoryObject*               equiped;
     InventoryObject*               default_;

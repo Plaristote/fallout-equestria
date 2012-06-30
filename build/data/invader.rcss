@@ -96,6 +96,15 @@ div#window
 	background-center-image:       invader.tga stretch 10px  350px 130px 351px;
 }
 
+.inventory-item-quantity
+{
+  font-family: JH_FALLOUT;
+  font-size:   8px;
+  position: absolute;
+  padding-left: 10px;
+  padding-top:  5px;
+}
+
 div#content
 {
 	z-index: 2;

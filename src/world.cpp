@@ -490,7 +490,7 @@ void Waypoint::SetMouseBox(void)
 Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
 {
   observer = 0;
-#ifdef WAYPOINT_DEBUG
+//#ifdef WAYPOINT_DEBUG
   csegment = new CollisionSegment();
   node     = new CollisionNode("waypointArc");
   node->set_into_collide_mask(CollideMask(0));
@@ -501,7 +501,7 @@ Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
   nodePath.set_pos(0, 0, 0);
   nodePath.show();
   UpdateDirection();
-#endif
+//#endif
 }
 
 void Waypoint::Arc::UpdateDirection(void)

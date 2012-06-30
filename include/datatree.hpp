@@ -49,7 +49,7 @@ public:
   /*! \brief Returns a Data containing the child DataBranch corresponding to key if it exists, or Nil Data otherwise (see the Nil method) */
   Data        operator[](const std::string& key);
   const Data  operator[](const std::string& key) const;
-  Data        operator[](int it);
+  Data        operator[](unsigned int it);
 
   std::string Key(void)   const { return (_data ? _data->key   : ""); }
   std::string Value(void) const { return (_data ? _data->value : ""); }
@@ -103,6 +103,9 @@ public:
   Data Parent(void)    { return (_data ? _data->father : _data); }
   /*! \brief For debug purposes, writes the content of the DataTree from the current branch to the standard output */
   void Output(unsigned char indent = 0);
+  
+  /*! \brief Returns the amount of children the branch has */
+  unsigned int Count(void) const { return (_data ? _data->children.size() : 0); }
   
   class iterator
   {

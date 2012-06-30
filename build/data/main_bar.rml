@@ -50,16 +50,18 @@ body
 {
   position:    absolute;
   left:        33%;
-  width:       20%;
-  padding-top: 20px;
+  width:       25%;
+  padding-top: 25px;
+  height:      100px;
 }
 
 #equiped_2
 {
   position:    absolute;
   left:        53%;
-  width:       20%;
-  padding-top: 20px;
+  width:       25%;
+  padding-top: 25px;
+  height:      100px;
 }
 
 #second_col
@@ -83,6 +85,24 @@ body
   left:     91%;
   bottom:   0px;
 }
+
+.equiped_action
+{
+  position: absolute;
+  left:  0px;
+  top:   10px;
+}
+
+.equiped_image
+{
+}
+
+.equiped_apcost
+{
+  position: absolute;
+  right:  0px;
+  bottom: 0px;
+}
  
     </style>
   </head>
@@ -103,11 +123,11 @@ body
         oooooooooo
       </p>
 
-      <p id="equiped_1">
+      <p class="equiped" id="equiped_1">
         Equiped One
       </p>
 
-      <p id="equiped_2">
+      <p class="equiped" id="equiped_2">
         Equiped Two
       </p>
 

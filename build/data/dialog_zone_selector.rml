@@ -1,0 +1,18 @@
+<rml>
+	<head>
+		<title>Iventory</title>
+		<link type="text/template" href="tpl_mainbar.rml" />
+		<style>
+	        #body
+		{
+		  width:  300px;
+		  height: 300px;
+                  margin: auto;
+		}
+		</style>
+	</head>
+  <body id="body" template="tplmainbar">
+  <div id="choices">
+  </div>
+  </body>
+</rml>

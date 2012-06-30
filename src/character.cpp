@@ -266,7 +266,7 @@ void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& 
   if (_equiped[it].equiped)
   {
     InventoryObject& item           = *(_equiped[it].equiped);
-    Data             playerAnim     = item["animations"]["player"][name];
+    Data             playerAnim     = item["actions"][_equiped[it].actionIt]["animations"]["player"][name];
     const string     playerAnimName = (playerAnim.Nil() ? ANIMATION_DEFAULT : playerAnim.Value());
 
     if (_equiped[it].graphics)
@@ -287,6 +287,7 @@ void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, E
   _equiped[it].equiped->SetEquiped(false);
   _equiped[it].equiped  = item;
   _equiped[it].mode     = mode;
+  _equiped[it].actionIt = 0;
 
   _equiped[it].graphics = item->CreateEquipedModel(_level->GetWorld());
   if (_equiped[it].graphics)
@@ -316,6 +317,26 @@ void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, E
 void ObjectCharacter::UnequipItem(unsigned short it)
 {
   SetEquipedItem(it, _equiped[it].default_);
+}
+
+void ObjectCharacter::ItemNextUseType(unsigned short it)
+{
+  if (_equiped[it].equiped)
+  {
+    Data             itemData   = *(_equiped[it].equiped);
+    Data             actionData = itemData["actions"];
+    unsigned char    action     = _equiped[it].actionIt;
+
+    if (!(actionData.Nil()))
+    {
+      if (actionData.Count() <= action + 1)
+	_equiped[it].actionIt = 0;
+      else
+	_equiped[it].actionIt++;
+      if (action != _equiped[it].actionIt)
+	EquipedItemActionChanged.Emit(it, _equiped[it].equiped, _equiped[it].actionIt);
+    }
+  }
 }
 
 void ObjectCharacter::RestartActionPoints(void)
@@ -927,7 +948,7 @@ void     ObjectCharacter::Diplomacy::SetAsEnemy(Diplomacy& other, bool enemy)
       if (enemy)
         _enemyMask |= otherFaction->flag;
       else if (_enemyMask & otherFaction->flag)
-	_enemyMask - otherFaction->flag;
+	_enemyMask -= otherFaction->flag;
     }
   }
 }

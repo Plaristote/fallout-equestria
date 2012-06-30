@@ -58,18 +58,21 @@ void SceneCamera::SwapCameraView(void)
   _objectiveHpr = cameraAngles[_currentCameraAngle];
 
   _centeringCamera = true;
-  if (_currentCameraAngle == 0)
-  {
-    _objectivePos.set_y(_camera.get_y() + 40 - 65);
-    _objectivePos.set_x(_camera.get_x() + 0  - 60);
-    _objectivePos.set_z(_camera.get_z());
-  }
-  else if (_currentCameraAngle == 1)
-  {
-    _objectivePos.set_y(_camera.get_y() + 65 - 40);
-    _objectivePos.set_x(_camera.get_x() + 60 - 0);
-    _objectivePos.set_z(_camera.get_z());
-  }
+  
+  _objectivePos.set_z(_camera.get_z());
+
+//   if (_currentCameraAngle == 0)
+//   {
+//     _objectivePos.set_y(_camera.get_y() + 40 - 65);
+//     _objectivePos.set_x(_camera.get_x() + 0  - 60);
+//     _objectivePos.set_z(_camera.get_z());
+//   }
+//   else if (_currentCameraAngle == 1)
+//   {
+//     _objectivePos.set_y(_camera.get_y() + 65 - 40);
+//     _objectivePos.set_x(_camera.get_x() + 60 - 0);
+//     _objectivePos.set_z(_camera.get_z());
+//   }
 }
 
 void SceneCamera::Run(float elapsedTime)
@@ -106,133 +109,73 @@ void SceneCamera::RunScroll(float elapsedTime)
   unsigned char cameraMotion = MotionNone;
   LPoint3       cameraPos    = _camera.get_pos();
 
-  float _mouseBorderMargin   = 40;
-  float cameraSpeed          = _cameraMovementSpeed;
-  float cameraMovement       = _cameraMovementSpeed * elapsedTime;
-
-  if (pointer.get_y() <= _mouseBorderMargin)
-  {
-    cameraMotion |= MotionTop;
-    cameraSpeed   = cameraSpeed * ((_mouseBorderMargin - pointer.get_y()) / _mouseBorderMargin);
-  }
-  else if (pointer.get_y() >= _graphicWindow->get_y_size() - _mouseBorderMargin)
-  {
-    cameraMotion |= MotionBottom;
-    cameraSpeed   = cameraSpeed * ((pointer.get_y() - (_graphicWindow->get_y_size() - _mouseBorderMargin)) / _mouseBorderMargin);
-  }
-  if (pointer.get_x() <= _mouseBorderMargin)
-  {
-    cameraMotion |= MotionLeft;
-    cameraSpeed   = cameraSpeed * ((_mouseBorderMargin - pointer.get_x()) / _mouseBorderMargin);
-  }
-  else if (pointer.get_x() >= _graphicWindow->get_x_size() - _mouseBorderMargin)
-  {
-    cameraMotion |= MotionRight;
-    cameraSpeed   = cameraSpeed * ((pointer.get_x() - (_graphicWindow->get_x_size() - _mouseBorderMargin)) / _mouseBorderMargin);
-  }
-  
-  cameraMovement = cameraSpeed * elapsedTime;
-
-  unsigned char motionTop    = MotionTop;
-  unsigned char motionBottom = MotionBottom;
-  unsigned char motionLeft   = MotionLeft;
-  unsigned char motionRight  = MotionRight;
-
+  float    _mouseBorderMargin   = 40;
+  float    cameraSpeedX         = _cameraMovementSpeed;
+  float    cameraSpeedY         = _cameraMovementSpeed;
+  float    cameraMovementX;
+  float    cameraMovementY;
   LPoint3f movement;
   LPoint3f cameraRot = _camera.get_hpr();
   float    rad2deg   = 3.1415926535897 / 180;
 
+  if (pointer.get_y() <= _mouseBorderMargin)
+  {
+    cameraMotion |= MotionTop;
+    cameraSpeedY  = cameraSpeedY * ((_mouseBorderMargin - pointer.get_y()) / _mouseBorderMargin);
+  }
+  else if (pointer.get_y() >= _graphicWindow->get_y_size() - _mouseBorderMargin)
+  {
+    cameraMotion |= MotionBottom;
+    cameraSpeedY  = cameraSpeedY * ((pointer.get_y() - (_graphicWindow->get_y_size() - _mouseBorderMargin)) / _mouseBorderMargin);
+  }
+  if (pointer.get_x() <= _mouseBorderMargin)
+  {
+    cameraMotion |= MotionLeft;
+    cameraSpeedX   = cameraSpeedX * ((_mouseBorderMargin - pointer.get_x()) / _mouseBorderMargin);
+  }
+  else if (pointer.get_x() >= _graphicWindow->get_x_size() - _mouseBorderMargin)
+  {
+    cameraMotion |= MotionRight;
+    cameraSpeedX   = cameraSpeedX * ((pointer.get_x() - (_graphicWindow->get_x_size() - _mouseBorderMargin)) / _mouseBorderMargin);
+  }
+  
+  cameraMovementX = cameraSpeedX * elapsedTime;
+  cameraMovementY = cameraSpeedY * elapsedTime;
   cameraRot.set_x(cameraRot.get_x() * rad2deg);
   cameraRot.set_y(cameraRot.get_y() * rad2deg);
   cameraRot.set_z(cameraRot.get_z() * rad2deg);
 
-  if (cameraMotion & MotionTop)
-    movement.set_y(cameraMovement);
-  else if (cameraMotion & MotionBottom)
-    movement.set_y(-cameraMovement);
-  if (cameraMotion & MotionLeft)
-    movement.set_x(-cameraMovement);
-  else if (cameraMotion & MotionRight)
-    movement.set_x(cameraMovement);
-
-  if (cameraMotion != MotionNone)
-    _cameraPos += movement;
-
-  /*float zoom = 1.f;
-
-  _camera.set_pos(_cameraPos.get_x() - cos(cameraRot.get_x()) * zoom,
-                  _cameraPos.get_y() - sin(cameraRot.get_y()) * zoom,
-                  _cameraPos.get_z() + sin(cameraRot.get_z()) * zoom + CAMERA_HEIGHT);*/
-  
-  if (scrollSwapAxis[_currentCameraAngle])
+  // Horizontal movement
   {
-    motionTop    = MotionBottom;
-    motionBottom = MotionTop;
-    motionLeft   = MotionRight;
-    motionRight  = MotionLeft;
+    movement.set_y(sin(cameraRot.get_x()));
+    movement.set_x(cos(cameraRot.get_x()));
+
+    if (cameraMotion & MotionLeft)
+      movement *= -cameraMovementX;
+    else if (cameraMotion & MotionRight)
+      movement *= cameraMovementX;
+    else
+      movement *= 0;
+
+    movement.set_z(0);
+    _camera.set_pos(_camera.get_pos() + movement);
   }
 
-  if (scrollSwapAngles[_currentCameraAngle])
+  // Vertical movement
   {
-    if (cameraMotion & motionTop && cameraMotion & motionRight)
-    {
-      cameraPos.set_x(cameraPos.get_x() + cameraMovement);
-    }
-    else if (cameraMotion & motionTop && cameraMotion & motionLeft)
-    {
-      cameraPos.set_y(cameraPos.get_y() + cameraMovement);
-    }
-    else if (cameraMotion & motionTop)
-    {
-      cameraPos.set_y(cameraPos.get_y() + cameraMovement);
-      cameraPos.set_x(cameraPos.get_x() + cameraMovement);
-    }
-    else if (cameraMotion & motionBottom && cameraMotion & motionRight)
-    {
-      cameraPos.set_y(cameraPos.get_y() - cameraMovement);
-    }
-    else if (cameraMotion & motionRight)
-    {
-      cameraPos.set_y(cameraPos.get_y() - cameraMovement);
-      cameraPos.set_x(cameraPos.get_x() + cameraMovement);
-    }
-    else if (cameraMotion & motionBottom && cameraMotion & motionLeft)
-    {
-      cameraPos.set_x(cameraPos.get_x() - cameraMovement);
-    }
-    else if (cameraMotion & motionBottom)
-    {
-      cameraPos.set_y(cameraPos.get_y() - cameraMovement);
-      cameraPos.set_x(cameraPos.get_x() - cameraMovement);
-    }
-    else if (cameraMotion & motionLeft)
-    {
-      cameraPos.set_y(cameraPos.get_y() + cameraMovement);
-      cameraPos.set_x(cameraPos.get_x() - cameraMovement);
-    }
-  }
-  else
-  {
-    if      (cameraMotion & motionTop)
-      cameraPos.set_y(cameraPos.get_y() + cameraMovement);
-    else if (cameraMotion & motionBottom)
-      cameraPos.set_y(cameraPos.get_y() - cameraMovement);
-    if (cameraMotion & motionLeft)
-      cameraPos.set_x(cameraPos.get_x() - cameraMovement);
-    else if (cameraMotion & motionRight)
-      cameraPos.set_x(cameraPos.get_x() + cameraMovement);
-  }
+    movement.set_x(tan(cameraRot.get_x()));
+    movement.set_y(tan(cameraRot.get_y()));
+    
+    if (cameraMotion & MotionTop)
+      movement *= -cameraMovementY;
+    else if (cameraMotion & MotionBottom)
+      movement *= cameraMovementY;
+    else
+      movement *= 0;
 
-  if      (cameraPos.get_x() < _minPosX && _minPosX != 0)
-    cameraPos.set_x(_minPosX);
-  else if (cameraPos.get_x() > _maxPosX && _minPosX != 0)
-    cameraPos.set_x(_maxPosX);
-  if      (cameraPos.get_y() < _minPosY && _minPosY != 0)
-    cameraPos.set_y(_minPosY);
-  else if (cameraPos.get_y() > _minPosY && _minPosY != 0)
-    cameraPos.set_y(_maxPosY);
-
-  _camera.set_pos(cameraPos);
+    movement.set_z(0);
+    _camera.set_pos(_camera.get_pos() + movement);
+  }
 }
 
 /*
@@ -241,16 +184,27 @@ void SceneCamera::RunScroll(float elapsedTime)
 void SceneCamera::CenterCameraInstant(LPoint3f pos)
 {
   _cameraPos = pos;
-  if (_currentCameraAngle == 0)
-  {
-    _camera.set_y(pos.get_y() - 65);
-    _camera.set_x(pos.get_x() - 60);
-  }
-  else if (_currentCameraAngle == 1)
-  {
-    _camera.set_y(pos.get_y() - 40);
-    _camera.set_x(pos.get_x());
-  }
+
+  LPoint3f cameraRot = _camera.get_hpr();
+  float    rad2deg   = 3.1415926535897 / 180;
+  
+  cameraRot.set_x(cameraRot.get_x() * rad2deg);
+  cameraRot.set_y(cameraRot.get_y() * rad2deg);
+  cameraRot.set_z(cameraRot.get_z() * rad2deg);
+  
+  _camera.set_x(pos.get_x() + sin(cameraRot.get_x()) * 100);
+  _camera.set_y(pos.get_y() + sin(cameraRot.get_y()) * 100);
+
+//   if (_currentCameraAngle == 0)
+//   {
+//     _camera.set_y(pos.get_y() - 65);
+//     _camera.set_x(pos.get_x() - 60);
+//   }
+//   else if (_currentCameraAngle == 1)
+//   {
+//     _camera.set_y(pos.get_y() - 40);
+//     _camera.set_x(pos.get_x());
+//   }
 }
 
 void SceneCamera::FollowObject(InstanceDynamicObject* object)
@@ -268,9 +222,19 @@ void SceneCamera::CenterCameraOn(NodePath np)
   _centeringCamera   = true;
   _objectivePos      = np.get_pos();
   _objectivePos.set_z(_objectivePos.get_z() + CAMERA_HEIGHT);
+
+  LPoint3f cameraRot = _camera.get_hpr();  
+  float    rad2deg   = 3.1415926535897 / 180;
+  
+  cameraRot.set_x(cameraRot.get_x() * rad2deg);
+  cameraRot.set_y(cameraRot.get_y() * rad2deg);
+  cameraRot.set_z(cameraRot.get_z() * rad2deg);  
+
+  _objectivePos.set_x(np.get_x() + sin(cameraRot.get_x()) * 100);
+  _objectivePos.set_y(np.get_y() + tan(cameraRot.get_y()) * 100);  
   
   // take in account camera decalage
-  if (_currentCameraAngle == 0)
+  /*if (_currentCameraAngle == 0)
   {
     _objectivePos.set_y(_objectivePos.get_y() - 65);
     _objectivePos.set_x(_objectivePos.get_x() - 60);
@@ -279,7 +243,7 @@ void SceneCamera::CenterCameraOn(NodePath np)
   {
     _objectivePos.set_y(_objectivePos.get_y() - 40);
     _objectivePos.set_x(_objectivePos.get_x());
-  }
+  }*/
 }
 
 void SceneCamera::FollowNodePath(NodePath np)
@@ -330,8 +294,5 @@ void SceneCamera::RunFollow(float elapsedTime)
     dest.set_z(_objectivePos.get_z());
   _camera.set_pos(dest);
   if (dest == _objectivePos)
-  {
     _centeringCamera = false;
-    std::cout << "Centering camera Done" << std::endl;
-  }
 }

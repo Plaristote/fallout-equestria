@@ -121,6 +121,7 @@ public:
 
   InstanceDynamicObject*   pendingActionOn;
   InventoryObject*         pendingActionObject;
+  unsigned char            pendingActionObjectActionIt;
   
   Observatory::Signal<void (InstanceDynamicObject*)> AnimationEnded;
 

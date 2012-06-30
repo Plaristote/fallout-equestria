@@ -37,9 +37,45 @@ void InventoryView::UpdateView(void)
     if ((item["hidden"].Nil() || item["hidden"].Value() != "1") && !(item.IsEquiped()))
     {
       std::stringstream stream;
+      bool              notVisible = false;
+      unsigned short    quantity   = 1;
 
-      stream << "<img id='" << count << "' src='../textures/itemIcons/" << item["icon"].Value() << "' />";
-      rml += stream.str();
+      // Look for groupable objects
+      {
+	Inventory::Content::iterator groupIt     = content.begin();
+	Inventory::Content::iterator groupEnd    = content.end();
+	bool                         hideIfFound = true;
+
+	for (; groupIt != groupEnd ; ++groupIt)
+	{
+	  if (groupIt == it)
+	  {
+	    hideIfFound = false;
+	    continue ;
+	  }
+	  if ((*groupIt)->IsGroupableWith(*it))
+	  {
+	    if ((*groupIt)->IsEquiped())
+	      continue ;
+	    if (hideIfFound)
+	    {
+	      notVisible = true;
+	      break ;
+	    }
+	    quantity++;
+	  }
+	}
+      }
+
+      if (!notVisible)
+      {
+	stream << "<p class='inventory-item-icon' id='" << count << "'>";
+	if (quantity > 1)
+	  stream << "<p class='inventory-item-quantity'>x" << quantity << "</p>";
+        stream << "<img src='../textures/itemIcons/" << item["icon"].Value() << "' />";
+	stream << "</p>";
+        rml += stream.str();
+      }
     }
   }
   _element.SetInnerRML(rml.c_str());

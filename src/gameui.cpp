@@ -584,7 +584,6 @@ void GameMainBar::SetEnabledAP(bool enabled)
 
   if (enabled)
   {
-    std::cout << "ENABLED" << std::endl;
     passTurn->AddEventListener("click", &PassTurnClicked);
     combatEnd->AddEventListener("click", &CombatEndClicked);  
   }
@@ -596,7 +595,35 @@ void GameMainBar::SetEnabledAP(bool enabled)
 }
 
 #include "inventory.hpp"
+void GameMainBar::CallbackEquipedItem1Clicked(Rocket::Core::Event& event)
+{
+  int button = 0;
+
+  button = event.GetParameter<int>("button", button);
+  if (button == 0)
+    UseEquipedItem.Emit(0);
+  else
+    EquipedItemNextAction.Emit(0);
+}
+
+void GameMainBar::CallbackEquipedItem2Clicked(Rocket::Core::Event& event)
+{
+  int button = 0;
+
+  button = event.GetParameter<int>("button", button);
+  if (button == 0)
+    UseEquipedItem.Emit(1);
+  else
+    EquipedItemNextAction.Emit(1);
+}
+
+
 void GameMainBar::SetEquipedItem(unsigned short it, InventoryObject* item)
+{
+  SetEquipedItemAction(it, item, 0);
+}
+
+void GameMainBar::SetEquipedItemAction(unsigned short it, InventoryObject* item, unsigned char actionIt)
 {
   if (item)
   {
@@ -608,8 +635,12 @@ void GameMainBar::SetEquipedItem(unsigned short it, InventoryObject* item)
     if (elem)
     {
       stringstream rml;
+      bool         actionExists = (*item)["actions"].Count() > actionIt;
 
-      rml << "<img src='../textures/itemIcons/" << (*item)["icon"].Value() << "' />";
+      std::cout << "Action It is " << (int)actionIt << std::endl;
+      if (actionExists) rml << "<p class='equiped_action'>" << (*item)["actions"][actionIt].Key() << "</p>";
+      rml << "<p class='equiped_image'><img src='../textures/itemIcons/" << (*item)["icon"].Value() << "' /></p>";
+      if (actionExists) rml << "<p class='equiped_apcost'>" << (*item)["actions"][actionIt]["ap-cost"].Value() << "AP</p>";
       elem->SetInnerRML(rml.str().c_str());
     }
   }
