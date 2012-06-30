@@ -49,7 +49,7 @@ public:
   /*! \brief Returns a Data containing the child DataBranch corresponding to key if it exists, or Nil Data otherwise (see the Nil method) */
   Data        operator[](const std::string& key);
   const Data  operator[](const std::string& key) const;
-  Data        operator[](int it);
+  Data        operator[](unsigned int it);
 
   std::string Key(void)   const { return (_data ? _data->key   : ""); }
   std::string Value(void) const { return (_data ? _data->value : ""); }
@@ -57,7 +57,8 @@ public:
   void        MoveUp();
   void        MoveDown();
 
-  void SetKey(const std::string& newKey) { if (_data) _data->key = newKey; }
+  void        SetKey(const std::string& newKey) { if (_data) _data->key = newKey; }
+  void        Duplicate(Data var);
 
   const Data& operator=(const Data& var);
 
@@ -104,6 +105,9 @@ public:
   /*! \brief For debug purposes, writes the content of the DataTree from the current branch to the standard output */
   void Output(unsigned char indent = 0);
   
+  /*! \brief Returns the amount of children the branch has */
+  unsigned int Count(void) const { return (_data ? _data->children.size() : 0); }
+  
   class iterator
   {
   public:
@@ -137,7 +141,7 @@ public:
   iterator       end()               { return (iterator(_data->children.end()));         }
   const_iterator const_end() const   { return (const_iterator(_data->children.end()));   }
 
-private:
+protected:
   DataBranch* _data;
 };
 
@@ -158,7 +162,7 @@ namespace Json
 
 /*! \class DataTree
  * \brief Represents the root DataBranch */
-class DataTree : private DataBranch
+class DataTree : public DataBranch
 {
   friend class Data;
   friend class Yaml::Parser;
@@ -178,11 +182,14 @@ public:
     static DataTree* ShinyLang(const std::string& filename);
     /*! \brief Loads a DataTree from a JSON file */
     static DataTree* JSON(const std::string& filename);
+    /*! \brief Loads a DataTree from a JSON string */
+    static DataTree* StringJSON(const std::string& str);
   };
 
   struct Writers
   {
       static bool JSON(Data, const std::string& filename);
+      static bool StringJSON(Data, std::string& str);
   };
 
   friend struct Factory;

@@ -237,6 +237,9 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
       }
     }
   }
+  
+  // Inventory
+  _inventory.LoadInventory(_object);
 
   // Equiped Items
   defEquiped[0] = DEFAULT_WEAPON_1;

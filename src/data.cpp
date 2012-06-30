@@ -103,6 +103,26 @@ const Data Data::operator[](const std::string& key) const
   return (Data(key, _data));
 }
 
+void        Data::Duplicate(Data var)
+{
+  Data::iterator it  = var.begin();
+  Data::iterator end = var.end();
+  
+  _data->key   = var.Key();
+  _data->value = var.Value();
+  _data->nil   = false;
+
+  for (; it != end ; ++it)
+  {
+    Data        children = *it;
+    DataBranch* tmp      = new DataBranch();
+    
+    tmp->father = _data;
+    _data->children.push_back(tmp);
+    Data(tmp).Duplicate(children);
+  }
+}
+
 const Data& Data::operator=(const Data& var)
 {
   if (var.Nil() && !Nil())

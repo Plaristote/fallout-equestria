@@ -57,7 +57,8 @@ public:
   void        MoveUp();
   void        MoveDown();
 
-  void SetKey(const std::string& newKey) { if (_data) _data->key = newKey; }
+  void        SetKey(const std::string& newKey) { if (_data) _data->key = newKey; }
+  void        Duplicate(Data var);
 
   const Data& operator=(const Data& var);
 
@@ -181,11 +182,14 @@ public:
     static DataTree* ShinyLang(const std::string& filename);
     /*! \brief Loads a DataTree from a JSON file */
     static DataTree* JSON(const std::string& filename);
+    /*! \brief Loads a DataTree from a JSON string */
+    static DataTree* StringJSON(const std::string& str);
   };
 
   struct Writers
   {
       static bool JSON(Data, const std::string& filename);
+      static bool StringJSON(Data, std::string& str);
   };
 
   friend struct Factory;

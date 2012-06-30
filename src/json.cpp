@@ -125,39 +125,47 @@ void Parser::ParseArray(DataBranch* value)
   }
 }
 
-Parser::Parser(const string& filename)
+Parser::Parser(const string& filename, bool filepath)
 {
-  std::ifstream file(filename.c_str());
-
-  if ((_fileLoaded = file.is_open()))
+  if (filepath)
   {
-    long  begin, end;
-    long  size;
-    char* raw;
+    std::ifstream file(filename.c_str());
 
-    begin     = file.tellg();
-    file.seekg (0, ios::end);
-    end       = file.tellg();
-    file.seekg(0, ios::beg);
-    size      = end - begin;
-    raw       = new char[size + 1];
-    file.read(raw, size);
-    file.close();
-    raw[size] = 0;
-    _str      = raw;
-    delete[] raw;
-
-    for (int i = 0 ; i < size ; ++i)
+    _source = filename;
+    if ((_fileLoaded = file.is_open()))
     {
-      if (_str[i] == '\t')
-        _str[i] = ' ';
-      if (_str[i] == '"')
-        for (; i < size && _str[i] != '"' && (i == 0 || _str[i] - 1 != '\\') ; ++i);
+      long  begin, end;
+      long  size;
+      char* raw;
+
+      begin     = file.tellg();
+      file.seekg (0, ios::end);
+      end       = file.tellg();
+      file.seekg(0, ios::beg);
+      size      = end - begin;
+      raw       = new char[size + 1];
+      file.read(raw, size);
+      file.close();
+      raw[size] = 0;
+      _str      = raw;
+      delete[] raw;
+    }
+    else
+    {
+      std::cerr << filename << ": can't open file." << std::endl;
+      return ;
     }
   }
   else
-    std::cerr << filename << ": can't open file." << std::endl;
-  _source = filename;
+    _str = filename;
+    
+  for (int i = 0 ; i < _str.size() ; ++i)
+  {
+    if (_str[i] == '\t')
+      _str[i] = ' ';
+    if (_str[i] == '"')
+      for (; i < _str.size() && _str[i] != '"' && (i == 0 || _str[i] - 1 != '\\') ; ++i);
+  }
 }
 
 DataTree* Parser::Run()
@@ -186,6 +194,13 @@ DataTree* Parser::Run()
 DataTree* DataTree::Factory::JSON(const std::string& filename)
 {
   Parser parser(filename);
+
+  return (parser.Run());
+}
+
+DataTree* DataTree::Factory::StringJSON(const std::string& filename)
+{
+  Parser parser(filename, false);
 
   return (parser.Run());
 }
@@ -296,42 +311,50 @@ static std::string appendObject(Data data)
     return (toWrite);
 }
 
+bool DataTree::Writers::StringJSON(Data data, string& str)
+{
+  std::string toWrite;
+
+  toWrite = "{\n";
+
+  appendValue(data);
+
+  Data::iterator it  = data.begin();
+  Data::iterator end = data.end();
+
+  while (it != end)
+  {
+      if ((*it).Nil())
+      {
+	++it;
+	continue ;
+      }
+      toWrite += "\"" + (*it).Key() + "\": ";
+      toWrite += appendValue(*it);
+      ++it;
+      if (it  != end)
+	  toWrite += ",";
+      toWrite += "\n";
+  }
+
+  toWrite += "\n}\n";
+  str = toWrite;
+  return (true);
+}
+
 bool DataTree::Writers::JSON(Data data, const string &filename)
 {
-    std::ofstream file(filename.c_str());
+  std::ofstream file(filename.c_str());
 
-    if (file.is_open())
-    {
-      std::string toWrite;
-
-      toWrite = "{\n";
-
-      appendValue(data);
-
-      Data::iterator it  = data.begin();
-      Data::iterator end = data.end();
-
-      while (it != end)
-      {
-          if ((*it).Nil())
-          {
-            ++it;
-            continue ;
-          }
-          toWrite += "\"" + (*it).Key() + "\": ";
-          toWrite += appendValue(*it);
-          ++it;
-          if (it  != end)
-              toWrite += ",";
-          toWrite += "\n";
-      }
-
-      toWrite += "\n}\n";
-
-      file.write(toWrite.c_str(), toWrite.size());
-      file.close();
-    }
-    else
-      return (false);
-    return (true);
+  if (file.is_open())
+  {
+    std::string toWrite;
+    
+    StringJSON(data, toWrite);
+    file.write(toWrite.c_str(), toWrite.size());
+    file.close();
+  }
+  else
+    return (false);
+  return (true);
 }

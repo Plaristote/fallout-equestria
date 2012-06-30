@@ -85,6 +85,9 @@ public:
   typedef std::list<InventoryObject*> Content;
   
   Inventory(void) { _currentWeight = _capacity = 0; }
+  
+  void             LoadInventory(DynamicObject*);
+  void             SaveInventory(DynamicObject*);
 
   void             AddObject(InventoryObject*);
   void             DelObject(InventoryObject*);

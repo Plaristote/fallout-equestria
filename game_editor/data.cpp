@@ -1,5 +1,4 @@
 #include "datatree.hpp"
-#include <algorithm>
 #include <fstream>
 #include <iostream>
 
@@ -61,19 +60,16 @@ Data::~Data()
   {
     _data->pointers--;
     if ((_data->nil || !_data->father) && _data->root == false && _data->pointers == 0)
-    {
       delete _data;
-      _data = 0;
-    }
   }
 }
 
-Data Data::operator[](int cur)
+Data Data::operator[](unsigned int n)
 {
   DataBranch::Children::iterator it  = _data->children.begin();
   DataBranch::Children::iterator end = _data->children.end();
-
-  while (cur-- && it != end) ++it;
+  
+  for (unsigned int nIt = 0 ; it != end && nIt < n ; ++it, ++nIt);
   if (it != end)
     return (Data((*it)));
   return (Data());
@@ -107,17 +103,44 @@ const Data Data::operator[](const std::string& key) const
   return (Data(key, _data));
 }
 
+void        Data::Duplicate(Data var)
+{
+  Data::iterator it  = var.begin();
+  Data::iterator end = var.end();
+  
+  _data->key   = var.Key();
+  _data->value = var.Value();
+  _data->nil   = false;
+
+  for (; it != end ; ++it)
+  {
+    Data        children = *it;
+    DataBranch* tmp      = new DataBranch();
+    
+    tmp->father = _data;
+    _data->children.push_back(tmp);
+    Data(tmp).Duplicate(children);
+  }
+}
+
 const Data& Data::operator=(const Data& var)
 {
-  if (_data)
+  if (var.Nil() && !Nil())
   {
     _data->pointers--;
-    if (Nil() && _data->pointers == 0)
-      delete _data;
+    delete _data;
+    _data = 0;
   }
-  _data = var._data;
-  if (_data)
-    _data->pointers++;
+  else if (Nil())
+  {
+    if (_data && _data->pointers == 1)
+      delete _data;
+    _data = var._data;
+    if (_data)
+      _data->pointers++;
+  }
+  else
+    _data->value = var.Value();
   return (*this);
 }
 
@@ -154,28 +177,3 @@ DataBranch::~DataBranch()
   }
 }
 
-void        Data::MoveUp()
-{
-    Children&          list  = _data->father->children;
-    Children::iterator it    = std::find(list.begin(), list.end(), _data);
-    Children::iterator next  = it;
-
-    if (it == list.end())
-      return ;
-    list.insert(--next, _data);
-    list.erase(it);
-}
-
-void        Data::MoveDown()
-{
-    Children&          list  = _data->father->children;
-    Children::iterator it    = std::find(list.begin(), list.end(), _data);
-    Children::iterator next  = it;
-
-    ++next;
-    if (next == list.end())
-      return ;
-    ++next;
-    list.insert(next, _data);
-    list.erase(it);
-}

@@ -213,7 +213,7 @@ void MainWindow::LoadAllMaps()
 {
     QDir        dir("maps/");
     QStringList fileList = dir.entryList();
-    QRegExp     regexp("\.json$");
+    QRegExp     regexp("\.blob$");
 
     foreach (QString string, fileList)
     {

@@ -97,7 +97,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Pa
       case DynamicObject::Character:
         {
 	  ObjectCharacter* character = new ObjectCharacter(this, &object);
-	  
+
 	  _characters.push_back(character);
         }
 	break ;

@@ -11,6 +11,7 @@ public:
   {
     _type   = ObjectTypes::Shelf;
     LockWaypoints(true);
+    _inventory.LoadInventory(object);
   }
   
   ~ObjectShelf()

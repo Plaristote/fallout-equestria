@@ -8,7 +8,7 @@ namespace Json
   class Parser
   {
   public:
-    Parser(const std::string&);
+    Parser(const std::string&, bool filename = true);
 
     DataTree*     Run(void);
 

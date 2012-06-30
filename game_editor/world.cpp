@@ -490,7 +490,7 @@ void Waypoint::SetMouseBox(void)
 Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
 {
   observer = 0;
-#ifdef WAYPOINT_DEBUG
+//#ifdef WAYPOINT_DEBUG
   csegment = new CollisionSegment();
   node     = new CollisionNode("waypointArc");
   node->set_into_collide_mask(CollideMask(0));
@@ -501,7 +501,7 @@ Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
   nodePath.set_pos(0, 0, 0);
   nodePath.show();
   UpdateDirection();
-#endif
+//#endif
 }
 
 void Waypoint::Arc::UpdateDirection(void)
@@ -658,7 +658,20 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
         }
     }
 
-    // Add inventory serialization
+    // Inventory serialization
+    {
+        int size;
+
+        packet >> size;
+        for (int i = 0 ; i < size ; ++i)
+        {
+            string jsonSrc;
+            int    quantity;
+
+            packet >> jsonSrc >> quantity;
+            inventory.push_back(std::pair<std::string, int>(jsonSrc, quantity));
+        }
+    }
 }
 
 void DynamicObject::Serialize(Utils::Packet& packet)
@@ -691,7 +704,16 @@ void DynamicObject::Serialize(Utils::Packet& packet)
           packet << (*it).first << (*it).second;
     }
 
-    // Add inventory serialization
+    // Inventory serialization
+    {
+      list<pair<string, int> >::iterator it   = inventory.begin();
+      list<pair<string, int> >::iterator end  = inventory.end();
+      int                                size = inventory.size();
+      
+      packet << size;
+      for (; it != end ; ++it)
+	packet << (*it).first << (*it).second;
+    }
 }
 
 void           World::UnSerialize(Utils::Packet& packet)
@@ -902,7 +924,7 @@ void           World::Serialize(Utils::Packet& packet)
       }
   }
 }
-
+#include <panda3d/collisionHandlerQueue.h>
 // MAP COMPILING
 void           World::CompileWaypoints(void)
 {
@@ -922,7 +944,7 @@ void           World::CompileWaypoints(void)
             LVecBase3         rot    = parent.get_hpr();
             other.get_pos();
             parent.get_pos();
-            LPoint3           tmp = other.get_pos() - parent.get_pos();
+            LPoint3           tmp    = other.get_pos() - parent.get_pos();
             LPoint3           dir    = parent.get_relative_vector(other, tmp);
 
             PT(CollisionNode) cnode  = new CollisionNode("compileWaypointsNode");
@@ -935,8 +957,7 @@ void           World::CompileWaypoints(void)
                                                          2.f*/);
             cnode->add_solid(ctube);
 
-            //np.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
-            //np.set_pos(0, 0, 0);
+            np.set_scale(1 / parent.get_scale().get_x());
 
             PT(CollisionHandlerQueue) handlerQueue = new CollisionHandlerQueue();
             CollisionTraverser        traverser;
@@ -981,6 +1002,7 @@ void World::CompileDoors(void)
 
             np.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
             np.set_pos(0, 0, 0);
+            np.set_scale(1 / parent.get_scale().get_x());
 
             np = (*it).nodePath.attach_new_node(cnode);
 

@@ -4,24 +4,12 @@
 
 InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
 {
-  this->SetKey(data.Key());
-  (*this)["icon"]     = data["icon"].Value();
-  (*this)["texture"]  = data["texture"].Value();
-  (*this)["model"]    = data["model"].Value();
-  (*this)["scale"]    = data["scale"].Value();
-  (*this)["pos"]["x"] = data["pos"]["x"].Value();
-  (*this)["pos"]["y"] = data["pos"]["y"].Value();
-  if (!(data["ap-cost"].Nil()))
-    (*this)["ap-cost"]  = data["ap-cost"].Value();
-  (*this)["weight"]   = (data["weight"].Nil()) ? "0" : data["weight"].Value();
-  (*this)["hidden"]   = data["hidden"].Value();
-  (*this)["combat"]   = data["combat"].Value();
-  (*this)["range"]    = data["range"].Value();
-  (*this)["interactions"]["use"] = "1";
+  // Duplicate the DataBranch into the InventoryObject
+  Duplicate(data);
 
-  (*this)["mode-mouth"]        = (data["mode-mouth"].Nil())        ? "1" : data["mode-mouth"].Value();
-  (*this)["mode-magic"]        = (data["mode-magic"].Nil())        ? "1" : data["mode-magic"].Value();
-  (*this)["mode-battlesaddle"] = (data["mode-battlesaddle"].Nil()) ? "1" : data["mode-battlesaddle"].Value();
+  // Set the default values
+  (*this)["weight"]   = (data["weight"].Nil()) ? "0" : data["weight"].Value();
+  (*this)["interactions"]["use"] = "1";
 
   _equiped = false;
 
@@ -269,6 +257,50 @@ const std::string InventoryObject::ExecuteHook(asIScriptFunction* hook, ObjectCh
 /*
  * Inventory
  */
+void Inventory::LoadInventory(DynamicObject* object)
+{
+  ForEach(object->inventory, [this](std::pair<std::string, int> data)
+  {
+    DataTree* dataTree = DataTree::Factory::StringJSON(data.first);
+    
+    for (int i = 0 ; i < data.second ; ++i)
+    {
+      InventoryObject* newObject = new InventoryObject(dataTree);
+      
+      AddObject(newObject);
+    }
+  });
+}
+
+void Inventory::SaveInventory(DynamicObject* object)
+{
+  Content::iterator it  = _content.begin();
+  Content::iterator end = _content.end();
+  
+  object->inventory.clear();
+  for (; it != end ; ++it)
+  {
+    Content::iterator groupIt  = _content.begin();
+    InventoryObject&  item     = **it;
+    bool              ignore   = true;
+    int               quantity = 1;
+
+    for (; groupIt != end ; ++groupIt)
+    {
+      if (groupIt == it && quantity == 1)
+	ignore = false;
+      if (item.IsGroupableWith(*groupIt))
+	quantity++;
+    }
+    if (!ignore)
+    {
+      std::string str;
+
+      DataTree::Writers::StringJSON(item, str);
+      object->inventory.push_back(std::pair<std::string, int>(str, quantity));
+    }
+  }
+}
 
 void Inventory::AddObject(InventoryObject* toAdd)
 {
