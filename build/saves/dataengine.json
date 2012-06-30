@@ -1,0 +1,22 @@
+{
+"shielding spell": {
+"graphics": {
+"model": "sphere.obj",
+"scale": 3
+}
+,
+"duration": 30,
+"script": {
+"source": "spell.as",
+"hookBegin": "shieldBegin",
+"hookEnd": "shieldEnd"
+}
+
+}
+,
+"system": {
+"current-level": "test"
+}
+
+
+}

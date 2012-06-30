@@ -333,6 +333,19 @@ void MainWindow::PandaInitialized()
 
      connect(&wizardObject, SIGNAL(accepted()), this, SLOT(ObjectAdd()));
 
+// ENTRY/EXIT ZONES
+     connect(ui->entryZoneAdd,    SIGNAL(clicked()), this, SLOT(EntryZoneAdd()));
+     connect(ui->entryZoneDelete, SIGNAL(clicked()), this, SLOT(EntryZoneDelete()));
+     connect(ui->entryZoneSetWaypoints, SIGNAL(clicked()), this, SLOT(EntryZoneSetAsSelection()));
+     connect(ui->entryZoneList,   SIGNAL(currentIndexChanged(QString)), this, SLOT(EntryZoneChanged(QString)));
+
+     connect(ui->exitZoneAdd,     SIGNAL(clicked()), this, SLOT(ExitZoneAdd()));
+     connect(ui->exitZoneDelete,  SIGNAL(clicked()), this, SLOT(ExitZoneDelete()));
+     connect(ui->exitZoneSetSelection, SIGNAL(clicked()), this, SLOT(ExitZoneSetAsSelection()));
+     connect(ui->exitZoneList,    SIGNAL(currentIndexChanged(QString)), this, SLOT(ExitZoneChanged(QString)));
+     connect(ui->exitZoneAddDestination, SIGNAL(clicked()), this, SLOT(ExitZoneDestinationAdd()));
+     connect(ui->exitZoneDeleteDestination, SIGNAL(clicked()), this, SLOT(ExitZoneDestinationDelete()));
+
 // MAPOBJECTS
      mapobjectSelected = 0;
      mapobjectHovered  = 0;
@@ -1003,6 +1016,153 @@ void MainWindow::LoadMap(const QString& path)
     }
     else
       QMessageBox::warning(this, "Fatal Error", "Can't load map file '" + QString::fromStdString(fullpath) + "'");
+
+    if (world)
+    {
+        ui->entryZoneList->clear();
+        ForEach(world->entryZones, [this](EntryZone& zone) { ui->entryZoneList->addItem(zone.name.c_str()); });
+
+        ui->exitZoneList->clear();
+        ForEach(world->exitZones,  [this](ExitZone& zone)  { ui->exitZoneList->addItem(zone.name.c_str());  });
+    }
+}
+
+void MainWindow::EntryZoneAdd()
+{
+    QString name = QInputDialog::getText(this, "Create Entry Zone", "Name");
+
+    if (name != "")
+    {
+        ui->entryZoneList->addItem(name);
+        world->AddEntryZone(name.toStdString());
+    }
+}
+
+void MainWindow::EntryZoneDelete()
+{
+    QString name = ui->entryZoneList->currentText();
+
+    if (name != "")
+    {
+        ui->entryZoneList->removeItem(ui->entryZoneList->currentIndex());
+        world->DeleteEntryZone(name.toStdString());
+    }
+}
+
+void MainWindow::EntryZoneSetAsSelection()
+{
+    QString name = ui->entryZoneList->currentText();
+
+    if (name != "")
+    {
+        EntryZone* entryZone = world->GetEntryZoneByName(name.toStdString());
+
+        if (entryZone)
+            entryZone->waypoints = waypointsSelection;
+    }
+}
+
+void MainWindow::ExitZoneAdd()
+{
+    QString name = QInputDialog::getText(this, "Create Exit Zone", "Name");
+
+    if (name != "")
+    {
+        world->AddExitZone(name.toStdString());
+        ui->exitZoneList->addItem(name);
+    }
+}
+
+void MainWindow::ExitZoneDelete()
+{
+    QString name = ui->exitZoneList->currentText();
+
+    if (name != "")
+    {
+        ui->exitZoneList->removeItem(ui->exitZoneList->currentIndex());
+        world->DeleteExitZone(name.toStdString());
+    }
+}
+
+void MainWindow::ExitZoneSetAsSelection()
+{
+    QString name = ui->exitZoneList->currentText();
+
+    if (name != "")
+    {
+        ExitZone* exitZone = world->GetExitZoneByName(name.toStdString());
+
+        if (exitZone)
+            exitZone->waypoints = waypointsSelection;
+    }
+}
+
+void MainWindow::EntryZoneChanged(QString string)
+{
+    if (string != "")
+    {
+        EntryZone* zone = world->GetEntryZoneByName(string.toStdString());
+
+        if (zone)
+        {
+            std::list<Waypoint*> tmp = waypointsSelection;
+            ForEach(tmp,             [this](Waypoint* wp) { this->WaypointSelect(wp); });
+            ForEach(zone->waypoints, [this](Waypoint* wp) { this->WaypointSelect(wp); });
+        }
+    }
+}
+
+void MainWindow::ExitZoneChanged(QString string)
+{
+    if (string != "")
+    {
+        ExitZone* zone = world->GetExitZoneByName(string.toStdString());
+
+        if (zone)
+        {
+            ui->exitZoneDestinations->clear();
+            ForEach(zone->destinations, [this](std::string name) { ui->exitZoneDestinations->addItem(name.c_str()); });
+
+            std::list<Waypoint*> tmp = waypointsSelection;
+            ForEach(tmp,             [this](Waypoint* wp) { this->WaypointSelect(wp); });
+            ForEach(zone->waypoints, [this](Waypoint* wp) { this->WaypointSelect(wp); });
+        }
+    }
+}
+
+
+void MainWindow::ExitZoneDestinationAdd()
+{
+    QString   name = ui->exitZoneList->currentText();
+    ExitZone* zone = world->GetExitZoneByName(name.toStdString());
+
+    if (zone)
+    {
+        QString newDest = QInputDialog::getText(this, "Add destination", "Map name");
+
+        zone->destinations.push_back(newDest.toStdString());
+        ui->exitZoneDestinations->addItem(newDest);
+    }
+}
+
+void MainWindow::ExitZoneDestinationDelete()
+{
+    QString   name = ui->exitZoneList->currentText();
+    ExitZone* zone = world->GetExitZoneByName(name.toStdString());
+
+    if (zone)
+    {
+        QListWidgetItem* item = ui->exitZoneDestinations->currentItem();
+
+        if (item)
+        {
+            QString destName = item->text();
+
+            zone->destinations.remove(destName.toStdString());
+            ui->exitZoneDestinations->removeItemWidget(item);
+            delete item;
+        }
+    }
 }
 
 void MainWindow::SaveMap()

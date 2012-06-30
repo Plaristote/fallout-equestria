@@ -7,12 +7,22 @@
 class DataEngine : public Data
 {
 public:
-  DataEngine(void) : Data(&_dataTree)
+  DataEngine(void)
   {
+    _dataTree = 0;
   }
+  
+  ~DataEngine(void)
+  {
+    if (_dataTree)
+      delete _dataTree;
+  }
+  
+  void      Load(const std::string& filepath);
+  void      Save(const std::string& filepath);
 
 private:
-  DataTree _dataTree;
+  DataTree* _dataTree;
 };
 
 #endif

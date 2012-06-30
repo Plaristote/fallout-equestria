@@ -3,6 +3,30 @@
 
 # include "objectnode.hpp"
 
+class LevelExitZone : public Waypoint::ArcObserver
+{
+public:
+  LevelExitZone(Level* level, std::list<std::string> destinations) : _level(level)
+  {
+    ForEach(destinations, [this](std::string dest) { _destinations.push_back(dest); });
+  }
+  
+  void               SetName(const std::string& name) { _name = name;   }
+  const std::string& GetName(void) const              { return (_name); }
+  
+  bool CanGoThrough(unsigned char id) { return (true); }
+  void GoingThrough(void* character);
+  
+  Observatory::Signal<void (void)>                            ExitZone;
+  Observatory::Signal<void (const std::string&)>              GoToNextZone;
+  Observatory::Signal<void (const std::vector<std::string>&)> SelectNextZone;
+
+private:
+  std::string              _name;
+  Level*                   _level;
+  std::vector<std::string> _destinations;
+};
+
 class ObjectDoor : public InstanceDynamicObject, public Waypoint::ArcObserver
 {
 public:
@@ -31,7 +55,7 @@ public:
   void     ProcessCollisions(void) {}
 
   bool     CanGoThrough(unsigned char id);
-  void     GoingThrough(void);
+  void     GoingThrough(void*);
 
 private:
   bool _closed;

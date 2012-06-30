@@ -25,7 +25,7 @@ public:
   void Hide(void)            { _root->Hide(); VisibilityToggled.Emit(false); }
   bool IsVisible(void) const { return (_root->IsVisible()); }
   
-  virtual void Destroy(void) { }
+  virtual void Destroy(void) { if (_root) { _root->Hide(); } }
 
   Observatory::Signal<void (bool)> VisibilityToggled;
 

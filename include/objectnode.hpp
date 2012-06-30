@@ -1,6 +1,7 @@
 #ifndef  OBJECT_NODE_HPP
 # define OBJECT_NODE_HPP
 
+# include "globals.hpp"
 # include <panda3d/pandaFramework.h>
 # include <panda3d/pandaSystem.h>
 # include <panda3d/texturePool.h>
@@ -92,6 +93,9 @@ public:
   
   InstanceDynamicObject(Level* level, DynamicObject* object);
   virtual ~InstanceDynamicObject() {}
+
+  virtual void       Load(Utils::Packet&);
+  virtual void       Save(Utils::Packet&);
 
   virtual void       Run(float elapsedTime)
   {

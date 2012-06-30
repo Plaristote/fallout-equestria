@@ -18,22 +18,20 @@ Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::Action
 
 Level* Level::CurrentLevel = 0;
 
-Level::Level(WindowFramework* window, const std::string& filename) : _window(window), _mouse(window),
-  _camera(window, window->get_camera_group()), _gameUi(window)
+Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Packet& packet) : _window(window), _asyncTask(task), _mouse(window),
+  _camera(window, window->get_camera_group()), _levelUi(window, gameUi)
 {
+  AsyncTaskManager::get_global_ptr()->add(&_asyncTask);  
   CurrentLevel = this;
   _state       = Normal;
-  
-  _gameUi.InterfaceOpened.Connect(*this, &Level::SetInterrupted);
+
+  _levelUi.InterfaceOpened.Connect(*this, &Level::SetInterrupted);
 
   _l18n  = DataTree::Factory::JSON("data/l18n/english.json");
   _items = DataTree::Factory::JSON("data/objects.json");
 
   ceilingCurrentTransparency = 1.f;
 
-  InstanceDynamicObject::ActionUse.Connect        (*this, &Level::CallbackActionUse);
-  InstanceDynamicObject::ActionTalkTo.Connect     (*this, &Level::CallbackActionTalkTo);
-  InstanceDynamicObject::ActionUseObjectOn.Connect(*this, &Level::CallbackActionUseObjectOn);
   for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
     _currentUis[i] = 0;
   _currentInteractMenu  = 0;
@@ -43,7 +41,6 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   _mouseActionBlocked   = false;
 
   _graphicWindow = _window->get_graphics_window();
-  AsyncTaskManager::get_global_ptr()->add(this);
 
   _sunLight = new DirectionalLight("sun_light");
 
@@ -62,47 +59,36 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   
   // WORLD LOADING
   _world = new World(window);  
-  std::ifstream file;
-  std::string   fullpath = "maps/" + filename + ".blob";
-
-  file.open(fullpath.c_str(), ios::binary);
-  if (file.is_open())
+  try
   {
-    try
-    {
-      Utils::Packet* packet;
-      long           begin, end;
-      long           size;
-      char*          raw;
-
-      begin     = file.tellg();
-      file.seekg(0, std::ios::end);
-      end       = file.tellg();
-      file.seekg(0, std::ios::beg);
-      size      = end - begin;
-      raw       = new char[size + 1];
-      file.read(raw, size);
-      file.close();
-      raw[size] = 0;
-
-      packet = new Utils::Packet(raw, size);
-      _world->UnSerialize(*packet);
-
-      delete   packet;
-      delete[] raw;
-    }
-    catch (unsigned int error)
-    {
-      std::cout << "Failed to load file" << std::endl;
-    }
+    _world->UnSerialize(packet);
   }
-  else
-    std::cout << "Blob file not found" << std::endl;
+  catch (unsigned int error)
+  {
+    std::cout << "Failed to load file" << std::endl;
+  }
 
-  World::DynamicObjects::iterator it  = _world->dynamicObjects.begin();
-  World::DynamicObjects::iterator end = _world->dynamicObjects.end();
-
-  for_each(it, end, [this](DynamicObject& object)
+  ForEach(_world->exitZones, [this](ExitZone& zone)
+  {
+    LevelExitZone* exitZone = new LevelExitZone(this, zone.destinations);
+    
+    exitZone->SetName(zone.name);
+    ForEach(zone.waypoints, [exitZone](Waypoint* wp)
+    {
+      ForEach(wp->arcs, [exitZone](Waypoint::Arc& arc)
+      {
+	arc.observer = exitZone;
+      });
+    });
+    
+    exitZone->ExitZone.Connect      (*this, &Level::CallbackExitZone);
+    exitZone->GoToNextZone.Connect  (*this, &Level::CallbackGoToZone);
+    exitZone->SelectNextZone.Connect(*this, &Level::CallbackSelectNextZone);
+  });
+  _exitingZone = false;
+  
+  
+  ForEach(_world->dynamicObjects, [this](DynamicObject& object)
   {
     InstanceDynamicObject* instance = 0;
     
@@ -134,28 +120,30 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
   InventoryObject* object = new InventoryObject(Data(_items)["Key"]);
 
   GetPlayer()->GetInventory().AddObject(object);
-//   GetPlayer()->SetEquipedItem(0, object);
-//   GetPlayer()->UnequipItem(0);
   if (GetPlayer()->GetStatistics())
   {
     Data stats(GetPlayer()->GetStatistics());
     
     if (!(stats["Statistics"]["Action Points"].Nil()))
-      _gameUi.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
-    GetPlayer()->ActionPointChanged.Connect(_gameUi.GetMainBar(), &GameMainBar::SetCurrentAP);
-    GetPlayer()->EquipedItemChanged.Connect(_gameUi.GetMainBar(), &GameMainBar::SetEquipedItem);
+      _levelUi.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
+    GetPlayer()->ActionPointChanged.Connect(_levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
+    GetPlayer()->EquipedItemChanged.Connect(_levelUi.GetMainBar(), &GameMainBar::SetEquipedItem);
     GetPlayer()->EquipedItemChanged.Emit(0, GetPlayer()->GetEquipedItem(0));
     GetPlayer()->EquipedItemChanged.Emit(1, GetPlayer()->GetEquipedItem(1));
   }
-  _gameUi.GetMainBar().UseEquipedItem.Connect(*this, &Level::CallbackActionTargetUse);
-  _gameUi.GetMainBar().CombatEnd.Connect     (*this, &Level::StopFight);
-  _gameUi.GetMainBar().CombatPassTurn.Connect(*this, &Level::NextTurn);
-  _gameUi.GetInventory().SetInventory(GetPlayer()->GetInventory());
-  _gameUi.GetInventory().EquipItem.Connect   (*this, &Level::PlayerEquipObject);
-  _gameUi.GetInventory().UnequipItem.Connect (*GetPlayer(), &ObjectCharacter::UnequipItem);
-  _gameUi.GetInventory().DropObject.Connect  (*this, &Level::PlayerDropObject);
-  _gameUi.GetInventory().UseObject.Connect   (*this, &Level::PlayerUseObject);
+  _levelUi.GetMainBar().UseEquipedItem.Connect(*this, &Level::CallbackActionTargetUse);
+  _levelUi.GetMainBar().CombatEnd.Connect     (*this, &Level::StopFight);
+  _levelUi.GetMainBar().CombatPassTurn.Connect(*this, &Level::NextTurn);
+  _levelUi.GetInventory().SetInventory(GetPlayer()->GetInventory());
+  obs.Connect(_levelUi.GetInventory().EquipItem,   *this,        &Level::PlayerEquipObject);
+  obs.Connect(_levelUi.GetInventory().UnequipItem, *GetPlayer(), &ObjectCharacter::UnequipItem);
+  obs.Connect(_levelUi.GetInventory().DropObject,  *this,        &Level::PlayerDropObject);
+  obs.Connect(_levelUi.GetInventory().UseObject,   *this,        &Level::PlayerUseObject);
   
+  obs.Connect(InstanceDynamicObject::ActionUse,         *this, &Level::CallbackActionUse);
+  obs.Connect(InstanceDynamicObject::ActionTalkTo,      *this, &Level::CallbackActionTalkTo);
+  obs.Connect(InstanceDynamicObject::ActionUseObjectOn, *this, &Level::CallbackActionUseObjectOn);  
+
   TimeManager::Task* daylightTask = _timeManager.AddTask(true, 3);
   daylightTask->Interval.Connect(*this, &Level::RunDaylight);
 
@@ -171,12 +159,31 @@ Level::Level(WindowFramework* window, const std::string& filename) : _window(win
       task->Interval.Connect(*character, &ObjectCharacter::CheckFieldOfView);
     }
   });
+  
+  _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
+  
+  _world->AddLight(WorldLight::Point, "toto");
+  WorldLight* light = _world->GetLightByName("toto");
+  
+  light->zoneSize = 20;
+  light->SetColor(255, 50, 50, 125);
+  light->nodePath.reparent_to(GetPlayer()->GetNodePath());
+  _world->CompileLight(light);
+
+  PointLight* plight = dynamic_cast<PointLight*>(light->nodePath.node());
+  plight->set_shadow_caster(true, 512, 512);
+  plight->get_lens()->set_near_far(1.f, 2.f);
+  plight->get_lens()->set_film_size(512);
+  
+  window->get_render().set_shader_auto();
 }
 
 Level::~Level()
 {
-  AsyncTaskManager::get_global_ptr()->remove(this);
-  std::for_each(_objects.begin(), _objects.end(), [](InstanceDynamicObject* obj) { delete obj; });
+  obs.DisconnectAll();
+  AsyncTaskManager::get_global_ptr()->remove(&_asyncTask);
+  ForEach(_objects,   [](InstanceDynamicObject* obj) { delete obj;  });
+  ForEach(_exitZones, [](LevelExitZone* zone)        { delete zone; });
   CurrentLevel = 0;
   for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
   {
@@ -188,6 +195,8 @@ Level::~Level()
   if (_l18n)
     delete _l18n;
   CurrentLevel = 0;
+  if (_world)
+    delete _world;
 }
 
 bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
@@ -261,7 +270,7 @@ void Level::SetInterrupted(bool set)
 void Level::StartFight(ObjectCharacter* starter)
 {
   _itCharacter = std::find(_characters.begin(), _characters.end(), starter);
-  _gameUi.GetMainBar().SetEnabledAP(true);
+  _levelUi.GetMainBar().SetEnabledAP(true);
   (*_itCharacter)->RestartActionPoints();
   SetState(Fight);
 }
@@ -275,7 +284,7 @@ void Level::StopFight(void)
     
     for (; it != end ; ++it)
     {
-      list<ObjectCharacter::FovEnemy>& listEnemies = (*it)->GetNearbyEnemies();
+      list<ObjectCharacter::FovEnemy> listEnemies = (*it)->GetNearbyEnemies();
 
       if (listEnemies.size() > 0 && (*it)->IsAlive())
       {
@@ -284,7 +293,7 @@ void Level::StopFight(void)
       }
     }
     SetState(Normal);
-    _gameUi.GetMainBar().SetEnabledAP(false);
+    _levelUi.GetMainBar().SetEnabledAP(false);
   }
 }
 
@@ -308,11 +317,10 @@ void Level::RunDaylight(void)
   static unsigned char dayStep    = 1;
   static unsigned int  stepLength = 60;
 
-  std::cout << "RunDaylight" << std::endl;
   LVecBase4f           colorSteps[3];
 
   colorSteps[0] = LVecBase4f(0.2, 0.2, 0.2, 1);
-  colorSteps[1] = LVecBase4f(0.8, 0.8, 0.8, 1);
+  colorSteps[1] = LVecBase4f(1.0, 1.0, 1.0, 1);
   colorSteps[2] = LVecBase4f(0.6, 0.3, 0.3, 1);
 
   if (lightTimer.GetElapsedTime() < stepLength)
@@ -335,28 +343,13 @@ void Level::RunDaylight(void)
 }
 
 AsyncTask::DoneStatus Level::do_task(void)
-{
-  // FPS COUNTER NO PSTAT
-  {
-    static Timer          timer;
-    static unsigned short fps = 0;
-
-    if (timer.GetElapsedTime() > 1.f)
-    {
-      cout << "[FPS] " << fps << endl;
-      fps = 0;
-      timer.Restart();
-      std::cout << _timeManager.GetHour() << ":" << _timeManager.GetMinute() << ":" << _timeManager.GetSecond() << std::endl;
-    }
-    fps++;
-  }
-  
+{ 
   float elapsedTime = _timer.GetElapsedTime();
-  
+
   _mouse.Run();
   _camera.Run(elapsedTime);
   _timeManager.ExecuteTasks();
-  
+
   switch (_state)
   {
     case Fight:
@@ -377,7 +370,7 @@ AsyncTask::DoneStatus Level::do_task(void)
       break ;
   }
   _timer.Restart();
-  return (AsyncTask::DS_cont);
+  return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);
 }
 
 void Level::TaskCeiling(float elapsedTime)
@@ -422,6 +415,18 @@ void                   Level::RemoveObject(InstanceDynamicObject* object)
     delete (*it);
     _objects.erase(it);
   }
+}
+
+void                   Level::UnprocessAllCollisions(void)
+{
+  ForEach(_objects,    [](InstanceDynamicObject* object) { object->UnprocessCollisions(); });
+  ForEach(_characters, [](ObjectCharacter*       object) { object->UnprocessCollisions(); });
+}
+
+void                   Level::ProcessAllCollisions(void)
+{
+  ForEach(_objects,    [](InstanceDynamicObject* object) { object->ProcessCollisions(); });
+  ForEach(_characters, [](ObjectCharacter*       object) { object->ProcessCollisions(); });
 }
 
 /*
@@ -555,7 +560,7 @@ void Level::CloseInteractMenu(void)
 
 void Level::ConsoleWrite(const string& str)
 {
-  _gameUi.GetMainBar().AppendToConsole(str);
+  _levelUi.GetMainBar().AppendToConsole(str);
 }
 
 // Interactions
@@ -584,7 +589,7 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
     if (talkTo)
       talkTo->LookAt(GetPlayer());
     
-    _currentRunningDialog = new DialogController(_window, _gameUi.GetContext(), dialog, _l18n);
+    _currentRunningDialog = new DialogController(_window, _levelUi.GetContext(), dialog, _l18n);
     _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningUi<UiItRunningDialog>);
     _mouseActionBlocked = true;
     _camera.SetEnabledScroll(false);
@@ -606,7 +611,7 @@ void Level::CallbackActionUseObjectOn(InstanceDynamicObject* target)
   CloseInteractMenu();
   if (_currentUis[UiItUseObjectOn])
     delete _currentUis[UiItUseObjectOn];
-  _currentUseObjectOn = new UiUseObjectOn(_window, _gameUi.GetContext(), GetPlayer()->GetInventory());
+  _currentUseObjectOn = new UiUseObjectOn(_window, _levelUi.GetContext(), GetPlayer()->GetInventory());
   _currentUseObjectOn->ActionCanceled.Connect(*this, &Level::CloseRunningUi<UiItUseObjectOn>);
   _currentUseObjectOn->ObjectSelected.Connect(*this, &Level::SelectedUseObjectOn);
   _mouseActionBlocked = true;
@@ -626,7 +631,7 @@ void Level::PlayerLoot(Inventory* inventory)
   CloseInteractMenu();
   if (_currentUis[UiItLoot])
     delete _currentUis[UiItLoot];
-  _currentUiLoot = new UiLoot(_window, _gameUi.GetContext(), GetPlayer()->GetInventory(), *inventory);
+  _currentUiLoot = new UiLoot(_window, _levelUi.GetContext(), GetPlayer()->GetInventory(), *inventory);
   _currentUiLoot->Done.Connect(*_currentUiLoot, &UiLoot::Destroy);
   _currentUiLoot->Done.Connect(*this, &Level::CloseRunningUi<UiItLoot>);
   _mouseActionBlocked = true;
@@ -682,7 +687,7 @@ void Level::PendingActionUseObjectOn(InstanceDynamicObject* object)
 
     if (!(dataUseCost.Nil()))
       useCost = dataUseCost;
-    object->GetNodePath().look_at(object->pendingActionOn->GetNodePath());
+    object->Get<ObjectCharacter>()->LookAt(object->pendingActionOn);
     if (UseActionPoints(useCost))
     {
       const string toOutput = item->UseOn(object->Get<ObjectCharacter>(), object->pendingActionOn);
@@ -705,7 +710,7 @@ void Level::PendingActionUse(InstanceDynamicObject* object)
   else
   {
     std::cout << "PendingAvtionUseAnimationDone" << std::endl;
-    object->GetNodePath().look_at(object->pendingActionOn->GetNodePath());
+    object->Get<ObjectCharacter>()->LookAt(object->pendingActionOn);
     if (!(UseActionPoints(AP_COST_USE)))
       return ;
     object->pendingActionOn->CallbackActionUse(object);
@@ -795,7 +800,7 @@ void Level::PlayerEquipObject(unsigned short it, InventoryObject* object)
 
   if (canWeildTotal >= 2)
   {
-    UiEquipMode* ui = new UiEquipMode(_window, _gameUi.GetContext(), it, object);
+    UiEquipMode* ui = new UiEquipMode(_window, _levelUi.GetContext(), it, object);
 
     if (_currentUis[UiItEquipMode])
       delete _currentUis[UiItEquipMode];
@@ -863,4 +868,74 @@ bool Level::UseActionPoints(unsigned short ap)
     }
   }
   return (true);
+}
+
+/*
+ * Exit Zone Stuff
+ */
+void Level::CallbackExitZone(void)
+{
+  if (_currentUis[UiItNextZone])
+    _currentUis[UiItNextZone]->Destroy();
+  _exitingZone   = true;
+}
+
+void Level::CallbackGoToZone(const string& nextZone)
+{
+  LevelExitZone* zone = reinterpret_cast<LevelExitZone*>(GetPlayer()->GetOccupiedWaypoint()->arcs.front().observer);  
+  
+  if (_currentUis[UiItNextZone])
+    _currentUis[UiItNextZone]->Destroy();
+  _exitingZone     = true;
+  _exitingZoneTo   = nextZone;
+  if (zone)
+    _exitingZoneName = zone->GetName();
+}
+
+void Level::CallbackSelectNextZone(const vector<string>& nextZoneChoices)
+{
+  if (_currentUis[UiItNextZone] && _currentUis[UiItNextZone]->IsVisible())
+    return ;
+  else
+  {
+    UiNextZone* uiNextZone = new UiNextZone(_window, _levelUi.GetContext(), nextZoneChoices);
+
+    if (_currentUis[UiItNextZone])
+      delete _currentUis[UiItNextZone];
+    _currentUis[UiItNextZone] = uiNextZone;
+    uiNextZone->NextZoneSelected.Connect(*this, &Level::CallbackGoToZone);
+  }
+}
+
+const string& Level::GetNextZone(void) const
+{
+  return (_exitingZoneTo);
+}
+
+const string& Level::GetExitZone(void) const
+{
+  return (_exitingZoneName);
+}
+
+void Level::SetEntryZone(const std::string& name)
+{
+  EntryZone* zone               = _world->GetEntryZoneByName(name);
+
+  if (!zone && _world->entryZones.size() > 0)
+    zone = &(_world->entryZones.front());
+  if (zone)
+  {
+    list<Waypoint*>::iterator it  = zone->waypoints.begin();
+    list<Waypoint*>::iterator end = zone->waypoints.end();
+
+    for (; it != end ; ++it)
+    {
+      // TODO if something
+      {
+        GetPlayer()->SetOccupiedWaypoint(*it);
+	GetPlayer()->GetNodePath().set_pos((*it)->nodePath.get_pos());
+        break ;
+      }
+    }
+  }
 }

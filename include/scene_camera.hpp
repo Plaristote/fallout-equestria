@@ -19,6 +19,8 @@ enum
   MotionRight  = 8
 };
 
+class InstanceDynamicObject;
+
 class SceneCamera
 {
 public:
@@ -36,13 +38,24 @@ public:
     _maxPosX = maxX;
     _maxPosY = maxY;
   }
-
+  
+  void            CenterCameraInstant(LPoint3f);
+  void            CenterCameraOn(NodePath np);
+  void            FollowNodePath(NodePath np);
+  void            StopFollowingNodePath(void);
+  
+  void            CenterOnObject(InstanceDynamicObject*);
+  void            FollowObject(InstanceDynamicObject*);
+  
 private:
   void            RunScroll(float elapsedTime);
+  void            RunFollow(float elapsedTime);
   
   WindowFramework* _window;
   GraphicsWindow*  _graphicWindow;
   NodePath         _camera;
+  LPoint3f         _cameraPos;
+  float            _cameraMovementSpeed;
   bool             _scrollEnabled;
 
   unsigned char    _currentCameraAngle;
@@ -50,6 +63,12 @@ private:
   LPoint3f         _objectiveHpr;
 
   unsigned int     _minPosX, _minPosY, _maxPosX, _maxPosY;
+
+  bool             _centeringCamera;
+  bool             _followingNodePath;
+  NodePath         _toFollow;
+  LPoint3f         _currentPos;
+  LPoint3f         _objectivePos;
 };
 
 #endif

@@ -71,29 +71,29 @@ div#window
 	width: auto;
 	padding: 10px 15px;
 
-	background-decorator: tiled-box;
-	background-top-left-image: invader.tga 0px 0px 133px 140px;
-	background-top-right-image: invader.tga 136px 0px 146px 140px;
-	background-top-image: invader.tga stretch 134px 0px 135px 140px;
-	background-bottom-left-image: invader.tga 0px 140px 11px 151px;
+	background-decorator:          tiled-box;
+	background-top-left-image:     invader.tga 0px 0px 133px 140px;
+	background-top-right-image:    invader.tga 136px 0px 146px 140px;
+	background-top-image:          invader.tga stretch 134px 0px 135px 140px;
+	background-bottom-left-image:  invader.tga 0px 140px 11px 151px;
 	background-bottom-right-image: invader.tga 136px 140px 146px 151px;
-	background-bottom-image: invader.tga stretch 11px 140px 12px 151px;
-	background-left-image: invader.tga stretch 0px 139px 10px 140px;
-	background-center-image: invader.tga stretch 11px 139px 12px 140px;
+	background-bottom-image:       invader.tga clamp-truncate 11px 140px 12px 151px;
+	background-left-image:         invader.tga clamp-truncate 0px 139px 10px 140px;
+	background-center-image:       invader.tga clamp-truncate 11px 139px 12px 140px;
 }
 
 .window-inventory
 {
 	background-decorator: tiled-box;
-	background-top-left-image:     invader.tga         0px   275px 10px  300px;
-	background-top-right-image:    invader.tga         130px 275px 140px 300px;
-	background-top-image:          invader.tga         10px  275px 130px 300px;
-	background-bottom-left-image:  invader.tga         0px   410px 10px  420px;
-	background-bottom-right-image: invader.tga         130px 410px 140px 420px;
-	background-bottom-image:       invader.tga         10px  410px 130px 420px;
-	background-left-image:         invader.tga         0px   300px 10px  410px;
-	background-right-image:        invater.tga         130px 300px 140px 410px;
-	background-center-image:       invader.tga stretch 10px  410px 130px 410px;
+	background-top-left-image:     invader.tga         0px   275px 10px  350px;
+	background-top-right-image:    invader.tga         130px 275px 140px 350px;
+	background-top-image:          invader.tga         10px  275px 130px 350px;
+	background-bottom-left-image:  invader.tga         0px   352px 10px  420px;
+	background-bottom-right-image: invader.tga         130px 352px 140px 420px;
+	background-bottom-image:       invader.tga         10px  352px 130px 420px;
+	background-left-image:         invader.tga         0px   350px 10px  351px;
+	background-right-image:        invader.tga         130px 350px 140px 351px;
+	background-center-image:       invader.tga stretch 10px  350px 130px 351px;
 }
 
 div#content
@@ -130,37 +130,6 @@ h1
 	shadow-color: black;
 }
 
-#console_output
-{
-  shadow-font-effect: shadow;
-  shadow-offset: 1px 1px;
-  shadow-color: black;
-  font-weight: bold;
-  color: rgb(0%, 100%, 0%);
-}
-
-.console-error
-{
-  font-weight: bold;
-  color: rgb(100%, 0%, 0%);
-}
-
-.console-as-error
-{
-  color: rgb(20%, 20%, 100%);
-}
-
-.console-write
-{
-  color: rgb(100%, 100%, 100%);
-}
-
-.console-write-output
-{
-  font-weight: normal;
-}
-
-input,
 select,
 dataselect
 {

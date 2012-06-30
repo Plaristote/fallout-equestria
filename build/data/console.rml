@@ -3,22 +3,51 @@
 		<title>Main Menu</title>
 		<link type="text/template" href="tpl_mainbar.rml" />
 		<style>
-	        body
-		{
-		  width: 100%;
-		  height: 120px;
-		}
+body
+{
+  width: 100%;
+  height: 120px;
+}
 	
-                #console-container
-                {
-                }
+#console_input
+{
+  background-color: #000000;
+  width: 100%;
+  height: 20px;
+}
 
-                #console_input
-                {
-                  background-color: #000000;
-                  width: 100%;
-                  height: 20px;
-                }
+#console_output
+{
+  background-color: rgba(0, 0, 0, 125);
+  font-family: JH_Fallout;
+  font-size:   8px;
+  shadow-font-effect: shadow;
+  shadow-offset: 1px 1px;
+  shadow-color: black;
+  font-weight: bold;
+  color: rgb(0%, 100%, 0%);
+}
+
+.console-error
+{
+  font-weight: bold;
+  color: rgb(100%, 0%, 0%);
+}
+
+.console-as-error
+{
+  color: rgb(20%, 20%, 100%);
+}
+
+.console-write
+{
+  color: rgb(100%, 100%, 100%);
+}
+
+.console-write-output
+{
+  font-weight: normal;
+}
 		</style>
 	</head>
   <body id="body" template="tplmainbar">
@@ -29,7 +58,7 @@
         </div>
 
         <p id="console_output">
-          <b>Welcome to teh Fallout Equestria Debug Console</b>
         </p>
+        <b>Welcome to teh Fallout Equestria Debug Console</b>
   </body>
 </rml>

@@ -64,8 +64,7 @@ InstanceDynamicObject::GoToData   InstanceDynamicObject::GetGoToData(InstanceDyn
 // Animations
 AnimatedObject::AnimatedObject(WindowFramework* window) : _window(window)
 {
-  _idleSemaphore       = false;
-  pendingAnimationDone = true;
+  pendingAnimationDone = false;
   AnimationEnd.Connect(*this, &AnimatedObject::PlayIdleAnimation);
 }
 
@@ -103,10 +102,11 @@ void                     AnimatedObject::PlayAnimation(const std::string& name, 
   }
   else if (!loop && name != ANIMATION_DEFAULT)
     PlayAnimation(ANIMATION_DEFAULT, loop);
-  else if (_idleSemaphore == false)
+  else
   {
     pendingAnimationDone = true;
     AnimationEnd.Emit();
+    pendingAnimationDone = false;
   }
 }
 
@@ -130,7 +130,9 @@ void                      AnimatedObject::TaskAnimation(void)
 
 void                      AnimatedObject::PlayIdleAnimation(void)
 {
-  _idleSemaphore = true;
-  PlayAnimation("idle", true);
-  _idleSemaphore = false;
+  MapAnims::iterator     it   = _mapAnims.find("idle");
+  AnimControl*           anim = (it != _mapAnims.end() ? it->second : 0);
+
+  if (anim)
+    anim->play();
 }

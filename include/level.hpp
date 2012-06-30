@@ -26,13 +26,18 @@
 
 # include "world.h"
 
-class Level : public AsyncTask
+class Level
 {
   float ceilingCurrentTransparency;
 public:
   static Level* CurrentLevel;
   
-  Level(WindowFramework* window, const std::string& filename);
+  Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Packet& data);
+
+  // Saving/Loading
+  void SetDataEngine(DataEngine* de) { _dataEngine = de; }
+  void Save(Utils::Packet&);
+  void Load(Utils::Packet&);
 
   ~Level();
 
@@ -43,7 +48,7 @@ public:
     Interrupted
   };
 
-  DoneStatus              do_task(void);
+  AsyncTask::DoneStatus   do_task(void);
   void                    SetState(State);
   State                   GetState(void) const { return (_state); }
   void                    SetInterrupted(bool);
@@ -52,18 +57,28 @@ public:
   // World Interactions
   bool                   FindPath(std::list<Waypoint>&, Waypoint&, Waypoint&);
   World*                 GetWorld(void)       { return (_world); }
+  SceneCamera&           GetCamera(void)      { return (_camera); }
   ObjectCharacter*       GetCharacter(const std::string& name);
   ObjectCharacter*       GetPlayer(void);
+  void                   UnprocessAllCollisions(void);
+  void                   ProcessAllCollisions(void);
 
   void                   CloseInteractMenu(void);
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);
-  TimeManager&           GetTimeManager(void) { return (_timeManager); }
-  Data                   GetDataEngine(void)  { return (_dataEngine);  }
-  Data                   GetItems(void)       { return (_items);       }
+  TimeManager&           GetTimeManager(void) { return (_timeManager);  }
+  Data                   GetDataEngine(void)  { return (*_dataEngine);  }
+  Data                   GetItems(void)       { return (_items);        }
   void                   ConsoleWrite(const std::string& str);
-  
+
   void                   RemoveObject(InstanceDynamicObject* object);
+  
+  void                   CallbackExitZone(void);
+  void                   CallbackGoToZone(const std::string& name);
+  void                   CallbackSelectNextZone(const std::vector<std::string>& zones);
+  const std::string&     GetNextZone(void) const;
+  const std::string&     GetExitZone(void) const;
+  void                   SetEntryZone(const std::string&);
 
   // Interaction Management
   void                   CallbackActionUse(InstanceDynamicObject* object);
@@ -116,12 +131,16 @@ public:
 private:
   typedef std::list<InstanceDynamicObject*> InstanceObjects;
   typedef std::list<ObjectCharacter*>       Characters;
+  typedef std::list<LevelExitZone*>         ExitZones;
 
   void              RunDaylight(void);
   void              MouseInit(void);
+  
+  Observatory::ObserverHandler obs;
 
   WindowFramework*  _window;
   GraphicsWindow*   _graphicWindow;
+  AsyncTask&        _asyncTask;
   Mouse             _mouse;
   SceneCamera       _camera;
   Timer             _timer;
@@ -132,6 +151,10 @@ private:
   InstanceObjects      _objects;
   Characters           _characters;
   Characters::iterator _itCharacter;
+  
+  ExitZones            _exitZones;
+  bool                 _exitingZone;
+  std::string          _exitingZoneTo, _exitingZoneName;
 
   DirectionalLight* _sunLight;
   NodePath          _sunLightNode;
@@ -142,6 +165,7 @@ private:
     UiItUseObjectOn,
     UiItLoot,
     UiItEquipMode,
+    UiItNextZone,
     UiTotalIt
   };
   
@@ -154,7 +178,7 @@ private:
     SetInterrupted(false);
   }
   
-  GameUi            _gameUi;
+  LevelUi           _levelUi;
   InteractMenu*     _currentInteractMenu;
   UiBase*           _currentUis[UiTotalIt];
   DialogController* _currentRunningDialog;
@@ -162,7 +186,7 @@ private:
   UiLoot*           _currentUiLoot;
   bool              _mouseActionBlocked;
 
-  DataEngine        _dataEngine;
+  DataEngine*       _dataEngine;
   DataTree*         _l18n;
   DataTree*         _items;
 };

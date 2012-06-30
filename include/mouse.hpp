@@ -36,6 +36,7 @@ class Mouse
 {
 public:
   Mouse(WindowFramework* window);
+  ~Mouse();
 
   void                      Run(void);
   const MouseHovering&      Hovering(void) const { return (_hovering); }

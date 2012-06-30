@@ -11,6 +11,8 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
   (*this)["scale"]    = data["scale"].Value();
   (*this)["pos"]["x"] = data["pos"]["x"].Value();
   (*this)["pos"]["y"] = data["pos"]["y"].Value();
+  if (!(data["ap-cost"].Nil()))
+    (*this)["ap-cost"]  = data["ap-cost"].Value();
   (*this)["weight"]   = (data["weight"].Nil()) ? "0" : data["weight"].Value();
   (*this)["hidden"]   = data["hidden"].Value();
   (*this)["combat"]   = data["combat"].Value();

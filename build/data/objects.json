@@ -8,7 +8,9 @@
                       },
             "combat": "1",
             "range":  "10",
-            "hidden": "1"
+            "hidden": "1",
+            "ap-cost": "3",
+            "damage":  "5"
           },
 
 "buck":   {
@@ -19,7 +21,9 @@
                       },
             "combat": "1",
             "range":  "20",
-            "hidden": "1"
+            "hidden": "1",
+            "ap-cost": "4",
+            "damage": "10"
           },
 
 "Key": {
