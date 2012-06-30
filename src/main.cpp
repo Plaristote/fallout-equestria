@@ -148,7 +148,8 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "float GetDistance(DynamicObject@)",        asMETHOD(ObjectCharacter,GetDistance), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "Inventory@ GetInventory()",                asMETHOD(ObjectCharacter,GetInventory), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "Data GetStatistics()",                     asMETHOD(ObjectCharacter,GetStatistics), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "int  GetCurrentWaypoint() const",          asMETHOD(ObjectCharacter,GetOccupiedWaypointAsInt), asCALL_THISCALL);
+  //MSVC2010 strangeness for this function: Base/Derived thingymajig complications
+  engine->RegisterObjectMethod(charClass, "int  GetCurrentWaypoint() const",          asMETHODPR(WaypointModifier,GetOccupiedWaypointAsInt, (void) const, int), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool IsMoving() const",                    asMETHOD(ObjectCharacter,IsMoving), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool IsAlive() const",                     asMETHOD(ObjectCharacter,IsAlive),  asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "DynamicObject@ AsObject()",                asFUNCTION(asUtils::CharacterAsObject), asCALL_CDECL_OBJLAST);
@@ -250,6 +251,9 @@ public:
     else
       _dataEngine["system"]["current-level"] = 0;
     _dataEngine.Save(savepath + "/dataengine.json");
+
+	//MSVC2010, "Function MUST return a value", DEBUG
+	return true;
   }
 
   bool LoadGame(const std::string& savepath)
