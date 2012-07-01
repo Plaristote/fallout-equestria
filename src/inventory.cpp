@@ -10,6 +10,11 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
   // Set the default values
   (*this)["weight"]   = (data["weight"].Nil()) ? "0" : data["weight"].Value();
   (*this)["interactions"]["use"] = "1";
+  
+  if (data["mode-mouth"].Nil())
+    (*this)["mode-mouth"] = "1";
+  if (data["mode-magic"].Nil())
+    (*this)["mode-magic"] = "1";
 
   _equiped = false;
 
