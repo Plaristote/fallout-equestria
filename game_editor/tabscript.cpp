@@ -2,8 +2,9 @@
 #include "ui_mainwindow.h"
 #include <QTextStream>
 
-extern QString strScriptCategories[3];
-extern QString pathScriptCategories[3];
+#define N_SCRIPT_CAT 5
+extern QString strScriptCategories[N_SCRIPT_CAT];
+extern QString pathScriptCategories[N_SCRIPT_CAT];
 
 TabScript::TabScript(QObject *parent, Ui::MainWindow* ui) : QObject(parent), ui(ui)
 {
@@ -14,7 +15,7 @@ void TabScript::FilterScript(QString string)
 {
     QRegExp regexp(string);
 
-    for (short i = 0 ; i < 3 ; ++i)
+    for (short i = 0 ; i < N_SCRIPT_CAT ; ++i)
     {
         short count = scriptCategories[i].childCount();
 
@@ -38,7 +39,7 @@ void TabScript::FilterScript(QString string)
 
 void TabScript::LoadAllScript(void)
 {
-    for (short i = 0 ; i < 3 ; ++i)
+    for (short i = 0 ; i < N_SCRIPT_CAT ; ++i)
     {
         QDir        dir("scripts/" + pathScriptCategories[i]);
         QStringList fileList = dir.entryList();
@@ -73,7 +74,7 @@ void TabScript::RemoveScript()
 
             if (file.remove())
             {
-                for (short i = 0 ; i < 3 ; ++i)
+                for (short i = 0 ; i < N_SCRIPT_CAT ; ++i)
                 {
                     short count = scriptCategories[i].childCount();
 
@@ -172,7 +173,7 @@ void TabScript::SwapScript(QTreeWidgetItem* first)
 {
     if (first)
     {
-        for (short i = 0 ; i < 3 ; ++i)
+        for (short i = 0 ; i < N_SCRIPT_CAT ; ++i)
         {
             if (first->parent() == &scriptCategories[i])
             {

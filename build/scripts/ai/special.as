@@ -6,7 +6,7 @@
 bool ActivateTraits(Data sheet, string trait, bool setActivated)
 {
   if      (trait == "Bruiser")
-    sheet["Special"]["STR"] = sheet["Special"]["STR"] + (setActivated ? 2 : -2);
+    sheet["Special"]["STR"] = sheet["Special"]["STR"].AsInt() + (setActivated ? 2 : -2);
   else if (trait == "Gifted")
   {
     sheet["Special"]["STR"] = sheet["Special"]["STR"].AsInt() + (setActivated ? 1 : -1);
@@ -18,7 +18,7 @@ bool ActivateTraits(Data sheet, string trait, bool setActivated)
     sheet["Special"]["LUC"] = sheet["Special"]["LUC"].AsInt() + (setActivated ? 1 : -1);
   }
   else if (trait == "Small Frame")
-    sheet["Special"]["AGI"] = sheet["Special"]["AGI"] + (setActivated ? 1 : -1);
+    sheet["Special"]["AGI"] = sheet["Special"]["AGI"].AsInt() + (setActivated ? 1 : -1);
 }
 
 // This must contains all the modifications to derived statistics and skills from SPECIAL and Traits changes

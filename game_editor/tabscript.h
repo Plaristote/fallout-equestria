@@ -46,7 +46,7 @@ private:
     Ui::MainWindow*          ui;
     DialogNewScript          dialogNewScript;
 
-    QTreeWidgetItem          scriptCategories[3];
+    QTreeWidgetItem          scriptCategories[5];
     ScriptFiles              files;
     QAngelScriptEdit*        currentEditor;
     QList<QAngelScriptEdit*> currentEditorHistory;

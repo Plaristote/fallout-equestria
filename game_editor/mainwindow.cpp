@@ -36,17 +36,18 @@ struct PandaTask : public AsyncTask
 
 PandaTask my_task;
 
-QString strScriptCategories[3] = {
-    "Dialogues", "Quests", "Artificial Intelligence"
+QString strScriptCategories[5] = {
+    "Dialogues", "Quests", "Artificial Intelligence", "Items", "Buffs"
 };
 
-QString pathScriptCategories[3] = {
-    "dialogs", "quests", "ai"
+QString pathScriptCategories[5] = {
+    "dialogs", "quests", "ai", "objects", "buffs"
 };
 
 MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), tabScript(this, ui), tabDialog(this, ui), tabL18n(this, ui), splashScreen(this), wizardObject(this), dialogObject(this)
 {
     QIcon iconScript("icons/script.png");
+    QIcon iconItems("icons/item.png");
     QIcon iconDialogs("icons/dialogs.png");
     QIcon iconLevel("icons/level.png");
     QIcon iconDelete("icons/delete.png");
@@ -78,8 +79,9 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
 
     ui->tabWidget->setTabIcon(0, iconLevel);
     ui->tabWidget->setTabIcon(1, iconScript);
-    ui->tabWidget->setTabIcon(2, iconDialogs);
-    ui->tabWidget->setTabIcon(3, iconLanguage);
+    ui->tabWidget->setTabIcon(2, iconItems);
+    ui->tabWidget->setTabIcon(3, iconDialogs);
+    ui->tabWidget->setTabIcon(4, iconLanguage);
     ui->scriptNew->setIcon(iconAdd);
     ui->dialogNew->setIcon(iconAdd);
     ui->mapNew->setIcon(iconAdd);
@@ -110,7 +112,7 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     {
     }
 
-    for (short i = 0 ; i < 3 ; ++i)
+    for (short i = 0 ; i < 5 ; ++i)
     {
         tabScript.scriptCategories[i].setText(0, strScriptCategories[i]);
         ui->scriptList->addTopLevelItem(&(tabScript.scriptCategories[i]));
@@ -203,6 +205,7 @@ void MainWindow::LoadProject()
         tabScript.LoadAllScript();
 		tabL18n.LoadAllLanguages();
         tabDialog.LoadAllDialogs();
+        ui->itemEditor->LoadAllItems();
         LoadAllMaps();
     }
     else
