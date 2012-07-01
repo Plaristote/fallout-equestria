@@ -13,13 +13,17 @@ extern PandaFramework framework;
 
 GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
 {
-  vector<string> fonts = { "JH_FALLOUT.TTF",
+  //HAIL MICROSOFT!!!
+	string fonts[] = { "JH_FALLOUT.TTF",
                            "Delicious-Roman.otf",
                            "Delicious-Italic.otf",
                            "Delicious-Bold.otf",
                            "Delicious-BoldItalic.otf" };
 
-  ForEach(fonts, [](string path) { Core::FontDatabase::LoadFontFace(Core::String(PATH_FONTS) + "/" + path.c_str()); });
+  //ForEach(fonts, [](string path) { Core::FontDatabase::LoadFontFace(Core::String(PATH_FONTS) + "/" + path.c_str()); });
+  for (int i=0; i<GET_ARRAY_SIZE(fonts); i++)
+	  Core::FontDatabase::LoadFontFace(Core::String(PATH_FONTS) + "/" + fonts[i].c_str());
+
   _rocket = RocketRegion::make("interface", window->get_graphics_output());
   _rocket->set_active(true);
   

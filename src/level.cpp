@@ -75,9 +75,10 @@ Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Pa
     exitZone->SetName(zone.name);
     ForEach(zone.waypoints, [exitZone](Waypoint* wp)
     {
-      ForEach(wp->arcs, [exitZone](Waypoint::Arc& arc)
+		LevelExitZone* ez= exitZone; //MSVC2010: Captured variables lambda stuffs (compiler bug, I think) 
+      ForEach(wp->arcs, [ez](Waypoint::Arc& arc)
       {
-	arc.observer = exitZone;
+	arc.observer = ez;
       });
     });
     

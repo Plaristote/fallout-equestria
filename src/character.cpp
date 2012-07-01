@@ -103,10 +103,9 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 
   PT(CharacterJointBundle) bodyBundle = _character->get_bundle(0);
 
-  vector<string> listJoints = { "Horn", "Mouth", "BattleSaddle" };
-  
-  for_each(listJoints.begin(), listJoints.end(), [this, bodyNP, bodyBundle](string name)
-  {
+  //HAIL MICROSOFT
+  string listJoints[] = { "Horn", "Mouth", "BattleSaddle" };
+  for (int i= 0; i<GET_ARRAY_SIZE(listJoints); i++) {
     for (unsigned short it = 0 ; it < 2 ; ++it)
     {
       stringstream       jointName;
@@ -114,8 +113,8 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
       PT(CharacterJoint) joint;
       NodePath           tmp;
 
-      jointName << "attach_"  << name << "_" << (it + 1);
-      npName    << "equiped_" << name << "_" << (it + 1);
+      jointName << "attach_"  << listJoints[i] << "_" << (it + 1);
+      npName    << "equiped_" << listJoints[i] << "_" << (it + 1);
       joint     = _character->find_joint(jointName.str());
 
       if (joint)
@@ -123,9 +122,9 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
         tmp     = bodyNP.attach_new_node(npName.str());
         bodyBundle->control_joint(jointName.str(), tmp.node());
 
-        if (name == "Horn")
+        if (listJoints[i] == "Horn")
           _equiped[it].jointHorn         = tmp;
-        else if (name == "Mouth")
+        else if (listJoints[i] == "Mouth")
           _equiped[it].jointMouth        = tmp;
         else
           _equiped[it].jointBattleSaddle = tmp;
@@ -133,7 +132,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
       else
 	cout << "/!\\ Joint " << jointName.str() << " doesn't exist for Character " << _object->nodePath.get_name() << endl;
     }
-  });
+  };
 
   _type         = ObjectTypes::Character;
   _actionPoints = 0;
@@ -255,11 +254,13 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
     _inventory.AddObject(_equiped[i].equiped);
   }
   
-  // Animations
-  vector<string> anims = { "idle", "walk", "run", "use" };
-  for_each(anims.begin(), anims.end(), [this](string anim)
-  { LoadAnimation(anim); });
-  
+  // Animations (HAIL MICROSOFT)
+  string anims[] = { "idle", "walk", "run", "use" };
+  /*for_each(anims.begin(), anims.end(), [this](string anim)
+  { LoadAnimation(anim); });*/
+  for (int i=0; i<GET_ARRAY_SIZE(anims); i++)
+	  LoadAnimation(anims[i]);
+
   // Others
   CharacterDied.Connect(*this, &ObjectCharacter::RunDeath);  
 }
