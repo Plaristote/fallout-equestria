@@ -8,7 +8,7 @@
 #include "qpandaapplication.h"
 #include <QMessageBox>
 
-QPandaWidget::QPandaWidget(QWidget *parent) : QWidget(parent)
+QPandaWidget::QPandaWidget(QWidget *parent) : QWidget(parent), _initialized(false)
 {
     EventHandler& events = QPandaApplication::Framework().get_event_handler();
 
@@ -86,7 +86,9 @@ void QPandaWidget::showEvent(QShowEvent* event)
     if (_window != 0)
     {
         UpdateSize();
-        Initialized();
+        if (_initialized == false)
+          Initialized();
+        _initialized = true;
     }
     else
     {

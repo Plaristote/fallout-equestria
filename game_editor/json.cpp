@@ -221,10 +221,10 @@ static bool isNumeric(const std::string& str)
     return (true);
 }
 
-static std::string appendArray(Data data);
-static std::string appendObject(Data data);
+static std::string appendArray(Data data, unsigned short indent = 0);
+static std::string appendObject(Data data, unsigned short indent = 0);
 
-static std::string appendValue(Data data)
+static std::string appendValue(Data data, unsigned short indent = 0)
 {
     std::string toWrite;
 
@@ -245,9 +245,9 @@ static std::string appendValue(Data data)
             }
         }
         if (isArray)
-          toWrite += appendArray(data);
+          toWrite += appendArray(data, indent);
         else
-          toWrite += appendObject(data);
+          toWrite += appendObject(data, indent);
     }
     else
     {
@@ -263,7 +263,7 @@ static std::string appendValue(Data data)
     return (toWrite);
 }
 
-static std::string appendArray(Data data)
+static std::string appendArray(Data data, unsigned short indent)
 {
     std::string toWrite;
     Data::iterator it  = data.begin();
@@ -277,16 +277,18 @@ static std::string appendArray(Data data)
           ++it;
           continue ;
         }
-        toWrite += appendValue(*it);
+        toWrite += appendValue(*it, indent + 2);
         ++it;
         if (it  != end)
           toWrite += ", ";
     }
+    for (unsigned short iIndent = indent ; iIndent ; --iIndent)
+        toWrite += ' ';
     toWrite += "\n]\n";
     return (toWrite);
 }
 
-static std::string appendObject(Data data)
+static std::string appendObject(Data data, unsigned short indent)
 {
     std::string toWrite;
     Data::iterator it  = data.begin();
@@ -300,13 +302,17 @@ static std::string appendObject(Data data)
           ++it;
           continue ;
         }
+        for (unsigned short iIndent = indent + 2 ; iIndent ; --iIndent)
+            toWrite += ' ';
         toWrite += "\"" + (*it).Key() + "\": ";
-        toWrite += appendValue(*it);
+        toWrite += appendValue(*it, indent + 2);
         ++it;
         if (it  != end)
             toWrite += ",";
         toWrite += "\n";
     }
+    for (unsigned short iIndent = indent ; iIndent ; --iIndent)
+        toWrite += ' ';
     toWrite += "}\n";
     return (toWrite);
 }

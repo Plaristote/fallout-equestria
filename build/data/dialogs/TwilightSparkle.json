@@ -1,37 +1,37 @@
 {
 "TwilightStudy": {
-"npcLine": 10014,
-"10015": {
-"HookAvailable": "",
-"HookExecute": "",
-"DefaultAnswer": "awesome"
-}
+  "npcLine": 10014,
+  "10015": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "awesome"
+  }
 ,
-"10018": {
-"HookAvailable": "",
-"HookExecute": "",
-"DefaultAnswer": "doomed"
-}
+  "10018": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "doomed"
+  }
 
 }
 ,
 "awesome": {
-"npcLine": 10016,
-"books": {
-"HookAvailable": "",
-"HookExecute": "",
-"DefaultAnswer": "TwilightStudy"
-}
+  "npcLine": 10016,
+  "books": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "TwilightStudy"
+  }
 
 }
 ,
 "doomed": {
-"npcLine": 10019,
-"10020": {
-"HookAvailable": "",
-"HookExecute": "TwilightAggro",
-"DefaultAnswer": ""
-}
+  "npcLine": 10019,
+  "10020": {
+    "HookAvailable": "",
+    "HookExecute": "TwilightAggro",
+    "DefaultAnswer": ""
+  }
 
 }
 

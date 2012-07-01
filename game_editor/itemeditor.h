@@ -19,13 +19,21 @@ public:
     void LoadAllItems(void);
 
 private slots:
+    void SaveData(void);
+    void UpdateData(void);
     void SelectItem(QString);
     void SelectAction(QString);
+
+    void ItemAdd(void);
+    void ItemDelete(void);
+    void ActionAdd(void);
+    void ActionDelete(void);
 
 private:
     Ui::ItemEditor *ui;
 
     DataTree*      dataTree;
+    bool           loading;
 };
 
 #endif // ITEMEDITOR_H

@@ -42,6 +42,7 @@ private:
     WindowFramework* _window;
     QSize            _size;
     bool             _loadingFailed;
+    bool             _initialized;
 
     PT(MouseWatcher) _mouseWatcher;
 };

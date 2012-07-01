@@ -1,54 +1,78 @@
 {
-
 "hooves": {
-            "icon":   "hooves.png",
-            "script": {
-                        "file":           "objectsUnarmed.as"
-                      },
-            "hidden": "1",
-            "actions": {
-                         "hooves": {
-                                     "ap-cost": 3,
-                                     "combat":  1,
-                                     "range":   10,
-                                     "danage":  5,
-                                     "hookWeapon": "HoovesHit"
-                                   }
-                       }
-          },
+  "icon": "hooves.png",
+  "script": {
+    "file": "objectsUnarmed.as"
+  }
+,
+  "hidden": 1,
+  "actions": {
+    "hooves": {
+      "ap-cost": 3,
+      "combat": 1,
+      "range": 10,
+      "danage": 5,
+      "hookWeapon": "HoovesHit"
+    }
 
-"buck":   {
-            "icon":   "buck.png",
-            "script": {
-                        "file":           "objectsUnarmed.as"
-                      },
-            "hidden": "1",
-            "actions": {
-                         "buck": {
-                                   "ap-cost": 4,
-                                   "combat":  1,
-                                   "range":   15,
-                                   "damage":  10,
-                                   "hookWeapon": "BuckHit"
-                                 }
-                       }
-          },
+  }
 
+}
+,
+"buck": {
+  "icon": "buck.png",
+  "script": {
+    "file": "objectsUnarmed.as"
+  }
+,
+  "hidden": 1,
+  "actions": {
+    "buck": {
+      "ap-cost": 4,
+      "combat": 1,
+      "range": 15,
+      "damage": 10,
+      "hookWeapon": "BuckHit"
+    }
+
+  }
+,
+  "model": "",
+  "texture": "",
+  "scale": 0,
+  "weight": 0,
+  "mode-mouth": 1,
+  "mode-magic": 1,
+  "mode-battlesaddle": 0
+}
+,
 "Key": {
-         "icon":    "key.png",
-         "texture": "lpip.png",
-         "model":   "horse.obj",
-         "scale":   1,
-         "weight":  5,
-         "script": {
-                     "file": "objectsMain.as"
-                   },
-         "actions": {
-                      "use on": {
-                                  "ap-cost": 2,
-                                  "hookDoors": "UseKeyOnDoor"
-                                }
-                    }
-       }
+  "icon": "key.png",
+  "texture": "lpip.png",
+  "model": "horse.obj",
+  "scale": 1,
+  "weight": 5,
+  "script": {
+    "file": "objectsMain.as"
+  }
+,
+  "actions": {
+    "use on": {
+      "ap-cost": 2,
+      "hookDoors": "UseKeyOnDoor",
+      "range": 999,
+      "combat": 0,
+      "targeted": 1,
+      "damage": 999,
+      "damage-max": 999
+    }
+
+  }
+,
+  "mode-mouth": 1,
+  "mode-magic": 1,
+  "mode-battlesaddle": 0
+}
+
 
 }
