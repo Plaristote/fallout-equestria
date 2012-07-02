@@ -66,9 +66,6 @@ void InventoryView::UpdateView(void)
 	  }
 	}
       }
-      
-      std::cout << "INVENTORY ITEM" << std::endl;
-      item.Output();
 
       if (!notVisible)
       {
@@ -254,9 +251,7 @@ UiLoot::UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventor
       _viewController.AddView(eInvLooter, looter);
     if (eInvLooted)
       _viewController.AddView(eInvLooted, looted);
-
     _viewController.ObjectSelected.Connect(*this, &UiLoot::SwapObjects);
-    
     _root->Show();
   }
 }

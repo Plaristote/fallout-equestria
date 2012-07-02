@@ -54,6 +54,7 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
 
 Mouse::~Mouse()
 {
+  _pickerPath.remove_node();
   _cursor.remove_node();
 }
 

@@ -81,6 +81,7 @@ struct Waypoint
     struct Arc
     {
         Arc(NodePath from, Waypoint* to);
+	~Arc();
 
         bool operator==(Waypoint* other) { return (to == other); }
         void UpdateDirection(void);

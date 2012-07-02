@@ -74,6 +74,7 @@ public:
   };
   
   ObjectCharacter(Level* level, DynamicObject* object);
+  ~ObjectCharacter(void);
   
   void Load(Utils::Packet&);
   void Save(Utils::Packet&);

@@ -265,6 +265,16 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   CharacterDied.Connect(*this, &ObjectCharacter::RunDeath);  
 }
 
+ObjectCharacter::~ObjectCharacter()
+{
+  _losNode->remove_solid(0);
+  _losPath.remove_node();
+  _fovTargetNode->remove_solid(0);
+  _fovTargetNp.remove_node();
+  _fovNode->remove_solid(0);
+  _fovNp.remove_node();
+}
+
 void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& name)
 {
   if (_equiped[it].equiped)

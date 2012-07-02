@@ -227,7 +227,6 @@ const std::string InventoryObject::ExecuteHook(asIScriptFunction* hook, ObjectCh
   {
     int ret;
 
-    _scriptContext = Script::Engine::Get()->CreateContext();
     ret = _scriptContext->Prepare(hook);
     
     switch (ret)
@@ -266,7 +265,8 @@ void Inventory::LoadInventory(DynamicObject* object)
 {
   ForEach(object->inventory, [this](std::pair<std::string, int> data)
   {
-    DataTree* objectTree = 0; // improve by using pre-loaded shit
+    Data      objectTree = Level::CurrentLevel->GetItems();
+    DataTree  objectTmp;
     DataTree* dataTree = DataTree::Factory::StringJSON(data.first);
     {
       Data      data_(dataTree);
@@ -274,10 +274,9 @@ void Inventory::LoadInventory(DynamicObject* object)
 
       if (!data_["type"].Nil())
       {
-	objectTree = DataTree::Factory::JSON("data/objects.json");
-	Data      objects(objectTree);
-	Data      object = objects[data_["type"].Value()];
+	Data      object(&objectTmp);
 
+	object.Duplicate(objectTree[data_["type"].Value()]);
 	if (!(data_["ammo"].Nil()))
 	{
 	  if (!(data_["ammo"]["ammount"].Nil()))
@@ -297,7 +296,6 @@ void Inventory::LoadInventory(DynamicObject* object)
       delete objectBuilder;
     }
     delete dataTree;
-    if (objectTree) delete objectTree;
   });
 }
 

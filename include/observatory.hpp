@@ -122,7 +122,10 @@ namespace Observatory
       typename Observers::iterator end   = _observers.end();
 
       while (_observers.begin() != end)
+      {
+	delete *(_observers.begin());
         _observers.erase(_observers.begin());
+      }
       _iterator = _observers.end();
     }
 
@@ -231,7 +234,10 @@ namespace Observatory
       typename Observers::iterator end   = _observers.end();
 
       while (_observers.begin() != end)
+      {
+	delete *(_observers.begin());
         _observers.erase(_observers.begin());
+      }
       _iterator = _observers.end();
     }    
 
@@ -340,7 +346,10 @@ namespace Observatory
       typename Observers::iterator end   = _observers.end();
 
       while (_observers.begin() != end)
+      {
+	delete *(_observers.begin());
         _observers.erase(_observers.begin());
+      }
       _iterator = _observers.end();
     }    
 
@@ -449,7 +458,10 @@ namespace Observatory
       typename Observers::iterator end   = _observers.end();
 
       while (_observers.begin() != end)
-        _observers.erase(_observers.begin());
+      {
+	delete *(_observers.begin());
+	_observers.erase(_observers.begin());
+      }
       _iterator = _observers.end();
     }    
 

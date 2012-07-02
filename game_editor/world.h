@@ -28,18 +28,13 @@
 #  define SQRT sqrt
 # endif
 
-# define GAME_EDITOR
+//# define GAME_EDITOR
 
 # ifdef GAME_EDITOR
 #  define WAYPOINT_DEBUG
 #  include <QDir>
-#  ifndef WIN32
-#   define MODEL_ROOT QDir::currentPath().toStdString() + "/models/"
-#   define TEXT_ROOT  QDir::currentPath().toStdString() + "/textures/"
-#  else
-#   define MODEL_ROOT "models/"
-#   define TEXT_ROOT  "textures/"
-#  endif
+#  define MODEL_ROOT QDir::currentPath().toStdString() + "/models/"
+#  define TEXT_ROOT  QDir::currentPath().toStdString() + "/textures/"
 # else
 #  define MODEL_ROOT "models/"
 #  define TEXT_ROOT  "textures/"
@@ -86,6 +81,7 @@ struct Waypoint
     struct Arc
     {
         Arc(NodePath from, Waypoint* to);
+	~Arc();
 
         bool operator==(Waypoint* other) { return (to == other); }
         void UpdateDirection(void);
