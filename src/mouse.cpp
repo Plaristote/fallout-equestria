@@ -8,6 +8,8 @@ using namespace std;
 Mouse::Mouse(WindowFramework* window) : _window(window)
 {
   MouseWatcher::init_type();
+  _lastMousePos.set_x(0);
+  _lastMousePos.set_y(0);
   _camera       = window->get_camera_group();
   _hovering.Reset();
   _mouseWatcher = dynamic_cast<MouseWatcher*>(window->get_mouse().node());

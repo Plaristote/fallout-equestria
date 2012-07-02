@@ -266,14 +266,38 @@ void Inventory::LoadInventory(DynamicObject* object)
 {
   ForEach(object->inventory, [this](std::pair<std::string, int> data)
   {
+    DataTree* objectTree = 0; // improve by using pre-loaded shit
     DataTree* dataTree = DataTree::Factory::StringJSON(data.first);
-    
-    for (int i = 0 ; i < data.second ; ++i)
     {
-      InventoryObject* newObject = new InventoryObject(dataTree);
-      
-      AddObject(newObject);
+      Data      data_(dataTree);
+      Data*     objectBuilder = new Data(dataTree);
+
+      if (!data_["type"].Nil())
+      {
+	objectTree = DataTree::Factory::JSON("data/objects.json");
+	Data      objects(objectTree);
+	Data      object = objects[data_["type"].Value()];
+
+	if (!(data_["ammo"].Nil()))
+	{
+	  if (!(data_["ammo"]["ammount"].Nil()))
+	    object["ammo"]["ammount"] = data_["ammo"]["ammount"];
+	  if (!(data_["ammo"]["current"].Nil()))
+	    object["ammo"]["current"] = data_["ammo"]["current"];
+	}
+	delete objectBuilder;
+	objectBuilder = new Data(object);
+      }
+      for (int i = 0 ; i < data.second ; ++i)
+      {
+	InventoryObject* newObject = new InventoryObject(*objectBuilder);
+
+	AddObject(newObject);
+      }
+      delete objectBuilder;
     }
+    delete dataTree;
+    if (objectTree) delete objectTree;
   });
 }
 

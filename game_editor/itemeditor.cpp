@@ -67,6 +67,14 @@ ItemEditor::~ItemEditor()
       delete dataTree;
 }
 
+QStringList ItemEditor::GetItemList() const
+{
+    QStringList ret;
+
+    for (int i = 0 ; i < ui->itemList->count() ; ++i)
+      ret << ui->itemList->item(i)->text();
+    return (ret);
+}
 
 void ItemEditor::LoadAllItems()
 {
@@ -83,6 +91,7 @@ void ItemEditor::LoadAllItems()
     for (; it != end ; ++it)
       ui->itemList->addItem((*it).Key().c_str());
     ui->itemList->sortItems();
+    ItemListChanged(GetItemList());
 }
 
 void ItemEditor::ItemAdd(void)
@@ -92,6 +101,7 @@ void ItemEditor::ItemAdd(void)
     if (name != "")
       ui->itemList->addItem(name);
     ui->itemList->sortItems();
+    ItemListChanged(GetItemList());
 }
 
 void ItemEditor::ItemDelete(void)
@@ -102,6 +112,7 @@ void ItemEditor::ItemDelete(void)
     Data(dataTree)[currentItem.toStdString()].Remove();
     ui->itemList->removeItemWidget(listItem);
     delete listItem;
+    ItemListChanged(GetItemList());
 }
 
 void ItemEditor::ActionAdd(void)

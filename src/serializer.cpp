@@ -81,17 +81,18 @@ namespace Utils
     long           size;
     char*          raw;
 
-    begin      = file.tellg();
+    isDuplicate = true;
+    begin       = file.tellg();
     file.seekg(0, std::ios::end);
-    end        = file.tellg();
+    end         = file.tellg();
     file.seekg(0, std::ios::beg);
-    size       = end - begin;
-    raw        = new char[size + 1];
+    size        = end - begin;
+    raw         = new char[size + 1];
     file.read(raw, size);
     file.close();
-    raw[size]  = 0;
-    buffer     = raw;
-    sizeBuffer = size;
+    raw[size]   = 0;
+    buffer      = raw;
+    sizeBuffer  = size;
     realloc(size);
     updateHeader();
   }

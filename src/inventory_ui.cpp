@@ -66,6 +66,9 @@ void InventoryView::UpdateView(void)
 	  }
 	}
       }
+      
+      std::cout << "INVENTORY ITEM" << std::endl;
+      item.Output();
 
       if (!notVisible)
       {

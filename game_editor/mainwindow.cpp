@@ -316,6 +316,8 @@ void MainWindow::PandaInitialized()
 
      world = new World(window);
 
+     connect(ui->itemEditor, SIGNAL(ItemListChanged(QStringList)), &dialogObject, SLOT(SetObjectList(QStringList)));
+
 // WAYPOINTS
      connect(ui->waypointAdd, SIGNAL(clicked()), this, SLOT(WaypointAdd()));
      connect(ui->waypointRemove, SIGNAL(clicked()), this, SLOT(WaypointDelete()));

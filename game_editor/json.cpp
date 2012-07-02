@@ -127,6 +127,7 @@ void Parser::ParseArray(DataBranch* value)
 
 Parser::Parser(const string& filename, bool filepath)
 {
+  _fileLoaded = true;
   if (filepath)
   {
     std::ifstream file(filename.c_str());

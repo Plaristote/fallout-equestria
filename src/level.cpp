@@ -118,23 +118,18 @@ Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Pa
 
   _world->SetWaypointsVisible(false);
 
-  InventoryObject* object1 = new InventoryObject(Data(_items)["Key"]);
-  InventoryObject* object2 = new InventoryObject(Data(_items)["Key"]);
-
-  GetPlayer()->GetInventory().AddObject(object1);
-  GetPlayer()->GetInventory().AddObject(object2);
-  if (GetPlayer()->GetStatistics())
+  if (!(GetPlayer()->GetStatistics().Nil()))
   {
     Data stats(GetPlayer()->GetStatistics());
     
     if (!(stats["Statistics"]["Action Points"].Nil()))
       _levelUi.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
-    GetPlayer()->ActionPointChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
-    GetPlayer()->EquipedItemActionChanged.Connect(_levelUi.GetMainBar(), &GameMainBar::SetEquipedItemAction);
-    GetPlayer()->EquipedItemChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetEquipedItem);
-    GetPlayer()->EquipedItemChanged.Emit(0, GetPlayer()->GetEquipedItem(0));
-    GetPlayer()->EquipedItemChanged.Emit(1, GetPlayer()->GetEquipedItem(1));
   }
+  GetPlayer()->ActionPointChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
+  GetPlayer()->EquipedItemActionChanged.Connect(_levelUi.GetMainBar(), &GameMainBar::SetEquipedItemAction);
+  GetPlayer()->EquipedItemChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetEquipedItem);
+  GetPlayer()->EquipedItemChanged.Emit(0, GetPlayer()->GetEquipedItem(0));
+  GetPlayer()->EquipedItemChanged.Emit(1, GetPlayer()->GetEquipedItem(1));
   _levelUi.GetMainBar().EquipedItemNextAction.Connect(*GetPlayer(), &ObjectCharacter::ItemNextUseType);
   _levelUi.GetMainBar().UseEquipedItem.Connect       (*this, &Level::CallbackActionTargetUse);
   _levelUi.GetMainBar().CombatEnd.Connect            (*this, &Level::StopFight);
@@ -144,6 +139,9 @@ Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Pa
   obs.Connect(_levelUi.GetInventory().UnequipItem, *GetPlayer(), &ObjectCharacter::UnequipItem);
   obs.Connect(_levelUi.GetInventory().DropObject,  *this,        &Level::PlayerDropObject);
   obs.Connect(_levelUi.GetInventory().UseObject,   *this,        &Level::PlayerUseObject);
+  
+  _levelUi.GetMainBar().SetEquipedItem(0, GetPlayer()->GetEquipedItem(0));
+  _levelUi.GetMainBar().SetEquipedItem(1, GetPlayer()->GetEquipedItem(1));
 
   obs.Connect(InstanceDynamicObject::ActionUse,         *this, &Level::CallbackActionUse);
   obs.Connect(InstanceDynamicObject::ActionTalkTo,      *this, &Level::CallbackActionTalkTo);

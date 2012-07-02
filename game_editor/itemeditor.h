@@ -17,6 +17,10 @@ public:
     ~ItemEditor();
 
     void LoadAllItems(void);
+    QStringList GetItemList(void) const;
+
+signals:
+    void ItemListChanged(QStringList);
 
 private slots:
     void SaveData(void);

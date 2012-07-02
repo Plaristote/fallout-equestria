@@ -1,7 +1,6 @@
 
 string HoovesHit(Item@ item, Character@ user, Character@ target)
 {
-  Write("Trololo");
   int ap = user.GetActionPoints();
 
   if (ap >= 3)
