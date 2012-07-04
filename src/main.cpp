@@ -74,7 +74,7 @@ void AngelScriptInitialize(void)
   engine->RegisterGlobalFunction("void Cout(string)", asFUNCTION(AngelCout), asCALL_CDECL);
   engine->RegisterGlobalFunction("void LF()", asFUNCTION( GameConsole::ListFunctions ), asCALL_CDECL);
   engine->RegisterGlobalFunction("void PrintScenegraph()", asFUNCTION( GameConsole::PrintScenegraph ), asCALL_CDECL);
-  engine->RegisterGlobalFunction("void Write(string)", asFUNCTION(GameConsole::WriteOn), asCALL_CDECL);
+  engine->RegisterGlobalFunction("void Write(const string &in)", asFUNCTION(GameConsole::WriteOn), asCALL_CDECL);
 
   Script::StdList<string>::Register(engine, "StringList", "string");  
 
