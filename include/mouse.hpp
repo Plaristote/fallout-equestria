@@ -32,6 +32,8 @@ struct MouseHovering
   NodePath dynObject;
 };
 
+class World;
+
 class Mouse
 {
 public:
@@ -42,6 +44,8 @@ public:
   const MouseHovering&      Hovering(void) const { return (_hovering); }
   
   void                      SetMouseState(char);
+  
+  void                      ClosestWaypoint(World*);
 
   Observatory::Signal<void> ButtonLeft;
   Observatory::Signal<void> ButtonMiddle;

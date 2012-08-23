@@ -21,12 +21,15 @@ Level* Level::CurrentLevel = 0;
 Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Packet& packet) : _window(window), _asyncTask(task), _mouse(window),
   _camera(window, window->get_camera_group()), _levelUi(window, gameUi)
 {
+  LoadingScreen* loadingScreen = new LoadingScreen(window, gameUi.GetContext());
+
   AsyncTaskManager::get_global_ptr()->add(&_asyncTask);  
   CurrentLevel = this;
   _state       = Normal;
 
   _levelUi.InterfaceOpened.Connect(*this, &Level::SetInterrupted);
 
+  loadingScreen->AppendText("-> Loading textual content");
   _l18n  = DataTree::Factory::JSON("data/l18n/english.json");
   _items = DataTree::Factory::JSON("data/objects.json");
 
@@ -56,7 +59,8 @@ Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Pa
 
   MouseInit();
   _timer.Restart();
-  
+
+  loadingScreen->AppendText("-> Loading World...");
   // WORLD LOADING
   _world = new World(window);  
   try
@@ -65,6 +69,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Pa
   }
   catch (unsigned int error)
   {
+    loadingScreen->AppendText("/!\\ Failed to load world file");
     std::cout << "Failed to load file" << std::endl;
   }
 
@@ -118,6 +123,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Pa
 
   _world->SetWaypointsVisible(false);
 
+  loadingScreen->AppendText("Loading interface");
   if (!(GetPlayer()->GetStatistics().Nil()))
   {
     Data stats(GetPlayer()->GetStatistics());
@@ -179,6 +185,10 @@ Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Pa
   plight->get_lens()->set_film_size(512);
   
   window->get_render().set_shader_auto();
+  loadingScreen->AppendText("-- Done --");
+  loadingScreen->FadeOut();
+  loadingScreen->Destroy();
+  delete loadingScreen;
 }
 
 Level::~Level()
@@ -483,10 +493,13 @@ void Level::MouseLeftClicked(void)
       {
         // Do something, or not...
       }
-      else if (hovering.hasWaypoint)
+      else
       {
-	Waypoint* toGo = _world->GetWaypointFromNodePath(hovering.waypoint);
+	Waypoint* toGo;
 
+	_mouse.ClosestWaypoint(_world);
+	toGo = _world->GetWaypointFromNodePath(hovering.waypoint);
+	
 	if (toGo)
 	{
 	  if (_characters.size() > 0)
@@ -583,8 +596,8 @@ void Level::CallbackActionUse(InstanceDynamicObject* object)
 void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 {
   CloseInteractMenu();
-  if (GetState() == Fight)
-    return ;
+  //if (GetState() == Fight)
+  //  return ;
   if ((GetPlayer()->HasLineOfSight(object)) && GetPlayer()->GetPathDistance(object) <= 3)
   {
     string dialog = object->GetDialog();

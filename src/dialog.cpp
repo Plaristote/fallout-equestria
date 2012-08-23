@@ -4,7 +4,7 @@ using namespace Rocket;
 using namespace std;
 
 // VIEW
-DialogView::DialogView(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window)
+DialogView::DialogView(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
   _root = context->LoadDocument("data/dialog.rml");
   if (_root)

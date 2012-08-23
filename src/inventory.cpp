@@ -31,26 +31,29 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
     Data hookWeildMagic = script["hookWeildMagic"];
     Data hookWeildBS    = script["hookWeildBattleSaddle"];
 
-    _scriptModule       = Script::ModuleManager::Require("item" + data.Key(), "scripts/objects/" + script["file"].Value());
-    if (_scriptModule)
+    if (script["file"].Value() != "")
     {
-      if (!(hookWeildMouth.Nil()))
+      _scriptModule       = Script::ModuleManager::Require("item" + data.Key(), "scripts/objects/" + script["file"].Value());
+      if (_scriptModule)
       {
-	std::string decl = "bool " + hookWeildMouth.Value() + "(Item@, Character@)";
-	
-	_hookCanWeildMouth  = _scriptModule->GetFunctionByDecl(decl.c_str());
-      }
-      if (!(hookWeildMagic.Nil()))
-      {
-	std::string decl = "bool " + hookWeildMagic.Value() + "(Item@, Character@)";
-	
-	_hookCanWeildMagic  = _scriptModule->GetFunctionByDecl(decl.c_str());
-      }
-      if (!(hookWeildBS.Nil()))
-      {
-	std::string decl = "bool " + hookWeildBS.Value() + "(Item@, Character@)";
-	
-	_hookCanWeildBattleSaddle  = _scriptModule->GetFunctionByDecl(decl.c_str());
+	if (!(hookWeildMouth.Nil()))
+	{
+	  std::string decl = "bool " + hookWeildMouth.Value() + "(Item@, Character@)";
+	  
+	  _hookCanWeildMouth  = _scriptModule->GetFunctionByDecl(decl.c_str());
+	}
+	if (!(hookWeildMagic.Nil()))
+	{
+	  std::string decl = "bool " + hookWeildMagic.Value() + "(Item@, Character@)";
+	  
+	  _hookCanWeildMagic  = _scriptModule->GetFunctionByDecl(decl.c_str());
+	}
+	if (!(hookWeildBS.Nil()))
+	{
+	  std::string decl = "bool " + hookWeildBS.Value() + "(Item@, Character@)";
+	  
+	  _hookCanWeildBattleSaddle  = _scriptModule->GetFunctionByDecl(decl.c_str());
+	}
       }
     }
   }

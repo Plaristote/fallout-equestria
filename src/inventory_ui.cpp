@@ -69,11 +69,11 @@ void InventoryView::UpdateView(void)
 
       if (!notVisible)
       {
-	stream << "<p class='inventory-item-icon' id='" << count << "'>";
-	if (quantity > 1)
-	  stream << "<p class='inventory-item-quantity'>x" << quantity << "</p>";
+	stream << "<span class='inventory-item-icon' id='" << count << "'>";
         stream << "<img src='../textures/itemIcons/" << item["icon"].Value() << "' />";
-	stream << "</p>";
+	//if (quantity > 1)
+	  stream << "<span class='inventory-item-quantity'>x" << quantity << "</span>";
+	stream << "</span>";
         rml += stream.str();
       }
     }
@@ -189,7 +189,7 @@ void InventoryViewController::Update(void)
 /*
  * UiUseObjectOn
  */
-UiUseObjectOn::UiUseObjectOn(WindowFramework* window, Rocket::Core::Context* context, Inventory& inventory) : UiBase(window)
+UiUseObjectOn::UiUseObjectOn(WindowFramework* window, Rocket::Core::Context* context, Inventory& inventory) : UiBase(window, context)
 {
   _root = context->LoadDocument("data/useobjecton.rml");
   if (_root)
@@ -215,7 +215,10 @@ UiUseObjectOn::~UiUseObjectOn()
 {
   _viewController.Destroy();
   if (_root)
+  {
     _root->RemoveReference();
+    //_context->UnloadDocument(_root);
+  }
 }
 
 void UiUseObjectOn::Destroy(void)
@@ -227,7 +230,7 @@ void UiUseObjectOn::Destroy(void)
 /*
  * UiLoot
  */
-UiLoot::UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventory& looter, Inventory& looted) : UiBase(window), _looter(looter), _looted(looted)
+UiLoot::UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventory& looter, Inventory& looted) : UiBase(window, context), _looter(looter), _looted(looted)
 {
   _root = context->LoadDocument("data/looting.rml");
   if (_root)
@@ -260,7 +263,10 @@ UiLoot::~UiLoot()
 {
   _viewController.Destroy();
   if (_root)
+  {
     _root->RemoveReference();
+    //_context->UnloadDocument(_root);
+  }
 }
 
 void UiLoot::Destroy(void)
@@ -315,7 +321,7 @@ void UiLoot::RocketTakeAllClicked(Rocket::Core::Event&)
  * Dialog Equip Mode
  */
 UiEquipMode::UiEquipMode(WindowFramework* window, Rocket::Core::Context* context, unsigned short it, InventoryObject* object)
-  : UiBase(window), _it(it), _object(*object)
+  : UiBase(window, context), _it(it), _object(*object)
 {
   _root = context->LoadDocument("data/dialog_equiped_mode.rml");
   if (_root)
@@ -390,7 +396,10 @@ void UiEquipMode::DisableMode(EquipedMode mode)
 UiEquipMode::~UiEquipMode()
 {
   if (_root)
+  {
     _root->RemoveReference();
+    //_context->UnloadDocument(_root);
+  }
 }
 
 void UiEquipMode::Destroy(void)
@@ -405,7 +414,7 @@ void UiEquipMode::Destroy(void)
 using namespace std;
 
 UiNextZone::UiNextZone(WindowFramework* window, Rocket::Core::Context* context, const std::vector<std::string> zones)
-  : UiBase(window)
+  : UiBase(window, context)
 {
   _root = context->LoadDocument("data/dialog_zone_selector.rml");
   if (_root)
@@ -455,5 +464,8 @@ void UiNextZone::CallbackLevelSelected(Rocket::Core::Event& event)
 UiNextZone::~UiNextZone()
 {
   if (_root)
+  {
     _root->RemoveReference();
+    //_context->UnloadDocument(_root);
+  }
 }

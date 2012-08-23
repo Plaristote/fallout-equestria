@@ -182,6 +182,17 @@ private:
   GamePers*        _pers;
 };
 
+#include <queue>
+class LoadingScreen : public UiBase
+{
+  typedef std::queue<std::string> StringQueue;
+public:
+  LoadingScreen(WindowFramework*, Rocket::Core::Context* rocket);
+  
+  void             AppendText(const std::string& str);
+  void             FadeOut(void);
+};
+
 class LevelUi
 {
 public:

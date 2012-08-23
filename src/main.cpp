@@ -399,8 +399,27 @@ Level* LoadLevel(WindowFramework* window, GameUi& gameUi, LevelTask& asyncTask, 
   return (level);
 }
 
+static string GetPathFromString(string str)
+{  
+  int lastSlash = str.size();
+
+  for (int i = 0 ; i < str.size() ; ++i)
+  {
+    if (str[i] == '/' || str[i] == '\\')
+      lastSlash = i;
+  }
+
+  if (lastSlash != str.size())
+    return (str.substr(0, lastSlash));
+  return ("");
+}
+
 int main(int argc, char *argv[])
 {
+  std::cout << "Executing path is " << GetPathFromString(argv[0]) << std::endl;
+  
+  //int chdirsuccess = chdir(GetPathFromString(argv[0]).c_str());
+  
   ConfigPage* config = load_prc_file("config.prc");
 
   //open a new window framework

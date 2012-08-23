@@ -18,7 +18,7 @@ class UiBase
 {
   friend class GameUi;
 public:
-  UiBase(WindowFramework* window) : _window(window), _root(0) {}
+  UiBase(WindowFramework* window, Rocket::Core::Context* context) : _window(window), _root(0), _context(context) {}
   virtual ~UiBase() {}
 
   void Show(void)            { _root->Show(); VisibilityToggled.Emit(true);  }
@@ -32,6 +32,7 @@ public:
 protected:
   WindowFramework*               _window;
   Rocket::Core::ElementDocument* _root;
+  Rocket::Core::Context*         _context;
 };
 
 #endif

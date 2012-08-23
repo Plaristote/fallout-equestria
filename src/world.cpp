@@ -46,6 +46,52 @@ void World::DeleteWayPoint(Waypoint* toDel)
     }
 }
 
+LPlane World::GetWaypointPlane(void) const
+{
+    Waypoints::const_iterator it  = waypoints.begin();
+    Waypoints::const_iterator end = waypoints.end();
+    LPlane              plane;
+
+    for (; it != end ; ++it)
+    {
+      const Waypoint& wp  = *it;
+      LPoint3   pos = wp.nodePath.get_pos();
+
+      if (pos.get_x() < plane.get_x())
+	plane.set_x(pos.get_x());
+      if (pos.get_y() < plane.get_y())
+	plane.set_y(pos.get_y());
+      if (pos.get_x() > plane.get_w())
+	plane.set_w(pos.get_x());
+      if (pos.get_y() > plane.get_z())
+	plane.set_z(plane.get_y());
+    }
+    return (plane);
+}
+
+Waypoint* World::GetWaypointClosest(LPoint3 pos_1)
+{
+    Waypoints::iterator it        = waypoints.begin();
+    Waypoints::iterator end       = waypoints.end();
+    Waypoint*           best      = 0;
+    float               bestScore = 0;
+
+    for (; it != end ; ++it)
+    {
+      LPoint3 pos_2  = (*it).nodePath.get_pos();
+      float   dist_x = pos_1.get_x() - pos_2.get_x();
+      float   dist_y = pos_1.get_y() - pos_2.get_y();
+      float   score  = SQRT(dist_x * dist_x + dist_y * dist_y);
+      
+      if (score <= bestScore || (bestScore == 0 && best == 0))
+      {
+	best      = &(*it);
+	bestScore = score;
+      }
+    }
+    return (best);
+}
+
 Waypoint* World::GetWaypointFromNodePath(NodePath path)
 {
     Waypoints::iterator it  = waypoints.begin();

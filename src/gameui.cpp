@@ -113,15 +113,41 @@ void GameUi::OpenPers(Rocket::Core::Event&)
 }
 
 /*
+ * LoadingScreen
+ */
+LoadingScreen::LoadingScreen(WindowFramework* window, Core::Context* context) : UiBase(window, context)
+{
+  Core::ElementDocument* doc = context->LoadDocument("data/loading.rml");
+
+  _root = doc;
+  Show();
+}
+
+void LoadingScreen::AppendText(const std::string& str)
+{
+  Core::Element* input = _root->GetElementById("content");
+  Core::String   content;
+
+  input->GetInnerRML(content);
+  content = Core::String(str.c_str()) + "<br />" + content;
+  input->SetInnerRML(content);
+  framework.get_graphics_engine()->render_frame();
+}
+
+void LoadingScreen::FadeOut(void)
+{
+}
+
+/*
  * GameConsole
  */
 #include "scriptengine.hpp"
 #include <scripthelper/scripthelper.h>
 #include <sstream>
 GameConsole* GameConsole::GConsole= 0;
-GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window)
+GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
-	GConsole= this;
+  GConsole= this;
 
   _scriptContext = Script::Engine::Get()->CreateContext();
   _observerError = Script::Engine::ScriptError.Connect(*this, &GameConsole::Output);
@@ -297,7 +323,7 @@ GameConsole& GameConsole::Get() {
 /*
  * GameInventory
  */
-GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window)
+GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
   Rocket::Core::ElementDocument* doc     = context->LoadDocument("data/inventory.rml");
 
@@ -398,7 +424,7 @@ void GameInventory::SetSelectedObject(InventoryObject* inventory)
 /*
  * GameMenu
  */
-GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window)
+GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
   Rocket::Core::ElementDocument* doc     = context->LoadDocument("data/main_menu.rml");
 
@@ -433,7 +459,7 @@ void GameMenu::MenuEventExit(Rocket::Core::Event& event)
 /*
  * GamePers
  */
-GamePers::GamePers(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window)
+GamePers::GamePers(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
   Rocket::Core::ElementDocument* doc = context->LoadDocument("data/charsheet.rml");
 
@@ -456,7 +482,7 @@ GamePers::GamePers(WindowFramework* window, Rocket::Core::Context* context) : Ui
 /*
  * GameMainBar
  */
-GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window)
+GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
   Rocket::Core::ElementDocument* doc = context->LoadDocument("data/main_bar.rml");
 
@@ -507,25 +533,6 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
     
     CombatEndClicked.EventReceived.Connect(*this, &GameMainBar::CallbackCombatEndClicked);
     PassTurnClicked.EventReceived.Connect (*this, &GameMainBar::CallbackPassTurnClicked);
-    
-    /*const Rocket::Core::Property* property = elementWindow->GetProperty("height");
-
-    cout << "Property bottom " << property->ToString().CString() << endl;*/
-
-
-    /*std::stringstream stream;
-    stream << (_window->get_graphics_window()->get_y_size() - 140.f);
-    elementWindow->SetProperty("bottom", stream.str().c_str());
-    //elementWindow->SetAttribute("bottom", _window->get_graphics_window()->get_y_size() - 140.f);
-
-    elementWindow = MyRocket::GetChildren(elementWindow, "content");
-
-    cout << "Num children" << elementWindow->GetNumChildren() << endl;
-
-    for (unsigned int i = 0 ; element = elementWindow->GetChild(i) ; ++i)
-    {
-      cout << "Element[" << i << "] id: " << element->GetId().CString() << endl;
-    }*/
   }
 }
 

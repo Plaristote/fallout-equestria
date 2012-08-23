@@ -57,7 +57,7 @@ namespace ObjectTypes
 {
   enum ObjectType
   {
-    Character, Door, Shelf, Locker, Item, Other
+    Character, Stair, Door, Shelf, Locker, Item, Other
   };
 }
 

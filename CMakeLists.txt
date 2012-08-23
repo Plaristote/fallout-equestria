@@ -14,6 +14,6 @@ file(GLOB_RECURSE sourceFiles
 
 add_executable(game ${sourceFiles})
 
-target_link_libraries(game -L/usr/lib/panda3d p3framework panda pandafx pandaexpress p3dtoolconfig p3dtool p3pystub p3direct
+target_link_libraries(game -L/usr/lib/panda3d p3framework panda pandafx pandaexpress p3dtoolconfig p3dtool p3direct
                                               p3rocket RocketCore RocketControls
                                               angelscript)

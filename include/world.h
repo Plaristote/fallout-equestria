@@ -51,7 +51,8 @@ namespace ColMask
       Tile       = 2,
       DynObject  = 4,
       Object     = 8,
-      FovTarget  = 16
+      FovTarget  = 16,
+      WpPlane    = 32
   };
 }
 
@@ -319,8 +320,10 @@ struct World
     void      DeleteWayPoint(Waypoint*);
     Waypoint* GetWaypointFromNodePath(NodePath path);
     Waypoint* GetWaypointFromId(unsigned int id);
+    Waypoint* GetWaypointClosest(LPoint3);
     void      SetWaypointsVisible(bool v)
     { if (v) { rootWaypoints.show();  } else { rootWaypoints.hide();  } }
+    LPlane         GetWaypointPlane(void) const;
 
     template<class OBJTYPE>
     void           DeleteObject(MapObject* ptr, std::list<OBJTYPE>& list)

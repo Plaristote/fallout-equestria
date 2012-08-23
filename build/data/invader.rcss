@@ -100,9 +100,8 @@ div#window
 {
   font-family: JH_FALLOUT;
   font-size:   8px;
-  position: absolute;
-  padding-left: 10px;
-  padding-top:  5px;
+  margin-left: -15px;
+  top: 0px;
 }
 
 div#content

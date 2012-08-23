@@ -2,6 +2,7 @@
 #include "world.h"
 #include "globals.hpp"
 #include <panda3d/cardMaker.h>
+#include <panda3d/collisionPlane.h>
 
 using namespace std;
 
@@ -84,6 +85,54 @@ void Mouse::SetMouseState(char i)
     
     _cursor.set_pos(cursorPos.get_x() + _cursorDecalage.get_x(), 0, cursorPos.get_y() + _cursorDecalage.get_y());    
   }
+}
+
+void Mouse::ClosestWaypoint(World* world)
+{
+  PT(CollisionPlane)        pickerPlane;
+  PT(CollisionRay)          pickerRay;
+  PT(CollisionNode)         planeNode;
+  PT(CollisionNode)         pickerNode;
+  NodePath                  planePath;
+  NodePath                  pickerPath;
+  CollisionTraverser        collisionTraverser;
+  PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
+  
+  pickerNode   = new CollisionNode("mouseRay2");
+  pickerPath   = _camera.attach_new_node(_pickerNode);
+  pickerNode->set_from_collide_mask(CollideMask(ColMask::WpPlane));
+  pickerNode->set_into_collide_mask(0);
+  pickerRay    = new CollisionRay();
+  pickerNode->add_solid(pickerRay);
+
+  LPlane plane = world->GetWaypointPlane();
+
+  pickerPlane = new CollisionPlane(plane);
+  planeNode = new CollisionNode("pickerPlane");
+  planeNode->set_into_collide_mask(CollideMask(ColMask::WpPlane));
+  planeNode->add_solid(pickerPlane);
+  planePath = _window->get_render().attach_new_node(planeNode);
+  
+  collisionTraverser.add_collider(pickerPath, collisionHandlerQueue);
+  collisionTraverser.traverse(_window->get_render());
+  
+  collisionHandlerQueue->sort_entries();
+  for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
+  {
+    CollisionEntry* entry = collisionHandlerQueue->get_entry(i);
+    NodePath        np    = entry->get_into_node_path();
+    LPoint3         pos   = entry->get_surface_point(np);
+
+    if (np.node() != planePath.node())
+      continue ;
+    pos.set_x(pos.get_x() + np.get_x());
+    pos.set_y(pos.get_y() + np.get_y());
+    pos.set_z(pos.get_z() + np.get_z());
+    _hovering.SetWaypoint(world->GetWaypointClosest(pos)->nodePath);
+    break ;
+  }
+  
+  planePath.detach_node();
 }
 
 void Mouse::Run(void)
