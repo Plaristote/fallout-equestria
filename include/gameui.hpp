@@ -211,7 +211,7 @@ private:
   GameUi&          _gameUi;
   GameMainBar*     _mainBar;
   
-  Observatory::ObserverId _observers[3];
+  Observatory::ObserverId _observers[6];
 };
 
 class GeneralUi

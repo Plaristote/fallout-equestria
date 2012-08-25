@@ -1,21 +1,21 @@
 {
 "shielding spell": {
-"graphics": {
-"model": "sphere.obj",
-"scale": 3
-}
+  "graphics": {
+    "model": "sphere.obj",
+    "scale": 3
+  }
 ,
-"duration": 30,
-"script": {
-"source": "spell.as",
-"hookBegin": "shieldBegin",
-"hookEnd": "shieldEnd"
-}
+  "duration": 30,
+  "script": {
+    "source": "spell.as",
+    "hookBegin": "shieldBegin",
+    "hookEnd": "shieldEnd"
+  }
 
 }
 ,
 "system": {
-"current-level": "test"
+  "current-level": "test"
 }
 
 

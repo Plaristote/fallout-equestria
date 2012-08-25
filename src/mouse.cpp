@@ -31,7 +31,7 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
     cerr << "Failed to registrate mouse2 event" << endl;
   if (!(events->add_hook("mouse3", &Mouse::CallbackButton3, (void*)this)))
     cerr << "Failed to registrate mouse2 event" << endl;
-  
+
   CardMaker cardMaker("cursorCardMaker");
   
   _cursorAction      = TexturePool::load_texture("textures/cursor-action.png");
@@ -57,6 +57,12 @@ Mouse::~Mouse()
 {
   _pickerPath.remove_node();
   _cursor.remove_node();
+  
+  EventHandler* events = EventHandler::get_global_event_handler();
+  
+  events->remove_hook("mouse1", &Mouse::CallbackButton1, (void*)this);
+  events->remove_hook("mouse2", &Mouse::CallbackButton2, (void*)this);
+  events->remove_hook("mouse3", &Mouse::CallbackButton3, (void*)this);
 }
 
 void Mouse::SetMouseState(char i)

@@ -23,11 +23,10 @@ Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Pa
 {
   LoadingScreen* loadingScreen = new LoadingScreen(window, gameUi.GetContext());
 
-  AsyncTaskManager::get_global_ptr()->add(&_asyncTask);  
   CurrentLevel = this;
   _state       = Normal;
 
-  _levelUi.InterfaceOpened.Connect(*this, &Level::SetInterrupted);
+  obs.Connect(_levelUi.InterfaceOpened, *this, &Level::SetInterrupted);
 
   loadingScreen->AppendText("-> Loading textual content");
   _l18n  = DataTree::Factory::JSON("data/l18n/english.json");
@@ -80,7 +79,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Pa
     exitZone->SetName(zone.name);
     ForEach(zone.waypoints, [exitZone](Waypoint* wp)
     {
-		LevelExitZone* ez= exitZone; //MSVC2010: Captured variables lambda stuffs (compiler bug, I think) 
+      LevelExitZone* ez= exitZone; //MSVC2010: Captured variables lambda stuffs (compiler bug, I think) 
       ForEach(wp->arcs, [ez](Waypoint::Arc& arc)
       {
 	arc.observer = ez;
@@ -194,7 +193,6 @@ Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Pa
 Level::~Level()
 {
   obs.DisconnectAll();
-  AsyncTaskManager::get_global_ptr()->remove(&_asyncTask);
   ForEach(_objects,   [](InstanceDynamicObject* obj) { delete obj;  });
   ForEach(_exitZones, [](LevelExitZone* zone)        { delete zone; });
   CurrentLevel = 0;
@@ -949,8 +947,8 @@ void Level::CallbackGoToZone(const string& nextZone)
     _currentUis[UiItNextZone]->Destroy();
   _exitingZone     = true;
   _exitingZoneTo   = nextZone;
-  if (zone)
-    _exitingZoneName = zone->GetName();
+  /*if (zone)
+    _exitingZoneName = zone->GetName();*/
 }
 
 void Level::CallbackSelectNextZone(const vector<string>& nextZoneChoices)

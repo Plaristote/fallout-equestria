@@ -202,6 +202,210 @@ void AngelScriptInitialize(void)
   engine->RegisterGlobalProperty("Level@ level", &(Level::CurrentLevel));
 }
 
+#include <fstream>
+class WorldMap : public UiBase
+{
+public:
+  WorldMap(WindowFramework* window, GameUi* gameUi) : UiBase(window, gameUi->GetContext()), _gameUi(*gameUi)
+  {
+    DataTree* mapTree = DataTree::Factory::JSON("saves/map.json");
+    MapTileGenerator(mapTree);
+    delete mapTree;
+
+    if (_root)
+    {
+      //
+      // Adds the known cities to the CityList.
+      //
+      DataTree* cityTree = DataTree::Factory::JSON("saves/cities.json");
+      {
+	Data      cities(cityTree);
+
+	std::for_each(cities.begin(), cities.end(), [this](Data city)
+	{
+	  Rocket::Core::Element* elem = _root->GetElementById("city-list");
+	  Rocket::Core::String   innerRml;
+	  std::stringstream      rml;
+
+	  rml << "<div class='city-entry'>";
+	  rml << "<div class='city-button'><button>Go</button></div>";
+	  rml << "<div class='city-name'>" << city.Value() << "</div>";
+	  rml << "</div>";
+	  elem->GetInnerRML(innerRml);
+	  innerRml = innerRml + Rocket::Core::String(rml.str().c_str());
+	  elem->SetInnerRML(innerRml);
+	});
+      }
+      delete cityTree;
+      
+      _root->GetElementById("button-inventory")->AddEventListener("click", &ButtonInventory);
+      _root->GetElementById("button-character")->AddEventListener("click", &ButtonCharacter);
+      _root->GetElementById("button-menu")->AddEventListener("click", &ButtonMenu);
+      ButtonInventory.EventReceived.Connect(_gameUi, &GameUi::OpenInventory);
+      ButtonCharacter.EventReceived.Connect(_gameUi, &GameUi::OpenPers);
+      ButtonMenu.EventReceived.Connect(_gameUi, &GameUi::OpenMenu);
+      
+      MapClickedEvent.EventReceived.Connect(*this, &WorldMap::MapClicked);
+    }
+  }
+  
+  void MapTileGenerator(Data map)
+  {
+    std::stringstream rml, rcss;
+    Data              tiles   = map["tiles"];
+    int               size_x  = map["size_x"];
+    int               size_y  = map["size_y"];
+    int               tsize_x = map["tile_size_x"];
+    int               tsize_y = map["tile_size_y"];
+    int               pos_x   = 0;
+    int               pos_y   = 0;
+
+    _tsize_x = tsize_x;
+    _tsize_y = tsize_y;
+    
+    //
+    // Generate RCSS and RML for the Tilemap
+    //
+    std::for_each(tiles.begin(), tiles.end(), [this, &rml, &rcss, &pos_x, &pos_y, size_x, size_y, tsize_x, tsize_y](Data tile)
+    {
+      rcss << "#tile" << pos_x << "-" << pos_y << "\n";
+      rcss << "{\n" << "  top: "  << (pos_y * tsize_y) << "px;\n" << "  left: " << (pos_x * tsize_x) << "px;\n";
+      rcss << "  height: " << tsize_y << "px; width: " << tsize_x << "px;\n";
+      rcss << "  background-decorator: image;\n";
+      rcss << "  background-image: worldmap.png " << (pos_x * tsize_x) << "px " << (pos_y * tsize_y) << "px ";
+      rcss << (pos_x * tsize_x + tsize_x) << "px " << (pos_y * tsize_y + tsize_y) << "px;\n";
+      rcss << "}\n\n";
+
+      rml  << "<div id='tile" << pos_x << "-" << pos_y << "' class='tile' style='position: absolute;";
+      rml  << "top: "  << (pos_y * tsize_y) << "px; ";
+      rml  << "left: " << (pos_x * tsize_x) << "px; ";
+      rml  << "height: " << tsize_y << "px; width: " << tsize_x << "px; ";
+      rml  << "background-decorator: image; ";
+      rml  << "background-image: worldmap.png " << (pos_x * tsize_x) << "px " << (pos_y * tsize_y) << "px ";
+      rml  << (pos_x * tsize_x + tsize_x) << "px " << (pos_y * tsize_y + tsize_y) << "px;";
+      rml  << "' data-pos-x='" << pos_x << "' data-pos-y='" << pos_y << "'>test</div>\n";
+
+      if (++pos_x >= size_x)
+      {
+        ++pos_y;
+        pos_x = 0;
+      }
+    });
+
+    //
+    // Load the worldmap rml template, replace the #{RML} and #{RCSS} bits with generated RML/RCSS,
+    // create a temporary RML file with the result.
+    //
+    std::ifstream file("data/worldmap.rml");
+
+    if (file.is_open())
+    {
+      std::string fileRml;
+      long        begin, end;
+      long        size;
+      char*       raw;
+
+      begin     = file.tellg();
+      file.seekg (0, ios::end);
+      end       = file.tellg();
+      file.seekg(0, ios::beg);
+      size      = end - begin;
+      raw       = new char[size + 1];
+      raw[size] = 0;
+      file.read(raw, size);
+      file.close();
+      fileRml = raw;
+      delete raw;
+
+      size_t firstReplaceIt = fileRml.find("#{RCSS}");      
+      fileRml.replace(firstReplaceIt, strlen("#{RCSS}"), rcss.str());
+      size_t secReplaceIt   = fileRml.find("#{RML}");
+      fileRml.replace(secReplaceIt, strlen("#{RML}"), rml.str());
+      
+      std::ofstream ofile("data/tmp-worldmap.rml");
+      
+      if (ofile.is_open())
+      {
+	ofile.write(fileRml.c_str(), fileRml.size());
+	ofile.close();
+      }
+
+      //
+      // Load the temporary file and link every click event from every tile
+      // to the RocketListener MapClickedEvent.
+      //
+      _root = _context->LoadDocument("data/tmp-worldmap.rml");
+      
+      if (_root)
+      {
+	Rocket::Core::Element* mapElem = _root->GetElementById("pworldmap");
+	mapElem->SetInnerRML(rml.str().c_str());
+	for (pos_x = 0, pos_y = 0 ; pos_x < size_x && pos_y < size_y ;)
+	{
+	  Rocket::Core::Element* tileElem;
+	  std::stringstream      idElem;
+	  
+	  idElem << "tile" << pos_x << "-" << pos_y;
+	  tileElem = _root->GetElementById(idElem.str().c_str());
+	  if (tileElem)
+	    tileElem->AddEventListener("click", &MapClickedEvent);
+	  if (++pos_x >= size_x)
+	  {
+	    ++pos_y;
+	    pos_x = 0;
+	  }
+	}
+      }
+    }
+  }
+  
+  void MapClicked(Rocket::Core::Event& event)
+  {
+    Rocket::Core::Element* tile = event.GetCurrentElement();
+    
+    if (tile)
+    {
+      Rocket::Core::Variant* v_pos_x = tile->GetAttribute("data-pos-x");
+      Rocket::Core::Variant* v_pos_y = tile->GetAttribute("data-pos-y");
+      int                    pos_x   = v_pos_x->Get<int>();
+      int                    pos_y   = v_pos_y->Get<int>();
+      int                    click_x = 0;
+      int                    click_y = 0;
+
+      click_x  = event.GetParameter("mouse_x", click_x);
+      click_y  = event.GetParameter("mouse_y", click_y);
+      click_x += (pos_x * _tsize_x);
+      click_y += (pos_y * _tsize_y);
+    }
+  }
+  
+  void UpdatePartyCursor(float elapsedTime)
+  {
+    
+  }
+  
+  void Run(void)
+  {
+    float elapsedTime = _timer.GetElapsedTime();
+    
+    if (_current_pos_x != _goal_x || _current_pos_y != _goal_y)
+      UpdatePartyCursor(elapsedTime);
+    _timer.Restart();
+  }
+
+  Observatory::Signal<void (std::string)> GoToPlace;
+
+private:
+  RocketListener MapClickedEvent, ButtonInventory, ButtonCharacter, ButtonMenu;
+  GameUi&        _gameUi;
+  Timer          _timer;
+
+  int            _tsize_x, _tsize_y;
+  
+  int            _current_pos_x, _current_pos_y;
+  int            _goal_x, _goal_y;
+};
+
 class LevelTask;
 
 bool   SaveLevel(Level* level, const std::string& name);
@@ -215,6 +419,25 @@ public:
     _window   = window;
     _level    = 0;
     _savePath = "saves";
+    _worldMap = new WorldMap(window, &_gameUi);
+    _worldMap->GoToPlace.Connect(*this, &LevelTask::MapOpenLevel);
+    AsyncTaskManager::get_global_ptr()->add(this);
+  }
+  
+  ~LevelTask()
+  {
+    std::cout << "Deleting LevelTask" << std::endl;
+    if (_level)    delete _level;
+    if (_worldMap) delete _worldMap;
+    std::cout << "Done" << std::endl;
+    AsyncTaskManager::get_global_ptr()->remove(this);
+  }
+  
+  void       MapOpenLevel(std::string name)
+  {
+    _worldMap->Hide();
+    if (!(OpenLevel(_savePath, name)))
+      _worldMap->Show();
   }
 
   void       SetLevel(Level* level)
@@ -232,30 +455,36 @@ public:
 	const string exitPoint = _level->GetExitZone();
 
 	ExitLevel(_savePath);
-	if (nextZone != "")
+	/*if (nextZone != "")
 	{
 	  OpenLevel(_savePath, nextZone);
 	  if (_level)
 	    _level->SetEntryZone(exitPoint);
-	}
+	}*/
+      }
+      if (!_level)
+      {
+	_worldMap->Show();
       }
     }
+    else
+      _worldMap->Run();
     return (AsyncTask::DoneStatus::DS_cont);
   }
   
   bool SaveGame(const std::string& savepath)
   {
+    bool success = true;
+
     if (_level)
     {
       _dataEngine["system"]["current-level"] = _levelName;
-      SaveLevel(_level, savepath + "/" + _levelName + ".blob");
+      success = success && SaveLevel(_level, savepath + "/" + _levelName + ".blob");
     }
     else
       _dataEngine["system"]["current-level"] = 0;
     _dataEngine.Save(savepath + "/dataengine.json");
-
-	//MSVC2010, "Function MUST return a value", DEBUG
-	return true;
+    return (success);
   }
 
   bool LoadGame(const std::string& savepath)
@@ -298,10 +527,11 @@ public:
 
   void ExitLevel(const std::string& savepath)
   {
-    if (!(SaveGame(savepath)))
+    /*if (!(SaveGame(savepath)))
     {
       cerr << "¡¡ Couldn't save level state on ExitLevel !!" << endl;
-    }
+    }*/
+    // TODO Find why level destruction makes panda3d crash
     delete _level;
     _level = 0;
     cout << "Exited Level" << endl;
@@ -345,6 +575,9 @@ private:
   WindowFramework* _window;
   GameUi           _gameUi;
   DataEngine       _dataEngine;
+  
+  WorldMap*        _worldMap;
+  
   std::string      _levelName;
   Level*           _level;
 

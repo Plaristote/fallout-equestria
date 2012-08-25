@@ -57,9 +57,9 @@ LevelUi::LevelUi(WindowFramework* window, GameUi& gameUi) : _gameUi(gameUi)
   _observers[1] = _mainBar->InventoryButtonClicked.EventReceived.Connect(_gameUi, &GameUi::OpenInventory);
   _observers[2] = _mainBar->PersButtonClicked.EventReceived.Connect     (_gameUi, &GameUi::OpenPers);
 
-  _gameUi.GetInventory().VisibilityToggled.Connect(InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
-  _gameUi.GetMenu().VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);  
-  _gameUi.GetPers().VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  _observers[3] = _gameUi.GetInventory().VisibilityToggled.Connect(InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  _observers[4] = _gameUi.GetMenu().VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);  
+  _observers[5] = _gameUi.GetPers().VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
 }
 
 LevelUi::~LevelUi(void)
@@ -67,6 +67,11 @@ LevelUi::~LevelUi(void)
   _gameUi.GetInventory().VisibilityToggled.Disconnect(_observers[0]);
   _gameUi.GetMenu().VisibilityToggled.Disconnect     (_observers[1]);
   _gameUi.GetPers().VisibilityToggled.Disconnect     (_observers[2]);
+  
+  _gameUi.GetInventory().VisibilityToggled.Disconnect(_observers[3]);
+  _gameUi.GetMenu().VisibilityToggled.Disconnect     (_observers[4]);
+  _gameUi.GetPers().VisibilityToggled.Disconnect     (_observers[5]);
+
   delete _mainBar;
 }
 
