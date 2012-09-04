@@ -1,2 +1,17 @@
-[ "Friendship City", "Ponyville", "Tombouctou", "Moncuq" ]
+{
+"test": {
+  "visible": 1,
+  "pos_x": 100,
+  "pos_y": 50,
+  "radius": 50
+}
+,
+"Hoofington": {
+  "visible": 0,
+  "pos_x": 50,
+  "pos_y": 100,
+  "radius": 50
+}
 
+
+}

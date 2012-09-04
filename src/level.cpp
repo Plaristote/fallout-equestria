@@ -18,7 +18,7 @@ Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::Action
 
 Level* Level::CurrentLevel = 0;
 
-Level::Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Packet& packet) : _window(window), _asyncTask(task), _mouse(window),
+Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet) : _window(window), _mouse(window),
   _camera(window, window->get_camera_group()), _levelUi(window, gameUi)
 {
   LoadingScreen* loadingScreen = new LoadingScreen(window, gameUi.GetContext());
@@ -477,36 +477,32 @@ void Level::SetMouseState(MouseState state)
 void Level::MouseLeftClicked(void)
 {
   const MouseHovering& hovering = _mouse.Hovering();
-  
-  cout << "Mouse Left Clicked" << endl;
+
   if (_mouseActionBlocked || _state == Interrupted)
     return ;
   switch (_mouseState)
   {
     case MouseAction:
-      cout << "Mouse Action" << endl;
       if (_currentInteractMenu)
 	return ;
-      if (hovering.hasDynObject && false)
-      {
-        // Do something, or not...
-      }
       else
       {
 	Waypoint* toGo;
 
 	_mouse.ClosestWaypoint(_world);
-	toGo = _world->GetWaypointFromNodePath(hovering.waypoint);
-	
-	if (toGo)
+	if (hovering.hasWaypoint)
 	{
-	  if (_characters.size() > 0)
-	    GetPlayer()->GoTo(toGo);
+	  toGo = _world->GetWaypointFromNodePath(hovering.waypoint);
+
+	  if (toGo)
+	  {
+	    if (_characters.size() > 0)
+	      GetPlayer()->GoTo(toGo);
+	  }
 	}
       }
       break ;
     case MouseInteraction:
-      cout << "Mouse Interaction" << endl;
       if (hovering.hasDynObject)
       {
 	InstanceDynamicObject* object = FindObjectFromNode(hovering.dynObject);
@@ -533,7 +529,6 @@ void Level::MouseLeftClicked(void)
       }
       break ;
     case MouseTarget:
-      cout << "Mouse Target" << endl;
       if (hovering.hasDynObject)
       {
 	InstanceDynamicObject* dynObject = FindObjectFromNode(hovering.dynObject);

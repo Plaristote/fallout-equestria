@@ -32,10 +32,11 @@ bool DataTree::Save(const string& path)
 {
   ofstream file;
   
-  file.open(path.c_str(),ios::binary);
+  file.open(path.c_str());
   if (file.is_open())
   {
     WriteFile(file, this, 0);
+    file.close();
     return (true);
   }
   return (false);

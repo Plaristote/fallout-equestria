@@ -4,14 +4,14 @@
   "tile_size_x": 50,
   "tile_size_y": 50,
   "tiles": [
-      { "1": 1 },
-      { "2": 2 },
-      { "2": 2 },
-      { "2": 2 },
-      { "2": 2 },
-      { "2": 2 },
-      { "2": 2 },
-      { "2": 2 },
-      { "2": 2 }
+      { "visibility": 2 },
+      { "visibility": 1 },
+      { "visibility": 0 },
+      { "visibility": 0 },
+      { "visibility": 0 },
+      { "visibility": 0 },
+      { "visibility": 0 },
+      { "visibility": 0 },
+      { "visibility": 0 }
     ]
 }

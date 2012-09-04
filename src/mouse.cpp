@@ -106,7 +106,7 @@ void Mouse::ClosestWaypoint(World* world)
   
   pickerNode   = new CollisionNode("mouseRay2");
   pickerPath   = _camera.attach_new_node(_pickerNode);
-  pickerNode->set_from_collide_mask(CollideMask(ColMask::WpPlane));
+  //pickerNode->set_from_collide_mask(CollideMask(ColMask::WpPlane));
   pickerNode->set_into_collide_mask(0);
   pickerRay    = new CollisionRay();
   pickerNode->add_solid(pickerRay);
@@ -115,7 +115,7 @@ void Mouse::ClosestWaypoint(World* world)
 
   pickerPlane = new CollisionPlane(plane);
   planeNode = new CollisionNode("pickerPlane");
-  planeNode->set_into_collide_mask(CollideMask(ColMask::WpPlane));
+  //planeNode->set_into_collide_mask(CollideMask(ColMask::WpPlane));
   planeNode->add_solid(pickerPlane);
   planePath = _window->get_render().attach_new_node(planeNode);
   
@@ -123,21 +123,27 @@ void Mouse::ClosestWaypoint(World* world)
   collisionTraverser.traverse(_window->get_render());
   
   collisionHandlerQueue->sort_entries();
+
+  //_hovering.Reset();
   for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
   {
     CollisionEntry* entry = collisionHandlerQueue->get_entry(i);
     NodePath        np    = entry->get_into_node_path();
     LPoint3         pos   = entry->get_surface_point(np);
 
-    if (np.node() != planePath.node())
+    if (!(planePath.is_ancestor_of(np.node())) && planePath != np)
       continue ;
     pos.set_x(pos.get_x() + np.get_x());
     pos.set_y(pos.get_y() + np.get_y());
     pos.set_z(pos.get_z() + np.get_z());
-    _hovering.SetWaypoint(world->GetWaypointClosest(pos)->nodePath);
+    std::cout << "Position: (" << pos.get_x() << ", " << pos.get_y() << ", " << pos.get_z() << ")\n";
+    NodePath tmp = world->GetWaypointClosest(pos)->nodePath;
+    std::cout << tmp.get_x() << ", " << tmp.get_y() << std::endl;
+    
+    //_hovering.SetWaypoint(world->GetWaypointClosest(pos)->nodePath);
     break ;
   }
-  
+
   planePath.detach_node();
 }
 

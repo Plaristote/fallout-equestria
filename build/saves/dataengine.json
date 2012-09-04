@@ -1,22 +1,23 @@
 {
-"shielding spell": {
-  "graphics": {
-    "model": "sphere.obj",
-    "scale": 3
-  }
-,
-  "duration": 30,
-  "script": {
-    "source": "spell.as",
-    "hookBegin": "shieldBegin",
-    "hookEnd": "shieldEnd"
-  }
+  "shielding spell": {
+    "graphics": {
+      "model": "sphere.obj",
+      "scale": 3
+    },
+    "duration": 30,
+    "script": {
+      "source": "spell.as",
+      "hookBegin": "shieldBegin",
+      "hookEnd": "shieldEnd"
+    }
 
-}
-,
-"system": {
-  "current-level": "test"
-}
-
+  },
+  "system": {
+    "current-level": "test"
+  },
+  "worldmap": {
+    "pos-x": 10,
+    "pos-y": 10
+  }
 
 }

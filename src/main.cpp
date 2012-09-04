@@ -9,6 +9,7 @@ PT(AsyncTaskManager) taskMgr = AsyncTaskManager::get_global_ptr();
 PT(ClockObject)      globalClock = ClockObject::get_global_clock();
 
 # include "level.hpp"
+# include "worldmap/worldmap.hpp"
 
 using namespace std;
 
@@ -198,220 +199,21 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(levelClass, "void           StartFight(Character@)",                asMETHOD(Level,StartFight),          asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           StopFight()",                           asMETHOD(Level,StopFight),           asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           NextTurn()",                            asMETHOD(Level,NextTurn),            asCALL_THISCALL);
+  
+  const char* worldmapClass = "WorldMap";
+  engine->RegisterObjectType(worldmapClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(worldmapClass, "void SetCityVisible(string)", asMETHOD(WorldMap,SetCityVisible), asCALL_THISCALL);
 
-  engine->RegisterGlobalProperty("Level@ level", &(Level::CurrentLevel));
+  engine->RegisterGlobalProperty("Level@    level",    &(Level::CurrentLevel));
+  engine->RegisterGlobalProperty("WorldMap@ worldmap", &(WorldMap::CurrentWorldMap));
 }
-
-#include <fstream>
-class WorldMap : public UiBase
-{
-public:
-  WorldMap(WindowFramework* window, GameUi* gameUi) : UiBase(window, gameUi->GetContext()), _gameUi(*gameUi)
-  {
-    DataTree* mapTree = DataTree::Factory::JSON("saves/map.json");
-    MapTileGenerator(mapTree);
-    delete mapTree;
-
-    if (_root)
-    {
-      //
-      // Adds the known cities to the CityList.
-      //
-      DataTree* cityTree = DataTree::Factory::JSON("saves/cities.json");
-      {
-	Data      cities(cityTree);
-
-	std::for_each(cities.begin(), cities.end(), [this](Data city)
-	{
-	  Rocket::Core::Element* elem = _root->GetElementById("city-list");
-	  Rocket::Core::String   innerRml;
-	  std::stringstream      rml;
-
-	  rml << "<div class='city-entry'>";
-	  rml << "<div class='city-button'><button>Go</button></div>";
-	  rml << "<div class='city-name'>" << city.Value() << "</div>";
-	  rml << "</div>";
-	  elem->GetInnerRML(innerRml);
-	  innerRml = innerRml + Rocket::Core::String(rml.str().c_str());
-	  elem->SetInnerRML(innerRml);
-	});
-      }
-      delete cityTree;
-      
-      _root->GetElementById("button-inventory")->AddEventListener("click", &ButtonInventory);
-      _root->GetElementById("button-character")->AddEventListener("click", &ButtonCharacter);
-      _root->GetElementById("button-menu")->AddEventListener("click", &ButtonMenu);
-      ButtonInventory.EventReceived.Connect(_gameUi, &GameUi::OpenInventory);
-      ButtonCharacter.EventReceived.Connect(_gameUi, &GameUi::OpenPers);
-      ButtonMenu.EventReceived.Connect(_gameUi, &GameUi::OpenMenu);
-      
-      MapClickedEvent.EventReceived.Connect(*this, &WorldMap::MapClicked);
-    }
-  }
-  
-  void MapTileGenerator(Data map)
-  {
-    std::stringstream rml, rcss;
-    Data              tiles   = map["tiles"];
-    int               size_x  = map["size_x"];
-    int               size_y  = map["size_y"];
-    int               tsize_x = map["tile_size_x"];
-    int               tsize_y = map["tile_size_y"];
-    int               pos_x   = 0;
-    int               pos_y   = 0;
-
-    _tsize_x = tsize_x;
-    _tsize_y = tsize_y;
-    
-    //
-    // Generate RCSS and RML for the Tilemap
-    //
-    std::for_each(tiles.begin(), tiles.end(), [this, &rml, &rcss, &pos_x, &pos_y, size_x, size_y, tsize_x, tsize_y](Data tile)
-    {
-      rcss << "#tile" << pos_x << "-" << pos_y << "\n";
-      rcss << "{\n" << "  top: "  << (pos_y * tsize_y) << "px;\n" << "  left: " << (pos_x * tsize_x) << "px;\n";
-      rcss << "  height: " << tsize_y << "px; width: " << tsize_x << "px;\n";
-      rcss << "  background-decorator: image;\n";
-      rcss << "  background-image: worldmap.png " << (pos_x * tsize_x) << "px " << (pos_y * tsize_y) << "px ";
-      rcss << (pos_x * tsize_x + tsize_x) << "px " << (pos_y * tsize_y + tsize_y) << "px;\n";
-      rcss << "}\n\n";
-
-      rml  << "<div id='tile" << pos_x << "-" << pos_y << "' class='tile' style='position: absolute;";
-      rml  << "top: "  << (pos_y * tsize_y) << "px; ";
-      rml  << "left: " << (pos_x * tsize_x) << "px; ";
-      rml  << "height: " << tsize_y << "px; width: " << tsize_x << "px; ";
-      rml  << "background-decorator: image; ";
-      rml  << "background-image: worldmap.png " << (pos_x * tsize_x) << "px " << (pos_y * tsize_y) << "px ";
-      rml  << (pos_x * tsize_x + tsize_x) << "px " << (pos_y * tsize_y + tsize_y) << "px;";
-      rml  << "' data-pos-x='" << pos_x << "' data-pos-y='" << pos_y << "'>test</div>\n";
-
-      if (++pos_x >= size_x)
-      {
-        ++pos_y;
-        pos_x = 0;
-      }
-    });
-
-    //
-    // Load the worldmap rml template, replace the #{RML} and #{RCSS} bits with generated RML/RCSS,
-    // create a temporary RML file with the result.
-    //
-    std::ifstream file("data/worldmap.rml");
-
-    if (file.is_open())
-    {
-      std::string fileRml;
-      long        begin, end;
-      long        size;
-      char*       raw;
-
-      begin     = file.tellg();
-      file.seekg (0, ios::end);
-      end       = file.tellg();
-      file.seekg(0, ios::beg);
-      size      = end - begin;
-      raw       = new char[size + 1];
-      raw[size] = 0;
-      file.read(raw, size);
-      file.close();
-      fileRml = raw;
-      delete raw;
-
-      size_t firstReplaceIt = fileRml.find("#{RCSS}");      
-      fileRml.replace(firstReplaceIt, strlen("#{RCSS}"), rcss.str());
-      size_t secReplaceIt   = fileRml.find("#{RML}");
-      fileRml.replace(secReplaceIt, strlen("#{RML}"), rml.str());
-      
-      std::ofstream ofile("data/tmp-worldmap.rml");
-      
-      if (ofile.is_open())
-      {
-	ofile.write(fileRml.c_str(), fileRml.size());
-	ofile.close();
-      }
-
-      //
-      // Load the temporary file and link every click event from every tile
-      // to the RocketListener MapClickedEvent.
-      //
-      _root = _context->LoadDocument("data/tmp-worldmap.rml");
-      
-      if (_root)
-      {
-	Rocket::Core::Element* mapElem = _root->GetElementById("pworldmap");
-	mapElem->SetInnerRML(rml.str().c_str());
-	for (pos_x = 0, pos_y = 0 ; pos_x < size_x && pos_y < size_y ;)
-	{
-	  Rocket::Core::Element* tileElem;
-	  std::stringstream      idElem;
-	  
-	  idElem << "tile" << pos_x << "-" << pos_y;
-	  tileElem = _root->GetElementById(idElem.str().c_str());
-	  if (tileElem)
-	    tileElem->AddEventListener("click", &MapClickedEvent);
-	  if (++pos_x >= size_x)
-	  {
-	    ++pos_y;
-	    pos_x = 0;
-	  }
-	}
-      }
-    }
-  }
-  
-  void MapClicked(Rocket::Core::Event& event)
-  {
-    Rocket::Core::Element* tile = event.GetCurrentElement();
-    
-    if (tile)
-    {
-      Rocket::Core::Variant* v_pos_x = tile->GetAttribute("data-pos-x");
-      Rocket::Core::Variant* v_pos_y = tile->GetAttribute("data-pos-y");
-      int                    pos_x   = v_pos_x->Get<int>();
-      int                    pos_y   = v_pos_y->Get<int>();
-      int                    click_x = 0;
-      int                    click_y = 0;
-
-      click_x  = event.GetParameter("mouse_x", click_x);
-      click_y  = event.GetParameter("mouse_y", click_y);
-      click_x += (pos_x * _tsize_x);
-      click_y += (pos_y * _tsize_y);
-    }
-  }
-  
-  void UpdatePartyCursor(float elapsedTime)
-  {
-    
-  }
-  
-  void Run(void)
-  {
-    float elapsedTime = _timer.GetElapsedTime();
-    
-    if (_current_pos_x != _goal_x || _current_pos_y != _goal_y)
-      UpdatePartyCursor(elapsedTime);
-    _timer.Restart();
-  }
-
-  Observatory::Signal<void (std::string)> GoToPlace;
-
-private:
-  RocketListener MapClickedEvent, ButtonInventory, ButtonCharacter, ButtonMenu;
-  GameUi&        _gameUi;
-  Timer          _timer;
-
-  int            _tsize_x, _tsize_y;
-  
-  int            _current_pos_x, _current_pos_y;
-  int            _goal_x, _goal_y;
-};
 
 class LevelTask;
 
 bool   SaveLevel(Level* level, const std::string& name);
 Level* LoadLevel(WindowFramework* window, GameUi& gameUi, LevelTask& asyncTask, const std::string& name, bool isSaveFile = false);
 
-class LevelTask : public AsyncTask
+class LevelTask
 {
 public:
   LevelTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi(window, rocket)
@@ -419,25 +221,21 @@ public:
     _window   = window;
     _level    = 0;
     _savePath = "saves";
-    _worldMap = new WorldMap(window, &_gameUi);
+    _dataEngine.Load(_savePath + "/dataengine.json");
+    _worldMap = new WorldMap(window, &_gameUi, _dataEngine);
     _worldMap->GoToPlace.Connect(*this, &LevelTask::MapOpenLevel);
-    AsyncTaskManager::get_global_ptr()->add(this);
+    _worldMap->Show();
   }
   
   ~LevelTask()
   {
-    std::cout << "Deleting LevelTask" << std::endl;
     if (_level)    delete _level;
     if (_worldMap) delete _worldMap;
-    std::cout << "Done" << std::endl;
-    AsyncTaskManager::get_global_ptr()->remove(this);
   }
   
   void       MapOpenLevel(std::string name)
   {
-    _worldMap->Hide();
-    if (!(OpenLevel(_savePath, name)))
-      _worldMap->Show();
+    OpenLevel(_savePath, name);
   }
 
   void       SetLevel(Level* level)
@@ -445,7 +243,7 @@ public:
     _level = level;
   }
 
-  DoneStatus do_task()
+  AsyncTask::DoneStatus do_task()
   {
     if (_level)
     {
@@ -471,7 +269,7 @@ public:
       _worldMap->Run();
     return (AsyncTask::DoneStatus::DS_cont);
   }
-  
+
   bool SaveGame(const std::string& savepath)
   {
     bool success = true;
@@ -503,6 +301,7 @@ public:
   {
     std::ifstream fileTest;
 
+    _worldMap->Hide();
     fileTest.open((savepath + "/" + level + ".blob").c_str());
     if (fileTest.is_open())
     {
@@ -521,7 +320,11 @@ public:
       SetLevel(_level);
     }
     else
+    {
       cerr << "¡¡ Can't open level !!" << endl;
+      _worldMap->Show();
+    }
+    cout << "Level opened" << endl;
     return (_level != 0);
   }
 
@@ -616,7 +419,7 @@ Level* LoadLevel(WindowFramework* window, GameUi& gameUi, LevelTask& asyncTask, 
 
     try
     {
-      level = new Level(window, gameUi, asyncTask, packet);
+      level = new Level(window, gameUi, packet);
       if (isSaveFile)
 	level->Load(packet);
       file.close();
@@ -647,47 +450,110 @@ static string GetPathFromString(string str)
   return ("");
 }
 
+class MainMenu : public AsyncTask
+{
+  struct View : public UiBase
+  {
+    View(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
+    {
+      _root = context->LoadDocument("data/startmenu.rml");
+
+      if (_root)
+      {
+	std::string                      idz[]       = { "button-new-game", "button-load-game", "button-options", "button-quit" };
+	Observatory::Signal<void (Rocket::Core::Event&)>* signalz[]   = { &NewGame, &LoadGame, &Options, &Quit };
+	RocketListener*                  listenerz[] = { &NewGameClicked, &LoadGameClicked, &OptionsClicked, &QuitClicked };
+	Rocket::Core::Element*           buttons[4];
+
+	for (int it = 0 ; it < 4 ; ++it)
+	{
+	  Rocket::Core::Element* element = _root->GetElementById(idz[it].c_str());
+
+	  if (element)
+	  {
+	    element->AddEventListener("click", listenerz[it]);
+	    listenerz[it]->EventReceived.Connect(*signalz[it], &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
+	  }
+	  else
+	    cerr << "Missing button " << idz[it] << endl;
+	}
+      }
+    }
+
+    Observatory::Signal<void (Rocket::Core::Event&)> NewGame;
+    Observatory::Signal<void (Rocket::Core::Event&)> Quit;
+    Observatory::Signal<void (Rocket::Core::Event&)> LoadGame;
+    Observatory::Signal<void (Rocket::Core::Event&)> Options;
+    
+  private:
+    RocketListener NewGameClicked, QuitClicked, LoadGameClicked, OptionsClicked;
+  };
+  
+public:
+  MainMenu(WindowFramework* window) : _window(window), _generalUi(window), _view(window, _generalUi.GetRocketRegion()->get_context())
+  {
+    _levelTask = 0;
+    AsyncTaskManager::get_global_ptr()->add(this);
+    
+    _view.NewGame.Connect(*this, &MainMenu::NewGame);
+    _view.Show();
+  }
+
+  void NewGame(Rocket::Core::Event&)
+  {
+    _levelTask = new LevelTask(_window, _generalUi.GetRocketRegion());
+    _view.Hide();
+  }
+  
+  void EndGame(void)
+  {
+    _view.Show();
+    delete _levelTask;
+    _levelTask = 0;
+  }
+  
+  DoneStatus do_task()
+  {
+    if (_levelTask)
+    {
+      DoneStatus done = _levelTask->do_task();
+      
+      if (done == AsyncTask::DoneStatus::DS_exit)
+        EndGame();
+    }
+    return (AsyncTask::DoneStatus::DS_cont);
+  }
+  
+private:
+  WindowFramework* _window;
+  GeneralUi        _generalUi;
+  LevelTask*       _levelTask;
+  View             _view;
+};
+
 int main(int argc, char *argv[])
 {
-  std::cout << "Executing path is " << GetPathFromString(argv[0]) << std::endl;
-  
-  //int chdirsuccess = chdir(GetPathFromString(argv[0]).c_str());
-  
-  ConfigPage* config = load_prc_file("config.prc");
+  WindowFramework* window;  
+  ConfigPage*      config = load_prc_file("config.prc");
 
-  //open a new window framework
+  if (!(PStatClient::connect("localhost", 5185)))
+    cout << "Can't connect to PStat client" << endl;  
   framework.open_framework(argc, argv);
-  //set the window title to My Panda3D Window
   framework.set_window_title("Fallout Equestria");
-  //open the window
-  WindowFramework *window = framework.open_window();
-  
+  window = framework.open_window();
   window->enable_keyboard();
   window->get_render().set_shader_auto();
 
-  if (!(PStatClient::connect("localhost", 5185)))
-    cout << "Can't connect to PStat client" << endl;
-
   Script::Engine::Initialize();
-
   AngelScriptInitialize();
+  {
+    MainMenu       mainMenu(window);
 
-  GeneralUi      generalUi(window);
-  LevelTask      levelTask(window, generalUi.GetRocketRegion());
-  std::string    filename = "test";
-  std::string    fullpath = "maps/" + filename + ".blob";  
-  Level*         level;
-  
-  //level = LoadLevel(window, levelTask,  fullpath);  
-  levelTask.OpenLevel("saves", "test");
-//   level = LoadLevel(window, levelTask, "saves/slot01.blob", true);
-//   levelTask.SetLevel(level);
-
-  framework.main_loop();
-  framework.close_framework();
-  
-  unload_prc_file(config);
-  
+    framework.main_loop();
+    framework.close_framework();
+    
+    unload_prc_file(config);
+  }
   Script::Engine::Finalize();
   return (0);
 }

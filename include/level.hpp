@@ -32,7 +32,7 @@ class Level
 public:
   static Level* CurrentLevel;
   
-  Level(WindowFramework* window, GameUi& gameUi, AsyncTask& task, Utils::Packet& data);
+  Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& data);
 
   // Saving/Loading
   void SetDataEngine(DataEngine* de) { _dataEngine = de; }
@@ -141,7 +141,6 @@ private:
 
   WindowFramework*  _window;
   GraphicsWindow*   _graphicWindow;
-  AsyncTask&        _asyncTask;
   Mouse             _mouse;
   SceneCamera       _camera;
   Timer             _timer;
