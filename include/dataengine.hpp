@@ -2,7 +2,6 @@
 # define DATAENGINE_HPP
 
 # include "datatree.hpp"
-# include "inventory.hpp"
 
 class DataEngine : public Data
 {

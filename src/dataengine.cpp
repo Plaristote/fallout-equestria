@@ -1,5 +1,4 @@
 #include "dataengine.hpp"
-#include "character.hpp"
 #include "json.hpp"
 
 void      DataEngine::Load(const std::string& filepath)

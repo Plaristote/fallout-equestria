@@ -1,7 +1,6 @@
-#include "objects/door.hpp"
-#include <character.hpp>
-
-#include "level.hpp"
+#include "level/objects/door.hpp"
+#include "level/character.hpp"
+#include "level/level.hpp"
 
 void LevelExitZone::GoingThrough(void* character)
 {

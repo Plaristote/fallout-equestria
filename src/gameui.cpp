@@ -611,7 +611,7 @@ void GameMainBar::SetEnabledAP(bool enabled)
   }
 }
 
-#include "inventory.hpp"
+#include "level/inventory.hpp"
 void GameMainBar::CallbackEquipedItem1Clicked(Rocket::Core::Event& event)
 {
   int button = 0;

@@ -1,5 +1,5 @@
-#include "mouse.hpp"
-#include "world.h"
+#include "level/mouse.hpp"
+#include "level/world.h"
 #include "globals.hpp"
 #include <panda3d/cardMaker.h>
 #include <panda3d/collisionPlane.h>

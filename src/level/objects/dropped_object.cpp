@@ -1,6 +1,6 @@
-#include "objects/dropped_object.hpp"
-#include "character.hpp"
-#include "level.hpp"
+#include "level/objects/dropped_object.hpp"
+#include "level/character.hpp"
+#include "level/level.hpp"
 
 ObjectItem::ObjectItem(Level* level, DynamicObject* object, InventoryObject* item) : InstanceDynamicObject(level, object), _item(item)
 {

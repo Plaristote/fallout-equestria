@@ -1,8 +1,8 @@
-#include "character.hpp"
-#include "scene_camera.hpp"
+#include "level/character.hpp"
+#include "level/scene_camera.hpp"
 #include <panda3d/nodePathCollection.h>
 
-#include "level.hpp"
+#include "level/level.hpp"
 
 #define DEFAULT_WEAPON_1 "hooves"
 #define DEFAULT_WEAPON_2 "buck"

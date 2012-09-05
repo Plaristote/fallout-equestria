@@ -1,7 +1,7 @@
 #ifndef  OBJECT_DOOR_HPP
 # define OBJECT_DOOR_HPP
 
-# include "objectnode.hpp"
+# include "level/objectnode.hpp"
 
 class LevelExitZone : public Waypoint::ArcObserver
 {

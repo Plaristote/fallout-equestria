@@ -1,8 +1,8 @@
 #include "globals.hpp"
-#include "objectnode.hpp"
+#include "level/objectnode.hpp"
 #include <panda3d/nodePathCollection.h>
 #include <panda3d/auto_bind.h>
-#include "level.hpp"
+#include "level/level.hpp"
 
 using namespace std;
 using namespace Observatory;

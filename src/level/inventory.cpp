@@ -1,5 +1,5 @@
-#include "inventory.hpp"
-#include <level.hpp>
+#include "level/inventory.hpp"
+#include "level/level.hpp"
 #include <algorithm>
 
 InventoryObject::InventoryObject(Data data) : Data(&_dataTree)

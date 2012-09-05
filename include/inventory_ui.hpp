@@ -1,13 +1,13 @@
 #ifndef  INVENTORY_UI_HPP
 # define INVENTORY_UI_HPP
 
-#include "inventory.hpp"
+#include "level/inventory.hpp"
 
 # include <Rocket/Core/Event.h>
 # include <Rocket/Core/EventListener.h>
 # include <Rocket/Core/Element.h>
 # include "rocket_extension.hpp"
-#include "character.hpp"
+# include "level/character.hpp"
 # include <sstream>
 
 class InventoryView : public Rocket::Core::EventListener

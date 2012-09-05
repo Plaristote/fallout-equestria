@@ -1,9 +1,9 @@
 #ifndef  DROPPED_OBJECT_HPP
 # define DROPPED_OBJECT_HPP
 
-# include "objectnode.hpp"
-# include "inventory.hpp"
-# include "character.hpp"
+# include "level/objectnode.hpp"
+# include "level/inventory.hpp"
+# include "level/character.hpp"
 
 class ObjectItem : public InstanceDynamicObject
 {

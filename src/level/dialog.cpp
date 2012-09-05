@@ -1,4 +1,4 @@
-#include "dialog.hpp"
+#include "level/dialog.hpp"
 
 using namespace Rocket;
 using namespace std;

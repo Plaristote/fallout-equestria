@@ -1,5 +1,5 @@
-#include "objects/shelf.hpp"
-#include "level.hpp"
+#include "level/objects/shelf.hpp"
+#include "level/level.hpp"
 #include <algorithm>
 
 using namespace std;

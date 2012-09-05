@@ -1,7 +1,7 @@
 #ifndef  STAIR_HPP
 # define STAIR_HPP
 
-# include "objectnode.hpp"
+# include "level/objectnode.hpp"
 
 class ObjectStair : public InstanceDynamicObject, public Waypoint::ArcObserver
 {

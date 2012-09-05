@@ -1,7 +1,7 @@
-#include "interact_menu.hpp"
+#include "level/interact_menu.hpp"
 #include <panda3d/mouseButton.h>
 #include <panda3d/mouseWatcher.h>
-#include "level.hpp"
+#include "level/level.hpp"
 
 using namespace std;
 

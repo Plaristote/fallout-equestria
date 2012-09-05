@@ -1,9 +1,9 @@
 #include "globals.hpp"
-#include "level.hpp"
+#include "level/level.hpp"
 #include "astar.hpp"
 
-#include "objects/door.hpp"
-#include "objects/shelf.hpp"
+#include "level/objects/door.hpp"
+#include "level/objects/shelf.hpp"
 
 #define AP_COST_USE             2
 #define WORLDTIME_TURN          10

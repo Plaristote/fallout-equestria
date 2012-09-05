@@ -3,7 +3,7 @@
 
 # include "datatree.hpp"
 # include "scriptengine.hpp"
-# include "world.h"
+# include "level/world.h"
 # include "animatedobject.hpp"
 
 class ObjectCharacter;

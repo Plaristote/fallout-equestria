@@ -1,6 +1,6 @@
 #include "globals.hpp"
-#include "scene_camera.hpp"
-#include <objectnode.hpp>
+#include "level/scene_camera.hpp"
+#include "level/objectnode.hpp"
 
 using namespace std;
 
