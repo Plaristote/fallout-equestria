@@ -137,7 +137,7 @@ void LoadingScreen::AppendText(const std::string& str)
   input->GetInnerRML(content);
   content = Core::String(str.c_str()) + "<br />" + content;
   input->SetInnerRML(content);
-  framework.get_graphics_engine()->render_frame();
+  //framework.get_graphics_engine()->render_frame();
 }
 
 void LoadingScreen::FadeOut(void)

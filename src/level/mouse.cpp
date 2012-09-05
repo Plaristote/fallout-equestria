@@ -124,7 +124,7 @@ void Mouse::ClosestWaypoint(World* world)
   
   collisionHandlerQueue->sort_entries();
 
-  //_hovering.Reset();
+  _hovering.Reset();
   for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
   {
     CollisionEntry* entry = collisionHandlerQueue->get_entry(i);
@@ -139,8 +139,8 @@ void Mouse::ClosestWaypoint(World* world)
     std::cout << "Position: (" << pos.get_x() << ", " << pos.get_y() << ", " << pos.get_z() << ")\n";
     NodePath tmp = world->GetWaypointClosest(pos)->nodePath;
     std::cout << tmp.get_x() << ", " << tmp.get_y() << std::endl;
-    
-    //_hovering.SetWaypoint(world->GetWaypointClosest(pos)->nodePath);
+
+    _hovering.SetWaypoint(tmp);
     break ;
   }
 

@@ -50,23 +50,30 @@ LPlane World::GetWaypointPlane(void) const
 {
     Waypoints::const_iterator it  = waypoints.begin();
     Waypoints::const_iterator end = waypoints.end();
-    LPlane              plane;
+    LPlane                    plane;
+    LPoint3                   upperRight, upperLeft, bottomLeft;
 
     for (; it != end ; ++it)
     {
       const Waypoint& wp  = *it;
       LPoint3   pos = wp.nodePath.get_pos();
 
-      if (pos.get_x() < plane.get_x())
-	plane.set_x(pos.get_x());
-      if (pos.get_y() < plane.get_y())
-	plane.set_y(pos.get_y());
-      if (pos.get_x() > plane.get_w())
-	plane.set_w(pos.get_x());
-      if (pos.get_y() > plane.get_z())
-	plane.set_z(plane.get_y());
+      if (pos.get_x() < upperLeft.get_x())
+      {
+	upperLeft.set_x(pos.get_x());
+	bottomLeft.set_x(pos.get_x());
+      }
+      if (pos.get_x() > upperRight.get_x())
+	upperRight.set_x(pos.get_x());
+      if (pos.get_y() > upperLeft.get_y())
+      {
+	upperLeft.set_y(pos.get_y());
+	upperRight.set_y(pos.get_y());
+      }
+      if (pos.get_y() < bottomLeft.get_y())
+	bottomLeft.set_y(pos.get_y());
     }
-    return (plane);
+    return (LPlane(upperRight, upperLeft, bottomLeft));
 }
 
 Waypoint* World::GetWaypointClosest(LPoint3 pos_1)
