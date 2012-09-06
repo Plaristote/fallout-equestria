@@ -8,7 +8,7 @@ class LevelTask
 {
 public:
   LevelTask(WindowFramework* window, PT(RocketRegion) rocket);  
-  ~LevelTask();  
+  ~LevelTask();
   
   void                  MapOpenLevel(std::string name);
   void                  SetLevel(Level* level);
@@ -26,8 +26,9 @@ public:
 
 private:
   static bool           SaveLevel(Level* level, const std::string& name);
-  static Level*         LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& name, bool isSaveFile = false);  
-  
+  Level*                LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& name, bool isSaveFile = false);  
+  Level*                DoLoadLevel(void);
+
   WindowFramework*      _window;
   GameUi                _gameUi;
   DataEngine            _dataEngine;
@@ -38,6 +39,11 @@ private:
   Level*                _level;
 
   std::string           _savePath;
+  
+  struct LoadLevelParams
+  { LoadLevelParams() : doLoad(false) {} bool doLoad; std::string name; std::string path; bool isSaveFile; };
+
+  LoadLevelParams       _loadLevelParams;
 };
 
 #endif

@@ -205,14 +205,13 @@ static void AngelScriptInitialize(void)
   engine->RegisterGlobalProperty("WorldMap@ worldmap", &(WorldMap::CurrentWorldMap));
 }
 
-
 int main(int argc, char *argv[])
 {
   WindowFramework* window;  
   ConfigPage*      config = load_prc_file("config.prc");
 
   if (!(PStatClient::connect("localhost", 5185)))
-    cout << "Can't connect to PStat client" << endl;  
+    cout << "Can't connect to PStat client" << endl;
   framework.open_framework(argc, argv);
   framework.set_window_title("Fallout Equestria");
   window = framework.open_window();

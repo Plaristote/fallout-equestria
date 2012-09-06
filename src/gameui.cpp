@@ -137,7 +137,7 @@ void LoadingScreen::AppendText(const std::string& str)
   input->GetInnerRML(content);
   content = Core::String(str.c_str()) + "<br />" + content;
   input->SetInnerRML(content);
-  //framework.get_graphics_engine()->render_frame();
+  framework.get_graphics_engine()->render_frame();
 }
 
 void LoadingScreen::FadeOut(void)
@@ -155,9 +155,16 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
 {
   GConsole= this;
 
-  _scriptContext = Script::Engine::Get()->CreateContext();
+  if (Script::Engine::Get())
+    _scriptContext = Script::Engine::Get()->CreateContext();
+  else
+  {
+    _scriptContext = 0;
+    cerr << "/!\\ [GameConsole] No Script::Engine" << endl;
+  }
+
   _observerError = Script::Engine::ScriptError.Connect(*this, &GameConsole::Output);
-  
+
   Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Roman.otf");
   Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Italic.otf");
   Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Bold.otf");

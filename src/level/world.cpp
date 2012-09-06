@@ -48,32 +48,32 @@ void World::DeleteWayPoint(Waypoint* toDel)
 
 LPlane World::GetWaypointPlane(void) const
 {
-    Waypoints::const_iterator it  = waypoints.begin();
-    Waypoints::const_iterator end = waypoints.end();
-    LPlane                    plane;
-    LPoint3                   upperRight, upperLeft, bottomLeft;
+  Waypoints::const_iterator it  = waypoints.begin();
+  Waypoints::const_iterator end = waypoints.end();
+  LPlane                    plane;
+  LPoint3                   upperRight, upperLeft, bottomLeft;
 
-    for (; it != end ; ++it)
+  for (; it != end ; ++it)
+  {
+    const Waypoint& wp  = *it;
+    LPoint3   pos = wp.nodePath.get_pos();
+
+    if (pos.get_x() < upperLeft.get_x())
     {
-      const Waypoint& wp  = *it;
-      LPoint3   pos = wp.nodePath.get_pos();
-
-      if (pos.get_x() < upperLeft.get_x())
-      {
-	upperLeft.set_x(pos.get_x());
-	bottomLeft.set_x(pos.get_x());
-      }
-      if (pos.get_x() > upperRight.get_x())
-	upperRight.set_x(pos.get_x());
-      if (pos.get_y() > upperLeft.get_y())
-      {
-	upperLeft.set_y(pos.get_y());
-	upperRight.set_y(pos.get_y());
-      }
-      if (pos.get_y() < bottomLeft.get_y())
-	bottomLeft.set_y(pos.get_y());
+      upperLeft.set_x(pos.get_x());
+      bottomLeft.set_x(pos.get_x());
     }
-    return (LPlane(upperRight, upperLeft, bottomLeft));
+    if (pos.get_x() > upperRight.get_x())
+      upperRight.set_x(pos.get_x());
+    if (pos.get_y() > upperLeft.get_y())
+    {
+      upperLeft.set_y(pos.get_y());
+      upperRight.set_y(pos.get_y());
+    }
+    if (pos.get_y() < bottomLeft.get_y())
+      bottomLeft.set_y(pos.get_y());
+  }
+  return (LPlane(upperRight, upperLeft, bottomLeft));
 }
 
 Waypoint* World::GetWaypointClosest(LPoint3 pos_1)
@@ -121,13 +121,28 @@ Waypoint* World::GetWaypointFromId(unsigned int id)
     return (0);
 }
 
+void World::FloorResize(int newSize)
+{
+  int currentSize = floors.size();
+  
+  floors.resize(newSize);
+  for (int it = currentSize ; it < newSize ; ++it)
+  {
+    std::stringstream stream;
+
+    stream << "floor-" << it;
+    floors[it] = window->get_render().attach_new_node(stream.str());
+    floors[it].attach_new_node("mapobjects");
+    floors[it].attach_new_node("dynamicobjects");
+    floors[it].attach_new_node("lights");
+  }
+}
+
 MapObject* World::AddMapObject(const string &name, const string &model, const string &texture, float x, float y, float z)
 {
     MapObject object;
     string model2 = model;
 
-    /*if (model2 == "lpip.egg")
-      model2 = "horse.obj";*/
     object.strModel   = model;
     object.strTexture = texture;
     object.nodePath   = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model2);
@@ -140,6 +155,11 @@ MapObject* World::AddMapObject(const string &name, const string &model, const st
 
     object.nodePath.set_name(name);
     object.nodePath.set_pos(x, y, z);
+    
+    int floor = 0;
+    if (floors.size() <= floor) FloorResize(floor + 1);
+    object.nodePath.reparent_to(floors[floor].get_child(0));
+    
     object.nodePath.reparent_to(rootMapObjects);
     object.nodePath.set_collide_mask(CollideMask(ColMask::Object));
     objects.push_back(object);
@@ -177,6 +197,11 @@ DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type t
     if (object.texture)
       object.nodePath.set_texture(object.texture);
   }
+  
+  int floor = 0;
+  if (floors.size() <= floor) FloorResize(floor + 1);
+  object.nodePath.reparent_to(floors[floor].get_child(1));
+  
 
   object.nodePath.set_name(name);
   object.nodePath.reparent_to(rootDynamicObjects);

@@ -28,14 +28,12 @@ public:
   
   void Show(void);
   
-  void MapTileGenerator(Data map);
   void SetCityVisible(const std::string&);
 
   void MapClicked(Rocket::Core::Event& event);
   void PartyClicked(Rocket::Core::Event& event);
   void CityClicked(Rocket::Core::Event& event);
 
-  void UpdatePartyCursor(float elapsedTime);  
   void Run(void);
   
   void MoveTowardsCoordinates(float x, float y);
@@ -44,6 +42,8 @@ public:
   Observatory::Signal<void (std::string)> GoToPlace;
 
 private:
+  void                   MapTileGenerator(Data map);
+  void                   UpdatePartyCursor(float elapsedTime);  
   bool                   IsPartyInCity(std::string& ret) const;
   Rocket::Core::Element* GetCaseAt(int x, int y) const;
   void                   GetCurrentCase(int&, int&) const;

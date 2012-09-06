@@ -295,8 +295,11 @@ struct World
     typedef std::list<WorldLight>    WorldLights;
     typedef std::list<ExitZone>      ExitZones;
     typedef std::list<EntryZone>     EntryZones;
+    typedef std::vector<NodePath>    Floors;
 
     WindowFramework* window;
+    
+    Floors           floors;
 
     NodePath         rootWaypoints;
     Waypoints        waypoints;
@@ -315,6 +318,8 @@ struct World
 
     World(WindowFramework* window);
     ~World(void);
+    
+    void      FloorResize(int);
 
     Waypoint* AddWayPoint(float x, float y, float z);
     void      DeleteWayPoint(Waypoint*);

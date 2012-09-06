@@ -9,6 +9,9 @@
 # define ANIMATION_PATH(model, str) ("models/anims/" + model + "-" + str + ".egg") 
 # define ANIMATION_DEFAULT "use"
 
+/**
+ * @brief Helper for managing an animated model
+ **/
 class AnimatedObject
 {
 public:
@@ -17,7 +20,18 @@ public:
   virtual NodePath          GetNodePath(void) const = 0;
   virtual void              ResetAnimation(void)    = 0;
 
+  /**
+   * @brief ... Starts an animation
+   *
+   * @param name ... Animation name
+   * @param loop ... If set to true, the animation will continue until another animation is played
+   * @return void
+   **/
   void                      PlayAnimation(const std::string& name, bool loop = false);
+
+  /**
+   * @brief ... Triggered when a not looping animation ends.
+   **/
   Observatory::Signal<void> AnimationEnd;
 
   bool                      pendingAnimationDone;

@@ -32,6 +32,8 @@ void       LevelTask::SetLevel(Level* level)
 
 AsyncTask::DoneStatus LevelTask::do_task()
 {
+  if (_loadLevelParams.doLoad)
+    DoLoadLevel();
   if (_level)
   {
     if (_level->do_task() == AsyncTask::DoneStatus::DS_done)
@@ -48,9 +50,7 @@ AsyncTask::DoneStatus LevelTask::do_task()
       }*/
     }
     if (!_level)
-    {
       _worldMap->Show();
-    }
   }
   else
     _worldMap->Run();
@@ -97,21 +97,6 @@ bool LevelTask::OpenLevel(const std::string& savepath, const std::string& level)
   }
   else
     _level = LoadLevel(_window, _gameUi, "maps/" + level + ".blob", false);
-  if (_level)
-  {
-    // WARNING This is only temporary
-    _dataEngine.Load(savepath + "/dataengine.json");
-
-    _levelName = level;
-    _level->SetDataEngine(&_dataEngine);
-    SetLevel(_level);
-  }
-  else
-  {
-    cerr << "¡¡ Can't open level !!" << endl;
-    _worldMap->Show();
-  }
-  cout << "Level opened" << endl;
   return (_level != 0);
 }
 
@@ -122,6 +107,7 @@ void LevelTask::ExitLevel(const std::string& savepath)
     cerr << "¡¡ Couldn't save level state on ExitLevel !!" << endl;
   }*/
   // TODO Find why level destruction makes panda3d crash
+  // TODO TODO Find out if level destruction still makes panda3d crash
   delete _level;
   _level = 0;
   cout << "Exited Level" << endl;
@@ -181,10 +167,12 @@ bool LevelTask::SaveLevel(Level* level, const std::string& name)
   return (true);
 }
 
-Level* LevelTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& name, bool isSaveFile)
+Level* LevelTask::DoLoadLevel(void)
 {
+  std::cout << "DoLoadLevel" << std::endl;
   Level*        level = 0;
   std::ifstream file;
+  std::string   name  = _loadLevelParams.path;
   
   file.open(name.c_str(), std::ios::binary);
   if (file.is_open())
@@ -193,9 +181,10 @@ Level* LevelTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::
 
     try
     {
-      level = new Level(window, gameUi, packet);
-      if (isSaveFile)
+      level = new Level(_window, _gameUi, packet);
+      if (_loadLevelParams.isSaveFile)
 	level->Load(packet);
+      SetLevel(level);
       file.close();
     }
     catch (const char* error)
@@ -206,5 +195,28 @@ Level* LevelTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::
   }
   else
     std::cerr << "¡¡ File not found !!" << std::endl;
-  return (level);
+  if (_level)
+  {
+    // WARNING This is only temporary
+    _dataEngine.Load(_savePath + "/dataengine.json");
+
+    _levelName = _loadLevelParams.name;
+    _level->SetDataEngine(&_dataEngine);
+    SetLevel(_level);
+  }
+  else
+  {
+    cerr << "¡¡ Can't open level !!" << endl;
+    _worldMap->Show();
+  }
+  _loadLevelParams.doLoad = false;
+  return (level);  
+}
+
+Level* LevelTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& name, bool isSaveFile)
+{
+  _loadLevelParams.path       = name;
+  _loadLevelParams.isSaveFile = isSaveFile;
+  _loadLevelParams.doLoad     = true;
+  return (0);
 }

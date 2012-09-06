@@ -1,5 +1,7 @@
 #include "mainmenu.hpp"
 
+bool createLevelPlz = false;
+
 MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window), _view(window, _generalUi.GetRocketRegion()->get_context())
 {
   _levelTask = 0;
@@ -11,8 +13,7 @@ MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window
 
 void MainMenu::NewGame(Rocket::Core::Event&)
 {
-  _levelTask = new LevelTask(_window, _generalUi.GetRocketRegion());
-  _view.Hide();
+  createLevelPlz = true;
 }
 
 void MainMenu::EndGame(void)
@@ -24,6 +25,13 @@ void MainMenu::EndGame(void)
 
 AsyncTask::DoneStatus MainMenu::do_task()
 {
+  if (createLevelPlz)
+  {
+    _levelTask = new LevelTask(_window, _generalUi.GetRocketRegion());
+    _view.Hide();
+    createLevelPlz = false;
+  }
+  
   if (_levelTask)
   {
     DoneStatus done = _levelTask->do_task();
