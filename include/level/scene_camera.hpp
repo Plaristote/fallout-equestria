@@ -27,7 +27,7 @@ public:
   SceneCamera(WindowFramework* window, NodePath camera);
 
   void            Run(float elapsedTime);
-  void            SetEnabledScroll(bool set) { _scrollEnabled = set; }
+  void            SetEnabledScroll(bool set);
 
   void            SwapCameraView(void);
 

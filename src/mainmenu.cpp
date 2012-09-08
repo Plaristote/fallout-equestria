@@ -122,9 +122,9 @@ MainMenu::View::View(WindowFramework* window, Rocket::Core::Context* context) : 
 
   if (_root)
   {
-    std::string                      idz[]       = { "button-continue", "button-new-game", "button-load-game", "button-options", "button-quit" };
+    std::string                      idz[]                        = { "button-continue", "button-new-game", "button-load-game", "button-options", "button-quit" };
     Observatory::Signal<void (Rocket::Core::Event&)>* signalz[]   = { &Continue, &NewGame, &LoadGame, &Options, &Quit };
-    RocketListener*                  listenerz[] = { &ContinueClicked, &NewGameClicked, &LoadGameClicked, &OptionsClicked, &QuitClicked };
+    RocketListener*                  listenerz[]                  = { &ContinueClicked, &NewGameClicked, &LoadGameClicked, &OptionsClicked, &QuitClicked };
     Rocket::Core::Element*           buttons[5];
 
     for (int it = 0 ; it < 5 ; ++it)

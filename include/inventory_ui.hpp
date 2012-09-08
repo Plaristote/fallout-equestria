@@ -121,11 +121,13 @@ public:
   ~UiNextZone();
   
   Observatory::Signal<void (const std::string&)> NextZoneSelected;
+  Observatory::Signal<void (void)>               Cancel;
 
 private:
-  RocketListener LevelSelected;
+  RocketListener LevelSelected, CancelSelected;
   
   void CallbackLevelSelected(Rocket::Core::Event&);
+  void CallbackCancel(Rocket::Core::Event&);
 };
 
 #endif

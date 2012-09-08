@@ -22,7 +22,7 @@ public:
   virtual ~UiBase() {}
 
   virtual void Show(void)    { if (_root) { _root->Show(); VisibilityToggled.Emit(true);  } }
-  virtual void Hide(void)    { if (_root) { _root->Hide(); VisibilityToggled.Emit(false); } }
+  virtual void Hide(void)    { if (_root) { _root->Hide(); _root->PushToBack(); VisibilityToggled.Emit(false); } }
   bool IsVisible(void) const { return (_root && _root->IsVisible()); }
 
   virtual void Destroy(void) { if (_root) { _root->Hide(); } }

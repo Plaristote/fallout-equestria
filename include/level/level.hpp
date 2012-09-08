@@ -63,7 +63,6 @@ public:
   void                   UnprocessAllCollisions(void);
   void                   ProcessAllCollisions(void);
 
-  void                   CloseInteractMenu(void);
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);
   TimeManager&           GetTimeManager(void) { return (_timeManager);  }
@@ -76,6 +75,7 @@ public:
   void                   CallbackExitZone(void);
   void                   CallbackGoToZone(const std::string& name);
   void                   CallbackSelectNextZone(const std::vector<std::string>& zones);
+  void                   CallbackCancelSelectZone(void);
   const std::string&     GetNextZone(void) const;
   const std::string&     GetExitZone(void) const;
   void                   SetEntryZone(const std::string&);
@@ -161,6 +161,7 @@ private:
 
   enum UiIterator
   {
+    UiItInteractMenu,
     UiItRunningDialog,
     UiItUseObjectOn,
     UiItLoot,
@@ -173,13 +174,17 @@ private:
   {
     if (_currentUis[it])
       _currentUis[it]->Destroy();
-    _camera.SetEnabledScroll(true);
+    for (short i = 0 ; i < UiTotalIt ; ++i)
+    {
+      if (_currentUis[it] != 0 && _currentUis[it]->IsVisible())
+        return ;
+    }
     _mouseActionBlocked = false;
+    _camera.SetEnabledScroll(true);
     SetInterrupted(false);
   }
   
   LevelUi           _levelUi;
-  InteractMenu*     _currentInteractMenu;
   UiBase*           _currentUis[UiTotalIt];
   DialogController* _currentRunningDialog;
   UiUseObjectOn*    _currentUseObjectOn;

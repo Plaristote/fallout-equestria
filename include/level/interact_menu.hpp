@@ -1,31 +1,23 @@
 #ifndef  INTERACT_MENU_HPP
 # define INTERACT_MENU_HPP
 
-# include <panda3d/pandaFramework.h>
-# include <panda3d/pgButton.h>
+# include "rocket_extension.hpp"
+# include "objectnode.hpp"
 
-class InstanceDynamicObject;
-
-class InteractMenu
-{
+class InteractMenu : public UiBase
+{  
 public:
-  InteractMenu(WindowFramework* window, InstanceDynamicObject& object);
+  InteractMenu(WindowFramework* window, Rocket::Core::Context* context, InstanceDynamicObject& object);
   ~InteractMenu();
-
 private:
-  static void ButtonClicked(const Event*, void* data);
+  void ButtonClicked(Rocket::Core::Event&);
 
-  struct ButtonStorage
-  {
-    ButtonStorage(PGButton* ptr, NodePath node) : button(ptr), node(node) {}
-    
-    PT(PGButton) button;
-    NodePath     node;
-  };
+  typedef std::vector<InstanceDynamicObject::Interaction*> Listeners;
   
-  typedef std::list<ButtonStorage> Buttons;
-
-  Buttons _buttons;
+  Listeners                    _listeners;
+  RocketListener               _buttonListener;
+  Observatory::ObserverHandler _obs;
+  bool                         _done;
 };
 
 #endif

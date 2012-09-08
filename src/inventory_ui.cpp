@@ -191,6 +191,7 @@ void InventoryViewController::Update(void)
  */
 UiUseObjectOn::UiUseObjectOn(WindowFramework* window, Rocket::Core::Context* context, Inventory& inventory) : UiBase(window, context)
 {
+  std::cout << "Creating UiUseObjectOn" << std::endl;
   _root = context->LoadDocument("data/useobjecton.rml");
   if (_root)
   {
@@ -213,6 +214,7 @@ UiUseObjectOn::UiUseObjectOn(WindowFramework* window, Rocket::Core::Context* con
 
 UiUseObjectOn::~UiUseObjectOn()
 {
+  std::cout << "Destruct UseUseObjectOn" << std::endl;
   _viewController.Destroy();
   if (_root)
   {
@@ -223,8 +225,12 @@ UiUseObjectOn::~UiUseObjectOn()
 
 void UiUseObjectOn::Destroy(void)
 {
+  std::cout << "Destroy UiUseObjectOn" << std::endl;
   if (_root)
+  {
+    std::cout << "Hiding it" << std::endl;
     _root->Hide();
+  }
 }
 
 /*
@@ -422,31 +428,38 @@ UiNextZone::UiNextZone(WindowFramework* window, Rocket::Core::Context* context, 
     Rocket::Core::Element*         eContainer = _root->GetElementById("choices");
     vector<string>::const_iterator it         = zones.begin();
     vector<string>::const_iterator end        = zones.end();
+    Rocket::Core::String           lastRml;
+    stringstream                   rml;
     
     for(short n = 1 ; it != end ; ++it, ++n)
     {
-      Rocket::Core::String lastRml;
-      stringstream         rml;
-
       rml << "<button id='choice-" << n << "' class='button_menu' zone='" << *it << "'>";
       rml << *it;
       rml << "</button>";
-
       rml << "<br />";
-      eContainer->GetInnerRML(lastRml);
-      eContainer->SetInnerRML(lastRml + rml.str().c_str());
     }
+    rml << "<button id='cancel' class='button_menu'>Stay here</button>";
+    eContainer->GetInnerRML(lastRml);
+    eContainer->SetInnerRML(lastRml + rml.str().c_str());
 
-    for (short n = 1 ; n <= zones.size() ; ++n)
     {
-      stringstream           name;
-      Rocket::Core::Element* zoneButton;
+      Rocket::Core::Element* cancelButton = _root->GetElementById("cancel");
 
-      name << "choice-" << n;
-      zoneButton = _root->GetElementById(name.str().c_str());
-      zoneButton->AddEventListener("click", &LevelSelected);
+      if (cancelButton)
+	cancelButton->AddEventListener("click", &CancelSelected);
+      for (short n = 1 ; n <= zones.size() ; ++n)
+      {
+	stringstream           name;
+	Rocket::Core::Element* zoneButton;
+
+	name << "choice-" << n;
+	zoneButton = _root->GetElementById(name.str().c_str());
+	if (zoneButton)
+	  zoneButton->AddEventListener("click", &LevelSelected);
+      }
+      LevelSelected.EventReceived.Connect (*this, &UiNextZone::CallbackLevelSelected);
+      CancelSelected.EventReceived.Connect(*this, &UiNextZone::CallbackCancel);
     }
-    LevelSelected.EventReceived.Connect(*this, &UiNextZone::CallbackLevelSelected);
     _root->Show();
   }
 }
@@ -459,6 +472,11 @@ void UiNextZone::CallbackLevelSelected(Rocket::Core::Event& event)
   std::string          tmp = str.CString();
 
   NextZoneSelected.Emit(tmp);
+}
+
+void UiNextZone::CallbackCancel(Rocket::Core::Event&)
+{
+  Cancel.Emit();
 }
 
 UiNextZone::~UiNextZone()

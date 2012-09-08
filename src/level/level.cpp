@@ -37,7 +37,6 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet) : _
 
   for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
     _currentUis[i] = 0;
-  _currentInteractMenu  = 0;
   _currentRunningDialog = 0;
   _currentUseObjectOn   = 0;
   _currentUiLoot        = 0;
@@ -202,8 +201,6 @@ Level::~Level()
     if (_currentUis[i] != 0)
       delete _currentUis[i];
   }
-  if (_currentInteractMenu)
-    delete _currentInteractMenu;
   if (_l18n)
     delete _l18n;
   CurrentLevel = 0;
@@ -268,6 +265,12 @@ void Level::SetState(State state)
 
 void Level::SetInterrupted(bool set)
 {
+  for (int i = 0 ; i < UiTotalIt ; ++i)
+  {
+    if (_currentUis[i] && _currentUis[i]->IsVisible())
+      set = true;
+  }
+  
   if (set)
     SetState(Interrupted);
   else
@@ -487,7 +490,7 @@ void Level::MouseLeftClicked(void)
   switch (_mouseState)
   {
     case MouseAction:
-      if (_currentInteractMenu)
+      if (_currentUis[UiItInteractMenu] && _currentUis[UiItInteractMenu]->IsVisible())
 	return ;
       else
       {
@@ -511,14 +514,13 @@ void Level::MouseLeftClicked(void)
       {
 	InstanceDynamicObject* object = FindObjectFromNode(hovering.dynObject);
 
-	if (_currentInteractMenu)
-	{
-	  delete _currentInteractMenu;
-	  _currentInteractMenu = 0;
-	}
+	if (_currentUis[UiItInteractMenu] && _currentUis[UiItInteractMenu]->IsVisible())
+	  CloseRunningUi<UiItInteractMenu>();
 	if (object && object->GetInteractions().size() != 0)
 	{
-	  _currentInteractMenu = new InteractMenu(_window, *object);	  
+	  if (_currentUis[UiItInteractMenu])
+	    delete _currentUis[UiItInteractMenu];
+	  _currentUis[UiItInteractMenu] = new InteractMenu(_window, _levelUi.GetContext(), *object);
 	  _camera.SetEnabledScroll(false);
 	}
 	else
@@ -560,22 +562,8 @@ void Level::MouseLeftClicked(void)
 
 void Level::MouseRightClicked(void)
 {
-  cout << "Changed mouse state" << endl;
-  CloseInteractMenu();
+  CloseRunningUi<UiItInteractMenu>();
   SetMouseState(_mouseState == MouseInteraction || _mouseState == MouseTarget ? MouseAction : MouseInteraction);
-}
-
-/*
- * InteractMenu
- */
-void Level::CloseInteractMenu(void)
-{
-  if (_currentInteractMenu)
-  {
-    delete _currentInteractMenu;
-    _currentInteractMenu = 0;
-  }
-  _camera.SetEnabledScroll(true);
 }
 
 void Level::ConsoleWrite(const string& str)
@@ -586,13 +574,13 @@ void Level::ConsoleWrite(const string& str)
 // Interactions
 void Level::CallbackActionUse(InstanceDynamicObject* object)
 {
-  CloseInteractMenu();
+  CloseRunningUi<UiItInteractMenu>();
   ActionUse(GetPlayer(), object);
 }
 
 void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 {
-  CloseInteractMenu();
+  CloseRunningUi<UiItInteractMenu>();
   //if (GetState() == Fight)
   //  return ;
   if ((GetPlayer()->HasLineOfSight(object)) && GetPlayer()->GetPathDistance(object) <= 3)
@@ -628,9 +616,10 @@ void Level::CallbackActionUseObjectOn(InstanceDynamicObject* target)
 {
   InventoryObject* object;
   
-  CloseInteractMenu();
+  CloseRunningUi<UiItInteractMenu>();
   if (_currentUis[UiItUseObjectOn])
     delete _currentUis[UiItUseObjectOn];
+  std::cout << "CallbackActionUseObjectOn" << std::endl;
   _currentUseObjectOn = new UiUseObjectOn(_window, _levelUi.GetContext(), GetPlayer()->GetInventory());
   _currentUseObjectOn->ActionCanceled.Connect(*this, &Level::CloseRunningUi<UiItUseObjectOn>);
   _currentUseObjectOn->ObjectSelected.Connect(*this, &Level::SelectedUseObjectOn);
@@ -648,7 +637,7 @@ void Level::PlayerLoot(Inventory* inventory)
     Script::Engine::ScriptError.Emit("<span class='console-error'>[PlayerLoot] Aborted: NullPointer Error</span>");
     return ;
   }
-  CloseInteractMenu();
+  CloseRunningUi<UiItInteractMenu>();
   if (_currentUis[UiItLoot])
     delete _currentUis[UiItLoot];
   _currentUiLoot = new UiLoot(_window, _levelUi.GetContext(), GetPlayer()->GetInventory(), *inventory);
@@ -960,9 +949,17 @@ void Level::CallbackSelectNextZone(const vector<string>& nextZoneChoices)
 
     if (_currentUis[UiItNextZone])
       delete _currentUis[UiItNextZone];
+    _camera.SetEnabledScroll(false);
+    SetInterrupted(true);
     _currentUis[UiItNextZone] = uiNextZone;
+    uiNextZone->Cancel.Connect          (*this, &Level::CallbackCancelSelectZone);
     uiNextZone->NextZoneSelected.Connect(*this, &Level::CallbackGoToZone);
   }
+}
+
+void Level::CallbackCancelSelectZone()
+{
+  CloseRunningUi<UiItNextZone>();
 }
 
 const string& Level::GetNextZone(void) const

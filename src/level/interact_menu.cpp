@@ -5,68 +5,78 @@
 
 using namespace std;
 
-extern PandaFramework framework;
-
-InteractMenu::InteractMenu(WindowFramework* window, InstanceDynamicObject& object)
+InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* context, InstanceDynamicObject& object) : UiBase(window, context)
 {
   InstanceDynamicObject::InteractionList& interactions = object.GetInteractions();
 
-  LPoint3       position;
-  MouseWatcher* mouseWatcher = dynamic_cast<MouseWatcher*>(window->get_mouse().node());
-  LPoint2f      cursorPoint  = mouseWatcher->get_mouse();
-
-  position.set_x(cursorPoint.get_x());
-  position.set_y(cursorPoint.get_y());
-  cout << position.get_x() << "/" << position.get_y() << endl;
-
-  for_each(interactions.begin(), interactions.end(), [this, window, &position](InstanceDynamicObject::Interaction& interaction)
+  _done = false;
+  _root = context->LoadDocument("data/interact_menu.rml");
+  if (_root)
   {
-    PGButton*    button = new PGButton("ButtonInteraction" + interaction.name);
-    PGFrameStyle style;
+    Rocket::Core::Element* element = _root->GetElementById("menu");
+    
+    if (element)
+    {
+      // Positioning the interact_menu
+      {
+	std::stringstream strTop, strLeft;
+	MouseData    pointer = _window->get_graphics_window()->get_pointer(0);
 
-    Texture*     texture = TexturePool::load_texture("textures/buttons/" + interaction.name + "-normal.png");
+	strTop  << (pointer.get_y());
+	strLeft << (pointer.get_x());
+	element->SetProperty("position", "absolute");
+	element->SetProperty("top",  strTop.str().c_str());
+	element->SetProperty("left", strLeft.str().c_str());
+      }
 
-    float ratio = texture->get_orig_file_y_size() / ((float)texture->get_orig_file_x_size());
-    button->set_frame(-0.1, 0.1, -ratio / 10, ratio / 10);
+      // Generating and setting the RML for the interact_menu
+      {
+	std::stringstream rml;
+	
+	for_each(interactions.begin(), interactions.end(), [&rml](InstanceDynamicObject::Interaction& interaction)
+	{
+	  rml << "<div id='interaction-" << interaction.name << "'>";
+	  rml << "<button id='" << interaction.name << "'>";
+	  rml << "<img src='../textures/buttons/" + interaction.name + "-normal.png' />";
+	  rml << "</button></div>";
+	});
 
-    style = button->get_frame_style(0);
-    style.set_type(PGFrameStyle::T_flat);
-    style.set_texture(TexturePool::load_texture("textures/buttons/" + interaction.name + "-normal.png"));
-    button->set_frame_style(0, style);
-    style.set_texture(TexturePool::load_texture("textures/buttons/" + interaction.name + "-active.png"));
-    button->set_frame_style(1, style);
-    style.set_texture(TexturePool::load_texture("textures/buttons/" + interaction.name + "-pressed.png"));
-    button->set_frame_style(2, style);
-    style.set_texture(TexturePool::load_texture("textures/buttons/" + interaction.name + "-inactive.png"));
-    button->set_frame_style(3, style);
+	element->SetInnerRML(rml.str().c_str());
+      }
 
-    // This prevents anything else to react to mouse events over the button
-    button->get_region()->set_suppress_flags(MouseWatcherRegion::SF_mouse_button);
+      int it = 0;
+      _listeners.resize(interactions.size());
 
-    NodePath defButNp = window->get_aspect_2d().attach_new_node(button);
+      for_each(interactions.begin(), interactions.end(), [this, &it](InstanceDynamicObject::Interaction& interaction)
+      {
+	Rocket::Core::Element* button = _root->GetElementById(interaction.name.c_str());
 
-    // Set the button position (y axis is unused in aspect2d)
-    defButNp.set_pos(position.get_x(), 0, position.get_y());
-    // Set the position for the next iteration
-    position.set_y(position.get_y() - ratio / 5);
-    framework.define_key(button->get_click_event(MouseButton::one()), "button press", &InteractMenu::ButtonClicked, &interaction);
-    _buttons.push_back(InteractMenu::ButtonStorage(button, defButNp));
-  });
-  cout << "Done opening menu" << endl;
+	button->AddEventListener("click", &_buttonListener);
+	_listeners[it] = &interaction;
+	_obs.Connect(_buttonListener.EventReceived, *this, &InteractMenu::ButtonClicked);
+	++it;
+      });
+    }
+  }
+  Show();
 }
 
 InteractMenu::~InteractMenu()
 {
-  for_each(_buttons.begin(), _buttons.end(), [](ButtonStorage data)
-  {
-    data.node.remove_node();
-  });
+  Hide();
+  _obs.DisconnectAll();
 }
 
-void InteractMenu::ButtonClicked(const Event*, void* data)
+void InteractMenu::ButtonClicked(Rocket::Core::Event& event)
 {
-  InstanceDynamicObject::Interaction* interaction = reinterpret_cast<InstanceDynamicObject::Interaction*>(data);
-
-  interaction->signal->Emit(interaction->instance);
-  cout << "Signal emitted" << endl;
+  if (_done) return;
+  for (int i = 0 ; i < _listeners.size() ; ++i)
+  {
+    if (event.GetCurrentElement()->GetId() == _listeners[i]->name.c_str())
+    {
+      _listeners[i]->signal->Emit(_listeners[i]->instance);
+      _done = true;
+      break ;
+    }
+  }
 }

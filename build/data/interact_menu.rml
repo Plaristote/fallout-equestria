@@ -1,0 +1,19 @@
+<template name="tplmainbar" content="content">
+<head>
+  <link type="text/rcss" href="rkt.rcss"/>
+  <link type="text/rcss" href="invader.rcss"/>
+
+  <style>
+    #menu
+    {
+      position: absolute;
+      top:      0px;
+      left:     0px;
+    }
+  </style>
+
+</head>
+<body class="window">
+  <div id="menu"></div>
+</body>
+</template>
