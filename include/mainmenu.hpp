@@ -30,6 +30,14 @@ private:
   GeneralUi        _generalUi;
   LevelTask*       _levelTask;
   View             _view;
+
+  UiLoad*          _uiLoad;
+  
+  void             OpenUiLoad(Rocket::Core::Event&);
+  void             LoadSlot(unsigned char slot);
+  
+  bool             createLevelPlz;
+  short            slotToLoadPlz;
 };
 
 
