@@ -23,6 +23,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet) : _
 {
   LoadingScreen* loadingScreen = new LoadingScreen(window, gameUi.GetContext());
 
+  loadingScreen->FadeIn();
   CurrentLevel = this;
   _state       = Normal;
 

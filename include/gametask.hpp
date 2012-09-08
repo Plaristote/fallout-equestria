@@ -23,6 +23,7 @@ public:
   
   void                  SaveToSlot(unsigned char slot);
   void                  LoadSlot(unsigned char slot);
+  void                  Exit(Rocket::Core::Event&) { _continue = false; }
   
   // LEVEL EVENTS
   void                  LevelExitZone(const std::string& toLevel);
@@ -38,6 +39,7 @@ private:
   
   void                  EraseSlot(unsigned char slot);
 
+  bool                  _continue;
   WindowFramework*      _window;
   GameUi                _gameUi;
   DataEngine            _dataEngine;
@@ -51,7 +53,7 @@ private:
   
   UiSave*               _uiSaveGame;
   UiLoad*               _uiLoadGame;
-  
+
   struct LoadLevelParams
   { LoadLevelParams() : doLoad(false) {} bool doLoad; std::string name; std::string path; bool isSaveFile; };
 

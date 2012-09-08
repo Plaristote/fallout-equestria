@@ -140,10 +140,6 @@ void LoadingScreen::AppendText(const std::string& str)
   framework.get_graphics_engine()->render_frame();
 }
 
-void LoadingScreen::FadeOut(void)
-{
-}
-
 /*
  * GameConsole
  */
@@ -464,15 +460,10 @@ GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : Ui
     if (buttonLoad)     buttonLoad->AddEventListener    ("click", &_loadClicked);
 
     _continueClicked.EventReceived.Connect(*this, &GameMenu::MenuEventContinue);
-    _exitClicked.EventReceived.Connect(*this,     &GameMenu::MenuEventExit);
+    _exitClicked.EventReceived.Connect(ExitClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
     _saveClicked.EventReceived.Connect(SaveClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
     _loadClicked.EventReceived.Connect(LoadClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
   }
-}
-
-void GameMenu::MenuEventExit(Rocket::Core::Event& event)
-{
-  framework.set_exit_flag();
 }
 
 /*

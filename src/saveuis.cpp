@@ -2,6 +2,68 @@
 
 using namespace std;
 
+  #include <timer.hpp>
+
+  extern PandaFramework framework;
+  
+  void SetOpacityOnAll(Rocket::Core::Element* element, float alpha)
+  {
+    std::stringstream             stream;    
+    const Rocket::Core::Property* property = element->GetProperty("color");
+    std::string                   string   = property->ToString().CString();
+    
+    std::cout << string << std::endl;
+    for (int it = 0 ; element->GetChild(it) ; ++it)
+    {
+      Rocket::Core::Element* cur = element->GetChild(it);
+
+      SetOpacityOnAll(cur, alpha);
+    }
+  }
+  
+  void UiBase::FadeOut(void)
+  {
+    Hide();
+    /*float alpha = 255;
+    Timer timer;
+    float elapsedTime;
+
+    for (alpha = 255 ; alpha >= 0 ; alpha -= (elapsedTime * 10.f))
+    {
+      std::stringstream stream;
+
+      stream << "rgba(0, 0, 0, " << alpha << ")";
+      SetOpacityOnAll(_root, alpha);
+      //SetPropertyOnAll(_root, "color", stream.str());
+      framework.get_graphics_engine()->render_frame();
+      elapsedTime = timer.GetElapsedTime();
+      timer.Restart();
+    }
+    Hide();*/
+  }
+  
+  void UiBase::FadeIn(void)
+  {
+    Show();
+    /*float alpha = 0;
+    Timer timer;
+    float elapsedTime;    
+
+    Show();
+    for (alpha = 0 ; alpha <= 255 ; alpha -= (elapsedTime * 10.f))
+    {
+      std::stringstream stream;
+      
+      stream << "rgba(0, 0, 0, " << alpha << ")";
+      SetOpacityOnAll(_root, alpha);
+      //SetPropertyOnAll(_root, "color", stream.str());
+      framework.get_graphics_engine()->render_frame();
+      elapsedTime = timer.GetElapsedTime();
+      timer.Restart();
+    }*/
+  }
+
+
 /*
  * UiLoad
  */

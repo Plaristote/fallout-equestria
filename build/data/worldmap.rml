@@ -48,14 +48,6 @@
   z-index:  998;
 }
 
-#mouse-cursor
-{
-  position: absolute;
-  top:      0px;
-  left:     0px;
-  z-index:  999;
-}
-
 #{RCSS}
 
 
@@ -66,8 +58,6 @@
   <body id="body">
 
   <div id="main" style="width:100%; height:100%;">
-
-    <div id="mouse-cursor"><img src="../textures/cursor-interaction.png" /></div>
 
     <div id="map-frame">
       <div id="party-cursor">-</div>

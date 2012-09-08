@@ -1,6 +1,7 @@
 #include "level/mouse.hpp"
 #include "level/world.h"
 #include "globals.hpp"
+#include <mousecursor.hpp>
 #include <panda3d/cardMaker.h>
 #include <panda3d/collisionPlane.h>
 
@@ -32,65 +33,40 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
   if (!(events->add_hook("mouse3", &Mouse::CallbackButton3, (void*)this)))
     cerr << "Failed to registrate mouse2 event" << endl;
 
-  CardMaker cardMaker("cursorCardMaker");
-  
-  _cursorAction      = TexturePool::load_texture("textures/cursor-action.png");
-  _cursorInteraction = TexturePool::load_texture("textures/cursor-interaction.png");
-  _cursorTarget      = TexturePool::load_texture("textures/cursor-target.png");
-
-  _cursorAction->set_magfilter(Texture::FT_nearest); 
-  _cursorAction->set_minfilter(Texture::FT_nearest);
-
-  _cursor = NodePath(cardMaker.generate());
-  _cursor.set_scale(0.1, 1, 0.1);
-  _cursor.reparent_to(window->get_render_2d());
-  _cursor.set_transparency(TransparencyAttrib::M_alpha);
   SetMouseState('a');
-  
-  // Hiding the regular cursor
-  WindowProperties props = window->get_graphics_window()->get_properties();
-  props.set_cursor_hidden(true);
-  window->get_graphics_window()->request_properties(props);
 }
 
 Mouse::~Mouse()
 {
   _pickerPath.remove_node();
-  _cursor.remove_node();
   
   EventHandler* events = EventHandler::get_global_event_handler();
   
   events->remove_hook("mouse1", &Mouse::CallbackButton1, (void*)this);
   events->remove_hook("mouse2", &Mouse::CallbackButton2, (void*)this);
   events->remove_hook("mouse3", &Mouse::CallbackButton3, (void*)this);
+  
+  MouseCursor::Get()->SetCursorTexture("textures/cursor-interaction.png");
 }
 
 void Mouse::SetMouseState(char i)
 {
+  std::string texture;
+  
   switch (i)
   {
     case 'a':
-      _cursor.set_texture(_cursorAction);
-      _cursorDecalage.set_x(-0.05);
-      _cursorDecalage.set_y(-0.05);
+      texture = "textures/cursor-action.png";
       break ;
     case 'i':
-      _cursor.set_texture(_cursorInteraction);
-      _cursorDecalage.set_x(0);
-      _cursorDecalage.set_y(-0.1);
+      texture = "textures/cursor-interaction.png";
       break ;
     case 't':
-      _cursor.set_texture(_cursorTarget);
-      _cursorDecalage.set_x(-0.05);
-      _cursorDecalage.set_y(-0.05);
+      texture = "textures/cursor-target.png";
       break ;
   }
-  if (_mouseWatcher->has_mouse())
-  {
-    LPoint2f cursorPos = _mouseWatcher->get_mouse();
-    
-    _cursor.set_pos(cursorPos.get_x() + _cursorDecalage.get_x(), 0, cursorPos.get_y() + _cursorDecalage.get_y());    
-  }
+  if (MouseCursor::Get())
+    MouseCursor::Get()->SetCursorTexture(texture);
 }
 
 void Mouse::ClosestWaypoint(World* world)
@@ -156,8 +132,6 @@ void Mouse::Run(void)
 
     if (cursorPos == _lastMousePos)
       return ;
-
-    _cursor.set_pos(cursorPos.get_x() + _cursorDecalage.get_x(), 0, cursorPos.get_y() + _cursorDecalage.get_y());
 
     _lastMousePos = cursorPos;
     _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());

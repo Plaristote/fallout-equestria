@@ -64,7 +64,7 @@ private:
   
   float                  _current_pos_x, _current_pos_y;
   int                    _goal_x, _goal_y;
-  Rocket::Core::Element* _cursor, *_mouse_cursor;
+  Rocket::Core::Element* _cursor;
 
   Cities                 _cities;
   Cases                  _cases;

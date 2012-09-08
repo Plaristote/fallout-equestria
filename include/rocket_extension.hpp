@@ -28,6 +28,20 @@ public:
   virtual void Destroy(void) { if (_root) { _root->Hide(); } }
 
   Observatory::Signal<void (bool)> VisibilityToggled;
+  
+  static void SetPropertyOnAll(Rocket::Core::Element* elem, const std::string& property, const std::string& value)
+  {
+    Rocket::Core::Element* child;
+    
+    for (int it = 0 ; child = elem->GetChild(it) ; ++it)
+    {
+      child->SetProperty(property.c_str(), value.c_str());
+      SetPropertyOnAll(child, property, value);
+    }
+  }
+  
+  void FadeOut(void);
+  void FadeIn(void);
 
 protected:
   WindowFramework*               _window;

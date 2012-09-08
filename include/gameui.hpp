@@ -19,10 +19,10 @@ class GameMenu : public UiBase
 public:
   GameMenu(WindowFramework* window, Rocket::Core::Context* context);
   void MenuEventContinue(Rocket::Core::Event& event) { Hide(); }
-  void MenuEventExit(Rocket::Core::Event& event);
   
   Observatory::Signal<void (Rocket::Core::Event&)> SaveClicked;
   Observatory::Signal<void (Rocket::Core::Event&)> LoadClicked;
+  Observatory::Signal<void (Rocket::Core::Event&)> ExitClicked;
 
 private:
   RocketListener         _continueClicked;
@@ -195,7 +195,6 @@ public:
   LoadingScreen(WindowFramework*, Rocket::Core::Context* rocket);
   
   void             AppendText(const std::string& str);
-  void             FadeOut(void);
 };
 
 class LevelUi

@@ -30,7 +30,6 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de) : Ui
     // Get some required elements
     //
     _cursor       = _root->GetElementById("party-cursor");
-    _mouse_cursor = _root->GetElementById("mouse-cursor");
 
     //
     // Event management
@@ -123,16 +122,6 @@ void WorldMap::Run(void)
   
   if (_current_pos_x != _goal_x || _current_pos_y != _goal_y)
     UpdatePartyCursor(elapsedTime);
-
-  if (_mouse_cursor)
-  {
-    stringstream strTop, strLeft;
-
-    strTop  << (_window->get_graphics_window()->get_pointer(0).get_y() + 1);
-    strLeft << (_window->get_graphics_window()->get_pointer(0).get_x() + 1);
-    _mouse_cursor->SetProperty("top",  strTop.str().c_str());
-    _mouse_cursor->SetProperty("left", strLeft.str().c_str());
-  }
   
   // Reveal nearby cases
   {

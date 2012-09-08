@@ -78,10 +78,6 @@ private:
   PT(CollisionHandlerQueue) _collisionHandlerQueue;
   
   MouseHovering             _hovering;
-  
-  LPoint2f                  _cursorDecalage;
-  NodePath                  _cursor;
-  PT(Texture)               _cursorAction, _cursorInteraction, _cursorTarget;
 };
 
 #endif

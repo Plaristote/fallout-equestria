@@ -5,6 +5,7 @@ using namespace std;
 
 LevelTask::LevelTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi(window, rocket)
 {
+  _continue   = true;
   _window     = window;
   _level      = 0;
   _savePath   = "saves";
@@ -17,6 +18,7 @@ LevelTask::LevelTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi
   _uiLoadGame = 0;
   _gameUi.GetMenu().SaveClicked.Connect(*this, &LevelTask::SaveClicked);
   _gameUi.GetMenu().LoadClicked.Connect(*this, &LevelTask::LoadClicked);
+  _gameUi.GetMenu().ExitClicked.Connect(*this, &LevelTask::Exit);
 }
 
 void LevelTask::SaveClicked(Rocket::Core::Event&)
@@ -57,6 +59,8 @@ void       LevelTask::SetLevel(Level* level)
 
 AsyncTask::DoneStatus LevelTask::do_task()
 {
+  if (!_continue)
+    return (AsyncTask::DS_done);
   if (_loadLevelParams.doLoad)
     DoLoadLevel();
   if (_level)

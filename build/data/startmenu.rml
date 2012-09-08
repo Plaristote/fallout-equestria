@@ -30,7 +30,8 @@
     <div id="loading_screen">
 
       <div id="button-container">
-        <button id="button-new-game">New game</button><br />
+        <button id="button-continue">Continue</button><br />
+        <button id="button-new-game">New Game</button><br />
         <button id="button-load-game">Load game</button><br />
         <button id="button-options">Options</button><br />
         <button id="button-quit">Quit</button>
