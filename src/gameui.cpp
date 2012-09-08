@@ -454,13 +454,19 @@ GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : Ui
     Rocket::Core::Element* buttonContinue = elementWindow->GetElementById("continue");
     Rocket::Core::Element* buttonOptions  = elementWindow->GetElementById("options");
     Rocket::Core::Element* buttonExit     = elementWindow->GetElementById("exit");
+    Rocket::Core::Element* buttonSave     = elementWindow->GetElementById("save");
+    Rocket::Core::Element* buttonLoad     = elementWindow->GetElementById("load");
 
     if (buttonContinue) buttonContinue->AddEventListener("click", &_continueClicked);
     if (buttonOptions)  buttonOptions->AddEventListener ("click", &_optionsClicked);
     if (buttonExit)     buttonExit->AddEventListener    ("click", &_exitClicked);
+    if (buttonSave)     buttonSave->AddEventListener    ("click", &_saveClicked);
+    if (buttonLoad)     buttonLoad->AddEventListener    ("click", &_loadClicked);
 
     _continueClicked.EventReceived.Connect(*this, &GameMenu::MenuEventContinue);
     _exitClicked.EventReceived.Connect(*this,     &GameMenu::MenuEventExit);
+    _saveClicked.EventReceived.Connect(SaveClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
+    _loadClicked.EventReceived.Connect(LoadClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
   }
 }
 

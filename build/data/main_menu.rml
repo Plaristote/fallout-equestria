@@ -20,8 +20,8 @@
 	</head>
 	<body template="pywindow" onload="document.context.LoadDocument('data/logo.rml').Show()">
 		<button class="button_menu" id="continue">Continue</button><br />
-                <button class="button_menu" id="options" >Save</button><br />
-                <button class="button_menu" id="options" >Load</button><br />
+                <button class="button_menu" id="save"    >Save</button><br />
+                <button class="button_menu" id="load"    >Load</button><br />
 		<button class="button_menu" id="options" >Options</button><br />
 		<button class="button_menu" id="exit"    >Exit</button>
 	</body>

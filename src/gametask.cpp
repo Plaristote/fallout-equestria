@@ -5,19 +5,44 @@ using namespace std;
 
 LevelTask::LevelTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi(window, rocket)
 {
-  _window   = window;
-  _level    = 0;
-  _savePath = "saves";
+  _window     = window;
+  _level      = 0;
+  _savePath   = "saves";
   _dataEngine.Load(_savePath + "/dataengine.json");
-  _worldMap = new WorldMap(window, &_gameUi, _dataEngine);
+  _worldMap   = new WorldMap(window, &_gameUi, _dataEngine);
   _worldMap->GoToPlace.Connect(*this, &LevelTask::MapOpenLevel);
   _worldMap->Show();
+
+  _uiSaveGame = 0;
+  _uiLoadGame = 0;
+  _gameUi.GetMenu().SaveClicked.Connect(*this, &LevelTask::SaveClicked);
+  _gameUi.GetMenu().LoadClicked.Connect(*this, &LevelTask::LoadClicked);
+}
+
+void LevelTask::SaveClicked(Rocket::Core::Event&)
+{
+  if (_uiSaveGame)
+    delete _uiSaveGame;
+  _uiSaveGame = new UiSave(_window, _gameUi.GetContext(), _savePath);
+  _uiSaveGame->SaveToSlot.Connect(*this, &LevelTask::SaveToSlot);
+  _uiSaveGame->Show();
+}
+
+void LevelTask::LoadClicked(Rocket::Core::Event&)
+{
+  if (_uiLoadGame)
+    delete _uiLoadGame;
+  _uiLoadGame = new UiLoad(_window, _gameUi.GetContext(), _savePath);
+  _uiLoadGame->LoadSlot.Connect(*this, &LevelTask::LoadSlot);
+  _uiLoadGame->Show();
 }
 
 LevelTask::~LevelTask()
 {
-  if (_level)    delete _level;
-  if (_worldMap) delete _worldMap;
+  if (_uiSaveGame) delete _uiSaveGame;
+  if (_uiLoadGame) delete _uiLoadGame;
+  if (_level)      delete _level;
+  if (_worldMap)   delete _worldMap;
 }
 
 void       LevelTask::MapOpenLevel(std::string name)
@@ -78,10 +103,17 @@ bool LevelTask::LoadGame(const std::string& savepath)
 
   _dataEngine.Load(savepath + "/dataengine.json");
   currentLevel = _dataEngine["system"]["current-level"];
+
+  _worldMap    = new WorldMap(_window, &_gameUi, _dataEngine);
+  _worldMap->GoToPlace.Connect(*this, &LevelTask::MapOpenLevel);
+  
   if (!(currentLevel.Nil()) && currentLevel.Value() != "0")
   {
+    _worldMap->Hide();
     LoadLevel(_window, _gameUi, savepath + "/" + currentLevel.Value() + ".blob", true);
   }
+  else
+    _worldMap->Show();
 }
 
 bool LevelTask::OpenLevel(const std::string& savepath, const std::string& level)
@@ -116,6 +148,118 @@ void LevelTask::ExitLevel(const std::string& savepath)
 bool LevelTask::CopySave(const std::string& savepath, const std::string& slotPath)
 {
   // Copy the savepath directory to the slotpath directory
+  Directory                          dir;
+  Directory::Entries::const_iterator it, end;
+
+  Directory::MakeDir(slotPath);
+  dir.OpenDir(savepath);
+  it  = dir.GetEntries().begin();
+  end = dir.GetEntries().end();
+  
+  for (; it != end ; ++it)
+  {
+    const struct dirent& entry = *it;
+
+    if (entry.d_type == DT_REG)
+    {
+      // Copy file to the slot
+      std::string   ifilePath, ofilePath;
+      std::ifstream ifile;
+      std::ofstream ofile;
+
+      ifilePath = savepath + "/" + entry.d_name;
+      ofilePath = slotPath + "/" + entry.d_name;
+      ifile.open(ifilePath.c_str());
+      ofile.open(ofilePath.c_str());
+      if (ifile.is_open() && ofile.is_open())
+      {
+	long  begin, end;
+	long  size;
+	char* raw;
+
+	begin     = ifile.tellg();
+	ifile.seekg (0, std::ios::end);
+	end       = ifile.tellg();
+	ifile.seekg(0, std::ios::beg);
+	size      = end - begin;
+	raw       = new char[size + 1];
+	raw[size] = 0;
+	ifile.read(raw, size);
+	ifile.close();
+
+	ofile.write(raw, size);
+	ofile.close();
+
+	delete[] raw;
+      }
+      else
+      {
+	// Can't copy file...
+	return (false);
+      }
+    }
+  }
+  return (true);
+}
+
+void LevelTask::EraseSlot(unsigned char slot)
+{
+  std::stringstream stream;
+  Directory         dir;
+  
+  stream << _savePath << "/slot-" << (int)slot;
+  dir.OpenDir(stream.str());
+  
+  std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [](const struct dirent& entry)
+  {
+    remove(entry.d_name);
+  });
+}
+
+void LevelTask::SaveToSlot(unsigned char slot)
+{
+  if (SaveGame(_savePath))
+  {
+    std::stringstream stream;
+
+    stream << _savePath << "/slot-" << (int)slot;
+    EraseSlot(slot);
+    CopySave(_savePath, stream.str());
+  }
+  if (_uiSaveGame) _uiSaveGame->Hide();
+}
+
+void LevelTask::LoadSlot(unsigned char slot)
+{
+  if (_level)    delete _level;
+  if (_worldMap) { _worldMap->Hide(); delete _worldMap; }
+  
+  // Clear original directory
+  {
+    Directory         dir;
+    
+    dir.OpenDir(_savePath);
+
+    std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [](const struct dirent& entry)
+    {
+      if (entry.d_type == DT_REG)
+        remove(entry.d_name);
+    });
+  }
+  
+  // Copy the saved files in the original directory
+  {
+    std::stringstream stream;
+
+    stream << _savePath << "/slot-" << (unsigned int)slot;
+    CopySave(stream.str(), _savePath);
+  }
+  
+  if (_uiLoadGame) _uiLoadGame->Hide();
+  if (!(LoadGame(_savePath)))
+  {
+    // TODO Handle error while loading the game
+  }
 }
 
 // LEVEL EVENTS
@@ -130,9 +274,7 @@ void LevelTask::LevelExitZone(const std::string& toLevel)
     }
   }
   if (!_level)
-  {
-    // Display Map Interface
-  }
+    _worldMap->Show();
 }
 
 void LevelTask::UiSaveGame(const std::string& slotPath)

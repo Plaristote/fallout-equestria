@@ -409,6 +409,8 @@ Waypoint::Waypoint(NodePath root)
 
     nodePath.set_transparency(TransparencyAttrib::M_alpha);
     nodePath.set_color(0, 0, 0, 0.5);
+    
+    floor    = 0;
 }
 
 void                Waypoint::SetSelected(bool selected)

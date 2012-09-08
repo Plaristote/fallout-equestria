@@ -189,6 +189,12 @@ private:
   DataEngine*       _dataEngine;
   DataTree*         _l18n;
   DataTree*         _items;
+
+  unsigned char     _currentFloor;
+  Waypoint*         _floor_lastWp;
+  
+  void              CheckCurrentFloor(void);
+  void              SetCurrentFloor(unsigned char floor);
 };
 
 #endif

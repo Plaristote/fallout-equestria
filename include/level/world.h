@@ -99,6 +99,7 @@ struct Waypoint
     typedef std::list<Arc> Arcs;
 
     unsigned int        id;
+    unsigned char       floor;
     Arcs                arcs;
     NodePath            nodePath;
     FBoundingBox        mouseBox;

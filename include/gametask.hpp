@@ -3,6 +3,7 @@
 
 # include "level/level.hpp"
 # include "worldmap/worldmap.hpp"
+# include "gameui.hpp"
 
 class LevelTask
 {
@@ -19,15 +20,22 @@ public:
   void                  ExitLevel(const std::string& savepath);
   bool                  CopySave(const std::string& savepath, const std::string& slotPath);
   
+  void                  SaveToSlot(unsigned char slot);
+  void                  LoadSlot(unsigned char slot);
+  
   // LEVEL EVENTS
   void                  LevelExitZone(const std::string& toLevel);
   void                  UiSaveGame(const std::string& slotPath);
   void                  UiLoadGame(const std::string& slotPath);
 
 private:
+  void                  LoadClicked(Rocket::Core::Event&);
+  void                  SaveClicked(Rocket::Core::Event&);
   static bool           SaveLevel(Level* level, const std::string& name);
   Level*                LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& name, bool isSaveFile = false);  
   Level*                DoLoadLevel(void);
+  
+  void                  EraseSlot(unsigned char slot);
 
   WindowFramework*      _window;
   GameUi                _gameUi;
@@ -39,6 +47,9 @@ private:
   Level*                _level;
 
   std::string           _savePath;
+  
+  UiSave*               _uiSaveGame;
+  UiLoad*               _uiLoadGame;
   
   struct LoadLevelParams
   { LoadLevelParams() : doLoad(false) {} bool doLoad; std::string name; std::string path; bool isSaveFile; };

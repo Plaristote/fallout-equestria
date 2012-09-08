@@ -386,6 +386,9 @@ AsyncTask::DoneStatus Level::do_task(void)
     case Interrupted:
       break ;
   }
+
+  CheckCurrentFloor();
+  
   _timer.Restart();
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);
 }
@@ -990,6 +993,49 @@ void Level::SetEntryZone(const std::string& name)
 	GetPlayer()->GetNodePath().set_pos((*it)->nodePath.get_pos());
         break ;
       }
+    }
+  }
+}
+
+/*
+ * Floors
+ */
+void Level::SetCurrentFloor(unsigned char floor)
+{
+  bool showLowerFloors  = true;
+  bool isInsideBuilding = false;
+
+  for (int it = 0 ; it < floor ; ++it)
+  {
+    NodePath floor = _world->floors[it];
+    
+    showLowerFloors ?  floor.show() : floor.hide();
+  }
+
+  if (_world->floors.size() > floor)
+    _world->floors[floor].show();
+
+  for (int it = floor + 1 ; it < _world->floors.size() ; ++it)
+  {
+    NodePath floor = _world->floors[it];
+
+    isInsideBuilding ? floor.hide() : floor.show();
+  }
+  _currentFloor = floor;
+}
+
+void Level::CheckCurrentFloor(void)
+{
+  ObjectCharacter* player = GetPlayer();
+
+  if (player)
+  {
+    Waypoint*      wp     = player->GetDynamicObject()->waypoint;
+
+    if (wp && wp != _floor_lastWp)
+    {
+      SetCurrentFloor(wp->floor);
+      _floor_lastWp = wp;
     }
   }
 }

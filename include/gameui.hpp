@@ -13,6 +13,174 @@
 
 # include "rocket_extension.hpp"
 
+#include "directory.hpp"
+class UiLoad : public UiBase
+{
+public:
+  UiLoad(WindowFramework* window, Rocket::Core::Context* context, const std::string& savePath) : UiBase(window, context)
+  {
+    _selectedSlot = 0;
+    _root         = context->LoadDocument("data/loadgame.rml");
+    if (_root)
+    {
+      Rocket::Core::Element* slotContainer = _root->GetElementById("slot-container");
+      
+      if (slotContainer)
+      {
+	Directory      dir;
+	unsigned short nSlots = 0;
+
+	dir.OpenDir(savePath);
+	std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [this, &nSlots](const struct dirent& entry)
+	{
+	  if (entry.d_type == DT_DIR)
+	  {
+	    std::string str("slot-");
+	    bool        compare = true;
+
+	    for (int i = 0 ; i < str.length() ; ++i)
+	    {
+	      if (str[i] != entry.d_name[i])
+	      {
+		compare = false;
+		break ;
+	      }
+	    }
+	    std::cout << "Directory " << entry.d_name << (compare ? "is" : "isn't") << " a directory" << std::endl;
+	    if (compare)
+	      nSlots++;
+	  }
+	});
+
+	std::stringstream rml;
+	for (int it = 0 ; it < nSlots ; ++it)
+	{
+	  rml << "<div class='load-slot' id='load-slot-" << it << "' data-slot='" << it << "'>";
+	  rml << "<div class='load-slot-title'>Slot " << it << "</div>";
+	  rml << "</div>";
+	}
+	slotContainer->SetInnerRML(rml.str().c_str());
+	
+	for (int it = 0 ; it < nSlots ; ++it)
+	{
+	  std::stringstream      idSlot;
+	  Rocket::Core::Element* slotElement;
+
+	  idSlot << "load-slot-" << it;
+	  slotElement = _root->GetElementById(idSlot.str().c_str());
+	  slotElement->AddEventListener("click",    &EventClickSlot);
+	  slotElement->AddEventListener("dblclick", &EventClickSlot);
+	  slotElement->AddEventListener("dblclick", &EventLoadGame);
+	}
+      }
+	
+      Rocket::Core::Element* buttonLoad = _root->GetElementById("button-load");
+      
+      if (buttonLoad)
+	buttonLoad->AddEventListener("click", &EventLoadGame);
+    }
+    EventClickSlot.EventReceived.Connect(*this, &UiLoad::ClickSlot);
+    EventLoadGame.EventReceived.Connect(*this, &UiLoad::LoadGame);
+  }
+  
+  Observatory::Signal<void (unsigned char)> LoadSlot;
+  
+private:
+  void LoadGame(Rocket::Core::Event&)
+  {
+    std::cout << "LoadGame called" << std::endl;
+    if (_selectedSlot)
+    {
+      Rocket::Core::Variant* varSlot = _selectedSlot->GetAttribute("data-slot");
+      unsigned int           slot    = 0;
+
+      slot = varSlot->Get<unsigned int>();
+      LoadSlot.Emit((unsigned char)slot);
+    }
+  }
+  
+  void ClickSlot(Rocket::Core::Event& event)
+  {
+    _selectedSlot = event.GetCurrentElement();
+  }
+  
+  RocketListener EventLoadGame, EventClickSlot;
+
+  Rocket::Core::Element* _selectedSlot;  
+};
+
+class UiSave : public UiBase
+{
+public:
+  UiSave(WindowFramework* window, Rocket::Core::Context* context, const std::string& savePath) : UiBase(window, context)
+  {
+    _root = context->LoadDocument("data/savegame.rml");
+    if (_root)
+    {
+      Rocket::Core::Element* slotContainer = _root->GetElementById("slot-container");
+      
+      if (slotContainer)
+      {
+	Directory      dir;
+	unsigned short nSlots = 0;
+
+	dir.OpenDir(savePath);
+	std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [this, &nSlots](const struct dirent& entry)
+	{ if (entry.d_type == DT_DIR && entry.d_name != "." && entry.d_name != "..") nSlots++; });
+
+	std::stringstream rml;
+	
+	for (unsigned short it = 0 ; it <= nSlots ; ++it)
+	{
+	  rml << "<div class='save-slot' id='save-slot-" << it << "' data-slot='" << it << "'>";
+	  rml << "<div class='save-slot-title'>Slot " << it << "</div>";
+	  rml << "</div>";
+	}
+	slotContainer->SetInnerRML(rml.str().c_str());
+	for (unsigned short it = 0 ; it <= nSlots ; ++it)
+	{
+	  std::stringstream      idSlot;
+	  Rocket::Core::Element* slotElement;
+	  
+	  idSlot << "save-slot-" << it;
+	  slotElement = _root->GetElementById(idSlot.str().c_str());
+	  slotElement->AddEventListener("click",    &EventClickSlot);
+	  slotElement->AddEventListener("dblclick", &EventClickSlot);
+	  slotElement->AddEventListener("dblclick", &EventSaveGame);
+	}
+      }
+    }
+    EventClickSlot.EventReceived.Connect(*this, &UiSave::ClickSlot);
+    EventSaveGame.EventReceived.Connect(*this, &UiSave::SaveGame);
+  }
+
+  Observatory::Signal<bool (unsigned char)> SaveToSlot;
+
+private:
+  void SaveGame(Rocket::Core::Event&)
+  {
+    std::cout << "SaveGame called" << std::endl;
+    if (_selectedSlot)
+    {
+      Rocket::Core::Variant* varSlot = _selectedSlot->GetAttribute("data-slot");
+      unsigned int           slot    = 0;
+
+      slot = varSlot->Get<unsigned int>();
+      SaveToSlot.Emit((unsigned char)slot);
+    }
+  }
+  
+  void ClickSlot(Rocket::Core::Event& event)
+  {
+    _selectedSlot = event.GetCurrentElement();
+  }
+  
+  RocketListener EventSaveGame, EventClickSlot;
+
+  Rocket::Core::Element* _selectedSlot;
+};
+
+
 class GameMenu : public UiBase
 {
   friend class GameUi;
@@ -20,11 +188,16 @@ public:
   GameMenu(WindowFramework* window, Rocket::Core::Context* context);
   void MenuEventContinue(Rocket::Core::Event& event) { Hide(); }
   void MenuEventExit(Rocket::Core::Event& event);
+  
+  Observatory::Signal<void (Rocket::Core::Event&)> SaveClicked;
+  Observatory::Signal<void (Rocket::Core::Event&)> LoadClicked;
 
 private:
   RocketListener         _continueClicked;
   RocketListener         _exitClicked;
   RocketListener         _optionsClicked;  
+  RocketListener         _saveClicked;
+  RocketListener         _loadClicked;
 };
 
 class InventoryObject;
