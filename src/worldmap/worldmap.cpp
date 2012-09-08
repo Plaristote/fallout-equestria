@@ -7,9 +7,8 @@ WorldMap* WorldMap::CurrentWorldMap = 0;
 
 WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de) : UiBase(window, gameUi->GetContext()), _gameUi(*gameUi), _dataEngine(de)
 {
-  _dataMap       = _dataEngine["worldmap"];
-  _current_pos_x = _goal_x = 0;
-  _current_pos_y = _goal_y = 0;
+  _current_pos_x = _goal_x = _dataEngine["worldmap"]["pos-x"];
+  _current_pos_y = _goal_y = _dataEngine["worldmap"]["pos-y"];
   
   _mapTree = DataTree::Factory::JSON("saves/map.json");
   MapTileGenerator(_mapTree);
@@ -48,6 +47,8 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de) : Ui
 
     MapClickedEvent.EventReceived.Connect(*this, &WorldMap::MapClicked);
     CityButtonClicked.EventReceived.Connect(*this, &WorldMap::CityClicked);
+    
+    UpdatePartyCursor(0);
   }
   CurrentWorldMap = this;
 }
@@ -112,8 +113,8 @@ void WorldMap::AddCityToList(Data cityData)
 void WorldMap::Show(void)
 {
   UiBase::Show();
-  _current_pos_x = _dataMap["pos-x"];
-  _current_pos_y = _dataMap["pos-y"];
+  _current_pos_x = _dataEngine["worldmap"]["pos-x"];
+  _current_pos_y = _dataEngine["worldmap"]["pos-y"];
 }
 
 void WorldMap::Run(void)
@@ -242,8 +243,8 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
     _cursor->SetProperty("top",  str_y.str().c_str());
   }
   
-  _dataMap["pos-x"] = _current_pos_x;
-  _dataMap["pos-y"] = _current_pos_y;
+  _dataEngine["worldmap"]["pos-x"] = _current_pos_x;
+  _dataEngine["worldmap"]["pos-y"] = _current_pos_y;
 }
 
 Core::Element* WorldMap::GetCaseAt(int x, int y) const

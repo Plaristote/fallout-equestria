@@ -56,7 +56,6 @@ private:
   RocketListener         MapClickedEvent, PartyCursorClicked, CityButtonClicked, ButtonInventory, ButtonCharacter, ButtonMenu;
   DataTree*              _mapTree;
   DataEngine&            _dataEngine;
-  Data                   _dataMap;
   GameUi&                _gameUi;
   Timer                  _timer;
 

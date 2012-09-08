@@ -74,7 +74,7 @@ AsyncTask::DoneStatus LevelTask::do_task()
 	  _level->SetEntryZone(exitPoint);
       }*/
     }
-    if (!_level)
+    if (!_level && _worldMap)
       _worldMap->Show();
   }
   else

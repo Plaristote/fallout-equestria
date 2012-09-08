@@ -21,8 +21,8 @@ class MainMenu : public AsyncTask
 public:
   MainMenu(WindowFramework* window);
 
-  void NewGame(Rocket::Core::Event&);  
-  void EndGame(void);
+  void       NewGame(Rocket::Core::Event&);  
+  void       EndGame(void);
   DoneStatus do_task(void);
   
 private:
@@ -33,9 +33,13 @@ private:
 
   UiLoad*          _uiLoad;
   
+  void             AsyncCreateLevel(void);
+  
+  void             QuitGame(Rocket::Core::Event&);
   void             OpenUiLoad(Rocket::Core::Event&);
   void             LoadSlot(unsigned char slot);
   
+  bool             quitGamePlz;
   bool             createLevelPlz;
   short            slotToLoadPlz;
 };

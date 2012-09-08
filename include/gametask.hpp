@@ -4,6 +4,7 @@
 # include "level/level.hpp"
 # include "worldmap/worldmap.hpp"
 # include "gameui.hpp"
+# include "saveuis.hpp"
 
 class LevelTask
 {
