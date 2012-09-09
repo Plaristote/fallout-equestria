@@ -195,11 +195,51 @@ private:
   DataTree*         _l18n;
   DataTree*         _items;
 
+  
+  class HidingFloor
+  {
+    NodePath floor;
+    bool     fadingIn, done;
+    float    alpha;  
+  public:
+    HidingFloor() : done(false) {}
+    
+    bool  operator==(NodePath np) const { return (floor == np); }
+    bool  Done(void)              const { return (done);        }
+    float Alpha(void)             const { return (alpha);       }
+    void  ForceAlpha(float _alpha)      { alpha = _alpha;       }
+
+    void  SetNodePath(NodePath np)
+    {
+      floor = np;
+      floor.set_transparency(TransparencyAttrib::M_alpha);
+    }
+
+    void  SetFadingIn(bool set)
+    {
+      fadingIn = set;
+      alpha    = fadingIn ? 1.f : 0.f;
+      if (fadingIn)
+	floor.show();
+    }
+
+    void  Run(float elapsedTime)
+    {
+      alpha += (fadingIn ? -0.1f : 0.1f) * (elapsedTime * 10);
+      done   = (fadingIn ? alpha <= 0.f : alpha >= 1.f);
+      floor.set_alpha_scale(alpha);
+      if (!fadingIn && done) floor.hide();
+    }
+  };
+  
+  std::list<HidingFloor> _hidingFloors;
+  
   unsigned char     _currentFloor;
   Waypoint*         _floor_lastWp;
   
-  void              CheckCurrentFloor(void);
+  void              CheckCurrentFloor(float elapsedTime);
   void              SetCurrentFloor(unsigned char floor);
+  void              FloorFade(bool in, NodePath floor);
 };
 
 #endif

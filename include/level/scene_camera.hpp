@@ -51,6 +51,7 @@ public:
 private:
   void            RunScroll(float elapsedTime);
   void            RunFollow(float elapsedTime);
+  void            RunSlideHeight(float elapsedTime);
   
   WindowFramework* _window;
   GraphicsWindow*  _graphicWindow;
@@ -64,6 +65,8 @@ private:
   LPoint3f         _objectiveHpr;
 
   unsigned int     _minPosX, _minPosY, _maxPosX, _maxPosY;
+
+  float            _destHeight;
 
   bool             _centeringCamera;
   bool             _followingNodePath;

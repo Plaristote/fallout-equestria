@@ -639,6 +639,8 @@ float my_sqrt(const float x)
 
 void World::DynamicObjectSetWaypoint(DynamicObject& object, Waypoint& waypoint)
 {
+  if (floors.size() > waypoint.floor)
+    object.nodePath.set_alpha_scale(floors[waypoint.floor].get_color_scale().get_w());
   object.waypoint = &waypoint;
   DynamicObjectChangeFloor(object, waypoint.floor);
 }

@@ -33,6 +33,8 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet) : _
   _l18n  = DataTree::Factory::JSON("data/l18n/english.json");
   _items = DataTree::Factory::JSON("data/objects.json");
 
+  
+  _floor_lastWp = 0;
   ceilingCurrentTransparency = 1.f;
 
   for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
@@ -391,7 +393,7 @@ AsyncTask::DoneStatus Level::do_task(void)
       break ;
   }
 
-  CheckCurrentFloor();
+  CheckCurrentFloor(elapsedTime);
   
   _timer.Restart();
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);
@@ -998,28 +1000,44 @@ void Level::SetEntryZone(const std::string& name)
 /*
  * Floors
  */
+void Level::FloorFade(bool in, NodePath floor)
+{
+  list<HidingFloor>::iterator it = std::find(_hidingFloors.begin(), _hidingFloors.end(), floor);
+  HidingFloor                 hidingFloor;
+
+  if (it == _hidingFloors.end() && (floor.is_hidden() ^ !in))
+    return ;
+  hidingFloor.SetNodePath(floor);
+  hidingFloor.SetFadingIn(in);  
+  if (it != _hidingFloors.end())
+  {
+    hidingFloor.ForceAlpha(it->Alpha());
+    _hidingFloors.erase(it);
+  }
+  _hidingFloors.push_back(hidingFloor);
+}
+
 void Level::SetCurrentFloor(unsigned char floor)
 {
-  bool showLowerFloors  = false;
+  bool showLowerFloors  = true;
   bool isInsideBuilding = false;
 
   for (int it = 0 ; it < floor ; ++it)
-  {
-    NodePath floor = _world->floors[it];
-
-    showLowerFloors ?  floor.show() : floor.hide();
-  }
+    FloorFade(showLowerFloors, _world->floors[it]);
 
   if (_world->floors.size() > floor)
+  {
+    list<HidingFloor>::iterator it = find(_hidingFloors.begin(), _hidingFloors.end(), _world->floors[floor]);
+
+    if (it != _hidingFloors.end())
+      _hidingFloors.erase(it);
+    _world->floors[floor].set_alpha_scale(1.f);
     _world->floors[floor].show();
+  }
 
   for (int it = floor + 1 ; it < _world->floors.size() ; ++it)
-  {
-    NodePath floor = _world->floors[it];
+    FloorFade(!isInsideBuilding, _world->floors[it]);
 
-    isInsideBuilding ? floor.hide() : floor.show();
-  }
-  
   World::Waypoints::const_iterator cur, end;
 
   for (cur = _world->waypoints.begin(), end = _world->waypoints.end() ; cur != end ; ++cur)
@@ -1034,7 +1052,7 @@ void Level::SetCurrentFloor(unsigned char floor)
   _currentFloor = floor;
 }
 
-void Level::CheckCurrentFloor(void)
+void Level::CheckCurrentFloor(float elapsedTime)
 {
   ObjectCharacter* player = GetPlayer();
 
@@ -1043,11 +1061,21 @@ void Level::CheckCurrentFloor(void)
     Waypoint*      wp;
 
     wp = player->GetDynamicObject()->waypoint;
-    if (wp && wp != _floor_lastWp)
+    if (!_floor_lastWp || (wp && wp->floor != _floor_lastWp->floor))
     {
-      std::cout << "Current floor is " << (int)wp->floor << std::endl;
       SetCurrentFloor(wp->floor);
       _floor_lastWp = wp;
     }
+  }
+
+  std::list<HidingFloor>::iterator cur, end;
+
+  for (cur = _hidingFloors.begin(), end = _hidingFloors.end() ; cur != end ;)
+  {
+    cur->Run(elapsedTime);
+    if (cur->Done())
+      cur = _hidingFloors.erase(cur);
+    else
+      ++cur;
   }
 }

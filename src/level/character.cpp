@@ -728,10 +728,6 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
 {
   if (object == this)
     return (true);
-  std::cout << GetName() << std::endl;
-  std::cout << "Trololo" << std::endl;
-  std::cout << object->GetName() << std::endl;
-  std::cout << "Trololo" << std::endl;
   NodePath root  = _object->nodePath;
   NodePath other = object->GetNodePath();
   bool ret = true;

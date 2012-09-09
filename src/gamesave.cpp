@@ -31,7 +31,11 @@ void Level::Save(Utils::Packet& packet)
   if (_state == Fight)
     packet << ((*_itCharacter)->GetName());
 
-  for_each(_objects.begin(),    _objects.end(),    [&packet](InstanceDynamicObject* object) { object->Save(packet);    });
+  for_each(_objects.begin(),    _objects.end(),    [&packet](InstanceDynamicObject* object)
+  {
+    if (object)
+      object->Save(packet);
+  });
   for_each(_characters.begin(), _characters.end(), [&packet](ObjectCharacter* character)    { character->Save(packet); });
 }
 

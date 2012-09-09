@@ -40,9 +40,16 @@ void SceneCamera::SetEnabledScroll(bool set)
 
 void SceneCamera::SlideToHeight(float height)
 {
-  LPoint3 pos = _camera.get_pos();
-  
-  pos.set_z(height + CAMERA_HEIGHT);
+  _destHeight = height + CAMERA_HEIGHT;
+}
+
+void SceneCamera::RunSlideHeight(float elapsedTime)
+{
+  LPoint3 pos    = _camera.get_pos();
+  float   posZ   = pos.get_z();
+  float   toMove = (posZ - _destHeight) * elapsedTime;
+
+  pos.set_z(posZ + -toMove);
   _camera.set_pos(pos);
 }
 
@@ -50,6 +57,7 @@ SceneCamera::SceneCamera(WindowFramework* window, NodePath camera) : _window(win
 {
   _scrollEnabled = true;
 
+  _destHeight = CAMERA_HEIGHT;
   camera.set_pos(0, 0, CAMERA_HEIGHT);
   camera.set_hpr(-40, -40, 0);
 
@@ -92,6 +100,8 @@ void SceneCamera::Run(float elapsedTime)
 {
   if (_scrollEnabled)
     RunScroll(elapsedTime);
+  if (_destHeight != _camera.get_z())
+    RunSlideHeight(elapsedTime);
   if (_currentHpr != _objectiveHpr)
   {
 
