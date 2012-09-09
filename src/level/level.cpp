@@ -1006,7 +1006,7 @@ void Level::SetCurrentFloor(unsigned char floor)
   for (int it = 0 ; it < floor ; ++it)
   {
     NodePath floor = _world->floors[it];
-    
+
     showLowerFloors ?  floor.show() : floor.hide();
   }
 
@@ -1019,6 +1019,18 @@ void Level::SetCurrentFloor(unsigned char floor)
 
     isInsideBuilding ? floor.hide() : floor.show();
   }
+  
+  World::Waypoints::const_iterator cur, end;
+
+  for (cur = _world->waypoints.begin(), end = _world->waypoints.end() ; cur != end ; ++cur)
+  {
+    if (cur->floor == floor)
+    {
+      _camera.SlideToHeight(cur->nodePath.get_pos().get_z());
+      break ;
+    }
+  }
+
   _currentFloor = floor;
 }
 
@@ -1032,6 +1044,7 @@ void Level::CheckCurrentFloor(void)
 
     if (wp && wp != _floor_lastWp)
     {
+      std::cout << "Current floor is " << (int)wp->floor << std::endl;
       SetCurrentFloor(wp->floor);
       _floor_lastWp = wp;
     }

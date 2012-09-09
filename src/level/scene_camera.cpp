@@ -38,6 +38,14 @@ void SceneCamera::SetEnabledScroll(bool set)
   _scrollEnabled = set;
 }
 
+void SceneCamera::SlideToHeight(float height)
+{
+  LPoint3 pos = _camera.get_pos();
+  
+  pos.set_z(height + CAMERA_HEIGHT);
+  _camera.set_pos(pos);
+}
+
 SceneCamera::SceneCamera(WindowFramework* window, NodePath camera) : _window(window), _graphicWindow(window->get_graphics_window()), _camera(camera)
 {
   _scrollEnabled = true;

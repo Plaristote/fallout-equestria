@@ -39,6 +39,7 @@ public:
     _maxPosY = maxY;
   }
   
+  void            SlideToHeight(float);
   void            CenterCameraInstant(LPoint3f);
   void            CenterCameraOn(NodePath np);
   void            FollowNodePath(NodePath np);

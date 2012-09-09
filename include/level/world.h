@@ -142,11 +142,13 @@ private:
 
 struct MapObject
 {
-    NodePath    nodePath;
-    PT(Texture) texture;
+    NodePath      nodePath;
+    PT(Texture)   texture;
+    
+    unsigned char floor;
 
-    std::string strModel;
-    std::string strTexture;
+    std::string   strModel;
+    std::string   strTexture;
 
     void UnSerialize(WindowFramework* window, Utils::Packet& packet);
     void Serialize(Utils::Packet& packet);
@@ -380,12 +382,15 @@ struct World
         return (0);
     }
 
+    void           ObjectChangeFloor(MapObject&, unsigned char floor, unsigned short type);
+
     MapObject*     AddMapObject(const std::string& name, const std::string& model, const std::string& texture, float x, float y, float z);
     void           DeleteMapObject(MapObject*);
     MapObject*     GetMapObjectFromName(const std::string& name);
     MapObject*     GetMapObjectFromNodePath(NodePath path);
     void           SetMapObjectsVisible(bool v)
     { if (v) { rootMapObjects.show(); } else { rootMapObjects.hide(); } }
+    void           MapObjectChangeFloor(MapObject&, unsigned char floor);
 
     DynamicObject* AddDynamicObject(const std::string& name, DynamicObject::Type type, const std::string& model, const std::string& texture);
     void           DeleteDynamicObject(DynamicObject*);
@@ -393,6 +398,7 @@ struct World
     DynamicObject* GetDynamicObjectFromNodePath(NodePath path);
     void           SetDynamicObjectsVisible(bool v)
     { if (v) { rootDynamicObjects.show(); } else { rootDynamicObjects.hide(); } }
+    void           DynamicObjectChangeFloor(DynamicObject&, unsigned char floor);
     
     void           AddExitZone(const std::string&);
     void           DeleteExitZone(const std::string&);
