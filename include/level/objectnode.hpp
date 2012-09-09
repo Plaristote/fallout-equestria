@@ -29,7 +29,7 @@ struct WaypointModifier
   void         UnprocessCollisions(void);
   int          GetOccupiedWaypointAsInt(void) const { return (_waypointOccupied->id); }
   Waypoint*    GetOccupiedWaypoint(void)     const  { return (_waypointOccupied);     }
-  void         SetOccupiedWaypoint(Waypoint* wp)    { _waypointOccupied = wp;         }
+  void         SetOccupiedWaypoint(Waypoint* wp);
 
 protected:
   void         WithdrawAllArcs(unsigned int id);

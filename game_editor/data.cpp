@@ -32,10 +32,11 @@ bool DataTree::Save(const string& path)
 {
   ofstream file;
   
-  file.open(path.c_str(),ios::binary);
+  file.open(path.c_str());
   if (file.is_open())
   {
     WriteFile(file, this, 0);
+    file.close();
     return (true);
   }
   return (false);
@@ -77,28 +78,34 @@ Data Data::operator[](unsigned int n)
 
 Data Data::operator[](const std::string& key)
 {
-  DataBranch::Children::iterator it  = _data->children.begin();
-  DataBranch::Children::iterator end = _data->children.end();
-
-  _data->nil = false;
-  for (; it != end ; ++it)
+  if (_data)
   {
-    if ((*it)->key == key)
-      return (Data((*it)));
+    DataBranch::Children::iterator it  = _data->children.begin();
+    DataBranch::Children::iterator end = _data->children.end();
+
+    _data->nil = false;
+    for (; it != end ; ++it)
+    {
+      if ((*it)->key == key)
+	return (Data((*it)));
+    }
   }
   return (Data(key, _data));
 }
 
 const Data Data::operator[](const std::string& key) const
 {
-  DataBranch::Children::const_iterator it  = _data->children.begin();
-  DataBranch::Children::const_iterator end = _data->children.end();
-
-  _data->nil = false;
-  for (; it != end ; ++it)
+  if (_data)
   {
-    if ((*it)->key == key)
-      return (Data((*it)));
+    DataBranch::Children::const_iterator it  = _data->children.begin();
+    DataBranch::Children::const_iterator end = _data->children.end();
+
+    _data->nil = false;
+    for (; it != end ; ++it)
+    {
+      if ((*it)->key == key)
+	return (Data((*it)));
+    }
   }
   return (Data(key, _data));
 }

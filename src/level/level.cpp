@@ -1000,7 +1000,7 @@ void Level::SetEntryZone(const std::string& name)
  */
 void Level::SetCurrentFloor(unsigned char floor)
 {
-  bool showLowerFloors  = true;
+  bool showLowerFloors  = false;
   bool isInsideBuilding = false;
 
   for (int it = 0 ; it < floor ; ++it)
@@ -1040,8 +1040,9 @@ void Level::CheckCurrentFloor(void)
 
   if (player)
   {
-    Waypoint*      wp     = player->GetDynamicObject()->waypoint;
+    Waypoint*      wp;
 
+    wp = player->GetDynamicObject()->waypoint;
     if (wp && wp != _floor_lastWp)
     {
       std::cout << "Current floor is " << (int)wp->floor << std::endl;

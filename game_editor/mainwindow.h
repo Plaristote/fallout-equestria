@@ -81,6 +81,7 @@ private slots:
     void WaypointUpdateSelX(void);
     void WaypointUpdateSelY(void);
     void WaypointUpdateSelZ(void);
+    void WaypointSelFloor(void);
     void WaypointSelDelete(void);
     void WaypointHovered(NodePath);
     void WaypointSelect(Waypoint*);
@@ -118,6 +119,7 @@ private slots:
     void MapObjectScaleX(void);
     void MapObjectScaleY(void);
     void MapObjectScaleZ(void);
+    void MapObjectFloor(void);
 
     // DYNAMICOBJECTS
     void DynamicObjectVisible(void);

@@ -58,6 +58,7 @@ public:
   void        MoveDown();
 
   void        SetKey(const std::string& newKey) { if (_data) _data->key = newKey; }
+  /*! \brief Copy all branches from var's tree and duplicate them under this branch */
   void        Duplicate(Data var);
 
   const Data& operator=(const Data& var);

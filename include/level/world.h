@@ -388,16 +388,15 @@ struct World
     void           DeleteMapObject(MapObject*);
     MapObject*     GetMapObjectFromName(const std::string& name);
     MapObject*     GetMapObjectFromNodePath(NodePath path);
-    void           SetMapObjectsVisible(bool v)
-    { if (v) { rootMapObjects.show(); } else { rootMapObjects.hide(); } }
+    void           SetMapObjectsVisible(bool v);
     void           MapObjectChangeFloor(MapObject&, unsigned char floor);
 
     DynamicObject* AddDynamicObject(const std::string& name, DynamicObject::Type type, const std::string& model, const std::string& texture);
     void           DeleteDynamicObject(DynamicObject*);
     DynamicObject* GetDynamicObjectFromName(const std::string& name);
     DynamicObject* GetDynamicObjectFromNodePath(NodePath path);
-    void           SetDynamicObjectsVisible(bool v)
-    { if (v) { rootDynamicObjects.show(); } else { rootDynamicObjects.hide(); } }
+    void           SetDynamicObjectsVisible(bool v);
+    void           DynamicObjectSetWaypoint(DynamicObject&, Waypoint&);
     void           DynamicObjectChangeFloor(DynamicObject&, unsigned char floor);
     
     void           AddExitZone(const std::string&);

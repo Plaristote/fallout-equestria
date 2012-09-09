@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>698</width>
-    <height>459</height>
+    <height>530</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -59,15 +59,15 @@
         <item row="4" column="1" rowspan="3" colspan="3">
          <widget class="QToolBox" name="toolBox">
           <property name="currentIndex">
-           <number>2</number>
+           <number>4</number>
           </property>
-          <widget class="QWidget" name="page">
+          <widget class="QWidget" name="waypointsPage">
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>0</y>
-             <width>251</width>
-             <height>371</height>
+             <y>-201</y>
+             <width>262</width>
+             <height>375</height>
             </rect>
            </property>
            <attribute name="label">
@@ -83,6 +83,33 @@
                <enum>QFrame::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout_8">
+               <item row="2" column="0" colspan="3">
+                <widget class="QPushButton" name="waypointConnect">
+                 <property name="text">
+                  <string>Connect</string>
+                 </property>
+                 <property name="flat">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_2">
+                 <property name="text">
+                  <string>&lt;b&gt;Selection&lt;/b&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="1">
+                <widget class="QDoubleSpinBox" name="waypointSelY">
+                 <property name="minimum">
+                  <double>-999.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>999.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
                <item row="5" column="2">
                 <widget class="QDoubleSpinBox" name="waypointSelZ">
                  <property name="minimum">
@@ -123,33 +150,6 @@
                  </property>
                 </widget>
                </item>
-               <item row="2" column="0" colspan="3">
-                <widget class="QPushButton" name="waypointConnect">
-                 <property name="text">
-                  <string>Connect</string>
-                 </property>
-                 <property name="flat">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_2">
-                 <property name="text">
-                  <string>&lt;b&gt;Selection&lt;/b&gt;</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="1">
-                <widget class="QDoubleSpinBox" name="waypointSelY">
-                 <property name="minimum">
-                  <double>-999.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>999.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
                <item row="4" column="0" colspan="3">
                 <widget class="QPushButton" name="waypointSelDelete">
                  <property name="text">
@@ -157,6 +157,16 @@
                  </property>
                  <property name="flat">
                   <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="1" colspan="2">
+                <widget class="QSpinBox" name="waypointSelFloor"/>
+               </item>
+               <item row="6" column="0">
+                <widget class="QLabel" name="label_9">
+                 <property name="text">
+                  <string>Floor:</string>
                  </property>
                 </widget>
                </item>
@@ -264,13 +274,128 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="page_2">
+          <widget class="QWidget" name="entryZonePage">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>245</width>
-             <height>309</height>
+             <width>241</width>
+             <height>92</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Entry Zones</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_12">
+            <item row="2" column="0" colspan="2">
+             <widget class="QPushButton" name="entryZoneSetWaypoints">
+              <property name="text">
+               <string>Set as selection</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QPushButton" name="entryZoneDelete">
+              <property name="text">
+               <string>Delete</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QComboBox" name="entryZoneList"/>
+            </item>
+            <item row="0" column="0" colspan="2">
+             <widget class="QPushButton" name="entryZoneAdd">
+              <property name="text">
+               <string>Add</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" colspan="2">
+             <spacer name="verticalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="exitZonePage">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>247</width>
+             <height>215</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Exit Zones</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_11">
+            <item row="1" column="1">
+             <widget class="QPushButton" name="exitZoneDelete">
+              <property name="text">
+               <string>Delete</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QPushButton" name="exitZoneDeleteDestination">
+              <property name="text">
+               <string>Delete</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="exitZoneLabelDestination">
+              <property name="text">
+               <string>Destinations:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" colspan="2">
+             <widget class="QPushButton" name="exitZoneAdd">
+              <property name="text">
+               <string>Add</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QPushButton" name="exitZoneAddDestination">
+              <property name="text">
+               <string>Add</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QComboBox" name="exitZoneList"/>
+            </item>
+            <item row="4" column="0" colspan="2">
+             <widget class="QListWidget" name="exitZoneDestinations"/>
+            </item>
+            <item row="2" column="0" colspan="2">
+             <widget class="QPushButton" name="exitZoneSetSelection">
+              <property name="text">
+               <string>Set as selection</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_2">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>-124</y>
+             <width>258</width>
+             <height>323</height>
             </rect>
            </property>
            <attribute name="label">
@@ -309,6 +434,16 @@
                <enum>QFrame::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout_6">
+               <item row="4" column="2">
+                <widget class="QDoubleSpinBox" name="objectRotationZ">
+                 <property name="minimum">
+                  <double>-360.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>360.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
                <item row="4" column="0">
                 <widget class="QDoubleSpinBox" name="objectRotationX">
                  <property name="minimum">
@@ -326,7 +461,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="7" column="0" colspan="3">
+               <item row="8" column="0" colspan="3">
                 <widget class="QPushButton" name="objectEdit">
                  <property name="text">
                   <string>Edit Object</string>
@@ -383,16 +518,6 @@
                  </property>
                 </widget>
                </item>
-               <item row="4" column="2">
-                <widget class="QDoubleSpinBox" name="objectRotationZ">
-                 <property name="minimum">
-                  <double>-360.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>360.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
                <item row="2" column="0">
                 <widget class="QDoubleSpinBox" name="objectPosX">
                  <property name="minimum">
@@ -434,7 +559,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="8" column="0" colspan="3">
+               <item row="9" column="0" colspan="3">
                 <widget class="QPushButton" name="objectRemove">
                  <property name="text">
                   <string>Remove Object</string>
@@ -443,6 +568,16 @@
                   <bool>true</bool>
                  </property>
                 </widget>
+               </item>
+               <item row="7" column="0">
+                <widget class="QLabel" name="label_10">
+                 <property name="text">
+                  <string>Floor</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="1" colspan="2">
+                <widget class="QSpinBox" name="objectFloor"/>
                </item>
               </layout>
              </widget>
@@ -466,9 +601,9 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>0</y>
-             <width>245</width>
-             <height>338</height>
+             <y>-133</y>
+             <width>258</width>
+             <height>324</height>
             </rect>
            </property>
            <attribute name="label">
@@ -504,6 +639,23 @@
                <enum>QFrame::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout_10">
+               <item row="5" column="0">
+                <widget class="QDoubleSpinBox" name="interObjRotX">
+                 <property name="minimum">
+                  <double>-360.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>360.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="1">
+                <widget class="QDoubleSpinBox" name="interObjScaleY">
+                 <property name="minimum">
+                  <double>-99.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
                <item row="3" column="0">
                 <widget class="QDoubleSpinBox" name="interObjPosX">
                  <property name="minimum">
@@ -551,13 +703,6 @@
                  </property>
                 </widget>
                </item>
-               <item row="7" column="1">
-                <widget class="QDoubleSpinBox" name="interObjScaleY">
-                 <property name="minimum">
-                  <double>-99.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
                <item row="7" column="2">
                 <widget class="QDoubleSpinBox" name="interObjScaleZ">
                  <property name="minimum">
@@ -565,16 +710,6 @@
                  </property>
                  <property name="maximum">
                   <double>99.000000000000000</double>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="0">
-                <widget class="QDoubleSpinBox" name="interObjRotX">
-                 <property name="minimum">
-                  <double>-360.000000000000000</double>
-                 </property>
-                 <property name="maximum">
-                  <double>360.000000000000000</double>
                  </property>
                 </widget>
                </item>
@@ -824,6 +959,16 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="itemTab">
+       <attribute name="title">
+        <string>Item Editor</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="ItemEditor" name="itemEditor" native="true"/>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tabDialogEditor">
        <attribute name="title">
         <string>Dialogue Editor</string>
@@ -928,6 +1073,12 @@
    <class>FormInternationalization</class>
    <extends>QWidget</extends>
    <header>forminternationalization.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ItemEditor</class>
+   <extends>QWidget</extends>
+   <header>itemeditor.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -160,7 +160,7 @@ Parser::Parser(const string& filename, bool filepath)
   else
     _str = filename;
     
-  for (int i = 0 ; i < _str.size() ; ++i)
+  for (unsigned int i = 0 ; i < _str.size() ; ++i)
   {
     if (_str[i] == '\t')
       _str[i] = ' ';

@@ -28,7 +28,7 @@
 #  define SQRT sqrt
 # endif
 
-//# define GAME_EDITOR
+# define GAME_EDITOR
 
 # ifdef GAME_EDITOR
 #  define WAYPOINT_DEBUG
@@ -51,7 +51,8 @@ namespace ColMask
       Tile       = 2,
       DynObject  = 4,
       Object     = 8,
-      FovTarget  = 16
+      FovTarget  = 16,
+      WpPlane    = 32
   };
 }
 
@@ -98,6 +99,7 @@ struct Waypoint
     typedef std::list<Arc> Arcs;
 
     unsigned int        id;
+    unsigned char       floor;
     Arcs                arcs;
     NodePath            nodePath;
     FBoundingBox        mouseBox;
@@ -140,11 +142,13 @@ private:
 
 struct MapObject
 {
-    NodePath    nodePath;
-    PT(Texture) texture;
+    NodePath      nodePath;
+    PT(Texture)   texture;
+    
+    unsigned char floor;
 
-    std::string strModel;
-    std::string strTexture;
+    std::string   strModel;
+    std::string   strTexture;
 
     void UnSerialize(WindowFramework* window, Utils::Packet& packet);
     void Serialize(Utils::Packet& packet);
@@ -294,8 +298,11 @@ struct World
     typedef std::list<WorldLight>    WorldLights;
     typedef std::list<ExitZone>      ExitZones;
     typedef std::list<EntryZone>     EntryZones;
+    typedef std::vector<NodePath>    Floors;
 
     WindowFramework* window;
+    
+    Floors           floors;
 
     NodePath         rootWaypoints;
     Waypoints        waypoints;
@@ -314,13 +321,17 @@ struct World
 
     World(WindowFramework* window);
     ~World(void);
+    
+    void      FloorResize(int);
 
     Waypoint* AddWayPoint(float x, float y, float z);
     void      DeleteWayPoint(Waypoint*);
     Waypoint* GetWaypointFromNodePath(NodePath path);
     Waypoint* GetWaypointFromId(unsigned int id);
+    Waypoint* GetWaypointClosest(LPoint3);
     void      SetWaypointsVisible(bool v)
     { if (v) { rootWaypoints.show();  } else { rootWaypoints.hide();  } }
+    LPlane         GetWaypointPlane(void) const;
 
     template<class OBJTYPE>
     void           DeleteObject(MapObject* ptr, std::list<OBJTYPE>& list)
@@ -371,19 +382,22 @@ struct World
         return (0);
     }
 
+    void           ObjectChangeFloor(MapObject&, unsigned char floor, unsigned short type);
+
     MapObject*     AddMapObject(const std::string& name, const std::string& model, const std::string& texture, float x, float y, float z);
     void           DeleteMapObject(MapObject*);
     MapObject*     GetMapObjectFromName(const std::string& name);
     MapObject*     GetMapObjectFromNodePath(NodePath path);
-    void           SetMapObjectsVisible(bool v)
-    { if (v) { rootMapObjects.show(); } else { rootMapObjects.hide(); } }
+    void           SetMapObjectsVisible(bool v);
+    void           MapObjectChangeFloor(MapObject&, unsigned char floor);
 
     DynamicObject* AddDynamicObject(const std::string& name, DynamicObject::Type type, const std::string& model, const std::string& texture);
     void           DeleteDynamicObject(DynamicObject*);
     DynamicObject* GetDynamicObjectFromName(const std::string& name);
     DynamicObject* GetDynamicObjectFromNodePath(NodePath path);
-    void           SetDynamicObjectsVisible(bool v)
-    { if (v) { rootDynamicObjects.show(); } else { rootDynamicObjects.hide(); } }
+    void           SetDynamicObjectsVisible(bool v);
+    void           DynamicObjectSetWaypoint(DynamicObject&, Waypoint&);
+    void           DynamicObjectChangeFloor(DynamicObject&, unsigned char floor);
     
     void           AddExitZone(const std::string&);
     void           DeleteExitZone(const std::string&);

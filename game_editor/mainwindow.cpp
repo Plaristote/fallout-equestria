@@ -319,22 +319,23 @@ void MainWindow::PandaInitialized()
      connect(ui->itemEditor, SIGNAL(ItemListChanged(QStringList)), &dialogObject, SLOT(SetObjectList(QStringList)));
 
 // WAYPOINTS
-     connect(ui->waypointAdd, SIGNAL(clicked()), this, SLOT(WaypointAdd()));
-     connect(ui->waypointRemove, SIGNAL(clicked()), this, SLOT(WaypointDelete()));
-     connect(ui->waypointVisible, SIGNAL(toggled(bool)), this, SLOT(WaypointVisible()));
-     connect(ui->waypointX, SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateX()));
-     connect(ui->waypointY, SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateY()));
-     connect(ui->waypointZ, SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateZ()));
-     connect(ui->waypointConnect, SIGNAL(clicked()), this, SLOT(WaypointConnect()));
-     connect(ui->waypointDisconnect, SIGNAL(clicked()), this, SLOT(WaypointDisconnect()));
+     connect(ui->waypointAdd,        SIGNAL(clicked()),            this, SLOT(WaypointAdd()));
+     connect(ui->waypointRemove,     SIGNAL(clicked()),            this, SLOT(WaypointDelete()));
+     connect(ui->waypointVisible,    SIGNAL(toggled(bool)),        this, SLOT(WaypointVisible()));
+     connect(ui->waypointX,          SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateX()));
+     connect(ui->waypointY,          SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateY()));
+     connect(ui->waypointZ,          SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateZ()));
 
-     connect(ui->waypointSelX, SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateSelX()));
-     connect(ui->waypointSelY, SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateSelY()));
-     connect(ui->waypointSelZ, SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateSelZ()));
-     connect(ui->waypointSelDelete, SIGNAL(clicked()), this, SLOT(WaypointSelDelete()));
+     connect(ui->waypointConnect,    SIGNAL(clicked()),            this, SLOT(WaypointConnect()));
+     connect(ui->waypointDisconnect, SIGNAL(clicked()),            this, SLOT(WaypointDisconnect()));
+     connect(ui->waypointSelX,       SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateSelX()));
+     connect(ui->waypointSelY,       SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateSelY()));
+     connect(ui->waypointSelZ,       SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateSelZ()));
+     connect(ui->waypointSelFloor,   SIGNAL(valueChanged(int)),    this, SLOT(WaypointSelFloor()));
+     connect(ui->waypointSelDelete,  SIGNAL(clicked()),            this, SLOT(WaypointSelDelete()));
 
      waypointGenerate.SetWorld(world);
-     connect(ui->waypointGenerate, SIGNAL(clicked()), &waypointGenerate, SLOT(open()));
+     connect(ui->waypointGenerate,   SIGNAL(clicked()), &waypointGenerate, SLOT(open()));
 
      connect(&wizardObject, SIGNAL(accepted()), this, SLOT(ObjectAdd()));
 
@@ -370,6 +371,7 @@ void MainWindow::PandaInitialized()
      connect(ui->objectScaleY, SIGNAL(valueChanged(double)), this, SLOT(MapObjectScaleY()));
      connect(ui->objectScaleZ, SIGNAL(valueChanged(double)), this, SLOT(MapObjectScaleZ()));
      connect(ui->objectName, SIGNAL(textChanged(QString)), this, SLOT(MapObjectNameChanged(QString)));
+     connect(ui->objectFloor, SIGNAL(valueChanged(int)), this, SLOT(MapObjectFloor()));
 
 // DYNAMICOBJECTS
      dynamicObjectSelected = 0;
@@ -416,7 +418,7 @@ void MainWindow::ObjectAdd()
 void MainWindow::DynamicObjectSetWaypoint()
 {
     if (dynamicObjectSelected)
-      dynamicObjectSelected->waypoint = waypointSelected;
+      world->DynamicObjectSetWaypoint(*dynamicObjectSelected, *waypointSelected);
 }
 
 void MainWindow::DynamicObjectWizard()
@@ -615,7 +617,6 @@ void MainWindow::MapObjectWizard()
 
 void MainWindow::MapObjectAdd()
 {
-    std::cout << "POIL DE BITE" << std::endl;
     wizardMapObject = false;
     QString name  = wizardObject.GetName();
     QString model = wizardObject.GetModel();
@@ -651,6 +652,12 @@ void MainWindow::MapObjectHovered(NodePath path)
     }
 }
 
+void MainWindow::MapObjectFloor()
+{
+    if (mapobjectSelected)
+      world->MapObjectChangeFloor(*mapobjectSelected, ui->objectFloor->value());
+}
+
 void MainWindow::MapObjectNameChanged(QString name)
 {
     if (mapobjectSelected)
@@ -662,6 +669,7 @@ void MainWindow::MapObjectSelect()
     mapobjectSelected = mapobjectHovered;
     if (mapobjectSelected)
     {
+        ui->objectFloor->setValue(mapobjectSelected->floor);
         ui->objectScaleX->setValue(mapobjectSelected->nodePath.get_scale().get_x());
         ui->objectScaleY->setValue(mapobjectSelected->nodePath.get_scale().get_y());
         ui->objectScaleZ->setValue(mapobjectSelected->nodePath.get_scale().get_z());
@@ -919,6 +927,15 @@ void MainWindow::WaypointSelect(Waypoint* waypoint)
       ui->waypointZ->setValue(waypoint->nodePath.get_z());
     }
     UpdateSelection();
+}
+
+void MainWindow::WaypointSelFloor()
+{
+    std::list<Waypoint*>::iterator it;
+    std::list<Waypoint*>::iterator end    = waypointsSelection.end();
+
+    for (it = waypointsSelection.begin() ; it != end ; ++it)
+      (*it)->floor = ui->waypointSelFloor->value();
 }
 
 void MainWindow::WaypointUpdateSelX()

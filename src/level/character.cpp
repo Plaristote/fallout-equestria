@@ -588,6 +588,7 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
   if (wp != _waypointOccupied)
     SetActionPoints(_actionPoints - 1);
   _waypointOccupied = wp;
+  _level->GetWorld()->DynamicObjectSetWaypoint(*(GetDynamicObject()), *wp);
 
   // Has reached object objective, if there is one ?
   if (_goToData.objective)

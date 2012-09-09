@@ -135,6 +135,7 @@ void World::FloorResize(int newSize)
     floors[it].attach_new_node("mapobjects");
     floors[it].attach_new_node("dynamicobjects");
     floors[it].attach_new_node("lights");
+    floors[it].show();
   }
 }
 
@@ -601,7 +602,7 @@ Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
 Waypoint::Arc::~Arc()
 {
 #ifdef WAYPOINT_DEBUG
-  node->remove_solid(csegment);
+  node->remove_solid(0);
   nodePath.remove_node();
 #endif
 }
@@ -636,6 +637,12 @@ float my_sqrt(const float x)
   return (u.x * 0.5f);
 }
 
+void World::DynamicObjectSetWaypoint(DynamicObject& object, Waypoint& waypoint)
+{
+  object.waypoint = &waypoint;
+  DynamicObjectChangeFloor(object, waypoint.floor);
+}
+
 // SERIALIZATION
 void Waypoint::Unserialize(Utils::Packet &packet)
 {
@@ -643,7 +650,7 @@ void Waypoint::Unserialize(Utils::Packet &packet)
 
   packet >> (int&)(id);
   packet >> posx >> posy >> posz;
-  //packet >> floor;
+  packet >> floor;
   packet >> tmpArcs;
 
   nodePath.set_pos(posx, posy, posz);
@@ -682,7 +689,7 @@ void Waypoint::Serialize(Utils::Packet &packet)
 
   packet << id;
   packet << posx << posy << posz;
-  //packet << floor;
+  packet << floor;
   packet << arcs;
 }
 
@@ -695,7 +702,7 @@ void MapObject::UnSerialize(WindowFramework* window, Utils::Packet& packet)
 
   packet >> name >> strModel >> strTexture;
   packet >> posX >> posY >> posZ >> rotX >> rotY >> rotZ >> scaleX >> scaleY >> scaleZ;
-  //packet >> floor;
+  packet >> floor;
   floor = 0;
 
   nodePath   = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + strModel);
@@ -729,6 +736,7 @@ void MapObject::Serialize(Utils::Packet& packet)
   scaleZ = nodePath.get_scale().get_z();
   packet << name << strModel << strTexture;
   packet << posX << posY << posZ << rotX << rotY << rotZ << scaleX << scaleY << scaleZ;
+  packet << floor;
 }
 
 void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
@@ -862,7 +870,6 @@ void           World::UnSerialize(Utils::Packet& packet)
       floor        = object.floor;
       object.floor = (floor == 0 ? 1 : 0); // This has to be done, or MapObjectChangeFloor won't execute
       MapObjectChangeFloor(object, floor);
-      //object.nodePath.reparent_to(rootMapObjects);
       object.nodePath.set_collide_mask(CollideMask(ColMask::Object));
       objects.push_back(object);
     }
@@ -1137,4 +1144,36 @@ void World::CompileDoors(void)
             np.remove_node();
         }
     }
+}
+
+void           World::SetMapObjectsVisible(bool v)
+{
+  if (v)
+  {
+    rootMapObjects.show();
+    for (int i = 0 ; i < floors.size() ; ++i)
+      floors[i].get_child(0).show();
+  }
+  else
+  {
+    rootMapObjects.hide();
+    for (int i = 0 ; i < floors.size() ; ++i)
+     floors[i].get_child(0).hide();
+  }
+}
+
+void           World::SetDynamicObjectsVisible(bool v)
+{
+  if (v)
+  {
+    rootDynamicObjects.show();
+    for (int i = 0 ; i < floors.size() ; ++i)
+      floors[i].get_child(1).show();
+  }
+  else
+  {
+    rootDynamicObjects.hide();
+    for (int i = 0 ; i < floors.size() ; ++i)
+      floors[i].get_child(1).hide();
+  }
 }
