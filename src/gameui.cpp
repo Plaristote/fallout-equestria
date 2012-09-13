@@ -42,7 +42,7 @@ GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
 
 GeneralUi::~GeneralUi(void)
 {
-  framework.define_key("tab", "ConsoleHandle", 0, 0);
+  //framework.define_key("tab", "ConsoleHandle", 0, 0);
   delete _console;
 }
 

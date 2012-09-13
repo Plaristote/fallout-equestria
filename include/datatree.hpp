@@ -44,7 +44,7 @@ public:
   Data(void)          : _data(0)       { }
   Data(DataTree*   d);
   Data(DataBranch* d) : _data(d)       { _data->pointers++; }
-  ~Data(void);
+  virtual ~Data(void);
 
   /*! \brief Returns a Data containing the child DataBranch corresponding to key if it exists, or Nil Data otherwise (see the Nil method) */
   Data        operator[](const std::string& key);

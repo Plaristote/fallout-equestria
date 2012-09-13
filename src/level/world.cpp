@@ -51,7 +51,7 @@ LPlane World::GetWaypointPlane(void) const
   Waypoints::const_iterator it  = waypoints.begin();
   Waypoints::const_iterator end = waypoints.end();
   LPlane                    plane;
-  LPoint3                   upperRight, upperLeft, bottomLeft;
+  LPoint3                   upperRight(0, 0, 0), upperLeft(0, 0, 0), bottomLeft(0, 0, 0);
 
   for (; it != end ; ++it)
   {

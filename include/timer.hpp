@@ -95,6 +95,11 @@ public:
     fseconds = 0.f;
   }
   
+  ~TimeManager(void)
+  {
+    std::for_each(tasks.begin(), tasks.end(), [](Task* task) { delete task; });
+  }
+  
   void AddElapsedSeconds(float s)
   {
     fseconds += s;

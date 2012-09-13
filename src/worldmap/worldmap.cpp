@@ -385,7 +385,7 @@ void WorldMap::MapTileGenerator(Data map)
     file.read(raw, size);
     file.close();
     fileRml = raw;
-    delete raw;
+    delete[] raw;
 
     size_t firstReplaceIt = fileRml.find("#{RCSS}");      
     fileRml.replace(firstReplaceIt, strlen("#{RCSS}"), rcss.str());

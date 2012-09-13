@@ -13,8 +13,8 @@ public:
   
   ~DataEngine(void)
   {
-    if (_dataTree)
-      delete _dataTree;
+//     Remove();
+//     _dataTree = 0;
   }
   
   void      Load(const std::string& filepath);

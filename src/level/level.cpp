@@ -203,11 +203,10 @@ Level::~Level()
     if (_currentUis[i] != 0)
       delete _currentUis[i];
   }
-  if (_l18n)
-    delete _l18n;
+  if (_l18n)  delete _l18n;
+  if (_world) delete _world;
+  if (_items) delete _items;
   CurrentLevel = 0;
-  if (_world)
-    delete _world;
 }
 
 bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)

@@ -12,6 +12,8 @@
 
 struct MouseHovering
 {
+  MouseHovering(void) : hasWaypoint(false), hasDynObject(false) {}
+  
   void Reset(void)
   { hasWaypoint = hasDynObject = false; }
   
