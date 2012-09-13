@@ -24,7 +24,7 @@ public:
   static WorldMap* CurrentWorldMap;
 
   WorldMap(WindowFramework*, GameUi*, DataEngine&);
-  ~WorldMap() { delete _mapTree; CurrentWorldMap = 0; }
+  ~WorldMap();
   
   void Show(void);
   

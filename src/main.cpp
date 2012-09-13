@@ -207,7 +207,7 @@ static void AngelScriptInitialize(void)
 
 int main(int argc, char *argv[])
 {
-  WindowFramework* window;  
+  WindowFramework* window;
   ConfigPage*      config = load_prc_file("config.prc");
 
   if (!(PStatClient::connect("localhost", 5185)))

@@ -208,28 +208,9 @@ private:
     bool  Done(void)              const { return (done);        }
     float Alpha(void)             const { return (alpha);       }
     void  ForceAlpha(float _alpha)      { alpha = _alpha;       }
-
-    void  SetNodePath(NodePath np)
-    {
-      floor = np;
-      floor.set_transparency(TransparencyAttrib::M_alpha);
-    }
-
-    void  SetFadingIn(bool set)
-    {
-      fadingIn = set;
-      alpha    = fadingIn ? 1.f : 0.f;
-      if (fadingIn)
-	floor.show();
-    }
-
-    void  Run(float elapsedTime)
-    {
-      alpha += (fadingIn ? -0.1f : 0.1f) * (elapsedTime * 10);
-      done   = (fadingIn ? alpha <= 0.f : alpha >= 1.f);
-      floor.set_alpha_scale(alpha);
-      if (!fadingIn && done) floor.hide();
-    }
+    void  SetNodePath(NodePath np);
+    void  SetFadingIn(bool set);
+    void  Run(float elapsedTime);
   };
   
   std::list<HidingFloor> _hidingFloors;

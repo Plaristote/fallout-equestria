@@ -83,7 +83,6 @@ GameUi::GameUi(WindowFramework* window, PT(RocketRegion) rocket) : _rocket(rocke
   _menu      = new GameMenu     (window, _rocket->get_context());
   _inventory = new GameInventory(window, _rocket->get_context());
   _pers      = new GamePers     (window, _rocket->get_context());
-
   _menu->Hide();
   _inventory->Hide();
   _pers->Hide();
@@ -91,6 +90,9 @@ GameUi::GameUi(WindowFramework* window, PT(RocketRegion) rocket) : _rocket(rocke
 
 GameUi::~GameUi(void)
 {
+  _menu->Destroy();
+  _inventory->Destroy();
+  _pers->Destroy();
   delete _menu;
   delete _inventory;
   delete _pers;

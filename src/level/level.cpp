@@ -392,8 +392,8 @@ AsyncTask::DoneStatus Level::do_task(void)
     case Interrupted:
       break ;
   }
-
-  CheckCurrentFloor(elapsedTime);
+  
+  CheckCurrentFloor(elapsedTime);  
   
   _timer.Restart();
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);
@@ -1000,6 +1000,29 @@ void Level::SetEntryZone(const std::string& name)
 /*
  * Floors
  */
+void Level::HidingFloor::SetNodePath(NodePath np)
+{
+  floor = np;
+  floor.set_transparency(TransparencyAttrib::M_alpha);
+}
+
+void Level::HidingFloor::SetFadingIn(bool set)
+{
+  fadingIn = set;
+  alpha    = fadingIn ? 1.f : 0.f;
+  if (!fadingIn)
+    floor.show();
+}
+
+void Level::HidingFloor::Run(float elapsedTime)
+{
+  alpha += (fadingIn ? -0.1f : 0.1f) * (elapsedTime * 10);
+  done   = (fadingIn ? alpha <= 0.f : alpha >= 1.f);
+  floor.set_alpha_scale(alpha);
+  if (fadingIn && done)
+    floor.hide();
+}
+
 void Level::FloorFade(bool in, NodePath floor)
 {
   list<HidingFloor>::iterator it = std::find(_hidingFloors.begin(), _hidingFloors.end(), floor);
@@ -1025,19 +1048,17 @@ void Level::SetCurrentFloor(unsigned char floor)
   for (int it = 0 ; it < floor ; ++it)
     FloorFade(showLowerFloors, _world->floors[it]);
 
+  for (int it = floor + 1 ; it < _world->floors.size() ; ++it)
+    FloorFade(!isInsideBuilding, _world->floors[it]);
+  
   if (_world->floors.size() > floor)
   {
     list<HidingFloor>::iterator it = find(_hidingFloors.begin(), _hidingFloors.end(), _world->floors[floor]);
 
     if (it != _hidingFloors.end())
       _hidingFloors.erase(it);
-    //_world->floors[floor].set_alpha_scale(1.f);
-    //_world->floors[floor].show();
     FloorFade(false, _world->floors[floor]);
   }
-
-  for (int it = floor + 1 ; it < _world->floors.size() ; ++it)
-    FloorFade(!isInsideBuilding, _world->floors[it]);
 
   World::Waypoints::const_iterator cur, end;
 

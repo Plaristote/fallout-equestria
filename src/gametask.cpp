@@ -21,6 +21,14 @@ LevelTask::LevelTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi
   _gameUi.GetMenu().ExitClicked.Connect(*this, &LevelTask::Exit);
 }
 
+LevelTask::~LevelTask()
+{
+  if (_uiSaveGame) { _uiSaveGame->Destroy(); delete _uiSaveGame; }
+  if (_uiLoadGame) { _uiLoadGame->Destroy(); delete _uiLoadGame; }
+  if (_worldMap)   { _worldMap->Destroy();   delete _worldMap;   }
+  if (_level)      { delete _level;  }
+}
+
 void LevelTask::SaveClicked(Rocket::Core::Event&)
 {
   if (_uiSaveGame)
@@ -37,14 +45,6 @@ void LevelTask::LoadClicked(Rocket::Core::Event&)
   _uiLoadGame = new UiLoad(_window, _gameUi.GetContext(), _savePath);
   _uiLoadGame->LoadSlot.Connect(*this, &LevelTask::LoadSlot);
   _uiLoadGame->Show();
-}
-
-LevelTask::~LevelTask()
-{
-  if (_uiSaveGame) delete _uiSaveGame;
-  if (_uiLoadGame) delete _uiLoadGame;
-  if (_level)      delete _level;
-  if (_worldMap)   delete _worldMap;
 }
 
 void       LevelTask::MapOpenLevel(std::string name)

@@ -5,6 +5,12 @@ using namespace Rocket;
 
 WorldMap* WorldMap::CurrentWorldMap = 0;
 
+WorldMap::~WorldMap()
+{
+  delete _mapTree;
+  CurrentWorldMap = 0;
+}
+
 WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de) : UiBase(window, gameUi->GetContext()), _gameUi(*gameUi), _dataEngine(de)
 {
   _current_pos_x = _goal_x = _dataEngine["worldmap"]["pos-x"];
