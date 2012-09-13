@@ -14,6 +14,10 @@ class DialogNewMap : public QDialog
 public:
     explicit DialogNewMap(QWidget *parent = 0);
     ~DialogNewMap();
+
+    const QString GetMapName(void) const;
+signals:
+    void CreateMap(void);
     
 private:
     Ui::DialogNewMap *ui;

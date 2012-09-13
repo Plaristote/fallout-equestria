@@ -1031,8 +1031,9 @@ void Level::SetCurrentFloor(unsigned char floor)
 
     if (it != _hidingFloors.end())
       _hidingFloors.erase(it);
-    _world->floors[floor].set_alpha_scale(1.f);
-    _world->floors[floor].show();
+    //_world->floors[floor].set_alpha_scale(1.f);
+    //_world->floors[floor].show();
+    FloorFade(false, _world->floors[floor]);
   }
 
   for (int it = floor + 1 ; it < _world->floors.size() ; ++it)

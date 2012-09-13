@@ -29,6 +29,8 @@ namespace Ui {
 class MainWindow;
 }
 
+class WindowFramework;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -62,7 +64,8 @@ private slots:
 
     // MAPS
     void LoadMap(const QString&);
-    void SaveMap();
+    void SaveMap(void);
+    void CreateMap(void);
 
     void CameraMoveTop(void);
     void CameraMoveLeft(void);
@@ -143,6 +146,7 @@ public:
     void DrawMap(void);
 
 private:
+    WindowFramework*         _window;
     Ui::MainWindow*          ui;
     TabScript                tabScript;
     TabDialog                tabDialog;

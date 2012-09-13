@@ -64,6 +64,7 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     QIcon iconDisconnect("icons/disconnect.png");
     QIcon waypointGenerate("icons/waypoint-generate.png");
 
+    world         = 0;
     objectFile    = 0;
     ui->setupUi(this);
 
@@ -148,6 +149,8 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(ui->saveMap, SIGNAL(clicked()),                    this, SLOT(SaveMap()));
     connect(ui->mapNew,  SIGNAL(clicked()),                    &dialogNewMap, SLOT(open()));
 
+    connect(&dialogNewMap, SIGNAL(CreateMap()), this, SLOT(CreateMap()));
+
     ui->scriptList->header()->hide();
 }
 
@@ -156,11 +159,24 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::CreateMap(void)
+{
+    QString name = dialogNewMap.GetMapName();
+
+    QMessageBox::warning(this, "creating map", "i'm creating yo map bitch");
+    if (world)
+      delete world;
+    world     = new World(_window);
+    levelName = name;
+    SaveMap();
+    ui->listMap->addItem(name);
+    LoadMap(name);
+}
+
 void MainWindow::LoadProject()
 {
     bool    success = true;
     QString path    = splashScreen.GetProjectPath();
-    //QString path = "/home/plaristote/Work/fallout-equestria/build";
     QDir    root(path);
 
     if (!(QDir::setCurrent(path)))
@@ -299,6 +315,8 @@ void MainWindow::PandaInitialized()
     waypointHovered = 0;
     WindowFramework* window = ui->widget->Window();
 
+    _window = window;
+
     my_task.brushTileId = -1;
     my_task.window  = window;
     my_task.camera  = new SceneCamera(window, window->get_camera_group());
@@ -313,8 +331,6 @@ void MainWindow::PandaInitialized()
     connect(ui->mapMoveRight,  SIGNAL(clicked()), this, SLOT(CameraMoveRight()));
 
     window->enable_keyboard();
-
-     world = new World(window);
 
      connect(ui->itemEditor, SIGNAL(ItemListChanged(QStringList)), &dialogObject, SLOT(SetObjectList(QStringList)));
 
@@ -1024,9 +1040,9 @@ void MainWindow::LoadMap(const QString& path)
             packet = new Utils::Packet(raw, size);
 
             if (world)
-              world->UnSerialize(*packet);
-            else
-              QMessageBox::warning(this, "Fatal Error", "World class not created. This whole thing's about to crash");
+                delete world;
+            world = new World(_window);
+            world->UnSerialize(*packet);
 
             delete   packet;
             delete[] raw;
@@ -1046,6 +1062,15 @@ void MainWindow::LoadMap(const QString& path)
 
         ui->exitZoneList->clear();
         ForEach(world->exitZones,  [this](ExitZone& zone)  { ui->exitZoneList->addItem(zone.name.c_str());  });
+
+        for (int i = 0 ; i < ui->listMap->count() ; ++i)
+        {
+            if (ui->listMap->itemText(i) == levelName)
+            {
+               ui->listMap->setCurrentIndex(i);
+               break ;
+            }
+        }
     }
 }
 
