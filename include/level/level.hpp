@@ -218,6 +218,7 @@ private:
   unsigned char     _currentFloor;
   Waypoint*         _floor_lastWp;
   
+  bool              IsInsideBuilding(unsigned char& floor);
   void              CheckCurrentFloor(float elapsedTime);
   void              SetCurrentFloor(unsigned char floor);
   void              FloorFade(bool in, NodePath floor);

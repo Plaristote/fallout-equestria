@@ -538,10 +538,12 @@ void Level::MouseLeftClicked(void)
       }
       break ;
     case MouseTarget:
+      std::cout << "Mouse Target" << std::endl;
       if (hovering.hasDynObject)
       {
 	InstanceDynamicObject* dynObject = FindObjectFromNode(hovering.dynObject);
 	
+	std::cout << "HasDynObject" << std::endl;
 	if (dynObject)
 	{
 	  ObjectCharacter*     player    = GetPlayer();
@@ -1041,25 +1043,62 @@ void Level::FloorFade(bool in, NodePath floor)
   _hidingFloors.push_back(hidingFloor);
 }
 
+bool Level::IsInsideBuilding(unsigned char& floor)
+{
+  bool                      isInsideBuilding = false;
+  PT(CollisionRay)          pickerRay;
+  PT(CollisionNode)         pickerNode;
+  NodePath                  pickerPath;
+  CollisionTraverser        collisionTraverser;
+  PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
+  
+  pickerNode   = new CollisionNode("isInsideBuildingRay");
+  pickerPath   = _window->get_render().attach_new_node(pickerNode);
+  pickerRay    = new CollisionRay();
+  pickerNode->add_solid(pickerRay);
+  
+  pickerPath.set_pos(GetPlayer()->GetNodePath().get_pos());
+  pickerRay->set_origin(0, 0, 0);
+  pickerRay->set_direction(0, 0, 10);
+  
+  collisionTraverser.add_collider(pickerPath, collisionHandlerQueue);
+  collisionTraverser.traverse(_window->get_render());
+  
+  collisionHandlerQueue->sort_entries();
+
+  for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
+  {
+    CollisionEntry* entry  = collisionHandlerQueue->get_entry(i);
+    MapObject*      object = GetWorld()->GetMapObjectFromNodePath(entry->get_into_node_path());
+
+    if (!object)
+      object = GetWorld()->GetDynamicObjectFromNodePath(entry->get_into_node_path());
+    if (object && object != GetPlayer()->GetDynamicObject())
+    {
+      isInsideBuilding = true;
+      floor            = object->floor;
+      break ;
+    }
+  }
+
+  pickerPath.detach_node();
+  return (isInsideBuilding);
+}
+
 void Level::SetCurrentFloor(unsigned char floor)
 {
-  bool showLowerFloors  = true;
-  bool isInsideBuilding = false;
+  bool          showLowerFloors  = true;
+  unsigned char floorAbove       = 0;
+  bool          isInsideBuilding = IsInsideBuilding(floorAbove);
 
   for (int it = 0 ; it < floor ; ++it)
     FloorFade(showLowerFloors, _world->floors[it]);
 
   for (int it = floor + 1 ; it < _world->floors.size() ; ++it)
-    FloorFade(!isInsideBuilding, _world->floors[it]);
+    FloorFade(isInsideBuilding, _world->floors[it]);
   
   if (_world->floors.size() > floor)
-  {
-    list<HidingFloor>::iterator it = find(_hidingFloors.begin(), _hidingFloors.end(), _world->floors[floor]);
-
-    if (it != _hidingFloors.end())
-      _hidingFloors.erase(it);
     FloorFade(false, _world->floors[floor]);
-  }
 
   World::Waypoints::const_iterator cur, end;
 
@@ -1084,7 +1123,7 @@ void Level::CheckCurrentFloor(float elapsedTime)
     Waypoint*      wp;
 
     wp = player->GetDynamicObject()->waypoint;
-    if (!_floor_lastWp || (wp && wp->floor != _floor_lastWp->floor))
+    if (!_floor_lastWp || (wp != _floor_lastWp))//(wp && wp->floor != _floor_lastWp->floor))
     {
       SetCurrentFloor(wp->floor);
       _floor_lastWp = wp;

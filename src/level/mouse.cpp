@@ -120,8 +120,9 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
     break ;
   }
 
-  planePath.show();
-  //planePath.detach_node();
+  //pickerPath.detach_node(); // TODO find out why hasDynObject stops working after this...
+			      //      this leak has to go away
+  planePath.detach_node();
 }
 
 void Mouse::Run(void)
@@ -129,7 +130,6 @@ void Mouse::Run(void)
   if (_mouseWatcher->has_mouse())
   {
     LPoint2f cursorPos   = _mouseWatcher->get_mouse();
-    bool     hadWaypoint = _hovering.hasWaypoint;
 
     if (cursorPos == _lastMousePos)
       return ;
@@ -147,22 +147,11 @@ void Mouse::Run(void)
 
       switch (into.get_collide_mask().get_word())
       {
-	case ColMask::Waypoint:
-	  if (!(_hovering.hasWaypoint))
-	    _hovering.SetWaypoint(into);
-	  break ;
 	case ColMask::DynObject:
 	  if (!(_hovering.hasDynObject))
 	    _hovering.SetDynObject(into);
 	  break ;
       }
-    }
-    if (!_hovering.hasWaypoint && hadWaypoint)
-    {
-      LPoint2f dist = _hovering.waypoint.get_pos().get_xy() - cursorPos;
-
-      if (ABS(dist.get_x()) < 0.5f && ABS(dist.get_y()) < 0.5f)
-	_hovering.hasWaypoint = true;
     }
   }
 }
