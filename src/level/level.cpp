@@ -488,6 +488,8 @@ void Level::MouseLeftClicked(void)
 
   if (_mouseActionBlocked || _state == Interrupted)
     return ;
+  if (_levelUi.GetContext()->GetHoverElement() != _levelUi.GetContext()->GetRootElement())
+    return ;
   switch (_mouseState)
   {
     case MouseAction:
@@ -497,7 +499,7 @@ void Level::MouseLeftClicked(void)
       {
 	Waypoint* toGo;
 
-	_mouse.ClosestWaypoint(_world);
+	_mouse.ClosestWaypoint(_world, _currentFloor);
 	if (hovering.hasWaypoint)
 	{
 	  toGo = _world->GetWaypointFromNodePath(hovering.waypoint);

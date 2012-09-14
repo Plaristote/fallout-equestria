@@ -69,7 +69,7 @@ void Mouse::SetMouseState(char i)
     MouseCursor::Get()->SetCursorTexture(texture);
 }
 
-void Mouse::ClosestWaypoint(World* world)
+void Mouse::ClosestWaypoint(World* world, short currentFloor)
 {
   PT(CollisionPlane)        pickerPlane;
   PT(CollisionRay)          pickerRay;
@@ -83,15 +83,15 @@ void Mouse::ClosestWaypoint(World* world)
   pickerNode   = new CollisionNode("mouseRay2");
   pickerPath   = _camera.attach_new_node(_pickerNode);
   //pickerNode->set_from_collide_mask(CollideMask(ColMask::WpPlane));
-  pickerNode->set_into_collide_mask(0);
+  //pickerNode->set_into_collide_mask(CollideMask(ColMask::WpPlane));
   pickerRay    = new CollisionRay();
   pickerNode->add_solid(pickerRay);
 
-  LPlane plane = world->GetWaypointPlane();
+  LPlane plane = world->GetWaypointPlane(currentFloor);
 
   pickerPlane = new CollisionPlane(plane);
   planeNode = new CollisionNode("pickerPlane");
-  //planeNode->set_into_collide_mask(CollideMask(ColMask::WpPlane));
+  // TODO? It would be cool to have a collide mask (ColMask::WpPlane), but they don't work with planeNode...
   planeNode->add_solid(pickerPlane);
   planePath = _window->get_render().attach_new_node(planeNode);
   
@@ -120,7 +120,8 @@ void Mouse::ClosestWaypoint(World* world)
     break ;
   }
 
-  planePath.detach_node();
+  planePath.show();
+  //planePath.detach_node();
 }
 
 void Mouse::Run(void)

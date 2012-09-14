@@ -47,7 +47,7 @@ public:
   
   void                      SetMouseState(char);
   
-  void                      ClosestWaypoint(World*);
+  void                      ClosestWaypoint(World*, short currentFloor);
 
   Observatory::Signal<void> ButtonLeft;
   Observatory::Signal<void> ButtonMiddle;

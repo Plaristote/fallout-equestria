@@ -331,7 +331,7 @@ struct World
     Waypoint* GetWaypointClosest(LPoint3);
     void      SetWaypointsVisible(bool v)
     { if (v) { rootWaypoints.show();  } else { rootWaypoints.hide();  } }
-    LPlane         GetWaypointPlane(void) const;
+    LPlane         GetWaypointPlane(short currentFloor) const;
 
     template<class OBJTYPE>
     void           DeleteObject(MapObject* ptr, std::list<OBJTYPE>& list)
