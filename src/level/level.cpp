@@ -49,7 +49,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet) : _
   _sunLight = new DirectionalLight("sun_light");
 
   _sunLight->set_color(LVecBase4f(0.8, 0.8, 0.8, 1));
-  //_sunLight->set_shadow_caster(true, 512, 512);
+  //_sunLight->set_shadow_caster(true, 12, 12);
   _sunLight->get_lens()->set_near_far(1.f, 2.f);
   _sunLight->get_lens()->set_film_size(512);
 
@@ -172,18 +172,18 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet) : _
   
   _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
   
-  _world->AddLight(WorldLight::Point, "toto");
-  WorldLight* light = _world->GetLightByName("toto");
-  
-  light->zoneSize = 20;
-  light->SetColor(255, 50, 50, 125);
-  light->nodePath.reparent_to(GetPlayer()->GetNodePath());
-  _world->CompileLight(light);
-
-  PointLight* plight = dynamic_cast<PointLight*>(light->nodePath.node());
-  plight->set_shadow_caster(true, 512, 512);
-  plight->get_lens()->set_near_far(1.f, 2.f);
-  plight->get_lens()->set_film_size(512);
+//   _world->AddLight(WorldLight::Point, "toto");
+//   WorldLight* light = _world->GetLightByName("toto");
+//   
+//   light->zoneSize = 20;
+//   light->SetColor(255, 50, 50, 125);
+//   light->nodePath.reparent_to(GetPlayer()->GetNodePath());
+//   _world->CompileLight(light);
+// 
+//   PointLight* plight = dynamic_cast<PointLight*>(light->nodePath.node());
+//   plight->set_shadow_caster(true, 12, 12);
+//   plight->get_lens()->set_near_far(1.f, 2.f);
+//   plight->get_lens()->set_film_size(512);
   
   window->get_render().set_shader_auto();
   loadingScreen->AppendText("-- Done --");

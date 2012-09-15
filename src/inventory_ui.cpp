@@ -71,7 +71,7 @@ void InventoryView::UpdateView(void)
       {
 	stream << "<span class='inventory-item-icon' id='" << count << "'>";
         stream << "<img src='../textures/itemIcons/" << item["icon"].Value() << "' />";
-	//if (quantity > 1)
+	if (quantity > 1)
 	  stream << "<span class='inventory-item-quantity'>x" << quantity << "</span>";
 	stream << "</span>";
         rml += stream.str();
@@ -158,11 +158,13 @@ void InventoryViewController::DragObserver(InventoryView* container, Rocket::Cor
 
   for (; itView != end && (!((*(*itView)) == element->GetParentNode())) ; ++itView)
 
+  std::cout << element->GetParentNode()->GetId().CString() << std::endl;
+    
   if (itView != _views.end())
   {
     InventoryView&   view = (*(*itView));
     InventoryObject* object;
-
+    
     object = view.GetObjectFromId(std::string(element->GetId().CString()));
     view.GetInventory().DelObject(object);
     container->GetInventory().AddObject(object);
@@ -191,7 +193,6 @@ void InventoryViewController::Update(void)
  */
 UiUseObjectOn::UiUseObjectOn(WindowFramework* window, Rocket::Core::Context* context, Inventory& inventory) : UiBase(window, context)
 {
-  std::cout << "Creating UiUseObjectOn" << std::endl;
   _root = context->LoadDocument("data/useobjecton.rml");
   if (_root)
   {
@@ -214,7 +215,6 @@ UiUseObjectOn::UiUseObjectOn(WindowFramework* window, Rocket::Core::Context* con
 
 UiUseObjectOn::~UiUseObjectOn()
 {
-  std::cout << "Destruct UseUseObjectOn" << std::endl;
   _viewController.Destroy();
   if (_root)
   {
@@ -225,12 +225,8 @@ UiUseObjectOn::~UiUseObjectOn()
 
 void UiUseObjectOn::Destroy(void)
 {
-  std::cout << "Destroy UiUseObjectOn" << std::endl;
   if (_root)
-  {
-    std::cout << "Hiding it" << std::endl;
     _root->Hide();
-  }
 }
 
 /*

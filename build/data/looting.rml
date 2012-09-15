@@ -24,7 +24,7 @@
       #self-inventory
       {
         position: absolute;
-        drag:  clone;
+        //drag:  clone;
         width: 40%;
         left:  20px;
         height: 80%;
@@ -34,7 +34,7 @@
       #other-inventory
       {
         position: absolute;
-        drag:  clone;
+        //drag:  clone;
         width: 40%;
         right: 20px;
         height: 80%;
@@ -47,7 +47,12 @@
         bottom:         5px;
         right:          5px;
       }
-    </style>
+
+      .inventory-item-icon
+      {
+        drag: clone;
+      }
+     </style>
   </head>
   <body id="body" template="tplmainbar">
   <p>

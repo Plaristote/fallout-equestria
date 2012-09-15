@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
   WindowProperties props = window->get_graphics_window()->get_properties();
   props.set_cursor_hidden(true);
   window->get_graphics_window()->request_properties(props);
-
+  
   Script::Engine::Initialize();
   AngelScriptInitialize();
   {
@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
 
     framework.main_loop();
     framework.close_framework();
-    
+
     unload_prc_file(config);
   }
   Script::Engine::Finalize();

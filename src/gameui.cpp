@@ -561,7 +561,7 @@ void GameMainBar::AppendToConsole(const std::string& str)
     toAdd  = "<li>- ";
     toAdd += str.c_str();
     toAdd += "</li><br />";
-    console->SetInnerRML(rml + toAdd);
+    console->SetInnerRML(toAdd + rml);
   }
 }
 

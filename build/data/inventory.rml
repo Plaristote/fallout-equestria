@@ -18,7 +18,7 @@
                   margin-top:     10px;
                   margin-bottom:  10px;
                   overflow-y:     auto;
-                  drag: clone;
+                  #drag: clone;
                 }
 
                 #inventory-capacity
