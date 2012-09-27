@@ -14,19 +14,27 @@ LevelTask::LevelTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi
   _worldMap->GoToPlace.Connect(*this, &LevelTask::MapOpenLevel);
   _worldMap->Show();
 
-  _uiSaveGame = 0;
-  _uiLoadGame = 0;
+  _charSheet   = 0;
+  _playerStats = 0;
+  _uiSaveGame  = 0;
+  _uiLoadGame  = 0;
   _gameUi.GetMenu().SaveClicked.Connect(*this, &LevelTask::SaveClicked);
   _gameUi.GetMenu().LoadClicked.Connect(*this, &LevelTask::LoadClicked);
   _gameUi.GetMenu().ExitClicked.Connect(*this, &LevelTask::Exit);
+  
+  _charSheet   = DataTree::Factory::JSON("data/charsheets/velvet.json");
+  _playerStats = new StatController(_charSheet);
+  _playerStats->SetView(&(_gameUi.GetPers()));
 }
 
 LevelTask::~LevelTask()
 {
-  if (_uiSaveGame) { _uiSaveGame->Destroy(); delete _uiSaveGame; }
-  if (_uiLoadGame) { _uiLoadGame->Destroy(); delete _uiLoadGame; }
-  if (_worldMap)   { _worldMap->Destroy();   delete _worldMap;   }
-  if (_level)      { delete _level;  }
+  if (_charSheet)   { delete _charSheet;   }
+  if (_playerStats) { delete _playerStats; }
+  if (_uiSaveGame)  { _uiSaveGame->Destroy(); delete _uiSaveGame; }
+  if (_uiLoadGame)  { _uiLoadGame->Destroy(); delete _uiLoadGame; }
+  if (_worldMap)    { _worldMap->Destroy();   delete _worldMap;   }
+  if (_level)       { delete _level;  }
 }
 
 void LevelTask::SaveClicked(Rocket::Core::Event&)
@@ -107,6 +115,12 @@ bool LevelTask::LoadGame(const std::string& savepath)
 
   _dataEngine.Load(savepath + "/dataengine.json");
   currentLevel = _dataEngine["system"]["current-level"];
+  
+  if (_charSheet)   delete _charSheet;
+  if (_playerStats) delete _playerStats;
+  _charSheet   = DataTree::Factory::JSON("data/charsheets/velvet.json");
+  _playerStats = new StatController(_charSheet);
+  _playerStats->SetView(&(_gameUi.GetPers()));
 
   _worldMap    = new WorldMap(_window, &_gameUi, _dataEngine);
   _worldMap->GoToPlace.Connect(*this, &LevelTask::MapOpenLevel);
@@ -348,6 +362,7 @@ Level* LevelTask::DoLoadLevel(void)
 
     _levelName = _loadLevelParams.name;
     _level->SetDataEngine(&_dataEngine);
+    _level->GetPlayer()->SetStatistics(_charSheet, _playerStats);
     SetLevel(_level);
   }
   else

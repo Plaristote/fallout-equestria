@@ -5,24 +5,101 @@
 // This must contain every modification to the SPECIAL attributes when a trait is activated/disactivated
 bool ActivateTraits(Data sheet, string trait, bool setActivated)
 {
-  if      (trait == "Bruiser")
-    sheet["Special"]["STR"] = sheet["Special"]["STR"].AsInt() + (setActivated ? 2 : -2);
-  else if (trait == "Gifted")
+  int isActive   = sheet["Traits"][trait].AsInt();
+  int traitsLeft;
+
+  if ((isActive != 0) != setActivated)
   {
-    sheet["Special"]["STR"] = sheet["Special"]["STR"].AsInt() + (setActivated ? 1 : -1);
-    sheet["Special"]["PER"] = sheet["Special"]["PER"].AsInt() + (setActivated ? 1 : -1);
-    sheet["Special"]["END"] = sheet["Special"]["END"].AsInt() + (setActivated ? 1 : -1);
-    sheet["Special"]["CHA"] = sheet["Special"]["CHA"].AsInt() + (setActivated ? 1 : -1);
-    sheet["Special"]["INT"] = sheet["Special"]["INT"].AsInt() + (setActivated ? 1 : -1);
-    sheet["Special"]["AGI"] = sheet["Special"]["AGI"].AsInt() + (setActivated ? 1 : -1);
-    sheet["Special"]["LUC"] = sheet["Special"]["LUC"].AsInt() + (setActivated ? 1 : -1);
+    traitsLeft = sheet["Variables"]["Traits"].AsInt();
+    if (setActivated && traitsLeft > 0)
+    {
+      sheet["Variables"]["Traits"] = traitsLeft + (setActivated ? 1 : -1);
+      sheet["Traits"][trait]       = (setActivated ? 1 : 0);
+      if      (trait == "Bruiser")
+	sheet["Special"]["STR"] = sheet["Special"]["STR"].AsInt() + (setActivated ? 2 : -2);
+      else if (trait == "Gifted")
+      {
+	sheet["Special"]["STR"] = sheet["Special"]["STR"].AsInt() + (setActivated ? 1 : -1);
+	sheet["Special"]["PER"] = sheet["Special"]["PER"].AsInt() + (setActivated ? 1 : -1);
+	sheet["Special"]["END"] = sheet["Special"]["END"].AsInt() + (setActivated ? 1 : -1);
+	sheet["Special"]["CHA"] = sheet["Special"]["CHA"].AsInt() + (setActivated ? 1 : -1);
+	sheet["Special"]["INT"] = sheet["Special"]["INT"].AsInt() + (setActivated ? 1 : -1);
+	sheet["Special"]["AGI"] = sheet["Special"]["AGI"].AsInt() + (setActivated ? 1 : -1);
+	sheet["Special"]["LUC"] = sheet["Special"]["LUC"].AsInt() + (setActivated ? 1 : -1);
+      }
+      else if (trait == "Small Frame")
+	sheet["Special"]["AGI"] = sheet["Special"]["AGI"].AsInt() + (setActivated ? 1 : -1);
+      return (true);
+    }
   }
-  else if (trait == "Small Frame")
-    sheet["Special"]["AGI"] = sheet["Special"]["AGI"].AsInt() + (setActivated ? 1 : -1);
+  return (false);
+}
+
+bool AddSpecialPoint(Data sheet, string stat, int value)
+{
+  int new_value = sheet["Special"][stat].AsInt() + value;
+
+  if ((new_value > 0 && new_value < 11) && ((sheet["Variables"]["Special Points"].AsInt() - value) >= 0))
+  {
+    sheet["Special"][stat]               = new_value;
+    sheet["Variables"]["Special Points"] = sheet["Variables"]["Special Points"].AsInt() - value;
+    UpdateAllValues(sheet);
+    return (true);
+  }
+  return (false);
+}
+
+bool AddExperience(Data sheet, int value)
+{
+  int px        = sheet["Variables"]["Experience"].AsInt() + value;
+  int nxt_level = XpNextLevel(sheet);
+
+  sheet["Variables"]["Experience"] = px;
+  return (px >= nxt_level);
+}
+
+int  XpNextLevel(Data sheet)
+{
+  int level = sheet["Variables"]["Level"].AsInt() + 1;
+
+  return ((level * (level - 1) / 2) * 1000);
+}
+
+void LevelUp(Data sheet)
+{
+  int skillRate = sheet["Statistics"]["Skill Rate"].AsInt();
+  int perkRate  = sheet["Statistics"]["Perk Rate"].AsInt();
+  int lastPerk  = sheet["Variables"]["Last Perk"].AsInt() + 1;
+  int endurance = sheet["Special"]["END"].AsInt();
+
+  if (lastPerk >= perkRate)
+  {
+    lastPerk = 0;
+    sheet["Variables"]["Perks"] = sheet["Variables"]["Perks"].AsInt() + 1;
+  }
+  sheet["Variables"]["Skill Points"]          = sheet["Variables"]["Skill Points"].AsInt() + skillRate;
+  sheet["Variables"]["Level"]                 = sheet["Variables"]["Level"].AsInt()        + 1;
+  sheet["Statistics Modifiers"]["Hit Points"] = sheet["Statistics Modifiers"]["Hit Points"].AsInt() + (endurance / 3 > 0 ? 1 : endurance / 3);
+}
+
+bool IsReady(Data sheet)
+{
+  bool ready = true;
+
+  if (sheet["Variables"]["Special Points"].AsInt() != 0)
+    ready = false;
+  return (true);
+}
+
+void AddToStatModifier(Data sheet, string statistic, int value)
+{
+  Data statModifier = sheet["Statistics Modifier"][statistic];
+  
+  statModifier = statModifier.AsInt() + value;
 }
 
 // This must contains all the modifications to derived statistics and skills from SPECIAL and Traits changes
-void SetInitialValues(Data sheet)
+void UpdateAllValues(Data sheet)
 {
   int strength     = sheet["Special"]["STR"].AsInt();
   int perception   = sheet["Special"]["PER"].AsInt();
@@ -35,39 +112,41 @@ void SetInitialValues(Data sheet)
   Data derivedStatistics = sheet["Statistics"];
   Data skills            = sheet["Skills"];
   Data traits            = sheet["Traits"];
+  Data skillPoints       = sheet["Skill Points"];
+  Data statsModifiers    = sheet["Statistics Modifiers"];
 
-  derivedStatistics["Action Points"]        = (agility < 5 ? 5 ? agility);
-  derivedStatistics["Armor Class"]          = agility;
-  derivedStatistics["Bonus Damage"]         = 0;
-  derivedStatistics["Carry Weight"]         = 25 + strength * 25;
-  derivedStatistics["Critical Chance"]      = luck;
-  derivedStatistics["Damage Resistance"]    = 0;
-  derivedStatistics["Healing Rate"]         = (endurance / 3 > 1 ? endurance / 3 : 1);
-  derivedStatistics["Hit Points"]           = 15 + strength + 2 * endurance;
-  derivedStatistics["Melee Damage"]         = (strength - 5  > 1 ? strength - 5 : 1);
-  derivedStatistics["Perk Rate"]            = 3;
-  derivedStatistics["Poison Resistance"]    = endurance * 5;
-  derivedStatistics["Radiation Resistance"] = (endurance - 1) * 2;
-  derivedStatistics["Skill Rate"]           = 5 + intelligence * 2;
-
-  skills["Small Guns"]    = 35 + agility;
-  skills["Big Guns"]      = 10 + agility;
-  skills["Energy Guns"]   = 10 + agility;
-  skills["Explosives"]    = 20 + (5 * perception) + (5 * agility);
-  skills["Unarmed"]       = 40 + (5 * agility) + (5 * strength);
-  skills["Lockpick"]      = 20 + (5 * perception) + (5 * agility);
-  skills["Melee Weapons"] = 55 + (5 * agility) + (5 * strength);
-  skills["Medicine"]      = 15 + (5 * perception) + (5 * intelligence);
-  skills["Repair"]        = 20 + intelligence;
-  skills["Science"]       = 25 + 2 * intelligence;
-  skills["Sneak"]         = 25 + agility;
-  skills["Spellcasting"]  = 25 + (2 * intelligence) + luck;
-  skills["Steal"]         = 20 + agility;
-  skills["Barter"]        = 20 + 2 * charisma;
-  skills["Outdoorspony"]  = 5 + (5 * endurance) + (5 * intelligence);
-  skills["Speech"]        = 25 + 2 * charisma;
-  skills["Gambling"]      = 20 + 3 * luck;
-
+  derivedStatistics["Action Points"]        = statsModifiers["Action Points"].AsInt()        + (agility < 5 ? 5 : agility);
+  derivedStatistics["Armor Class"]          = statsModifiers["Armor Class"].AsInt()          + agility;
+  derivedStatistics["Bonus Damage"]         = statsModifiers["Bonus Damage"].AsInt()         + 0;
+  derivedStatistics["Carry Weight"]         = statsModifiers["Carry Weight"].AsInt()         + 25 + strength * 25;
+  derivedStatistics["Critical Chance"]      = statsModifiers["Critical Chance"].AsInt()      + luck;
+  derivedStatistics["Damage Resistance"]    = statsModifiers["Damage Resistance"].AsInt()    + 0;
+  derivedStatistics["Healing Rate"]         = statsModifiers["Healing Rate"].AsInt()         + (endurance / 3 > 1 ? endurance / 3 : 1);
+  derivedStatistics["Hit Points"]           = statsModifiers["Hit Points"].AsInt()           + 15 + strength + 2 * endurance;
+  derivedStatistics["Melee Damage"]         = statsModifiers["Melee Damage"].AsInt()         + (strength - 5  > 1 ? strength - 5 : 1);
+  derivedStatistics["Perk Rate"]            = statsModifiers["Perk Rate"].AsInt()            + 3;
+  derivedStatistics["Poison Resistance"]    = statsModifiers["Poison Resistance"].AsInt()    + endurance * 5;
+  derivedStatistics["Radiation Resistance"] = statsModifiers["Radiation Resistance"].AsInt() + (endurance - 1) * 2;
+  derivedStatistics["Skill Rate"]           = statsModifiers["Skill Rate"].AsInt()           + 5 + intelligence * 2;
+  
+  skills["Small Guns"]    = skillPoints["Small Guns"].AsInt()    + 35 + agility;
+  skills["Big Guns"]      = skillPoints["Big Guns"].AsInt()      + 10 + agility;
+  skills["Energy Guns"]   = skillPoints["Energy Guns"].AsInt()   + 10 + agility;
+  skills["Explosives"]    = skillPoints["Explosives"].AsInt()    + 20 + (5 * perception) + (5 * agility);
+  skills["Unarmed"]       = skillPoints["Unarmed"].AsInt()       + 40 + (5 * agility) + (5 * strength);
+  skills["Lockpick"]      = skillPoints["Lockpick"].AsInt()      + 20 + (5 * perception) + (5 * agility);
+  skills["Melee Weapons"] = skillPoints["Melee Weapons"].AsInt() + 55 + (5 * agility) + (5 * strength);
+  skills["Medicine"]      = skillPoints["Medicine"].AsInt()      + 15 + (5 * perception) + (5 * intelligence);
+  skills["Repair"]        = skillPoints["Repair"].AsInt()        + 20 + intelligence;
+  skills["Science"]       = skillPoints["Science"].AsInt()       + 25 + 2 * intelligence;
+  skills["Sneak"]         = skillPoints["Sneak"].AsInt()         + 25 + agility;
+  skills["Spellcasting"]  = skillPoints["Spellcasting"].AsInt()  + 25 + (2 * intelligence) + luck;
+  skills["Steal"]         = skillPoints["Steal"].AsInt()         + 0 + agility;
+  skills["Barter"]        = skillPoints["Barter"].AsInt()        + 20 + 2 * charisma;
+  skills["Outdoorspony"]  = skillPoints["Outdoorspony"].AsInt()  + 5 + (5 * endurance) + (5 * intelligence);
+  skills["Speech"]        = skillPoints["Speech"].AsInt()        + 25 + 2 * charisma;
+  skills["Gambling"]      = skillPoints["Gambling"].AsInt()      + 20 + 3 * luck;
+  
   if (!(traits["Bloody Mess"].Nil()))
   {
     derivedStatistics["Damage Resistance"]  = derivedStatistics["Damage Resistance"].AsInt() + 5;
@@ -104,4 +183,19 @@ void SetInitialValues(Data sheet)
   {
     derivedStatistics["Carry Weight"]   = derivedStatistics["Carry Weight"].AsInt() - 25;
   }
+}
+
+StringList AvailableTraits(Data sheet)
+{
+  StringList toRet;
+
+  toRet.Add("Bloody Mess");
+  toRet.Add("Bruiser");
+  toRet.Add("Finesse");
+  toRet.Add("Gifted");
+  toRet.Add("Heavy Hoofed");
+  toRet.Add("Kamikaze");
+  toRet.Add("Skilled");
+  toRet.Add("Small Frame");
+  return (toRet);
 }

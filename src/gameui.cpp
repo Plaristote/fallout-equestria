@@ -80,9 +80,9 @@ LevelUi::~LevelUi(void)
  */
 GameUi::GameUi(WindowFramework* window, PT(RocketRegion) rocket) : _rocket(rocket)
 {
-  _menu      = new GameMenu     (window, _rocket->get_context());
-  _inventory = new GameInventory(window, _rocket->get_context());
-  _pers      = new GamePers     (window, _rocket->get_context());
+  _menu      = new GameMenu      (window, _rocket->get_context());
+  _inventory = new GameInventory (window, _rocket->get_context());
+  _pers      = new StatViewRocket(window, _rocket->get_context());
   _menu->Hide();
   _inventory->Hide();
   _pers->Hide();
@@ -465,29 +465,6 @@ GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : Ui
     _exitClicked.EventReceived.Connect(ExitClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
     _saveClicked.EventReceived.Connect(SaveClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
     _loadClicked.EventReceived.Connect(LoadClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
-  }
-}
-
-/*
- * GamePers
- */
-GamePers::GamePers(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
-{
-  Rocket::Core::ElementDocument* doc = context->LoadDocument("data/charsheet.rml");
-
-  _root = doc;
-  if (doc)
-  {
-    doc->Show();
-
-    Rocket::Core::Element* button_continue = doc->GetElementById("continue");
-    Rocket::Core::Element* button_cancel   = doc->GetElementById("cancel");
-
-    if (button_continue) button_continue->AddEventListener("click", &DoneButton);
-    if (button_cancel)   button_cancel->AddEventListener  ("click", &CancelButton);
-
-    DoneButton.EventReceived.Connect  (*this, &GamePers::Close);
-    CancelButton.EventReceived.Connect(*this, &GamePers::Close);
   }
 }
 

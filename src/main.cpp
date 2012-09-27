@@ -38,9 +38,9 @@ namespace asData
   bool        opEqualsFloat(Data* obj, float f)                   { return (obj->operator==(f));       }
   bool        opEqualsString(Data* obj, const std::string& str)   { return (obj->Value() == str);      }
 
-  std::string getAsString(Data* obj)                              { return (obj->Value());             }
-  int         getAsInt(Data* obj)                                 { return (*obj);                     }
-  float       getAsFloat(Data* obj)                               { return (*obj);                     }
+  std::string getAsString(Data* obj)                              { return (obj ? obj->Value() : "");  }
+  int         getAsInt(Data* obj)                                 { return (obj ? (int)*obj   : 0);    }
+  float       getAsFloat(Data* obj)                               { return (obj ? (float)*obj : 0.f);  }
 }
 
 namespace asUtils

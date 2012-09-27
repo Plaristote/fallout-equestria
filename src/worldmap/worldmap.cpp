@@ -13,6 +13,7 @@ WorldMap::~WorldMap()
 
 WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de) : UiBase(window, gameUi->GetContext()), _gameUi(*gameUi), _dataEngine(de)
 {
+  cout << "Building worldmap" << endl;
   _current_pos_x = _goal_x = _dataEngine["worldmap"]["pos-x"];
   _current_pos_y = _goal_y = _dataEngine["worldmap"]["pos-y"];
   
@@ -150,6 +151,12 @@ void WorldMap::Run(void)
   }
 
   _timer.Restart();
+  
+//   Core::Element* elem = _gameUi.GetContext()->GetHoverElement();
+//   Core::String str;
+//   elem->GetInnerRML(str);
+//   
+//   std::cout << "Hovered element: '" << str.CString() << "'" << std::endl;
 }
 
 void WorldMap::CityClicked(Rocket::Core::Event& event)

@@ -186,6 +186,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
     _inventory.SetCapacity(stats["Statistics"]["Carry Weight"]);
     _armorClass = stats["Statistics"]["Armor Class"].Nil() ? 5  : (int)(stats["Statistics"]["Armor Class"]);
     _hitPoints  = stats["Statistics"]["Hit Points"].Nil()  ? 15 : (int)(stats["Statistics"]["Hit Points"]);
+    _stats      = new StatController(stats);
   }
   else
     _inventory.SetCapacity(275);
@@ -267,12 +268,29 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 
 ObjectCharacter::~ObjectCharacter()
 {
+  SetStatistics(0, 0);
   _losNode->remove_solid(0);
   _losPath.remove_node();
   _fovTargetNode->remove_solid(0);
   _fovTargetNp.remove_node();
   _fovNode->remove_solid(0);
   _fovNp.remove_node();
+}
+
+void ObjectCharacter::SetHitPoints(short hp)
+{
+  _hitPoints = hp;
+  HitPointsChanged.Emit(_hitPoints);
+  if (hp <= 0)
+    CharacterDied.Emit();
+}
+
+void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* controller)
+{
+  if (_statistics) delete _statistics;
+  if (_stats)      delete _stats;
+  _statistics = statistics;
+  _stats      = controller;  
 }
 
 void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& name)

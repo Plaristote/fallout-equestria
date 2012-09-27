@@ -150,18 +150,7 @@ private:
   Observatory::ObserverId        _observerError;
 };
 
-class GamePers : public UiBase
-{
-public:
-  GamePers(WindowFramework* window, Rocket::Core::Context* context);
-
-  RocketListener CancelButton;
-  RocketListener DoneButton;
-
-private:
-  void           Close(Rocket::Core::Event&) { Hide(); }
-};
-
+# include "statsheet.hpp"
 class GameUi
 {
 public:
@@ -171,7 +160,7 @@ public:
   Rocket::Core::Context* GetContext()       { return (_rocket->get_context()); }
   GameMenu&              GetMenu(void)      { return (*_menu); }
   GameInventory&         GetInventory(void) { return (*_inventory); }
-  GamePers&              GetPers(void)      { return (*_pers); }
+  StatViewRocket&        GetPers(void)      { return (*_pers); }
   
   void                   OpenMenu(Rocket::Core::Event&);
   void                   OpenInventory(Rocket::Core::Event&);
@@ -184,7 +173,7 @@ private:
   GameConsole*     _console;
   GameMenu*        _menu;
   GameInventory*   _inventory;
-  GamePers*        _pers;
+  StatViewRocket*  _pers;
 };
 
 #include <queue>
@@ -207,7 +196,7 @@ public:
   GameMainBar&     GetMainBar(void)   { return (*_mainBar);              }
   GameMenu&        GetMenu(void)      { return (_gameUi.GetMenu());      }
   GameInventory&   GetInventory(void) { return (_gameUi.GetInventory()); }
-  GamePers&        GetPers(void)      { return (_gameUi.GetPers());      }
+  StatViewRocket&  GetPers(void)      { return (_gameUi.GetPers());      }
 
   Observatory::Signal<void (bool)> InterfaceOpened;  
 

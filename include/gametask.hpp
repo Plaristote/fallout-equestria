@@ -5,6 +5,7 @@
 # include "worldmap/worldmap.hpp"
 # include "gameui.hpp"
 # include "saveuis.hpp"
+# include "statsheet.hpp"
 
 class LevelTask
 {
@@ -43,6 +44,9 @@ private:
   WindowFramework*      _window;
   GameUi                _gameUi;
   DataEngine            _dataEngine;
+  
+  DataTree*             _charSheet;
+  StatController*       _playerStats;
   
   WorldMap*             _worldMap;
   

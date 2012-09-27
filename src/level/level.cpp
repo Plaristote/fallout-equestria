@@ -792,6 +792,36 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
     CloseRunningUi<UiItUseObjectOn>();
 }
 
+struct XpFetcher
+{
+  XpFetcher(ObjectCharacter* killer, ObjectCharacter* target) : killer(killer), target(target)
+  {
+    observerId = target->CharacterDied.Connect(*this, &XpFetcher::CharacterDied);
+  }
+  
+  ~XpFetcher(void)
+  {
+    target->CharacterDied.Disconnect(observerId);
+  }
+
+  void CharacterDied(void)
+  {
+    Data            stats      = target->GetStatistics();
+    StatController* controller = killer->GetStatController();
+
+    if (controller)
+    {
+      if (stats.Nil())
+        controller->AddExperience(50);
+      else
+        controller->AddExperience(stats["Variable"]["XpReward"]);
+    }
+  }
+
+  ObjectCharacter         *killer, *target;
+  Observatory::ObserverId observerId;
+};
+
 void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* item, unsigned char actionIt)
 {
   if (!(user->pendingAnimationDone))
@@ -826,7 +856,8 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
   }
   else
   {
-    string output;
+    XpFetcher xpFetcher(user, target);
+    string    output;
     
     output = (item->UseAsWeapon(user, target, user->pendingActionObjectActionIt));
     MouseRightClicked();

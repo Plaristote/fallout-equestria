@@ -164,7 +164,7 @@ void InventoryViewController::DragObserver(InventoryView* container, Rocket::Cor
   {
     InventoryView&   view = (*(*itView));
     InventoryObject* object;
-    
+
     object = view.GetObjectFromId(std::string(element->GetId().CString()));
     view.GetInventory().DelObject(object);
     container->GetInventory().AddObject(object);

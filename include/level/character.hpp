@@ -5,6 +5,7 @@
 # include "objectnode.hpp"
 # include "inventory.hpp"
 # include "timer.hpp"
+# include "statsheet.hpp"
 # include <panda3d/collisionRay.h>
 # include <panda3d/collisionSegment.h>
 # include <panda3d/collisionSphere.h>
@@ -78,6 +79,9 @@ public:
   
   void Load(Utils::Packet&);
   void Save(Utils::Packet&);
+  
+  void SetStatistics(DataTree* stats, StatController* statsController);
+  
 
   Observatory::Signal<void (InstanceDynamicObject*)> ReachedDestination;
   Observatory::Signal<void (unsigned short)>         ActionPointChanged;
@@ -117,6 +121,7 @@ public:
   bool                IsInterrupted(void) const { return (AnimationEnded.ObserverCount() > 0); }
   Inventory&          GetInventory(void)        { return (_inventory);            }
   Data                GetStatistics(void)       { return (_statistics);           }
+  StatController*     GetStatController(void)   { return (_stats);                }
   Diplomacy&          GetDiplomacy(void)        { return (_diplomacy);            }
 
   unsigned short      GetActionPoints(void) const        { return (_actionPoints); }
@@ -124,14 +129,7 @@ public:
   void                RestartActionPoints(void);
   
   short               GetHitPoints(void) const        { return (_hitPoints); }
-  void                SetHitPoints(short hp)
-  {
-    std::cout << "HitPoints are now " << hp << std::endl;
-    _hitPoints = hp;
-    HitPointsChanged.Emit(_hitPoints);
-    if (hp <= 0)
-      CharacterDied.Emit();
-  }
+  void                SetHitPoints(short hp);
   
   short               GetArmorClass(void) const        { return (_armorClass); }
   void                SetArmorClass(short ac)          { _armorClass = ac; ArmorClassChanged.Emit(_armorClass); }
@@ -183,6 +181,7 @@ private:
   GoToData                  _goToData;
 
   DataTree*                 _statistics;
+  StatController*           _stats;
   Diplomacy                 _diplomacy;
   unsigned short            _actionPoints;
   short                     _hitPoints, _armorClass, _tmpArmorClass;

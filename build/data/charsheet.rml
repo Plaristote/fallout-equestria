@@ -21,11 +21,30 @@
   width: 46%;
 }
 
+#char-name-edit
+{
+  position: absolute;
+  width: 46%;
+  top:   7%;
+  z-index: 99;
+  background-color: black;
+}
+
 #char-age
 {
   position: absolute;
   width: 20%;
   left:  46%;
+}
+
+#char-age-edit
+{
+  position: absolute;
+  width: 20%;
+  left:  46%;
+  top:   7%;
+  z-index: 99;
+  background-color: black;
 }
 
 #char-gender
@@ -34,6 +53,17 @@
   width: 33%;
   left:  66%;
 }
+
+#char-gender-edit
+{
+  position: absolute;
+  width: 33%;
+  left:  66%;
+  top:   7%;
+  z-index: 99;
+  background-color: black;
+}
+
 
 #char-bottom-box
 {
@@ -52,7 +82,7 @@
   left:     25%;
 }
 
-#char-stats
+#statistics
 {
   position: absolute;
   top:       32%;
@@ -61,16 +91,44 @@
   left:      25%;
 }
 
-.char-stats-key
+.statistics-key
 {
   left: 0px;
 }
 
-.char-stats-value
+.statistics-value
 {
   position: absolute;
   right:    0px;
 }
+
+#skill-points-title { position: absolute; left: 50%; top: 67%; }
+
+#skills
+{
+  position: absolute;
+  top:      7%;
+  height:   40%;
+  width:    50%;
+  left:     50%;
+}
+
+.skills-key
+{
+  left: 0px;
+}
+
+.statistics-value
+{
+  position: absolute;
+  right: 0px;
+}
+
+.current-level-label  { position: absolute; top: 54%; }
+.current-xp-label     { position: absolute; top: 51%; }
+.next-level-label     { position: absolute; top: 48%;  }
+
+#special-points-title { position: absolute; top: 54%; }
 
 #special
 {
@@ -85,7 +143,7 @@
   position: absolute;
 }
 
-.special-title
+.special-key
 {
   position: absolute;
   width: 50px;
@@ -119,6 +177,24 @@
   right:    0px;
   width:    25%;
 }
+
+#edit-value-cursor
+{
+  right:  0px;
+}
+
+#edit-value-cursor-plus
+{
+  width:  30px;
+  height: 30px;
+  z-index: 99;
+}
+
+#edit-value-cursor-less
+{
+  width:  30px;
+  height: 30px;
+}
 		</style>
 	</head>
   <body id="body" template="tplmainbar">
@@ -128,6 +204,29 @@
         <p id="char-name">Twilight</p>
         <p id="char-age">16</p>
         <p id="char-gender">Mare</p>
+        
+        <p id="char-name-edit" style="display: none;">
+	  <input type="text" id="char-name-value" size="12" />
+	  <button class="francis" id="char-name-edit-ok">Ok</button>
+        </p>
+
+        <p id="char-age-edit" style="display: none;">
+          <input type="text" id="char-age-value" maxlength="2" />
+	  <button class="francis" id="char-age-edit-ok">Ok</button>
+        </p>
+
+        <p id="char-gender-edit" style="display: none;">
+	  <form>
+	    <input type="radio" name="char-gender-radio" id="char-gender-option-male" /> Male<br />
+	    <input type="radio" name="char-gender-radio" id="char-gender-option-female" /> Female<br />
+	    <button class="francis" id="char-gender-edit-ok">Ok</button>
+	  </form>
+        </p>
+      </p>
+
+      <p id="edit-value-cursor">
+        <button id="edit-value-cursor-plus" class="button_menu">+</button>
+        <button id="edit-value-cursor-less" class="button_menu">-</button>
       </p>
 
       <p id="special">
@@ -136,6 +235,7 @@
             <p class="special-title">ST</p>
             <p class="special-value">10</p>
             <p class="special-commt">Great</p>
+
           </p>
 
           <p id="perception" class="special-group" style="top: 40px;">
@@ -176,6 +276,14 @@
 
       </p>
 
+      <p id="special-points-title">Special Points<span id="special-points">0</span></p>
+
+      <p id="experience">
+        <p class='current-level-label'>Level: <span id='level'>999</span></p>
+        <p class='current-xp-label'>Experience: <span id='current-xp'>999</span></p>
+        <p class='next-level-label'>Next level: <span id='next-level'>999</span></p>
+      </p>
+
       <p id="char-state">
         <span id="char-state-hp">Hit Points </span> <span id="char-state-hp-id-value">50</span>/<span id="char-state-hp-id-total">50</span><br />
         <span id="char-state-poisoned">Poisoned</span><br />
@@ -187,59 +295,64 @@
         <span id="char-state-crippled-behind-right-leg">Crippled behind right leg</span><br />
       </p>
 
-      <p id="char-stats">
+      <p id="statistics">
 
         <datagrid>
-          <col width="80%"><span class"char-stats-key">Armor Class</span></col>
-          <col width="20%"><span class"char-stats-value" id="armor-class">10</span></col>
+          <col width="80%"><span class"statistics-key">Armor Class</span></col>
+          <col width="20%"><span class"statistics-value" id="armor-class">10</span></col>
         </datagrid>
 
         <datagrid>
-          <col width="80%"><span class"char-stats-key">Action Points</span></col>
-          <col width="20%"><span class"char-stats-value" id="armor-class">10</span></col>
+          <col width="80%"><span class"statistics-key">Action Points</span></col>
+          <col width="20%"><span class"statistics-value" id="armor-class">10</span></col>
         </datagrid>
 
         <datagrid>
-          <col width="80%"><span class"char-stats-key">Carry Weight</span></col>
-          <col width="20%"><span class"char-stats-value" id="carry-weight">275</span></col>
+          <col width="80%"><span class"statistics-key">Carry Weight</span></col>
+          <col width="20%"><span class"statistics-value" id="carry-weight">275</span></col>
         </datagrid>
 
         <datagrid>
-          <col width="80%"><span class"char-stats-key">Melee Damage</span></col>
-          <col width="20%"><span class"char-stats-value" id="melee-damage">1</span></col>
+          <col width="80%"><span class"statistics-key">Melee Damage</span></col>
+          <col width="20%"><span class"statistics-value" id="melee-damage">1</span></col>
         </datagrid>
 
         <datagrid>
-          <col width="80%"><span class"char-stats-key">Damage Res.</span></col>
-          <col width="20%"><span class"char-stats-value" id="damage-res">0%</span></col>
+          <col width="80%"><span class"statistics-key">Damage Res.</span></col>
+          <col width="20%"><span class"statistics-value" id="damage-res">0%</span></col>
         </datagrid>
 
         <datagrid>
-          <col width="80%"><span class"char-stats-key">Poison Res.</span></col>
-          <col width="20%"><span class"char-stats-value" id="poison-res">25%</span></col>
+          <col width="80%"><span class"statistics-key">Poison Res.</span></col>
+          <col width="20%"><span class"statistics-value" id="poison-res">25%</span></col>
         </datagrid>
 
         <datagrid>
-          <col width="80%"><span class"char-stats-key">Radiation Res.</span></col>
-          <col width="20%"><span class"char-stats-value" id="radiation-res">10%</span></col>
+          <col width="80%"><span class"statistics-key">Radiation Res.</span></col>
+          <col width="20%"><span class"statistics-value" id="radiation-res">10%</span></col>
         </datagrid>
 
         <datagrid>
-          <col width="80%"><span class"char-stats-key">Sequence</span></col>
-          <col width="20%"><span class"char-stats-value" id="sequence">10</span></col>
+          <col width="80%"><span class"statistics-key">Sequence</span></col>
+          <col width="20%"><span class"statistics-value" id="sequence">10</span></col>
         </datagrid>
 
         <datagrid>
-          <col width="80%"><span class"char-stats-key">Healing Rate</span></col>
-          <col width="20%"><span class"char-stats-value" id="healing-rate">1</span></col>
+          <col width="80%"><span class"statistics-key">Healing Rate</span></col>
+          <col width="20%"><span class"statistics-value" id="healing-rate">1</span></col>
         </datagrid>
 
         <datagrid>
-          <col width="80%"><span class"char-stats-key">Critical Chance</span></col>
-          <col width="20%"><span class"char-stats-value" id="critical-chance">15%</span></col>
+          <col width="80%"><span class"statistics-key">Critical Chance</span></col>
+          <col width="20%"><span class"statistics-value" id="critical-chance">15%</span></col>
         </datagrid>
 
       </p>
+      
+      <p id="skills">
+      </p>
+      
+      <p id="skill-points-title">Skill Points: <span id="skill-points">0</span></p>
 
       <button class="button_menu" id="continue">Done</button>
       <button class="button_menu" id="cancel">Cancel</button>
@@ -252,7 +365,7 @@
       <panel>Nada</panel>
 
       <tab id="tab-traits">Traits</tab>
-      <panel>Rien</panel>
+      <panel id="panel-traits">Rien</panel>
 
       <tab id="tab-reputation">Reputation</tab>
       <panel>Nothing</panel>

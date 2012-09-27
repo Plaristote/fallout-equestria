@@ -52,7 +52,12 @@ namespace Script
     StdList(void) {}
     StdList(std::list<T> list) : std::list<T>(list)
     {}
-    
+
+    void Add(T t)
+    {
+      this->push_back(t);
+    }
+
     struct asIterator
     {
       static void Constructor(void* memory) { new(memory) asIterator();  }
@@ -100,6 +105,8 @@ namespace Script
       engine->RegisterObjectType(type.c_str(), sizeof(StdList), asOBJ_VALUE | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_DESTRUCTOR);
       engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(StdList<T>::Constructor), asCALL_CDECL_OBJLAST);
       engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_DESTRUCT,  "void f()", asFUNCTION(StdList<T>::Destructor),  asCALL_CDECL_OBJLAST);
+      
+      engine->RegisterObjectMethod(type.c_str(), ("void Add(" + typeName + ")").c_str(), asMETHOD(StdList<T>,Add), asCALL_THISCALL);
       
       engine->RegisterObjectType(itType.c_str(), sizeof(asIterator), asOBJ_VALUE | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_DESTRUCTOR);
       engine->RegisterObjectBehaviour(itType.c_str(), asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(StdList<T>::asIterator::Constructor), asCALL_CDECL_OBJLAST);
