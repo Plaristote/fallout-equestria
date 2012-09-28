@@ -9,7 +9,7 @@ StatModel::StatModel(Data statsheet) : _statsheet(statsheet)
 {
   _scriptContext = Script::Engine::Get()->CreateContext();
   
-  _scriptActivateTraits = _scriptAddExperience = _scriptAddSpecialPoint = _scriptIsReady = _scriptLevelUp = _scriptXpNextLevel = 0;
+  _scriptUpdateAllValues = _scriptAvailableTraits = _scriptActivateTraits = _scriptAddExperience = _scriptAddSpecialPoint = _scriptIsReady = _scriptLevelUp = _scriptXpNextLevel = 0;
   if (_scriptContext)
   {
     _scriptModule = Script::Engine::LoadModule("special", "scripts/ai/special.as");
@@ -57,6 +57,26 @@ list<string>   StatModel::GetAvailableTraits(void)
     ret = *((list<string>*)_scriptContext->GetReturnObject());
   }
   return (ret);
+}
+
+void           StatModel::ToggleTrait(const string& trait)
+{
+  Data         dtrait    = _statsheet["Traits"][trait];
+  bool         is_active = (!dtrait.Nil()) && dtrait == 1;
+
+  if (_scriptActivateTraits)
+  {
+    string tmp = trait;
+    
+    //Script::Call(_scriptContext, _scriptActivateTraits, "OOb", &_statsheet, &tmp, !is_active);
+    _scriptContext->Prepare(_scriptActivateTraits);
+    _scriptContext->SetArgObject(0, &_statsheet);
+    _scriptContext->SetArgObject(1, &tmp);
+    _scriptContext->SetArgByte(2, !is_active);
+    _scriptContext->Execute();
+    if (_scriptContext->GetReturnByte())
+      UpdateAllValues();
+  }
 }
 
 void           StatModel::SetExperience(unsigned short e)
@@ -124,8 +144,15 @@ bool          StatModel::UpdateAllValues(void)
     _scriptContext->Execute();
     std::cout << "Test 2" << std::endl;
     
+    std::for_each(_statsheet["Special"].begin(), _statsheet["Special"].end(), [this](Data value)
+    { SpecialChanged.Emit(value.Key(), value); });
+    
     std::for_each(_statsheet["Statistics"].begin(), _statsheet["Statistics"].end(), [this](Data value)
-    { StatisticChanged.Emit(value.Key(), value); });
+    {
+      StatisticChanged.Emit(value.Key(), value);
+      if (value.Key() == "Critical Chance")
+	cout << "Critical Chance changed to " << value.Value() << endl;
+    });
     
     std::for_each(_statsheet["Skills"].begin(), _statsheet["Skills"].end(), [this](Data value)
     { SkillChanged.Emit(value.Key(), value); });
@@ -194,7 +221,6 @@ StatController::StatController(Data statsheet) : _model(statsheet), _view(0)
   _model.SpecialChanged.Connect  (*this,   &StatController::SpecialChanged);
   _model.SkillChanged.Connect    (*this,   &StatController::SkillChanged);
   _model.StatisticChanged.Connect(*this,   &StatController::StatisticChanged);
-  _model.TraitToggled.Connect    (*this,   &StatController::TraitToggled);
   _model.LevelUpped.Connect      (*this,   &StatController::LevelChanged);
   _model.LevelUpped.Connect      (LevelUp, &Observatory::Signal<void (unsigned short)>::Emit);
 }
@@ -212,7 +238,6 @@ void StatController::SkillChanged(const string& stat, short value)
 {
   if (_view)
   {
-    std::cout << "Set skill " << stat << " to value " << value << endl;
     _view->SetFieldValue("Skills", stat, value);
     _view->SetIdValue("skill-points", _model.GetSkillPoints());
   }
@@ -224,11 +249,9 @@ void StatController::StatisticChanged(const string& stat, short value)
     _view->SetFieldValue("Statistics", stat, value);
 }
 
-void StatController::TraitToggled(const string& trait, bool value)
+void StatController::TraitToggled(const string& trait)
 {
-  if (_view)
-  {
-  }
+  _model.ToggleTrait(trait);
 }
 
 void StatController::LevelChanged(unsigned short lvl)
@@ -317,6 +340,7 @@ void StatController::SetView(StatView* view)
   _view->AgeChanged.Connect        (*this, &StatController::AgeChanged);
   
   _view->SetTraits(_model.GetAvailableTraits());
+  _view->TraitToggled.Connect(*this, &StatController::TraitToggled);
   
   if (_model.GetSpecialPoints() > 0)
     _view->SetEditMode(StatView::Create);
@@ -328,7 +352,6 @@ void StatController::SetView(StatView* view)
 
 void StatController::InformationChanged(const string& info, const string& value)
 {
-  cout << "Information " << info << " changed to " << value << endl;
   if (info == "name")
   {
     _model.SetName(value);
@@ -367,6 +390,22 @@ void StatController::ViewStatDowned(const string& type, const string& stat)
  */
 using namespace Rocket;
 
+static string humanize(const std::string& str)
+{
+  string ret;
+  
+  for (unsigned short i = 0 ;  i < str.size() ; ++i)
+  {
+    if (i == 0 || str[i - 1] == '_')
+      ret += str[i] - 'a' + 'A';
+    else if (str[i] == '_')
+      ret += ' ';
+    else
+      ret += str[i];
+  }
+  return (ret);
+}
+
 static string underscore(const std::string& str)
 {
   string ret;
@@ -400,12 +439,14 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
 
     // Edit Mode
     EventSpecialClicked.EventReceived.Connect(*this, &StatViewRocket::SpecialClicked);
-    EventSkillClicked.EventReceived.Connect  (*this,   &StatViewRocket::SkillClicked);
+    EventSkillClicked.EventReceived.Connect  (*this, &StatViewRocket::SkillClicked);
     EventGeneralClicked.EventReceived.Connect(*this, &StatViewRocket::GeneralClicked);
 
     EventAgeChanged.EventReceived.Connect   (*this, &StatViewRocket::UpdateAge);
     EventNameChanged.EventReceived.Connect  (*this, &StatViewRocket::UpdateName);
     EventGenderChanged.EventReceived.Connect(*this, &StatViewRocket::UpdateGender);
+    
+    EventTraitClicked.EventReceived.Connect (*this, &StatViewRocket::TraitClicked);
     
     Core::Element* age_edit_ok    = _root->GetElementById("char-age-edit-ok");
     Core::Element* name_edit_ok   = _root->GetElementById("char-name-edit-ok");
@@ -503,7 +544,6 @@ void        StatViewRocket::StatUpdate(Core::Event& event, string& ret_type, str
     Core::Variant* var_type;
 
     element->GetInnerRML(stat);
-    cout << stat.CString() << endl;
     element->GetChild(0)->GetInnerRML(stat);
     var_type = element->GetAttribute("data-type");
     if (var_type) type = var_type->Get<Core::String>();
@@ -555,12 +595,6 @@ void StatViewRocket::SkillClicked(Core::Event& event)
   if (cursor)
   {
     Core::Element* current = _context->GetHoverElement();
-    
-    Core::String tmpstr;
-    
-    current->GetInnerRML(tmpstr);
-    
-    cout << "Currently hovered: " << tmpstr.CString() << endl;
     
     while (current && current->GetClassNames() != "skill-datagrid")
       current = current->GetParentNode();
@@ -644,7 +678,6 @@ void StatViewRocket::SetEditMode(EditMode mode)
   {
     Core::Element* elem = _root->GetElementById(toShow[i]);
 
-    std::cout << "Show element " << toShow[i] << endl;
     if (elem) elem->SetProperty("display", "block");
   }
 
@@ -675,7 +708,6 @@ void StatViewRocket::SetFieldValue(const std::string& category, const std::strin
   string         strId;
 
   strId = underscore(category) + "-value-" + underscore(key);
-  cout << strId << endl;
   if ((element = _root->GetElementById(strId.c_str())))
     element->SetInnerRML(value.c_str());
   else
@@ -751,6 +783,18 @@ void StatViewRocket::SetExperience(unsigned short xp, unsigned short lvl, unsign
   }
 }
 
+void StatViewRocket::TraitClicked(Core::Event& event)
+{
+  Core::Element* element = event.GetCurrentElement();
+  
+  if (element && _editMode == StatView::Create)
+  {
+    string trait = humanize(element->GetId().CString());
+
+    TraitToggled.Emit(trait);
+  }
+}
+
 void StatViewRocket::SetTraits(list<string> traits)
 {
   if (_root)
@@ -763,10 +807,18 @@ void StatViewRocket::SetTraits(list<string> traits)
       
       for_each(traits.begin(), traits.end(), [&rml](const string trait)
       {
-	rml << "<button id='" << underscore(trait) << ">O</button>";
+	rml << "<button id='" << underscore(trait) << "'>O</button>";
 	rml << "<span class='text-trait' id='text-" << underscore(trait) << "'>" << trait << "</span><br />";
       });
       element->SetInnerRML(rml.str().c_str());
+      
+      for_each(traits.begin(), traits.end(), [this](const string trait)
+      {
+	Core::Element* traitButton = _root->GetElementById(underscore(trait).c_str());
+
+	if (traitButton)
+	  traitButton->AddEventListener("click", &EventTraitClicked);
+      });
     }
   }
 }

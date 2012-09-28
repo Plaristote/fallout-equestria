@@ -5,9 +5,12 @@
 # include <scriptbuilder/scriptbuilder.h>
 # include <scriptstdstring/scriptstdstring.h>
 # include "observatory.hpp"
+# include <stdarg.h>
 
 namespace Script
 {
+  void     Call(asIScriptContext*, asIScriptFunction*, const std::string fmt, ...);
+  
   class Engine
   {
   public:

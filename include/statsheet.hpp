@@ -18,6 +18,9 @@ public:
   unsigned short GetAge(void) const                { return (_statsheet["Age"]);            }
   void           SetGender(const std::string& g)   { _statsheet["Gender"] = (g == "male" ? "Stallion" : "Mare"); }
   std::string    GetGender(void) const             { return (_statsheet["Gender"].Value()); }
+  
+  void           ToggleTrait(const std::string& trait);
+  bool           HasTrait(const std::string& trait)    const { return (_statsheet["Traits"][trait] == 1); }
 
   void           SetStatistic(const std::string& stat, short value);
   void           SetSpecial(const std::string& stat, short value);
@@ -44,7 +47,6 @@ public:
   
   Observatory::Signal<void (unsigned short)>            LevelUpped;
   Observatory::Signal<void (const std::string&, short)> SpecialChanged, SkillChanged, StatisticChanged;
-  Observatory::Signal<void (const std::string&, bool)>  TraitToggled;
 
 private:
   bool           UpdateAllValues(void);
@@ -82,6 +84,7 @@ public:
   Observatory::Signal<void (const std::string&, const std::string&)> StatUpped, StatDowned; 
   Observatory::Signal<void (const std::string&, const std::string&)> InformationChanged;
   Observatory::Signal<void (unsigned char)>                          AgeChanged;
+  Observatory::Signal<void (const std::string&)>                     TraitToggled;
 };
 
 class StatController
@@ -109,7 +112,7 @@ private:
   void      SpecialChanged(const std::string&, short);
   void      SkillChanged(const std::string&, short);
   void      StatisticChanged(const std::string&, short);
-  void      TraitToggled(const std::string&, bool);
+  void      TraitToggled(const std::string&);
   void      LevelChanged(unsigned short);
   void      InformationChanged(const std::string&, const std::string&);
   void      AgeChanged(unsigned char);
@@ -141,7 +144,7 @@ public:
 private:  
   RocketListener CancelButton;
   RocketListener DoneButton;
-  RocketListener EventSpecialClicked, EventSkillClicked, EventGeneralClicked;
+  RocketListener EventSpecialClicked, EventSkillClicked, EventGeneralClicked, EventTraitClicked;
   RocketListener ButtonUp, ButtonDown;
   
   RocketListener EventNameChanged, EventAgeChanged, EventGenderChanged;
@@ -152,6 +155,7 @@ private:
   void           UpdateGender(Rocket::Core::Event&);
   void           UpdateAge(Rocket::Core::Event&);
   
+  void           TraitClicked(Rocket::Core::Event&);
   void           SpecialClicked(Rocket::Core::Event&);
   void           SkillClicked(Rocket::Core::Event&);
   void           GeneralClicked(Rocket::Core::Event&);

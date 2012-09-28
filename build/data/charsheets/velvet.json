@@ -87,8 +87,9 @@
                   "Experience":     0,
                   "Skill Points":   0,
                   "Special Points": 10,
-                  "Perks":          0
-                }
+                  "Perks":          0,
+                  "Traits":         2
+                },
 
-
+  "Traits": { }
 }

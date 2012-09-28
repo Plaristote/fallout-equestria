@@ -9,6 +9,27 @@ asIScriptEngine*                        Engine::_engine;
 Observatory::Signal<void (std::string)> Engine::ScriptError;
 ModuleManager::Modules                  ModuleManager::_modules;
 
+void Script::Call(asIScriptContext* context, asIScriptFunction* function, const std::string fmt, ...)
+{
+  va_list ap;
+
+  context->Prepare(function);
+  va_start(ap, fmt);
+  for (unsigned short i = 0 ; fmt[i] ; ++i)
+  {
+    if (i == 'O')
+      context->SetArgObject(i, va_arg(ap, void*));
+    else if (i == 'b')
+      context->SetArgByte(i, va_arg(ap, int));
+    else if (i == 'i')
+      context->SetArgDWord(i, va_arg(ap, int));
+    else if (i == 'f')
+      context->SetArgFloat(i, va_arg(ap, double));
+  }
+  va_end(ap);
+  context->Execute();
+}
+
 void             Engine::Initialize(void)
 {
   _engine = asCreateScriptEngine(ANGELSCRIPT_VERSION);
