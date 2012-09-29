@@ -35,6 +35,7 @@ public:
   unsigned short GetSkillPoints(void)                  const { return (_statsheet["Variables"]["Skill Points"]);   }
   unsigned short GetPerksPoints(void)                  const { return (_statsheet["Variables"]["Perks"]);          }
 
+  std::list<std::string>   GetAvailablePerks(void);
   std::list<std::string>   GetAvailableTraits(void);
   std::vector<std::string> GetStatistics(void) const { return (GetStatKeys(_statsheet["Statistics"])); }
   std::vector<std::string> GetSpecials(void)   const { return (GetStatKeys(_statsheet["Special"])); }

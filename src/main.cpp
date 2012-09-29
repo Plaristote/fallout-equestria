@@ -59,7 +59,7 @@ namespace asUtils
 
 struct asConsoleOutput
 {
-  void OutputError(std::string str) { std::cout << str << std::endl; }
+  void OutputError(std::string str) { std::cout << "[asConsoleOutput]" << str << std::endl; }
 };
 asConsoleOutput asConsole;
 

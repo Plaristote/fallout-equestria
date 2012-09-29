@@ -133,7 +133,6 @@ LoadingScreen::LoadingScreen(WindowFramework* window, Core::Context* context) : 
 void LoadingScreen::AppendText(const std::string& str)
 {
   Core::Element* input = _root->GetElementById("content");
-  std::cout << "bite" << std::endl;
   Core::String   content;
 
   input->GetInnerRML(content);
@@ -387,6 +386,7 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
 
 void GameInventory::SetInventory(Inventory& inventory)
 {
+  
   Core::Element* itemListContainer = _root->GetElementById("body-inventory-items");
 
   if (itemListContainer)

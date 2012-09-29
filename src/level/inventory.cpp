@@ -290,6 +290,8 @@ void Inventory::LoadInventory(DynamicObject* object)
 	delete objectBuilder;
 	objectBuilder = new Data(object);
       }
+      else
+	objectBuilder->SetKey(data_["Name"]);
       for (int i = 0 ; i < data.second ; ++i)
       {
 	InventoryObject* newObject = new InventoryObject(*objectBuilder);
@@ -313,19 +315,21 @@ void Inventory::SaveInventory(DynamicObject* object)
     Content::iterator groupIt  = _content.begin();
     InventoryObject&  item     = **it;
     bool              ignore   = true;
-    int               quantity = 1;
+    int               quantity = 0;
 
     for (; groupIt != end ; ++groupIt)
     {
-      if (groupIt == it && quantity == 1)
+      if (groupIt == it && quantity == 0)
 	ignore = false;
       if (item.IsGroupableWith(*groupIt))
 	quantity++;
     }
+    if (quantity == 0) quantity = 1;
     if (!ignore)
     {
       std::string str;
 
+      item["Name"] = item.Key();
       DataTree::Writers::StringJSON(item, str);
       object->inventory.push_back(std::pair<std::string, int>(str, quantity));
     }
@@ -334,14 +338,12 @@ void Inventory::SaveInventory(DynamicObject* object)
 
 void Inventory::AddObject(InventoryObject* toAdd)
 {
-  std::cout << "Weight is " << _currentWeight << ", adding object " << toAdd->GetName() << std::endl;
   Data weight = (*toAdd)["weight"];
   
   if (!(weight.Nil()))
     _currentWeight += (unsigned short)((*toAdd)["weight"]);
   _content.push_back(toAdd);
   ContentChanged.Emit();
-  std::cout << "Weight is now " << _currentWeight << std::endl;
 }
 
 void Inventory::DelObject(InventoryObject* toDel)
@@ -366,7 +368,6 @@ InventoryObject* Inventory::GetObject(const std::string& name)
   
   for (; it != end ; ++it)
   {
-    std::cout << "Object: " << (*it)->GetName() << std::endl;
     if ((*(*it)).GetName() == name)
       return (*it);
   }

@@ -33,7 +33,6 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet) : _
   _l18n  = DataTree::Factory::JSON("data/l18n/english.json");
   _items = DataTree::Factory::JSON("data/objects.json");
 
-  
   _floor_lastWp = 0;
   ceilingCurrentTransparency = 1.f;
 
@@ -93,7 +92,6 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet) : _
     exitZone->SelectNextZone.Connect(*this, &Level::CallbackSelectNextZone);
   });
   _exitingZone = false;
-  
   
   ForEach(_world->dynamicObjects, [this](DynamicObject& object)
   {

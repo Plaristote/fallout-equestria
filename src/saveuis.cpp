@@ -2,66 +2,65 @@
 
 using namespace std;
 
-  #include <timer.hpp>
+#include <timer.hpp>
 
-  extern PandaFramework framework;
-  
-  void SetOpacityOnAll(Rocket::Core::Element* element, float alpha)
+extern PandaFramework framework;
+
+void SetOpacityOnAll(Rocket::Core::Element* element, float alpha)
+{
+  std::stringstream             stream;    
+  const Rocket::Core::Property* property = element->GetProperty("color");
+  std::string                   string   = property->ToString().CString();
+
+  for (int it = 0 ; element->GetChild(it) ; ++it)
   {
-    std::stringstream             stream;    
-    const Rocket::Core::Property* property = element->GetProperty("color");
-    std::string                   string   = property->ToString().CString();
+    Rocket::Core::Element* cur = element->GetChild(it);
+
+    SetOpacityOnAll(cur, alpha);
+  }
+}
+
+void UiBase::FadeOut(void)
+{
+  Hide();
+  /*float alpha = 255;
+  Timer timer;
+  float elapsedTime;
+
+  for (alpha = 255 ; alpha >= 0 ; alpha -= (elapsedTime * 10.f))
+  {
+    std::stringstream stream;
+
+    stream << "rgba(0, 0, 0, " << alpha << ")";
+    SetOpacityOnAll(_root, alpha);
+    //SetPropertyOnAll(_root, "color", stream.str());
+    framework.get_graphics_engine()->render_frame();
+    elapsedTime = timer.GetElapsedTime();
+    timer.Restart();
+  }
+  Hide();*/
+}
+
+void UiBase::FadeIn(void)
+{
+  Show();
+  /*float alpha = 0;
+  Timer timer;
+  float elapsedTime;    
+
+  Show();
+  for (alpha = 0 ; alpha <= 255 ; alpha -= (elapsedTime * 10.f))
+  {
+    std::stringstream stream;
     
-    std::cout << string << std::endl;
-    for (int it = 0 ; element->GetChild(it) ; ++it)
-    {
-      Rocket::Core::Element* cur = element->GetChild(it);
-
-      SetOpacityOnAll(cur, alpha);
-    }
-  }
-  
-  void UiBase::FadeOut(void)
-  {
-    Hide();
-    /*float alpha = 255;
-    Timer timer;
-    float elapsedTime;
-
-    for (alpha = 255 ; alpha >= 0 ; alpha -= (elapsedTime * 10.f))
-    {
-      std::stringstream stream;
-
-      stream << "rgba(0, 0, 0, " << alpha << ")";
-      SetOpacityOnAll(_root, alpha);
-      //SetPropertyOnAll(_root, "color", stream.str());
-      framework.get_graphics_engine()->render_frame();
-      elapsedTime = timer.GetElapsedTime();
-      timer.Restart();
-    }
-    Hide();*/
-  }
-  
-  void UiBase::FadeIn(void)
-  {
-    Show();
-    /*float alpha = 0;
-    Timer timer;
-    float elapsedTime;    
-
-    Show();
-    for (alpha = 0 ; alpha <= 255 ; alpha -= (elapsedTime * 10.f))
-    {
-      std::stringstream stream;
-      
-      stream << "rgba(0, 0, 0, " << alpha << ")";
-      SetOpacityOnAll(_root, alpha);
-      //SetPropertyOnAll(_root, "color", stream.str());
-      framework.get_graphics_engine()->render_frame();
-      elapsedTime = timer.GetElapsedTime();
-      timer.Restart();
-    }*/
-  }
+    stream << "rgba(0, 0, 0, " << alpha << ")";
+    SetOpacityOnAll(_root, alpha);
+    //SetPropertyOnAll(_root, "color", stream.str());
+    framework.get_graphics_engine()->render_frame();
+    elapsedTime = timer.GetElapsedTime();
+    timer.Restart();
+  }*/
+}
 
 
 /*
@@ -96,7 +95,6 @@ UiLoad::UiLoad(WindowFramework* window, Rocket::Core::Context* context, const st
 	      break ;
 	    }
 	  }
-	  std::cout << "Directory " << entry.d_name << (compare ? "is" : "isn't") << " a directory" << std::endl;
 	  if (compare)
 	    nSlots++;
 	}
@@ -124,13 +122,17 @@ UiLoad::UiLoad(WindowFramework* window, Rocket::Core::Context* context, const st
       }
     }
       
-    Rocket::Core::Element* buttonLoad = _root->GetElementById("button-load");
+    Rocket::Core::Element* buttonLoad    = _root->GetElementById("button-load");
+    Rocket::Core::Element* button_cancel = _root->GetElementById("button-cancel");
     
     if (buttonLoad)
       buttonLoad->AddEventListener("click", &EventLoadGame);
+    if (button_cancel)
+      button_cancel->AddEventListener("click", &EventCancel);
   }
   EventClickSlot.EventReceived.Connect(*this, &UiLoad::ClickSlot);
   EventLoadGame.EventReceived.Connect(*this, &UiLoad::LoadGame);
+  EventCancel.EventReceived.Connect(*this, &UiLoad::Cancel);
 }
 
 void UiLoad::LoadGame(Rocket::Core::Event&)
@@ -149,6 +151,11 @@ void UiLoad::LoadGame(Rocket::Core::Event&)
 void UiLoad::ClickSlot(Rocket::Core::Event& event)
 {
   _selectedSlot = event.GetCurrentElement();
+}
+
+void UiLoad::Cancel(Rocket::Core::Event&)
+{
+  Hide();
 }
 
 /*
@@ -172,14 +179,14 @@ UiSave::UiSave(WindowFramework* window, Rocket::Core::Context* context, const st
 
       std::stringstream rml;
       
-      for (unsigned short it = 0 ; it <= nSlots ; ++it)
+      for (unsigned short it = 0 ; it < nSlots ; ++it)
       {
 	rml << "<div class='save-slot' id='save-slot-" << it << "' data-slot='" << it << "'>";
 	rml << "<div class='save-slot-title'>Slot " << it << "</div>";
 	rml << "</div>";
       }
       slotContainer->SetInnerRML(rml.str().c_str());
-      for (unsigned short it = 0 ; it <= nSlots ; ++it)
+      for (unsigned short it = 0 ; it < nSlots ; ++it)
       {
 	std::stringstream      idSlot;
 	Rocket::Core::Element* slotElement;
@@ -191,14 +198,23 @@ UiSave::UiSave(WindowFramework* window, Rocket::Core::Context* context, const st
 	slotElement->AddEventListener("dblclick", &EventSaveGame);
       }
     }
+    
+    Rocket::Core::Element* button_save   = _root->GetElementById("button-save");
+    Rocket::Core::Element* button_cancel = _root->GetElementById("button-cancel");
+    
+    if (button_save)
+      button_save->AddEventListener("click", &EventSaveGame);
+    if (button_cancel)
+      button_cancel->AddEventListener("click", &EventCancel);
+    
   }
   EventClickSlot.EventReceived.Connect(*this, &UiSave::ClickSlot);
   EventSaveGame.EventReceived.Connect(*this, &UiSave::SaveGame);
+  EventCancel.EventReceived.Connect(*this, &UiSave::Cancel);
 }
 
 void UiSave::SaveGame(Rocket::Core::Event&)
 {
-  std::cout << "SaveGame called" << std::endl;
   if (_selectedSlot)
   {
     Rocket::Core::Variant* varSlot = _selectedSlot->GetAttribute("data-slot");
@@ -212,4 +228,9 @@ void UiSave::SaveGame(Rocket::Core::Event&)
 void UiSave::ClickSlot(Rocket::Core::Event& event)
 {
   _selectedSlot = event.GetCurrentElement();
+}
+
+void UiSave::Cancel(Rocket::Core::Event&)
+{
+  Hide();
 }

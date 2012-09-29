@@ -312,6 +312,7 @@ bool LevelTask::SaveLevel(Level* level, const std::string& name)
   Utils::Packet packet;
   std::ofstream file;
 
+  level->SaveUpdateWorld();
   level->UnprocessAllCollisions();
   level->GetWorld()->Serialize(packet);
   level->Save(packet);

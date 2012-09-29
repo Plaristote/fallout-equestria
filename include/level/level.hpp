@@ -36,6 +36,7 @@ public:
 
   // Saving/Loading
   void SetDataEngine(DataEngine* de) { _dataEngine = de; }
+  void SaveUpdateWorld(void);
   void Save(Utils::Packet&);
   void Load(Utils::Packet&);
 

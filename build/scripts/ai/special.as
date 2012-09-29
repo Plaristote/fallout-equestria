@@ -200,43 +200,6 @@ void UpdateAllValues(Data sheet)
   skills["Outdoorspony"]  = skillPoints["Outdoorspony"].AsInt()  + 5 + (5 * endurance) + (5 * intelligence);
   skills["Speech"]        = skillPoints["Speech"].AsInt()        + 25 + 2 * charisma;
   skills["Gambling"]      = skillPoints["Gambling"].AsInt()      + 20 + 3 * luck;
-  
-//   if (!(traits["Bloody Mess"].Nil()))
-//   {
-//     derivedStatistics["Damage Resistance"]  = derivedStatistics["Damage Resistance"].AsInt() + 5;
-//   }
-//   if (!(traits["Bruiser"].Nil()))
-//   {
-//     derivedStatistics["Action Points"]   = derivedStatistics["Action Points"].AsInt() - 2;
-//   }
-//   if (!(traits["Finesse"].Nil()))
-//   {
-//     derivedStatistics["Bonus Damage"]    = derivedStatistics["Bonus Damage"].AsInt() - 25;
-//     derivedStatistics["Critical Chance"] = derivedStatistics["Critical Chance"].AsInt() + 10;
-//   }
-//   if (!(traits["Gifted"].Nil()))
-//   {
-//     derivedStatistics["Skill Rate"]      = derivedStatistics["Skill Rate"].AsInt() - 6;
-//   }
-//   if (!(traits["Heavy Hoofed"].Nil()))
-//   {
-//     derivedStatistics["Melee Damage"]    = derivedStatistics["Melee Damage"].AsInt() + 4;
-//     derivedStatistics["Critical Chance"] = derivedStatistics["Critical Chance"].AsInt() - 20;
-//   }
-//   if (!(traits["Kamikaze"].Nil()))
-//   {
-//     derivedStatistics["Bonus Damage"]    = derivedStatistics["Bonus Damage"].AsInt() + 25;
-//     derivedStatistics["Armor Class"]     = derivedStatistics["Armor Class"].AsInt() - 10;
-//   }
-//   if (!(traits["Skilled"].Nil()))
-//   {
-//     derivedStatistics["Skill Rate"]      = derivedStatistics["Skill Rate"].AsInt() + 5;
-//     derivedStatistics["Perk Rate"]       = derivedStatistics["Perk Rate"].AsInt() + 1;
-//   }
-//   if (!(traits["Small Frame"].Nil()))
-//   {
-//     derivedStatistics["Carry Weight"]   = derivedStatistics["Carry Weight"].AsInt() - 25;
-//   }
 }
 
 StringList AvailableTraits(Data sheet)

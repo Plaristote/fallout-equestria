@@ -34,6 +34,9 @@ void InventoryView::UpdateView(void)
   {
     InventoryObject&  item = *(*it);
     
+    item["hidden"].Nil();
+    item["hidden"].Value() != "1";
+    item.IsEquiped();
     if ((item["hidden"].Nil() || item["hidden"].Value() != "1") && !(item.IsEquiped()))
     {
       std::stringstream stream;
@@ -157,8 +160,6 @@ void InventoryViewController::DragObserver(InventoryView* container, Rocket::Cor
   std::vector<InventoryView*>::iterator end    = _views.end();
 
   for (; itView != end && (!((*(*itView)) == element->GetParentNode())) ; ++itView)
-
-  std::cout << element->GetParentNode()->GetId().CString() << std::endl;
     
   if (itView != _views.end())
   {

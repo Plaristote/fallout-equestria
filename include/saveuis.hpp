@@ -13,8 +13,9 @@ public:
 private:
   void LoadGame(Rocket::Core::Event&);
   void ClickSlot(Rocket::Core::Event& event);
+  void Cancel(Rocket::Core::Event&);
   
-  RocketListener EventLoadGame, EventClickSlot;
+  RocketListener EventLoadGame, EventClickSlot, EventCancel;
 
   Rocket::Core::Element* _selectedSlot;  
 };
@@ -28,8 +29,9 @@ public:
 private:
   void SaveGame(Rocket::Core::Event&);
   void ClickSlot(Rocket::Core::Event& event);
+  void Cancel(Rocket::Core::Event&);
   
-  RocketListener EventSaveGame, EventClickSlot;
+  RocketListener EventSaveGame, EventClickSlot, EventCancel;
 
   Rocket::Core::Element* _selectedSlot;
 };

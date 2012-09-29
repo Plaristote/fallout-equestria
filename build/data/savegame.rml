@@ -28,8 +28,9 @@
     <div id="slot-preview">
     </div>
 
-    <button id="button-save">Save</button>
-    <button id="button-erase">Erase</button>
+    <button class="button_menu" id="button-save">Save</button>
+    <button class="button_menu" id="button-erase">Erase</button><br />
+    <button class="button_menu" id="button-cancel">Cancel</button>
 
   </div>
 

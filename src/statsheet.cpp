@@ -138,11 +138,9 @@ bool          StatModel::UpdateAllValues(void)
 {
   if (_scriptUpdateAllValues)
   {
-    std::cout << "Test 1" << std::endl;
     _scriptContext->Prepare(_scriptUpdateAllValues);
     _scriptContext->SetArgObject(0, &_statsheet);
     _scriptContext->Execute();
-    std::cout << "Test 2" << std::endl;
     
     std::for_each(_statsheet["Special"].begin(), _statsheet["Special"].end(), [this](Data value)
     { SpecialChanged.Emit(value.Key(), value); });
@@ -348,6 +346,13 @@ void StatController::SetView(StatView* view)
     _view->SetEditMode(StatView::Update);
   else
     _view->SetEditMode(StatView::Display);
+  
+  list<string> perks = _model.GetAvailablePerks();
+  
+  for_each(perks.begin(), perks.end(), [](string perk)
+  {
+    cout << "Available Perk: " << perk << endl;
+  });
 }
 
 void StatController::InformationChanged(const string& info, const string& value)
@@ -389,6 +394,87 @@ void StatController::ViewStatDowned(const string& type, const string& stat)
  * StatViewRocket
  */
 using namespace Rocket;
+
+static list<string> split(const std::string& str, char c = ' ')
+{
+  list<string> ret;
+  short        last_sep = -1;
+  short        i;
+
+  for (i = 0 ; str[i] ; ++i)
+  {
+    if (str[i] == c)
+    {
+      if (i != 0 && str[i - 1] != c)
+        ret.push_back(str.substr(last_sep + 1, i - (last_sep + 1)));
+      last_sep = i;
+    }
+  }
+  if (last_sep != i && i > 0 && str[i - 1] != c)
+    ret.push_back(str.substr(last_sep + 1));
+  return (ret);
+}
+
+Data DataGetFromPathRec(Data data, list<string> array)
+{
+  if (array.size() != 0)
+  {
+    string key = (*array.begin());
+    
+    array.erase(array.begin());
+    return (DataGetFromPathRec(data[key], array));
+  }
+  return (data);
+}
+
+Data DataGetFromPath(Data data, const std::string& path)
+{
+  list<string> array = split(path, '/');
+  
+  return (DataGetFromPathRec(data, array));
+}
+
+list<string> StatModel::GetAvailablePerks(void)
+{
+  list<string> perks;
+  DataTree*    file = DataTree::Factory::JSON("data/perks.json");
+
+  if (file)
+  {
+    Data dataPerks(file);
+    
+    dataPerks.Output();
+    for_each(dataPerks.begin(), dataPerks.end(), [this, &perks](Data perk)
+    {
+      cout << "Testing perk " << perk.Key() << endl;
+      Data           requirements = perk["Requirements"];
+      bool           do_add       = true;
+      Data::iterator it           = requirements.begin();
+      Data::iterator end          = requirements.end();
+      
+      for (; it != end ; ++it)
+      {
+	Data         requirement = *it;
+	string       comp        = requirement["Comp"];
+	short        value       = requirement["Value"];
+	Data         data_check  = DataGetFromPath(_statsheet, requirement.Key());
+	short        to_check    = data_check;
+
+	if      (comp == "==") do_add = data_check.Value() == requirement["Value"].Value();
+	else if (comp == ">=") do_add = to_check >= value;
+	else if (comp == "<=") do_add = to_check <= value;
+	else if (comp == ">")  do_add = to_check >  value;
+	else if (comp == "<")  do_add = to_check <  value;
+	if (!do_add)
+	  break ;
+      }
+      if (do_add)
+	perks.push_back(perk.Key());
+    });
+    delete file;
+  }
+  return (perks);
+}
 
 static string humanize(const std::string& str)
 {

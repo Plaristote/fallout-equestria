@@ -394,48 +394,6 @@ namespace Utils
   */
   void		Packet::PrintContent(void)
   {
-    void*		tmpReading = reading;
-    bool		coma = false;
-
-    cout << "[Packet content raw: " << (char*)buffer << "]" << endl;
-    cout << "[Packet content : ";
-    reading = reinterpret_cast<void*>((int)buffer + sizeof(int) * 2);
-    while ((int)reading + (int)sizeof(my_int32) < (int)buffer + (int)sizeBuffer)
-    {
-      char*	    typeCode;
-      int		i;
-      float	    f;
-      string	s;
-
-      if (coma)
-        cout << ", ";
-      typeCode = reinterpret_cast<char*>(reading);
-      switch (*typeCode)
-      {
-	case Packet::Int:
-	  *this >> i;
-	  cout << "(int)" << i;
-	  break ;
-	case Packet::Float:
-	  *this >> f;
-	  cout << "(float)" << f;
-	  break ;
-	case Packet::String:
-	  *this >> s;
-	  cout << "(string)\"" << s << "\"";
-	  break ;
-	case Packet::Array:
-	  cout << endl << "[PrintContent() failed : cannot read Array type yet]" << endl;
-	  reading = tmpReading;
-	  return ;
-	default:
-          cout << endl << "[PrintContent() failed : unknown type '" << (int)(*typeCode) << "']" << endl;
-	  reading = tmpReading;
-	  return ;
-      }
-      coma = true;
-    }
-    cout << "]" << endl;
-    reading = tmpReading;
+    std::cout << "[Packet::PrintContent] isn't implemented yet" << std::endl;
   }
 }

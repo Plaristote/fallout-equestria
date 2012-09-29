@@ -52,7 +52,8 @@ Data::Data(const std::string& key, DataBranch* father)
   _data->key      = key;
   _data->pointers = 1;
   _data->nil      = true;
-  father->children.push_back(_data);
+  if (father)
+    father->children.push_back(_data);
 }
 
 Data::~Data()
@@ -90,7 +91,7 @@ Data Data::operator[](const std::string& key)
 	return (Data((*it)));
     }
   }
-  return (Data(key, _data));
+  return (Data(key, _data));  
 }
 
 const Data Data::operator[](const std::string& key) const

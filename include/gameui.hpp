@@ -67,7 +67,7 @@ private:
   
   void                   CallbackEquipedItem1Clicked(Rocket::Core::Event&);
   void                   CallbackEquipedItem2Clicked(Rocket::Core::Event&);
-  void                   CallbackPassTurnClicked(Rocket::Core::Event&)  { CombatPassTurn.Emit(); std::cout << "GENIUS" << std::endl; }
+  void                   CallbackPassTurnClicked(Rocket::Core::Event&)  { CombatPassTurn.Emit(); }
   void                   CallbackCombatEndClicked(Rocket::Core::Event&) { CombatEnd.Emit();      }
   
   unsigned short         _apMax;

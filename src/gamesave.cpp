@@ -25,6 +25,17 @@ void Level::Load(Utils::Packet& packet)
   for_each(_characters.begin(), _characters.end(), [&packet](ObjectCharacter* character)    { character->Load(packet); });
 }
 
+void Level::SaveUpdateWorld(void)
+{
+  std::cout << "Using SaveUpdateWorld" << std::endl;
+  for_each(_characters.begin(), _characters.end(), [this](ObjectCharacter* character)
+  {
+    Inventory& inventory = character->GetInventory();
+    
+    inventory.SaveInventory(character->GetDynamicObject());
+  });
+}
+
 void Level::Save(Utils::Packet& packet)
 {
   packet << (char)(_state);
