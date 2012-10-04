@@ -29,8 +29,8 @@ LevelTask::LevelTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi
 
 LevelTask::~LevelTask()
 {
-  if (_charSheet)   { delete _charSheet;   }
   if (_playerStats) { delete _playerStats; }
+  if (_charSheet)   { delete _charSheet;   }
   if (_uiSaveGame)  { _uiSaveGame->Destroy(); delete _uiSaveGame; }
   if (_uiLoadGame)  { _uiLoadGame->Destroy(); delete _uiLoadGame; }
   if (_worldMap)    { _worldMap->Destroy();   delete _worldMap;   }
@@ -106,6 +106,10 @@ bool LevelTask::SaveGame(const std::string& savepath)
   else
     _dataEngine["system"]["current-level"] = 0;
   _dataEngine.Save(savepath + "/dataengine.json");
+
+  DataTree::Writers::JSON(_charSheet, savepath + "/");
+  _charSheet->Save();
+  
   return (success);
 }
 

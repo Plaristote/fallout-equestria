@@ -287,8 +287,8 @@ void ObjectCharacter::SetHitPoints(short hp)
 
 void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* controller)
 {
-  if (_statistics) delete _statistics;
   if (_stats)      delete _stats;
+  if (_statistics) delete _statistics;
   _statistics = statistics;
   _stats      = controller;  
 }

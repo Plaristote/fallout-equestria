@@ -20,12 +20,14 @@
 BEGIN_AS_NAMESPACE
 
 struct SArrayBuffer;
+struct SArrayCache;
 
 class CScriptArray
 {
 public:
 	CScriptArray(asUINT length, asIObjectType *ot);
 	CScriptArray(asUINT length, void *defVal, asIObjectType *ot);
+	CScriptArray(const CScriptArray &other);
 	virtual ~CScriptArray();
 
 	void AddRef() const;
@@ -44,6 +46,9 @@ public:
 	// Get a pointer to an element. Returns 0 if out of bounds
 	void       *At(asUINT index);
 	const void *At(asUINT index) const;
+
+	// Set value of an element
+	void  SetValue(asUINT index, void *value);
 
 	CScriptArray &operator=(const CScriptArray&);
 	bool operator==(const CScriptArray &) const;
@@ -74,8 +79,6 @@ protected:
 	asIObjectType    *objType;
 	SArrayBuffer     *buffer;
 	int               elementSize;
-	int               cmpFuncId;
-	int               eqFuncId;
 	int               subTypeId;
 
 	bool  Less(const void *a, const void *b, bool asc, asIScriptContext *ctx);
@@ -85,13 +88,12 @@ protected:
 	void  Precache();
 	bool  CheckMaxSize(asUINT numElements);
 	void  Resize(int delta, asUINT at);
-	void  SetValue(asUINT index, void *value);
 	void  CreateBuffer(SArrayBuffer **buf, asUINT numElements);
 	void  DeleteBuffer(SArrayBuffer *buf);
 	void  CopyBuffer(SArrayBuffer *dst, SArrayBuffer *src);
 	void  Construct(SArrayBuffer *buf, asUINT start, asUINT end);
 	void  Destruct(SArrayBuffer *buf, asUINT start, asUINT end);
-	bool  Equals(const void *a, const void *b, asIScriptContext *ctx) const;
+	bool  Equals(const void *a, const void *b, asIScriptContext *ctx, SArrayCache *cache) const;
 };
 
 void RegisterScriptArray(asIScriptEngine *engine, bool defaultArray);
