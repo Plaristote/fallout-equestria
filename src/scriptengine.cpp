@@ -36,7 +36,8 @@ void             Engine::Initialize(void)
   if (_engine)
   {
     _engine->SetMessageCallback(asFUNCTION(Engine::MessageCallback), 0, asCALL_CDECL);    
-    RegisterStdString_Generic(_engine);
+    RegisterStdString(_engine);
+    //RegisterStdString_Generic(_engine);
   }
 }
 

@@ -7,11 +7,11 @@
 # include "saveuis.hpp"
 # include "statsheet.hpp"
 
-class LevelTask
+class GameTask
 {
 public:
-  LevelTask(WindowFramework* window, PT(RocketRegion) rocket);  
-  ~LevelTask();
+  GameTask(WindowFramework* window, PT(RocketRegion) rocket);  
+  ~GameTask();
   
   void                  MapOpenLevel(std::string name);
   void                  SetLevel(Level* level);
@@ -24,6 +24,7 @@ public:
   
   void                  SaveToSlot(unsigned char slot);
   void                  LoadSlot(unsigned char slot);
+  void                  LoadLastState(void);
   void                  Exit(Rocket::Core::Event&) { _continue = false; }
   
   // LEVEL EVENTS
@@ -32,6 +33,7 @@ public:
   void                  UiLoadGame(const std::string& slotPath);
 
 private:
+  void                  FinishLoad(void);
   void                  LoadClicked(Rocket::Core::Event&);
   void                  SaveClicked(Rocket::Core::Event&);
   static bool           SaveLevel(Level* level, const std::string& name);

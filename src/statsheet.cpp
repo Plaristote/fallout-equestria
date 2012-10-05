@@ -8,24 +8,52 @@ using namespace std;
 StatModel::StatModel(Data statsheet) : _statsheet(statsheet)
 {
   _scriptContext = Script::Engine::Get()->CreateContext();
-  
+  LoadFunctions();
+}
+
+StatModel::~StatModel(void)
+{
+  if (_scriptContext) _scriptContext->Release();
+}
+
+void StatModel::ReloadFunction(asIScriptFunction** pointer)
+{
+  *pointer = 0;
+  if (_scriptContext && _scriptModule)
+  {
+    ScriptFuncPtrs::iterator cur, end;
+
+    for (cur = _script_func_ptrs.begin(), end = _script_func_ptrs.end() ; cur != end ; ++cur)
+    {
+      if (cur->first == pointer)
+      {
+	*pointer = _scriptModule->GetFunctionByDecl(cur->second.c_str());
+	break ;
+      }
+    }
+  }
+}
+
+void StatModel::LoadFunctions(void)
+{
   _scriptUpdateAllValues = _scriptAvailableTraits = _scriptActivateTraits = _scriptAddExperience = _scriptAddSpecialPoint = _scriptIsReady = _scriptLevelUp = _scriptXpNextLevel = 0;
   if (_scriptContext)
   {
     _scriptModule = Script::Engine::LoadModule("special", "scripts/ai/special.as");
     if (_scriptModule)
     {
-      _scriptAvailableTraits = _scriptModule->GetFunctionByDecl("StringList AvailableTraits(Data)");
-      _scriptActivateTraits  = _scriptModule->GetFunctionByDecl("bool ActivateTraits(Data, string, bool)");
-      _scriptAddExperience   = _scriptModule->GetFunctionByDecl("void AddExperience(Data, int)");
-      _scriptAddSpecialPoint = _scriptModule->GetFunctionByDecl("bool AddSpecialPoint(Data, string, int)");
-      _scriptXpNextLevel     = _scriptModule->GetFunctionByDecl("int  XpNextLevel(Data)");
-      _scriptLevelUp         = _scriptModule->GetFunctionByDecl("void LevelUp(Data)");
-      _scriptIsReady         = _scriptModule->GetFunctionByDecl("bool IsReady(Data)");
+      ScriptFuncPtrs _script_func_ptrs;
 
-      _scriptUpdateAllValues = _scriptModule->GetFunctionByDecl("void UpdateAllValues(Data)");
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAvailableTraits, "StringList AvailableTraits(Data)"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptActivateTraits,  "bool ActivateTraits(Data, string, bool)"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAddExperience,   "void AddExperience(Data, int)"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAddSpecialPoint, "bool AddSpecialPoint(Data, string, int)"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptXpNextLevel,     "int  XpNextLevel(Data)"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptLevelUp,         "void LevelUp(Data)"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptIsReady,         "bool IsReady(Data)"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptUpdateAllValues, "void UpdateAllValues(Data)"));
     }
-  }
+  }  
 }
 
 unsigned short StatModel::GetLevel(void) const
@@ -36,6 +64,7 @@ unsigned short StatModel::GetLevel(void) const
 void           StatModel::LevelUp(void)
 {
   _statsheet["Variables"]["Level"] = GetLevel() + 1;
+  ReloadFunction(&_scriptLevelUp);
   if (_scriptLevelUp)
   {
     _scriptContext->Prepare(_scriptLevelUp);
@@ -49,6 +78,7 @@ list<string>   StatModel::GetAvailableTraits(void)
 {
   list<string> ret;
   
+  ReloadFunction(&_scriptAvailableTraits);
   if (_scriptAvailableTraits)
   {
     _scriptContext->Prepare(_scriptAvailableTraits);
@@ -64,6 +94,7 @@ void           StatModel::ToggleTrait(const string& trait)
   Data         dtrait    = _statsheet["Traits"][trait];
   bool         is_active = (!dtrait.Nil()) && dtrait == 1;
 
+  ReloadFunction(&_scriptActivateTraits);
   if (_scriptActivateTraits)
   {
     string tmp = trait;
@@ -85,6 +116,7 @@ void           StatModel::SetExperience(unsigned short e)
   unsigned short nextLevel = 0;
 
   _statsheet["Variables"]["Experience"] = e;
+  ReloadFunction(&_scriptAddExperience);
   if (_scriptAddExperience)
   {
     _scriptContext->Prepare(_scriptAddExperience);
@@ -113,12 +145,19 @@ void           StatModel::SetSpecial(const std::string& stat, short value)
   short  currentValue = _statsheet["Special"][stat];
   bool   sendSignal   = true;
 
+  ReloadFunction(&_scriptAddSpecialPoint);
   if (_scriptAddSpecialPoint)
   {
     string stat_      = stat;
 
     cout << "Eq => " << value << " - " << currentValue << endl;
-    _scriptContext->Prepare(_scriptAddSpecialPoint);
+    if (int err = _scriptContext->Prepare(_scriptAddSpecialPoint) < 0)
+    {
+      std::cout << "Cannot prepare context" << std::endl;
+      if (err == asCONTEXT_ACTIVE)
+	std::cout << "Context is already active" << std::endl;
+      return ;
+    }
     _scriptContext->SetArgObject(0, &_statsheet);
     _scriptContext->SetArgObject(1, &stat_);
     _scriptContext->SetArgDWord(2, (value - currentValue));
@@ -136,6 +175,7 @@ void           StatModel::SetSpecial(const std::string& stat, short value)
 
 bool          StatModel::UpdateAllValues(void)
 {
+  ReloadFunction(&_scriptUpdateAllValues);
   if (_scriptUpdateAllValues)
   {
     _scriptContext->Prepare(_scriptUpdateAllValues);
@@ -162,6 +202,7 @@ bool          StatModel::UpdateAllValues(void)
 
 unsigned short StatModel::GetXpNextLevel(void)
 {
+  ReloadFunction(&_scriptXpNextLevel);
   if (_scriptXpNextLevel)
   {
     _scriptContext->Prepare(_scriptXpNextLevel);
@@ -441,36 +482,38 @@ list<string> StatModel::GetAvailablePerks(void)
 
   if (file)
   {
-    Data dataPerks(file);
-    
-    dataPerks.Output();
-    for_each(dataPerks.begin(), dataPerks.end(), [this, &perks](Data perk)
-    {
-      cout << "Testing perk " << perk.Key() << endl;
-      Data           requirements = perk["Requirements"];
-      bool           do_add       = true;
-      Data::iterator it           = requirements.begin();
-      Data::iterator end          = requirements.end();
+    { // dataPerks needs to get out of the heap before file is deleted
+      Data dataPerks(file);
       
-      for (; it != end ; ++it)
+      dataPerks.Output();
+      for_each(dataPerks.begin(), dataPerks.end(), [this, &perks](Data perk)
       {
-	Data         requirement = *it;
-	string       comp        = requirement["Comp"];
-	short        value       = requirement["Value"];
-	Data         data_check  = DataGetFromPath(_statsheet, requirement.Key());
-	short        to_check    = data_check;
+	cout << "Testing perk " << perk.Key() << endl;
+	Data           requirements = perk["Requirements"];
+	bool           do_add       = true;
+	Data::iterator it           = requirements.begin();
+	Data::iterator end          = requirements.end();
+	
+	for (; it != end ; ++it)
+	{
+	  Data         requirement = *it;
+	  string       comp        = requirement["Comp"];
+	  short        value       = requirement["Value"];
+	  Data         data_check  = DataGetFromPath(_statsheet, requirement.Key());
+	  short        to_check    = data_check;
 
-	if      (comp == "==") do_add = data_check.Value() == requirement["Value"].Value();
-	else if (comp == ">=") do_add = to_check >= value;
-	else if (comp == "<=") do_add = to_check <= value;
-	else if (comp == ">")  do_add = to_check >  value;
-	else if (comp == "<")  do_add = to_check <  value;
-	if (!do_add)
-	  break ;
-      }
-      if (do_add)
-	perks.push_back(perk.Key());
-    });
+	  if      (comp == "==") do_add = data_check.Value() == requirement["Value"].Value();
+	  else if (comp == ">=") do_add = to_check >= value;
+	  else if (comp == "<=") do_add = to_check <= value;
+	  else if (comp == ">")  do_add = to_check >  value;
+	  else if (comp == "<")  do_add = to_check <  value;
+	  if (!do_add)
+	    break ;
+	}
+	if (do_add)
+	  perks.push_back(perk.Key());
+      });
+    }
     delete file;
   }
   return (perks);

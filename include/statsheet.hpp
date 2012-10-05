@@ -9,6 +9,7 @@ class StatModel
 {
 public:
   StatModel(Data statsheet);
+  ~StatModel(void);
   
   void           SetName(const std::string& name)  { _statsheet["Name"]   = name;           }
   std::string    GetName(void) const               { return (_statsheet["Name"].Value());   }
@@ -50,6 +51,12 @@ public:
   Observatory::Signal<void (const std::string&, short)> SpecialChanged, SkillChanged, StatisticChanged;
 
 private:
+  typedef std::pair<asIScriptFunction**, std::string> ScriptFuncPtr;
+  typedef std::list<ScriptFuncPtr>                    ScriptFuncPtrs;
+  void           LoadFunctions(void);
+  void           ReloadFunction(asIScriptFunction**);
+  ScriptFuncPtrs _script_func_ptrs;
+  
   bool           UpdateAllValues(void);
   
   std::vector<std::string> GetStatKeys(Data stats) const;

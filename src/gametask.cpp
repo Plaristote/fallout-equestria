@@ -3,7 +3,7 @@
 
 using namespace std;
 
-LevelTask::LevelTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi(window, rocket)
+GameTask::GameTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi(window, rocket)
 {
   _continue   = true;
   _window     = window;
@@ -11,23 +11,23 @@ LevelTask::LevelTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi
   _savePath   = "saves";
   _dataEngine.Load(_savePath + "/dataengine.json");
   _worldMap   = new WorldMap(window, &_gameUi, _dataEngine);
-  _worldMap->GoToPlace.Connect(*this, &LevelTask::MapOpenLevel);
+  _worldMap->GoToPlace.Connect(*this, &GameTask::MapOpenLevel);
   _worldMap->Show();
 
   _charSheet   = 0;
   _playerStats = 0;
   _uiSaveGame  = 0;
   _uiLoadGame  = 0;
-  _gameUi.GetMenu().SaveClicked.Connect(*this, &LevelTask::SaveClicked);
-  _gameUi.GetMenu().LoadClicked.Connect(*this, &LevelTask::LoadClicked);
-  _gameUi.GetMenu().ExitClicked.Connect(*this, &LevelTask::Exit);
+  _gameUi.GetMenu().SaveClicked.Connect(*this, &GameTask::SaveClicked);
+  _gameUi.GetMenu().LoadClicked.Connect(*this, &GameTask::LoadClicked);
+  _gameUi.GetMenu().ExitClicked.Connect(*this, &GameTask::Exit);
   
   _charSheet   = DataTree::Factory::JSON("data/charsheets/velvet.json");
   _playerStats = new StatController(_charSheet);
   _playerStats->SetView(&(_gameUi.GetPers()));
 }
 
-LevelTask::~LevelTask()
+GameTask::~GameTask()
 {
   if (_playerStats) { delete _playerStats; }
   if (_charSheet)   { delete _charSheet;   }
@@ -37,35 +37,35 @@ LevelTask::~LevelTask()
   if (_level)       { delete _level;  }
 }
 
-void LevelTask::SaveClicked(Rocket::Core::Event&)
+void GameTask::SaveClicked(Rocket::Core::Event&)
 {
   if (_uiSaveGame)
     delete _uiSaveGame;
   _uiSaveGame = new UiSave(_window, _gameUi.GetContext(), _savePath);
-  _uiSaveGame->SaveToSlot.Connect(*this, &LevelTask::SaveToSlot);
+  _uiSaveGame->SaveToSlot.Connect(*this, &GameTask::SaveToSlot);
   _uiSaveGame->Show();
 }
 
-void LevelTask::LoadClicked(Rocket::Core::Event&)
+void GameTask::LoadClicked(Rocket::Core::Event&)
 {
   if (_uiLoadGame)
     delete _uiLoadGame;
   _uiLoadGame = new UiLoad(_window, _gameUi.GetContext(), _savePath);
-  _uiLoadGame->LoadSlot.Connect(*this, &LevelTask::LoadSlot);
+  _uiLoadGame->LoadSlot.Connect(*this, &GameTask::LoadSlot);
   _uiLoadGame->Show();
 }
 
-void       LevelTask::MapOpenLevel(std::string name)
+void       GameTask::MapOpenLevel(std::string name)
 {
   OpenLevel(_savePath, name);
 }
 
-void       LevelTask::SetLevel(Level* level)
+void       GameTask::SetLevel(Level* level)
 {
   _level = level;
 }
 
-AsyncTask::DoneStatus LevelTask::do_task()
+AsyncTask::DoneStatus GameTask::do_task()
 {
   if (!_continue)
     return (AsyncTask::DS_done);
@@ -94,7 +94,7 @@ AsyncTask::DoneStatus LevelTask::do_task()
   return (AsyncTask::DoneStatus::DS_cont);
 }
 
-bool LevelTask::SaveGame(const std::string& savepath)
+bool GameTask::SaveGame(const std::string& savepath)
 {
   bool success = true;
 
@@ -113,7 +113,7 @@ bool LevelTask::SaveGame(const std::string& savepath)
   return (success);
 }
 
-bool LevelTask::LoadGame(const std::string& savepath)
+bool GameTask::LoadGame(const std::string& savepath)
 {
   Data currentLevel;
 
@@ -127,7 +127,7 @@ bool LevelTask::LoadGame(const std::string& savepath)
   _playerStats->SetView(&(_gameUi.GetPers()));
 
   _worldMap    = new WorldMap(_window, &_gameUi, _dataEngine);
-  _worldMap->GoToPlace.Connect(*this, &LevelTask::MapOpenLevel);
+  _worldMap->GoToPlace.Connect(*this, &GameTask::MapOpenLevel);
   
   if (!(currentLevel.Nil()) && currentLevel.Value() != "0")
   {
@@ -138,7 +138,7 @@ bool LevelTask::LoadGame(const std::string& savepath)
     _worldMap->Show();
 }
 
-bool LevelTask::OpenLevel(const std::string& savepath, const std::string& level)
+bool GameTask::OpenLevel(const std::string& savepath, const std::string& level)
 {
   std::ifstream fileTest;
 
@@ -154,7 +154,7 @@ bool LevelTask::OpenLevel(const std::string& savepath, const std::string& level)
   return (_level != 0);
 }
 
-void LevelTask::ExitLevel(const std::string& savepath)
+void GameTask::ExitLevel(const std::string& savepath)
 {
   /*if (!(SaveGame(savepath)))
   {
@@ -167,7 +167,7 @@ void LevelTask::ExitLevel(const std::string& savepath)
   cout << "Exited Level" << endl;
 }
 
-bool LevelTask::CopySave(const std::string& savepath, const std::string& slotPath)
+bool GameTask::CopySave(const std::string& savepath, const std::string& slotPath)
 {
   // Copy the savepath directory to the slotpath directory
   Directory                          dir;
@@ -224,7 +224,7 @@ bool LevelTask::CopySave(const std::string& savepath, const std::string& slotPat
   return (true);
 }
 
-void LevelTask::EraseSlot(unsigned char slot)
+void GameTask::EraseSlot(unsigned char slot)
 {
   std::stringstream stream;
   Directory         dir;
@@ -238,7 +238,7 @@ void LevelTask::EraseSlot(unsigned char slot)
   });
 }
 
-void LevelTask::SaveToSlot(unsigned char slot)
+void GameTask::SaveToSlot(unsigned char slot)
 {
   if (SaveGame(_savePath))
   {
@@ -251,7 +251,14 @@ void LevelTask::SaveToSlot(unsigned char slot)
   if (_uiSaveGame) _uiSaveGame->Hide();
 }
 
-void LevelTask::LoadSlot(unsigned char slot)
+void GameTask::LoadLastState(void)
+{
+  if (_level)    delete _level;
+  if (_worldMap) { _worldMap->Hide(); delete _worldMap; }
+  FinishLoad();
+}
+
+void GameTask::LoadSlot(unsigned char slot)
 {
   if (_level)    delete _level;
   if (_worldMap) { _worldMap->Hide(); delete _worldMap; }
@@ -259,7 +266,7 @@ void LevelTask::LoadSlot(unsigned char slot)
   // Clear original directory
   {
     Directory         dir;
-    
+
     dir.OpenDir(_savePath);
 
     std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [](const struct dirent& entry)
@@ -278,6 +285,11 @@ void LevelTask::LoadSlot(unsigned char slot)
   }
   
   if (_uiLoadGame) _uiLoadGame->Hide();
+  FinishLoad();
+}
+
+void GameTask::FinishLoad(void)
+{
   if (!(LoadGame(_savePath)))
   {
     // TODO Handle error while loading the game
@@ -285,7 +297,7 @@ void LevelTask::LoadSlot(unsigned char slot)
 }
 
 // LEVEL EVENTS
-void LevelTask::LevelExitZone(const std::string& toLevel)
+void GameTask::LevelExitZone(const std::string& toLevel)
 {
   ExitLevel(_savePath);
   if (toLevel != "")
@@ -299,19 +311,19 @@ void LevelTask::LevelExitZone(const std::string& toLevel)
     _worldMap->Show();
 }
 
-void LevelTask::UiSaveGame(const std::string& slotPath)
+void GameTask::UiSaveGame(const std::string& slotPath)
 {
   SaveGame(_savePath);
   CopySave(_savePath, slotPath);
 }
 
-void LevelTask::UiLoadGame(const std::string& slotPath)
+void GameTask::UiLoadGame(const std::string& slotPath)
 {
   CopySave(_savePath, slotPath);
   LoadGame(_savePath);
 }
 
-bool LevelTask::SaveLevel(Level* level, const std::string& name)
+bool GameTask::SaveLevel(Level* level, const std::string& name)
 {
   Utils::Packet packet;
   std::ofstream file;
@@ -332,7 +344,7 @@ bool LevelTask::SaveLevel(Level* level, const std::string& name)
   return (true);
 }
 
-Level* LevelTask::DoLoadLevel(void)
+Level* GameTask::DoLoadLevel(void)
 {
   std::cout << "DoLoadLevel" << std::endl;
   Level*        level = 0;
@@ -379,7 +391,7 @@ Level* LevelTask::DoLoadLevel(void)
   return (level);  
 }
 
-Level* LevelTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& name, bool isSaveFile)
+Level* GameTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& name, bool isSaveFile)
 {
   _loadLevelParams.path       = name;
   _loadLevelParams.isSaveFile = isSaveFile;

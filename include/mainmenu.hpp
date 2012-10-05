@@ -31,7 +31,7 @@ private:
   WindowFramework* _window;
   GeneralUi        _generalUi;
   MouseCursor      _mouseCursor;
-  LevelTask*       _levelTask;
+  GameTask*       _levelTask;
   View             _view;
 
   UiLoad*          _uiLoad;

@@ -85,10 +85,12 @@ AsyncTask::DoneStatus MainMenu::do_task()
 
 void MainMenu::AsyncCreateLevel(void)
 {
-  _levelTask = new LevelTask(_window, _generalUi.GetRocketRegion());
+  _levelTask = new GameTask(_window, _generalUi.GetRocketRegion());
   _view.Hide();
   if (slotToLoadPlz >= 0)
     _levelTask->LoadSlot(slotToLoadPlz);
+  else
+    _levelTask->LoadLastState();
   slotToLoadPlz  = -1;
   createLevelPlz = false;
 }
