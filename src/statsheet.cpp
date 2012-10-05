@@ -42,8 +42,6 @@ void StatModel::LoadFunctions(void)
     _scriptModule = Script::Engine::LoadModule("special", "scripts/ai/special.as");
     if (_scriptModule)
     {
-      ScriptFuncPtrs _script_func_ptrs;
-
       _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAvailableTraits, "StringList AvailableTraits(Data)"));
       _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptActivateTraits,  "bool ActivateTraits(Data, string, bool)"));
       _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAddExperience,   "void AddExperience(Data, int)"));
@@ -77,7 +75,7 @@ void           StatModel::LevelUp(void)
 list<string>   StatModel::GetAvailableTraits(void)
 {
   list<string> ret;
-  
+
   ReloadFunction(&_scriptAvailableTraits);
   if (_scriptAvailableTraits)
   {
@@ -150,14 +148,7 @@ void           StatModel::SetSpecial(const std::string& stat, short value)
   {
     string stat_      = stat;
 
-    cout << "Eq => " << value << " - " << currentValue << endl;
-    if (int err = _scriptContext->Prepare(_scriptAddSpecialPoint) < 0)
-    {
-      std::cout << "Cannot prepare context" << std::endl;
-      if (err == asCONTEXT_ACTIVE)
-	std::cout << "Context is already active" << std::endl;
-      return ;
-    }
+    _scriptContext->Prepare(_scriptAddSpecialPoint);
     _scriptContext->SetArgObject(0, &_statsheet);
     _scriptContext->SetArgObject(1, &stat_);
     _scriptContext->SetArgDWord(2, (value - currentValue));
@@ -186,12 +177,8 @@ bool          StatModel::UpdateAllValues(void)
     { SpecialChanged.Emit(value.Key(), value); });
     
     std::for_each(_statsheet["Statistics"].begin(), _statsheet["Statistics"].end(), [this](Data value)
-    {
-      StatisticChanged.Emit(value.Key(), value);
-      if (value.Key() == "Critical Chance")
-	cout << "Critical Chance changed to " << value.Value() << endl;
-    });
-    
+    { StatisticChanged.Emit(value.Key(), value); });
+
     std::for_each(_statsheet["Skills"].begin(), _statsheet["Skills"].end(), [this](Data value)
     { SkillChanged.Emit(value.Key(), value); });
     
@@ -344,6 +331,8 @@ void StatController::SetView(StatView* view)
 {
   vector<string> specials, skills, statistics;
 
+  if (_view)
+    _viewObservers.DisconnectAll();
   _view      = view;
   specials   = _model.GetSpecials();
   skills     = _model.GetSkills();
@@ -371,15 +360,14 @@ void StatController::SetView(StatView* view)
   _view->SetIdValue("skill-points",   _model.GetSkillPoints());
   
   _view->SetExperience(_model.GetExperience(), _model.GetLevel(), _model.GetXpNextLevel());
-  
-  _view->StatDowned.Connect(*this, &StatController::ViewStatDowned);
-  _view->StatUpped.Connect (*this, &StatController::ViewStatUpped);
-  
-  _view->InformationChanged.Connect(*this, &StatController::InformationChanged);
-  _view->AgeChanged.Connect        (*this, &StatController::AgeChanged);
-  
+
+  _viewObservers.Connect(_view->StatDowned,         *this, &StatController::ViewStatDowned);
+  _viewObservers.Connect(_view->StatUpped,          *this, &StatController::ViewStatUpped);
+  _viewObservers.Connect(_view->InformationChanged, *this, &StatController::InformationChanged);
+  _viewObservers.Connect(_view->AgeChanged,         *this, &StatController::AgeChanged);
+  _viewObservers.Connect(_view->TraitToggled,       *this, &StatController::TraitToggled);
+
   _view->SetTraits(_model.GetAvailableTraits());
-  _view->TraitToggled.Connect(*this, &StatController::TraitToggled);
   
   if (_model.GetSpecialPoints() > 0)
     _view->SetEditMode(StatView::Create);
@@ -387,13 +375,13 @@ void StatController::SetView(StatView* view)
     _view->SetEditMode(StatView::Update);
   else
     _view->SetEditMode(StatView::Display);
-  
-  list<string> perks = _model.GetAvailablePerks();
+
+  /*list<string> perks = _model.GetAvailablePerks();
   
   for_each(perks.begin(), perks.end(), [](string perk)
   {
     cout << "Available Perk: " << perk << endl;
-  });
+  });*/
 }
 
 void StatController::InformationChanged(const string& info, const string& value)
@@ -485,10 +473,8 @@ list<string> StatModel::GetAvailablePerks(void)
     { // dataPerks needs to get out of the heap before file is deleted
       Data dataPerks(file);
       
-      dataPerks.Output();
       for_each(dataPerks.begin(), dataPerks.end(), [this, &perks](Data perk)
       {
-	cout << "Testing perk " << perk.Key() << endl;
 	Data           requirements = perk["Requirements"];
 	bool           do_add       = true;
 	Data::iterator it           = requirements.begin();

@@ -37,7 +37,7 @@ private:
   void                  LoadClicked(Rocket::Core::Event&);
   void                  SaveClicked(Rocket::Core::Event&);
   static bool           SaveLevel(Level* level, const std::string& name);
-  Level*                LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& name, bool isSaveFile = false);  
+  Level*                LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& path, const std::string& name, bool isSaveFile = false);  
   Level*                DoLoadLevel(void);
   
   void                  EraseSlot(unsigned char slot);

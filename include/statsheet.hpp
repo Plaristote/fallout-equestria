@@ -128,8 +128,9 @@ private:
   void      ViewStatUpped(const std::string&, const std::string&);
   void      ViewStatDowned(const std::string&, const std::string&);
   
-  StatModel _model;
-  StatView* _view;
+  StatModel                    _model;
+  StatView*                    _view;
+  Observatory::ObserverHandler _viewObservers;
 };
 
 class StatViewRocket : public UiBase, public StatView

@@ -132,7 +132,7 @@ bool GameTask::LoadGame(const std::string& savepath)
   if (!(currentLevel.Nil()) && currentLevel.Value() != "0")
   {
     _worldMap->Hide();
-    LoadLevel(_window, _gameUi, savepath + "/" + currentLevel.Value() + ".blob", true);
+    LoadLevel(_window, _gameUi, savepath + "/" + currentLevel.Value() + ".blob", currentLevel.Value(), true);
   }
   else
     _worldMap->Show();
@@ -147,10 +147,10 @@ bool GameTask::OpenLevel(const std::string& savepath, const std::string& level)
   if (fileTest.is_open())
   {
     fileTest.close();
-    _level = LoadLevel(_window, _gameUi, savepath + "/" + level + ".blob", true);
+    _level = LoadLevel(_window, _gameUi, savepath + "/" + level + ".blob", level, true);
   }
   else
-    _level = LoadLevel(_window, _gameUi, "maps/" + level + ".blob", false);
+    _level = LoadLevel(_window, _gameUi, "maps/" + level + ".blob", level, false);
   return (_level != 0);
 }
 
@@ -338,7 +338,7 @@ bool GameTask::SaveLevel(Level* level, const std::string& name)
     file.write(packet.raw(), packet.size());
   else
   {
-    std::cerr << "Â¡Â¡ Failed to open file '" << name << "', save failed !!" << std::endl;
+    std::cerr << "¡¡ Failed to open file '" << name << "', save failed !!" << std::endl;
     return (false);
   }
   return (true);
@@ -366,12 +366,12 @@ Level* GameTask::DoLoadLevel(void)
     }
     catch (const char* error)
     {
-      std::cerr << "Â¡Â¡ Failed to load file !! (" << error << ")" << std::endl;
+      std::cerr << "¡¡ Failed to load file !! (" << error << ")" << std::endl;
       level = 0;
     }
   }
   else
-    std::cerr << "Â¡Â¡ File not found !!" << std::endl;
+    std::cerr << "¡¡ File not found !!" << std::endl;
   if (_level)
   {
     // WARNING This is only temporary
@@ -384,16 +384,17 @@ Level* GameTask::DoLoadLevel(void)
   }
   else
   {
-    cerr << "Â¡Â¡ Can't open level !!" << endl;
+    cerr << "¡¡ Can't open level !!" << endl;
     _worldMap->Show();
   }
   _loadLevelParams.doLoad = false;
   return (level);  
 }
 
-Level* GameTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& name, bool isSaveFile)
+Level* GameTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& path, const std::string& name, bool isSaveFile)
 {
-  _loadLevelParams.path       = name;
+  _loadLevelParams.name       = name;
+  _loadLevelParams.path       = path;
   _loadLevelParams.isSaveFile = isSaveFile;
   _loadLevelParams.doLoad     = true;
   return (0);
