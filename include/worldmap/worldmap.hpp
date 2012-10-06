@@ -35,6 +35,7 @@ public:
   void CityClicked(Rocket::Core::Event& event);
 
   void Run(void);
+  void Save(const std::string&);
   
   void MoveTowardsCoordinates(float x, float y);
   void MoveTowardsPlace(const std::string&);

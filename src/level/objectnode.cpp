@@ -92,7 +92,6 @@ void                     AnimatedObject::PlayAnimation(const std::string& name, 
 
   if (anim)
   {
-    std::cout << "Playing animation " << name << " now." << std::endl;
     if (anim->is_playing() && loop)
       return ;
     anim->loop(true);
@@ -118,7 +117,6 @@ void                      AnimatedObject::TaskAnimation(void)
       _anim->play();
     else
     {
-      std::cout << "Animation is over" << std::endl;
       pendingAnimationDone = true;
       AnimationEnd.Emit();
       ResetAnimation();

@@ -11,6 +11,11 @@ WorldMap::~WorldMap()
   CurrentWorldMap = 0;
 }
 
+void WorldMap::Save(const string& savepath)
+{
+  DataTree::Writers::JSON(_mapTree, "saves/map.json");
+}
+
 WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de) : UiBase(window, gameUi->GetContext()), _gameUi(*gameUi), _dataEngine(de)
 {
   cout << "Building worldmap" << endl;
@@ -126,10 +131,10 @@ void WorldMap::Show(void)
 void WorldMap::Run(void)
 {
   float elapsedTime = _timer.GetElapsedTime();
-  
+
   if (_current_pos_x != _goal_x || _current_pos_y != _goal_y)
     UpdatePartyCursor(elapsedTime);
-  
+
   // Reveal nearby cases
   {
     int x, y;
@@ -151,12 +156,6 @@ void WorldMap::Run(void)
   }
 
   _timer.Restart();
-  
-//   Core::Element* elem = _gameUi.GetContext()->GetHoverElement();
-//   Core::String str;
-//   elem->GetInnerRML(str);
-//   
-//   std::cout << "Hovered element: '" << str.CString() << "'" << std::endl;
 }
 
 void WorldMap::CityClicked(Rocket::Core::Event& event)
@@ -208,13 +207,25 @@ bool WorldMap::IsPartyInCity(string& cityname) const
 
 void WorldMap::UpdatePartyCursor(float elapsedTime)
 {
-  float movementSpeed = elapsedTime * 10;
-  int   dist_x        = MAX(_goal_x, _current_pos_x) - MIN(_goal_x, _current_pos_x);
+  float movementSpeed = elapsedTime * 50;
+  /*int   dist_x        = MAX(_goal_x, _current_pos_x) - MIN(_goal_x, _current_pos_x);
   int   dist_y        = MAX(_goal_y, _current_pos_y) - MIN(_goal_y, _current_pos_y);
   float tomove_x      = movementSpeed;
-  float tomove_y      = movementSpeed;
+  float tomove_y      = movementSpeed;*/
+  
 
-  if (dist_x != 0 && dist_y != 0)
+  float a        = _current_pos_x - _goal_x;
+  float b        = _goal_y        - _current_pos_y;
+  float distance = SQRT(a * a + b * b);
+
+  float k  = (movementSpeed > distance ? 1 : movementSpeed / distance);
+  float dx = _current_pos_x + (k * _goal_x - k * _current_pos_x);
+  float dy = _current_pos_y + (k * _goal_y - k * _current_pos_y);
+  
+  _current_pos_x = dx;
+  _current_pos_y = dy;
+
+  /*if (dist_x != 0 && dist_y != 0)
   {
     if      (dist_x > dist_y)   tomove_x = (dist_x / dist_y) * tomove_y;
     else if (dist_y > dist_x)   tomove_y = (dist_y / dist_x) * tomove_x;
@@ -233,7 +244,7 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
       (_current_pos_y + tomove_y < _goal_y && _goal_y < _current_pos_y))
     _current_pos_y = _goal_y;
   else
-    _current_pos_y += tomove_y;
+    _current_pos_y += tomove_y;*/
 
   if (_cursor)
   {
@@ -271,6 +282,7 @@ void WorldMap::SetCaseVisibility(int x, int y, char visibility) const
   Data           dataCase = Data(_mapTree)["tiles"][it];
   stringstream   stream;
 
+  if (!element) return ;
   if ((int)dataCase["visibility"] >= visibility)
     return ;
   switch ((int)visibility)
@@ -300,20 +312,18 @@ void WorldMap::MoveTowardsCoordinates(float x, float y)
 
 void WorldMap::MapClicked(Rocket::Core::Event& event)
 {
-  Rocket::Core::Element* tile = event.GetCurrentElement();
-  
-  if (tile)
-  {
-    Rocket::Core::Variant* v_pos_x = tile->GetAttribute("data-pos-x");
-    Rocket::Core::Variant* v_pos_y = tile->GetAttribute("data-pos-y");
-    int                    pos_x   = v_pos_x->Get<int>();
-    int                    pos_y   = v_pos_y->Get<int>();
-    int                    click_x = 0;
-    int                    click_y = 0;
+  Core::Element* frame = _root->GetElementById("map-frame");
 
+  if (frame)
+  {
+    int   click_x    = 0;
+    int   click_y    = 0;
+    float scrollTop  = frame->GetScrollTop();
+    float scrollLeft = frame->GetScrollLeft();
+    
     click_x  = event.GetParameter("mouse_x", click_x);
     click_y  = event.GetParameter("mouse_y", click_y);
-    MoveTowardsCoordinates(click_x, click_y);
+    MoveTowardsCoordinates(click_x + scrollLeft, click_y + scrollTop);
   }
 }
 
@@ -416,7 +426,13 @@ void WorldMap::MapTileGenerator(Data map)
     
     if (_root)
     {
+      stringstream           streamSizeX, streamSizeY;
       Rocket::Core::Element* mapElem = _root->GetElementById("pworldmap");
+      
+      streamSizeX << (_size_x * _tsize_x);
+      streamSizeY << (_size_y * _tsize_y);
+      mapElem->SetProperty("width",  streamSizeX.str().c_str());
+      mapElem->SetProperty("height", streamSizeY.str().c_str());
       mapElem->SetInnerRML(rml.str().c_str());
       for (pos_x = 0, pos_y = 0 ; pos_x < size_x && pos_y < size_y ;)
       {

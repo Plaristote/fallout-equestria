@@ -1,0 +1,101 @@
+{
+"Name": "Pipsqueak",
+"Age": 16,
+"Gender": "Male",
+"Race": "Unicorn",
+"Special": {
+  "STR": 5,
+  "PER": 5,
+  "END": 5,
+  "CHA": 5,
+  "INT": 5,
+  "AGI": 5,
+  "LUC": 5
+}
+,
+"Statistics": {
+  "Action Points": 0,
+  "Armor Class": 0,
+  "Bonus Damage": 0,
+  "Carry Weight": 0,
+  "Critical Chance": 0,
+  "Damage Resistance": 0,
+  "Healing Rate": 0,
+  "Hit Points": 0,
+  "Melee Damage": 0,
+  "Perk Rate": 0,
+  "Poison Resistance": 0,
+  "Radiation Resistance": 0,
+  "Skill Rate": 0
+}
+,
+"Skills": {
+  "Small Guns": 45,
+  "Big Guns": 20,
+  "Energy Guns": 20,
+  "Explosives": 100,
+  "Unarmed": 105,
+  "Lockpick": 100,
+  "Melee Weapons": 120,
+  "Medicine": 90,
+  "Repair": 29,
+  "Science": 43,
+  "Sneak": 35,
+  "Spellcasting": 53,
+  "Steal": 10,
+  "Barter": 38,
+  "Outdoorspony": 65,
+  "Speech": 43,
+  "Gambling": 50
+}
+,
+"Skill Points": {
+  "Small Guns": 0,
+  "Big Guns": 0,
+  "Energy Guns": 0,
+  "Explosives": 0,
+  "Unarmed": 0,
+  "Lockpick": 0,
+  "Melee Weapons": 0,
+  "Medicine": 0,
+  "Repair": 0,
+  "Science": 0,
+  "Sneak": 0,
+  "Spellcasting": 0,
+  "Steal": 0,
+  "Barter": 0,
+  "Outdoorspony": 0,
+  "Speech": 0,
+  "Gambling": 0
+}
+,
+"Statistics Modifiers": {
+  "Action Points": 0,
+  "Armor Class": 0,
+  "Bonus Damage": 0,
+  "Carry Weight": 0,
+  "Critical Chance": 0,
+  "Damage Resistance": 0,
+  "Healing Rate": 0,
+  "Hit Points": 0,
+  "Melee Damage": 0,
+  "Perk Rate": 0,
+  "Poison Resistance": 0,
+  "Radiation Resistance": 0,
+  "Skill Rate": 0
+}
+,
+"Variables": {
+  "Level": 1,
+  "Experience": 0,
+  "Skill Points": 0,
+  "Special Points": 5,
+  "Perks": 0,
+  "Traits": 2
+}
+,
+"Traits": {
+}
+
+
+}

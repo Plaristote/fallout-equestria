@@ -72,6 +72,21 @@ void           StatModel::LevelUp(void)
   LevelUpped.Emit(GetLevel());
 }
 
+bool           StatModel::IsReady(void)
+{
+  bool         is_ready = true;
+
+  ReloadFunction(&_scriptIsReady);
+  if (_scriptIsReady)
+  {
+    _scriptContext->Prepare(_scriptIsReady);
+    _scriptContext->SetArgObject(0, &_statsheet);
+    _scriptContext->Execute();
+    is_ready = _scriptContext->GetReturnByte();
+  }
+  return (is_ready);
+}
+
 list<string>   StatModel::GetAvailableTraits(void)
 {
   list<string> ret;
@@ -122,6 +137,9 @@ void           StatModel::SetExperience(unsigned short e)
     _scriptContext->SetArgDWord(1, e - currentXp);
     _scriptContext->Execute();
   }
+  else
+    _statsheet["Variables"]["Experience"] = currentXp + e;
+  ReloadFunction(&_scriptXpNextLevel);
   if (_scriptXpNextLevel)
   {
     _scriptContext->Prepare(_scriptXpNextLevel);
@@ -284,6 +302,8 @@ void StatController::LevelChanged(unsigned short lvl)
 {
   _view->SetIdValue("level", lvl);
   _view->SetIdValue("next-level", _model.GetXpNextLevel());
+  if (_model.GetSkillPoints() > 0)
+    _view->SetEditMode(StatView::Update);
 }
 
 void StatController::AddExperience(unsigned short exp)
@@ -327,6 +347,31 @@ void StatController::SetSkill(const std::string& stat, short value)
   _model.SetSkill(stat, value);
 }
 
+void StatController::AcceptChanges(void)
+{
+  StatView::EditMode editMode = _view->GetEditMode();
+
+  if (!(_model.IsReady()))
+  {
+    cout << "[StatController] Thou art not ready" << endl;
+    // TODO popup a dialog saying that you're not ready
+    return ;
+  }
+  cout << "[StatController] Thou art ready" << endl;
+  if (_model.GetSpecialPoints() > 0)
+    _view->SetEditMode(StatView::Create);
+  else if (_model.GetSkillPoints() > 0)
+    _view->SetEditMode(StatView::Update);
+  else
+    _view->SetEditMode(StatView::Display);
+  _view->Hide();
+}
+
+void StatController::CancelChanges(void)
+{
+  _view->Hide();
+}
+
 void StatController::SetView(StatView* view)
 {
   vector<string> specials, skills, statistics;
@@ -366,6 +411,8 @@ void StatController::SetView(StatView* view)
   _viewObservers.Connect(_view->InformationChanged, *this, &StatController::InformationChanged);
   _viewObservers.Connect(_view->AgeChanged,         *this, &StatController::AgeChanged);
   _viewObservers.Connect(_view->TraitToggled,       *this, &StatController::TraitToggled);
+  _viewObservers.Connect(_view->Accepted,           *this, &StatController::AcceptChanges);
+  _viewObservers.Connect(_view->Canceled,           *this, &StatController::CancelChanges);
 
   _view->SetTraits(_model.GetAvailableTraits());
   
@@ -549,8 +596,8 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
     if (button_continue) button_continue->AddEventListener("click", &DoneButton);
     if (button_cancel)   button_cancel->AddEventListener  ("click", &CancelButton);
 
-    DoneButton.EventReceived.Connect  (*this, &StatViewRocket::Close);
-    CancelButton.EventReceived.Connect(*this, &StatViewRocket::Close);
+    DoneButton.EventReceived.Connect  (*this, &StatViewRocket::Accept);
+    CancelButton.EventReceived.Connect(*this, &StatViewRocket::Cancel);
 
     // Edit Mode
     EventSpecialClicked.EventReceived.Connect(*this, &StatViewRocket::SpecialClicked);

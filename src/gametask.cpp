@@ -21,7 +21,7 @@ GameTask::GameTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi(w
   _gameUi.GetMenu().SaveClicked.Connect(*this, &GameTask::SaveClicked);
   _gameUi.GetMenu().LoadClicked.Connect(*this, &GameTask::LoadClicked);
   _gameUi.GetMenu().ExitClicked.Connect(*this, &GameTask::Exit);
-  
+
   _charSheet   = DataTree::Factory::JSON("data/charsheets/velvet.json");
   _playerStats = new StatController(_charSheet);
   _playerStats->SetView(&(_gameUi.GetPers()));
@@ -34,7 +34,7 @@ GameTask::~GameTask()
   if (_uiSaveGame)  { _uiSaveGame->Destroy(); delete _uiSaveGame; }
   if (_uiLoadGame)  { _uiLoadGame->Destroy(); delete _uiLoadGame; }
   if (_worldMap)    { _worldMap->Destroy();   delete _worldMap;   }
-  if (_level)       { delete _level;  }
+  if (_level)       { delete _level;       }
 }
 
 void GameTask::SaveClicked(Rocket::Core::Event&)
@@ -79,12 +79,12 @@ AsyncTask::DoneStatus GameTask::do_task()
       const string exitPoint = _level->GetExitZone();
 
       ExitLevel(_savePath);
-      /*if (nextZone != "")
+      if (nextZone != "")
       {
 	OpenLevel(_savePath, nextZone);
 	if (_level)
 	  _level->SetEntryZone(exitPoint);
-      }*/
+      }
     }
     if (!_level && _worldMap)
       _worldMap->Show();
@@ -98,6 +98,7 @@ bool GameTask::SaveGame(const std::string& savepath)
 {
   bool success = true;
 
+  _worldMap->Save(savepath);
   if (_level)
   {
     _dataEngine["system"]["current-level"] = _levelName;
@@ -107,8 +108,7 @@ bool GameTask::SaveGame(const std::string& savepath)
     _dataEngine["system"]["current-level"] = 0;
   _dataEngine.Save(savepath + "/dataengine.json");
 
-  DataTree::Writers::JSON(_charSheet, savepath + "/");
-  _charSheet->Save();
+  DataTree::Writers::JSON(_charSheet, savepath + "/stats-self.json");
   
   return (success);
 }
@@ -122,7 +122,8 @@ bool GameTask::LoadGame(const std::string& savepath)
   
   if (_charSheet)   delete _charSheet;
   if (_playerStats) delete _playerStats;
-  _charSheet   = DataTree::Factory::JSON("data/charsheets/velvet.json");
+  _charSheet   = DataTree::Factory::JSON(savepath + "/stats-self.json");
+  if (!_charSheet)  return (false);
   _playerStats = new StatController(_charSheet);
   _playerStats->SetView(&(_gameUi.GetPers()));
 
@@ -136,6 +137,7 @@ bool GameTask::LoadGame(const std::string& savepath)
   }
   else
     _worldMap->Show();
+  return (true);
 }
 
 bool GameTask::OpenLevel(const std::string& savepath, const std::string& level)
@@ -156,12 +158,10 @@ bool GameTask::OpenLevel(const std::string& savepath, const std::string& level)
 
 void GameTask::ExitLevel(const std::string& savepath)
 {
-  /*if (!(SaveGame(savepath)))
+  if (!(SaveGame(savepath)))
   {
-    cerr << "¡¡ Couldn't save level state on ExitLevel !!" << endl;
-  }*/
-  // TODO Find why level destruction makes panda3d crash
-  // TODO TODO Find out if level destruction still makes panda3d crash
+    cerr << "!! Couldn't save level state on ExitLevel !!" << endl;
+  }
   delete _level;
   _level = 0;
   cout << "Exited Level" << endl;
@@ -293,6 +293,7 @@ void GameTask::FinishLoad(void)
   if (!(LoadGame(_savePath)))
   {
     // TODO Handle error while loading the game
+    cout << "[NOT IMPLEMENTED] GameTask::FinishLoad -> LoadGame Failure" << endl;
   }
 }
 

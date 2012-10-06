@@ -919,10 +919,10 @@ void           World::UnSerialize(Utils::Packet& packet)
 
       for (; begin != end ; ++begin)
       {
-    Waypoint* wp = GetWaypointFromId(*begin);
+        Waypoint* wp = GetWaypointFromId(*begin);
 
-    if (wp)
-      zone.waypoints.push_back(wp);
+       if (wp)
+         zone.waypoints.push_back(wp);
       }
       exitZones.push_back(zone);
     }

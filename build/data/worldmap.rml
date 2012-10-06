@@ -11,12 +11,13 @@
 
 #map-frame
 {
-  position: absolute;
-  top:    0px;
-  left:   0px;
-  width:  80%;
-  height: 80%;
-  overflow: scroll;
+  position:   absolute;
+  top:        0px;
+  left:       0px;
+  width:      80%;
+  height:     80%;
+  overflow-x: scroll;
+  overflow-y: scroll;
 }
 
 #city-list

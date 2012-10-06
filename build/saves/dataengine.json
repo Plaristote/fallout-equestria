@@ -15,12 +15,12 @@
 }
 ,
 "system": {
-  "current-level": "test"
+  "current-level": 0
 }
 ,
 "worldmap": {
-  "pos-x": 106,
-  "pos-y": 72
+  "pos-x": 25,
+  "pos-y": 25
 }
 
 

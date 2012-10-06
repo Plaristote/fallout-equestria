@@ -112,9 +112,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
     pos.set_x(pos.get_x() + np.get_x());
     pos.set_y(pos.get_y() + np.get_y());
     pos.set_z(pos.get_z() + np.get_z());
-    std::cout << "Position: (" << pos.get_x() << ", " << pos.get_y() << ", " << pos.get_z() << ")\n";
     NodePath tmp = world->GetWaypointClosest(pos)->nodePath;
-    std::cout << tmp.get_x() << ", " << tmp.get_y() << std::endl;
 
     _hovering.SetWaypoint(tmp);
     break ;

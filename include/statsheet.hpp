@@ -47,6 +47,8 @@ public:
   void           SetExperience(unsigned short e);
   void           LevelUp(void);
   
+  bool           IsReady(void);
+  
   Observatory::Signal<void (unsigned short)>            LevelUpped;
   Observatory::Signal<void (const std::string&, short)> SpecialChanged, SkillChanged, StatisticChanged;
 
@@ -61,8 +63,7 @@ private:
   
   std::vector<std::string> GetStatKeys(Data stats) const;
 
-  Data _statsheet;
-
+  Data               _statsheet;
   asIScriptContext*  _scriptContext;
   asIScriptModule*   _scriptModule;
   asIScriptFunction *_scriptAddSpecialPoint, *_scriptActivateTraits, *_scriptAddExperience;
@@ -78,7 +79,11 @@ public:
   enum EditMode { Create, Update, Display };
 
   virtual void SetEditMode(EditMode) = 0;
+  EditMode     GetEditMode(void) { return (_editMode); }
   
+  virtual void Hide(void) = 0;
+  virtual void Show(void) = 0;
+
   virtual void SetInformation(const std::string& name, const std::string& value)                            = 0;
   virtual void SetInformation(const std::string& name, short value)                                         = 0;
   virtual void SetFieldValue(const std::string& category, const std::string& key, const std::string& value) = 0;
@@ -93,6 +98,10 @@ public:
   Observatory::Signal<void (const std::string&, const std::string&)> InformationChanged;
   Observatory::Signal<void (unsigned char)>                          AgeChanged;
   Observatory::Signal<void (const std::string&)>                     TraitToggled;
+  Observatory::Signal<void>                                          Accepted, Canceled;
+  
+protected:
+  EditMode     _editMode;
 };
 
 class StatController
@@ -128,6 +137,9 @@ private:
   void      ViewStatUpped(const std::string&, const std::string&);
   void      ViewStatDowned(const std::string&, const std::string&);
   
+  void      AcceptChanges(void);
+  void      CancelChanges(void);
+
   StatModel                    _model;
   StatView*                    _view;
   Observatory::ObserverHandler _viewObservers;
@@ -139,6 +151,9 @@ public:
   StatViewRocket(WindowFramework* window, Rocket::Core::Context* context);
   
   void SetEditMode(EditMode);
+  
+  void Hide(void) { UiBase::Hide(); }
+  void Show(void) { UiBase::Show(); }
 
   void SetInformation(const std::string& name, const std::string& value);
   void SetInformation(const std::string& name, short value);
@@ -158,7 +173,8 @@ private:
   
   RocketListener EventNameChanged, EventAgeChanged, EventGenderChanged;
 
-  void           Close(Rocket::Core::Event&) { Hide(); }
+  void           Cancel(Rocket::Core::Event&) { Canceled.Emit(); }
+  void           Accept(Rocket::Core::Event&) { Accepted.Emit(); }
   
   void           UpdateName(Rocket::Core::Event&);
   void           UpdateGender(Rocket::Core::Event&);
@@ -176,8 +192,6 @@ private:
   Rocket::Core::Element* _specialSelected;
   Rocket::Core::Element* _skillSelected;
   Rocket::Core::Element* _traitSelected;
-  
-  EditMode               _editMode;
 };
 
 #endif

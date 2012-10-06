@@ -142,7 +142,7 @@ bool IsReady(Data sheet)
     ready = false;
   if (sheet["Variables"]["Traits"].AsInt() != 0)
     ready = false;
-  return (true);
+  return (ready);
 }
 
 void AddToStatModifier(Data sheet, string statistic, int value)
