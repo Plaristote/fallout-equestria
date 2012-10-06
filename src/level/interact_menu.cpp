@@ -51,6 +51,7 @@ InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* conte
       {
 	Rocket::Core::Element* button = _root->GetElementById(interaction.name.c_str());
 
+	_buttons.push_back(button);
 	button->AddEventListener("click", &_buttonListener);
 	_listeners[it] = &interaction;
 	_obs.Connect(_buttonListener.EventReceived, *this, &InteractMenu::ButtonClicked);
@@ -63,6 +64,8 @@ InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* conte
 
 InteractMenu::~InteractMenu()
 {
+  for_each(_buttons.begin(), _buttons.end(), [this](Rocket::Core::Element* button)
+  { button->RemoveEventListener("click", &_buttonListener); });
   Hide();
   _obs.DisconnectAll();
 }

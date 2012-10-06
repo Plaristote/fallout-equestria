@@ -18,6 +18,7 @@ class GameMenu : public UiBase
   friend class GameUi;
 public:
   GameMenu(WindowFramework* window, Rocket::Core::Context* context);
+  ~GameMenu();
   void MenuEventContinue(Rocket::Core::Event& event) { Hide(); }
   
   Observatory::Signal<void (Rocket::Core::Event&)> SaveClicked;
@@ -40,10 +41,11 @@ class GameMainBar : public UiBase
   friend class GameUi;
 public:
   GameMainBar(WindowFramework* window, Rocket::Core::Context* context);
+  ~GameMainBar();
   
   void                   AppendToConsole(const std::string& str);
-  
-  void                   SetCurrentAP(unsigned short ap);
+
+  void                   SetCurrentAP(unsigned short ap, unsigned short maxap);
   void                   SetMaxAP(unsigned short ap);
   void                   SetEnabledAP(bool);
   
@@ -80,6 +82,7 @@ class GameInventory : public UiBase
   friend class GameUi;
 public:
   GameInventory(WindowFramework* window, Rocket::Core::Context* context);
+  ~GameInventory();
 
   void                     SetInventory(Inventory&);
   void                     UpdateInventory(void);

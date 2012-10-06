@@ -794,7 +794,7 @@ void StatViewRocket::SetEditMode(EditMode mode)
   Core::Element* cursor  = _root->GetElementById("edit-value-cursor");
   Core::Element* special = _root->GetElementById("special");
   Core::Element* skill   = _root->GetElementById("body");
-  
+
   Core::Element* name   = _root->GetElementById("char-name");
   Core::Element* age    = _root->GetElementById("char-age");
   Core::Element* gender = _root->GetElementById("char-gender");
@@ -802,7 +802,7 @@ void StatViewRocket::SetEditMode(EditMode mode)
   if (cursor)  cursor->SetProperty("display", "none");
   if (special) special->RemoveEventListener("click", &EventSpecialClicked);
   if (skill)   skill->RemoveEventListener  ("click", &EventSkillClicked);
-  
+
   if (name)    name->RemoveEventListener  ("click", &EventGeneralClicked);
   if (age)     age->RemoveEventListener   ("click", &EventGeneralClicked);
   if (gender)  gender->RemoveEventListener("click", &EventGeneralClicked);
@@ -976,10 +976,7 @@ void StatViewRocket::SetTraits(list<string> traits)
       
       for_each(traits.begin(), traits.end(), [this](const string trait)
       {
-	Core::Element* traitButton = _root->GetElementById(underscore(trait).c_str());
-
-	if (traitButton)
-	  traitButton->AddEventListener("click", &EventTraitClicked);
+	ToggleEventListener(true, underscore(trait).c_str(), "click", EventTraitClicked);
       });
     }
   }

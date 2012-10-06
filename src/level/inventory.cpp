@@ -195,6 +195,8 @@ DynamicObject* InventoryObject::CreateDynamicObject(World* world) const
 
   object               = world->AddDynamicObject("item" + Key(), DynamicObject::Item, self["model"], self["texture"]);
   object->interactions = Interactions::Use;
+  object->waypoint     = 0;
+  object->type         = DynamicObject::Item;
   return (object);
 }
 

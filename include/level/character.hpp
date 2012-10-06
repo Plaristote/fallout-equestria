@@ -83,10 +83,10 @@ public:
   void SetStatistics(DataTree* stats, StatController* statsController);
   
 
-  Observatory::Signal<void (InstanceDynamicObject*)> ReachedDestination;
-  Observatory::Signal<void (unsigned short)>         ActionPointChanged;
-  Observatory::Signal<void (unsigned short)>         HitPointsChanged;
-  Observatory::Signal<void>                          CharacterDied;
+  Observatory::Signal<void (InstanceDynamicObject*)>         ReachedDestination;
+  Observatory::Signal<void (unsigned short, unsigned short)> ActionPointChanged;
+  Observatory::Signal<void (unsigned short)>                 HitPointsChanged;
+  Observatory::Signal<void>                                  CharacterDied;
 
   virtual GoToData   GetGoToData(InstanceDynamicObject* character)
   {
@@ -125,7 +125,7 @@ public:
   Diplomacy&          GetDiplomacy(void)        { return (_diplomacy);            }
 
   unsigned short      GetActionPoints(void) const        { return (_actionPoints); }
-  void                SetActionPoints(unsigned short ap) { _actionPoints = ap; ActionPointChanged.Emit(_actionPoints); }
+  void                SetActionPoints(unsigned short ap) { _actionPoints = ap; ActionPointChanged.Emit(_actionPoints, Data(_statistics)["Statistics"]["Action Points"]); }
   void                RestartActionPoints(void);
   
   short               GetHitPoints(void) const        { return (_hitPoints); }

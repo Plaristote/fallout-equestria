@@ -112,6 +112,18 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet) : _
       case DynamicObject::Shelf:
 	instance = new ObjectShelf(this, &object);
 	break ;
+      case DynamicObject::Item:
+      {
+	DataTree*        item_data = DataTree::Factory::StringJSON(object.inventory.front().first);
+	InventoryObject* item;
+
+	item_data->key = object.key;
+	cout << "[LOADING ITEM] Object key is " << object.key << endl;
+	item           = new InventoryObject(item_data);
+	instance       = new ObjectItem(this, &object, item);
+	delete item_data;
+	break ;
+      }
       case DynamicObject::Locker:
 	break ;
     }
@@ -810,7 +822,7 @@ struct XpFetcher
     if (controller)
     {
       if (stats.Nil())
-        controller->AddExperience(50);
+        controller->AddExperience(1001);
       else
         controller->AddExperience(stats["Variable"]["XpReward"]);
     }

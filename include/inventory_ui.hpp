@@ -14,6 +14,7 @@ class InventoryView : public Rocket::Core::EventListener
 {
 public:
   InventoryView(Rocket::Core::Element* element, Inventory& inventory);
+  virtual ~InventoryView(void);
   
   bool operator==(Rocket::Core::Element* element);
 

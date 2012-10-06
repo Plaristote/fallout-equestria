@@ -351,25 +351,13 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
       itemListContainer->AppendChild(item);
     }
     
-    Core::Element* buttonUse    = _root->GetElementById("button_use");
-    Core::Element* buttonDrop   = _root->GetElementById("button_drop");
-    Core::Element* buttonEquip1 = _root->GetElementById("button_equip_1");
-    Core::Element* buttonEquip2 = _root->GetElementById("button_equip_2");
-    Core::Element* buttonUneuip1= _root->GetElementById("button_unequip_1");
-    Core::Element* buttonUneuip2= _root->GetElementById("button_unequip_2");
-    
-    if (buttonUse)
-      buttonUse->AddEventListener("click", &ButtonUseClicked);
-    if (buttonDrop)
-      buttonDrop->AddEventListener("click", &ButtonDropClicked);
-    if (buttonEquip1)
-      buttonEquip1->AddEventListener("click", &ButtonEquip1Clicked);
-    if (buttonEquip2)
-      buttonEquip2->AddEventListener("click", &ButtonEquip2Clicked);    
-    if (buttonUneuip1)
-      buttonUneuip1->AddEventListener("click", &ButtonUnequip1);
-    if (buttonUneuip2)
-      buttonUneuip2->AddEventListener("click", &ButtonUnequip2);
+    ToggleEventListener(true, "button_use",       "click", ButtonUseClicked);
+    ToggleEventListener(true, "button_drop",      "click", ButtonDropClicked);
+    ToggleEventListener(true, "button_equip_1",   "click", ButtonEquip1Clicked);
+    ToggleEventListener(true, "button_equip_2",   "click", ButtonEquip2Clicked);
+    ToggleEventListener(true, "button_unequip_1", "click", ButtonUnequip1);
+    ToggleEventListener(true, "button_unequip_2", "click", ButtonUnequip2);
+
     ButtonUseClicked.EventReceived.Connect   (*this, &GameInventory::CallbackButtonUse);
     ButtonDropClicked.EventReceived.Connect  (*this, &GameInventory::CallbackButtonDrop);
     ButtonEquip1Clicked.EventReceived.Connect(*this, &GameInventory::CallbackButtonEquip1);
@@ -382,6 +370,16 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
   }
   _inventoryView.ObjectSelected.Connect(*this, &GameInventory::SetSelectedObject);
   _selectedObject = 0;  
+}
+
+GameInventory::~GameInventory()
+{
+  ToggleEventListener(false, "button_use",       "click", ButtonUseClicked);
+  ToggleEventListener(false, "button_drop",      "click", ButtonDropClicked);
+  ToggleEventListener(false, "button_equip_1",   "click", ButtonEquip1Clicked);
+  ToggleEventListener(false, "button_equip_2",   "click", ButtonEquip2Clicked);
+  ToggleEventListener(false, "button_unequip_1", "click", ButtonUnequip1);
+  ToggleEventListener(false, "button_unequip_2", "click", ButtonUnequip2);
 }
 
 void GameInventory::SetInventory(Inventory& inventory)
@@ -449,23 +447,26 @@ GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : Ui
 
     elementWindow = doc->GetElementById("content");
 
-    Rocket::Core::Element* buttonContinue = elementWindow->GetElementById("continue");
-    Rocket::Core::Element* buttonOptions  = elementWindow->GetElementById("options");
-    Rocket::Core::Element* buttonExit     = elementWindow->GetElementById("exit");
-    Rocket::Core::Element* buttonSave     = elementWindow->GetElementById("save");
-    Rocket::Core::Element* buttonLoad     = elementWindow->GetElementById("load");
-
-    if (buttonContinue) buttonContinue->AddEventListener("click", &_continueClicked);
-    if (buttonOptions)  buttonOptions->AddEventListener ("click", &_optionsClicked);
-    if (buttonExit)     buttonExit->AddEventListener    ("click", &_exitClicked);
-    if (buttonSave)     buttonSave->AddEventListener    ("click", &_saveClicked);
-    if (buttonLoad)     buttonLoad->AddEventListener    ("click", &_loadClicked);
+    ToggleEventListener(true, "continue", "click", _continueClicked);
+    ToggleEventListener(true, "options",  "click", _optionsClicked);
+    ToggleEventListener(true, "exit",     "click", _exitClicked);
+    ToggleEventListener(true, "save",     "click", _saveClicked);
+    ToggleEventListener(true, "load",     "click", _loadClicked);
 
     _continueClicked.EventReceived.Connect(*this, &GameMenu::MenuEventContinue);
     _exitClicked.EventReceived.Connect(ExitClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
     _saveClicked.EventReceived.Connect(SaveClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
     _loadClicked.EventReceived.Connect(LoadClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
   }
+}
+
+GameMenu::~GameMenu()
+{
+  ToggleEventListener(false, "continue", "click", _continueClicked);
+  ToggleEventListener(false, "options",  "click", _optionsClicked);
+  ToggleEventListener(false, "exit",     "click", _exitClicked);
+  ToggleEventListener(false, "save",     "click", _saveClicked);
+  ToggleEventListener(false, "load",     "click", _loadClicked);  
 }
 
 /*
@@ -501,28 +502,31 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
     if (!element)
       cout << "first_col doesn't exist" << endl;
 
-    Rocket::Core::Element* button1 = doc->GetElementById("menu");
-    Rocket::Core::Element* button2 = doc->GetElementById("inv");
-    Rocket::Core::Element* button3 = doc->GetElementById("charsheet");
-
-    if (button1) button1->AddEventListener("click", &MenuButtonClicked);
-    if (button2) button2->AddEventListener("click", &InventoryButtonClicked);
-    if (button3) button3->AddEventListener("click", &PersButtonClicked);
+    ToggleEventListener(true, "menu",      "click", MenuButtonClicked);
+    ToggleEventListener(true, "inv",       "click", InventoryButtonClicked);
+    ToggleEventListener(true, "charsheet", "click", PersButtonClicked);
+    ToggleEventListener(true, "equiped_1", "click", EquipedItem1Clicked);
+    ToggleEventListener(true, "equiped_2", "click", EquipedItem2Clicked);
     
     _apEnabled = false;
     _apMax     = 0;
     
-    Rocket::Core::Element* equipedItem1 = doc->GetElementById("equiped_1");
-    Rocket::Core::Element* equipedItem2 = doc->GetElementById("equiped_2");
-    
-    equipedItem1->AddEventListener("click", &EquipedItem1Clicked);
-    equipedItem2->AddEventListener("click", &EquipedItem2Clicked);
     EquipedItem1Clicked.EventReceived.Connect(*this, &GameMainBar::CallbackEquipedItem1Clicked);
     EquipedItem2Clicked.EventReceived.Connect(*this, &GameMainBar::CallbackEquipedItem2Clicked);
-    
     CombatEndClicked.EventReceived.Connect(*this, &GameMainBar::CallbackCombatEndClicked);
     PassTurnClicked.EventReceived.Connect (*this, &GameMainBar::CallbackPassTurnClicked);
   }
+}
+
+GameMainBar::~GameMainBar()
+{
+  ToggleEventListener(false, "menu",      "click", MenuButtonClicked);
+  ToggleEventListener(false, "inv",       "click", InventoryButtonClicked);
+  ToggleEventListener(false, "charsheet", "click", PersButtonClicked);
+  ToggleEventListener(false, "equiped_1", "click", EquipedItem1Clicked);
+  ToggleEventListener(false, "equiped_2", "click", EquipedItem2Clicked);
+  ToggleEventListener(false, "pass_turn",  "click", PassTurnClicked);
+  ToggleEventListener(false, "stop_fight", "click", CombatEndClicked);  
 }
 
 void GameMainBar::AppendToConsole(const std::string& str)
@@ -542,8 +546,9 @@ void GameMainBar::AppendToConsole(const std::string& str)
   }
 }
 
-void GameMainBar::SetCurrentAP(unsigned short ap)
+void GameMainBar::SetCurrentAP(unsigned short ap, unsigned short max)
 {
+  SetMaxAP(max);
   if (_apEnabled)
   {
     Rocket::Core::Element* apbar = _root->GetElementById("action_points");

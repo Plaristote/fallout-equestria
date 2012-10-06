@@ -18,11 +18,11 @@ string BuckHit(Item@ item, Character@ user, Character@ target)
 {
   int ap = user.GetActionPoints();
 
-  if (ap >= 3)
+  if (ap >= 4)
   {
     int damage = 10;
 
-    user.SetActionPoints(ap - 3);
+    user.SetActionPoints(ap - 4);
     target.SetHitPoints(target.GetHitPoints() - damage);
     return (user.GetName() + " hit " + target.GetName() + " for 10 hit points");
   }

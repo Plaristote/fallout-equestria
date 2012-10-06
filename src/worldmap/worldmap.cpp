@@ -7,8 +7,12 @@ WorldMap* WorldMap::CurrentWorldMap = 0;
 
 WorldMap::~WorldMap()
 {
+  ToggleEventListener(false, "button-inventory", "click", ButtonInventory);
+  ToggleEventListener(false, "button-character", "click", ButtonCharacter);
+  ToggleEventListener(false, "button-menu",      "click", ButtonMenu);
   for_each(_cases.begin(), _cases.end(), [this](Core::Element* tile)
   { tile->RemoveEventListener("click", &MapClickedEvent); });
+  _cursor->RemoveEventListener("click", &PartyCursorClicked);
 
   Destroy();
   delete _mapTree;
@@ -53,9 +57,9 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de) : Ui
     //
     // Event management
     //
-    _root->GetElementById("button-inventory")->AddEventListener("click", &ButtonInventory);
-    _root->GetElementById("button-character")->AddEventListener("click", &ButtonCharacter);
-    _root->GetElementById("button-menu")->AddEventListener("click", &ButtonMenu);
+    ToggleEventListener(true, "button-inventory", "click", ButtonInventory);
+    ToggleEventListener(true, "button-character", "click", ButtonCharacter);
+    ToggleEventListener(true, "button-menu",      "click", ButtonMenu);
     ButtonInventory.EventReceived.Connect(_gameUi, &GameUi::OpenInventory);
     ButtonCharacter.EventReceived.Connect(_gameUi, &GameUi::OpenPers);
     ButtonMenu.EventReceived.Connect(_gameUi, &GameUi::OpenMenu);

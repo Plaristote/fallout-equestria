@@ -755,10 +755,12 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
     packet >> iType >> interactions;
     type = (Type)iType;
 
-    if (type == Character)
+    if      (type == Character)
       packet >> script >> charsheet >> dialog;
-    if (type == Door || type == Locker)
+    else if (type == Door || type == Locker)
       packet >> iLocked >> key;
+    else if (type == Item)
+      packet >> key;
     locked = iLocked;
 
     packet >> iWaypoint;
@@ -804,10 +806,12 @@ void DynamicObject::Serialize(Utils::Packet& packet)
 
     packet << iType << interactions;
 
-    if (type == Character)
+    if      (type == Character)
       packet << script << charsheet << dialog;
-    if (type == Door || type == Locker)
+    else if (type == Door || type == Locker)
       packet << iLocked << key;
+    else if (type == Item)
+      packet << key;
 
     if (waypoint)
       iWaypoint = waypoint->id;
@@ -1022,7 +1026,7 @@ void           World::Serialize(Utils::Packet& packet)
       std::list<Waypoint*>::iterator wpEnd = zone.waypoints.end();
 
       for (; wpIt != wpEnd ; ++wpIt)
-    waypointsId.push_back((*wpIt)->id);
+        waypointsId.push_back((*wpIt)->id);
       packet << zone.name;
       packet << zone.destinations;
       packet << waypointsId;

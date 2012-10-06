@@ -290,7 +290,9 @@ void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* contro
   if (_stats)      delete _stats;
   if (_statistics) delete _statistics;
   _statistics = statistics;
-  _stats      = controller;  
+  _stats      = controller;
+  if (_statistics)
+    ActionPointChanged.Emit(_actionPoints, Data(_statistics)["Statistics"]["Action Points"]);
 }
 
 void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& name)
@@ -373,16 +375,14 @@ void ObjectCharacter::ItemNextUseType(unsigned short it)
 
 void ObjectCharacter::RestartActionPoints(void)
 {
+  Data stats(_statistics);
+
   _path.clear();
   if (_statistics)
-  {
-    Data stats(_statistics);
-
     _actionPoints = stats["Statistics"]["Action Points"];
-  }
   else
     _actionPoints = 10;
-  ActionPointChanged.Emit(_actionPoints);
+  ActionPointChanged.Emit(_actionPoints, stats["Statistics"]["Action Points"]);
 }
 
 void ObjectCharacter::Run(float elapsedTime)

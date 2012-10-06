@@ -42,6 +42,22 @@ public:
   
   void FadeOut(void);
   void FadeIn(void);
+  
+  void ToggleEventListener(bool toggle_on, const std::string& id, const std::string& event, RocketListener& listener)
+  {
+    if (_root)
+    {
+      Rocket::Core::Element* element = _root->GetElementById(id.c_str());
+      
+      if (element)
+      {
+	if (toggle_on)
+	  element->AddEventListener(event.c_str(), &listener);
+	else
+	  element->RemoveEventListener(event.c_str(), &listener);
+      }
+    }
+  }
 
 protected:
   WindowFramework*               _window;

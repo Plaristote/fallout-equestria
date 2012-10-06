@@ -185,7 +185,7 @@ struct DynamicObject : public MapObject
 
     // Door / Locker
     bool                            locked;
-    std::string                     key;
+    std::string                     key; // Also used to store item names for DynamicObject::Item
     std::list<std::pair<int, int> > lockedArcs;
 
     // Shelf / Character

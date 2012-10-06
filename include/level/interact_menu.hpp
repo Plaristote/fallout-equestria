@@ -13,7 +13,9 @@ private:
   void ButtonClicked(Rocket::Core::Event&);
 
   typedef std::vector<InstanceDynamicObject::Interaction*> Listeners;
+  typedef std::vector<Rocket::Core::Element*>              Buttons;
   
+  Buttons                      _buttons;
   Listeners                    _listeners;
   RocketListener               _buttonListener;
   Observatory::ObserverHandler _obs;

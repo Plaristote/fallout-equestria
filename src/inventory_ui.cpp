@@ -10,6 +10,11 @@ InventoryView::InventoryView(Rocket::Core::Element* element, Inventory& inventor
   UpdateView();
 }
 
+InventoryView::~InventoryView()
+{
+  _element.RemoveEventListener("dragdrop", this);
+}
+
 bool InventoryView::operator==(Rocket::Core::Element* element)
 {
   return (element == &_element);
@@ -197,14 +202,10 @@ UiUseObjectOn::UiUseObjectOn(WindowFramework* window, Rocket::Core::Context* con
   _root = context->LoadDocument("data/useobjecton.rml");
   if (_root)
   {
-    Rocket::Core::Element* eCancel    = _root->GetElementById("button_cancel");
     Rocket::Core::Element* eInventory = _root->GetElementById("inventory");
 
-    if (eCancel)
-    {
-      eCancel->AddEventListener("click", &CancelClicked);
-      CancelClicked.EventReceived.Connect(*this, &UiUseObjectOn::RocketCancelClicked);
-    }
+    ToggleEventListener(true, "button_cancel", "click", CancelClicked);
+    CancelClicked.EventReceived.Connect(*this, &UiUseObjectOn::RocketCancelClicked);
     if (eInventory)
     {
       _viewController.AddView(eInventory, inventory);
@@ -216,9 +217,11 @@ UiUseObjectOn::UiUseObjectOn(WindowFramework* window, Rocket::Core::Context* con
 
 UiUseObjectOn::~UiUseObjectOn()
 {
+  ToggleEventListener(false, "button_cancel", "click", CancelClicked);
   _viewController.Destroy();
   if (_root)
   {
+    _root->Close();
     _root->RemoveReference();
     //_context->UnloadDocument(_root);
   }
