@@ -85,7 +85,7 @@ public:
 
   Observatory::Signal<void (InstanceDynamicObject*)>         ReachedDestination;
   Observatory::Signal<void (unsigned short, unsigned short)> ActionPointChanged;
-  Observatory::Signal<void (unsigned short)>                 HitPointsChanged;
+  Observatory::Signal<void (short)>                          HitPointsChanged;
   Observatory::Signal<void>                                  CharacterDied;
 
   virtual GoToData   GetGoToData(InstanceDynamicObject* character)

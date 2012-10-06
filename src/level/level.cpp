@@ -118,7 +118,6 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet) : _
 	InventoryObject* item;
 
 	item_data->key = object.key;
-	cout << "[LOADING ITEM] Object key is " << object.key << endl;
 	item           = new InventoryObject(item_data);
 	instance       = new ObjectItem(this, &object, item);
 	delete item_data;
@@ -142,6 +141,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet) : _
     if (!(stats["Statistics"]["Action Points"].Nil()))
       _levelUi.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
   }
+  GetPlayer()->HitPointsChanged.Connect        (_levelUi.GetMainBar(), &GameMainBar::SetCurrentHp);
   GetPlayer()->ActionPointChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
   GetPlayer()->EquipedItemActionChanged.Connect(_levelUi.GetMainBar(), &GameMainBar::SetEquipedItemAction);
   GetPlayer()->EquipedItemChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetEquipedItem);

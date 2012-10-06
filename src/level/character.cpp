@@ -177,8 +177,9 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _diplomacy.SetEnemyMask(0);
 
   // Statistics
+  _stats      = 0;
   _statistics = DataTree::Factory::JSON("data/charsheets/" + object->charsheet + ".json");
-  _hitPoints = _armorClass = 5;
+  _hitPoints  = _armorClass = 5;
   if (_statistics)
   {
     Data stats = GetStatistics();
@@ -280,6 +281,8 @@ ObjectCharacter::~ObjectCharacter()
 void ObjectCharacter::SetHitPoints(short hp)
 {
   _hitPoints = hp;
+  if (_stats)
+    _stats->SetCurrentHp(hp);
   HitPointsChanged.Emit(_hitPoints);
   if (hp <= 0)
     CharacterDied.Emit();
@@ -292,7 +295,12 @@ void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* contro
   _statistics = statistics;
   _stats      = controller;
   if (_statistics)
-    ActionPointChanged.Emit(_actionPoints, Data(_statistics)["Statistics"]["Action Points"]);
+  {
+    Data data_stats(_statistics);
+
+    ActionPointChanged.Emit(_actionPoints, data_stats["Statistics"]["Action Points"]);
+    SetHitPoints(data_stats["Variables"]["Hit Points"]);
+  }
 }
 
 void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& name)

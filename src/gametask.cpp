@@ -252,8 +252,8 @@ void GameTask::LoadLastState(void)
 
 void GameTask::LoadSlot(unsigned char slot)
 {
-  if (_level)    delete _level;
-  if (_worldMap) { _worldMap->Hide(); delete _worldMap; }
+  if (_level)    { delete _level; _level = 0; }
+  if (_worldMap) { _worldMap->Hide(); delete _worldMap; _worldMap = 0; }
   
   // Clear original directory
   {

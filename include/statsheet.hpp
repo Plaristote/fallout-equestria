@@ -46,11 +46,15 @@ public:
   unsigned short GetExperience(void) const       { return (_statsheet["Variables"]["Experience"]); }
   void           SetExperience(unsigned short e);
   void           LevelUp(void);
+  void           SetCurrentHp(short hp);
+  short          GetCurrentHp(void) const { return (_statsheet["Variables"]["Hit Points"]);  }
+  short          GetMaxHp(void)     const { return (_statsheet["Statistics"]["Hit Points"]); }
   
   bool           IsReady(void);
   
   Observatory::Signal<void (unsigned short)>            LevelUpped;
   Observatory::Signal<void (const std::string&, short)> SpecialChanged, SkillChanged, StatisticChanged;
+  Observatory::Signal<void (short)>                     MaxHpChanged;
 
 private:
   typedef std::pair<asIScriptFunction**, std::string> ScriptFuncPtr;
@@ -122,10 +126,12 @@ public:
   void SetSkill(const std::string& stat, short value);
 
   void AddExperience(unsigned short experience);
+  void SetCurrentHp(short hp);
   
   Observatory::Signal<void (unsigned short)> LevelUp;
 
 private:
+  void      SetMaxHp(short hp);
   void      SpecialChanged(const std::string&, short);
   void      SkillChanged(const std::string&, short);
   void      StatisticChanged(const std::string&, short);

@@ -54,6 +54,11 @@ void StatModel::LoadFunctions(void)
   }  
 }
 
+void           StatModel::SetCurrentHp(short hp)
+{
+  _statsheet["Variables"]["Hit Points"] = hp;
+}
+
 unsigned short StatModel::GetLevel(void) const
 {
   return (_statsheet["Variables"]["Level"]);
@@ -61,7 +66,6 @@ unsigned short StatModel::GetLevel(void) const
 
 void           StatModel::LevelUp(void)
 {
-  _statsheet["Variables"]["Level"] = GetLevel() + 1;
   ReloadFunction(&_scriptLevelUp);
   if (_scriptLevelUp)
   {
@@ -69,6 +73,8 @@ void           StatModel::LevelUp(void)
     _scriptContext->SetArgObject(0, &_statsheet);
     _scriptContext->Execute();
   }
+  else
+    _statsheet["Variables"]["Level"] = GetLevel() + 1;
   LevelUpped.Emit(GetLevel());
 }
 
@@ -200,6 +206,8 @@ bool          StatModel::UpdateAllValues(void)
     std::for_each(_statsheet["Skills"].begin(), _statsheet["Skills"].end(), [this](Data value)
     { SkillChanged.Emit(value.Key(), value); });
     
+    MaxHpChanged.Emit(_statsheet["Statistics"]["Hit Points"]);
+
     return (true);
   }
   return (false);
@@ -267,6 +275,7 @@ StatController::StatController(Data statsheet) : _model(statsheet), _view(0)
   _model.StatisticChanged.Connect(*this,   &StatController::StatisticChanged);
   _model.LevelUpped.Connect      (*this,   &StatController::LevelChanged);
   _model.LevelUpped.Connect      (LevelUp, &Observatory::Signal<void (unsigned short)>::Emit);
+  _model.MaxHpChanged.Connect    (*this,   &StatController::SetMaxHp);
 }
 
 void StatController::SpecialChanged(const string& stat, short value)
@@ -300,10 +309,15 @@ void StatController::TraitToggled(const string& trait)
 
 void StatController::LevelChanged(unsigned short lvl)
 {
+  unsigned short skill_points;
+
   _view->SetIdValue("level", lvl);
   _view->SetIdValue("next-level", _model.GetXpNextLevel());
-  if (_model.GetSkillPoints() > 0)
+  if ((skill_points = _model.GetSkillPoints()) > 0)
+  {
     _view->SetEditMode(StatView::Update);
+    _view->SetIdValue("skill-points", skill_points);
+  }
 }
 
 void StatController::AddExperience(unsigned short exp)
@@ -403,7 +417,9 @@ void StatController::SetView(StatView* view)
   
   _view->SetIdValue("special-points", _model.GetSpecialPoints());
   _view->SetIdValue("skill-points",   _model.GetSkillPoints());
-  
+
+  SetCurrentHp(_model.GetCurrentHp());
+  SetMaxHp(_model.GetMaxHp());
   _view->SetExperience(_model.GetExperience(), _model.GetLevel(), _model.GetXpNextLevel());
 
   _viewObservers.Connect(_view->StatDowned,         *this, &StatController::ViewStatDowned);
@@ -429,6 +445,23 @@ void StatController::SetView(StatView* view)
   {
     cout << "Available Perk: " << perk << endl;
   });*/
+}
+
+void StatController::SetCurrentHp(short hp)
+{
+  _model.SetCurrentHp(hp);
+  if (_view)
+    _view->SetInformation("char-state-hp-id-value", hp);
+}
+
+void StatController::SetMaxHp(short hp)
+{
+  if (_view)
+  {
+    _view->SetInformation("char-state-hp-id-total", hp);
+    if (_view->GetEditMode() == StatView::Create)
+      SetCurrentHp(hp);
+  }
 }
 
 void StatController::InformationChanged(const string& info, const string& value)

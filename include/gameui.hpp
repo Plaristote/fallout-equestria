@@ -49,6 +49,9 @@ public:
   void                   SetMaxAP(unsigned short ap);
   void                   SetEnabledAP(bool);
   
+  void                   SetCurrentHp(short hp);
+  void                   SetCurrentAc(short ac);
+  
   void                   SetEquipedItem(unsigned short it, InventoryObject* item);
   void                   SetEquipedItemAction(unsigned short it, InventoryObject* item, unsigned char actionIt);
 

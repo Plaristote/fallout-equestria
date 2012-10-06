@@ -546,6 +546,32 @@ void GameMainBar::AppendToConsole(const std::string& str)
   }
 }
 
+void GameMainBar::SetCurrentHp(short hp)
+{
+  Rocket::Core::Element* elem_hp = _root->GetElementById("current-hp");
+  
+  if (elem_hp)
+  {
+    stringstream rml;
+
+    rml << hp;
+    elem_hp->SetInnerRML(rml.str().c_str());
+  }
+}
+
+void GameMainBar::SetCurrentAc(short ac)
+{
+  Rocket::Core::Element* elem_ac = _root->GetElementById("current-ac");
+  
+  if (elem_ac)
+  {
+    stringstream rml;
+
+    rml << ac;
+    elem_ac->SetInnerRML(rml.str().c_str());
+  }
+}
+
 void GameMainBar::SetCurrentAP(unsigned short ap, unsigned short max)
 {
   SetMaxAP(max);
