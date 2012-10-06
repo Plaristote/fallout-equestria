@@ -10,12 +10,8 @@ public:
   {
     _dataTree = 0;
   }
-  
-  ~DataEngine(void)
-  {
-//     Remove();
-//     _dataTree = 0;
-  }
+
+  ~DataEngine(void);
   
   void      Load(const std::string& filepath);
   void      Save(const std::string& filepath);

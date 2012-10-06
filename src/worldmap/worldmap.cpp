@@ -7,8 +7,15 @@ WorldMap* WorldMap::CurrentWorldMap = 0;
 
 WorldMap::~WorldMap()
 {
+  for_each(_cases.begin(), _cases.end(), [this](Core::Element* tile)
+  { tile->RemoveEventListener("click", &MapClickedEvent); });
+
+  Destroy();
   delete _mapTree;
   CurrentWorldMap = 0;
+  _root->Close();
+  _root->RemoveReference();
+  std::cout << "Deleting WorldMap. References left: " << _root->GetReferenceCount() << endl;
 }
 
 void WorldMap::Save(const string& savepath)
@@ -74,14 +81,16 @@ void WorldMap::SetCityVisible(const string& name)
     
     if (cityTree)
     {
-      Data citiesData(cityTree);
-      Data cityData = citiesData[it->name];
-
-      if (!(cityData.Nil()))
       {
-        cityData["visible"] = "1";
-        AddCityToList(cityData);
-        DataTree::Writers::JSON(cityTree, cityTree->GetSourceFile());
+	Data citiesData(cityTree);
+	Data cityData = citiesData[it->name];
+
+	if (!(cityData.Nil()))
+	{
+	  cityData["visible"] = "1";
+	  AddCityToList(cityData);
+	  DataTree::Writers::JSON(cityTree, cityTree->GetSourceFile());
+	}
       }
       delete cityTree;
     }
@@ -104,9 +113,9 @@ void WorldMap::AddCityToList(Data cityData)
   _cities.push_back(city);
   if (cityData["visible"].Value() == "1")
   {
-    Rocket::Core::Element* elem = _root->GetElementById("city-list");
-    Rocket::Core::String   innerRml;
-    std::stringstream      rml;
+    Core::Element* elem = _root->GetElementById("city-list");
+    Core::String   innerRml;
+    stringstream   rml;
 
     rml << "<div class='city-entry'>";
     rml << "<div class='city-button'><button id='city-" << cityData.Key() << "' data-city='" << cityData.Key() << "'>Go</button></div>";
@@ -208,44 +217,17 @@ bool WorldMap::IsPartyInCity(string& cityname) const
 void WorldMap::UpdatePartyCursor(float elapsedTime)
 {
   float movementSpeed = elapsedTime * 50;
-  /*int   dist_x        = MAX(_goal_x, _current_pos_x) - MIN(_goal_x, _current_pos_x);
-  int   dist_y        = MAX(_goal_y, _current_pos_y) - MIN(_goal_y, _current_pos_y);
-  float tomove_x      = movementSpeed;
-  float tomove_y      = movementSpeed;*/
-  
+  float a             = _current_pos_x - _goal_x;
+  float b             = _goal_y        - _current_pos_y;
+  float distance      = SQRT(a * a + b * b);
+  float k             = (movementSpeed > distance ? 1 : movementSpeed / distance);
+  float dx            = _current_pos_x + (k * _goal_x - k * _current_pos_x);
+  float dy            = _current_pos_y + (k * _goal_y - k * _current_pos_y);
 
-  float a        = _current_pos_x - _goal_x;
-  float b        = _goal_y        - _current_pos_y;
-  float distance = SQRT(a * a + b * b);
-
-  float k  = (movementSpeed > distance ? 1 : movementSpeed / distance);
-  float dx = _current_pos_x + (k * _goal_x - k * _current_pos_x);
-  float dy = _current_pos_y + (k * _goal_y - k * _current_pos_y);
-  
-  _current_pos_x = dx;
-  _current_pos_y = dy;
-
-  /*if (dist_x != 0 && dist_y != 0)
-  {
-    if      (dist_x > dist_y)   tomove_x = (dist_x / dist_y) * tomove_y;
-    else if (dist_y > dist_x)   tomove_y = (dist_y / dist_x) * tomove_x;
-  }
-
-  if (_goal_x < _current_pos_x) tomove_x = -tomove_x;
-  if (_goal_y < _current_pos_y) tomove_y = -tomove_y;
-  
-  if ((_current_pos_x + tomove_x > _goal_x && _goal_x > _current_pos_x) ||
-      (_current_pos_x + tomove_x < _goal_x && _goal_x < _current_pos_x))
-    _current_pos_x = _goal_x;
-  else
-    _current_pos_x += tomove_x;
-  
-  if ((_current_pos_y + tomove_y > _goal_y && _goal_y > _current_pos_y) ||
-      (_current_pos_y + tomove_y < _goal_y && _goal_y < _current_pos_y))
-    _current_pos_y = _goal_y;
-  else
-    _current_pos_y += tomove_y;*/
-
+  _current_pos_x                   = dx;
+  _current_pos_y                   = dy;
+  _dataEngine["worldmap"]["pos-x"] = _current_pos_x;
+  _dataEngine["worldmap"]["pos-y"] = _current_pos_y;
   if (_cursor)
   {
     stringstream str_x, str_y;
@@ -255,9 +237,6 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
     _cursor->SetProperty("left", str_x.str().c_str());
     _cursor->SetProperty("top",  str_y.str().c_str());
   }
-  
-  _dataEngine["worldmap"]["pos-x"] = _current_pos_x;
-  _dataEngine["worldmap"]["pos-y"] = _current_pos_y;
 }
 
 Core::Element* WorldMap::GetCaseAt(int x, int y) const
@@ -342,113 +321,127 @@ void WorldMap::MapTileGenerator(Data map)
   _size_y  = size_y;
   _tsize_x = tsize_x;
   _tsize_y = tsize_y;
-  
-  //
-  // Generate RCSS and RML for the Tilemap
-  //
-  std::for_each(tiles.begin(), tiles.end(), [this, &rml, &rcss, &pos_x, &pos_y, size_x, size_y, tsize_x, tsize_y](Data tile)
+
+  // TODO Find out why this is broken. We can't afford compiling maps in the release version.
+  //_root = _context->LoadDocument("data/worldmap.rml");
+  _root = 0;
+  if (!_root)
   {
-    rcss << "#tile" << pos_x << "-" << pos_y << "\n";
-    rcss << "{\n" << "  top: "  << (pos_y * tsize_y) << "px;\n" << "  left: " << (pos_x * tsize_x) << "px;\n";
-    rcss << "  height: " << tsize_y << "px; width: " << tsize_x << "px;\n";
-    rcss << "  background-decorator: image;\n";
-    rcss << "  background-image: worldmap.png " << (pos_x * tsize_x) << "px " << (pos_y * tsize_y) << "px ";
-    rcss << (pos_x * tsize_x + tsize_x) << "px " << (pos_y * tsize_y + tsize_y) << "px;\n";
-    rcss << "}\n\n";
+    LoadingScreen loadingScreen(_window, _context);
 
-    rml  << "<div id='tile" << pos_x << "-" << pos_y << "' class='tile' style='position: absolute;";
-    rml  << "top: "  << (pos_y * tsize_y) << "px; ";
-    rml  << "left: " << (pos_x * tsize_x) << "px; ";
-    rml  << "height: " << tsize_y << "px; width: " << tsize_x << "px; ";
-    rml  << "background-decorator: image; ";
-    rml  << "background-image: worldmap.png " << (pos_x * tsize_x) << "px " << (pos_y * tsize_y) << "px ";
-    rml  << (pos_x * tsize_x + tsize_x) << "px " << (pos_y * tsize_y + tsize_y) << "px;";
-    rml  << "' data-pos-x='" << pos_x << "' data-pos-y='" << pos_y << "'>";
-    
-    if (tile["visibility"].Value() == "0")
-      rml << "<div style='background: rgba(0, 0, 0, 255); width: " << tsize_x << "px; height: " << tsize_y << ";'></div>";
-    if (tile["visibility"].Value() == "1")
-      rml << "<div style='background: rgba(0, 0, 0, 125); width: " << tsize_x << "px; height: " << tsize_y << ";'></div>";
-
-    rml  << "</div>\n";
-
-    if (++pos_x >= size_x)
-    {
-      ++pos_y;
-      pos_x = 0;
-    }
-  });
-
-  //
-  // Load the worldmap rml template, replace the #{RML} and #{RCSS} bits with generated RML/RCSS,
-  // create a temporary RML file with the result.
-  //
-  std::ifstream file("data/worldmap.rml");
-
-  if (file.is_open())
-  {
-    std::string fileRml;
-    long        begin, end;
-    long        size;
-    char*       raw;
-
-    begin     = file.tellg();
-    file.seekg (0, ios::end);
-    end       = file.tellg();
-    file.seekg(0, ios::beg);
-    size      = end - begin;
-    raw       = new char[size + 1];
-    raw[size] = 0;
-    file.read(raw, size);
-    file.close();
-    fileRml = raw;
-    delete[] raw;
-
-    size_t firstReplaceIt = fileRml.find("#{RCSS}");      
-    fileRml.replace(firstReplaceIt, strlen("#{RCSS}"), rcss.str());
-    size_t secReplaceIt   = fileRml.find("#{RML}");
-    fileRml.replace(secReplaceIt, strlen("#{RML}"), rml.str());
-    
-    std::ofstream ofile("data/tmp-worldmap.rml");
-    
-    if (ofile.is_open())
-    {
-      ofile.write(fileRml.c_str(), fileRml.size());
-      ofile.close();
-    }
-
+    loadingScreen.AppendText("No compiled worldmap found. Generating one instead...");
     //
-    // Load the temporary file and link every click event from every tile
-    // to the RocketListener MapClickedEvent.
-    // While adding every case Element to the Case array.
+    // Generate RCSS and RML for the Tilemap
     //
-    _root = _context->LoadDocument("data/tmp-worldmap.rml");
-    
-    if (_root)
+    loadingScreen.AppendText("Generating Tiles...");
+    for_each(tiles.begin(), tiles.end(), [this, &rml, &rcss, &pos_x, &pos_y, size_x, size_y, tsize_x, tsize_y](Data tile)
     {
-      stringstream           streamSizeX, streamSizeY;
-      Rocket::Core::Element* mapElem = _root->GetElementById("pworldmap");
+      rcss << "#tile" << pos_x << "-" << pos_y << "\n";
+      rcss << "{\n" << "  top: "  << (pos_y * tsize_y) << "px;\n" << "  left: " << (pos_x * tsize_x) << "px;\n";
+      rcss << "  height: " << tsize_y << "px; width: " << tsize_x << "px;\n";
+      rcss << "  background-decorator: image;\n";
+      rcss << "  background-image: worldmap.png " << (pos_x * tsize_x) << "px " << (pos_y * tsize_y) << "px ";
+      rcss << (pos_x * tsize_x + tsize_x) << "px " << (pos_y * tsize_y + tsize_y) << "px;\n";
+      rcss << "}\n\n";
+
+      rml  << "<div id='tile" << pos_x << "-" << pos_y << "' class='tile' style='position: absolute;";
+      rml  << "top: "  << (pos_y * tsize_y) << "px; ";
+      rml  << "left: " << (pos_x * tsize_x) << "px; ";
+      rml  << "height: " << tsize_y << "px; width: " << tsize_x << "px; ";
+      rml  << "background-decorator: image; ";
+      rml  << "background-image: worldmap.png " << (pos_x * tsize_x) << "px " << (pos_y * tsize_y) << "px ";
+      rml  << (pos_x * tsize_x + tsize_x) << "px " << (pos_y * tsize_y + tsize_y) << "px;";
+      rml  << "' data-pos-x='" << pos_x << "' data-pos-y='" << pos_y << "'>";
       
-      streamSizeX << (_size_x * _tsize_x);
-      streamSizeY << (_size_y * _tsize_y);
-      mapElem->SetProperty("width",  streamSizeX.str().c_str());
-      mapElem->SetProperty("height", streamSizeY.str().c_str());
-      mapElem->SetInnerRML(rml.str().c_str());
-      for (pos_x = 0, pos_y = 0 ; pos_x < size_x && pos_y < size_y ;)
+      if (tile["visibility"].Value() == "0")
+	rml << "<div style='background: rgba(0, 0, 0, 255); width: " << tsize_x << "px; height: " << tsize_y << ";'></div>";
+      if (tile["visibility"].Value() == "1")
+	rml << "<div style='background: rgba(0, 0, 0, 125); width: " << tsize_x << "px; height: " << tsize_y << ";'></div>";
+
+      rml  << "</div>\n";
+
+      if (++pos_x >= size_x)
       {
-	Rocket::Core::Element* tileElem;
-	std::stringstream      idElem;
-	
-	idElem << "tile" << pos_x << "-" << pos_y;
-	tileElem = _root->GetElementById(idElem.str().c_str());
-	if (tileElem)
-	  tileElem->AddEventListener("click", &MapClickedEvent);
-	if (++pos_x >= size_x)
-	{
-	  ++pos_y;
-	  pos_x = 0;
-	}
-	_cases.push_back(tileElem);
+	++pos_y;
+	pos_x = 0;
+      }
+    });
+
+    //
+    // Load the worldmap rml template, replace the #{RML} and #{RCSS} bits with generated RML/RCSS,
+    // create a temporary RML file with the result.
+    //
+    ifstream file("data/worldmap.rml.tpl");
+
+    loadingScreen.AppendText("Compiling Worldmap. This might take a while.");
+    if (file.is_open())
+    {
+      string fileRml;
+      long   begin, end;
+      long   size;
+      char*  raw;
+
+      begin     = file.tellg();
+      file.seekg (0, ios::end);
+      end       = file.tellg();
+      file.seekg(0, ios::beg);
+      size      = end - begin;
+      raw       = new char[size + 1];
+      raw[size] = 0;
+      file.read(raw, size);
+      file.close();
+      fileRml = raw;
+      delete[] raw;
+
+      size_t firstReplaceIt = fileRml.find("#{RCSS}");      
+      fileRml.replace(firstReplaceIt, strlen("#{RCSS}"), rcss.str());
+      size_t secReplaceIt   = fileRml.find("#{RML}");
+      fileRml.replace(secReplaceIt, strlen("#{RML}"), rml.str());
+      
+      ofstream ofile("data/worldmap.rml");
+      
+      if (ofile.is_open())
+      {
+	ofile.write(fileRml.c_str(), fileRml.size());
+	ofile.close();
+      }
+
+      //
+      // Load the temporary file and link every click event from every tile
+      // to the RocketListener MapClickedEvent.
+      // While adding every case Element to the Case array.
+      //
+      loadingScreen.AppendText("Loading compiled worldmap");
+      _root = _context->LoadDocument("data/worldmap.rml");
+    }
+  }
+
+  if (_root)
+  {
+    stringstream           streamSizeX, streamSizeY;
+    Rocket::Core::Element* mapElem = _root->GetElementById("pworldmap");
+    
+    streamSizeX << (_size_x * _tsize_x);
+    streamSizeY << (_size_y * _tsize_y);
+    mapElem->SetProperty("width",  streamSizeX.str().c_str());
+    mapElem->SetProperty("height", streamSizeY.str().c_str());
+    mapElem->SetInnerRML(rml.str().c_str());
+    for (pos_x = 0, pos_y = 0 ; pos_x < size_x && pos_y < size_y ;)
+    {
+      Rocket::Core::Element* tileElem;
+      stringstream           idElem;
+
+      idElem << "tile" << pos_x << "-" << pos_y;
+      tileElem = _root->GetElementById(idElem.str().c_str());
+      if (tileElem)
+      {
+	tileElem->AddEventListener("click", &MapClickedEvent);
+        _cases.push_back(tileElem);
+      }
+      if (++pos_x >= size_x)
+      {
+	++pos_y;
+	pos_x = 0;
       }
     }
   }

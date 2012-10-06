@@ -1,6 +1,13 @@
 #include "dataengine.hpp"
 #include "json.hpp"
 
+DataEngine::~DataEngine()
+{
+  delete _dataTree;
+  _dataTree = 0;
+  _data     = 0;
+}
+
 void      DataEngine::Load(const std::string& filepath)
 {
   if (_dataTree)

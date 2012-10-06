@@ -1023,10 +1023,14 @@ void Level::SetEntryZone(const std::string& name)
       {
         GetPlayer()->SetOccupiedWaypoint(*it);
 	GetPlayer()->GetNodePath().set_pos((*it)->nodePath.get_pos());
+	GetPlayer()->TruncatePath(0);
         break ;
       }
     }
   }
+  else
+    cout << "[Map Error] This map has no entry zones" << endl;
+  _exitingZone = false;
 }
 
 /*

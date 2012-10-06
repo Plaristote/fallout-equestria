@@ -18,7 +18,7 @@ public:
   AsyncTask::DoneStatus do_task();
   bool                  SaveGame(const std::string& savepath);
   bool                  LoadGame(const std::string& savepath);  
-  bool                  OpenLevel(const std::string& savepath, const std::string& level);
+  void                  OpenLevel(const std::string& savepath, const std::string& level);
   void                  ExitLevel(const std::string& savepath);
   bool                  CopySave(const std::string& savepath, const std::string& slotPath);
   
@@ -28,7 +28,6 @@ public:
   void                  Exit(Rocket::Core::Event&) { _continue = false; }
   
   // LEVEL EVENTS
-  void                  LevelExitZone(const std::string& toLevel);
   void                  UiSaveGame(const std::string& slotPath);
   void                  UiLoadGame(const std::string& slotPath);
 
@@ -61,7 +60,7 @@ private:
   UiLoad*               _uiLoadGame;
 
   struct LoadLevelParams
-  { LoadLevelParams() : doLoad(false) {} bool doLoad; std::string name; std::string path; bool isSaveFile; };
+  { LoadLevelParams() : doLoad(false) {} bool doLoad; std::string name; std::string path; bool isSaveFile; std::string entry_zone; };
 
   LoadLevelParams       _loadLevelParams;
 };

@@ -5,15 +5,11 @@ using namespace std;
 
 GameTask::GameTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi(window, rocket)
 {
-  _continue   = true;
-  _window     = window;
-  _level      = 0;
-  _savePath   = "saves";
-  _dataEngine.Load(_savePath + "/dataengine.json");
-  _worldMap   = new WorldMap(window, &_gameUi, _dataEngine);
-  _worldMap->GoToPlace.Connect(*this, &GameTask::MapOpenLevel);
-  _worldMap->Show();
-
+  _continue    = true;
+  _window      = window;
+  _level       = 0;
+  _savePath    = "saves";
+  _worldMap    = 0;
   _charSheet   = 0;
   _playerStats = 0;
   _uiSaveGame  = 0;
@@ -21,10 +17,6 @@ GameTask::GameTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi(w
   _gameUi.GetMenu().SaveClicked.Connect(*this, &GameTask::SaveClicked);
   _gameUi.GetMenu().LoadClicked.Connect(*this, &GameTask::LoadClicked);
   _gameUi.GetMenu().ExitClicked.Connect(*this, &GameTask::Exit);
-
-  _charSheet   = DataTree::Factory::JSON("data/charsheets/velvet.json");
-  _playerStats = new StatController(_charSheet);
-  _playerStats->SetView(&(_gameUi.GetPers()));
 }
 
 GameTask::~GameTask()
@@ -58,6 +50,7 @@ void GameTask::LoadClicked(Rocket::Core::Event&)
 void       GameTask::MapOpenLevel(std::string name)
 {
   OpenLevel(_savePath, name);
+  _loadLevelParams.entry_zone = "worldmap";
 }
 
 void       GameTask::SetLevel(Level* level)
@@ -82,14 +75,13 @@ AsyncTask::DoneStatus GameTask::do_task()
       if (nextZone != "")
       {
 	OpenLevel(_savePath, nextZone);
-	if (_level)
-	  _level->SetEntryZone(exitPoint);
+	_loadLevelParams.entry_zone = exitPoint;
       }
     }
     if (!_level && _worldMap)
       _worldMap->Show();
   }
-  else
+  else if (_worldMap)
     _worldMap->Run();
   return (AsyncTask::DoneStatus::DS_cont);
 }
@@ -117,11 +109,12 @@ bool GameTask::LoadGame(const std::string& savepath)
 {
   Data currentLevel;
 
+  if (_worldMap)    delete _worldMap;
+  if (_playerStats) delete _playerStats;
+  if (_charSheet)   delete _charSheet;
+
   _dataEngine.Load(savepath + "/dataengine.json");
   currentLevel = _dataEngine["system"]["current-level"];
-  
-  if (_charSheet)   delete _charSheet;
-  if (_playerStats) delete _playerStats;
   _charSheet   = DataTree::Factory::JSON(savepath + "/stats-self.json");
   if (!_charSheet)  return (false);
   _playerStats = new StatController(_charSheet);
@@ -140,7 +133,7 @@ bool GameTask::LoadGame(const std::string& savepath)
   return (true);
 }
 
-bool GameTask::OpenLevel(const std::string& savepath, const std::string& level)
+void GameTask::OpenLevel(const std::string& savepath, const std::string& level)
 {
   std::ifstream fileTest;
 
@@ -153,7 +146,6 @@ bool GameTask::OpenLevel(const std::string& savepath, const std::string& level)
   }
   else
     _level = LoadLevel(_window, _gameUi, "maps/" + level + ".blob", level, false);
-  return (_level != 0);
 }
 
 void GameTask::ExitLevel(const std::string& savepath)
@@ -298,20 +290,6 @@ void GameTask::FinishLoad(void)
 }
 
 // LEVEL EVENTS
-void GameTask::LevelExitZone(const std::string& toLevel)
-{
-  ExitLevel(_savePath);
-  if (toLevel != "")
-  {
-    if (!(OpenLevel(_savePath, toLevel)))
-    {
-      // Display Level Opening Error
-    }
-  }
-  if (!_level)
-    _worldMap->Show();
-}
-
 void GameTask::UiSaveGame(const std::string& slotPath)
 {
   SaveGame(_savePath);
@@ -375,12 +353,10 @@ Level* GameTask::DoLoadLevel(void)
     std::cerr << "¡¡ File not found !!" << std::endl;
   if (_level)
   {
-    // WARNING This is only temporary
-    _dataEngine.Load(_savePath + "/dataengine.json");
-
     _levelName = _loadLevelParams.name;
     _level->SetDataEngine(&_dataEngine);
     _level->GetPlayer()->SetStatistics(_charSheet, _playerStats);
+    _level->SetEntryZone(_loadLevelParams.entry_zone);
     SetLevel(_level);
   }
   else
@@ -388,7 +364,8 @@ Level* GameTask::DoLoadLevel(void)
     cerr << "¡¡ Can't open level !!" << endl;
     _worldMap->Show();
   }
-  _loadLevelParams.doLoad = false;
+  _loadLevelParams.entry_zone = "";
+  _loadLevelParams.doLoad     = false;
   return (level);  
 }
 

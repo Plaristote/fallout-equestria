@@ -19,7 +19,7 @@ class UiBase
   friend class GameUi;
 public:
   UiBase(WindowFramework* window, Rocket::Core::Context* context) : _window(window), _root(0), _context(context) {}
-  virtual ~UiBase() {}
+  virtual ~UiBase() { if (_root) { _root->Close(); } }
 
   virtual void Show(void)    { if (_root) { _root->Show(); VisibilityToggled.Emit(true);  } }
   virtual void Hide(void)    { if (_root) { _root->Hide(); _root->PushToBack(); VisibilityToggled.Emit(false); } }
