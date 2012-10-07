@@ -217,10 +217,15 @@ int main(int argc, char *argv[])
   window = framework.open_window();
   window->enable_keyboard();
   window->get_render().set_shader_auto();
-  
-  WindowProperties props = window->get_graphics_window()->get_properties();
-  props.set_cursor_hidden(true);
-  window->get_graphics_window()->request_properties(props);
+
+  // Set Windows Properties
+  {
+    WindowProperties props = window->get_graphics_window()->get_properties();
+
+    props.set_cursor_hidden(true);
+    props.set_icon_filename("data/icon.ico");
+    window->get_graphics_window()->request_properties(props);
+  }
   
   Script::Engine::Initialize();
   AngelScriptInitialize();

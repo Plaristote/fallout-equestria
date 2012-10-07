@@ -133,8 +133,8 @@ body
 
       <p id="second_col">
         <br />
-        99PV<br />
-        50AC<br />
+        <span id="current-hp">99</span>PV<br />
+        <span id="current-ac">50</span>AC<br />
       </p>
 
       <p id="third_col">

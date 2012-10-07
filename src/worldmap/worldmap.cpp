@@ -19,6 +19,7 @@ WorldMap::~WorldMap()
   CurrentWorldMap = 0;
   _root->Close();
   _root->RemoveReference();
+  _root = 0;
   std::cout << "Deleting WorldMap. References left: " << _root->GetReferenceCount() << endl;
 }
 

@@ -121,18 +121,31 @@ UiLoad::UiLoad(WindowFramework* window, Rocket::Core::Context* context, const st
 	slotElement->AddEventListener("dblclick", &EventLoadGame);
       }
     }
-      
-    Rocket::Core::Element* buttonLoad    = _root->GetElementById("button-load");
-    Rocket::Core::Element* button_cancel = _root->GetElementById("button-cancel");
-    
-    if (buttonLoad)
-      buttonLoad->AddEventListener("click", &EventLoadGame);
-    if (button_cancel)
-      button_cancel->AddEventListener("click", &EventCancel);
+    ToggleEventListener(true, "button-load",   "click", EventLoadGame);
+    ToggleEventListener(true, "button-cancel", "click", EventCancel);
   }
   EventClickSlot.EventReceived.Connect(*this, &UiLoad::ClickSlot);
   EventLoadGame.EventReceived.Connect(*this, &UiLoad::LoadGame);
   EventCancel.EventReceived.Connect(*this, &UiLoad::Cancel);
+}
+
+UiLoad::~UiLoad()
+{
+  Rocket::Core::Element*   slot_container = _root->GetElementById("slot-container");
+  
+  if (slot_container)
+  {
+    Rocket::Core::Element* slot;
+
+    for (unsigned short i = 0 ; (slot = slot_container->GetChild(i)) ; ++i)
+    {
+      slot->RemoveEventListener("click",    &EventClickSlot);
+      slot->RemoveEventListener("dblclick", &EventClickSlot);
+      slot->RemoveEventListener("dblclick", &EventLoadGame);
+    }
+  }
+  ToggleEventListener(false, "button-load",   "click", EventLoadGame);
+  ToggleEventListener(false, "button-cancel", "click", EventCancel);
 }
 
 void UiLoad::LoadGame(Rocket::Core::Event&)
@@ -198,19 +211,31 @@ UiSave::UiSave(WindowFramework* window, Rocket::Core::Context* context, const st
 	slotElement->AddEventListener("dblclick", &EventSaveGame);
       }
     }
-    
-    Rocket::Core::Element* button_save   = _root->GetElementById("button-save");
-    Rocket::Core::Element* button_cancel = _root->GetElementById("button-cancel");
-    
-    if (button_save)
-      button_save->AddEventListener("click", &EventSaveGame);
-    if (button_cancel)
-      button_cancel->AddEventListener("click", &EventCancel);
-    
+    ToggleEventListener(true, "button-save",   "click", EventSaveGame);
+    ToggleEventListener(true, "button-cancel", "click", EventCancel);
   }
   EventClickSlot.EventReceived.Connect(*this, &UiSave::ClickSlot);
   EventSaveGame.EventReceived.Connect(*this, &UiSave::SaveGame);
   EventCancel.EventReceived.Connect(*this, &UiSave::Cancel);
+}
+
+UiSave::~UiSave()
+{
+  Rocket::Core::Element*   slot_container = _root->GetElementById("slot-container");
+  
+  if (slot_container)
+  {
+    Rocket::Core::Element* slot;
+
+    for (unsigned short i = 0 ; (slot = slot_container->GetChild(i)) ; ++i)
+    {
+      slot->RemoveEventListener("click",    &EventClickSlot);
+      slot->RemoveEventListener("dblclick", &EventClickSlot);
+      slot->RemoveEventListener("dblclick", &EventSaveGame);
+    }
+  }
+  ToggleEventListener(false, "button-save",   "click", EventSaveGame);
+  ToggleEventListener(false, "button-cancel", "click", EventCancel);
 }
 
 void UiSave::SaveGame(Rocket::Core::Event&)

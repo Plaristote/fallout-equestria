@@ -1,0 +1,50 @@
+MILESTONES
+
+Milestone I [Started May 2012, Finished October 2012]
+x -> Statistics
+x --> Creating a character
+x --> Updating a character
+x --> Checking a character's statistics
+x --> Support for:
+x ----> Special points, skills points, traits
+
+x -> Worldmap
+x --> Exploring,
+x --> Getting into cities
+x --> Saving/Loading
+
+x -> Levels
+x --> Pathfinding
+x --> Floors
+x --> AI Scripting Engine
+x --> Field of views
+x --> Lines of sight
+x --> Turn per turn fighting
+x --> Dialogs
+x --> Inventories
+x --> Saving/Loading
+
+Milestone II
+  -> Statistics
+  --> Support for:
+  ----> Skill afinities, perks
+
+  -> Levels
+  --> Proper camera handling
+  --> Barter
+x --> Doors
+  --> Stairs
+  --> Lockers
+  --> Shelfs
+
+  -> Shared "world clock" management for Worldmap and Levels
+
+Milestone III
+  -> Worldmap
+  --> Random encounters
+  --> Various terrain and movement speed
+  --> World clock moving forward in time while traveling
+
+  -> Levels
+  --> Lights
+  
