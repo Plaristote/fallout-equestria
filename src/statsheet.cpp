@@ -118,7 +118,6 @@ void           StatModel::ToggleTrait(const string& trait)
   {
     string tmp = trait;
     
-    //Script::Call(_scriptContext, _scriptActivateTraits, "OOb", &_statsheet, &tmp, !is_active);
     _scriptContext->Prepare(_scriptActivateTraits);
     _scriptContext->SetArgObject(0, &_statsheet);
     _scriptContext->SetArgObject(1, &tmp);
@@ -186,6 +185,31 @@ void           StatModel::SetSpecial(const std::string& stat, short value)
     SpecialChanged.Emit(stat, _statsheet["Special"][stat]);
     UpdateAllValues();
   }
+}
+
+list<string>  StatModel::GetTraits(void) const
+{
+  Data         data_traits = _statsheet["Traits"];
+  list<string> traits;
+
+  for_each(data_traits.begin(), data_traits.end(), [&traits](Data trait)
+  {
+    if (trait == 1)
+      traits.push_back(trait.Key());
+  });
+  return (traits);
+}
+
+list<string>  StatModel::GetPerks(void) const
+{
+  Data         data_perks = _statsheet["Perks"];
+  list<string> perks;
+
+  for_each(data_perks.begin(), data_perks.end(), [&perks](Data perk)
+  {
+    perks.push_back(perk.Value());
+  });
+  return (perks);
 }
 
 bool          StatModel::UpdateAllValues(void)
@@ -305,6 +329,15 @@ void StatController::StatisticChanged(const string& stat, short value)
 void StatController::TraitToggled(const string& trait)
 {
   _model.ToggleTrait(trait);
+  if (_view)
+  {
+    list<string>           traits;
+    list<string>::iterator it;
+
+    traits = _model.GetTraits();
+    it     = find(traits.begin(), traits.end(), trait);
+    _view->SetTraitActive(trait, it != traits.end());
+  }
 }
 
 void StatController::LevelChanged(unsigned short lvl)
@@ -388,11 +421,13 @@ void StatController::CancelChanges(void)
 
 void StatController::SetView(StatView* view)
 {
+  list<string>   perks,    traits;
   vector<string> specials, skills, statistics;
 
   if (_view)
     _viewObservers.DisconnectAll();
   _view      = view;
+  traits     = _model.GetTraits();
   specials   = _model.GetSpecials();
   skills     = _model.GetSkills();
   statistics = _model.GetStatistics();
@@ -409,6 +444,9 @@ void StatController::SetView(StatView* view)
 
   for_each(statistics.begin(), statistics.end(), [this](const string& key)
   { _view->SetFieldValue("Statistics", key, _model.GetStatistic(key)); });
+  
+  for_each(traits.begin(), traits.end(), [this](const string& key)
+  { _view->SetTraitActive(key, true); });
 
   _view->SetInformation("Name",   _model.GetName());
   _view->SetInformation("Age",    _model.GetAge());
@@ -987,6 +1025,18 @@ void StatViewRocket::TraitClicked(Core::Event& event)
     string trait = humanize(element->GetId().CString());
 
     TraitToggled.Emit(trait);
+  }
+}
+
+void StatViewRocket::SetTraitActive(const string& trait, bool active)
+{
+  if (_root)
+  {
+    string         elem_id = "text-" + underscore(trait);
+    Core::Element* elem    = _root->GetElementById(elem_id.c_str());
+    
+    if (elem)
+      elem->SetProperty("color", (active ? "yellow" : "white"));
   }
 }
 

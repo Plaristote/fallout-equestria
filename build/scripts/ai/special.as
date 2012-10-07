@@ -3,87 +3,83 @@
 //
 
 // This must contain every modification to the SPECIAL attributes when a trait is activated/disactivated
-bool ActivateTraits(Data sheet, string trait, bool setActivated)
+bool DoActivateTrait(Data sheet, string trait, bool setActivated, int traitsLeft)
 {
   Data derivedStatistics = sheet["Statistics Modifiers"];
+  int modifier = 1;
+  
+  Write(sheet["Variables"]["Traits"].AsString());
+  if (setActivated == false)
+    modifier = -1;
+  sheet["Traits"][trait]       = (setActivated ? 1 : 0);
+
+  if (trait == "Bloody Mess")
+  {
+    derivedStatistics["Damage Resistance"]  = derivedStatistics["Damage Resistance"].AsInt() + (5 * modifier);
+  }
+  else if (trait == "Finesse")
+  {
+    derivedStatistics["Bonus Damage"]    = derivedStatistics["Bonus Damage"].AsInt() - (25 * modifier);
+    derivedStatistics["Critical Chance"] = derivedStatistics["Critical Chance"].AsInt() + (10 * modifier);
+  }
+  else if (trait == "Heavy Hoofed")
+  {
+    derivedStatistics["Melee Damage"]    = derivedStatistics["Melee Damage"].AsInt() + (4 * modifier);
+    derivedStatistics["Critical Chance"] = derivedStatistics["Critical Chance"].AsInt() - (20 * modifier);
+  }
+  else if (trait == "Kamikaze")
+  {
+    derivedStatistics["Bonus Damage"]  = derivedStatistics["Bonus Damage"].AsInt() + (25 * modifier);
+    derivedStatistics["Armor Class"]   = derivedStatistics["Armor Class"].AsInt() - (10 * modifier);
+  }
+  else if (trait == "Bruiser")
+  {
+    sheet["Special"]["STR"]            = sheet["Special"]["STR"].AsInt() + (2 * modifier);
+    derivedStatistics["Action Points"] = derivedStatistics["Action Points"].AsInt() - (2 * modifier);
+  }
+  else if (trait == "Gifted")
+  {
+    sheet["Special"]["STR"]         = sheet["Special"]["STR"].AsInt() + (1 * modifier);
+    sheet["Special"]["PER"]         = sheet["Special"]["PER"].AsInt() + (1 * modifier);
+    sheet["Special"]["END"]         = sheet["Special"]["END"].AsInt() + (1 * modifier);
+    sheet["Special"]["CHA"]         = sheet["Special"]["CHA"].AsInt() + (1 * modifier);
+    sheet["Special"]["INT"]         = sheet["Special"]["INT"].AsInt() + (1 * modifier);
+    sheet["Special"]["AGI"]         = sheet["Special"]["AGI"].AsInt() + (1 * modifier);
+    sheet["Special"]["LUC"]         = sheet["Special"]["LUC"].AsInt() + (1 * modifier);
+    derivedStatistics["Skill Rate"] = derivedStatistics["Skill Rate"].AsInt() - (6 * modifier);
+  }
+  else if (trait == "Small Frame")
+  {
+    sheet["Special"]["AGI"]           = sheet["Special"]["AGI"].AsInt() + (1 * modifier);
+    derivedStatistics["Carry Weight"] = derivedStatistics["Carry Weight"].AsInt() - (25 * modifier);	
+  }
+  else if (trait == "Skilled")
+  {
+    derivedStatistics["Skill Rate"]      = derivedStatistics["Skill Rate"].AsInt() + (5 * modifier);
+    derivedStatistics["Perk Rate"]       = derivedStatistics["Perk Rate"].AsInt() + (1 * modifier);
+  }
+
+  if (setActivated)
+    traitsLeft -= 1;
+  else
+    traitsLeft += 1;
+  sheet["Variables"]["Traits"] = traitsLeft;
+  return (true);
+}
+
+bool ActivateTraits(Data sheet, string trait, bool setActivated)
+{
   Data dataTrait  = sheet["Traits"][trait];
   bool isActive   = !(dataTrait.Nil()) && dataTrait.AsInt() == 1;
   int  traitsLeft = sheet["Variables"]["Traits"].AsInt();
 
   dataTrait = setActivated ? 1 : 0;
-  if ((isActive) != setActivated)
+  if (isActive != setActivated)
   {
-    traitsLeft = sheet["Variables"]["Traits"].AsInt();
-    if (setActivated && traitsLeft > 0 || !setActivated)
-    {
-      int modifier = 1;
-     
-      if (setActivated == false)
-        modifier = -1;
-      sheet["Traits"][trait]       = (setActivated ? 1 : 0);
-      
-      if (trait == "Bloody Mess")
-      {
-	derivedStatistics["Damage Resistance"]  = derivedStatistics["Damage Resistance"].AsInt() + (5 * modifier);
-      }
-      else if (trait == "Finesse")
-      {
-	derivedStatistics["Bonus Damage"]    = derivedStatistics["Bonus Damage"].AsInt() - (25 * modifier);
-	derivedStatistics["Critical Chance"] = derivedStatistics["Critical Chance"].AsInt() + (10 * modifier);
-      }
-      else if (trait == "Heavy Hoofed")
-      {
-        string tmp1 = "";
-        
-        tmp1 = derivedStatistics["Critical Chance"].AsString();
-      
-	derivedStatistics["Melee Damage"]    = derivedStatistics["Melee Damage"].AsInt() + (4 * modifier);
-	derivedStatistics["Critical Chance"] = derivedStatistics["Critical Chance"].AsInt() - (20 * modifier);
-	
-	tmp1 += " now is ";
-	tmp1 += derivedStatistics["Critical Chance"].AsString();
-	Cout(tmp1);
-      }
-      else if (trait == "Kamikaze")
-      {
-	derivedStatistics["Bonus Damage"]  = derivedStatistics["Bonus Damage"].AsInt() + (25 * modifier);
-	derivedStatistics["Armor Class"]   = derivedStatistics["Armor Class"].AsInt() - (10 * modifier);
-      }
-      else if (trait == "Bruiser")
-      {
-	sheet["Special"]["STR"]            = sheet["Special"]["STR"].AsInt() + (2 * modifier);
-	derivedStatistics["Action Points"] = derivedStatistics["Action Points"].AsInt() - (2 * modifier);
-      }
-      else if (trait == "Gifted")
-      {
-	sheet["Special"]["STR"]         = sheet["Special"]["STR"].AsInt() + (1 * modifier);
-	sheet["Special"]["PER"]         = sheet["Special"]["PER"].AsInt() + (1 * modifier);
-	sheet["Special"]["END"]         = sheet["Special"]["END"].AsInt() + (1 * modifier);
-	sheet["Special"]["CHA"]         = sheet["Special"]["CHA"].AsInt() + (1 * modifier);
-	sheet["Special"]["INT"]         = sheet["Special"]["INT"].AsInt() + (1 * modifier);
-	sheet["Special"]["AGI"]         = sheet["Special"]["AGI"].AsInt() + (1 * modifier);
-	sheet["Special"]["LUC"]         = sheet["Special"]["LUC"].AsInt() + (1 * modifier);
-	derivedStatistics["Skill Rate"] = derivedStatistics["Skill Rate"].AsInt() - (6 * modifier);
-      }
-      else if (trait == "Small Frame")
-      {
-	sheet["Special"]["AGI"]           = sheet["Special"]["AGI"].AsInt() + (1 * modifier);
-	derivedStatistics["Carry Weight"] = derivedStatistics["Carry Weight"].AsInt() - (25 * modifier);	
-      }
-      else if (trait == "Skilled")
-      {
-	derivedStatistics["Skill Rate"]      = derivedStatistics["Skill Rate"].AsInt() + (5 * modifier);
-	derivedStatistics["Perk Rate"]       = derivedStatistics["Perk Rate"].AsInt() + (1 * modifier);
-      }
-
-      if (setActivated)
-        traitsLeft -= 1;
-      else
-        traitsLeft += 1;
-      sheet["Variables"]["Traits"] = traitsLeft;
-      return (true);
-    }
+    if ((setActivated && traitsLeft > 0) || (!setActivated && isActive))
+      return (DoActivateTrait(sheet, trait, setActivated, traitsLeft));
   }
+  sheet["Traits"][trait] = (isActive ? 1 : 0);
   return (false);
 }
 

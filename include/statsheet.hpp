@@ -38,6 +38,8 @@ public:
 
   std::list<std::string>   GetAvailablePerks(void);
   std::list<std::string>   GetAvailableTraits(void);
+  std::list<std::string>   GetPerks(void)      const;
+  std::list<std::string>   GetTraits(void)     const;
   std::vector<std::string> GetStatistics(void) const { return (GetStatKeys(_statsheet["Statistics"])); }
   std::vector<std::string> GetSpecials(void)   const { return (GetStatKeys(_statsheet["Special"])); }
   std::vector<std::string> GetSkills(void)     const { return (GetStatKeys(_statsheet["Skills"])); }
@@ -96,8 +98,9 @@ public:
   virtual void SetIdValue(const std::string& id, const std::string& value)                                  = 0;
   virtual void SetIdValue(const std::string& id, short value)                                               = 0;
   virtual void SetExperience(unsigned short xp, unsigned short lvl, unsigned short next_level)              = 0;
-  virtual void SetTraits(std::list<std::string>)                                                                      = 0;
-  
+  virtual void SetTraits(std::list<std::string>)                                                            = 0;
+  virtual void SetTraitActive(const std::string&, bool)                                                     = 0;
+
   Observatory::Signal<void (const std::string&, const std::string&)> StatUpped, StatDowned; 
   Observatory::Signal<void (const std::string&, const std::string&)> InformationChanged;
   Observatory::Signal<void (unsigned char)>                          AgeChanged;
@@ -170,6 +173,7 @@ public:
   void SetCategoryFields(const std::string& category, const std::vector<std::string>& keys);
   void SetExperience(unsigned short, unsigned short, unsigned short);
   void SetTraits(std::list<std::string>);
+  void SetTraitActive(const std::string&, bool);
 
 private:  
   RocketListener CancelButton;
