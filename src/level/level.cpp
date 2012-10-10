@@ -806,7 +806,8 @@ struct XpFetcher
 {
   XpFetcher(ObjectCharacter* killer, ObjectCharacter* target) : killer(killer), target(target)
   {
-    observerId = target->CharacterDied.Connect(*this, &XpFetcher::CharacterDied);
+    observerId     = target->CharacterDied.Connect(*this, &XpFetcher::CharacterDied);
+    character_died = false;
   }
   
   ~XpFetcher(void)
@@ -815,6 +816,11 @@ struct XpFetcher
   }
 
   void CharacterDied(void)
+  {
+    character_died = true;
+  }
+  
+  void Execute(void)
   {
     Data            stats      = target->GetStatistics();
     StatController* controller = killer->GetStatController();
@@ -825,11 +831,12 @@ struct XpFetcher
         controller->AddExperience(1001);
       else
         controller->AddExperience(stats["Variable"]["XpReward"]);
-    }
+    }    
   }
 
   ObjectCharacter         *killer, *target;
   Observatory::ObserverId observerId;
+  bool                    character_died;
 };
 
 void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* item, unsigned char actionIt)
@@ -872,6 +879,8 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
     output = (item->UseAsWeapon(user, target, user->pendingActionObjectActionIt));
     MouseRightClicked();
     ConsoleWrite(output);
+    if (xpFetcher.character_died)
+      xpFetcher.Execute();
   }
 }
 
@@ -886,24 +895,33 @@ void Level::PendingActionUseWeaponOn(InstanceDynamicObject* fromObject)
 
 void Level::PlayerEquipObject(unsigned short it, InventoryObject* object)
 {
+  cout << "PlayerEquipObject #1" << endl;
   bool canWeildMouth        = object->CanWeild(GetPlayer(), EquipedMouth);
   bool canWeildMagic        = object->CanWeild(GetPlayer(), EquipedMagic);
   bool canWeildBattleSaddle = object->CanWeild(GetPlayer(), EquipedBattleSaddle);
   int  canWeildTotal        = (canWeildMouth ? 1 : 0) + (canWeildMagic ? 1 : 0) + (canWeildBattleSaddle ? 1 : 0);
 
+  cout << "PlayerEquipObject #2" << endl;
   if (canWeildTotal >= 2)
   {
+    cout << "PlayerEquipObject #2.1" << endl;
     UiEquipMode* ui = new UiEquipMode(_window, _levelUi.GetContext(), it, object);
+    cout << "PlayerEquipObject #2.2" << endl;
 
     if (_currentUis[UiItEquipMode])
       delete _currentUis[UiItEquipMode];
+    cout << "PlayerEquipObject #2.3" << endl;
     _currentUis[UiItEquipMode] = ui;
+  cout << "PlayerEquipObject #2.4" << endl;
     ui->Closed.Connect(*this, &Level::CloseRunningUi<UiItEquipMode>);
+  cout << "PlayerEquipObject #2.5" << endl;
     ui->EquipModeSelected.Connect(*GetPlayer(), &ObjectCharacter::SetEquipedItem);
+  cout << "PlayerEquipObject #2.6" << endl;
 
     if (!canWeildMouth)        ui->DisableMode(EquipedMouth);
     if (!canWeildMagic)        ui->DisableMode(EquipedMagic);
     if (!canWeildBattleSaddle) ui->DisableMode(EquipedBattleSaddle);
+  cout << "PlayerEquipObject #2.7" << endl;
   }
   else if (canWeildTotal)
   {
@@ -912,6 +930,7 @@ void Level::PlayerEquipObject(unsigned short it, InventoryObject* object)
   }
   else
     ConsoleWrite("You can't equip " + object->GetName());
+  cout << "PlayerEquipObject #3" << endl;  
 }
 
 void Level::PlayerDropObject(InventoryObject* object)

@@ -129,6 +129,8 @@ private:
   
   void CallbackLevelSelected(Rocket::Core::Event&);
   void CallbackCancel(Rocket::Core::Event&);
+  
+  std::vector<Rocket::Core::Element*> _elements;
 };
 
 #endif

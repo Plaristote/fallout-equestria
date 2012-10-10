@@ -324,13 +324,16 @@ InventoryObject* ObjectCharacter::GetEquipedItem(unsigned short it)
 
 void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, EquipedMode mode)
 {
+  cout << "SetEquipedItem #1" << endl;
   if (_equiped[it].graphics)
     delete _equiped[it].graphics;
+  cout << "SetEquipedItem #2" << endl;
   _equiped[it].equiped->SetEquiped(false);
   _equiped[it].equiped  = item;
   _equiped[it].mode     = mode;
   _equiped[it].actionIt = 0;
 
+  cout << "SetEquipedItem #3" << endl;
   _equiped[it].graphics = item->CreateEquipedModel(_level->GetWorld());
   if (_equiped[it].graphics)
   {
@@ -351,9 +354,13 @@ void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, E
     _equiped[it].graphics->GetNodePath().reparent_to(itemParentNode);
   }
   
+  cout << "SetEquipedItem #4" << endl;
   item->SetEquiped(true);
+  cout << "SetEquipedItem #5" << endl;
   EquipedItemChanged.Emit(it, item);
+  cout << "SetEquipedItem #6" << endl;
   _inventory.ContentChanged.Emit();
+  cout << "SetEquipedItem #7" << endl;
 }
 
 void ObjectCharacter::UnequipItem(unsigned short it)
@@ -586,7 +593,7 @@ void                ObjectCharacter::GoToRandomWaypoint(void)
 
 void                ObjectCharacter::TruncatePath(unsigned short max_size)
 {
-  if ((*_path.begin()).id == GetOccupiedWaypointAsInt())
+  if ((_path.size() > 0) && (*_path.begin()).id == GetOccupiedWaypointAsInt())
     max_size++;
   if (_path.size() > max_size)
     _path.resize(max_size);

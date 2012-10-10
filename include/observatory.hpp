@@ -3,6 +3,7 @@
 
 # include <panda3d/cmath.h>
 # include <list>
+# include <queue>
 # include <algorithm>
 # include <iostream>
 
@@ -12,11 +13,24 @@ namespace Observatory
   
   class ObserverHandler;
   
+  class ISignal
+  {
+  public:
+    virtual void ExecuteRecordedCalls(void) = 0;
+  };
+  
   template<class p1 = void>
-  class Signal
+  class Signal : public ISignal
   {
     friend class ObserverHandler;
     
+    struct RecordedCall
+    {
+      bool byte;
+    };
+
+    typedef std::queue<RecordedCall> RecordedCalls;
+
     struct InterfaceObserver
     {
       virtual ~InterfaceObserver() {}
@@ -58,6 +72,8 @@ namespace Observatory
 
     typedef std::list<InterfaceObserver*> Observers;
   public:
+    Signal(bool async = true) : _async(async) {}    
+    
     ~Signal()
     {
       typename Observers::iterator it  = _observers.begin();
@@ -69,15 +85,20 @@ namespace Observatory
 
     void       Emit()
     {
-      _iterator = _observers.begin();
-      while (_iterator != _observers.end())
+      if (_async)
       {
-        typename Observers::iterator trace = _iterator;
+	_iterator = _observers.begin();
+	while (_iterator != _observers.end())
+	{
+	  typename Observers::iterator trace = _iterator;
 
-        (**_iterator)();
-        if (trace == _iterator)
-          _iterator++;
+	  (**_iterator)();
+	  if (trace == _iterator)
+	    _iterator++;
+	}
       }
+      else
+	_recordedCalls.push(RecordedCall());
     }
 
     template<class ObserverClass>
@@ -133,6 +154,25 @@ namespace Observatory
     {
       return (_observers.size());
     }
+    
+    void       ExecuteRecordedCalls(void)
+    {
+      while (_recordedCalls.size())
+      {
+	RecordedCall& params = _recordedCalls.front();
+
+	_iterator = _observers.begin();
+	while (_iterator != _observers.end())
+	{
+	  typename Observers::iterator trace = _iterator;
+
+	  (**_iterator)();
+	  if (trace == _iterator)
+	    _iterator++;
+	}
+	_recordedCalls.pop();
+      }
+    }    
 
   private:
     ObserverId AddObserver(InterfaceObserver* observer)
@@ -145,12 +185,23 @@ namespace Observatory
 
     typename Observers::iterator _iterator;
     Observers                    _observers;
+    RecordedCalls                _recordedCalls;
+    bool                         _async;
   };
 
   template<class P1, class P2>
-  class Signal<P1 (P2)>
+  class Signal<P1 (P2)> : public ISignal
   {
     friend class ObserverHandler;
+
+    struct RecordedCall
+    {
+      RecordedCall(P2 p1) : p1(p1) {}
+
+      P2 p1;
+    };
+
+    typedef std::queue<RecordedCall> RecordedCalls;    
     
     struct InterfaceObserver
     {
@@ -177,6 +228,8 @@ namespace Observatory
 
     typedef std::list<InterfaceObserver*> Observers;
   public:
+    Signal(bool async = true) : _async(async) {}
+    
     ~Signal()
     {
       typename Observers::iterator it  = _observers.begin();
@@ -188,15 +241,20 @@ namespace Observatory
 
     void       Emit(P2 p2)
     {
-      _iterator = _observers.begin();
-      while (_iterator != _observers.end())
+      if (_async)
       {
-        typename Observers::iterator trace = _iterator;
+	_iterator = _observers.begin();
+	while (_iterator != _observers.end())
+	{
+	  typename Observers::iterator trace = _iterator;
 
-        (**_iterator)(p2);
-        if (trace == _iterator)
-          _iterator++;
+	  (**_iterator)(p2);
+	  if (trace == _iterator)
+	    _iterator++;
+	}
       }
+      else
+	_recordedCalls.push(RecordedCall(p2));
     }
 
     template<typename ObserverClass>
@@ -245,6 +303,25 @@ namespace Observatory
     {
       return (_observers.size());
     }
+    
+    void       ExecuteRecordedCalls(void)
+    {
+      while (_recordedCalls.size())
+      {
+	RecordedCall& params = _recordedCalls.front();
+
+	_iterator = _observers.begin();
+	while (_iterator != _observers.end())
+	{
+	  typename Observers::iterator trace = _iterator;
+
+	  (**_iterator)(params.p1);
+	  if (trace == _iterator)
+	    _iterator++;
+	}
+	_recordedCalls.pop();
+      }
+    }
 
   private:
     ObserverId AddObserver(InterfaceObserver* observer)
@@ -257,12 +334,24 @@ namespace Observatory
 
     typename Observers::iterator _iterator;
     Observers                    _observers;
+    RecordedCalls                _recordedCalls;
+    bool                         _async;
   };
 
   template<class P1, class P2, class P3>
-  class Signal<P1 (P2, P3)>
+  class Signal<P1 (P2, P3)> : public ISignal
   {
     friend class ObserverHandler;
+
+    struct RecordedCall
+    {
+      RecordedCall(P2 p1, P3 p2) : p1(p1), p2(p2) {}
+
+      P2 p1;
+      P3 p2;
+    };
+
+    typedef std::queue<RecordedCall> RecordedCalls;    
     
     struct InterfaceObserver
     {
@@ -289,6 +378,8 @@ namespace Observatory
 
     typedef std::list<InterfaceObserver*> Observers;
   public:
+    Signal(bool async = true) : _async(async) {}
+
     ~Signal()
     {
       typename Observers::iterator it  = _observers.begin();
@@ -300,15 +391,20 @@ namespace Observatory
 
     void       Emit(P2 p2, P3 p3)
     {
-      _iterator = _observers.begin();
-      while (_iterator != _observers.end())
+      if (_async)
       {
-        typename Observers::iterator trace = _iterator;
+	_iterator = _observers.begin();
+	while (_iterator != _observers.end())
+	{
+	  typename Observers::iterator trace = _iterator;
 
-        (**_iterator)(p2, p3);
-        if (trace == _iterator)
-          _iterator++;
+	  (**_iterator)(p2, p3);
+	  if (trace == _iterator)
+	    _iterator++;
+	}
       }
+      else
+	_recordedCalls.push(RecordedCall(p2, p3));
     }
 
     template<typename ObserverClass>
@@ -357,6 +453,25 @@ namespace Observatory
     {
       return (_observers.size());
     }
+    
+    void       ExecuteRecordedCalls(void)
+    {
+      while (_recordedCalls.size())
+      {
+	RecordedCall& params = _recordedCalls.front();
+
+	_iterator = _observers.begin();
+	while (_iterator != _observers.end())
+	{
+	  typename Observers::iterator trace = _iterator;
+
+	  (**_iterator)(params.p1, params.p2);
+	  if (trace == _iterator)
+	    _iterator++;
+	}
+	_recordedCalls.pop();
+      }
+    }
 
   private:
     ObserverId AddObserver(InterfaceObserver* observer)
@@ -369,12 +484,25 @@ namespace Observatory
 
     typename Observers::iterator _iterator;
     Observers                    _observers;
+    RecordedCalls                _recordedCalls;
+    bool                         _async;
   };
   
   template<class P1, class P2, class P3, class P4>
-  class Signal<P1 (P2, P3, P4)>
+  class Signal<P1 (P2, P3, P4)> : public ISignal
   {
     friend class ObserverHandler;
+
+    struct RecordedCall
+    {
+      RecordedCall(P2 p1, P3 p2, P4 p3) : p1(p1), p2(p2), p3(p3) {}
+
+      P2 p1;
+      P3 p2;
+      P4 p3;
+    };
+    
+    typedef std::queue<RecordedCall> RecordedCalls;
     
     struct InterfaceObserver
     {
@@ -401,6 +529,8 @@ namespace Observatory
 
     typedef std::list<InterfaceObserver*> Observers;
   public:
+    Signal(bool async = true) : _async(async) {}
+    
     ~Signal()
     {
       typename Observers::iterator it  = _observers.begin();
@@ -412,15 +542,20 @@ namespace Observatory
 
     void       Emit(P2 p2, P3 p3, P4 p4)
     {
-      _iterator = _observers.begin();
-      while (_iterator != _observers.end())
+      if (_async)
       {
-        typename Observers::iterator trace = _iterator;
+	_iterator = _observers.begin();
+	while (_iterator != _observers.end())
+	{
+	  typename Observers::iterator trace = _iterator;
 
-        (**_iterator)(p2, p3, p4);
-        if (trace == _iterator)
-          _iterator++;
+	  (**_iterator)(p2, p3, p4);
+	  if (trace == _iterator)
+	    _iterator++;
+	}
       }
+      else
+	_recordedCalls.push(RecordedCall(p2, p3, p4));
     }
 
     template<typename ObserverClass>
@@ -469,6 +604,25 @@ namespace Observatory
     {
       return (_observers.size());
     }
+    
+    void       ExecuteRecordedCalls(void)
+    {
+      while (_recordedCalls.size())
+      {
+	RecordedCall& params = _recordedCalls.front();
+
+	_iterator = _observers.begin();
+	while (_iterator != _observers.end())
+	{
+	  typename Observers::iterator trace = _iterator;
+
+	  (**_iterator)(params.p1, params.p2, params.p3);
+	  if (trace == _iterator)
+	    _iterator++;
+	}
+	_recordedCalls.pop();
+      }
+    }    
 
   private:
     ObserverId AddObserver(InterfaceObserver* observer)
@@ -481,6 +635,8 @@ namespace Observatory
 
     typename Observers::iterator _iterator;
     Observers                    _observers;
+    RecordedCalls                _recordedCalls;
+    bool                         _async;
   };
   
   class ObserverHandler

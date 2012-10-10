@@ -223,7 +223,7 @@ UiUseObjectOn::~UiUseObjectOn()
   {
     _root->Close();
     _root->RemoveReference();
-    //_context->UnloadDocument(_root);
+    _root = 0;
   }
 }
 
@@ -241,21 +241,13 @@ UiLoot::UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventor
   _root = context->LoadDocument("data/looting.rml");
   if (_root)
   {
-    Rocket::Core::Element* eDone      = _root->GetElementById("button_done");
-    Rocket::Core::Element* eTakeAll   = _root->GetElementById("button_take_all");
     Rocket::Core::Element* eInvLooter = _root->GetElementById("self-inventory");
     Rocket::Core::Element* eInvLooted = _root->GetElementById("other-inventory");
     
-    if (eDone)
-    {
-      eDone->AddEventListener("click", &DoneClicked);
-      DoneClicked.EventReceived.Connect(*this, &UiLoot::RocketDoneClicked);
-    }
-    if (eTakeAll)
-    {
-      eTakeAll->AddEventListener("click", &TakeAllClicked);
-      TakeAllClicked.EventReceived.Connect(*this, &UiLoot::RocketTakeAllClicked);
-    }
+    ToggleEventListener(true, "button_done",     "click", DoneClicked);
+    ToggleEventListener(true, "button_take_all", "click", TakeAllClicked);
+    DoneClicked.EventReceived.Connect(*this, &UiLoot::RocketDoneClicked);
+    TakeAllClicked.EventReceived.Connect(*this, &UiLoot::RocketTakeAllClicked);
     if (eInvLooter)
       _viewController.AddView(eInvLooter, looter);
     if (eInvLooted)
@@ -270,8 +262,11 @@ UiLoot::~UiLoot()
   _viewController.Destroy();
   if (_root)
   {
+    ToggleEventListener(false, "button_done",     "click", DoneClicked);
+    ToggleEventListener(false, "button_take_all", "click", TakeAllClicked);
+    _root->Close();
     _root->RemoveReference();
-    //_context->UnloadDocument(_root);
+    _root = 0;
   }
 }
 
@@ -336,7 +331,6 @@ UiEquipMode::UiEquipMode(WindowFramework* window, Rocket::Core::Context* context
     Rocket::Core::Element* eMouth        = _root->GetElementById("mode_mouth");
     Rocket::Core::Element* eMagic        = _root->GetElementById("mode_magic");
     Rocket::Core::Element* eBattleSaddle = _root->GetElementById("mode_battlesaddle");
-    Rocket::Core::Element* eCancel       = _root->GetElementById("cancel");
 
     if (eDialog)
     {
@@ -362,10 +356,7 @@ UiEquipMode::UiEquipMode(WindowFramework* window, Rocket::Core::Context* context
 	  eBattleSaddle->AddEventListener("click", &BattleSaddleClicked);
       }
     }
-    if (eCancel)
-    {
-      eCancel->AddEventListener("click", &CancelClicked);
-    }
+    ToggleEventListener(true, "cancel", "click", CancelClicked);
     
     MouthClicked.EventReceived.Connect(*this, &UiEquipMode::CallbackButton<EquipedMouth>);
     MagicClicked.EventReceived.Connect(*this, &UiEquipMode::CallbackButton<EquipedMagic>);
@@ -373,6 +364,17 @@ UiEquipMode::UiEquipMode(WindowFramework* window, Rocket::Core::Context* context
     CancelClicked.EventReceived.Connect(*this, &UiEquipMode::CallbackCancel);
     
     _root->Show();
+  }
+}
+
+UiEquipMode::~UiEquipMode()
+{
+  if (_root)
+  {
+    ToggleEventListener(false, "cancel",            "click", CancelClicked);
+    ToggleEventListener(false, "mode_mouth",        "click", MouthClicked);
+    ToggleEventListener(false, "mode_magic",        "click", MagicClicked);
+    ToggleEventListener(false, "mode_battlesaddle", "click", BattleSaddleClicked);
   }
 }
 
@@ -397,15 +399,6 @@ void UiEquipMode::DisableMode(EquipedMode mode)
   }
   if (element)
     eDialog->RemoveChild(element);
-}
-
-UiEquipMode::~UiEquipMode()
-{
-  if (_root)
-  {
-    _root->RemoveReference();
-    //_context->UnloadDocument(_root);
-  }
 }
 
 void UiEquipMode::Destroy(void)
@@ -443,10 +436,7 @@ UiNextZone::UiNextZone(WindowFramework* window, Rocket::Core::Context* context, 
     eContainer->SetInnerRML(lastRml + rml.str().c_str());
 
     {
-      Rocket::Core::Element* cancelButton = _root->GetElementById("cancel");
-
-      if (cancelButton)
-	cancelButton->AddEventListener("click", &CancelSelected);
+      ToggleEventListener(true, "cancel", "click", CancelSelected);
       for (short n = 1 ; n <= zones.size() ; ++n)
       {
 	stringstream           name;
@@ -455,7 +445,10 @@ UiNextZone::UiNextZone(WindowFramework* window, Rocket::Core::Context* context, 
 	name << "choice-" << n;
 	zoneButton = _root->GetElementById(name.str().c_str());
 	if (zoneButton)
+	{
+	  _elements.push_back(zoneButton);
 	  zoneButton->AddEventListener("click", &LevelSelected);
+	}
       }
       LevelSelected.EventReceived.Connect (*this, &UiNextZone::CallbackLevelSelected);
       CancelSelected.EventReceived.Connect(*this, &UiNextZone::CallbackCancel);
@@ -481,9 +474,7 @@ void UiNextZone::CallbackCancel(Rocket::Core::Event&)
 
 UiNextZone::~UiNextZone()
 {
-  if (_root)
-  {
-    _root->RemoveReference();
-    //_context->UnloadDocument(_root);
-  }
+  ToggleEventListener(false, "cancel", "click", CancelSelected);
+  for_each(_elements.begin(), _elements.end(), [this](Rocket::Core::Element* zoneButton)
+  { zoneButton->RemoveEventListener("click", &LevelSelected); });
 }

@@ -21,6 +21,7 @@ void StatModel::ReloadFunction(asIScriptFunction** pointer)
   *pointer = 0;
   if (_scriptContext && _scriptModule)
   {
+    cout << "ScriptContext in use is " << _scriptContext << endl;
     ScriptFuncPtrs::iterator cur, end;
 
     for (cur = _script_func_ptrs.begin(), end = _script_func_ptrs.end() ; cur != end ; ++cur)
