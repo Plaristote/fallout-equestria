@@ -1,12 +1,21 @@
 #include "inventory_ui.hpp"
+#include <panda3d/pandaVersion.h>
+
+#if PANDA_MAJOR_VERSION > 1 || PANDA_MINOR_VERSION > 8
+# define INVENTORY_USE_DRAGDROP
+#endif
 
 /*
  * InventoryView
  */
 InventoryView::InventoryView(Rocket::Core::Element* element, Inventory& inventory) : _element(*element), _inventory(inventory)
 {
+#ifdef INVENTORY_USE_DRAGDROP
   //element->AddEventListener("dragstart", this);
   element->AddEventListener("dragdrop",  this);
+#else
+# warning "Compiling with Panda <= 1.8.0, inventory drag and drop won't be supported"
+#endif
   UpdateView();
 }
 
@@ -77,7 +86,11 @@ void InventoryView::UpdateView(void)
 
       if (!notVisible)
       {
-	stream << "<span class='inventory-item-icon' id='" << count << "'>";
+	stream << "<span class='inventory-item-icon";
+#ifdef INVENTORY_USE_DRAGDROP
+	stream << " inventory-item-draggable";
+#endif
+	stream << "' id='" << count << "'>";
         stream << "<img src='../textures/itemIcons/" << item["icon"].Value() << "' />";
 	if (quantity > 1)
 	  stream << "<span class='inventory-item-quantity'>x" << quantity << "</span>";
@@ -460,9 +473,8 @@ UiNextZone::UiNextZone(WindowFramework* window, Rocket::Core::Context* context, 
 void UiNextZone::CallbackLevelSelected(Rocket::Core::Event& event)
 {
   Rocket::Core::String name = event.GetCurrentElement()->GetId();
-  stringstream         id;
   Rocket::Core::String str  = event.GetCurrentElement()->GetAttribute("zone")->Get<Rocket::Core::String>();
-  std::string          tmp = str.CString();
+  string               tmp = str.CString();
 
   NextZoneSelected.Emit(tmp);
 }
