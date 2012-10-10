@@ -179,7 +179,6 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   // Statistics
   _stats      = 0;
   _statistics = DataTree::Factory::JSON("data/charsheets/" + object->charsheet + ".json");
-  _hitPoints  = _armorClass = 5;
   if (_statistics)
   {
     Data stats = GetStatistics();
@@ -190,7 +189,11 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
     _stats      = new StatController(stats);
   }
   else
+  {
     _inventory.SetCapacity(275);
+    _hitPoints  = 15;
+    _armorClass = 5;
+  }
   
   // Script
   _scriptContext = 0;
@@ -324,16 +327,13 @@ InventoryObject* ObjectCharacter::GetEquipedItem(unsigned short it)
 
 void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, EquipedMode mode)
 {
-  cout << "SetEquipedItem #1" << endl;
   if (_equiped[it].graphics)
     delete _equiped[it].graphics;
-  cout << "SetEquipedItem #2" << endl;
   _equiped[it].equiped->SetEquiped(false);
   _equiped[it].equiped  = item;
   _equiped[it].mode     = mode;
   _equiped[it].actionIt = 0;
 
-  cout << "SetEquipedItem #3" << endl;
   _equiped[it].graphics = item->CreateEquipedModel(_level->GetWorld());
   if (_equiped[it].graphics)
   {
@@ -354,13 +354,9 @@ void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, E
     _equiped[it].graphics->GetNodePath().reparent_to(itemParentNode);
   }
   
-  cout << "SetEquipedItem #4" << endl;
   item->SetEquiped(true);
-  cout << "SetEquipedItem #5" << endl;
   EquipedItemChanged.Emit(it, item);
-  cout << "SetEquipedItem #6" << endl;
   _inventory.ContentChanged.Emit();
-  cout << "SetEquipedItem #7" << endl;
 }
 
 void ObjectCharacter::UnequipItem(unsigned short it)

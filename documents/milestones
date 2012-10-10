@@ -6,7 +6,9 @@ x --> Creating a character
 x --> Updating a character
 x --> Checking a character's statistics
 x --> Support for:
-x ----> Special points, skills points, traits
+x ----> Special points
+x ----> Skill points
+x ----> Traits
 
 x -> Worldmap
 x --> Exploring,
@@ -27,7 +29,8 @@ x --> Saving/Loading
 Milestone II
   -> Statistics
   --> Support for:
-  ----> Skill afinities, perks
+  ----> Skill afinities
+  ----> Perks
 
   -> Levels
   --> Proper camera handling
