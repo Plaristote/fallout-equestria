@@ -9,7 +9,7 @@ extern PandaFramework framework;
 /*
  * GeneralUi
  */
-#define PATH_FONTS "assets"
+#define PATH_FONTS "data"
 
 GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
 {
@@ -162,12 +162,7 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
 
   _observerError = Script::Engine::ScriptError.Connect(*this, &GameConsole::Output);
 
-  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Roman.otf");
-  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Italic.otf");
-  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-Bold.otf");
-  Rocket::Core::FontDatabase::LoadFontFace("assets/Delicious-BoldItalic.otf");
-  
-  Rocket::Core::ElementDocument* doc     = context->LoadDocument("data/console.rml");
+  Core::ElementDocument* doc     = context->LoadDocument("data/console.rml");
 
   _root = doc;
   _input = doc->GetElementById("console_input");

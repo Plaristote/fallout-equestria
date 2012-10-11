@@ -43,9 +43,10 @@ MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window
   _view.LoadGame.Connect(*this, &MainMenu::OpenUiLoad);
   _view.Quit.Connect(*this, &MainMenu::QuitGame);
   _view.Show();
-  slotToLoadPlz  = -1;
-  createLevelPlz = false;
-  quitGamePlz    = false;
+  slotToLoadPlz         = -1;
+  createLevelPlz        = false;
+  quitGamePlz           = false;
+  _need_garbage_collect = false;
 }
 
 void MainMenu::Continue(Rocket::Core::Event&)
@@ -57,7 +58,8 @@ void MainMenu::EndGame(void)
 {
   _view.Show();
   delete _levelTask;
-  _levelTask = 0;
+  _levelTask            = 0;
+  _need_garbage_collect = true;
 }
 
 AsyncTask::DoneStatus MainMenu::do_task()
@@ -78,6 +80,11 @@ AsyncTask::DoneStatus MainMenu::do_task()
       default:
 	break ;
     }
+  }
+  else if (_need_garbage_collect)
+  {
+    TexturePool::get_global_ptr()->garbage_collect();
+    _need_garbage_collect = false;
   }
   _mouseCursor.Update();
   return (quitGamePlz ? AsyncTask::DoneStatus::DS_exit : AsyncTask::DoneStatus::DS_cont);

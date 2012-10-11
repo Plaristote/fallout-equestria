@@ -42,6 +42,7 @@ private:
   void             OpenUiLoad(Rocket::Core::Event&);
   void             LoadSlot(unsigned char slot);
   
+  bool             _need_garbage_collect;
   bool             quitGamePlz;
   bool             createLevelPlz;
   short            slotToLoadPlz;

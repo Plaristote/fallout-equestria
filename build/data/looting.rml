@@ -49,6 +49,9 @@
       }
 
       .inventory-item-icon
+      {}
+
+      .inventory-item-draggable
       {
         drag: clone;
       }

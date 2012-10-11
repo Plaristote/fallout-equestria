@@ -1,7 +1,7 @@
-<template name="tplmainbar" content="content">
+<template>
 <head>
   <link type="text/rcss" href="rkt.rcss"/>
-  <link type="text/rcss" href="invader.rcss"/>
+  <link type="text/rcss" href="main.rcss"/>
 
   <style>
 
