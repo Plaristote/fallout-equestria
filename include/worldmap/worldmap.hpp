@@ -23,7 +23,7 @@ class WorldMap : public UiBase
 public:
   static WorldMap* CurrentWorldMap;
 
-  WorldMap(WindowFramework*, GameUi*, DataEngine&);
+  WorldMap(WindowFramework*, GameUi*, DataEngine&, TimeManager&);
   ~WorldMap();
   
   void Show(void);
@@ -57,6 +57,7 @@ private:
   RocketListener         MapClickedEvent, PartyCursorClicked, CityButtonClicked, ButtonInventory, ButtonCharacter, ButtonMenu;
   DataTree*              _mapTree;
   DataEngine&            _dataEngine;
+  TimeManager&           _timeManager;
   GameUi&                _gameUi;
   Timer                  _timer;
 

@@ -32,7 +32,7 @@ class Level
 public:
   static Level* CurrentLevel;
   
-  Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& data);
+  Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& data, TimeManager& tm);
 
   // Saving/Loading
   void SetDataEngine(DataEngine* de) { _dataEngine = de; }
@@ -140,13 +140,13 @@ private:
   
   Observatory::ObserverHandler obs;
 
-  WindowFramework*  _window;
-  GraphicsWindow*   _graphicWindow;
-  Mouse             _mouse;
-  SceneCamera       _camera;
-  Timer             _timer;
-  TimeManager       _timeManager;
-  State             _state;
+  WindowFramework*     _window;
+  GraphicsWindow*      _graphicWindow;
+  Mouse                _mouse;
+  SceneCamera          _camera;
+  Timer                _timer;
+  TimeManager&         _timeManager;
+  State                _state;
 
   World*               _world;
   InstanceObjects      _objects;

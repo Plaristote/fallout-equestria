@@ -45,6 +45,7 @@ private:
   WindowFramework*      _window;
   GameUi                _gameUi;
   DataEngine            _dataEngine;
+  TimeManager           _timeManager;
   
   DataTree*             _charSheet;
   StatController*       _playerStats;

@@ -27,7 +27,7 @@ void WorldMap::Save(const string& savepath)
   DataTree::Writers::JSON(_mapTree, "saves/map.json");
 }
 
-WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de) : UiBase(window, gameUi->GetContext()), _gameUi(*gameUi), _dataEngine(de)
+WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, TimeManager& tm) : UiBase(window, gameUi->GetContext()), _gameUi(*gameUi), _dataEngine(de), _timeManager(tm)
 {
   cout << "Building worldmap" << endl;
   _current_pos_x = _goal_x = _dataEngine["worldmap"]["pos-x"];
@@ -220,7 +220,8 @@ bool WorldMap::IsPartyInCity(string& cityname) const
 
 void WorldMap::UpdatePartyCursor(float elapsedTime)
 {
-  float movementSpeed = elapsedTime * 50;
+  float movementTime  = elapsedTime * 50;
+  float movementSpeed = movementTime;
   float a             = _current_pos_x - _goal_x;
   float b             = _goal_y        - _current_pos_y;
   float distance      = SQRT(a * a + b * b);
@@ -241,6 +242,10 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
     _cursor->SetProperty("left", str_x.str().c_str());
     _cursor->SetProperty("top",  str_y.str().c_str());
   }
+
+  unsigned short elapsedHours   = movementTime;
+  unsigned short elapsedMinutes = (((movementTime * 100) - (elapsedHours * 100)) / 100) * 60;
+  _timeManager.AddElapsedTime(0, elapsedMinutes, elapsedHours);
 }
 
 Core::Element* WorldMap::GetCaseAt(int x, int y) const

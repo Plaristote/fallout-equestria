@@ -18,8 +18,8 @@ Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::Action
 
 Level* Level::CurrentLevel = 0;
 
-Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet) : _window(window), _mouse(window),
-  _camera(window, window->get_camera_group()), _levelUi(window, gameUi)
+Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
+  _timeManager(tm), _camera(window, window->get_camera_group()), _levelUi(window, gameUi)
 {
   LoadingScreen* loadingScreen = new LoadingScreen(window, gameUi.GetContext());
 

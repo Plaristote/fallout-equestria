@@ -98,6 +98,12 @@ bool GameTask::SaveGame(const std::string& savepath)
   }
   else
     _dataEngine["system"]["current-level"] = 0;
+  _dataEngine["time"]["seconds"] = _timeManager.GetSecond();
+  _dataEngine["time"]["minutes"] = _timeManager.GetMinute();
+  _dataEngine["time"]["hours"]   = _timeManager.GetHour();
+  _dataEngine["time"]["days"]    = _timeManager.GetDay();
+  _dataEngine["time"]["month"]   = _timeManager.GetMonth();
+  _dataEngine["time"]["year"]    = _timeManager.GetYear();
   _dataEngine.Save(savepath + "/dataengine.json");
 
   DataTree::Writers::JSON(_charSheet, savepath + "/stats-self.json");
@@ -107,7 +113,7 @@ bool GameTask::SaveGame(const std::string& savepath)
 
 bool GameTask::LoadGame(const std::string& savepath)
 {
-  Data currentLevel;
+  Data currentLevel, time;
 
   if (_worldMap)    delete _worldMap;
   if (_playerStats) delete _playerStats;
@@ -115,12 +121,15 @@ bool GameTask::LoadGame(const std::string& savepath)
 
   _dataEngine.Load(savepath + "/dataengine.json");
   currentLevel = _dataEngine["system"]["current-level"];
+  time         = _dataEngine["time"];
+  _timeManager.ClearTasks();
+  _timeManager.SetTime(time["seconds"], time["minutes"], time["hours"], time["days"], time["month"], time["year"]);
   _charSheet   = DataTree::Factory::JSON(savepath + "/stats-self.json");
   if (!_charSheet)  return (false);
   _playerStats = new StatController(_charSheet);
   _playerStats->SetView(&(_gameUi.GetPers()));
 
-  _worldMap    = new WorldMap(_window, &_gameUi, _dataEngine);
+  _worldMap    = new WorldMap(_window, &_gameUi, _dataEngine, _timeManager);
   _worldMap->GoToPlace.Connect(*this, &GameTask::MapOpenLevel);
   
   if (!(currentLevel.Nil()) && currentLevel.Value() != "0")
@@ -337,7 +346,7 @@ Level* GameTask::DoLoadLevel(void)
 
     try
     {
-      level = new Level(_window, _gameUi, packet);
+      level = new Level(_window, _gameUi, packet, _timeManager);
       if (_loadLevelParams.isSaveFile)
 	level->Load(packet);
       SetLevel(level);
