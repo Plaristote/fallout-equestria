@@ -28,12 +28,15 @@ x --> Saving/Loading
 
 Milestone II
   -> Statistics
+  --> i18n
+x --> Canceling modifications
   --> Support for:
   ----> Skill afinities
-  ----> Perks
+x ----> Perks
 
   -> Worldmap
-  --> Displaying world time
+x --> World clock moving forward in time while traveling
+x --> Displaying world time
 
   -> Levels
   --> Proper camera handling
@@ -42,15 +45,15 @@ x --> Doors
   --> Stairs
   --> Lockers
   --> Shelfs
+  --> Saving/Loading of buffs
 
+  -> Worldmap/Level shared buffs
 x -> Shared "world clock" management for Worldmap and Levels
 
 Milestone III
   -> Worldmap
   --> Random encounters
   --> Various terrain and movement speed
-x --> World clock moving forward in time while traveling
 
   -> Levels
   --> Lights
-  

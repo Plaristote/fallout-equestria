@@ -16,6 +16,59 @@ StatModel::~StatModel(void)
   if (_scriptContext) _scriptContext->Release();
 }
 
+void StatModel::Backup(void)
+{
+  cout << "Cleaning statsheet_backup" << endl;
+  _statsheet_backup.Remove();
+  cout << "Remove called" << endl;
+  _statsheet_backup = Data();
+  cout << "Replaced with empty Data()" << endl;
+//   while (_statsheet_backup.Count() > 0)
+//   {
+//     _statsheet_backup[0].Remove();
+//     cout << "[Statsheet Backup] Removing a branch" << endl;
+//   }
+  cout << "Duplicating statsheet into statsheet_backup" << endl;
+  _statsheet_backup.Duplicate(_statsheet);
+  cout << "Duplicating over" << endl;
+}
+
+static void RestoreData(Data restoring, Data to_restore)
+{
+  unsigned int it = 0;
+
+  while (it < restoring.Count())
+  {
+    bool need_delete = false;
+    {
+      Data cur1 = restoring[it];
+      Data cur2 = to_restore[cur1.Key()];
+
+      if (cur2.Nil())
+	need_delete = true;
+      else
+      {
+	if (cur1.Count() > 0)
+	  RestoreData(cur1, cur2);
+	else
+	  cur1 = cur2.Value();
+      }
+    }
+    if (need_delete)
+      restoring[it].Remove();
+    else
+      ++it;
+  }
+}
+
+void StatModel::RestoreBackup(void)
+{
+  cout << "Restoring backup" << endl;
+  RestoreData(_statsheet, _statsheet_backup);
+  cout << "Done" << endl;
+  UpdateAllValues();
+}
+
 void StatModel::ReloadFunction(asIScriptFunction** pointer)
 {
   *pointer = 0;
@@ -262,6 +315,7 @@ bool          StatModel::UpdateAllValues(void)
     { SkillChanged.Emit(value.Key(), value); });
     
     MaxHpChanged.Emit(_statsheet["Statistics"]["Hit Points"]);
+    PerksChanged.Emit();
 
     return (true);
   }
@@ -287,8 +341,13 @@ void           StatModel::SetSkill(const std::string& stat, short value)
   short          v_skill_points = skill_points;
   Data           skill          = _statsheet["Skills"][stat];
   short          current_value  = skill;
-  
+
   v_skill_points += (current_value - value);
+  if (!(_statsheet_backup.Nil()))
+  {
+    if ((short)_statsheet_backup["Skills"][stat] > value)
+      return ;
+  }
   if (v_skill_points >= 0)
   {
     skill        = value;
@@ -331,6 +390,7 @@ StatController::StatController(Data statsheet) : _model(statsheet), _view(0)
   _model.LevelUpped.Connect      (*this,   &StatController::LevelChanged);
   _model.LevelUpped.Connect      (LevelUp, &Observatory::Signal<void (unsigned short)>::Emit);
   _model.MaxHpChanged.Connect    (*this,   &StatController::SetMaxHp);
+  _model.PerksChanged.Connect    (*this,   &StatController::PerksChanged);
 }
 
 void StatController::SpecialChanged(const string& stat, short value)
@@ -357,6 +417,16 @@ void StatController::StatisticChanged(const string& stat, short value)
     _view->SetFieldValue("Statistics", stat, value);
 }
 
+void StatController::PerksChanged(void)
+{
+  if (_view)
+  {
+    _view->SetNumPerks(_model.GetPerksPoints());
+    _view->SetPerks(_model.GetPerks());
+    _view->SetAvailablePerks(_model.GetAvailablePerks());
+  }
+}
+
 void StatController::TraitToggled(const string& trait)
 {
   _model.ToggleTrait(trait);
@@ -377,7 +447,7 @@ void StatController::LevelChanged(unsigned short lvl)
 
   _view->SetIdValue("level", lvl);
   _view->SetIdValue("next-level", _model.GetXpNextLevel());
-  if ((skill_points = _model.GetSkillPoints()) > 0)
+  if (((skill_points = _model.GetSkillPoints()) > 0) || (_model.GetPerksPoints() > 0))
   {
     _view->SetEditMode(StatView::Update);
     _view->SetIdValue("skill-points", skill_points);
@@ -440,7 +510,7 @@ void StatController::AcceptChanges(void)
   cout << "[StatController] Thou art ready" << endl;
   if (_model.GetSpecialPoints() > 0)
     _view->SetEditMode(StatView::Create);
-  else if (_model.GetSkillPoints() > 0)
+  else if (_model.GetSkillPoints() > 0 || _model.GetPerksPoints() > 0)
     _view->SetEditMode(StatView::Update);
   else
     _view->SetEditMode(StatView::Display);
@@ -450,6 +520,13 @@ void StatController::AcceptChanges(void)
 void StatController::CancelChanges(void)
 {
   _view->Hide();
+  if (_view->GetEditMode() == StatView::Update)
+    _model.RestoreBackup();
+}
+
+void StatController::MakeBackup(void)
+{
+  _model.Backup();
 }
 
 void StatController::SetView(StatView* view)
@@ -501,6 +578,7 @@ void StatController::SetView(StatView* view)
   _viewObservers.Connect(_view->PerkToggled,        *this, &StatController::PerkAdded);
   _viewObservers.Connect(_view->Accepted,           *this, &StatController::AcceptChanges);
   _viewObservers.Connect(_view->Canceled,           *this, &StatController::CancelChanges);
+  _viewObservers.Connect(_view->MakeBackup,         *this, &StatController::MakeBackup);
 
   _view->SetTraits(_model.GetAvailableTraits());
   
@@ -1155,6 +1233,8 @@ void StatViewRocket::SetCategoryFields(const std::string& category, const std::v
 
 void StatViewRocket::Show(void)
 {
+  if (_editMode == StatView::Update)
+    MakeBackup.Emit();
   UiBase::Show();
   if (_n_perks > 0)
     _perks_dialog.Show();

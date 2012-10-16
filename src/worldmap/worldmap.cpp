@@ -134,11 +134,38 @@ void WorldMap::AddCityToList(Data cityData)
   }
 }
 
+void WorldMap::UpdateClock(void)
+{
+  Core::Element* elem_year  = _root->GetElementById("clock-year");
+  Core::Element* elem_month = _root->GetElementById("clock-month");
+  Core::Element* elem_day   = _root->GetElementById("clock-day");
+  
+  if (elem_year)
+  {
+    stringstream str;
+    str << _timeManager.GetYear();
+    elem_year->SetInnerRML(str.str().c_str());
+  }
+  if (elem_month)
+  {
+    stringstream str;
+    str << _timeManager.GetMonth();
+    elem_month->SetInnerRML(str.str().c_str());
+  }
+  if (elem_day)
+  {
+    stringstream str;
+    str << _timeManager.GetDay();
+    elem_day->SetInnerRML(str.str().c_str());
+  }
+}
+
 void WorldMap::Show(void)
 {
   UiBase::Show();
   _current_pos_x = _dataEngine["worldmap"]["pos-x"];
   _current_pos_y = _dataEngine["worldmap"]["pos-y"];
+  UpdateClock();
 }
 
 void WorldMap::Run(void)
@@ -243,9 +270,12 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
     _cursor->SetProperty("top",  str_y.str().c_str());
   }
 
+  unsigned short lastDay        = _timeManager.GetDay();
   unsigned short elapsedHours   = movementTime;
   unsigned short elapsedMinutes = (((movementTime * 100) - (elapsedHours * 100)) / 100) * 60;
   _timeManager.AddElapsedTime(0, elapsedMinutes, elapsedHours);
+  if (lastDay != _timeManager.GetDay())
+    UpdateClock();
 }
 
 Core::Element* WorldMap::GetCaseAt(int x, int y) const

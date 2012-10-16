@@ -47,19 +47,16 @@ public:
   virtual ~Data(void);
 
   /*! \brief Returns a Data containing the child DataBranch corresponding to key if it exists, or Nil Data otherwise (see the Nil method) */
-  Data        operator[](const std::string& key);
-  const Data  operator[](const std::string& key) const;
-  Data        operator[](unsigned int it);
+  Data         operator[](const std::string& key);
+  const Data   operator[](const std::string& key) const;
+  Data         operator[](unsigned int it);
 
-  std::string Key(void)   const { return (_data ? _data->key   : ""); }
-  std::string Value(void) const { return (_data ? _data->value : ""); }
+  std::string  Key(void)   const { return (_data ? _data->key             : ""); }
+  std::string  Value(void) const { return (_data ? _data->value           : ""); }
 
-  void        MoveUp();
-  void        MoveDown();
-
-  void        SetKey(const std::string& newKey) { if (_data) _data->key = newKey; }
+  void         SetKey(const std::string& newKey) { if (_data) _data->key = newKey; }
   /*! \brief Copy all branches from var's tree and duplicate them under this branch */
-  void        Duplicate(Data var);
+  void         Duplicate(Data var);
 
   const Data& operator=(const Data& var);
 

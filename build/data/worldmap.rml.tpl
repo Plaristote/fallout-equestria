@@ -19,13 +19,22 @@
   overflow: scroll;
 }
 
+#clock-frame
+{
+  position: absolute;
+  top:      0px;
+  right:    0px;
+  width:    20%;
+  height:   10%;
+}
+
 #city-list
 {
   position: absolute;
-  top:    0px;
-  right:  0px;
-  width:  20%;
-  height: 80%;
+  top:      10%;
+  right:    0px;
+  width:    20%;
+  height:   70%;
 }
 
 #main-bar
@@ -64,6 +73,10 @@
       <p id="pworldmap">
         #{RML}
       </p>
+    </div>
+
+    <div id="clock-frame">
+      <span id="clock-year">0000</span> - <span id="clock-month">01</span> - <span id="clock-day">01</span>
     </div>
 
     <div id="city-list">

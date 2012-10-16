@@ -44,7 +44,8 @@ public:
 
 private:
   void                   MapTileGenerator(Data map);
-  void                   UpdatePartyCursor(float elapsedTime);  
+  void                   UpdatePartyCursor(float elapsedTime);
+  void                   UpdateClock(void);
   bool                   IsPartyInCity(std::string& ret) const;
   Rocket::Core::Element* GetCaseAt(int x, int y) const;
   void                   GetCurrentCase(int&, int&) const;

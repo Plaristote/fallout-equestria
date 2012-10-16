@@ -1,0 +1,56 @@
+<rml>
+  <head>
+    <title>Perks Menu</title>
+    <link type="text/template" href="window.rml" />
+    <style>
+      body
+      {
+	width: 400px;
+	height: 300x;
+	margin: auto;
+      }
+      
+      #controls
+      {
+        position: absolute;
+        bottom:   0px;
+        right:    0px;
+        height:   10%;
+      }
+
+      #perks-selector
+      {
+        position:   absolute;
+        height:     90%;
+        width:      30%;
+        top:        0px;
+        left:       0px;
+        overflow-x: scroll;
+      }
+
+      #perks-description
+      {
+        position:   absolute;
+        height:     90%;
+        width:      70%;
+        top:        0px;
+        right:      0px;
+        overflow:   auto;
+      }
+
+    </style>
+  </head>
+  <body template="pywindow">
+
+    <div id="perks-selector">
+    </div>
+
+    <div id="perks-description">
+    </div>
+
+    <div id="controls">
+      <button class="button_menu" id="select">Ok</button>
+      <button class="button_menu" id="cancel">Cancel</button>
+    </div>
+  </body>
+</rml>

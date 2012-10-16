@@ -115,7 +115,12 @@ void        Data::Duplicate(Data var)
 {
   Data::iterator it  = var.begin();
   Data::iterator end = var.end();
-  
+
+  if (_data == 0)
+  {
+    _data = new DataBranch;
+    _data->pointers++;
+  }
   _data->key   = var.Key();
   _data->value = var.Value();
   _data->nil   = false;

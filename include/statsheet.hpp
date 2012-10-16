@@ -11,6 +11,9 @@ public:
   StatModel(Data statsheet);
   ~StatModel(void);
   
+  void           Backup(void);
+  void           RestoreBackup(void);
+  
   void           SetName(const std::string& name)  { _statsheet["Name"]   = name;           }
   std::string    GetName(void) const               { return (_statsheet["Name"].Value());   }
   void           SetRace(const std::string& race)  { _statsheet["Race"]   = race;           }
@@ -58,6 +61,7 @@ public:
   Observatory::Signal<void (unsigned short)>            LevelUpped;
   Observatory::Signal<void (const std::string&, short)> SpecialChanged, SkillChanged, StatisticChanged;
   Observatory::Signal<void (short)>                     MaxHpChanged;
+  Observatory::Signal<void>                             PerksChanged;
 
 private:
   typedef std::pair<asIScriptFunction**, std::string> ScriptFuncPtr;
@@ -71,6 +75,7 @@ private:
   std::vector<std::string> GetStatKeys(Data stats) const;
 
   Data               _statsheet;
+  Data               _statsheet_backup;
   asIScriptContext*  _scriptContext;
   asIScriptModule*   _scriptModule;
   asIScriptFunction *_scriptAddSpecialPoint, *_scriptActivateTraits,  *_scriptAddExperience;
@@ -109,7 +114,7 @@ public:
   Observatory::Signal<void (unsigned char)>                          AgeChanged;
   Observatory::Signal<void (const std::string&)>                     TraitToggled;
   Observatory::Signal<void (const std::string&)>                     PerkToggled;
-  Observatory::Signal<void>                                          Accepted, Canceled;
+  Observatory::Signal<void>                                          Accepted, Canceled, MakeBackup;
 
   void         SetNumPerks(unsigned short n_perks)             { _n_perks = n_perks; }
 
@@ -145,6 +150,7 @@ private:
   void      SpecialChanged(const std::string&, short);
   void      SkillChanged(const std::string&, short);
   void      StatisticChanged(const std::string&, short);
+  void      PerksChanged(void);
   void      TraitToggled(const std::string&);
   void      LevelChanged(unsigned short);
   void      InformationChanged(const std::string&, const std::string&);
@@ -156,6 +162,7 @@ private:
   
   void      AcceptChanges(void);
   void      CancelChanges(void);
+  void      MakeBackup(void);
 
   StatModel                    _model;
   StatView*                    _view;
