@@ -36,7 +36,7 @@ void StatModel::ReloadFunction(asIScriptFunction** pointer)
 
 void StatModel::LoadFunctions(void)
 {
-  _scriptUpdateAllValues = _scriptAvailableTraits = _scriptActivateTraits = _scriptAddExperience = _scriptAddSpecialPoint = _scriptIsReady = _scriptLevelUp = _scriptXpNextLevel = 0;
+  _scriptUpdateAllValues = _scriptAvailableTraits = _scriptActivateTraits = _scriptAddExperience = _scriptAddSpecialPoint = _scriptIsReady = _scriptLevelUp = _scriptXpNextLevel = _scriptAddPerk = 0;
   if (_scriptContext)
   {
     _scriptModule = Script::Engine::LoadModule("special", "scripts/ai/special.as");
@@ -50,8 +50,39 @@ void StatModel::LoadFunctions(void)
       _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptLevelUp,         "void LevelUp(Data)"));
       _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptIsReady,         "bool IsReady(Data)"));
       _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptUpdateAllValues, "void UpdateAllValues(Data)"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAddPerk,         "bool AddPerk(Data, string)"));
     }
-  }  
+  }
+}
+
+bool           StatModel::AddPerk(const string& perk)
+{
+  bool         success = true;
+  
+  ReloadFunction(&_scriptAddPerk);
+  if (_scriptAddPerk)
+  {
+    string tmp = perk;
+
+    _scriptContext->Prepare(_scriptAddPerk);
+    _scriptContext->SetArgObject(0, &_statsheet);
+    _scriptContext->SetArgObject(1, &tmp);
+    _scriptContext->Execute();
+    success = _scriptContext->GetReturnByte();
+  }
+  else
+  {
+    int points_left = _statsheet["Variables"]["Perks"];
+    
+    if (points_left > 0)
+    {
+      _statsheet["Perks"][perk]        = 1;
+      _statsheet["Variables"]["Perks"] = points_left - 1;
+    }
+    else
+      success = false;
+  }
+  return (success);
 }
 
 void           StatModel::SetCurrentHp(short hp)
@@ -207,7 +238,7 @@ list<string>  StatModel::GetPerks(void) const
 
   for_each(data_perks.begin(), data_perks.end(), [&perks](Data perk)
   {
-    perks.push_back(perk.Value());
+    perks.push_back(perk.Key());
   });
   return (perks);
 }
@@ -350,6 +381,8 @@ void StatController::LevelChanged(unsigned short lvl)
   {
     _view->SetEditMode(StatView::Update);
     _view->SetIdValue("skill-points", skill_points);
+    _view->SetNumPerks(_model.GetPerksPoints());
+    _view->SetPerks(_model.GetAvailablePerks());
   }
 }
 
@@ -465,6 +498,7 @@ void StatController::SetView(StatView* view)
   _viewObservers.Connect(_view->InformationChanged, *this, &StatController::InformationChanged);
   _viewObservers.Connect(_view->AgeChanged,         *this, &StatController::AgeChanged);
   _viewObservers.Connect(_view->TraitToggled,       *this, &StatController::TraitToggled);
+  _viewObservers.Connect(_view->PerkToggled,        *this, &StatController::PerkAdded);
   _viewObservers.Connect(_view->Accepted,           *this, &StatController::AcceptChanges);
   _viewObservers.Connect(_view->Canceled,           *this, &StatController::CancelChanges);
 
@@ -477,12 +511,9 @@ void StatController::SetView(StatView* view)
   else
     _view->SetEditMode(StatView::Display);
 
-  /*list<string> perks = _model.GetAvailablePerks();
-  
-  for_each(perks.begin(), perks.end(), [](string perk)
-  {
-    cout << "Available Perk: " << perk << endl;
-  });*/
+  _view->SetNumPerks      (_model.GetPerksPoints());
+  _view->SetPerks         (_model.GetPerks());
+  _view->SetAvailablePerks(_model.GetAvailablePerks());
 }
 
 void StatController::SetCurrentHp(short hp)
@@ -535,6 +566,16 @@ void StatController::ViewStatDowned(const string& type, const string& stat)
 {
   if      (type == "Special") DownSpecial(stat);
   else if (type == "Skills")  DownSkill(stat);
+}
+
+void StatController::PerkAdded(const string& str)
+{
+  if (_model.AddPerk(str) && _view)
+  {
+    _view->SetNumPerks(_model.GetPerksPoints());
+    _view->SetPerks(_model.GetPerks());
+    _view->SetAvailablePerks(_model.GetAvailablePerks());
+  }
 }
 
 /*
@@ -655,7 +696,7 @@ static string underscore(const std::string& str)
   return (ret);
 }
 
-StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
+StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context), _perks_dialog(window, context)
 {
   _root     = context->LoadDocument("data/charsheet.rml");
 
@@ -669,6 +710,9 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
 
     DoneButton.EventReceived.Connect  (*this, &StatViewRocket::Accept);
     CancelButton.EventReceived.Connect(*this, &StatViewRocket::Cancel);
+    
+    // Perks Dialog
+    _perks_dialog.PerkChoosen.Connect (PerkToggled, &Observatory::Signal<void (const string&)>::Emit);
 
     // Edit Mode
     EventSpecialClicked.EventReceived.Connect(*this, &StatViewRocket::SpecialClicked);
@@ -1106,5 +1150,148 @@ void StatViewRocket::SetCategoryFields(const std::string& category, const std::v
       }
       element->SetInnerRML(rml.str().c_str());
     }
+  }
+}
+
+void StatViewRocket::Show(void)
+{
+  UiBase::Show();
+  if (_n_perks > 0)
+    _perks_dialog.Show();
+}
+
+void StatViewRocket::Hide(void)
+{
+  _perks_dialog.Hide();
+  UiBase::Hide();  
+}
+
+void StatViewRocket::SetPerks(list<string> perks)
+{
+  if (_root)
+  {
+    Core::Element* panel_perks = _root->GetElementById("panel-perks");
+    stringstream   rml;
+
+    for_each(perks.begin(), perks.end(), [&rml](const string& perk)
+    {
+      rml << "- " << perk << "<br />" << endl;
+    });
+    panel_perks->SetInnerRML(rml.str().c_str());
+  }
+}
+
+void StatViewRocket::SetAvailablePerks(list<string> perks)
+{
+  _perks_dialog.SetAvailablePerks(perks);
+  if (_n_perks <= 0)
+    _perks_dialog.Hide();
+}
+
+/*
+ * PerksDialog
+ */
+StatViewRocket::PerksDialog::PerksDialog(WindowFramework* w, Core::Context* c) : UiBase(w, c)
+{
+  _root = c->LoadDocument("data/perks_menu.rml");
+  if (_root)
+  {
+    ToggleEventListener(true, "cancel", "click", Cancel);
+    ToggleEventListener(true, "select", "click", ChoosePerk);
+    DblClickPerk.EventReceived.Connect(*this, &PerksDialog::CallbackDblClickPerk);
+    Cancel.EventReceived.Connect      (*this, &PerksDialog::CallbackCancel);
+    SelectPerk.EventReceived.Connect  (*this, &PerksDialog::SetSelectedPerk);
+    ChoosePerk.EventReceived.Connect  (*this, &PerksDialog::CallbackChoosePerk);
+  }
+  else
+    cerr << "[PerksDialog][Missing RML Template]" << endl;
+}
+
+StatViewRocket::PerksDialog::~PerksDialog()
+{
+  ToggleEventListener(false, "cancel", "click", Cancel);
+  ToggleEventListener(false, "select", "click", ChoosePerk);
+  ClearPerksButtons();
+}
+
+void StatViewRocket::PerksDialog::CallbackCancel(Core::Event&)
+{
+  Hide();
+}
+
+void StatViewRocket::PerksDialog::SetSelectedPerk(Core::Event& event)
+{
+  Core::Element* element   = event.GetCurrentElement();
+  Core::Variant* variant   = element->GetAttribute("data-perk");
+  string         data_perk = variant->Get<Core::String>().CString();
+  
+  _selected_perk = data_perk;
+  PerkSelected.Emit(data_perk);
+}
+
+void StatViewRocket::PerksDialog::CallbackChoosePerk(Core::Event&)
+{
+  PerkChoosen.Emit(_selected_perk);
+}
+
+void StatViewRocket::PerksDialog::CallbackDblClickPerk(Core::Event& event)
+{
+  SetSelectedPerk(event);
+  CallbackChoosePerk(event);
+}
+
+void StatViewRocket::PerksDialog::ClearPerksButtons(void)
+{
+  for_each(_perks_buttons.begin(), _perks_buttons.end(), [this](Core::Element* element)
+  {
+    element->RemoveEventListener("click",    &SelectPerk);
+    element->RemoveEventListener("dblclick", &DblClickPerk);
+  });
+  _perks_buttons.clear();
+}
+
+void StatViewRocket::PerksDialog::SetAvailablePerks(list<string> perks)
+{
+  if (_perks_buttons.size())
+    ClearPerksButtons();
+  if (_root)
+  {
+    Core::Element* element = _root->GetElementById("perks-selector");
+    
+    if (element)
+    {
+      stringstream rml;
+      
+      for_each(perks.begin(), perks.end(), [this, &rml](const string& perk)
+      {
+	rml << "- <button id='perk-picker-" << underscore(perk) << "' data-perk='" << underscore(perk) << "'>" << perk << "</button><br />" << endl;
+      });
+      element->SetInnerRML(rml.str().c_str());
+      for_each(perks.begin(), perks.end(), [this, element](const string& perk)
+      {
+	string         id          = "perk-picker-" + underscore(perk);
+	Core::Element* perk_picker = element->GetElementById(id.c_str());
+
+	if (perk_picker)
+	{
+	  perk_picker->AddEventListener("click",    &SelectPerk);
+	  perk_picker->AddEventListener("dblclick", &DblClickPerk);
+	  _perks_buttons.push_back(perk_picker);
+	}
+	else
+	  cerr << "[StatViewRocket][PerksPicker] Fatal Error" << endl;
+      });
+    }
+  }
+}
+
+void StatViewRocket::PerksDialog::SetPerkDescription(string description)
+{
+  if (_root)
+  {
+    Core::Element* element = _root->GetElementById("perks-description");
+    
+    if (element)
+      element->SetInnerRML(description.c_str());
   }
 }

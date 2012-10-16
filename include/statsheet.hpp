@@ -19,7 +19,8 @@ public:
   unsigned short GetAge(void) const                { return (_statsheet["Age"]);            }
   void           SetGender(const std::string& g)   { _statsheet["Gender"] = (g == "male" ? "Stallion" : "Mare"); }
   std::string    GetGender(void) const             { return (_statsheet["Gender"].Value()); }
-  
+
+  bool           AddPerk(const std::string& perk);
   void           ToggleTrait(const std::string& trait);
   bool           HasTrait(const std::string& trait)    const { return (_statsheet["Traits"][trait] == 1); }
 
@@ -72,9 +73,9 @@ private:
   Data               _statsheet;
   asIScriptContext*  _scriptContext;
   asIScriptModule*   _scriptModule;
-  asIScriptFunction *_scriptAddSpecialPoint, *_scriptActivateTraits, *_scriptAddExperience;
-  asIScriptFunction *_scriptXpNextLevel,     *_scriptLevelUp,        *_scriptUpdateAllValues;
-  asIScriptFunction *_scriptIsReady,         *_scriptAvailableTraits;
+  asIScriptFunction *_scriptAddSpecialPoint, *_scriptActivateTraits,  *_scriptAddExperience;
+  asIScriptFunction *_scriptXpNextLevel,     *_scriptLevelUp,         *_scriptUpdateAllValues;
+  asIScriptFunction *_scriptIsReady,         *_scriptAvailableTraits, *_scriptAddPerk;
 };
 
 class StatView
@@ -100,15 +101,21 @@ public:
   virtual void SetExperience(unsigned short xp, unsigned short lvl, unsigned short next_level)              = 0;
   virtual void SetTraits(std::list<std::string>)                                                            = 0;
   virtual void SetTraitActive(const std::string&, bool)                                                     = 0;
+  virtual void SetPerks(std::list<std::string>)                                                             = 0;
+  virtual void SetAvailablePerks(std::list<std::string> perks)                                              = 0;
 
   Observatory::Signal<void (const std::string&, const std::string&)> StatUpped, StatDowned; 
   Observatory::Signal<void (const std::string&, const std::string&)> InformationChanged;
   Observatory::Signal<void (unsigned char)>                          AgeChanged;
   Observatory::Signal<void (const std::string&)>                     TraitToggled;
+  Observatory::Signal<void (const std::string&)>                     PerkToggled;
   Observatory::Signal<void>                                          Accepted, Canceled;
-  
+
+  void         SetNumPerks(unsigned short n_perks)             { _n_perks = n_perks; }
+
 protected:
-  EditMode     _editMode;
+  EditMode       _editMode;
+  unsigned short _n_perks;
 };
 
 class StatController
@@ -142,6 +149,7 @@ private:
   void      LevelChanged(unsigned short);
   void      InformationChanged(const std::string&, const std::string&);
   void      AgeChanged(unsigned char);
+  void      PerkAdded(const std::string&);
 
   void      ViewStatUpped(const std::string&, const std::string&);
   void      ViewStatDowned(const std::string&, const std::string&);
@@ -156,13 +164,40 @@ private:
 
 class StatViewRocket : public UiBase, public StatView
 {
+  struct PerksDialog : public UiBase
+  {
+    PerksDialog(WindowFramework* window, Rocket::Core::Context* context);
+    ~PerksDialog();
+    
+    void SetAvailablePerks(std::list<std::string> perks);
+    void SetPerkDescription(std::string description);
+
+    Observatory::Signal<void (const std::string&)> PerkSelected;
+    Observatory::Signal<void (const std::string&)> PerkChoosen;
+    
+  private:
+    void ClearPerksButtons(void);
+    void SetSelectedPerk(Rocket::Core::Event& event);
+    void CallbackChoosePerk(Rocket::Core::Event& event);
+    void CallbackCancel(Rocket::Core::Event& event);
+    void CallbackDblClickPerk(Rocket::Core::Event& event);
+
+    RocketListener Cancel;
+    RocketListener SelectPerk;
+    RocketListener ChoosePerk;    
+    RocketListener DblClickPerk;
+
+    std::vector<Rocket::Core::Element*> _perks_buttons;
+    string                              _selected_perk;
+  };
+
 public:
   StatViewRocket(WindowFramework* window, Rocket::Core::Context* context);
   
   void SetEditMode(EditMode);
   
-  void Hide(void) { UiBase::Hide(); }
-  void Show(void) { UiBase::Show(); }
+  void Hide(void);
+  void Show(void);
 
   void SetInformation(const std::string& name, const std::string& value);
   void SetInformation(const std::string& name, short value);
@@ -174,8 +209,11 @@ public:
   void SetExperience(unsigned short, unsigned short, unsigned short);
   void SetTraits(std::list<std::string>);
   void SetTraitActive(const std::string&, bool);
+  void SetPerks(std::list<std::string>);
+  void SetAvailablePerks(std::list<std::string>);
 
-private:  
+private:
+  PerksDialog    _perks_dialog;
   RocketListener CancelButton;
   RocketListener DoneButton;
   RocketListener EventSpecialClicked, EventSkillClicked, EventGeneralClicked, EventTraitClicked;

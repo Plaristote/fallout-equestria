@@ -362,7 +362,7 @@
     <p id="char-bottom-box">
      <tabset>
       <tab id="tab-perks">Perks</tab>
-      <panel>Nada</panel>
+      <panel id="panel-perks">Nada</panel>
 
       <tab id="tab-traits">Traits</tab>
       <panel id="panel-traits">Rien</panel>

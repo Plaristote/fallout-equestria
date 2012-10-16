@@ -32,6 +32,9 @@ Milestone II
   ----> Skill afinities
   ----> Perks
 
+  -> Worldmap
+  --> Displaying world time
+
   -> Levels
   --> Proper camera handling
   --> Barter
@@ -40,13 +43,13 @@ x --> Doors
   --> Lockers
   --> Shelfs
 
-  -> Shared "world clock" management for Worldmap and Levels
+x -> Shared "world clock" management for Worldmap and Levels
 
 Milestone III
   -> Worldmap
   --> Random encounters
   --> Various terrain and movement speed
-  --> World clock moving forward in time while traveling
+x --> World clock moving forward in time while traveling
 
   -> Levels
   --> Lights
