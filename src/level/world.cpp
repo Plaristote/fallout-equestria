@@ -46,12 +46,10 @@ void World::DeleteWayPoint(Waypoint* toDel)
   }
 }
 
-LPlane World::GetWaypointPlane(short currentFloor) const
+void   World::GetWaypointLimits(short currentFloor, LPoint3& upperRight, LPoint3& upperLeft, LPoint3& bottomLeft) const
 {
   Waypoints::const_iterator it  = waypoints.begin();
   Waypoints::const_iterator end = waypoints.end();
-  LPlane                    plane;
-  LPoint3                   upperRight(0, 0, 0), upperLeft(0, 0, 0), bottomLeft(0, 0, 0);
 
   for (; it != end ; ++it)
   {
@@ -78,6 +76,13 @@ LPlane World::GetWaypointPlane(short currentFloor) const
   }
   upperRight.set_z(bottomLeft.get_z());
   upperLeft.set_z(bottomLeft.get_z());
+}
+
+LPlane World::GetWaypointPlane(short currentFloor) const
+{
+  LPoint3 upperRight(0, 0, 0), upperLeft(0, 0, 0), bottomLeft(0, 0, 0);
+
+  GetWaypointLimits(currentFloor, upperRight, upperLeft, bottomLeft);
   return (LPlane(upperRight, upperLeft, bottomLeft));
 }
 

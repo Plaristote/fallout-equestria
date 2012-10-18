@@ -43,7 +43,7 @@
       <div id="inventory">
       </div>
     </div>
-    <button class="button_menu" id="button_cancel">Cancel</button>
+    <button class="button_menu" id="button_cancel" i18n="Cancel">Cancel</button>
   </p>
   </body>
 </rml>

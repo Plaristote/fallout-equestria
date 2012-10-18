@@ -22,6 +22,7 @@ class MainMenu : public AsyncTask
   
 public:
   MainMenu(WindowFramework* window);
+  ~MainMenu();
 
   void       Continue(Rocket::Core::Event&);  
   void       EndGame(void);

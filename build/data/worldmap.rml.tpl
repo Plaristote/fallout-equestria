@@ -84,9 +84,9 @@
     </div>
 
     <div id="main-bar">
-      <button id="button-inventory">Inventory</button><br />
-      <button id="button-character">Character</button><br />
-      <button id="button-menu">Menu</button>
+      <button id="button-inventory" i18n="Inventory">Inventory</button><br />
+      <button id="button-character" i18n="Character">Character</button><br />
+      <button id="button-menu"      i18n="Menu">Menu</button>
     </div>
 
   </div>

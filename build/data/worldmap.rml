@@ -19,13 +19,22 @@
   overflow: scroll;
 }
 
+#clock-frame
+{
+  position: absolute;
+  top:      0px;
+  right:    0px;
+  width:    20%;
+  height:   10%;
+}
+
 #city-list
 {
   position: absolute;
-  top:    0px;
-  right:  0px;
-  width:  20%;
-  height: 80%;
+  top:      10%;
+  right:    0px;
+  width:    20%;
+  height:   70%;
 }
 
 #main-bar
@@ -5326,14 +5335,18 @@
       </p>
     </div>
 
+    <div id="clock-frame">
+      <span id="clock-year">0000</span> - <span id="clock-month">01</span> - <span id="clock-day">01</span>
+    </div>
+
     <div id="city-list">
       City list
     </div>
 
     <div id="main-bar">
-      <button id="button-inventory">Inventory</button><br />
-      <button id="button-character">Character</button><br />
-      <button id="button-menu">Menu</button>
+      <button id="button-inventory" i18n="Inventory">Inventory</button><br />
+      <button id="button-character" i18n="Character">Character</button><br />
+      <button id="button-menu"      i18n="Menu">Menu</button>
     </div>
 
   </div>

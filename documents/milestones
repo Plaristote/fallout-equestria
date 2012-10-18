@@ -28,7 +28,7 @@ x --> Saving/Loading
 
 Milestone II
   -> Statistics
-  --> i18n
+x --> i18n
 x --> Canceling modifications
   --> Support for:
   ----> Skill afinities
@@ -49,6 +49,8 @@ x --> Doors
 
   -> Worldmap/Level shared buffs
 x -> Shared "world clock" management for Worldmap and Levels
+? -> Music Manager
+x -> i18n/Rocket interfaces dynamic translator
 
 Milestone III
   -> Worldmap
@@ -57,3 +59,5 @@ Milestone III
 
   -> Levels
   --> Lights
+
+  -> Sound Manager

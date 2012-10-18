@@ -49,8 +49,8 @@
     </div>
 
     <div id="controls">
-      <button class="button_menu" id="select">Ok</button>
-      <button class="button_menu" id="cancel">Cancel</button>
+      <button class="button_menu" id="select" i18n="Ok">Ok</button>
+      <button class="button_menu" id="cancel" i18n="Cancel">Cancel</button>
     </div>
   </body>
 </rml>

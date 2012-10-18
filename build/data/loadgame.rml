@@ -28,9 +28,9 @@
     <div id="slot-preview">
     </div>
 
-    <button class="button_menu" id="button-load">Load</button>
-    <button class="button_menu" id="button-erase">Erase</button><br />
-    <button class="button_menu" id="button-cancel">Cancel</button>
+    <button class="button_menu" id="button-load"   i18n="Load">Load</button>
+    <button class="button_menu" id="button-erase"  i18n="Delete">Erase</button><br />
+    <button class="button_menu" id="button-cancel" i18n="Cancel">Cancel</button>
 
   </div>
 

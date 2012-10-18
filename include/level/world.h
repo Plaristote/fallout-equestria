@@ -331,6 +331,7 @@ struct World
     Waypoint* GetWaypointClosest(LPoint3);
     void      SetWaypointsVisible(bool v)
     { if (v) { rootWaypoints.show();  } else { rootWaypoints.hide();  } }
+    void           GetWaypointLimits(short currentFloor, LPoint3& upperRight, LPoint3& upperLeft, LPoint3& bottomLeft) const;
     LPlane         GetWaypointPlane(short currentFloor) const;
 
     template<class OBJTYPE>

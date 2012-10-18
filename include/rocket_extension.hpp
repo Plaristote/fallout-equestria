@@ -4,6 +4,7 @@
 # include <panda3d/pandaFramework.h>
 # include <Rocket/Core.h>
 # include "observatory.hpp"
+# include "i18n.hpp"
 
 struct RocketListener : public Rocket::Core::EventListener
 {
@@ -18,8 +19,16 @@ class UiBase
 {
   friend class GameUi;
 public:
-  UiBase(WindowFramework* window, Rocket::Core::Context* context) : _window(window), _root(0), _context(context) {}
-  virtual ~UiBase() { if (_root) { _root->Close(); _root->RemoveReference(); _root = 0; } }
+  UiBase(WindowFramework* window, Rocket::Core::Context* context) : _window(window), _root(0), _context(context)
+  {
+    i18n::LanguageChanged.Connect(*this, &UiBase::Translate);
+  }
+
+  virtual ~UiBase()
+  {
+    if (_root) { _root->Close(); _root->RemoveReference(); _root = 0; }
+    i18n::LanguageChanged.Disconnect(_languageObs);
+  }
 
   virtual void Show(void)    { if (_root) { _root->Show(); VisibilityToggled.Emit(true);  } }
   virtual void Hide(void)    { if (_root) { _root->Hide(); _root->PushToBack(); VisibilityToggled.Emit(false); } }
@@ -59,10 +68,16 @@ public:
     }
   }
 
+  void Translate(void);
+
 protected:
   WindowFramework*               _window;
   Rocket::Core::ElementDocument* _root;
   Rocket::Core::Context*         _context;
+private:
+  void RecursiveTranslate(Rocket::Core::Element*);
+  
+  Observatory::ObserverId        _languageObs;
 };
 
 #endif

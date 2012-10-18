@@ -161,7 +161,7 @@ void SceneCamera::RunScroll(float elapsedTime)
     cameraMotion |= MotionRight;
     cameraSpeedX   = cameraSpeedX * ((pointer.get_x() - (_graphicWindow->get_x_size() - _mouseBorderMargin)) / _mouseBorderMargin);
   }
-  
+
   cameraMovementX = cameraSpeedX * elapsedTime;
   cameraMovementY = cameraSpeedY * elapsedTime;
   cameraRot.set_x(cameraRot.get_x() * rad2deg);
@@ -217,17 +217,6 @@ void SceneCamera::CenterCameraInstant(LPoint3f pos)
   
   _camera.set_x(pos.get_x() + sin(cameraRot.get_x()) * 100);
   _camera.set_y(pos.get_y() + sin(cameraRot.get_y()) * 100);
-
-//   if (_currentCameraAngle == 0)
-//   {
-//     _camera.set_y(pos.get_y() - 65);
-//     _camera.set_x(pos.get_x() - 60);
-//   }
-//   else if (_currentCameraAngle == 1)
-//   {
-//     _camera.set_y(pos.get_y() - 40);
-//     _camera.set_x(pos.get_x());
-//   }
 }
 
 void SceneCamera::FollowObject(InstanceDynamicObject* object)

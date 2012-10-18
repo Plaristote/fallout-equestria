@@ -127,6 +127,8 @@ LoadingScreen::LoadingScreen(WindowFramework* window, Core::Context* context) : 
   Core::ElementDocument* doc = context->LoadDocument("data/loading.rml");
 
   _root = doc;
+  if (_root)
+    Translate();
   Show();
 }
 
@@ -183,6 +185,7 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
     }
     else
       cout << "[UI] No input for the console" << endl;
+    Translate();
   }
 }
 
@@ -361,6 +364,7 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
     ButtonUnequip1.EventReceived.Connect(*this, &GameInventory::CallbackButtonUnequip1);
     ButtonUnequip2.EventReceived.Connect(*this, &GameInventory::CallbackButtonUnequip2);
 
+    Translate();
     doc->Show();
   }
   _inventoryView.ObjectSelected.Connect(*this, &GameInventory::SetSelectedObject);
@@ -452,6 +456,8 @@ GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : Ui
     _exitClicked.EventReceived.Connect(ExitClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
     _saveClicked.EventReceived.Connect(SaveClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
     _loadClicked.EventReceived.Connect(LoadClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
+    
+    Translate();
   }
 }
 
@@ -510,6 +516,8 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
     EquipedItem2Clicked.EventReceived.Connect(*this, &GameMainBar::CallbackEquipedItem2Clicked);
     CombatEndClicked.EventReceived.Connect(*this, &GameMainBar::CallbackCombatEndClicked);
     PassTurnClicked.EventReceived.Connect (*this, &GameMainBar::CallbackPassTurnClicked);
+    
+    Translate();
   }
 }
 
@@ -670,4 +678,33 @@ void GameMainBar::SetEquipedItemAction(unsigned short it, InventoryObject* item,
       elem->SetInnerRML(rml.str().c_str());
     }
   }
+}
+
+/*
+ * UiBase
+ */
+void UiBase::RecursiveTranslate(Core::Element* root)
+{
+  unsigned short it;
+  Core::Element* child;
+  
+  for (it = 0 ; (child = root->GetChild(it)) ; ++it)
+  {
+    Core::Variant* attr = child->GetAttribute("i18n");
+
+    if (attr)
+    {
+      string key = attr->Get<Core::String>().CString();
+
+      child->SetInnerRML(i18n::T(key).c_str());
+    }
+    else
+      RecursiveTranslate(child);
+  }
+}
+
+void UiBase::Translate(void)
+{
+  if (_root)
+    RecursiveTranslate(_root);
 }

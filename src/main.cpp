@@ -15,10 +15,12 @@ using namespace std;
 #include <panda3d/load_prc_file.h>
 #include <panda3d/graphicsStateGuardianBase.h>
 #include <panda3d/pStatClient.h>
+#include <panda3d/audioManager.h>
 
 # include "scriptengine.hpp"
 
 #include "serializer.hpp"
+#include <i18n.hpp>
 
 void AngelCout(const std::string& str)
 {
@@ -73,6 +75,7 @@ static void AngelScriptInitialize(void)
   engine->RegisterGlobalFunction("void LF()", asFUNCTION( GameConsole::ListFunctions ), asCALL_CDECL);
   engine->RegisterGlobalFunction("void PrintScenegraph()", asFUNCTION( GameConsole::PrintScenegraph ), asCALL_CDECL);
   engine->RegisterGlobalFunction("void Write(const string &in)", asFUNCTION(GameConsole::WriteOn), asCALL_CDECL);
+  engine->RegisterGlobalFunction("void SetLanguage(const string& in)", asFUNCTION(i18n::Load), asCALL_CDECL);
 
   Script::StdList<string>::Register(engine, "StringList", "string");  
 
@@ -226,9 +229,10 @@ int main(int argc, char *argv[])
     props.set_icon_filename("data/icon.ico");
     window->get_graphics_window()->request_properties(props);
   }
-  
+
   Script::Engine::Initialize();
   AngelScriptInitialize();
+  i18n::Load("English");
   {
     MainMenu       mainMenu(window);
 

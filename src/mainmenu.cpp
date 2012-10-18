@@ -1,4 +1,5 @@
 #include "mainmenu.hpp"
+#include "musicmanager.hpp"
 
 extern PandaFramework framework;
 
@@ -47,6 +48,14 @@ MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window
   createLevelPlz        = false;
   quitGamePlz           = false;
   _need_garbage_collect = false;
+
+  MusicManager::Initialize();
+  MusicManager::Get()->Play("mainmenu", "traderslife");
+}
+
+MainMenu::~MainMenu()
+{
+  MusicManager::Finalize();
 }
 
 void MainMenu::Continue(Rocket::Core::Event&)
@@ -64,6 +73,9 @@ void MainMenu::EndGame(void)
 
 AsyncTask::DoneStatus MainMenu::do_task()
 {
+  MusicManager* mm = MusicManager::Get();
+
+  if (mm) { mm->Run(); }
   if (createLevelPlz) AsyncCreateLevel();
   if (_levelTask)
   {

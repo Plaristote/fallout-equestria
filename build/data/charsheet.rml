@@ -279,9 +279,9 @@
       <p id="special-points-title">Special Points<span id="special-points">0</span></p>
 
       <p id="experience">
-        <p class='current-level-label'>Level: <span id='level'>999</span></p>
-        <p class='current-xp-label'>Experience: <span id='current-xp'>999</span></p>
-        <p class='next-level-label'>Next level: <span id='next-level'>999</span></p>
+        <p class='current-level-label'><span i18n='Level'>Level</span>: <span id='level'>999</span></p>
+        <p class='current-xp-label'><span i18n='Experience'>Experience</span>: <span id='current-xp'>999</span></p>
+        <p class='next-level-label'><span i18n='Next level'>Next level</span>: <span id='next-level'>999</span></p>
       </p>
 
       <p id="char-state">
@@ -352,10 +352,10 @@
       <p id="skills">
       </p>
       
-      <p id="skill-points-title">Skill Points: <span id="skill-points">0</span></p>
+      <p id="skill-points-title" i18n="Skill Points">Skill Points: <span id="skill-points">0</span></p>
 
-      <button class="button_menu" id="continue">Done</button>
-      <button class="button_menu" id="cancel">Cancel</button>
+      <button class="button_menu" id="continue" i18n="Confirm">Done</button>
+      <button class="button_menu" id="cancel"   i18n="Close">Cancel</button>
 
     </p>
 

@@ -64,7 +64,7 @@ private:
   LPoint3f         _currentHpr;
   LPoint3f         _objectiveHpr;
 
-  unsigned int     _minPosX, _minPosY, _maxPosX, _maxPosY;
+  int              _minPosX, _minPosY, _maxPosX, _maxPosY;
 
   float            _destHeight;
 

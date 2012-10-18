@@ -220,6 +220,7 @@ public:
   void SetAvailablePerks(std::list<std::string>);
 
 private:
+  Data           _i18n;
   PerksDialog    _perks_dialog;
   RocketListener CancelButton;
   RocketListener DoneButton;

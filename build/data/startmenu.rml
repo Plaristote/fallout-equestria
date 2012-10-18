@@ -30,11 +30,11 @@
     <div id="loading_screen">
 
       <div id="button-container">
-        <button id="button-continue">Continue</button><br />
-        <button id="button-new-game">New Game</button><br />
-        <button id="button-load-game">Load game</button><br />
-        <button id="button-options">Options</button><br />
-        <button id="button-quit">Quit</button>
+        <button id="button-continue"   i18n="Continue">Continue</button><br />
+        <button id="button-new-game"   i18n="New Game">New Game</button><br />
+        <button id="button-load-game"  i18n="Load">Load game</button><br />
+        <button id="button-options"    i18n="Options">Options</button><br />
+        <button id="button-quit"       i18n="Exit">Quit</button>
       </div>
 
       <div id="content" style="color: black;">

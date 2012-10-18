@@ -71,6 +71,7 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, Time
     CityButtonClicked.EventReceived.Connect(*this, &WorldMap::CityClicked);
     
     UpdatePartyCursor(0);
+    Translate();
   }
   CurrentWorldMap = this;
 }

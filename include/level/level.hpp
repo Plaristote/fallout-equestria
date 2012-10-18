@@ -193,7 +193,6 @@ private:
   bool              _mouseActionBlocked;
 
   DataEngine*       _dataEngine;
-  DataTree*         _l18n;
   DataTree*         _items;
 
   

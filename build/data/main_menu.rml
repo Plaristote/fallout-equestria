@@ -18,10 +18,10 @@
     </style>
   </head>
   <body template="pywindow">
-    <button class="button_menu" id="continue">Continue</button><br />
-    <button class="button_menu" id="save"    >Save</button><br />
-    <button class="button_menu" id="load"    >Load</button><br />
-    <button class="button_menu" id="options" >Options</button><br />
-    <button class="button_menu" id="exit"    >Exit</button>
+    <button class="button_menu" id="continue" i18n="Continue">Continue</button><br />
+    <button class="button_menu" id="save"     i18n="Save">Save</button><br />
+    <button class="button_menu" id="load"     i18n="Load">Load</button><br />
+    <button class="button_menu" id="options"  i18n="Options">Options</button><br />
+    <button class="button_menu" id="exit"     i18n="Exit">Exit</button>
   </body>
 </rml>

@@ -1,4 +1,5 @@
 #include "statsheet.hpp"
+#include <i18n.hpp>
 
 using namespace std;
 
@@ -783,12 +784,14 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
     Rocket::Core::Element* button_continue = _root->GetElementById("continue");
     Rocket::Core::Element* button_cancel   = _root->GetElementById("cancel");
 
+    _i18n = i18n::GetStatistics();
+
     if (button_continue) button_continue->AddEventListener("click", &DoneButton);
     if (button_cancel)   button_cancel->AddEventListener  ("click", &CancelButton);
 
     DoneButton.EventReceived.Connect  (*this, &StatViewRocket::Accept);
     CancelButton.EventReceived.Connect(*this, &StatViewRocket::Cancel);
-    
+
     // Perks Dialog
     _perks_dialog.PerkChoosen.Connect (PerkToggled, &Observatory::Signal<void (const string&)>::Emit);
 
@@ -806,7 +809,7 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
     Core::Element* age_edit_ok    = _root->GetElementById("char-age-edit-ok");
     Core::Element* name_edit_ok   = _root->GetElementById("char-name-edit-ok");
     Core::Element* gender_edit_ok = _root->GetElementById("char-gender-edit-ok");
-    
+
     if (age_edit_ok)    age_edit_ok->AddEventListener   ("click", &EventAgeChanged);
     if (name_edit_ok)   name_edit_ok->AddEventListener  ("click", &EventNameChanged);
     if (gender_edit_ok) gender_edit_ok->AddEventListener("click", &EventGenderChanged);
@@ -821,8 +824,9 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
       ButtonUp.EventReceived.Connect  (*this, &StatViewRocket::StatMore);
       ButtonDown.EventReceived.Connect(*this, &StatViewRocket::StatLess);
     }
-    
+
     SetEditMode(Display);
+    Translate();
   }
 }
 
@@ -1172,10 +1176,10 @@ void StatViewRocket::SetTraits(list<string> traits)
     {
       stringstream rml;
       
-      for_each(traits.begin(), traits.end(), [&rml](const string trait)
+      for_each(traits.begin(), traits.end(), [this, &rml](const string trait)
       {
 	rml << "<button id='" << underscore(trait) << "'>O</button>";
-	rml << "<span class='text-trait' id='text-" << underscore(trait) << "'>" << trait << "</span><br />";
+	rml << "<span class='text-trait' id='text-" << underscore(trait) << "'>" << _i18n[trait].Value() << "</span><br />";
       });
       element->SetInnerRML(rml.str().c_str());
       
@@ -1214,14 +1218,14 @@ void StatViewRocket::SetCategoryFields(const std::string& category, const std::v
 	else if (category == "Statistics")
 	{
 	  rml << "<datagrid>\n";
-          rml << "  <col width='80%'><span class'statistics-key'>" << keys[i] << "</span></col>\n";
+          rml << "  <col width='80%'><span class'statistics-key'>" << _i18n[keys[i]].Value() << "</span></col>\n";
           rml << "  <col width='20%'><span class'statistics-value' id='statistics-value-" << underscored << "'>0</span></col>\n";
           rml << "</datagrid>\n\n";
 	}
 	else if (category == "Skills")
 	{
 	  rml << "<datagrid class='skill-datagrid' data-type='Skills' data-key='" << keys[i] << "'>\n";
-          rml << "  <col width='80%'><span class='skill-key'>" << keys[i] << "</span></col>\n";
+          rml << "  <col width='80%'><span class='skill-key'>" << _i18n[keys[i]].Value() << "</span></col>\n";
           rml << "  <col width='20%'><span class='skill-value' id='skills-value-" << underscored << "'>0</span>%</col>\n";
           rml << "</datagrid>\n\n";
 	}
@@ -1282,6 +1286,7 @@ StatViewRocket::PerksDialog::PerksDialog(WindowFramework* w, Core::Context* c) :
     Cancel.EventReceived.Connect      (*this, &PerksDialog::CallbackCancel);
     SelectPerk.EventReceived.Connect  (*this, &PerksDialog::SetSelectedPerk);
     ChoosePerk.EventReceived.Connect  (*this, &PerksDialog::CallbackChoosePerk);
+    Translate();
   }
   else
     cerr << "[PerksDialog][Missing RML Template]" << endl;

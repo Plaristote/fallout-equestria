@@ -4,6 +4,7 @@
 
 #include "level/objects/door.hpp"
 #include "level/objects/shelf.hpp"
+#include <i18n.hpp>
 
 #define AP_COST_USE             2
 #define WORLDTIME_TURN          10
@@ -30,7 +31,6 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   obs.Connect(_levelUi.InterfaceOpened, *this, &Level::SetInterrupted);
 
   loadingScreen->AppendText("-> Loading textual content");
-  _l18n  = DataTree::Factory::JSON("data/l18n/english.json");
   _items = DataTree::Factory::JSON("data/objects.json");
 
   _floor_lastWp = 0;
@@ -181,6 +181,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   });
   
   _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
+  _camera.FollowObject(GetPlayer());
   
 //   _world->AddLight(WorldLight::Point, "toto");
 //   WorldLight* light = _world->GetLightByName("toto");
@@ -213,7 +214,6 @@ Level::~Level()
     if (_currentUis[i] != 0)
       delete _currentUis[i];
   }
-  if (_l18n)  delete _l18n;
   if (_world) delete _world;
   if (_items) delete _items;
   CurrentLevel = 0;
@@ -612,7 +612,7 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
     if (talkTo)
       talkTo->LookAt(GetPlayer());
     
-    _currentRunningDialog = new DialogController(_window, _levelUi.GetContext(), dialog, _l18n);
+    _currentRunningDialog = new DialogController(_window, _levelUi.GetContext(), dialog, i18n::GetDialogs());
     _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningUi<UiItRunningDialog>);
     _mouseActionBlocked = true;
     _camera.SetEnabledScroll(false);
@@ -1174,7 +1174,10 @@ void Level::SetCurrentFloor(unsigned char floor)
       break ;
     }
   }
-
+  
+  LPoint3 upperLeft(0, 0, 0), upperRight(0, 0, 0), bottomLeft(0, 0, 0);
+  _world->GetWaypointLimits(floor, upperRight, upperLeft, bottomLeft);
+  //_camera.SetLimits(bottomLeft.get_x(), bottomLeft.get_y(), upperRight.get_x(), upperRight.get_y());
   _currentFloor = floor;
 }
 
