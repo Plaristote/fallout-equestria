@@ -7,6 +7,8 @@ WorldMap* WorldMap::CurrentWorldMap = 0;
 
 WorldMap::~WorldMap()
 {
+  _timeManager.ClearTasks(TASK_LVL_WORLDMAP);
+  
   ToggleEventListener(false, "button-inventory", "click", ButtonInventory);
   ToggleEventListener(false, "button-character", "click", ButtonCharacter);
   ToggleEventListener(false, "button-menu",      "click", ButtonMenu);

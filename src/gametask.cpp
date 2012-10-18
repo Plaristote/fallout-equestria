@@ -122,7 +122,7 @@ bool GameTask::LoadGame(const std::string& savepath)
   _dataEngine.Load(savepath + "/dataengine.json");
   currentLevel = _dataEngine["system"]["current-level"];
   time         = _dataEngine["time"];
-  _timeManager.ClearTasks();
+  _timeManager.ClearTasks(0);
   _timeManager.SetTime(time["seconds"], time["minutes"], time["hours"], time["days"], time["month"], time["year"]);
   _charSheet   = DataTree::Factory::JSON(savepath + "/stats-self.json");
   if (!_charSheet)  return (false);

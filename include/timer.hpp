@@ -5,6 +5,9 @@
 # include <panda3d/pandaSystem.h>
 # include "observatory.hpp"
 
+# define TASK_LVL_WORLDMAP 1
+# define TASK_LVL_CITY     2
+
 class Timer
 {
 public:
@@ -36,6 +39,8 @@ public:
 
     unsigned short lastY, lastMo, lastD, lastH, lastM, lastS;
     unsigned short timeY, timeMo, timeD, timeH, timeM, timeS;
+    
+    unsigned char  level;
 
     void NextStep(void);
 
@@ -58,7 +63,7 @@ public:
 
   ~TimeManager(void)
   {
-    ClearTasks();
+    ClearTasks(0);
   }
   
   static unsigned short GetDaysPerMonth(unsigned short m)
@@ -68,10 +73,22 @@ public:
     return (m % 2 != 0 ? 30 : 31);
   }
   
-  void            ClearTasks(void)
+  void            ClearTasks(unsigned char level)
   {
-    std::for_each(tasks.begin(), tasks.end(), [](Task* task) { delete task; });
-    tasks.clear();
+    Tasks::iterator it, end;
+    
+    for (it = tasks.begin(), end = tasks.end() ; it != end ;)
+    {
+      Task* task = *it;
+      
+      if (task->level >= level)
+      {
+	delete task;
+	it = tasks.erase(it);
+      }
+      else
+	++it;
+    }
   }
   
   void            SetTime(unsigned short s, unsigned short m, unsigned short h, unsigned short d, unsigned short mo, unsigned short y)
@@ -89,7 +106,7 @@ public:
   void            AddElapsedSeconds(float s);
   void            AddElapsedTime(unsigned short s, unsigned short m = 0, unsigned short h = 0, unsigned short d = 0, unsigned short mo = 0, unsigned short y = 0);
   
-  Task*           AddTask(bool loop, unsigned short s, unsigned short m = 0, unsigned short h = 0, unsigned short d = 0, unsigned short mo = 0, unsigned short y = 0);
+  Task*           AddTask(unsigned char level, bool loop, unsigned short s, unsigned short m = 0, unsigned short h = 0, unsigned short d = 0, unsigned short mo = 0, unsigned short y = 0);
   void            DelTask(Task* task);  
   void            ExecuteTasks(void);
 private:

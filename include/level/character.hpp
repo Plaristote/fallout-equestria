@@ -20,14 +20,22 @@ class CharacterBuff
 {
 public:
   CharacterBuff(Level*, ObjectCharacter* character, Data buff);
+  CharacterBuff(Level* l);
 
   bool               operator==(const std::string& comp) const { return (_name == comp); }
   const std::string& GetName(void)                       const { return (_name);         }
 
-  void Begin(ObjectCharacter* from);
+  void Begin(ObjectCharacter* from, TimeManager::Task* task = 0);
   void End(void);
 
+  void Load(Level*, ObjectCharacter*, Utils::Packet&);
+  void Save(Utils::Packet&);
+
 private:
+  void               Initialize(Level*, ObjectCharacter*, Data buff);
+  
+  Data               _buff;
+  
   TimeManager&       _timeManager;
   ObjectCharacter*   _character;
   unsigned short     _duration;
@@ -147,6 +155,7 @@ public:
   Observatory::Signal<void (unsigned short, InventoryObject*, unsigned char)> EquipedItemActionChanged;
 
   void                PushBuff(Data, ObjectCharacter* caster);
+  void                DelBuff(CharacterBuff* buff);
 
   void                CheckFieldOfView(void);
   void                SetAsEnemy(ObjectCharacter*, bool);
@@ -201,6 +210,7 @@ private:
 
   Inventory                 _inventory;
   ItemEquiped               _equiped[2];
+  std::list<CharacterBuff*> _buffs;
 
   // Line of Sight Tools
   NodePath                  _losPath;

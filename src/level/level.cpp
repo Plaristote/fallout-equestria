@@ -164,7 +164,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   obs.Connect(InstanceDynamicObject::ActionTalkTo,      *this, &Level::CallbackActionTalkTo);
   obs.Connect(InstanceDynamicObject::ActionUseObjectOn, *this, &Level::CallbackActionUseObjectOn);
 
-  TimeManager::Task* daylightTask = _timeManager.AddTask(true, 3);
+  TimeManager::Task* daylightTask = _timeManager.AddTask(TASK_LVL_CITY, true, 3);
   daylightTask->Interval.Connect(*this, &Level::RunDaylight);
 
   unsigned int taskIt = 0;
@@ -172,7 +172,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   {
     if (character != GetPlayer())
     {
-      TimeManager::Task* task = _timeManager.AddTask(true, 3);
+      TimeManager::Task* task = _timeManager.AddTask(TASK_LVL_CITY, true, 3);
 
       task->lastS += (taskIt % 3);
       ++taskIt;
@@ -205,6 +205,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 
 Level::~Level()
 {
+  _timeManager.ClearTasks(TASK_LVL_CITY);
   obs.DisconnectAll();
   ForEach(_objects,   [](InstanceDynamicObject* obj) { delete obj;  });
   ForEach(_exitZones, [](LevelExitZone* zone)        { delete zone; });

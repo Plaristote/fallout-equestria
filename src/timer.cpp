@@ -22,10 +22,11 @@ void TimeManager::AddElapsedTime(unsigned short s, unsigned short m, unsigned sh
   CorrectValues();
 }
 
-TimeManager::Task* TimeManager::AddTask(bool loop, unsigned short s, unsigned short m, unsigned short h, unsigned short d, unsigned short mo, unsigned short y)
+TimeManager::Task* TimeManager::AddTask(unsigned char level, bool loop, unsigned short s, unsigned short m, unsigned short h, unsigned short d, unsigned short mo, unsigned short y)
 {
   Task* task = new Task;
-  
+
+  task->level  = level;
   task->loop   = loop;
   task->it     = 0;
   task->timeY  = y;

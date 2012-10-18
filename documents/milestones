@@ -45,7 +45,7 @@ x --> Doors
   --> Stairs
   --> Lockers
   --> Shelfs
-  --> Saving/Loading of buffs
+x --> Saving/Loading of buffs
 
   -> Worldmap/Level shared buffs
 x -> Shared "world clock" management for Worldmap and Levels

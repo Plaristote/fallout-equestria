@@ -10,16 +10,26 @@
 using namespace std;
 
 CharacterBuff::CharacterBuff(Level* level, ObjectCharacter* character, Data buff)
-  : _timeManager(level->GetTimeManager()), _character(character)
+  : _timeManager(level->GetTimeManager())
+{
+  Initialize(level, character, buff);
+}
+
+CharacterBuff::CharacterBuff(Level* l) : _timeManager(l->GetTimeManager()) {}
+
+void CharacterBuff::Initialize(Level* level, ObjectCharacter* character, Data buff)
 {
   Data dataGraphics = buff["graphics"];
 
-  _name     = buff.Key();
-  _duration = buff["duration"];
-  _begin    = _end = 0;
-  _module   = 0;
-  _task     = 0;
-  _context  = Script::Engine::Get()->CreateContext();
+  _buff.Duplicate(buff);
+  _buff.Output();
+  _character = character;
+  _name      = buff.Key();
+  _duration  = buff["duration"];
+  _begin     = _end = 0;
+  _module    = 0;
+  _task      = 0;
+  _context   = Script::Engine::Get()->CreateContext();
   if (_context)
   {
     Data scriptName = buff["script"]["source"];
@@ -42,26 +52,29 @@ CharacterBuff::CharacterBuff(Level* level, ObjectCharacter* character, Data buff
   if (!(dataGraphics.Nil()))
   {
     WindowFramework* window = level->GetWorld()->window;
-    
+
     _graphicalEffect = window->load_model(window->get_panda_framework()->get_models(), "models/" + dataGraphics["model"].Value());
     if (!(dataGraphics["scale"].Nil()))
       _graphicalEffect.set_scale((float)dataGraphics["scale"]);
   }
 }
 
-void CharacterBuff::Begin(ObjectCharacter* from)
+void CharacterBuff::Begin(ObjectCharacter* from, TimeManager::Task* task)
 {
   if (_begin)
   {
-    TimeManager::Task* task;
+    if (!task)
+    {
+      _context->Prepare(_begin);
+      _context->SetArgAddress(0, _character);
+      _context->SetArgAddress(1, from);
+      _context->Execute();
+      _task = _timeManager.AddTask(TASK_LVL_CITY, false, _duration);
+    }
+    else
+      _task = task;
+    _task->Interval.Connect(*this, &CharacterBuff::End);
 
-    _context->Prepare(_begin);
-    _context->SetArgAddress(0, _character);
-    _context->SetArgAddress(1, from);
-    _context->Execute();
-    task = _timeManager.AddTask(false, _duration);
-    task->Interval.Connect(*this, &CharacterBuff::End);
-    
     if (_graphicalEffect.node())
       _graphicalEffect.reparent_to(_character->GetNodePath());
   }
@@ -78,6 +91,7 @@ void CharacterBuff::End(void)
     if (_graphicalEffect.node())
       _graphicalEffect.remove_node();
   }
+  _character->DelBuff(this);
 }
 
 void ObjectCharacter::PushBuff(Data data, ObjectCharacter* caster)
@@ -85,6 +99,18 @@ void ObjectCharacter::PushBuff(Data data, ObjectCharacter* caster)
   CharacterBuff* buff = new CharacterBuff(_level, this, data);
 
   buff->Begin(caster);
+  _buffs.push_back(buff);
+}
+
+void ObjectCharacter::DelBuff(CharacterBuff* to_del)
+{
+  std::list<CharacterBuff*>::iterator it = find(_buffs.begin(), _buffs.end(), to_del);
+  
+  if (it != _buffs.end())
+  {
+    _buffs.erase(it);
+    delete to_del;
+  }
 }
 
 using namespace std;
