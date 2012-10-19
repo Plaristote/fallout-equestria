@@ -3,7 +3,7 @@
 
 using namespace std;
 
-GameTask::GameTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi(window, rocket)
+GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(window, generalUi.GetRocketRegion())
 {
   _continue    = true;
   _window      = window;
@@ -17,6 +17,7 @@ GameTask::GameTask(WindowFramework* window, PT(RocketRegion) rocket) : _gameUi(w
   _gameUi.GetMenu().SaveClicked.Connect(*this, &GameTask::SaveClicked);
   _gameUi.GetMenu().LoadClicked.Connect(*this, &GameTask::LoadClicked);
   _gameUi.GetMenu().ExitClicked.Connect(*this, &GameTask::Exit);
+  _gameUi.GetMenu().OptionsClicked.Connect(generalUi.GetOptions(), &UiBase::FireShow);
 }
 
 GameTask::~GameTask()

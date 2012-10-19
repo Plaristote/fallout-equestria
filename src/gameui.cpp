@@ -33,8 +33,11 @@ GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
   window->get_mouse().attach_new_node(_ih);
   _rocket->set_input_handler(_ih);
   
-  _console = new GameConsole  (window, _rocket->get_context());
+  _console = new GameConsole(window, _rocket->get_context());
   _console->Hide();
+  
+  _options = new GameOptions(window, _rocket->get_context());
+  _options->Hide();
 
   _window->enable_keyboard();
   framework.define_key("tab", "ConsoleHandle", GameConsole::Toggle, (void*)_console);  
@@ -141,6 +144,116 @@ void LoadingScreen::AppendText(const std::string& str)
   content = Core::String(str.c_str()) + "<br />" + content;
   input->SetInnerRML(content);
   framework.get_graphics_engine()->render_frame();
+}
+
+/*
+ * GameOptions
+ */
+#include "options.hpp"
+DataTree* OptionsManager::_data = 0;
+
+void OptionsManager::Initialize(void)
+{
+  if (!_data)
+  {
+    _data = DataTree::Factory::JSON("conf.json");
+    Refresh();
+  }
+}
+
+void OptionsManager::Finalize(void)
+{
+  if (_data)
+  {
+    delete _data;
+    _data = 0;
+  }
+}
+
+Data OptionsManager::Get(void)
+{
+  if (!_data)
+    Initialize();
+  return (_data);
+}
+
+void OptionsManager::Refresh(void)
+{
+  Data data(_data);
+  
+  if (_data)
+  {
+    Data language = data["language"];
+
+    if (!(language.Nil()))
+      i18n::Load(language.Value());
+    DataTree::Writers::JSON(_data, "conf.json");
+  }
+}
+
+GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBase(window, context)
+{
+  _root = context->LoadDocument("data/options.rml");
+  if (_root)
+  {
+    Core::Element* language_select  = _root->GetElementById("language-select");
+    vector<string> languages        = i18n::LanguagesAvailable();
+    Data           current_language = OptionsManager::Get()["language"];
+    stringstream   rml;
+
+    for_each(languages.begin(), languages.end(), [&rml](string language)
+    {
+      rml << "<option id='language-" << language << "' value='" << language << "'";
+      rml << ">" << language << "</option>\n";
+    });
+    language_select->SetInnerRML(rml.str().c_str());
+    {
+      Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("language-select"));
+      
+      for (unsigned int i = 0 ; i < select->GetNumOptions() ; ++i)
+      {
+	Controls::SelectOption* option = select->GetOption(i);
+	
+	if (option)
+	{
+	  if (current_language.Value() == option->GetValue().CString())
+	  {
+	    select->SetSelection(i);
+	    break ;
+	  }
+	}
+      }
+    }
+
+    
+    ToggleEventListener(true, "language-select", "change", LanguageSelected);
+    ToggleEventListener(true, "exit", "click", ExitClicked);
+    ExitClicked.EventReceived.Connect(*this, &UiBase::FireHide);
+    LanguageSelected.EventReceived.Connect(*this, &GameOptions::SetLanguage);
+    Translate();
+  }
+}
+
+GameOptions::~GameOptions()
+{
+  ToggleEventListener(false, "language-select", "change", LanguageSelected);
+  ToggleEventListener(false, "exit", "click", ExitClicked);
+}
+
+void GameOptions::SetLanguage(Core::Event& event)
+{
+  Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("language-select"));
+  int                                 it_select = select->GetSelection();
+  Controls::SelectOption*             option    = select->GetOption(it_select);
+  
+  if (option)
+  {
+    Core::String str  = option->GetValue();
+    Data         opts = OptionsManager::Get();
+
+    opts["language"] = str.CString();
+    OptionsManager::Refresh();    
+  }
 }
 
 /*
@@ -456,7 +569,8 @@ GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : Ui
     _exitClicked.EventReceived.Connect(ExitClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
     _saveClicked.EventReceived.Connect(SaveClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
     _loadClicked.EventReceived.Connect(LoadClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
-    
+    _optionsClicked.EventReceived.Connect(OptionsClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
+
     Translate();
   }
 }
@@ -467,7 +581,7 @@ GameMenu::~GameMenu()
   ToggleEventListener(false, "options",  "click", _optionsClicked);
   ToggleEventListener(false, "exit",     "click", _exitClicked);
   ToggleEventListener(false, "save",     "click", _saveClicked);
-  ToggleEventListener(false, "load",     "click", _loadClicked);  
+  ToggleEventListener(false, "load",     "click", _loadClicked);
 }
 
 /*
@@ -687,7 +801,9 @@ void UiBase::RecursiveTranslate(Core::Element* root)
 {
   unsigned short it;
   Core::Element* child;
-  
+
+  if (!root)
+    return ;
   for (it = 0 ; (child = root->GetChild(it)) ; ++it)
   {
     Core::Variant* attr = child->GetAttribute("i18n");

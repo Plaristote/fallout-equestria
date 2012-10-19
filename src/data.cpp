@@ -141,7 +141,6 @@ const Data& Data::operator=(const Data& var)
   if (var.Nil() && !Nil())
   {
     _data->pointers--;
-    delete _data;
     _data = 0;
   }
   else if (Nil())

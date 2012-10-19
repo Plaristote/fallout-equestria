@@ -9,6 +9,7 @@ PT(AsyncTaskManager) taskMgr = AsyncTaskManager::get_global_ptr();
 PT(ClockObject)      globalClock = ClockObject::get_global_clock();
 
 # include "mainmenu.hpp"
+# include "options.hpp"
 
 using namespace std;
 
@@ -232,7 +233,7 @@ int main(int argc, char *argv[])
 
   Script::Engine::Initialize();
   AngelScriptInitialize();
-  i18n::Load("English");
+  OptionsManager::Initialize();
   {
     MainMenu       mainMenu(window);
 
@@ -241,6 +242,7 @@ int main(int argc, char *argv[])
 
     unload_prc_file(config);
   }
+  OptionsManager::Finalize();
   Script::Engine::Finalize();
   return (0);
 }

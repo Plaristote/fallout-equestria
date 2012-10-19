@@ -127,6 +127,7 @@ UiLoad::UiLoad(WindowFramework* window, Rocket::Core::Context* context, const st
   EventClickSlot.EventReceived.Connect(*this, &UiLoad::ClickSlot);
   EventLoadGame.EventReceived.Connect(*this, &UiLoad::LoadGame);
   EventCancel.EventReceived.Connect(*this, &UiLoad::Cancel);
+  Translate();
 }
 
 UiLoad::~UiLoad()
@@ -213,6 +214,7 @@ UiSave::UiSave(WindowFramework* window, Rocket::Core::Context* context, const st
     }
     ToggleEventListener(true, "button-save",   "click", EventSaveGame);
     ToggleEventListener(true, "button-cancel", "click", EventCancel);
+    Translate();
   }
   EventClickSlot.EventReceived.Connect(*this, &UiSave::ClickSlot);
   EventSaveGame.EventReceived.Connect(*this, &UiSave::SaveGame);

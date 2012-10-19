@@ -52,7 +52,7 @@ vector<string> i18n::LanguagesAvailable(void)
     
     for_each(files.begin(), files.end(), [&list](const struct dirent& file)
     {
-      if (file.d_type == DT_DIR)
+      if (file.d_type == DT_DIR && file.d_name[0] != '.')
 	list.push_back(file.d_name);
     });
   }

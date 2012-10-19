@@ -24,6 +24,7 @@ public:
   Observatory::Signal<void (Rocket::Core::Event&)> SaveClicked;
   Observatory::Signal<void (Rocket::Core::Event&)> LoadClicked;
   Observatory::Signal<void (Rocket::Core::Event&)> ExitClicked;
+  Observatory::Signal<void (Rocket::Core::Event&)> OptionsClicked;
 
 private:
   RocketListener         _continueClicked;
@@ -213,6 +214,20 @@ private:
   Observatory::ObserverId _observers[6];
 };
 
+class GameOptions : public UiBase
+{
+public:
+  GameOptions(WindowFramework* window, Rocket::Core::Context* context);
+  ~GameOptions(void);
+private:
+  RocketListener ExitClicked;
+  RocketListener LanguageSelected;
+  
+  void SetLanguage(Rocket::Core::Event&);
+  
+  std::list<Rocket::Core::Element*> _language_options;
+};
+
 class GeneralUi
 {
 public:
@@ -220,13 +235,15 @@ public:
   ~GeneralUi();
 
   PT(RocketRegion)       GetRocketRegion(void) const { return (_rocket); }
+  GameOptions&           GetOptions(void) { return (*_options); }
 
 private:
   WindowFramework*       _window;
   PT(RocketRegion)       _rocket;
   PT(RocketInputHandler) _ih;
-  
+
   GameConsole*           _console;
+  GameOptions*           _options;
 };
 
 #endif

@@ -21,7 +21,7 @@ class UiBase
 public:
   UiBase(WindowFramework* window, Rocket::Core::Context* context) : _window(window), _root(0), _context(context)
   {
-    i18n::LanguageChanged.Connect(*this, &UiBase::Translate);
+    _languageObs = i18n::LanguageChanged.Connect(*this, &UiBase::Translate);
   }
 
   virtual ~UiBase()
@@ -29,6 +29,9 @@ public:
     if (_root) { _root->Close(); _root->RemoveReference(); _root = 0; }
     i18n::LanguageChanged.Disconnect(_languageObs);
   }
+  
+  void         FireShow(Rocket::Core::Event&) { Show(); }
+  void         FireHide(Rocket::Core::Event&) { Hide(); }
 
   virtual void Show(void)    { if (_root) { _root->Show(); VisibilityToggled.Emit(true);  } }
   virtual void Hide(void)    { if (_root) { _root->Hide(); _root->PushToBack(); VisibilityToggled.Emit(false); } }

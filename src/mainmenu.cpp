@@ -42,7 +42,8 @@ MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window
   
   _view.Continue.Connect(*this, &MainMenu::Continue);
   _view.LoadGame.Connect(*this, &MainMenu::OpenUiLoad);
-  _view.Quit.Connect(*this, &MainMenu::QuitGame);
+  _view.Quit.Connect    (*this, &MainMenu::QuitGame);
+  _view.Options.Connect (_generalUi.GetOptions(), &UiBase::FireShow);
   _view.Show();
   slotToLoadPlz         = -1;
   createLevelPlz        = false;
@@ -104,7 +105,7 @@ AsyncTask::DoneStatus MainMenu::do_task()
 
 void MainMenu::AsyncCreateLevel(void)
 {
-  _levelTask = new GameTask(_window, _generalUi.GetRocketRegion());
+  _levelTask = new GameTask(_window, _generalUi);
   _view.Hide();
   if (slotToLoadPlz >= 0)
     _levelTask->LoadSlot(slotToLoadPlz);
@@ -160,5 +161,6 @@ MainMenu::View::View(WindowFramework* window, Rocket::Core::Context* context) : 
       else
 	cerr << "Missing button " << idz[it] << endl;
     }
+    Translate();
   }
 }

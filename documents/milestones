@@ -34,7 +34,7 @@ x --> Canceling modifications
   ----> Skill afinities
 x ----> Perks
 
-  -> Worldmap
+x -> Worldmap
 x --> World clock moving forward in time while traveling
 x --> Displaying world time
 
@@ -51,6 +51,7 @@ x --> Saving/Loading of buffs
 x -> Shared "world clock" management for Worldmap and Levels
 ? -> Music Manager
 x -> i18n/Rocket interfaces dynamic translator
+x -> Option Manager and user interface
 
 Milestone III
   -> Worldmap

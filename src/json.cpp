@@ -324,8 +324,6 @@ bool DataTree::Writers::StringJSON(Data data, string& str)
 
   toWrite = "{\n";
 
-  //appendValue(data);
-
   Data::iterator it  = data.begin();
   Data::iterator end = data.end();
 

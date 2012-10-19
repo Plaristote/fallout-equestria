@@ -10,7 +10,7 @@
 class GameTask
 {
 public:
-  GameTask(WindowFramework* window, PT(RocketRegion) rocket);  
+  GameTask(WindowFramework* window, GeneralUi&);
   ~GameTask();
   
   void                  MapOpenLevel(std::string name);
