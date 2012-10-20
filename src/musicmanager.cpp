@@ -56,6 +56,7 @@ void MusicManager::Play(const string& scategory, const string& name)
       cout << "LOL WTF" << endl;
     cout << "Current music length is " << _current_music->length() << endl;
    }
+  _current_music->set_play_rate(5.0);
 }
 
 void MusicManager::PlayNext(void)
@@ -89,11 +90,18 @@ void MusicManager::PlayNext(void)
 
 void MusicManager::Run(void)
 {
+  _audio_manager->update();
   if (_current_music)
   {
     float elapsed_time = _timer.GetElapsedTime();
 
-    _current_music->set_time(_current_music->get_time() + elapsed_time);
+    _current_music->set_play_rate(10.f);
+    _current_music->set_volume(1.f);
+    _current_music->set_balance(0.f);
+    if (_current_music->status() == AudioSound::PLAYING)
+      cout << "Current Music time = " << _current_music->get_time() << endl;
+    else
+      cout << "Not playing" << endl;
     if (_current_music->status() != AudioSound::PLAYING)
     {
       PlayNext();
