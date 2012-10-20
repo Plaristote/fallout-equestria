@@ -182,7 +182,7 @@ bool GameTask::CopySave(const std::string& savepath, const std::string& slotPath
   
   for (; it != end ; ++it)
   {
-    const struct dirent& entry = *it;
+    const Dirent& entry = *it;
 
     if (entry.d_type == DT_REG)
     {
@@ -234,9 +234,10 @@ void GameTask::EraseSlot(unsigned char slot)
   stream << _savePath << "/slot-" << (int)slot;
   dir.OpenDir(stream.str());
   
-  std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [](const struct dirent& entry)
+  std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [](const Dirent& entry)
   {
-    remove(entry.d_name);
+	std::string to_remove = entry.d_name;
+    remove(to_remove.c_str());
   });
 }
 
@@ -271,10 +272,13 @@ void GameTask::LoadSlot(unsigned char slot)
 
     dir.OpenDir(_savePath);
 
-    std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [](const struct dirent& entry)
+    std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [](const Dirent& entry)
     {
       if (entry.d_type == DT_REG)
-        remove(entry.d_name);
+	  {
+		std::string dname = entry.d_name;
+        remove(dname.c_str());
+	  }
     });
   }
   

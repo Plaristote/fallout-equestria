@@ -13,8 +13,6 @@ InventoryView::InventoryView(Rocket::Core::Element* element, Inventory& inventor
 #ifdef INVENTORY_USE_DRAGDROP
   //element->AddEventListener("dragstart", this);
   element->AddEventListener("dragdrop",  this);
-#else
-# warning "Compiling with Panda <= 1.8.0, inventory drag and drop won't be supported"
 #endif
   UpdateView();
 }

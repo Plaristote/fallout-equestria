@@ -234,8 +234,8 @@ static std::string appendValue(Data data, unsigned short indent = 0)
         // Object or Array
         bool isArray = true;
 
-        Data::iterator arrChkIt  = data.begin();
-        Data::iterator arrChkEnd = data.end();
+        Data::my_iterator arrChkIt  = data.begin();
+        Data::my_iterator arrChkEnd = data.end();
 
         for (; arrChkIt != arrChkEnd ; ++arrChkIt)
         {
@@ -267,8 +267,8 @@ static std::string appendValue(Data data, unsigned short indent = 0)
 static std::string appendArray(Data data, unsigned short indent)
 {
     std::string toWrite;
-    Data::iterator it  = data.begin();
-    Data::iterator end = data.end();
+    Data::my_iterator it  = data.begin();
+    Data::my_iterator end = data.end();
 
     toWrite = "[\n";
     while (it != end)
@@ -292,8 +292,8 @@ static std::string appendArray(Data data, unsigned short indent)
 static std::string appendObject(Data data, unsigned short indent)
 {
     std::string toWrite;
-    Data::iterator it  = data.begin();
-    Data::iterator end = data.end();
+    Data::my_iterator it  = data.begin();
+    Data::my_iterator end = data.end();
 
     toWrite = "{\n";
     while (it != end)
@@ -324,8 +324,8 @@ bool DataTree::Writers::StringJSON(Data data, string& str)
 
   toWrite = "{\n";
 
-  Data::iterator it  = data.begin();
-  Data::iterator end = data.end();
+  Data::my_iterator it  = data.begin();
+  Data::my_iterator end = data.end();
 
   while (it != end)
   {

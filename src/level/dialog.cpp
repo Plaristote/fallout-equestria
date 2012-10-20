@@ -193,8 +193,8 @@ DialogAnswers     DialogModel::GetDialogAnswers(void)
 
   if (_currentNpcLine != "")
   {
-    Data::iterator  it  = _data[_currentNpcLine].begin();
-    Data::iterator  end = _data[_currentNpcLine].end();
+    Data::my_iterator  it  = _data[_currentNpcLine].begin();
+    Data::my_iterator  end = _data[_currentNpcLine].end();
 
     _data[_currentNpcLine].Output();
     for (; it != end ; ++it)
