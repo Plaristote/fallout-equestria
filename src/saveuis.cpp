@@ -80,7 +80,7 @@ UiLoad::UiLoad(WindowFramework* window, Rocket::Core::Context* context, const st
       unsigned short nSlots = 0;
 
       dir.OpenDir(savePath);
-      std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [this, &nSlots](const struct dirent& entry)
+      std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [this, &nSlots](const Dirent& entry)
       {
 	if (entry.d_type == DT_DIR)
 	{
@@ -188,7 +188,7 @@ UiSave::UiSave(WindowFramework* window, Rocket::Core::Context* context, const st
       unsigned short nSlots = 0;
 
       dir.OpenDir(savePath);
-      std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [this, &nSlots](const struct dirent& entry)
+      std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [this, &nSlots](const Dirent& entry)
       { if (entry.d_type == DT_DIR && entry.d_name != "." && entry.d_name != "..") nSlots++; });
 
       std::stringstream rml;

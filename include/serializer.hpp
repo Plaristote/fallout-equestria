@@ -8,10 +8,12 @@
 # include <iostream>
 # include <fstream>
 
-# ifdef WIN32
+# ifdef _WIN32 || _WIN64
 #  include <cstdint>
-# endif
+typedef std::int32_t my_int32;
+# else
 typedef int32_t	my_int32;
+# endif
 
 /*! \namespace Utils
  * \brief Various essentials utilities for all-purpose programming

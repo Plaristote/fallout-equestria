@@ -359,7 +359,7 @@ void           StatModel::SetSkill(const std::string& stat, short value)
 
 std::string    StatModel::GetStatistic(const std::string& stat) const
 {
-  return (_statsheet["Statistics"][stat]);
+  return (_statsheet["Statistics"][stat].Value());
 }
 
 short          StatModel::GetSpecial(const std::string& stat)   const
@@ -715,13 +715,13 @@ list<string> StatModel::GetAvailablePerks(void)
       {
 	Data           requirements = perk["Requirements"];
 	bool           do_add       = true;
-	Data::iterator it           = requirements.begin();
-	Data::iterator end          = requirements.end();
+	Data::my_iterator it           = requirements.begin();
+	Data::my_iterator end          = requirements.end();
 	
 	for (; it != end ; ++it)
 	{
 	  Data         requirement = *it;
-	  string       comp        = requirement["Comp"];
+	  string       comp        = requirement["Comp"].Value();
 	  short        value       = requirement["Value"];
 	  Data         data_check  = DataGetFromPath(_statsheet, requirement.Key());
 	  short        to_check    = data_check;

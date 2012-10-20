@@ -50,7 +50,7 @@ vector<string> i18n::LanguagesAvailable(void)
   {
     const Directory::Entries& files = dir.GetEntries();
     
-    for_each(files.begin(), files.end(), [&list](const struct dirent& file)
+    for_each(files.begin(), files.end(), [&list](const Dirent& file)
     {
       if (file.d_type == DT_DIR && file.d_name[0] != '.')
 	list.push_back(file.d_name);
