@@ -8,7 +8,7 @@
 # include <iostream>
 # include <fstream>
 
-# ifdef _WIN32 || _WIN64
+# ifdef _WIN32
 #  include <cstdint>
 typedef std::int32_t my_int32;
 # else

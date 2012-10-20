@@ -22,6 +22,14 @@ void ObjectShelf::LockWaypoints(bool locking)
   });
 }
 
+ObjectShelf::ObjectShelf(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
+{
+  _type   = ObjectTypes::Shelf;
+  LockWaypoints(true);
+  _inventory.LoadInventory(object);
+  _inventory.SetCapacity(450);
+}
+
 InstanceDynamicObject::GoToData ObjectShelf::GetGoToData(InstanceDynamicObject* character)
 {
   Waypoint* waypoint = character->GetOccupiedWaypoint();

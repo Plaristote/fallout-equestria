@@ -5,7 +5,7 @@
 #include <panda3d/directionalLight.h>
 
 PandaFramework       framework;
-PT(AsyncTaskManager) taskMgr = AsyncTaskManager::get_global_ptr();
+PT(AsyncTaskManager) taskMgr     = AsyncTaskManager::get_global_ptr();
 PT(ClockObject)      globalClock = ClockObject::get_global_clock();
 
 # include "mainmenu.hpp"
@@ -22,6 +22,8 @@ using namespace std;
 
 #include "serializer.hpp"
 #include <i18n.hpp>
+#include <level/objects/shelf.hpp>
+#include <level/objects/locker.hpp>
 
 void AngelCout(const std::string& str)
 {
@@ -130,9 +132,11 @@ static void AngelScriptInitialize(void)
   const char* dynObjectClass = "DynamicObject";
   const char* charClass      = "Character";
   const char* doorClass      = "Door";
+  const char* shelfClass     = "Shelf";
   engine->RegisterObjectType(dynObjectClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(charClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(doorClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectType(shelfClass,     0, asOBJ_REF | asOBJ_NOCOUNT);
 
   Script::StdList<ObjectCharacter*>::Register(engine, "CharacterList", "Character@");
   engine->RegisterObjectMethod(charClass, "CharacterList GetNearbyAllies()",  asMETHOD(ObjectCharacter,GetNearbyAllies),  asCALL_THISCALL);
@@ -167,11 +171,13 @@ static void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "void LookAt(DynamicObject@)",              asMETHODPR(ObjectCharacter,LookAt,(InstanceDynamicObject*),void),         asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void PushBuff(Data, Character@)",          asMETHOD(ObjectCharacter,PushBuff), asCALL_THISCALL);
 
-  engine->RegisterObjectMethod(doorClass, "void Unlock()",       asMETHOD(ObjectDoor,Unlock), asCALL_THISCALL);
-  engine->RegisterObjectMethod(doorClass, "bool IsLocked()",     asMETHOD(ObjectDoor,IsLocked), asCALL_THISCALL);
-  engine->RegisterObjectMethod(doorClass, "bool IsOpen()",       asMETHOD(ObjectDoor,IsOpen), asCALL_THISCALL);
-  engine->RegisterObjectMethod(doorClass, "string GetKeyName()", asMETHOD(ObjectDoor,GetKeyName), asCALL_THISCALL);
-
+  engine->RegisterObjectMethod(doorClass, "void   Unlock()",     asMETHOD(Lockable,Unlock),         asCALL_THISCALL);
+  engine->RegisterObjectMethod(doorClass, "bool   IsLocked()",   asMETHOD(Lockable,IsLocked),       asCALL_THISCALL);
+  engine->RegisterObjectMethod(doorClass, "bool   IsOpen()",     asMETHOD(Lockable,IsOpen),         asCALL_THISCALL);
+  engine->RegisterObjectMethod(doorClass, "string GetKeyName()", asMETHOD(Lockable,GetKeyName),     asCALL_THISCALL);
+  
+  engine->RegisterObjectMethod(shelfClass,  "Inventory@ GetInventory()", asMETHOD(ObjectShelf,GetInventory), asCALL_THISCALL);
+  
   const char* worldClass = "World";
   engine->RegisterObjectType(worldClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(worldClass, "void SetWaypointsVisible(bool) const",      asMETHOD(World,SetWaypointsVisible),      asCALL_THISCALL);

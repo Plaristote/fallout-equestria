@@ -1,5 +1,6 @@
 #include "level/inventory.hpp"
 #include "level/level.hpp"
+#include <level/objects/locker.hpp>
 #include <algorithm>
 
 InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
@@ -208,13 +209,15 @@ const std::string InventoryObject::UseAsWeapon(ObjectCharacter* user, ObjectChar
 const std::string InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType)
 {
   ObjectCharacter* charTarget;
-  ObjectDoor*      doorTarget;
+  Lockable*        lockTarget;
   ActionHooks&     hooks = _actionHooks[useType];
 
   if (hooks.UseOnCharacter && (charTarget = target->Get<ObjectCharacter>()) != 0)
     return (ExecuteHook(hooks.UseOnCharacter, user, charTarget, useType));
-  if (hooks.UseOnDoor      && (doorTarget = target->Get<ObjectDoor>())      != 0)
-    return (ExecuteHook(hooks.UseOnDoor, user, doorTarget, useType));
+  if (hooks.UseOnDoor      && (lockTarget = target->Get<ObjectDoor>())      != 0)
+    return (ExecuteHook(hooks.UseOnDoor, user, lockTarget, useType));
+  if (hooks.UseOnDoor      && (lockTarget = target->Get<ObjectLocker>())  != 0)
+    return (ExecuteHook(hooks.UseOnDoor, user, lockTarget, useType));
   if (hooks.UseOnOthers)
     return (ExecuteHook(hooks.UseOnOthers, user, target, useType));
   return ("That does nothing");

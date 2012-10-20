@@ -100,7 +100,29 @@ void ObjectDoor::GoingThrough(void*)
 void ObjectDoor::CallbackActionUse(InstanceDynamicObject* object)
 {
   if (!_locked)
-    _closed = !_closed;
+  {
+    AnimationEnded.DisconnectAll();
+    AnimationEnded.Connect(*this, &ObjectDoor::PendingActionOpen);
+    pendingActionOn = object;
+    PlayAnimation(_closed ? "open" : "close");
+  }
   else
-    _level->ConsoleWrite("It's locked !");
+    _level->ConsoleWrite(i18n::T("It's locked"));
 }
+
+void ObjectDoor::PendingActionOpen(InstanceDynamicObject*)
+{
+  _closed = !_closed;
+}
+
+
+
+
+
+
+
+
+
+
+
+

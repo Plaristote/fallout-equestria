@@ -43,8 +43,8 @@ x --> Displaying world time
   --> Barter
 x --> Doors
   --> Stairs
-  --> Lockers
-  --> Shelfs
+x --> Lockers
+x --> Shelfs
 x --> Saving/Loading of buffs
 
   -> Worldmap/Level shared buffs

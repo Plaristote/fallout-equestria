@@ -4,6 +4,7 @@
 
 #include "level/objects/door.hpp"
 #include "level/objects/shelf.hpp"
+#include <level/objects/locker.hpp>
 #include <i18n.hpp>
 
 #define AP_COST_USE             2
@@ -108,9 +109,11 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 	break ;
       case DynamicObject::Door:
 	instance = new ObjectDoor(this, &object);
+	cout << "LOADING A DOOR" << endl;
 	break ;
       case DynamicObject::Shelf:
 	instance = new ObjectShelf(this, &object);
+	cout << "LOADING A SHELF" << endl;
 	break ;
       case DynamicObject::Item:
       {
@@ -124,7 +127,11 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 	break ;
       }
       case DynamicObject::Locker:
+	instance = new ObjectLocker(this, &object);
+	cout << "LOADING A LOCKER" << endl;
 	break ;
+      default:
+	cout << "[FATAL ERROR:] Unimplemented object type " << object.type << endl;
     }
     if (instance != 0)
       _objects.push_back(instance);
