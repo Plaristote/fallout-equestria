@@ -221,9 +221,11 @@ public:
   ~GameOptions(void);
 private:
   RocketListener ExitClicked;
-  RocketListener LanguageSelected;
+  RocketListener LanguageSelected, ScreenSelected, FullscreenToggled;
   
   void SetLanguage(Rocket::Core::Event&);
+  void SetResolution(Rocket::Core::Event&);
+  void ToggleFullscreen(Rocket::Core::Event&);
   
   std::list<Rocket::Core::Element*> _language_options;
 };

@@ -183,10 +183,28 @@ void OptionsManager::Refresh(void)
   
   if (_data)
   {
+    // Language
     Data language = data["language"];
 
     if (!(language.Nil()))
       i18n::Load(language.Value());
+    
+    // Screen
+    Data             screen        = data["screen"];
+
+    if (!(screen.Nil()))
+    {
+      unsigned int     screen_width  = screen["x"];
+      unsigned int     screen_height = screen["y"];
+      bool             fullscreen    = screen["fullscreen"] == 1;
+      WindowProperties props         = framework.get_window(0)->get_graphics_window()->get_properties();
+
+      props.set_fullscreen(fullscreen);
+      props.set_size(screen_width, screen_height);
+      framework.get_window(0)->get_graphics_window()->request_properties(props);
+    }
+
+    // Saving changes
     DataTree::Writers::JSON(_data, "conf.json");
   }
 }
@@ -196,17 +214,40 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
   _root = context->LoadDocument("data/options.rml");
   if (_root)
   {
+    Core::Element* fullscreen_box   = _root->GetElementById("fullscreen");
+    Core::Element* screen_select    = _root->GetElementById("screen-select");
     Core::Element* language_select  = _root->GetElementById("language-select");
     vector<string> languages        = i18n::LanguagesAvailable();
     Data           current_language = OptionsManager::Get()["language"];
-    stringstream   rml;
 
-    for_each(languages.begin(), languages.end(), [&rml](string language)
     {
-      rml << "<option id='language-" << language << "' value='" << language << "'";
-      rml << ">" << language << "</option>\n";
-    });
-    language_select->SetInnerRML(rml.str().c_str());
+      stringstream        rml;
+      GraphicsPipe*       pipe   = framework.get_default_pipe();
+      DisplayInformation* di     = pipe->get_display_information();
+      int                 di_tot = di->get_total_display_modes();
+      
+      for (int i = 0 ; i < di_tot ; ++i)
+      {
+	rml << "<option value='" << i << "'>";
+	rml << di->get_display_mode_width(i) << 'x' << di->get_display_mode_height(i) << ' ';
+	if (di->get_display_mode_fullscreen_only(i))
+	  rml << " (Fullscreen)";
+	rml << "</option>";
+      }
+      fullscreen_box->SetInnerRML(rml.str().c_str());
+    }
+
+    {
+      stringstream rml;
+
+      for_each(languages.begin(), languages.end(), [&rml](string language)
+      {
+	rml << "<option id='language-" << language << "' value='" << language << "'";
+	rml << ">" << language << "</option>\n";
+      });
+      language_select->SetInnerRML(rml.str().c_str());
+    }
+
     {
       Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("language-select"));
       
@@ -224,20 +265,84 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
 	}
       }
     }
-
     
+    {
+      Controls::ElementFormControlSelect* select = dynamic_cast<Controls::ElementFormControlSelect*>(screen_select);
+      
+      for (unsigned int i = 0 ; i < select->GetNumOptions() ; ++i)
+      {
+	Controls::SelectOption* option = select->GetOption(i);
+
+	if (option)
+	{
+	  if (current_language.Value() == option->GetValue().CString())
+	  {
+	    select->SetSelection(i);
+	    break ;
+	  }
+	}
+      }
+    }
+
+    ToggleEventListener(true, "fullscreen",      "click",  FullscreenToggled);
+    ToggleEventListener(true, "screen-select",   "change", ScreenSelected);
     ToggleEventListener(true, "language-select", "change", LanguageSelected);
-    ToggleEventListener(true, "exit", "click", ExitClicked);
-    ExitClicked.EventReceived.Connect(*this, &UiBase::FireHide);
-    LanguageSelected.EventReceived.Connect(*this, &GameOptions::SetLanguage);
+    ToggleEventListener(true, "exit",            "click",  ExitClicked);
+    ExitClicked.EventReceived.Connect      (*this, &UiBase::FireHide);
+    FullscreenToggled.EventReceived.Connect(*this, &GameOptions::ToggleFullscreen);
+    ScreenSelected.EventReceived.Connect   (*this, &GameOptions::SetResolution);
+    LanguageSelected.EventReceived.Connect (*this, &GameOptions::SetLanguage);
     Translate();
   }
 }
 
 GameOptions::~GameOptions()
 {
+  ToggleEventListener(false, "fullscreen",      "click",  FullscreenToggled);
+  ToggleEventListener(false, "screen-select",   "change", ScreenSelected);  
   ToggleEventListener(false, "language-select", "change", LanguageSelected);
-  ToggleEventListener(false, "exit", "click", ExitClicked);
+  ToggleEventListener(false, "exit",            "click",  ExitClicked);
+}
+
+void GameOptions::ToggleFullscreen(Rocket::Core::Event& event)
+{
+  Core::Element* checkbox = event.GetCurrentElement();
+  
+  if (checkbox)
+  {
+    Core::Variant* var  = checkbox->GetAttribute("checked");
+    Data           opts = OptionsManager::Get();
+    
+    opts["screen"]["fullscreen"] = (var ? 1 : 0);
+    OptionsManager::Refresh();
+  }
+}
+
+void GameOptions::SetResolution(Rocket::Core::Event&)
+{
+  Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("screen-select"));
+  int                                 it_select = select->GetSelection();
+  Controls::SelectOption*             option    = select->GetOption(it_select);
+
+  if (option)
+  {
+    stringstream        str_it;
+    int                 it;
+    Core::String        str    = option->GetValue();
+    GraphicsPipe*       pipe   = framework.get_default_pipe();
+    DisplayInformation* di     = pipe->get_display_information();
+    
+    str_it << str.CString();
+    str_it >> it;
+    if (it < di->get_total_display_modes())
+    {
+      Data opts = OptionsManager::Get();
+      
+      opts["screen"]["x"] = di->get_display_mode_width(it);
+      opts["screen"]["y"] = di->get_display_mode_height(it);
+      OptionsManager::Refresh();
+    }
+  }
 }
 
 void GameOptions::SetLanguage(Core::Event& event)
