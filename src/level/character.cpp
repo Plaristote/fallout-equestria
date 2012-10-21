@@ -121,6 +121,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   string defEquiped[2];
   
   _goToData.objective = 0;  
+  _inventory          = new Inventory;
   
   NodePath bodyNP = object->nodePath.find("**/+Character");
   _character      = dynamic_cast<Character*>(bodyNP.node());
@@ -209,14 +210,14 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   {
     Data stats = GetStatistics();
     
-    _inventory.SetCapacity(stats["Statistics"]["Carry Weight"]);
+    _inventory->SetCapacity(stats["Statistics"]["Carry Weight"]);
     _armorClass = stats["Statistics"]["Armor Class"].Nil() ? 5  : (int)(stats["Statistics"]["Armor Class"]);
     _hitPoints  = stats["Statistics"]["Hit Points"].Nil()  ? 15 : (int)(stats["Statistics"]["Hit Points"]);
     _stats      = new StatController(stats);
   }
   else
   {
-    _inventory.SetCapacity(275);
+    _inventory->SetCapacity(275);
     _hitPoints  = 15;
     _armorClass = 5;
   }
@@ -269,7 +270,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   }
   
   // Inventory
-  _inventory.LoadInventory(_object);
+  _inventory->LoadInventory(_object);
 
   // Equiped Items
   defEquiped[0] = DEFAULT_WEAPON_1;
@@ -282,7 +283,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
     _equiped[i].default_ = new InventoryObject(items[defEquiped[i]]);
     _equiped[i].equiped  = _equiped[i].default_;
     _equiped[i].equiped->SetEquiped(true);
-    _inventory.AddObject(_equiped[i].equiped);
+    _inventory->AddObject(_equiped[i].equiped);
   }
   
   // Animations (HAIL MICROSOFT)
@@ -382,7 +383,7 @@ void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, E
   
   item->SetEquiped(true);
   EquipedItemChanged.Emit(it, item);
-  _inventory.ContentChanged.Emit();
+  _inventory->ContentChanged.Emit();
 }
 
 void ObjectCharacter::UnequipItem(unsigned short it)

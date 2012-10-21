@@ -88,6 +88,8 @@ public:
   
   void             LoadInventory(DynamicObject*);
   void             SaveInventory(DynamicObject*);
+  void             LoadInventory(Data);
+  void             SaveInventory(Data);
 
   void             AddObject(InventoryObject*);
   void             DelObject(InventoryObject*);

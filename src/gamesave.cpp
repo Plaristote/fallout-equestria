@@ -1,4 +1,6 @@
 #include "level/level.hpp"
+#include "level/objects/shelf.hpp"
+#include "level/objects/locker.hpp"
 
 /*
  * Level
@@ -27,11 +29,27 @@ void Level::Load(Utils::Packet& packet)
 
 void Level::SaveUpdateWorld(void)
 {
+  /*
+   * This is saving the inventories in the DynamicObject structure, thus they will be saved
+   * in the World part of the save file. This information consequently need to be processed before everything else.
+   */
   for_each(_characters.begin(), _characters.end(), [this](ObjectCharacter* character)
   {
     Inventory& inventory = character->GetInventory();
-    
+
     inventory.SaveInventory(character->GetDynamicObject());
+  });
+  for_each(_objects.begin(), _objects.end(), [this](InstanceDynamicObject* object)
+  {
+    ObjectShelf* shelf = object->Get<ObjectShelf>();
+
+    if (!shelf) { shelf = object->Get<ObjectLocker>(); }
+    if (shelf)
+    {
+      Inventory& inventory = shelf->GetInventory();
+
+      inventory.SaveInventory(shelf->GetDynamicObject());
+    }
   });
 }
 

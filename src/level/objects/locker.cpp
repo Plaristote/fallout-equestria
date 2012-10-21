@@ -3,11 +3,11 @@
 
 using namespace std;
 
-ObjectLocker::ObjectLocker(Level* level, DynamicObject* object) : ObjectShelf(level, object)
+ObjectLocker::ObjectLocker(Level* level, DynamicObject* object) : ObjectShelf(level, object), Lockable(object)
 {
   _type   = ObjectTypes::Locker;
   _closed = true;
-  _locked = object->locked;
+  InstanceDynamicObject::_object = object;
   
   string anims[] = { "open", "close" };
   for (int i = 0 ; i < GET_ARRAY_SIZE(anims) ; ++i)

@@ -127,6 +127,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 	break ;
       }
       case DynamicObject::Locker:
+	cout << "INSTANTIATING A LOCKER" << endl;
 	instance = new ObjectLocker(this, &object);
 	cout << "LOADING A LOCKER" << endl;
 	break ;
@@ -152,13 +153,10 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   GetPlayer()->ActionPointChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
   GetPlayer()->EquipedItemActionChanged.Connect(_levelUi.GetMainBar(), &GameMainBar::SetEquipedItemAction);
   GetPlayer()->EquipedItemChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetEquipedItem);
-  GetPlayer()->EquipedItemChanged.Emit(0, GetPlayer()->GetEquipedItem(0));
-  GetPlayer()->EquipedItemChanged.Emit(1, GetPlayer()->GetEquipedItem(1));
   _levelUi.GetMainBar().EquipedItemNextAction.Connect(*GetPlayer(), &ObjectCharacter::ItemNextUseType);
   _levelUi.GetMainBar().UseEquipedItem.Connect       (*this, &Level::CallbackActionTargetUse);
   _levelUi.GetMainBar().CombatEnd.Connect            (*this, &Level::StopFight);
   _levelUi.GetMainBar().CombatPassTurn.Connect       (*this, &Level::NextTurn);
-  _levelUi.GetInventory().SetInventory(GetPlayer()->GetInventory());
   obs.Connect(_levelUi.GetInventory().EquipItem,   *this,        &Level::PlayerEquipObject);
   obs.Connect(_levelUi.GetInventory().UnequipItem, *GetPlayer(), &ObjectCharacter::UnequipItem);
   obs.Connect(_levelUi.GetInventory().DropObject,  *this,        &Level::PlayerDropObject);
@@ -208,6 +206,21 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   loadingScreen->FadeOut();
   loadingScreen->Destroy();
   delete loadingScreen;
+}
+
+void Level::SetPlayerInventory(Inventory* inventory)
+{
+  ObjectCharacter* player = GetPlayer();
+  
+  cout << "SetPlayerInventory" << endl;
+  if (!inventory)
+  { cout << "Using map's inventory" << endl;
+    inventory = &(player->GetInventory()); }
+  else
+  {  player->SetInventory(inventory);       }
+  _levelUi.GetInventory().SetInventory(*inventory);
+  player->EquipedItemChanged.Emit(0, player->GetEquipedItem(0));
+  player->EquipedItemChanged.Emit(1, player->GetEquipedItem(1));  
 }
 
 Level::~Level()

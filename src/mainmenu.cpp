@@ -74,13 +74,17 @@ void MainMenu::EndGame(void)
 
 AsyncTask::DoneStatus MainMenu::do_task()
 {
-  MusicManager* mm = MusicManager::Get();
+  cout << "MainMenu do_task" << endl;
+  /*MusicManager* mm = MusicManager::Get();
 
-  if (mm) { mm->Run(); }
+  if (mm) { mm->Run(); }*/
   if (createLevelPlz) AsyncCreateLevel();
+  cout << "Debug2" << endl;
   if (_levelTask)
   {
+    cout << "Debug2.1" << endl;
     DoneStatus done = _levelTask->do_task();
+    cout << "Debug2.2" << endl;
     
     switch (done)
     {
@@ -88,6 +92,7 @@ AsyncTask::DoneStatus MainMenu::do_task()
 	quitGamePlz = true;
 	break ;
       case AsyncTask::DoneStatus::DS_done:
+	cout << "Debug3" << endl;
 	EndGame();
 	break ;
       default:
@@ -96,23 +101,30 @@ AsyncTask::DoneStatus MainMenu::do_task()
   }
   else if (_need_garbage_collect)
   {
+    cout << "Debug4" << endl;
     TexturePool::get_global_ptr()->garbage_collect();
     _need_garbage_collect = false;
   }
+  cout << "Debug5" << endl;
   _mouseCursor.Update();
+  cout << "MainMenu End Task" << endl;
   return (quitGamePlz ? AsyncTask::DoneStatus::DS_exit : AsyncTask::DoneStatus::DS_cont);
 }
 
 void MainMenu::AsyncCreateLevel(void)
 {
+  cout << "AsyncCreateLevel 1" << endl;
   _levelTask = new GameTask(_window, _generalUi);
+  cout << "AsyncCreateLevel 2" << endl;
   _view.Hide();
+  cout << "AsyncCreateLevel 3" << endl;
   if (slotToLoadPlz >= 0)
     _levelTask->LoadSlot(slotToLoadPlz);
   else
     _levelTask->LoadLastState();
   slotToLoadPlz  = -1;
   createLevelPlz = false;
+  cout << "AsyncCreateLevel 4" << endl;
 }
 
 void MainMenu::OpenUiLoad(Rocket::Core::Event&)

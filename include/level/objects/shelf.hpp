@@ -20,7 +20,6 @@ public:
   Inventory&   GetInventory(void)      { return (_inventory); }
 
   virtual void CallbackActionUse(InstanceDynamicObject*);
-
 private:
   Inventory   _inventory;
 };

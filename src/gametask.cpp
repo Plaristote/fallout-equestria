@@ -5,15 +5,16 @@ using namespace std;
 
 GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(window, generalUi.GetRocketRegion())
 {
-  _continue    = true;
-  _window      = window;
-  _level       = 0;
-  _savePath    = "saves";
-  _worldMap    = 0;
-  _charSheet   = 0;
-  _playerStats = 0;
-  _uiSaveGame  = 0;
-  _uiLoadGame  = 0;
+  _continue        = true;
+  _window          = window;
+  _level           = 0;
+  _savePath        = "saves";
+  _worldMap        = 0;
+  _charSheet       = 0;
+  _playerStats     = 0;
+  _playerInventory = 0;
+  _uiSaveGame      = 0;
+  _uiLoadGame      = 0;
   _gameUi.GetMenu().SaveClicked.Connect(*this, &GameTask::SaveClicked);
   _gameUi.GetMenu().LoadClicked.Connect(*this, &GameTask::LoadClicked);
   _gameUi.GetMenu().ExitClicked.Connect(*this, &GameTask::Exit);
@@ -63,8 +64,10 @@ AsyncTask::DoneStatus GameTask::do_task()
 {
   if (!_continue)
     return (AsyncTask::DS_done);
+  cout << "GameTask Loop 1" << endl;
   if (_loadLevelParams.doLoad)
     DoLoadLevel();
+  cout << "GameTask Loop 2" << endl;
   if (_level)
   {
     if (_level->do_task() == AsyncTask::DoneStatus::DS_done)
@@ -84,6 +87,7 @@ AsyncTask::DoneStatus GameTask::do_task()
   }
   else if (_worldMap)
     _worldMap->Run();
+  cout << "GameTask Loop 3" << endl;
   return (AsyncTask::DoneStatus::DS_cont);
 }
 
@@ -99,6 +103,17 @@ bool GameTask::SaveGame(const std::string& savepath)
   }
   else
     _dataEngine["system"]["current-level"] = 0;
+  {
+    Data player_inventory = _dataEngine["player"]["inventory"];
+    
+    if (player_inventory.Count() != 0)
+    {
+      player_inventory.CutBranch();
+      player_inventory = _dataEngine["player"]["inventory"];
+      player_inventory.Output();
+    }
+    _playerInventory->SaveInventory(player_inventory);
+  }
   _dataEngine["time"]["seconds"] = _timeManager.GetSecond();
   _dataEngine["time"]["minutes"] = _timeManager.GetMinute();
   _dataEngine["time"]["hours"]   = _timeManager.GetHour();
@@ -108,27 +123,47 @@ bool GameTask::SaveGame(const std::string& savepath)
   _dataEngine.Save(savepath + "/dataengine.json");
 
   DataTree::Writers::JSON(_charSheet, savepath + "/stats-self.json");
-  
+
   return (success);
 }
 
 bool GameTask::LoadGame(const std::string& savepath)
 {
+  cout << "LoadGame 1" << endl;
   Data currentLevel, time;
 
   if (_worldMap)    delete _worldMap;
   if (_playerStats) delete _playerStats;
   if (_charSheet)   delete _charSheet;
+  if (_playerInventory)
+  {
+    delete _playerInventory;
+    _playerInventory = 0;
+  }
 
+  cout << "LoadGame 2" << endl;
   _dataEngine.Load(savepath + "/dataengine.json");
-  currentLevel = _dataEngine["system"]["current-level"];
-  time         = _dataEngine["time"];
+  currentLevel     = _dataEngine["system"]["current-level"];
+  time             = _dataEngine["time"];
+  cout << "LoadGame 3" << endl;
   _timeManager.ClearTasks(0);
   _timeManager.SetTime(time["seconds"], time["minutes"], time["hours"], time["days"], time["month"], time["year"]);
-  _charSheet   = DataTree::Factory::JSON(savepath + "/stats-self.json");
+  _charSheet       = DataTree::Factory::JSON(savepath + "/stats-self.json");
+  cout << "LoadGame 4" << endl;
   if (!_charSheet)  return (false);
-  _playerStats = new StatController(_charSheet);
+  cout << "LoadGame 5" << endl;
+  _playerStats     = new StatController(_charSheet);
+  cout << "LoadGame 6" << endl;
   _playerStats->SetView(&(_gameUi.GetPers()));
+  cout << "Lol" << endl;
+  if (_dataEngine["player"]["inventory"].NotNil())
+  {
+    _playerInventory = new Inventory;
+    cout << "Double lol" << endl;
+    _playerInventory->LoadInventory(_dataEngine["player"]["inventory"]);
+    cout << "Triple lol" << endl;
+    _gameUi.GetInventory().SetInventory(*_playerInventory);
+  }
 
   _worldMap    = new WorldMap(_window, &_gameUi, _dataEngine, _timeManager);
   _worldMap->GoToPlace.Connect(*this, &GameTask::MapOpenLevel);
@@ -337,6 +372,22 @@ bool GameTask::SaveLevel(Level* level, const std::string& name)
   return (true);
 }
 
+void   GameTask::SetPlayerInventory(void)
+{
+  if (!_playerInventory)
+  {
+    Inventory& inventory = _level->GetPlayer()->GetInventory();
+    Data       save      = _dataEngine["player"]["inventory"];
+
+    inventory.SaveInventory(save);
+    save.Output();
+    _playerInventory = new Inventory;
+    _playerInventory->LoadInventory(save);
+    _gameUi.GetInventory().SetInventory(*_playerInventory);
+  }
+  _level->SetPlayerInventory(_playerInventory);
+}
+
 Level* GameTask::DoLoadLevel(void)
 {
   std::cout << "DoLoadLevel" << std::endl;
@@ -370,6 +421,7 @@ Level* GameTask::DoLoadLevel(void)
     _levelName = _loadLevelParams.name;
     _level->SetDataEngine(&_dataEngine);
     _level->GetPlayer()->SetStatistics(_charSheet, _playerStats);
+    SetPlayerInventory();
     _level->SetEntryZone(_loadLevelParams.entry_zone);
     SetLevel(_level);
   }

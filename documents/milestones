@@ -1,4 +1,8 @@
 MILESTONES
+x -> Finished
+~ -> In progress
+? -> Finished but not working for obscure reasons
+
 
 Milestone I [Started May 2012, Finished October 2012]
 x -> Statistics
@@ -39,7 +43,7 @@ x --> World clock moving forward in time while traveling
 x --> Displaying world time
 
   -> Levels
-  --> Proper camera handling
+~ --> Proper camera handling
   --> Barter
 x --> Doors
   --> Stairs
@@ -47,8 +51,14 @@ x --> Lockers
 x --> Shelfs
 x --> Saving/Loading of buffs
 
-  -> Worldmap/Level shared buffs
-x -> Shared "world clock" management for Worldmap and Levels
+  -> GameTask (Worldmap and Level handler)
+~ --> Player stored globally, and inserted into maps instead of loaded from there
+x ---> Saving and loading player globally
+x ---> Inventory access from  the WorldMap
+  ---> Inserting player into loaded maps when needed
+  --> Worldmap/Level shared buffs
+x --> Shared "world clock" management for Worldmap and Levels
+
 ? -> Music Manager
 x -> i18n/Rocket interfaces dynamic translator
 x -> Option Manager and user interface

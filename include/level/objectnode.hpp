@@ -92,6 +92,7 @@ public:
   };
   
   InstanceDynamicObject(Level* level, DynamicObject* object);
+  InstanceDynamicObject(void) : AnimatedObject(_window) {}
   virtual ~InstanceDynamicObject() {}
 
   virtual void       Load(Utils::Packet&);

@@ -30,23 +30,27 @@ private:
 class Lockable
 {
 public:
-  virtual string GetKeyName() const = 0;
-  void           Unlock(void)       { _locked = !_locked; }
-  bool           IsLocked(void)     { return (_locked);   }
-  bool           IsOpen(void)       { return (!_closed);  }  
+  Lockable(DynamicObject* o) : __object(o) {}
+  Lockable(void) {}
+
+  string         GetKeyName(void) const { return (__object->key);              }
+  bool           IsLocked(void)   const { return (__object->locked);           }
+  bool           IsOpen(void)     const { return (!_closed);                  }
+  void           Unlock(void)           { __object->locked = !__object->locked; }
+
 protected:
   bool           _closed;
-  bool           _locked;
+private:
+  DynamicObject* __object;
 };
 
 class ObjectDoor : public InstanceDynamicObject, public Lockable, public Waypoint::ArcObserver
 {
 public:
-  ObjectDoor(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
+  ObjectDoor(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object), Lockable(object)
   {
     _type   = ObjectTypes::Door;
     _closed = true;
-    _locked = object->locked;
     ObserveWaypoints(true);
   }
   

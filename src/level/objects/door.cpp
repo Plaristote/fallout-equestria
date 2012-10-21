@@ -94,12 +94,14 @@ bool ObjectDoor::CanGoThrough(unsigned char id)
 
 void ObjectDoor::GoingThrough(void*)
 {
+  if (_closed)
+    PlayAnimation("open");
   _closed = false;
 }
 
 void ObjectDoor::CallbackActionUse(InstanceDynamicObject* object)
 {
-  if (!_locked)
+  if (!IsLocked())
   {
     AnimationEnded.DisconnectAll();
     AnimationEnded.Connect(*this, &ObjectDoor::PendingActionOpen);

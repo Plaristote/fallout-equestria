@@ -39,6 +39,8 @@ private:
   Level*                LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& path, const std::string& name, bool isSaveFile = false);  
   Level*                DoLoadLevel(void);
   
+  void                  SetPlayerInventory(void);
+  
   void                  EraseSlot(unsigned char slot);
 
   bool                  _continue;
@@ -49,6 +51,7 @@ private:
   
   DataTree*             _charSheet;
   StatController*       _playerStats;
+  Inventory*            _playerInventory;
   
   WorldMap*             _worldMap;
   

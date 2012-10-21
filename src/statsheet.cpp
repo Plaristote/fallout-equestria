@@ -535,6 +535,7 @@ void StatController::SetView(StatView* view)
   list<string>   perks,    traits;
   vector<string> specials, skills, statistics;
 
+  cout << "SetView 1" << endl;
   if (_view)
     _viewObservers.DisconnectAll();
   _view      = view;
@@ -542,10 +543,12 @@ void StatController::SetView(StatView* view)
   specials   = _model.GetSpecials();
   skills     = _model.GetSkills();
   statistics = _model.GetStatistics();
+  cout << "SetView 2" << endl;
   
   _view->SetCategoryFields("Special",    specials);
   _view->SetCategoryFields("Skills",     skills);
   _view->SetCategoryFields("Statistics", statistics);
+  cout << "SetView 3" << endl;
 
   for_each(specials.begin(), specials.end(), [this](const string& key)
   { _view->SetFieldValue("Special", key, _model.GetSpecial(key)); });
@@ -559,6 +562,7 @@ void StatController::SetView(StatView* view)
   for_each(traits.begin(), traits.end(), [this](const string& key)
   { _view->SetTraitActive(key, true); });
 
+  cout << "SetView 4" << endl;
   _view->SetInformation("Name",   _model.GetName());
   _view->SetInformation("Age",    _model.GetAge());
   _view->SetInformation("Race",   _model.GetRace());
@@ -567,6 +571,7 @@ void StatController::SetView(StatView* view)
   _view->SetIdValue("special-points", _model.GetSpecialPoints());
   _view->SetIdValue("skill-points",   _model.GetSkillPoints());
 
+  cout << "SetView 5" << endl;
   SetCurrentHp(_model.GetCurrentHp());
   SetMaxHp(_model.GetMaxHp());
   _view->SetExperience(_model.GetExperience(), _model.GetLevel(), _model.GetXpNextLevel());
@@ -580,6 +585,7 @@ void StatController::SetView(StatView* view)
   _viewObservers.Connect(_view->Accepted,           *this, &StatController::AcceptChanges);
   _viewObservers.Connect(_view->Canceled,           *this, &StatController::CancelChanges);
   _viewObservers.Connect(_view->MakeBackup,         *this, &StatController::MakeBackup);
+  cout << "SetView 7" << endl;
 
   _view->SetTraits(_model.GetAvailableTraits());
   
@@ -590,9 +596,13 @@ void StatController::SetView(StatView* view)
   else
     _view->SetEditMode(StatView::Display);
 
+  cout << "SetView 8" << endl;
   _view->SetNumPerks      (_model.GetPerksPoints());
+  cout << "SetView 8.1" << endl;
   _view->SetPerks         (_model.GetPerks());
+  cout << "SetView 8.2" << endl;
   _view->SetAvailablePerks(_model.GetAvailablePerks());
+  cout << "SetView 9" << endl;
 }
 
 void StatController::SetCurrentHp(short hp)
@@ -703,6 +713,7 @@ Data DataGetFromPath(Data data, const std::string& path)
 
 list<string> StatModel::GetAvailablePerks(void)
 {
+  cout << "GetAvailablePerks" << endl;
   list<string> perks;
   DataTree*    file = DataTree::Factory::JSON("data/perks.json");
 
@@ -711,6 +722,7 @@ list<string> StatModel::GetAvailablePerks(void)
     { // dataPerks needs to get out of the heap before file is deleted
       Data dataPerks(file);
       
+      cout << "GetAvailablePerks 2" << endl;
       for_each(dataPerks.begin(), dataPerks.end(), [this, &perks](Data perk)
       {
 	Data           requirements = perk["Requirements"];
@@ -718,6 +730,7 @@ list<string> StatModel::GetAvailablePerks(void)
 	Data::my_iterator it           = requirements.begin();
 	Data::my_iterator end          = requirements.end();
 	
+	cout << "GetAvailablePerks 3" << endl;
 	for (; it != end ; ++it)
 	{
 	  Data         requirement = *it;
@@ -737,9 +750,11 @@ list<string> StatModel::GetAvailablePerks(void)
 	if (do_add)
 	  perks.push_back(perk.Key());
       });
+      cout << "GetAvailablePerks 4" << endl;
     }
     delete file;
   }
+  cout << "GetAvailablePerks 5" << endl;
   return (perks);
 }
 

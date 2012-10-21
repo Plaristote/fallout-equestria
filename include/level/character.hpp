@@ -89,7 +89,6 @@ public:
   void Save(Utils::Packet&);
   
   void SetStatistics(DataTree* stats, StatController* statsController);
-  
 
   Observatory::Signal<void (InstanceDynamicObject*)>         ReachedDestination;
   Observatory::Signal<void (unsigned short, unsigned short)> ActionPointChanged;
@@ -105,6 +104,15 @@ public:
     ret.max_distance = 0;
     ret.min_distance = 1;
     return (ret);
+  }
+  
+  void                SetInventory(Inventory* inventory)
+  {
+    if (inventory)
+    {
+      if (_inventory) delete _inventory;
+      _inventory = inventory;
+    }
   }
   
   void                ProcessCollisions() { if (_hitPoints > 0) InstanceDynamicObject::ProcessCollisions(); }
@@ -127,7 +135,7 @@ public:
   bool                IsMoving(void) const      { return (_path.size());          }
   bool                IsAlive(void) const       { return (_hitPoints > 0);        }
   bool                IsInterrupted(void) const { return (AnimationEnded.ObserverCount() > 0); }
-  Inventory&          GetInventory(void)        { return (_inventory);            }
+  Inventory&          GetInventory(void)        { return (*_inventory);            }
   Data                GetStatistics(void)       { return (_statistics);           }
   StatController*     GetStatController(void)   { return (_stats);                }
   Diplomacy&          GetDiplomacy(void)        { return (_diplomacy);            }
@@ -208,7 +216,7 @@ private:
     NodePath                       jointHorn, jointBattleSaddle, jointMouth;
   };
 
-  Inventory                 _inventory;
+  Inventory*                _inventory;
   ItemEquiped               _equiped[2];
   std::list<CharacterBuff*> _buffs;
 

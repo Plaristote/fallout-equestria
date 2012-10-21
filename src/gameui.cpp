@@ -234,8 +234,11 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
 	  rml << " (Fullscreen)";
 	rml << "</option>";
       }
-      fullscreen_box->SetInnerRML(rml.str().c_str());
+      screen_select->SetInnerRML(rml.str().c_str());
     }
+
+    if (OptionsManager::Get()["screen"]["fullscreen"] == 1)
+      fullscreen_box->SetAttribute("checked", "on");
 
     {
       stringstream rml;
@@ -601,7 +604,6 @@ GameInventory::~GameInventory()
 
 void GameInventory::SetInventory(Inventory& inventory)
 {
-  
   Core::Element* itemListContainer = _root->GetElementById("body-inventory-items");
 
   if (itemListContainer)

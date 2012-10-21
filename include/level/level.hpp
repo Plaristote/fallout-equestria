@@ -35,7 +35,8 @@ public:
   Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& data, TimeManager& tm);
 
   // Saving/Loading
-  void SetDataEngine(DataEngine* de) { _dataEngine = de; }
+  void SetDataEngine(DataEngine* de)   { _dataEngine = de; }
+  void SetPlayerInventory(Inventory*);
   void SaveUpdateWorld(void);
   void Save(Utils::Packet&);
   void Load(Utils::Packet&);

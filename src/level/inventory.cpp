@@ -309,6 +309,24 @@ void Inventory::LoadInventory(DynamicObject* object)
   });
 }
 
+void Inventory::LoadInventory(Data items)
+{
+  _content.clear();
+  for_each(items.begin(), items.end(), [this](Data item)
+  {
+    InventoryObject* newObject;
+    unsigned int     quantity;
+
+    quantity = (item["quantity"].Nil() ? 1 : (unsigned int)item["quantity"]);
+    for (unsigned short i = 0 ; i < quantity ; ++i)
+    {
+      newObject = new InventoryObject(item);
+      (*newObject)["quantity"].Remove();
+      AddObject(newObject);
+    }
+  });
+}
+
 void Inventory::SaveInventory(DynamicObject* object)
 {
   Content::iterator it  = _content.begin();
@@ -337,6 +355,37 @@ void Inventory::SaveInventory(DynamicObject* object)
       item["Name"] = item.Key();
       DataTree::Writers::StringJSON(item, str);
       object->inventory.push_back(std::pair<std::string, int>(str, quantity));
+    }
+  }
+}
+
+void Inventory::SaveInventory(Data items)
+{
+  Content::iterator it  = _content.begin();
+  Content::iterator end = _content.end();
+  
+  for (; it != end ; ++it)
+  {
+    Content::iterator groupIt  = _content.begin();
+    InventoryObject&  item     = **it;
+    bool              ignore   = true;
+    int               quantity = 0;
+
+    for (; groupIt != end ; ++groupIt)
+    {
+      if (groupIt == it && quantity == 0)
+	ignore = false;
+      if (item.IsGroupableWith(*groupIt))
+	quantity++;
+    }
+    if (quantity == 0) quantity = 1;
+    if (!ignore)
+    {
+      std::string str;
+
+      item["quantity"] = quantity;
+      items[item.Key()].Duplicate(item);
+      item["quantity"].Remove();
     }
   }
 }
