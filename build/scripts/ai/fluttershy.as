@@ -28,8 +28,8 @@ void CastShield(Character@ self)
 
 void main(Character@ self, float elaspedTime)
 {
-  //if (myTimer.GetElapsedTime() > 2.5)
-  //  CastShield(self);
+  if (myTimer.GetElapsedTime() > 2.5)
+    CastShield(self);
   /*if (!(self.IsMoving()) && myTimer.GetElapsedTime() > 2.5)
   {
     if (initWaypoint == 0)

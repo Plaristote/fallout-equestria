@@ -4,6 +4,7 @@
 # include "rocket_extension.hpp"
 # include "datatree.hpp"
 # include "scriptengine.hpp"
+# include <cstdarg>
 
 class StatModel
 {
@@ -13,7 +14,10 @@ public:
   
   void           Backup(void);
   void           RestoreBackup(void);
-  
+
+  int            Action(const std::string& action, unsigned short n_args, ...);
+  Data           GetAll(void) { return (_statsheet); }
+
   void           SetName(const std::string& name)  { _statsheet["Name"]   = name;           }
   std::string    GetName(void) const               { return (_statsheet["Name"].Value());   }
   void           SetRace(const std::string& race)  { _statsheet["Race"]   = race;           }
@@ -128,6 +132,9 @@ class StatController
 public:
   StatController(Data statsheet);
   
+  StatModel&       Model(void)       { return (_model); }
+  const StatModel& Model(void) const { return (_model); }
+
   void SetView(StatView*);
 
   void UpSpecial(const std::string& stat);

@@ -8,7 +8,10 @@ string UseKeyOnDoor(Item@ item, Character@ user, Door@ door)
     string postStr = (door.IsLocked() ? " unlocked a door" : " locked a door");
 
     door.Unlock();
-    return (user.GetName() + postStr);
+    if (door.IsLocked())
+      return (user.GetName() + postStr);
+    else
+      return ("FATAL ERROR UseKeyOnDoor");
   }
   return ("The door won't open");
 }

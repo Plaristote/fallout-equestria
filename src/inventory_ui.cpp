@@ -89,7 +89,12 @@ void InventoryView::UpdateView(void)
 	stream << " inventory-item-draggable";
 #endif
 	stream << "' id='" << count << "'>";
-        stream << "<img src='../textures/itemIcons/" << item["icon"].Value() << "' />";
+        stream << "<img src='../textures/itemIcons/";
+	if (item["icon"].Value() != "")
+	  stream << item["icon"].Value();
+	else
+	  stream << "default.png";
+	stream << "' />";
 	if (quantity > 1)
 	  stream << "<span class='inventory-item-quantity'>x" << quantity << "</span>";
 	stream << "</span>";
@@ -175,18 +180,20 @@ void InventoryViewController::DragObserver(InventoryView* container, Rocket::Cor
   std::vector<InventoryView*>::iterator itView = _views.begin();
   std::vector<InventoryView*>::iterator end    = _views.end();
 
-  for (; itView != end && (!((*(*itView)) == element->GetParentNode())) ; ++itView)
-    
+  for (; itView != end && (!((*(*itView)) == element->GetParentNode())) ; ++itView);
   if (itView != _views.end())
   {
     InventoryView&   view = (*(*itView));
     InventoryObject* object;
 
-    object = view.GetObjectFromId(std::string(element->GetId().CString()));
-    view.GetInventory().DelObject(object);
-    container->GetInventory().AddObject(object);
-    view.UpdateView();
-    container->UpdateView();
+    if (AllowDrop(view, *container))
+    {
+      object = view.GetObjectFromId(std::string(element->GetId().CString()));
+      view.GetInventory().DelObject(object);
+      container->GetInventory().AddObject(object);
+      view.UpdateView();
+      container->UpdateView();
+    }
   }
 }
 
@@ -487,4 +494,177 @@ UiNextZone::~UiNextZone()
   ToggleEventListener(false, "cancel", "click", CancelSelected);
   for_each(_elements.begin(), _elements.end(), [this](Rocket::Core::Element* zoneButton)
   { zoneButton->RemoveEventListener("click", &LevelSelected); });
+}
+
+/*
+ * UiBarter
+ */
+UiBarter::UiBarter(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* player, ObjectCharacter* other) : UiBase(window, context), _inventory_player(player->GetInventory()), _inventory_other(other->GetInventory())
+{
+  _root = context->LoadDocument("data/barter.rml");
+  _stats_player = player->GetStatController();
+  _stats_other  = other->GetStatController();
+  if (_root)
+  {
+    Rocket::Core::Element* eInvLooter   = _root->GetElementById("self-inventory");
+    Rocket::Core::Element* eInvLooted   = _root->GetElementById("other-inventory");
+    Rocket::Core::Element* eStackPlayer = _root->GetElementById("stack-player");
+    Rocket::Core::Element* eStackOther  = _root->GetElementById("stack-other");
+
+    ToggleEventListener(true, "button_done", "click", EventMakeDeal);
+    ToggleEventListener(true, "button_quit", "click", EventBarterEnd);
+    EventMakeDeal.EventReceived.Connect(*this, &UiBarter::MakeDeal);
+    EventBarterEnd.EventReceived.Connect(*this, &UiBarter::BarterEnd);
+    if (eInvLooter)
+      AddView(eInvLooter,   _inventory_player);
+    else
+      cout << "[UiBarter][Rocket] Missing element self-inventory" << endl;
+    if (eInvLooted)
+      AddView(eInvLooted,   _inventory_other);
+    else
+      cout << "[UiBarter][Rocket] Missing element other-inventory" << endl;
+    if (eStackPlayer)
+      AddView(eStackPlayer, _stack_player);
+    else
+      cout << "[UiBarter][Rocket] Missing element stack-player" << endl;
+    if (eStackOther)
+      AddView(eStackOther,  _stack_other);
+    else
+      cout << "[UiBarter][Rocket] Missing element stack-other" << endl;
+    ObjectSelected.Connect(*this, &UiBarter::SwapObjects);
+    _stack_player.ContentChanged.Connect(*this, &UiBarter::UpdateInterface);
+    _stack_other.ContentChanged.Connect (*this, &UiBarter::UpdateInterface);
+    _root->Show();    
+  }
+}
+
+void UiBarter::UpdateInterfaceSide(Rocket::Core::Element* e, Inventory::Content& content, StatController* stats_self, StatController* stats_other)
+{
+  int                          total = 0;
+  stringstream                 str;
+
+  total = GetStackValue(content, stats_self, stats_other);
+  str << total << ' ' << i18n::T("caps");
+  e->SetInnerRML(str.str().c_str());
+}
+
+int  UiBarter::GetStackValue(Inventory::Content& content, StatController* stats_self, StatController* stats_other)
+{
+  Inventory::Content::iterator it    = content.begin();
+  Inventory::Content::iterator end   = content.end();
+  int                          total = 0;
+
+  for (; it != end ; ++it)
+  {
+    if (stats_self && stats_other)
+    {
+      InventoryObject& object     = *(*it);
+      Data             data_self  = stats_self->Model().GetAll();
+      Data             data_other = stats_other->Model().GetAll();
+
+      total += stats_self->Model().Action("barter_value", 3, &object, &data_self, &data_other);
+    }
+    else
+      total += 5;
+  }
+  return (total);
+}
+
+void UiBarter::UpdateInterface(void)
+{
+  Rocket::Core::Element* value_player = _root->GetElementById("value-player");
+  Rocket::Core::Element* value_other  = _root->GetElementById("value-other");
+
+  if (value_player && _stats_player && _stats_other)
+    UpdateInterfaceSide(value_player, _stack_player.GetContent(), _stats_player, _stats_other);
+  if (value_other  && _stats_player && _stats_other)
+    UpdateInterfaceSide(value_other,  _stack_other.GetContent(),  _stats_other,  _stats_player);  
+}
+
+UiBarter::~UiBarter()
+{
+  ToggleEventListener(false, "button_done", "click", EventMakeDeal);
+  ToggleEventListener(false, "button_quit", "click", EventBarterEnd);
+}
+
+void UiBarter::BarterEnd(Rocket::Core::Event&)
+{
+  Hide();
+  BarterEnded.Emit();
+}
+
+bool UiBarter::AllowDrop(InventoryView& from, InventoryView& to)
+{
+  Inventory* inv_from = &(from.GetInventory());
+  Inventory* inv_to   = &(to.GetInventory());   
+
+  if ((inv_from == &_inventory_player && inv_to == &_stack_player) ||
+      (inv_from == &_stack_player     && inv_to == &_inventory_player))
+    return (true);
+  if ((inv_from == &_inventory_other && inv_to == &_stack_other) ||
+      (inv_from == &_stack_other     && inv_to == &_inventory_other))
+    return (true);
+  return (false);
+}
+
+bool UiBarter::SwapFunctor(InventoryObject* object, Inventory& from, Inventory& to)
+{
+  if (from.IncludesObject(object))
+  {
+    to.AddObject(object);
+    from.DelObject(object);
+    Update();
+    return (true);
+  }
+  return (false);
+}
+
+void UiBarter::SwapObjects(InventoryObject* object)
+{
+  cout << "Swap Objects Executed" << endl;
+  cout << "Swap player stack/inventory" << endl;
+  if (SwapFunctor(object, _stack_player, _inventory_player)) return ;
+  cout << "Swap player inventory/stack" << endl;
+  if (SwapFunctor(object, _inventory_player, _stack_player)) return ;
+  if (SwapFunctor(object, _stack_other, _inventory_other))   return ;
+  if (SwapFunctor(object, _inventory_other, _stack_other))   return ;
+  cout << "No swap were executed" << endl;
+}
+
+void UiBarter::MakeDeal(Rocket::Core::Event& event)
+{
+  cout << "Make deal" << endl;
+  int  total_player = GetStackValue(_stack_player.GetContent(), _stats_player, _stats_other);
+  int  total_other  = GetStackValue(_stack_other.GetContent(),  _stats_other,  _stats_player);
+  int  success      = 1;
+
+  if (_stats_player && _stats_other)
+  {
+    cout << "Processing barter test" << endl;
+    Data data_player  = _stats_player->Model().GetAll();
+    Data data_other   = _stats_other->Model().GetAll();
+
+    success = _stats_player->Model().Action("barter_deal", 4, &data_player, total_player, &data_other, total_other);
+  }
+  if (success)
+  {
+    cout << "Successfull barter is successfull" << endl;
+    DropInventory(_stack_player, _inventory_other);
+    DropInventory(_stack_other,  _inventory_player);
+    Update();
+  }
+}
+
+void UiBarter::DropInventory(Inventory& from, Inventory& to)
+{
+  Inventory::Content::iterator it, end;
+
+  it  = from.GetContent().begin();
+  end = from.GetContent().end();
+  while (it != end)
+  {
+    to.AddObject(*it);
+    from.DelObject(*it);
+    it = from.GetContent().begin();
+  }
 }

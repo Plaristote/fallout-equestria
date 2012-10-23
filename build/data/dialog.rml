@@ -12,17 +12,24 @@
 
                 #npcLine
                 {
-                  width: 100%;
+                  width: 80%;
                   height: 20%;
                   overflow-x: scroll;
                 }
 
                 #answers
                 {
-                  width:  100%;
+                  width:  80%;
                   height: 80%;
                   overflow-x: auto;
                 }
+
+#sidebar
+{
+  position: absolute;
+  width:    20%;
+  right:    0px;
+}
 
 button.dialog-answer
 {
@@ -68,6 +75,10 @@ button.dialog-answer:active,
 
       <p id="answers">
       </p>
+
+      <div id="sidebar">
+        <button id="button-open-barter" i18n="Barter">Barter</button>
+      </div>
 
     </p>
   </body>

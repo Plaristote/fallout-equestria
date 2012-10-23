@@ -105,6 +105,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 	  ObjectCharacter* character = new ObjectCharacter(this, &object);
 
 	  _characters.push_back(character);
+	  cout << "Added an instance: " << character << endl;
         }
 	break ;
       case DynamicObject::Door:
@@ -134,6 +135,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
       default:
 	cout << "[FATAL ERROR:] Unimplemented object type " << object.type << endl;
     }
+    cout << "Added an instance => " << instance << endl;
     if (instance != 0)
       _objects.push_back(instance);
   });
@@ -214,8 +216,10 @@ void Level::SetPlayerInventory(Inventory* inventory)
   
   cout << "SetPlayerInventory" << endl;
   if (!inventory)
-  { cout << "Using map's inventory" << endl;
-    inventory = &(player->GetInventory()); }
+  {
+    cout << "Using map's inventory" << endl;
+    inventory = &(player->GetInventory());
+  }
   else
   {  player->SetInventory(inventory);       }
   _levelUi.GetInventory().SetInventory(*inventory);
@@ -317,6 +321,16 @@ void Level::SetInterrupted(bool set)
 void Level::StartFight(ObjectCharacter* starter)
 {
   _itCharacter = std::find(_characters.begin(), _characters.end(), starter);
+  if (_itCharacter == _characters.end())
+  { 
+    cout << "[FATAL ERROR][Level::StartFight] Unable to find starting character" << endl;
+    if (_characters.size() < 1)
+    {
+      cout << "[FATAL ERROR][Level::StartFight] Can't find a single character" << endl;
+      return ;
+    }
+    _itCharacter = _characters.begin();
+  }
   _levelUi.GetMainBar().SetEnabledAP(true);
   (*_itCharacter)->RestartActionPoints();
   SetState(Fight);
@@ -348,14 +362,24 @@ void Level::NextTurn(void)
 {
   if (_state != Fight)
     return ;
-  std::cout << "Next Turn" << std::endl;
-  (*_itCharacter)->PlayAnimation("idle");
+  cout << "Next Turn" << endl;
+  if (_itCharacter != _characters.end())
+  {
+    cout << "Playing animation idle" << endl;
+    (*_itCharacter)->PlayAnimation("idle");
+  }
+  cout << "Next Turn Step 2" << endl;
   if ((++_itCharacter) == _characters.end())
   {
     _itCharacter = _characters.begin();
     _timeManager.AddElapsedTime(WORLDTIME_TURN);
   }
-  (*_itCharacter)->RestartActionPoints();
+  cout << "Next Turn Step 3" << endl;
+  if (_itCharacter != _characters.end())
+    (*_itCharacter)->RestartActionPoints();
+  else
+    cout << "[FATAL ERROR][Level::NextTurn] Character Iterator points to nothing (n_characters = " << _characters.size() << ")" << endl;
+  cout << "Next Turn Step 4" << endl;
 }
 
 void Level::RunDaylight(void)
@@ -614,6 +638,22 @@ void Level::CallbackActionUse(InstanceDynamicObject* object)
   ActionUse(GetPlayer(), object);
 }
 
+void Level::CallbackActionBarter(ObjectCharacter* character)
+{
+  cout << "CallbackActionBarter" << endl;
+  UiBarter* ui_barter;
+
+  CloseRunningUi<UiItBarter>();
+  if (_currentUis[UiItBarter])
+    delete _currentUis[UiItBarter];
+  ui_barter = new UiBarter(_window, _levelUi.GetContext(), GetPlayer(), character);
+  ui_barter->BarterEnded.Connect(*this, &Level::CloseRunningUi<UiItBarter>);
+  ui_barter->Show();
+  _currentUis[UiItBarter] = ui_barter;
+  _camera.SetEnabledScroll(false);
+  SetInterrupted(true);
+}
+
 void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 {
   CloseRunningUi<UiItInteractMenu>();
@@ -633,8 +673,9 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
     if (talkTo)
       talkTo->LookAt(GetPlayer());
     
-    _currentRunningDialog = new DialogController(_window, _levelUi.GetContext(), dialog, i18n::GetDialogs());
+    _currentRunningDialog = new DialogController(_window, _levelUi.GetContext(), talkTo, i18n::GetDialogs());
     _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningUi<UiItRunningDialog>);
+    _currentRunningDialog->StartBarter.Connect(*this, &Level::CallbackActionBarter);
     _mouseActionBlocked = true;
     _camera.SetEnabledScroll(false);
     SetInterrupted(true);

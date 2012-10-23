@@ -415,6 +415,13 @@ void Inventory::DelObject(InventoryObject* toDel)
   }
 }
 
+bool Inventory::IncludesObject(InventoryObject* obj) const
+{
+  Content::const_iterator it = std::find(_content.begin(), _content.end(), obj);
+  
+  return (it != _content.end());
+}
+
 InventoryObject* Inventory::GetObject(const std::string& name)
 {
   Content::iterator it  = _content.begin();

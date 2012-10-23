@@ -413,14 +413,16 @@ void ObjectCharacter::ItemNextUseType(unsigned short it)
 
 void ObjectCharacter::RestartActionPoints(void)
 {
-  Data stats(_statistics);
-
   _path.clear();
   if (_statistics)
+  {
+    Data stats(_statistics);
+
     _actionPoints = stats["Statistics"]["Action Points"];
+  }
   else
     _actionPoints = 10;
-  ActionPointChanged.Emit(_actionPoints, stats["Statistics"]["Action Points"]);
+  ActionPointChanged.Emit(_actionPoints, _actionPoints);
 }
 
 void ObjectCharacter::Run(float elapsedTime)

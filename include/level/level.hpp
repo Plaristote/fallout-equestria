@@ -83,6 +83,7 @@ public:
   void                   SetEntryZone(const std::string&);
 
   // Interaction Management
+  void                   CallbackActionBarter(ObjectCharacter*);
   void                   CallbackActionUse(InstanceDynamicObject* object);
   void                   CallbackActionTalkTo(InstanceDynamicObject* object);
   void                   CallbackActionUseObjectOn(InstanceDynamicObject* object);
@@ -169,6 +170,7 @@ private:
     UiItLoot,
     UiItEquipMode,
     UiItNextZone,
+    UiItBarter,
     UiTotalIt
   };
   
@@ -185,7 +187,7 @@ private:
     _camera.SetEnabledScroll(true);
     SetInterrupted(false);
   }
-  
+
   LevelUi           _levelUi;
   UiBase*           _currentUis[UiTotalIt];
   DialogController* _currentRunningDialog;

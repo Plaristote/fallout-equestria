@@ -11,6 +11,7 @@ DialogView::DialogView(WindowFramework* window, Rocket::Core::Context* context) 
   {
     _containerNpcLine = _root->GetElementById("npcLine");
     _containerAnswers = _root->GetElementById("answers");
+    ToggleEventListener(true, "button-open-barter", "click", BarterOpened);
   }
 }
 
@@ -27,6 +28,7 @@ DialogView::~DialogView()
         element->RemoveEventListener("click", &AnswerSelected);
       }
     }
+    ToggleEventListener(false, "button-open-barter", "click", BarterOpened);
     _root->Close();
     _root->RemoveReference();
   }
@@ -94,10 +96,13 @@ void DialogView::CleanView(const DialogAnswers& answers)
 }
 
 // CONTROLLER
-DialogController::DialogController(WindowFramework* window, Rocket::Core::Context* context, const string& dialogId, Data l18n) : DialogView(window, context), _model(dialogId, l18n)
+DialogController::DialogController(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* character, Data l18n) : DialogView(window, context), _model(character->GetDialog(), l18n)
 {
-  _context = Script::Engine::Get()->CreateContext();
-  _module   = Script::Engine::LoadModule("Dialog-" + dialogId, "scripts/dialogs/" + dialogId + ".as");
+  const string& dialogId = character->GetDialog();
+
+  _character = character;
+  _context   = Script::Engine::Get()->CreateContext();
+  _module    = Script::Engine::LoadModule("Dialog-" + dialogId, "scripts/dialogs/" + dialogId + ".as");
   AnswerSelected.EventReceived.Connect(*this, &DialogController::ExecuteAnswer);
 
   if (_module)
@@ -115,9 +120,16 @@ DialogController::DialogController(WindowFramework* window, Rocket::Core::Contex
         SetCurrentNode(npcLine);
       }
     }
+    BarterOpened.EventReceived.Connect(*this, &DialogController::OpenBarter);
   }
   else
     DialogEnded.Emit();
+}
+
+void DialogController::OpenBarter(Core::Event& event)
+{
+  cout << "OpenBarter executed" << endl;
+  StartBarter.Emit(_character);
 }
 
 void DialogController::SetCurrentNode(const string& node)

@@ -93,6 +93,7 @@ public:
 
   void             AddObject(InventoryObject*);
   void             DelObject(InventoryObject*);
+  bool             IncludesObject(InventoryObject*) const;
   const Content&   GetContent(void) const { return (_content); }
   Content&         GetContent(void)       { return (_content); }
   InventoryObject* GetObject(const std::string& name);

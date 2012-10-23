@@ -4,6 +4,7 @@
 # include "rocket_extension.hpp"
 # include "scriptengine.hpp"
 #include "datatree.hpp"
+#include <inventory_ui.hpp>
 # include <list>
 # include <string>
 # include <algorithm>
@@ -78,6 +79,7 @@ protected:
   void CleanView(const DialogAnswers& answers);
 
   RocketListener AnswerSelected;
+  RocketListener BarterOpened;
 
 private:
   Rocket::Core::Element* _containerNpcLine;
@@ -87,21 +89,26 @@ private:
 class DialogController : public DialogView
 {
 public:
-  DialogController(WindowFramework* window, Rocket::Core::Context* context, const std::string& dialogId, Data l18n);
+  DialogController(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* character, Data i18n);
   ~DialogController()
   {
     _context->Release();
   }
 
-  Observatory::Signal<void ()> DialogEnded;
+  ObjectCharacter* WithCharacter(void) const { return (_character); }
+
+  Observatory::Signal<void ()>                 DialogEnded;
+  Observatory::Signal<void (ObjectCharacter*)> StartBarter;
 
 private:
   void             ExecuteAnswer(Rocket::Core::Event& event);
   void             SetCurrentNode(const std::string& nodeName);
+  void             OpenBarter(Rocket::Core::Event& event);
 
   asIScriptContext* _context;
   asIScriptModule*  _module;
   DialogModel       _model;
+  ObjectCharacter*  _character;
 };
 
 

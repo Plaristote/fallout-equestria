@@ -135,13 +135,18 @@ public:
   bool                IsMoving(void) const      { return (_path.size());          }
   bool                IsAlive(void) const       { return (_hitPoints > 0);        }
   bool                IsInterrupted(void) const { return (AnimationEnded.ObserverCount() > 0); }
-  Inventory&          GetInventory(void)        { return (*_inventory);            }
-  Data                GetStatistics(void)       { return (_statistics);           }
+  Inventory&          GetInventory(void)        { return (*_inventory);           }
+  Data                GetStatistics(void)       { return (_statistics ? Data(_statistics) : Data()); }
   StatController*     GetStatController(void)   { return (_stats);                }
   Diplomacy&          GetDiplomacy(void)        { return (_diplomacy);            }
 
   unsigned short      GetActionPoints(void) const        { return (_actionPoints); }
-  void                SetActionPoints(unsigned short ap) { _actionPoints = ap; ActionPointChanged.Emit(_actionPoints, Data(_statistics)["Statistics"]["Action Points"]); }
+  void                SetActionPoints(unsigned short ap)
+  {
+    _actionPoints = ap;
+    if (_statistics)
+      ActionPointChanged.Emit(_actionPoints, Data(_statistics)["Statistics"]["Action Points"]);
+  }
   void                RestartActionPoints(void);
   
   short               GetHitPoints(void) const        { return (_hitPoints); }

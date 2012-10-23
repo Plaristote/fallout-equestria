@@ -44,7 +44,7 @@ x --> Displaying world time
 
   -> Levels
 ~ --> Proper camera handling
-  --> Barter
+x --> Barter
 x --> Doors
   --> Stairs
 x --> Lockers
@@ -52,7 +52,7 @@ x --> Shelfs
 x --> Saving/Loading of buffs
 
   -> GameTask (Worldmap and Level handler)
-~ --> Player stored globally, and inserted into maps instead of loaded from there
+  --> Player stored globally, and inserted into maps instead of loaded from there
 x ---> Saving and loading player globally
 x ---> Inventory access from  the WorldMap
   ---> Inserting player into loaded maps when needed

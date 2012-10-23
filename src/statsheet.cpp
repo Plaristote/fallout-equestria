@@ -336,6 +336,30 @@ unsigned short StatModel::GetXpNextLevel(void)
   return (0);
 }
 
+int           StatModel::Action(const std::string& action, unsigned short n_args, ...)
+{
+  string             func_name   = "action_" + action;
+  asIScriptFunction* action_func = _scriptModule->GetFunctionByName(func_name.c_str());
+  
+  if (action_func)
+  {
+    va_list      ap;
+
+    _scriptContext->Prepare(action_func);
+    va_start(ap, n_args);
+    for (unsigned short it = 0 ; it < n_args ; ++it)
+    {
+      void*      arg = va_arg(ap, void*);
+      
+      _scriptContext->SetArgObject(it, arg);
+    }
+    va_end(ap);
+    _scriptContext->Execute();
+    return (_scriptContext->GetReturnWord());
+  }
+  return (0);
+}
+
 void           StatModel::SetSkill(const std::string& stat, short value)
 {
   Data           skill_points   = _statsheet["Variables"]["Skill Points"];
@@ -713,7 +737,6 @@ Data DataGetFromPath(Data data, const std::string& path)
 
 list<string> StatModel::GetAvailablePerks(void)
 {
-  cout << "GetAvailablePerks" << endl;
   list<string> perks;
   DataTree*    file = DataTree::Factory::JSON("data/perks.json");
 
@@ -722,7 +745,6 @@ list<string> StatModel::GetAvailablePerks(void)
     { // dataPerks needs to get out of the heap before file is deleted
       Data dataPerks(file);
       
-      cout << "GetAvailablePerks 2" << endl;
       for_each(dataPerks.begin(), dataPerks.end(), [this, &perks](Data perk)
       {
 	Data           requirements = perk["Requirements"];
@@ -730,7 +752,6 @@ list<string> StatModel::GetAvailablePerks(void)
 	Data::my_iterator it           = requirements.begin();
 	Data::my_iterator end          = requirements.end();
 	
-	cout << "GetAvailablePerks 3" << endl;
 	for (; it != end ; ++it)
 	{
 	  Data         requirement = *it;
@@ -750,11 +771,9 @@ list<string> StatModel::GetAvailablePerks(void)
 	if (do_add)
 	  perks.push_back(perk.Key());
       });
-      cout << "GetAvailablePerks 4" << endl;
     }
     delete file;
   }
-  cout << "GetAvailablePerks 5" << endl;
   return (perks);
 }
 

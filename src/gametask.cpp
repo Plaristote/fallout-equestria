@@ -64,10 +64,8 @@ AsyncTask::DoneStatus GameTask::do_task()
 {
   if (!_continue)
     return (AsyncTask::DS_done);
-  cout << "GameTask Loop 1" << endl;
   if (_loadLevelParams.doLoad)
     DoLoadLevel();
-  cout << "GameTask Loop 2" << endl;
   if (_level)
   {
     if (_level->do_task() == AsyncTask::DoneStatus::DS_done)
@@ -87,7 +85,6 @@ AsyncTask::DoneStatus GameTask::do_task()
   }
   else if (_worldMap)
     _worldMap->Run();
-  cout << "GameTask Loop 3" << endl;
   return (AsyncTask::DoneStatus::DS_cont);
 }
 

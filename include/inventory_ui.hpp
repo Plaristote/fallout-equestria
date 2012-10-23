@@ -46,6 +46,8 @@ public:
   void DragObserver(InventoryView* container, Rocket::Core::Element* element);
   void Destroy(void);
   void Update(void);
+
+  virtual bool AllowDrop(InventoryView& from, InventoryView& to) { return (true); }
   
 private:
   std::vector<InventoryView*> _views;
@@ -67,6 +69,35 @@ private:
 
   RocketListener                               CancelClicked;
   InventoryViewController                      _viewController;
+};
+
+class UiBarter : public UiBase, public InventoryViewController
+{
+public:
+  UiBarter(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* player, ObjectCharacter* other);
+  ~UiBarter();
+  
+  bool AllowDrop(InventoryView& from, InventoryView& to);
+  
+  Observatory::Signal<void> BarterEnded;
+
+private:
+  void SwapObjects(InventoryObject* object);
+  void MakeDeal(Rocket::Core::Event&);
+  void BarterEnd(Rocket::Core::Event&);
+  void UpdateInterface(void);
+  void UpdateInterfaceSide(Rocket::Core::Element* e, Inventory::Content&, StatController*, StatController*);
+  
+  int  GetStackValue(Inventory::Content&, StatController*, StatController*);
+  void DropInventory(Inventory& from, Inventory& to);
+  bool SwapFunctor(InventoryObject* object, Inventory& from, Inventory& to);
+  
+  RocketListener   EventMakeDeal, EventBarterEnd;
+  
+  Inventory        _stack_player,  _stack_other;
+  StatController  *_stats_player, *_stats_other;
+  Inventory&       _inventory_player;
+  Inventory&       _inventory_other;
 };
 
 class UiLoot : public UiBase
