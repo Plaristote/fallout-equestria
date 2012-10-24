@@ -19,19 +19,9 @@ StatModel::~StatModel(void)
 
 void StatModel::Backup(void)
 {
-  cout << "Cleaning statsheet_backup" << endl;
   _statsheet_backup.Remove();
-  cout << "Remove called" << endl;
   _statsheet_backup = Data();
-  cout << "Replaced with empty Data()" << endl;
-//   while (_statsheet_backup.Count() > 0)
-//   {
-//     _statsheet_backup[0].Remove();
-//     cout << "[Statsheet Backup] Removing a branch" << endl;
-//   }
-  cout << "Duplicating statsheet into statsheet_backup" << endl;
   _statsheet_backup.Duplicate(_statsheet);
-  cout << "Duplicating over" << endl;
 }
 
 static void RestoreData(Data restoring, Data to_restore)
@@ -191,6 +181,18 @@ list<string>   StatModel::GetAvailableTraits(void)
     ret = *((list<string>*)_scriptContext->GetReturnObject());
   }
   return (ret);
+}
+
+void           StatModel::ToggleSkillAffinity(const string& skill)
+{
+  int          left      = _statsheet["Variables"]["Affinities"];
+  Data         affinity  = _statsheet["Affinities"][skill];
+  bool         is_active = (!affinity.Nil()) && affinity == 1;
+
+  if (!is_active && left <= 0)
+    return ;
+  affinity = (is_active ? 0 : 1);
+  _statsheet["Variables"]["Affinities"] = left + (is_active ? 1 : -1);
 }
 
 void           StatModel::ToggleTrait(const string& trait)
@@ -452,6 +454,13 @@ void StatController::PerksChanged(void)
   }
 }
 
+void StatController::SkillAffinityToggled(const string& skill)
+{
+  _model.ToggleSkillAffinity(skill);
+  if (&_view)
+    _view->SetSkillAffinity(skill, _model.HasSkillAffinity(skill));
+}
+
 void StatController::TraitToggled(const string& trait)
 {
   _model.ToggleTrait(trait);
@@ -509,12 +518,16 @@ void StatController::SetStatistic(const std::string& stat, short value)
 
 void StatController::UpSkill(const std::string& stat)
 {
-  SetSkill(stat, _model.GetSkill(stat) + 1);
+  bool affinity = _model.HasSkillAffinity(stat);
+
+  SetSkill(stat, _model.GetSkill(stat) + (affinity ? 2 : 1));
 }
 
 void StatController::DownSkill(const std::string& stat)
 {
-  SetSkill(stat, _model.GetSkill(stat) - 1);
+  bool affinity = _model.HasSkillAffinity(stat);
+
+  SetSkill(stat, _model.GetSkill(stat) - (affinity ? 2 : 1));
 }
 
 void StatController::SetSkill(const std::string& stat, short value)
@@ -559,7 +572,6 @@ void StatController::SetView(StatView* view)
   list<string>   perks,    traits;
   vector<string> specials, skills, statistics;
 
-  cout << "SetView 1" << endl;
   if (_view)
     _viewObservers.DisconnectAll();
   _view      = view;
@@ -567,12 +579,10 @@ void StatController::SetView(StatView* view)
   specials   = _model.GetSpecials();
   skills     = _model.GetSkills();
   statistics = _model.GetStatistics();
-  cout << "SetView 2" << endl;
   
   _view->SetCategoryFields("Special",    specials);
   _view->SetCategoryFields("Skills",     skills);
   _view->SetCategoryFields("Statistics", statistics);
-  cout << "SetView 3" << endl;
 
   for_each(specials.begin(), specials.end(), [this](const string& key)
   { _view->SetFieldValue("Special", key, _model.GetSpecial(key)); });
@@ -586,7 +596,6 @@ void StatController::SetView(StatView* view)
   for_each(traits.begin(), traits.end(), [this](const string& key)
   { _view->SetTraitActive(key, true); });
 
-  cout << "SetView 4" << endl;
   _view->SetInformation("Name",   _model.GetName());
   _view->SetInformation("Age",    _model.GetAge());
   _view->SetInformation("Race",   _model.GetRace());
@@ -595,24 +604,27 @@ void StatController::SetView(StatView* view)
   _view->SetIdValue("special-points", _model.GetSpecialPoints());
   _view->SetIdValue("skill-points",   _model.GetSkillPoints());
 
-  cout << "SetView 5" << endl;
   SetCurrentHp(_model.GetCurrentHp());
   SetMaxHp(_model.GetMaxHp());
   _view->SetExperience(_model.GetExperience(), _model.GetLevel(), _model.GetXpNextLevel());
 
-  _viewObservers.Connect(_view->StatDowned,         *this, &StatController::ViewStatDowned);
-  _viewObservers.Connect(_view->StatUpped,          *this, &StatController::ViewStatUpped);
-  _viewObservers.Connect(_view->InformationChanged, *this, &StatController::InformationChanged);
-  _viewObservers.Connect(_view->AgeChanged,         *this, &StatController::AgeChanged);
-  _viewObservers.Connect(_view->TraitToggled,       *this, &StatController::TraitToggled);
-  _viewObservers.Connect(_view->PerkToggled,        *this, &StatController::PerkAdded);
-  _viewObservers.Connect(_view->Accepted,           *this, &StatController::AcceptChanges);
-  _viewObservers.Connect(_view->Canceled,           *this, &StatController::CancelChanges);
-  _viewObservers.Connect(_view->MakeBackup,         *this, &StatController::MakeBackup);
-  cout << "SetView 7" << endl;
+  _viewObservers.Connect(_view->StatDowned,          *this, &StatController::ViewStatDowned);
+  _viewObservers.Connect(_view->StatUpped,           *this, &StatController::ViewStatUpped);
+  _viewObservers.Connect(_view->InformationChanged,  *this, &StatController::InformationChanged);
+  _viewObservers.Connect(_view->AgeChanged,          *this, &StatController::AgeChanged);
+  _viewObservers.Connect(_view->ToggleSkillAffinity, *this, &StatController::SkillAffinityToggled);
+  _viewObservers.Connect(_view->TraitToggled,        *this, &StatController::TraitToggled);
+  _viewObservers.Connect(_view->PerkToggled,         *this, &StatController::PerkAdded);
+  _viewObservers.Connect(_view->Accepted,            *this, &StatController::AcceptChanges);
+  _viewObservers.Connect(_view->Canceled,            *this, &StatController::CancelChanges);
+  _viewObservers.Connect(_view->MakeBackup,          *this, &StatController::MakeBackup);
 
   _view->SetTraits(_model.GetAvailableTraits());
   
+  Data affinities = _model.GetSkillAffinities();
+  for_each(affinities.begin(), affinities.end(), [this](Data affinity)
+  { if (affinity == 1) _view->SetSkillAffinity(affinity.Key(), true); });
+
   if (_model.GetSpecialPoints() > 0)
     _view->SetEditMode(StatView::Create);
   else if (_model.GetSkillPoints() > 0)
@@ -620,13 +632,9 @@ void StatController::SetView(StatView* view)
   else
     _view->SetEditMode(StatView::Display);
 
-  cout << "SetView 8" << endl;
   _view->SetNumPerks      (_model.GetPerksPoints());
-  cout << "SetView 8.1" << endl;
   _view->SetPerks         (_model.GetPerks());
-  cout << "SetView 8.2" << endl;
   _view->SetAvailablePerks(_model.GetAvailablePerks());
-  cout << "SetView 9" << endl;
 }
 
 void StatController::SetCurrentHp(short hp)
@@ -983,15 +991,22 @@ void StatViewRocket::SpecialClicked(Core::Event& event)
 
 void StatViewRocket::SkillClicked(Core::Event& event)
 {
-  Core::Element* cursor = _root->GetElementById("edit-value-cursor");
-  
-  if (cursor)
+  Core::Element* current = _context->GetHoverElement();
+
+  while (current && current->GetClassNames() != "skill-datagrid")
+	  current = current->GetParentNode();  
+  if (_editMode == StatView::Create && current)
   {
-    Core::Element* current = _context->GetHoverElement();
+    Core::Variant* var = current->GetAttribute("data-key");
+    Core::String   str = (var ? var->Get<Core::String>() : "");
     
-    while (current && current->GetClassNames() != "skill-datagrid")
-      current = current->GetParentNode();
-    if (current)
+    ToggleSkillAffinity.Emit(str.CString());
+  }
+  else if (_editMode == StatView::Update)
+  {
+    Core::Element* cursor = _root->GetElementById("edit-value-cursor");
+    
+    if (cursor && current)
     {
       cursor->SetProperty("display", "block");
       cursor->GetParentNode()->RemoveChild(cursor);
@@ -1045,6 +1060,7 @@ void StatViewRocket::SetEditMode(EditMode mode)
       if (name)    name->AddEventListener   ("click", &EventGeneralClicked);
       if (age)     age->AddEventListener    ("click", &EventGeneralClicked);
       if (gender)  gender->AddEventListener ("click", &EventGeneralClicked);
+      if (skill)   skill->AddEventListener  ("click", &EventSkillClicked);
       toShow = createElems;
       break ;
     case Update:
@@ -1188,6 +1204,18 @@ void StatViewRocket::TraitClicked(Core::Event& event)
   }
 }
 
+void StatViewRocket::SetSkillAffinity(const string& skill, bool active)
+{
+  if (_root)
+  {
+    string         elem_id = "skill-datagrid-" + underscore(skill);
+    Core::Element* elem    = _root->GetElementById(elem_id.c_str());
+
+    if (elem)
+      elem->SetProperty("color", (active ? "yellow" : "white"));
+  }
+}
+
 void StatViewRocket::SetTraitActive(const string& trait, bool active)
 {
   if (_root)
@@ -1258,7 +1286,7 @@ void StatViewRocket::SetCategoryFields(const std::string& category, const std::v
 	}
 	else if (category == "Skills")
 	{
-	  rml << "<datagrid class='skill-datagrid' data-type='Skills' data-key='" << keys[i] << "'>\n";
+	  rml << "<datagrid id='skill-datagrid-" << underscored << "' class='skill-datagrid' data-type='Skills' data-key='" << keys[i] << "'>\n";
           rml << "  <col width='80%'><span class='skill-key'>" << _i18n[keys[i]].Value() << "</span></col>\n";
           rml << "  <col width='20%'><span class='skill-value' id='skills-value-" << underscored << "'>0</span>%</col>\n";
           rml << "</datagrid>\n\n";

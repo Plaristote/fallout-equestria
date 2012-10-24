@@ -36,7 +36,8 @@
         position: absolute;
         width: 20%;
         left: 20%;
-        height: 80%;
+        height: 70%;
+        top: 5%;
         overflow-y: scroll;
       }
 
@@ -45,8 +46,27 @@
         position: absolute;
         width: 20%;
         right: 20%;
-        height: 80%;
+        height: 70%;
+        top: 5%;
         overflow-y: scroll;
+      }
+
+      #value-other
+      {
+        position: absolute;
+        top:      0px;
+        height:   10%;
+        width:    20%;
+        right:    20%;
+      }
+
+      #value-player
+      {
+        position: absolute;
+        top:      0px;
+        height:   10%;
+        width:    20%;
+        left:     20%;
       }
 
       #other-inventory
@@ -80,6 +100,8 @@
     <div id="inventory-items">
       <p id="self-inventory"  class="window-inventory">
       </p>
+      <span id="value-player">0 caps</span>
+      <span id="value-other">0 caps</span>
       <p id="stack-player"    class="window-inventory">
       </p>
       <p id="stack-other"     class="window-inventory">

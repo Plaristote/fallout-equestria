@@ -81,7 +81,7 @@ AsyncTask::DoneStatus MainMenu::do_task()
   if (_levelTask)
   {
     DoneStatus done = _levelTask->do_task();
-    
+
     switch (done)
     {
       case AsyncTask::DoneStatus::DS_exit:

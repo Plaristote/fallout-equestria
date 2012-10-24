@@ -575,9 +575,9 @@ void UiBarter::UpdateInterface(void)
   Rocket::Core::Element* value_player = _root->GetElementById("value-player");
   Rocket::Core::Element* value_other  = _root->GetElementById("value-other");
 
-  if (value_player && _stats_player && _stats_other)
+  if (value_player)
     UpdateInterfaceSide(value_player, _stack_player.GetContent(), _stats_player, _stats_other);
-  if (value_other  && _stats_player && _stats_other)
+  if (value_other)
     UpdateInterfaceSide(value_other,  _stack_other.GetContent(),  _stats_other,  _stats_player);  
 }
 
@@ -636,7 +636,7 @@ void UiBarter::MakeDeal(Rocket::Core::Event& event)
   cout << "Make deal" << endl;
   int  total_player = GetStackValue(_stack_player.GetContent(), _stats_player, _stats_other);
   int  total_other  = GetStackValue(_stack_other.GetContent(),  _stats_other,  _stats_player);
-  int  success      = 1;
+  int  success;
 
   if (_stats_player && _stats_other)
   {
@@ -646,6 +646,8 @@ void UiBarter::MakeDeal(Rocket::Core::Event& event)
 
     success = _stats_player->Model().Action("barter_deal", 4, &data_player, total_player, &data_other, total_other);
   }
+  else
+    success = total_player >= total_other;
   if (success)
   {
     cout << "Successfull barter is successfull" << endl;

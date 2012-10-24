@@ -31,11 +31,11 @@ x --> Inventories
 x --> Saving/Loading
 
 Milestone II
-  -> Statistics
+x -> Statistics
 x --> i18n
 x --> Canceling modifications
-  --> Support for:
-  ----> Skill afinities
+x --> Support for:
+x ----> Skill afinities
 x ----> Perks
 
 x -> Worldmap
@@ -59,7 +59,10 @@ x ---> Inventory access from  the WorldMap
   --> Worldmap/Level shared buffs
 x --> Shared "world clock" management for Worldmap and Levels
 
+  -> PipBuck
+
 ? -> Music Manager
+  -> Sound Manager
 x -> i18n/Rocket interfaces dynamic translator
 x -> Option Manager and user interface
 
@@ -71,4 +74,5 @@ Milestone III
   -> Levels
   --> Lights
 
-  -> Sound Manager
+  -> GameTask
+  --> Quests
