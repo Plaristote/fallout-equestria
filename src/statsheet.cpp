@@ -553,6 +553,7 @@ void StatController::AcceptChanges(void)
   else
     _view->SetEditMode(StatView::Display);
   _view->Hide();
+  ChangesAccepted.Emit();
 }
 
 void StatController::CancelChanges(void)

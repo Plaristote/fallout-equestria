@@ -1190,6 +1190,7 @@ void Level::SetEntryZone(PlayerParty& player_party, const std::string& name)
 	  {
 	    cout << "Some character entry zone haz been set" << endl;
 	    (*party_it)->waypoint = *it;
+	    (*party_it)->floor    = -1;
 	    (*party_it)->nodePath.set_alpha_scale(1.f);
 	    (*party_it)->nodePath.show();
 	    character->SetOccupiedWaypoint(*it);

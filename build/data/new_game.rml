@@ -1,0 +1,42 @@
+<template name="tplmainbar" content="content">
+<head>
+  <link type="text/rcss" href="rkt.rcss"/>
+  <link type="text/rcss" href="main.rcss"/>
+
+  <style>
+
+    #content
+    {
+      color: black;
+      outline-font-effect: outline;
+      outline-width: 1px;
+      outline-color: white;
+    }
+
+    #newgame-window
+    {
+      width: 100%;
+      height: 100%;
+      background-color: black;
+    }
+
+  </style>
+
+</head>
+<body class="window">
+  <div id="canvas" style="width:100%;height:100%;">
+    <div id="newgame-window">
+
+      <div id="button-container">
+        <button id="button-next-profile"     i18n="Next Character"    >Next Character</button><br />
+        <button id="button-previous-profile" i18n="Previous Character">Previous Character</button><br />
+        <button id="button-load-start-from-scratch" i18n="Create Character">Create Character</button><br />
+        <button id="button-select-profile" i18n="Select this character">Select this character</button><br />
+      </div>
+
+      <div id="content" style="color: black;">
+      </div>
+    </div>
+  </div>
+</body>
+</template>

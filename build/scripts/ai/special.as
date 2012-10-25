@@ -222,6 +222,6 @@ int action_barter_deal(Data stats_first, int total_first, Data stats_second, int
 {
   // TODO: Make this shit use the stats
   if (total_first >= total_second)
-    return (true);
-  return (false);
+    return (0);
+  return (1);
 }

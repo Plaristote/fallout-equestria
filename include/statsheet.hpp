@@ -158,6 +158,7 @@ public:
   void TriggerSkillAffinity(const std::string& stat, bool);
 
   Observatory::Signal<void (unsigned short)> LevelUp;
+  Observatory::Signal<void>                  ChangesAccepted;
 
 private:
   void      SetMaxHp(short hp);

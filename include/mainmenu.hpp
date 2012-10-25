@@ -3,6 +3,7 @@
 
 # include "gametask.hpp"
 # include "mousecursor.hpp"
+#include "newgametask.hpp"
 
 class MainMenu : public AsyncTask
 {
@@ -26,13 +27,16 @@ public:
 
   void       Continue(Rocket::Core::Event&);  
   void       EndGame(void);
+  void       NewGame(Rocket::Core::Event&);
+  void       StartGame(void);
   DoneStatus do_task(void);
   
 private:
   WindowFramework* _window;
   GeneralUi        _generalUi;
   MouseCursor      _mouseCursor;
-  GameTask*       _levelTask;
+  NewGameTask*     _new_game_task;
+  GameTask*        _levelTask;
   View             _view;
 
   UiLoad*          _uiLoad;

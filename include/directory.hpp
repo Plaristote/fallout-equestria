@@ -4,6 +4,7 @@
 # ifndef _WIN32
 #  include <dirent.h>
 #  include <sys/stat.h>
+#include <string>
 typedef struct dirent Dirent;
 # else
 #  define _WINSOCKAPI_
@@ -21,6 +22,27 @@ struct Dirent
 	std::string   d_name;
 };
 # endif
+
+# include <fstream>
+class Filesystem
+{
+public:
+  static bool FileCopy(const std::string& from, const std::string& dest)
+  {
+    std::ifstream stream_src(from.c_str());
+    std::ofstream stream_dest(dest.c_str());
+
+    if (stream_src.is_open() && stream_dest.is_open())
+    {
+      stream_dest << stream_src;
+      return (true);
+    }
+    return (false);
+  }
+
+private:
+  Filesystem() {}
+};
 
 class Directory
 {

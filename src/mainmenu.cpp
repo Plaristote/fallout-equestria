@@ -42,6 +42,7 @@ MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window
   
   _view.Continue.Connect(*this, &MainMenu::Continue);
   _view.LoadGame.Connect(*this, &MainMenu::OpenUiLoad);
+  _view.NewGame.Connect (*this, &MainMenu::NewGame);
   _view.Quit.Connect    (*this, &MainMenu::QuitGame);
   _view.Options.Connect (_generalUi.GetOptions(), &UiBase::FireShow);
   _view.Show();
@@ -56,7 +57,21 @@ MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window
 
 MainMenu::~MainMenu()
 {
+  if (_new_game_task) { delete _new_game_task; }
   MusicManager::Finalize();
+}
+
+void MainMenu::NewGame(Rocket::Core::Event&)
+{
+  _new_game_task = new NewGameTask(_window, _generalUi.GetRocketRegion()->get_context());
+  _new_game_task->StartGame.Connect(*this, &MainMenu::StartGame);
+}
+
+void MainMenu::StartGame(void)
+{
+  delete _new_game_task;
+  _new_game_task = 0;
+  createLevelPlz = true;
 }
 
 void MainMenu::Continue(Rocket::Core::Event&)
