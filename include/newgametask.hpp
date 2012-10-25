@@ -16,6 +16,7 @@ public:
   
 private:
   RocketListener PreviousProfile, NextProfile, EventSelectProfile, EventStartFromScratch;
+  DataTree*      _data_profiles;
   
   void SelectedProfile(Rocket::Core::Event&);
   void ClickedStartFromScratch(Rocket::Core::Event&);

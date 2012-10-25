@@ -1,0 +1,23 @@
+{
+  "velvet": {
+    "Name": "Velvet Remedy",
+    "Description": "This kind mare from vault whatever knows how to sing and shake her plot for persuasion. She's also well versed into the art of medecine.",
+    "Pros": "Persuasive, good perception, medecine affinities",
+    "Cons": "Bad in hoof to hoof fighting, can't carry much stuff",
+    "Image": "profile-velvet.jpg"
+  },
+  "pipsqueak": {
+    "Name": "Pipsqueak",
+    "Description": "This filly is a freaking pirate and will buck you up if you so much as glance towards his candy.",
+    "Pros": "Pirate",
+    "Cons": "Mud pony",
+    "Image": "profile-pipsqueak.png"
+  },
+  "mayormare": {
+    "Name": "Mayor Mare",
+    "Description": "Mayor Mare is everywhere"
+    "Pros": "Mayor",
+    "Cons": "Mare",
+    "Image": "profile_mayormare.jpg"
+  }
+}

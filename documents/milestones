@@ -65,6 +65,7 @@ x --> Shared "world clock" management for Worldmap and Levels
   -> Sound Manager
 x -> i18n/Rocket interfaces dynamic translator
 x -> Option Manager and user interface
+x -> Creating New Games
 
 Milestone III
   -> Worldmap

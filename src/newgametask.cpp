@@ -15,7 +15,8 @@ NewGameTask::NewGameTask(WindowFramework* window, Core::Context* rocket) : _ui_n
 
 NewGameTask::~NewGameTask()
 {
-  if (_stat_controller) { delete _stat_controller; }
+  // TODO Fix StatController deletion issues
+  //if (_stat_controller) { delete _stat_controller; }
   if (_stat_view)       { delete _stat_view;       }
   if (_stat_sheet)      { delete _stat_sheet;      }
 }
@@ -70,7 +71,16 @@ UiNewGame::UiNewGame(WindowFramework* window, Core::Context* context) : UiBase(w
   }
   else
     cout << "Missing file data/new_game.rml" << endl;
-  _profiles.push_back("velvet");
+  
+  _data_profiles = DataTree::Factory::JSON("data/newgame/profiles.json");
+  if (_data_profiles)
+  {
+    Data profiles(_data_profiles);
+    
+    for_each(profiles.begin(), profiles.end(), [this](Data profile)
+    { _profiles.push_back(profile.Key()); });
+    GoToProfile((*profiles.begin()).Key());
+  }
   _current_profile = _profiles.begin();
 }
 
@@ -94,6 +104,21 @@ void UiNewGame::GoToProfile(const string& profile)
 {
   // TODO
   cout << "Load Profile " << profile << endl;
+  Data profiles(_data_profiles);
+  
+  Core::Element* name        = _root->GetElementById("character-name");
+  Core::Element* description = _root->GetElementById("character-description");
+  Core::Element* pros        = _root->GetElementById("character-pros");
+  Core::Element* cons        = _root->GetElementById("character-cons");
+  
+  name->SetInnerRML       (profiles[profile]["Name"].Value().c_str());
+  description->SetInnerRML(profiles[profile]["Description"].Value().c_str());
+  pros->SetInnerRML       (profiles[profile]["Pros"].Value().c_str());
+  cons->SetInnerRML       (profiles[profile]["Cons"].Value().c_str());
+  
+  string rml = "<img src='newgame/" + profiles[profile]["Image"].Value() + "' style='width: 100%; height: 100%;' />";
+  Core::Element* image = _root->GetElementById("background-image");
+  image->SetInnerRML(rml.c_str());
 }
 
 void UiNewGame::SelectedProfile(Rocket::Core::Event&)

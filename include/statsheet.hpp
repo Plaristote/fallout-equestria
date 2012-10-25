@@ -216,6 +216,7 @@ class StatViewRocket : public UiBase, public StatView
 
 public:
   StatViewRocket(WindowFramework* window, Rocket::Core::Context* context);
+  ~StatViewRocket();
   
   void SetEditMode(EditMode);
   
@@ -265,6 +266,8 @@ private:
   Rocket::Core::Element* _specialSelected;
   Rocket::Core::Element* _skillSelected;
   Rocket::Core::Element* _traitSelected;
+  
+  std::list<Rocket::Core::Element*> _traits;
 };
 
 #endif

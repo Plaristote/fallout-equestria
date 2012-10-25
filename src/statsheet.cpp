@@ -818,20 +818,35 @@ static string underscore(const std::string& str)
   return (ret);
 }
 
+StatViewRocket::~StatViewRocket()
+{
+  ToggleEventListener(false, "continue",               "click", DoneButton);
+  ToggleEventListener(false, "cancel",                 "click", CancelButton);
+  ToggleEventListener(false, "char-age-edit-ok",       "click", EventAgeChanged);
+  ToggleEventListener(false, "char-name-edit-ok",      "click", EventNameChanged);
+  ToggleEventListener(false, "char-gender-edit-ok",    "click", EventGenderChanged);
+  ToggleEventListener(false, "edit-value-cursor-plus", "click", ButtonUp);
+  ToggleEventListener(false, "edit-value-cursor-less", "click", ButtonDown);
+  ToggleEventListener(false, "edit-value-cursor-less", "click", ButtonDown);
+  ToggleEventListener(false, "special",                "click", EventSpecialClicked);
+  ToggleEventListener(false, "body",                   "click", EventSkillClicked);
+  ToggleEventListener(false, "char-name",              "click", EventGeneralClicked);
+  ToggleEventListener(false, "char-age",               "click", EventGeneralClicked);
+  ToggleEventListener(false, "char-gender",            "click", EventGeneralClicked);
+  for_each(_traits.begin(), _traits.end(), [this](Core::Element* trait)
+  { trait->RemoveEventListener("click", &EventTraitClicked); });
+}
+
 StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context), _perks_dialog(window, context)
 {
   _root     = context->LoadDocument("data/charsheet.rml");
 
   if (_root)
   {
-    Rocket::Core::Element* button_continue = _root->GetElementById("continue");
-    Rocket::Core::Element* button_cancel   = _root->GetElementById("cancel");
-
     _i18n = i18n::GetStatistics();
-
-    if (button_continue) button_continue->AddEventListener("click", &DoneButton);
-    if (button_cancel)   button_cancel->AddEventListener  ("click", &CancelButton);
-
+    
+    ToggleEventListener(true, "continue", "click", DoneButton);
+    ToggleEventListener(true, "cancel",   "click", CancelButton);
     DoneButton.EventReceived.Connect  (*this, &StatViewRocket::Accept);
     CancelButton.EventReceived.Connect(*this, &StatViewRocket::Cancel);
 
@@ -849,24 +864,13 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
     
     EventTraitClicked.EventReceived.Connect (*this, &StatViewRocket::TraitClicked);
     
-    Core::Element* age_edit_ok    = _root->GetElementById("char-age-edit-ok");
-    Core::Element* name_edit_ok   = _root->GetElementById("char-name-edit-ok");
-    Core::Element* gender_edit_ok = _root->GetElementById("char-gender-edit-ok");
-
-    if (age_edit_ok)    age_edit_ok->AddEventListener   ("click", &EventAgeChanged);
-    if (name_edit_ok)   name_edit_ok->AddEventListener  ("click", &EventNameChanged);
-    if (gender_edit_ok) gender_edit_ok->AddEventListener("click", &EventGenderChanged);
-
-    Core::Element* cursor_plus = _root->GetElementById("edit-value-cursor-plus");
-    Core::Element* cursor_less = _root->GetElementById("edit-value-cursor-less");
-
-    if (cursor_plus && cursor_less)
-    {
-      cursor_plus->AddEventListener("click", &ButtonUp);
-      cursor_less->AddEventListener("click", &ButtonDown);
-      ButtonUp.EventReceived.Connect  (*this, &StatViewRocket::StatMore);
-      ButtonDown.EventReceived.Connect(*this, &StatViewRocket::StatLess);
-    }
+    ToggleEventListener(true, "char-age-edit-ok",       "click", EventAgeChanged);
+    ToggleEventListener(true, "char-name-edit-ok",      "click", EventNameChanged);
+    ToggleEventListener(true, "char-gender-edit-ok",    "click", EventGenderChanged);
+    ToggleEventListener(true, "edit-value-cursor-plus", "click", ButtonUp);
+    ToggleEventListener(true, "edit-value-cursor-less", "click", ButtonDown);
+    ButtonUp.EventReceived.Connect  (*this, &StatViewRocket::StatMore);
+    ButtonDown.EventReceived.Connect(*this, &StatViewRocket::StatLess);
 
     SetEditMode(Display);
     Translate();
@@ -1245,10 +1249,13 @@ void StatViewRocket::SetTraits(list<string> traits)
 	rml << "<span class='text-trait' id='text-" << underscore(trait) << "'>" << _i18n[trait].Value() << "</span><br />";
       });
       element->SetInnerRML(rml.str().c_str());
-      
+
+      _traits.clear();
       for_each(traits.begin(), traits.end(), [this](const string trait)
       {
-	ToggleEventListener(true, underscore(trait).c_str(), "click", EventTraitClicked);
+	string elem_id = underscore(trait);
+	ToggleEventListener(true, elem_id.c_str(), "click", EventTraitClicked);
+	_traits.push_back(_root->GetElementById(elem_id.c_str()));
       });
     }
   }
