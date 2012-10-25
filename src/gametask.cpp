@@ -3,8 +3,50 @@
 
 using namespace std;
 
+GameTask* GameTask::CurrentGameTask = 0;
+
+Buff::Buff(const string& name, StatController* stats, Data data)
+{
+  Data   data_script = data["scripts"];
+  string script_src, script_func, script_decl;
+
+  _target_name  = name;
+  _target_stats = stats;
+  if (data_script.Nil())
+    return ;
+  script_src  = data_script["src"].Value();
+  script_func = data_script["hook"].Value();
+  script_decl = "void " + script_func + "(Data, int)";
+  _context    = Script::Engine::Get()->CreateContext();
+  _module     = Script::ModuleManager::Require(script_src, "scripts/buffs/" + script_src);
+  if (!_module || !_context)
+    return ;
+  _refresh    = _module->GetFunctionByDecl(script_decl.c_str());
+}
+
+void Buff::Refresh(void)
+{
+  float elapsed_time = _timer.GetElapsedTime();
+
+  if (elapsed_time > 1.f)
+  {
+    Data  stats        = _target_stats->Model().GetAll();
+    bool  keep_going;
+
+    _context->Prepare(_refresh);
+    _context->SetArgObject(0, &stats);
+    _context->SetArgDWord(1, elapsed_time);
+    _context->Execute();
+    keep_going = _context->GetReturnByte();
+    _timer.Restart();
+    if (!keep_going)
+      Over.Emit(this);
+  }
+}
+
 GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(window, generalUi.GetRocketRegion())
 {
+  CurrentGameTask  = this;
   _continue        = true;
   _window          = window;
   _level           = 0;
@@ -31,6 +73,7 @@ GameTask::~GameTask()
   if (_uiLoadGame)  { _uiLoadGame->Destroy(); delete _uiLoadGame; }
   if (_worldMap)    { _worldMap->Destroy();   delete _worldMap;   }
   if (_level)       { delete _level;       }
+  CurrentGameTask = 0;
 }
 
 void GameTask::SaveClicked(Rocket::Core::Event&)
@@ -68,6 +111,11 @@ AsyncTask::DoneStatus GameTask::do_task()
     return (AsyncTask::DS_done);
   if (_loadLevelParams.doLoad)
     DoLoadLevel();
+  {
+    Data charsheet(_charSheet);
+    if ((int)charsheet["Variables"]["Hit Points"] <= 0)
+      ; // TODO Implement Game Over
+  }
   if (_level)
   {
     if (_level->do_task() == AsyncTask::DoneStatus::DS_done)

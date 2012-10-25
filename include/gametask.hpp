@@ -8,9 +8,30 @@
 # include "saveuis.hpp"
 # include "statsheet.hpp"
 
+class Buff
+{
+public:
+  Buff(const std::string& name, StatController* stats, Data data);
+  
+  const std::string& GetTargetName(void) const { return (_target_name); }
+  
+  void Refresh(void);
+  
+  Observatory::Signal<void (Buff*)> Over;
+private:
+  asIScriptContext*  _context;
+  asIScriptModule*   _module;
+  asIScriptFunction* _refresh;
+
+  std::string        _target_name;
+  StatController*    _target_stats;
+  Timer              _timer;
+};
+
 class GameTask
 {
 public:
+  static GameTask* CurrentGameTask;
   GameTask(WindowFramework* window, GeneralUi&);
   ~GameTask();
   

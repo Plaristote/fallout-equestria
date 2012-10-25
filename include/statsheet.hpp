@@ -70,14 +70,14 @@ public:
   Observatory::Signal<void (short)>                     MaxHpChanged;
   Observatory::Signal<void>                             PerksChanged;
 
+  bool           UpdateAllValues(void);  
+  
 private:
   typedef std::pair<asIScriptFunction**, std::string> ScriptFuncPtr;
   typedef std::list<ScriptFuncPtr>                    ScriptFuncPtrs;
   void           LoadFunctions(void);
   void           ReloadFunction(asIScriptFunction**);
   ScriptFuncPtrs _script_func_ptrs;
-  
-  bool           UpdateAllValues(void);
   
   std::vector<std::string> GetStatKeys(Data stats) const;
 

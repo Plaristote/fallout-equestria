@@ -210,9 +210,15 @@ static void AngelScriptInitialize(void)
   const char* worldmapClass = "WorldMap";
   engine->RegisterObjectType(worldmapClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(worldmapClass, "void SetCityVisible(string)", asMETHOD(WorldMap,SetCityVisible), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(worldmapClass, "Data GetDataEngine()",        asMETHOD(WorldMap,GetDataEngine),  asCALL_THISCALL);
+
+  const char* gametaskClass = "Game";
+  //engine->RegisterObjectMethod(gametaskClass, "void PushBuff(Data, Character@)", asMETHODPR(ObjectCharacter,PushBuff,(Data, ObjectCharacter*),void), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(gametaskClass, "void PushBuff(Data, string)",     asMETHODPR(ObjectCharacter,PushBuff,(Data, const string&),void), asCALL_THISCALL);
 
   engine->RegisterGlobalProperty("Level@    level",    &(Level::CurrentLevel));
   engine->RegisterGlobalProperty("WorldMap@ worldmap", &(WorldMap::CurrentWorldMap));
+  engine->RegisterGlobalProperty("Game@     game",     &(GameTask::CurrentGameTask));
 }
 
 int main(int argc, char *argv[])

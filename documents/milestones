@@ -1,8 +1,8 @@
 MILESTONES
 x -> Finished
 ~ -> In progress
+# -> Delayed
 ? -> Finished but not working for obscure reasons
-
 
 Milestone I [Started May 2012, Finished October 2012]
 x -> Statistics
@@ -52,11 +52,11 @@ x --> Shelfs
 x --> Saving/Loading of buffs
 
   -> GameTask (Worldmap and Level handler)
-  --> Player stored globally, and inserted into maps instead of loaded from there
+x --> Player stored globally, and inserted into maps instead of loaded from there
 x ---> Saving and loading player globally
 x ---> Inventory access from  the WorldMap
-~ ---> Inserting player into loaded maps when needed
-  --> Worldmap/Level shared buffs
+x ---> Inserting player into loaded maps when needed
+~ --> Worldmap/Level shared buffs
 x --> Shared "world clock" management for Worldmap and Levels
 
   -> PipBuck
@@ -77,3 +77,4 @@ Milestone III
 
   -> GameTask
   --> Quests
+~ --> Party management

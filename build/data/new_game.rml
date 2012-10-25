@@ -5,12 +5,21 @@
 
   <style>
 
+    #background-image
+    {
+      width:    100%;
+      height:   100%;
+      position: absolute;
+      z-index:  1;
+    }
+
     #content
     {
       color: black;
       outline-font-effect: outline;
       outline-width: 1px;
       outline-color: white;
+      z-index: 2;
     }
 
     #newgame-window
@@ -18,6 +27,13 @@
       width: 100%;
       height: 100%;
       background-color: black;
+      z-index: 0;
+    }
+
+    #button-container
+    {
+      background-color: black;
+      z-index: 2;
     }
 
   </style>
@@ -27,6 +43,9 @@
   <div id="canvas" style="width:100%;height:100%;">
     <div id="newgame-window">
 
+      <div id="background-image">
+      </div>
+
       <div id="button-container">
         <button id="button-next-profile"     i18n="Next Character"    >Next Character</button><br />
         <button id="button-previous-profile" i18n="Previous Character">Previous Character</button><br />
@@ -35,6 +54,13 @@
       </div>
 
       <div id="content" style="color: black;">
+        <span id="character-name">Character name</span><br />
+        <span>Description: </span>
+        <span id="character-description">character description</span><br />
+        <span>Pros: </span>
+        <span id="character-pros">character pros</span><br />
+        <span>Cons: </span>
+        <span id="character-cons">character cons</span><br />
       </div>
     </div>
   </div>
