@@ -11,6 +11,7 @@ GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(wind
   _savePath        = "saves";
   _worldMap        = 0;
   _charSheet       = 0;
+  _playerParty     = 0;
   _playerStats     = 0;
   _playerInventory = 0;
   _uiSaveGame      = 0;
@@ -23,6 +24,7 @@ GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(wind
 
 GameTask::~GameTask()
 {
+  if (_playerParty) { delete _playerParty; }
   if (_playerStats) { delete _playerStats; }
   if (_charSheet)   { delete _charSheet;   }
   if (_uiSaveGame)  { _uiSaveGame->Destroy(); delete _uiSaveGame; }
@@ -99,7 +101,11 @@ bool GameTask::SaveGame(const std::string& savepath)
     success = success && SaveLevel(_level, savepath + "/" + _levelName + ".blob");
   }
   else
+  {
     _dataEngine["system"]["current-level"] = 0;
+    _playerParty->Save(savepath);
+  }
+
   {
     Data player_inventory = _dataEngine["player"]["inventory"];
     
@@ -126,10 +132,10 @@ bool GameTask::SaveGame(const std::string& savepath)
 
 bool GameTask::LoadGame(const std::string& savepath)
 {
-  cout << "LoadGame 1" << endl;
   Data currentLevel, time;
 
   if (_worldMap)    delete _worldMap;
+  if (_playerParty) delete _playerParty;
   if (_playerStats) delete _playerStats;
   if (_charSheet)   delete _charSheet;
   if (_playerInventory)
@@ -138,33 +144,26 @@ bool GameTask::LoadGame(const std::string& savepath)
     _playerInventory = 0;
   }
 
-  cout << "LoadGame 2" << endl;
   _dataEngine.Load(savepath + "/dataengine.json");
   currentLevel     = _dataEngine["system"]["current-level"];
   time             = _dataEngine["time"];
-  cout << "LoadGame 3" << endl;
   _timeManager.ClearTasks(0);
   _timeManager.SetTime(time["seconds"], time["minutes"], time["hours"], time["days"], time["month"], time["year"]);
   _charSheet       = DataTree::Factory::JSON(savepath + "/stats-self.json");
-  cout << "LoadGame 4" << endl;
   if (!_charSheet)  return (false);
-  cout << "LoadGame 5" << endl;
+  _playerParty     = new PlayerParty(savepath);
   _playerStats     = new StatController(_charSheet);
-  cout << "LoadGame 6" << endl;
   _playerStats->SetView(&(_gameUi.GetPers()));
-  cout << "Lol" << endl;
   if (_dataEngine["player"]["inventory"].NotNil())
   {
     _playerInventory = new Inventory;
-    cout << "Double lol" << endl;
     _playerInventory->LoadInventory(_dataEngine["player"]["inventory"]);
-    cout << "Triple lol" << endl;
     _gameUi.GetInventory().SetInventory(*_playerInventory);
   }
 
   _worldMap    = new WorldMap(_window, &_gameUi, _dataEngine, _timeManager);
   _worldMap->GoToPlace.Connect(*this, &GameTask::MapOpenLevel);
-  
+
   if (!(currentLevel.Nil()) && currentLevel.Value() != "0")
   {
     _worldMap->Hide();
@@ -192,6 +191,7 @@ void GameTask::OpenLevel(const std::string& savepath, const std::string& level)
 
 void GameTask::ExitLevel(const std::string& savepath)
 {
+  _level->StripParty(*_playerParty);
   if (!(SaveGame(savepath)))
   {
     cerr << "!! Couldn't save level state on ExitLevel !!" << endl;
@@ -360,7 +360,10 @@ bool GameTask::SaveLevel(Level* level, const std::string& name)
   level->ProcessAllCollisions();
   file.open(name.c_str(), std::ios::binary);
   if (file.is_open())
+  {
     file.write(packet.raw(), packet.size());
+    file.close();
+  }
   else
   {
     std::cerr << "¡¡ Failed to open file '" << name << "', save failed !!" << std::endl;
@@ -417,9 +420,12 @@ Level* GameTask::DoLoadLevel(void)
   {
     _levelName = _loadLevelParams.name;
     _level->SetDataEngine(&_dataEngine);
+    if (_loadLevelParams.entry_zone == "worldmap")
+      _level->InsertParty(*_playerParty);
+    _level->InitPlayer();
     _level->GetPlayer()->SetStatistics(_charSheet, _playerStats);
     SetPlayerInventory();
-    _level->SetEntryZone(_loadLevelParams.entry_zone);
+    _level->SetEntryZone(*_playerParty, _loadLevelParams.entry_zone);
     SetLevel(_level);
   }
   else

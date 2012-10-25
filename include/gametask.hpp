@@ -3,6 +3,7 @@
 
 # include "level/level.hpp"
 # include "worldmap/worldmap.hpp"
+# include "playerparty.hpp"
 # include "gameui.hpp"
 # include "saveuis.hpp"
 # include "statsheet.hpp"
@@ -50,6 +51,7 @@ private:
   TimeManager           _timeManager;
   
   DataTree*             _charSheet;
+  PlayerParty*          _playerParty;
   StatController*       _playerStats;
   Inventory*            _playerInventory;
   

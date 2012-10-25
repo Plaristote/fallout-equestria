@@ -144,29 +144,6 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   _world->SetWaypointsVisible(false);
 
   loadingScreen->AppendText("Loading interface");
-  if (!(GetPlayer()->GetStatistics().Nil()))
-  {
-    Data stats(GetPlayer()->GetStatistics());
-    
-    if (!(stats["Statistics"]["Action Points"].Nil()))
-      _levelUi.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
-  }
-  GetPlayer()->HitPointsChanged.Connect        (_levelUi.GetMainBar(), &GameMainBar::SetCurrentHp);
-  GetPlayer()->ActionPointChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
-  GetPlayer()->EquipedItemActionChanged.Connect(_levelUi.GetMainBar(), &GameMainBar::SetEquipedItemAction);
-  GetPlayer()->EquipedItemChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetEquipedItem);
-  _levelUi.GetMainBar().EquipedItemNextAction.Connect(*GetPlayer(), &ObjectCharacter::ItemNextUseType);
-  _levelUi.GetMainBar().UseEquipedItem.Connect       (*this, &Level::CallbackActionTargetUse);
-  _levelUi.GetMainBar().CombatEnd.Connect            (*this, &Level::StopFight);
-  _levelUi.GetMainBar().CombatPassTurn.Connect       (*this, &Level::NextTurn);
-  obs.Connect(_levelUi.GetInventory().EquipItem,   *this,        &Level::PlayerEquipObject);
-  obs.Connect(_levelUi.GetInventory().UnequipItem, *GetPlayer(), &ObjectCharacter::UnequipItem);
-  obs.Connect(_levelUi.GetInventory().DropObject,  *this,        &Level::PlayerDropObject);
-  obs.Connect(_levelUi.GetInventory().UseObject,   *this,        &Level::PlayerUseObject);
-  
-  _levelUi.GetMainBar().SetEquipedItem(0, GetPlayer()->GetEquipedItem(0));
-  _levelUi.GetMainBar().SetEquipedItem(1, GetPlayer()->GetEquipedItem(1));
-
   obs.Connect(InstanceDynamicObject::ActionUse,         *this, &Level::CallbackActionUse);
   obs.Connect(InstanceDynamicObject::ActionTalkTo,      *this, &Level::CallbackActionTalkTo);
   obs.Connect(InstanceDynamicObject::ActionUseObjectOn, *this, &Level::CallbackActionUseObjectOn);
@@ -208,6 +185,84 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   loadingScreen->FadeOut();
   loadingScreen->Destroy();
   delete loadingScreen;
+}
+
+void Level::InitPlayer(void)
+{
+  if (!(GetPlayer()->GetStatistics().Nil()))
+  {
+    Data stats(GetPlayer()->GetStatistics());
+    
+    if (!(stats["Statistics"]["Action Points"].Nil()))
+      _levelUi.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
+  }
+  GetPlayer()->HitPointsChanged.Connect        (_levelUi.GetMainBar(), &GameMainBar::SetCurrentHp);
+  GetPlayer()->ActionPointChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
+  GetPlayer()->EquipedItemActionChanged.Connect(_levelUi.GetMainBar(), &GameMainBar::SetEquipedItemAction);
+  GetPlayer()->EquipedItemChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetEquipedItem);
+  _levelUi.GetMainBar().EquipedItemNextAction.Connect(*GetPlayer(), &ObjectCharacter::ItemNextUseType);
+  _levelUi.GetMainBar().UseEquipedItem.Connect       (*this, &Level::CallbackActionTargetUse);
+  _levelUi.GetMainBar().CombatEnd.Connect            (*this, &Level::StopFight);
+  _levelUi.GetMainBar().CombatPassTurn.Connect       (*this, &Level::NextTurn);
+  obs.Connect(_levelUi.GetInventory().EquipItem,   *this,        &Level::PlayerEquipObject);
+  obs.Connect(_levelUi.GetInventory().UnequipItem, *GetPlayer(), &ObjectCharacter::UnequipItem);
+  obs.Connect(_levelUi.GetInventory().DropObject,  *this,        &Level::PlayerDropObject);
+  obs.Connect(_levelUi.GetInventory().UseObject,   *this,        &Level::PlayerUseObject);
+  
+  _levelUi.GetMainBar().SetEquipedItem(0, GetPlayer()->GetEquipedItem(0));
+  _levelUi.GetMainBar().SetEquipedItem(1, GetPlayer()->GetEquipedItem(1));  
+}
+
+void Level::InsertParty(PlayerParty& party)
+{
+  PlayerParty::DynamicObjects::reverse_iterator it, end;
+
+  // Inserting progressively the last of PlayerParty's character at the beginning of the characters list
+  // Player being the first of PlayerParty's list, it will also be the first of Level's character list.
+  it  = party.GetObjects().rbegin();
+  end = party.GetObjects().rend();
+  for (; it != end ; ++it)
+  {
+    DynamicObject*   object    = _world->InsertDynamicObject(**it);
+    ObjectCharacter* character = new ObjectCharacter(this, object);
+
+    _characters.insert(_characters.begin(), character);
+    // Replace the Party DynamicObject pointer to the new one
+    delete *it;
+    *it = object;
+  }
+  party.SetHasLocalObjects(false);
+}
+
+// Takes the party's characters out of the map.
+// Backups their DynamicObject in PlayerParty because World is going to remove them anyway.
+void Level::StripParty(PlayerParty& party)
+{
+  PlayerParty::DynamicObjects::iterator it  = party.GetObjects().begin();
+  PlayerParty::DynamicObjects::iterator end = party.GetObjects().end();
+  
+  for (; it != end ; ++it)
+  {
+    DynamicObject*       backup = new DynamicObject;
+    Characters::iterator cit    = _characters.begin();
+    Characters::iterator cend   = _characters.end();
+
+    *backup = **it;
+    while (cit != cend)
+    {
+      ObjectCharacter* character = *cit;
+
+      if (character->GetDynamicObject() == *it)
+      {
+	delete character;
+	_characters.erase(cit);
+	_world->DeleteDynamicObject(*it);
+	break ;
+      }
+    }
+    *it = backup;
+  }
+  party.SetHasLocalObjects(true);
 }
 
 void Level::SetPlayerInventory(Inventory* inventory)
@@ -276,12 +331,25 @@ InstanceDynamicObject* Level::GetObject(const string& name)
 
 ObjectCharacter* Level::GetCharacter(const string& name)
 {
+  Characters::const_iterator it  = _characters.begin();
+  Characters::const_iterator end = _characters.end();
+
+  for (; it != end ; ++it)
+  {
+    if ((*(*it)) == name)
+      return (*it);
+  }
+  return (0);
+}
+
+ObjectCharacter* Level::GetCharacter(const DynamicObject* object)
+{
   Characters::iterator it  = _characters.begin();
   Characters::iterator end = _characters.end();
 
   for (; it != end ; ++it)
   {
-    if ((*(*it)) == name)
+    if ((*(*it)).GetDynamicObject() == object)
       return (*it);
   }
   return (0);
@@ -559,11 +627,8 @@ void Level::MouseLeftClicked(void)
 	{
 	  toGo = _world->GetWaypointFromNodePath(hovering.waypoint);
 
-	  if (toGo)
-	  {
-	    if (_characters.size() > 0)
-	      GetPlayer()->GoTo(toGo);
-	  }
+	  if (toGo && _characters.size() > 0)
+	    GetPlayer()->GoTo(toGo);
 	}
       }
       break ;
@@ -1099,7 +1164,7 @@ const string& Level::GetExitZone(void) const
   return (_exitingZoneName);
 }
 
-void Level::SetEntryZone(const std::string& name)
+void Level::SetEntryZone(PlayerParty& player_party, const std::string& name)
 {
   EntryZone* zone               = _world->GetEntryZoneByName(name);
 
@@ -1107,23 +1172,42 @@ void Level::SetEntryZone(const std::string& name)
     zone = &(_world->entryZones.front());
   if (zone)
   {
-    list<Waypoint*>::iterator it  = zone->waypoints.begin();
-    list<Waypoint*>::iterator end = zone->waypoints.end();
-
-    for (; it != end ; ++it)
+    auto party_it  = player_party.GetObjects().begin();
+    auto party_end = player_party.GetObjects().end();
+    
+    for (; party_it != party_end ; ++party_it)
     {
-      // TODO if something
+      list<Waypoint*>::iterator it  = zone->waypoints.begin();
+      list<Waypoint*>::iterator end = zone->waypoints.end();
+
+      for (; it != end ; ++it)
       {
-        GetPlayer()->SetOccupiedWaypoint(*it);
-	GetPlayer()->GetNodePath().set_pos((*it)->nodePath.get_pos());
-	GetPlayer()->TruncatePath(0);
-        break ;
+	// TODO if something
+	{
+	  ObjectCharacter* character = GetCharacter(*party_it);
+
+	  if (character)
+	  {
+	    cout << "Some character entry zone haz been set" << endl;
+	    (*party_it)->waypoint = *it;
+	    (*party_it)->nodePath.set_alpha_scale(1.f);
+	    (*party_it)->nodePath.show();
+	    character->SetOccupiedWaypoint(*it);
+	    _world->DynamicObjectChangeFloor(*character->GetDynamicObject(), (*it)->floor);
+	    character->GetNodePath().set_pos((*it)->nodePath.get_pos());
+	    character->TruncatePath(0);
+	  }
+	  break ;
+	}
       }
     }
   }
   else
     cout << "[Map Error] This map has no entry zones" << endl;
   _exitingZone = false;
+  _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
+  _camera.FollowObject(GetPlayer());
+  _floor_lastWp = 0;
 }
 
 /*
@@ -1252,7 +1336,7 @@ void Level::CheckCurrentFloor(float elapsedTime)
     Waypoint*      wp;
 
     wp = player->GetDynamicObject()->waypoint;
-    if (!_floor_lastWp || (wp != _floor_lastWp))//(wp && wp->floor != _floor_lastWp->floor))
+    if (!_floor_lastWp || (wp != _floor_lastWp))
     {
       SetCurrentFloor(wp->floor);
       _floor_lastWp = wp;

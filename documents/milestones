@@ -55,7 +55,7 @@ x --> Saving/Loading of buffs
   --> Player stored globally, and inserted into maps instead of loaded from there
 x ---> Saving and loading player globally
 x ---> Inventory access from  the WorldMap
-  ---> Inserting player into loaded maps when needed
+~ ---> Inserting player into loaded maps when needed
   --> Worldmap/Level shared buffs
 x --> Shared "world clock" management for Worldmap and Levels
 

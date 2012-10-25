@@ -392,6 +392,7 @@ struct World
     void           SetMapObjectsVisible(bool v);
     void           MapObjectChangeFloor(MapObject&, unsigned char floor);
 
+    DynamicObject* InsertDynamicObject(DynamicObject&);
     DynamicObject* AddDynamicObject(const std::string& name, DynamicObject::Type type, const std::string& model, const std::string& texture);
     void           DeleteDynamicObject(DynamicObject*);
     DynamicObject* GetDynamicObjectFromName(const std::string& name);

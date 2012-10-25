@@ -211,6 +211,20 @@ MapObject* World::GetMapObjectFromNodePath(NodePath path)
 }
 
 // DYNAMIC OBJECTS
+DynamicObject* World::InsertDynamicObject(DynamicObject& object)
+{
+  object.nodePath = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + object.strModel);
+  if (object.strTexture != "")
+  {
+    object.texture    = TexturePool::load_texture(TEXT_ROOT + object.strTexture);
+    if (object.texture)
+      object.nodePath.set_texture(object.texture);
+  }
+  object.nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
+  dynamicObjects.push_back(object);
+  return (&(*dynamicObjects.rbegin()));
+}
+
 DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type type, const string &model, const string &texture)
 {
   DynamicObject object;
@@ -219,20 +233,7 @@ DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type t
   object.interactions = 0;
   object.strModel     = model;
   object.strTexture   = texture;
-  object.nodePath     = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model);
-  if (texture != "")
-  {
-    object.texture    = TexturePool::load_texture(TEXT_ROOT + texture);
-    if (object.texture)
-      object.nodePath.set_texture(object.texture);
-  }
-
-  DynamicObjectChangeFloor(object, 0);
-
-  object.nodePath.set_name(name);
-  object.nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
-  dynamicObjects.push_back(object);
-  return (&(*(--(dynamicObjects.end()))));
+  return (InsertDynamicObject(object));
 }
 
 void World::DeleteDynamicObject(DynamicObject* ptr)
@@ -769,7 +770,8 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
     locked = iLocked;
 
     packet >> iWaypoint;
-    waypoint = world->GetWaypointFromId(iWaypoint);
+    if (world)
+      waypoint = world->GetWaypointFromId(iWaypoint);
 
     // Blocked Arcs
     {
@@ -841,7 +843,7 @@ void DynamicObject::Serialize(Utils::Packet& packet)
 
       packet << size;
       for (; it != end ; ++it)
-    packet << (*it).first << (*it).second;
+        packet << (*it).first << (*it).second;
     }
 }
 

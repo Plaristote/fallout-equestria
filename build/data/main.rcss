@@ -152,8 +152,8 @@ input.submit
 button.francis
 {
   display: inline-block;
-  width:  30px;
-  height: 30px;
+  width:   60px;
+  height:  20px;
 
   padding-top: 15px;
   font-size: 10;
@@ -161,7 +161,8 @@ button.francis
   tab-index: auto;
 
   background-decorator: image;
-  background-image: invader.tga 247px 0px 406px 45px;
+  //background-image: hud.png 0px 0px 72px 21px;
+  background-image: hud.png 0px 0px 72px 21px;
 }
 
 button.francis:focus
@@ -174,12 +175,12 @@ button.francis:focus
 
 button.francis:hover
 {
-  background-image-t: 45px 90px;
+  background-image: hud.png 0px 23px 72px 44px;
 }
 
 button.francis:active
 {
-  background-image-t: 90px 135px;
+  background-image: hud.png 0px 46px 72px 65px;
 }
 
 button.button_menu

@@ -7,6 +7,8 @@
 # include <panda3d/texturePool.h>
 # include <panda3d/directionalLight.h>
 
+# include "playerparty.hpp"
+
 # include "timer.hpp"
 # include "datatree.hpp"
 # include "scene_camera.hpp"
@@ -33,6 +35,8 @@ public:
   static Level* CurrentLevel;
   
   Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& data, TimeManager& tm);
+  
+  void InitPlayer(void);
 
   // Saving/Loading
   void SetDataEngine(DataEngine* de)   { _dataEngine = de; }
@@ -40,6 +44,9 @@ public:
   void SaveUpdateWorld(void);
   void Save(Utils::Packet&);
   void Load(Utils::Packet&);
+  
+  void InsertParty(PlayerParty& party);
+  void StripParty(PlayerParty& party);
 
   ~Level();
 
@@ -61,6 +68,7 @@ public:
   World*                 GetWorld(void)       { return (_world); }
   SceneCamera&           GetCamera(void)      { return (_camera); }
   ObjectCharacter*       GetCharacter(const std::string& name);
+  ObjectCharacter*       GetCharacter(const DynamicObject*);
   ObjectCharacter*       GetPlayer(void);
   void                   UnprocessAllCollisions(void);
   void                   ProcessAllCollisions(void);
@@ -80,7 +88,7 @@ public:
   void                   CallbackCancelSelectZone(void);
   const std::string&     GetNextZone(void) const;
   const std::string&     GetExitZone(void) const;
-  void                   SetEntryZone(const std::string&);
+  void                   SetEntryZone(PlayerParty&, const std::string&);
 
   // Interaction Management
   void                   CallbackActionBarter(ObjectCharacter*);
