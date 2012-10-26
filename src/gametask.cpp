@@ -5,46 +5,245 @@ using namespace std;
 
 GameTask* GameTask::CurrentGameTask = 0;
 
-Buff::Buff(const string& name, StatController* stats, Data data)
+Buff::~Buff()
 {
-  Data   data_script = data["scripts"];
-  string script_src, script_func, script_decl;
+  if (_task)
+    _tm.DelTask(_task);
+}
 
+Buff::Buff(const string& name, StatController* stats, Data data, TimeManager& tm) : _tm(tm)
+{
+  unsigned short refresh_time = 1;
+
+  _buff.Duplicate(data);
+  InitScripts();
   _target_name  = name;
   _target_stats = stats;
+  //_looping    = _buff["loop"].Value() == "1";
+  _task       = tm.AddTask(TASK_LVL_WORLDMAP, _buff["loop"].Value() == "1", data["duration"].Nil() ? 1 : (int)data["duration"]);
+  _task->Interval.Connect(*this, &Buff::Refresh);
+}
+
+Buff::Buff(Utils::Packet& packet, TimeManager& tm, function<StatController* (const string&)> get_controller) : _tm(tm)
+{
+  string    data_json;
+  DataTree* data_tree;
+
+  packet >> _target_name;
+  packet >> data_json;
+  data_tree = DataTree::Factory::StringJSON(data_json);
+  if (data_tree)
+  {
+    _buff.Duplicate(data_tree);
+    delete data_tree;
+  }
+  _target_stats = get_controller(_target_name);
+  _looping      = _buff["loop"].Value() == "1";
+  _task         = _tm.AddTask(TASK_LVL_WORLDMAP, _looping, 0);
+  packet >> _task->lastS >> _task->lastM >> _task->lastH >> _task->lastD >> _task->lastMo >> _task->lastY;
+  packet >> _task->timeS >> _task->timeM >> _task->timeH >> _task->timeD >> _task->timeMo >> _task->timeY;
+  _task->Interval.Connect(*this, &Buff::Refresh);
+  InitScripts();
+}
+
+void Buff::Save(Utils::Packet& packet)
+{
+  string json;
+  Data   safeDataCopy;
+
+  safeDataCopy.Duplicate(_buff);
+  DataTree::Writers::StringJSON(safeDataCopy, json);
+  packet << _target_name << json;
+  packet << _task->lastS << _task->lastM << _task->lastH << _task->lastD << _task->lastMo << _task->lastY;
+  packet << _task->timeS << _task->timeM << _task->timeH << _task->timeD << _task->timeMo << _task->timeY;
+}
+
+void Buff::InitScripts(void)
+{
+  Data           data_script  = _buff["script"];
+  string         script_src, script_func, script_decl;
+
   if (data_script.Nil())
     return ;
   script_src  = data_script["src"].Value();
   script_func = data_script["hook"].Value();
-  script_decl = "void " + script_func + "(Data, int)";
+  script_decl = "bool " + script_func + "(Data, Data)";
   _context    = Script::Engine::Get()->CreateContext();
   _module     = Script::ModuleManager::Require(script_src, "scripts/buffs/" + script_src);
   if (!_module || !_context)
     return ;
-  _refresh    = _module->GetFunctionByDecl(script_decl.c_str());
+  _refresh    = _module->GetFunctionByDecl(script_decl.c_str());  
+  if (_refresh == 0)
+    cout << "[Fatal Error] Buff refresh function '" << script_decl << "' doesn't exist" << endl;
+  cout << "Successfully loaded scripts" << endl;
 }
 
 void Buff::Refresh(void)
 {
-  float elapsed_time = _timer.GetElapsedTime();
+  bool  keep_going = false;
+  bool  looping    = _buff["loop"].Value() == "1";
 
-  if (elapsed_time > 1.f)
+  cout << "Refreshing Buff" << endl;
+  if (_target_stats)
   {
+    cout << "Executing scripts" << endl;
     Data  stats        = _target_stats->Model().GetAll();
-    bool  keep_going;
 
+    InitScripts();
     _context->Prepare(_refresh);
-    _context->SetArgObject(0, &stats);
-    _context->SetArgDWord(1, elapsed_time);
+    _context->SetArgObject(0, &_buff);
+    _context->SetArgObject(1, &stats);
     _context->Execute();
     keep_going = _context->GetReturnByte();
-    _timer.Restart();
-    if (!keep_going)
-      Over.Emit(this);
+    cout << "Returned " << (keep_going ? "true" : "false") << endl;
+    cout << "Looping is " << (looping ? "true" : "false") << endl;
+  }
+  if (!keep_going || !looping)
+  {
+    _buff.Output();
+    cout << "Buff is over" << endl;
+    Over.Emit(this);
   }
 }
 
-GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(window, generalUi.GetRocketRegion())
+void BuffManager::Cleanup(Buff* to_del)
+{
+  auto it = find(buffs.begin(), buffs.end(), to_del);
+  
+  if (it != buffs.end())
+    buffs.erase(it);
+  garbage.push_back(to_del);
+}
+
+void BuffManager::CollectGarbage(void)
+{
+  for_each(garbage.begin(), garbage.end(), [](Buff* to_del) { delete to_del; } );
+  garbage.clear();
+}
+
+void BuffManager::Load(Utils::Packet& packet, function<StatController* (const string&)> get_controller)
+{
+  unsigned short n_buffs;
+
+  packet >> n_buffs;
+  for (unsigned short i = 0 ; i < n_buffs ; ++i)
+  {
+    Buff* buff = new Buff(packet, tm, get_controller);
+
+    buff->Over.Connect(*this, &BuffManager::Cleanup);
+    buffs.push_back(buff);
+  }
+}
+
+void BuffManager::Save(Utils::Packet& packet, function<bool (const string&)> callback)
+{
+  unsigned short n_buff = 0;
+  auto           it     = buffs.begin();
+  auto           end    = buffs.end();
+
+  // How much buffs need to be saved ?
+  while (it != end)
+  {
+    Buff* buff = *it;
+    
+    if (callback(buff->GetTargetName()))
+      n_buff++;
+  }
+  packet << n_buff;
+
+  // Now save them
+  it  = buffs.begin();
+  end = buffs.end();
+  while (it != end)
+  {
+    Buff* buff = *it;
+
+    if (callback(buff->GetTargetName()))
+    {
+      buff->Save(packet);
+      it = buffs.erase(it);
+    }
+    else
+      ++it;
+  }
+}
+
+void GameTask::LoadLevelBuffs(Utils::Packet& packet)
+{
+  _buff_manager.Load(packet, [this](const string&name) -> StatController*
+  {
+    ObjectCharacter* character = _level->GetCharacter(name);
+
+    return (character ? character->GetStatController() : 0);
+  });
+}
+
+void GameTask::SaveLevelBuffs(Utils::Packet& packet)
+{
+  _buff_manager.Save(packet, _is_level_buff);
+}
+
+void GameTask::SavePartyBuffs(Utils::Packet&)
+{
+  auto it  = _buff_manager.buffs.begin();
+  auto end = _buff_manager.buffs.end();
+
+  while (it != end)
+  {
+    Buff* buff = *it;
+
+    if (_is_level_buff(buff->GetTargetName()))
+    {
+      it = _buff_manager.buffs.erase(it);
+      delete buff;
+    }
+    else
+      ++it;
+  }
+}
+
+void GameTask::PushBuff(ObjectCharacter* character, Data data)
+{
+  StatController* controller = character->GetStatController();
+  Buff*           buff       = new Buff(character->GetName(), controller, data, _timeManager);
+
+  _buff_manager.buffs.push_back(buff);
+}
+
+void GameTask::PushBuff(const std::string& name, Data data)
+{
+  // If Level is open, do it with level
+  if (_level)
+  {
+    ObjectCharacter* character = _level->GetCharacter(name);
+
+    if (character)
+    {
+      PushBuff(character, data);
+      return ;
+    }
+  }
+
+  // If target hasn't been found, or if level isn't open, search for target in PlayerParty
+  auto it  = _playerParty->GetObjects().begin();
+  auto end = _playerParty->GetObjects().end();
+ 
+  for (; it != end ; ++it)
+  {
+    DynamicObject* object = *it;
+    
+    if (object->nodePath.get_name() == name)
+    {
+      StatController* controller = 0;
+      Buff*           buff       = new Buff(name, controller, data, _timeManager);
+
+      _buff_manager.buffs.push_back(buff);
+      break ;
+    }
+  }
+}
+
+GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(window, generalUi.GetRocketRegion()), _buff_manager(_timeManager)
 {
   CurrentGameTask  = this;
   _continue        = true;
@@ -62,6 +261,22 @@ GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(wind
   _gameUi.GetMenu().LoadClicked.Connect(*this, &GameTask::LoadClicked);
   _gameUi.GetMenu().ExitClicked.Connect(*this, &GameTask::Exit);
   _gameUi.GetMenu().OptionsClicked.Connect(generalUi.GetOptions(), &UiBase::FireShow);
+  
+  _is_level_buff   = [this](const string& name) -> bool
+  {
+    ObjectCharacter* character   = _level->GetCharacter(name);
+    auto             party_chars = _playerParty->ConstGetObjects();
+    auto             it = party_chars.begin(), end = party_chars.end();
+    
+    for (; it != end ; ++it)
+    {
+      DynamicObject* party_character = *it;
+      
+      if (character->GetDynamicObject() == party_character)
+	return (false);
+    }
+    return (character != 0);
+  };
 }
 
 GameTask::~GameTask()
@@ -76,7 +291,7 @@ GameTask::~GameTask()
   CurrentGameTask = 0;
 }
 
-void GameTask::SaveClicked(Rocket::Core::Event&)
+void                  GameTask::SaveClicked(Rocket::Core::Event&)
 {
   if (_uiSaveGame)
     delete _uiSaveGame;
@@ -85,7 +300,7 @@ void GameTask::SaveClicked(Rocket::Core::Event&)
   _uiSaveGame->Show();
 }
 
-void GameTask::LoadClicked(Rocket::Core::Event&)
+void                  GameTask::LoadClicked(Rocket::Core::Event&)
 {
   if (_uiLoadGame)
     delete _uiLoadGame;
@@ -94,15 +309,20 @@ void GameTask::LoadClicked(Rocket::Core::Event&)
   _uiLoadGame->Show();
 }
 
-void       GameTask::MapOpenLevel(std::string name)
+void                  GameTask::MapOpenLevel(std::string name)
 {
   OpenLevel(_savePath, name);
   _loadLevelParams.entry_zone = "worldmap";
 }
 
-void       GameTask::SetLevel(Level* level)
+void                  GameTask::SetLevel(Level* level)
 {
   _level = level;
+}
+
+void                  GameTask::GameOver(void)
+{
+  _continue = false;
 }
 
 AsyncTask::DoneStatus GameTask::do_task()
@@ -114,7 +334,7 @@ AsyncTask::DoneStatus GameTask::do_task()
   {
     Data charsheet(_charSheet);
     if ((int)charsheet["Variables"]["Hit Points"] <= 0)
-      ; // TODO Implement Game Over
+      GameOver();
   }
   if (_level)
   {
@@ -135,6 +355,7 @@ AsyncTask::DoneStatus GameTask::do_task()
   }
   else if (_worldMap)
     _worldMap->Run();
+  _buff_manager.CollectGarbage();
   return (AsyncTask::DoneStatus::DS_cont);
 }
 

@@ -11,21 +11,53 @@
 class Buff
 {
 public:
-  Buff(const std::string& name, StatController* stats, Data data);
-  
-  const std::string& GetTargetName(void) const { return (_target_name); }
-  
-  void Refresh(void);
-  
+  Buff(const std::string& name, StatController* stats, Data data, TimeManager& tm);
+  Buff(Utils::Packet& packet,   TimeManager& tm, std::function<StatController* (const std::string&)>);
+  ~Buff(void);
+
+  const std::string& GetTargetName(void) const        { return (_target_name);  }
+  StatController*    GetStatistics(void) const        { return (_target_stats); }
+  void               SetStatistics(StatController* v) { _target_stats = v;      }
+
+  void               Refresh(void);
+  void               Save(Utils::Packet&);
+
   Observatory::Signal<void (Buff*)> Over;
+
 private:
+  void               InitScripts(void);
+  
   asIScriptContext*  _context;
   asIScriptModule*   _module;
   asIScriptFunction* _refresh;
 
+  Data               _buff;
   std::string        _target_name;
   StatController*    _target_stats;
-  Timer              _timer;
+  TimeManager&       _tm;
+  TimeManager::Task* _task;
+  bool               _looping;
+};
+
+struct BuffManager
+{
+  typedef std::list<Buff*> Buffs;
+  
+  BuffManager(TimeManager& tm) : tm(tm) {}
+  ~BuffManager() { CollectGarbage(); }
+
+  void  Save(Utils::Packet&, std::function<bool            (const std::string&)>);
+  void  Load(Utils::Packet&, std::function<StatController* (const std::string&)>);
+
+  Buffs        buffs;
+  TimeManager& tm;
+  
+  void CollectGarbage(void);
+
+private:
+  void Cleanup(Buff*);
+
+  Buffs garbage;
 };
 
 class GameTask
@@ -53,6 +85,15 @@ public:
   void                  UiSaveGame(const std::string& slotPath);
   void                  UiLoadGame(const std::string& slotPath);
 
+  // BUFF MANAGEMENT
+  void                  PushBuff(ObjectCharacter* character, Data buff);
+  void                  PushBuff(const std::string& name,    Data buff);
+  void                  SaveLevelBuffs(Utils::Packet&);
+  void                  SavePartyBuffs(Utils::Packet&);
+  void                  LoadLevelBuffs(Utils::Packet&);
+  void                  LoadPartyBuffs(Utils::Packet&);
+  std::function<bool (const std::string&)> _is_level_buff;
+
 private:
   void                  FinishLoad(void);
   void                  LoadClicked(Rocket::Core::Event&);
@@ -60,6 +101,7 @@ private:
   static bool           SaveLevel(Level* level, const std::string& name);
   Level*                LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& path, const std::string& name, bool isSaveFile = false);  
   Level*                DoLoadLevel(void);
+  void                  GameOver(void);
   
   void                  SetPlayerInventory(void);
   
@@ -70,6 +112,7 @@ private:
   GameUi                _gameUi;
   DataEngine            _dataEngine;
   TimeManager           _timeManager;
+  BuffManager           _buff_manager;
   
   DataTree*             _charSheet;
   PlayerParty*          _playerParty;

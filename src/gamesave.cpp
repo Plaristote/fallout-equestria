@@ -1,6 +1,7 @@
 #include "level/level.hpp"
 #include "level/objects/shelf.hpp"
 #include "level/objects/locker.hpp"
+#include <gametask.hpp>
 
 /*
  * Level
@@ -25,6 +26,8 @@ void Level::Load(Utils::Packet& packet)
 
   for_each(_objects.begin(),    _objects.end(),    [&packet](InstanceDynamicObject* object) { object->Load(packet);    });
   for_each(_characters.begin(), _characters.end(), [&packet](ObjectCharacter* character)    { character->Load(packet); });
+
+  GameTask::CurrentGameTask->LoadLevelBuffs(packet);
 }
 
 void Level::SaveUpdateWorld(void)
@@ -65,6 +68,8 @@ void Level::Save(Utils::Packet& packet)
       object->Save(packet);
   });
   for_each(_characters.begin(), _characters.end(), [&packet](ObjectCharacter* character)    { character->Save(packet); });
+
+  GameTask::CurrentGameTask->SaveLevelBuffs(packet);
 }
 
 /*

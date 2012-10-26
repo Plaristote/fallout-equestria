@@ -17,9 +17,11 @@ public:
     _lastTime    = _globalClock->get_real_time();
   }
 
-  double          GetElapsedTime(void) { return (_globalClock->get_real_time() - _lastTime); }
-  void            Profile(std::string str) { cout << str+": " << GetElapsedTime() << " sec\n"; Restart(); }
-  void            Restart(void)        { _lastTime = _globalClock->get_real_time();          }
+  double          GetElapsedTime(void) const { return (_globalClock->get_real_time() - _lastTime); }
+  void            Profile(std::string str)   { cout << str+": " << GetElapsedTime() << " sec\n"; Restart(); }
+  void            Restart(void)              { _lastTime = _globalClock->get_real_time();          }
+  void            SetLastTime(double v)      { _lastTime = v; }
+  float           GetLastTime(void) const    { return (_lastTime); }
   
   static void     asConstructor(void* memory) { new(memory) Timer(); }
   static void     asDestructor(void* memory)  {                      }

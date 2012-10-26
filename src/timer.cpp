@@ -47,6 +47,7 @@ TimeManager::Task* TimeManager::AddTask(unsigned char level, bool loop, unsigned
 
 void TimeManager::DelTask(Task* task)
 {
+  cout << "[" << task << "] Del Task" << endl;
   Tasks::iterator it = std::find(tasks.begin(), tasks.end(), task);
   
   if (it != tasks.end())
@@ -61,26 +62,71 @@ void TimeManager::ExecuteTasks(void)
   Tasks::iterator it  = tasks.begin();
   Tasks::iterator end = tasks.end();
 
+  //cout << "[ExecuteTasks] " << tasks.size() << " tasks to execute" << endl;
+  // TODO Write that shit again while not drunk.
   while (it != end)
   {
     Task&          task = **it;
 
-    if (task.lastY <= year && task.lastMo <= month && task.lastD <= day && task.lastM <= minute && task.lastS <= second)
+    bool dostuff = true;
+    if (year < task.lastY)
+      dostuff = false;
+    else
+    {
+      if (year == task.lastY && month < task.lastMo)
+	dostuff = false;
+      else
+      {
+	if (year == task.lastY && month == task.lastMo && hour < task.lastH)
+	  dostuff = false;
+	else
+	{
+	  if (year == task.lastY && month == task.lastMo && hour == task.lastH && minute < task.lastM)
+	    dostuff = false;
+	  else
+	  {
+	    if (year == task.lastY && month == task.lastMo && hour == task.lastH && minute == task.lastM && second < task.lastS)
+	      dostuff = false;
+	    else
+	    {
+	      if (*it == *tasks.rbegin())
+	      {
+		cout << "[" << &task << "] " << task.lastY << "/" << task.lastMo << "/" << task.lastD << " ";
+		cout << task.lastH << ":" << task.lastM  << ":" << task.lastS << endl;
+
+		cout << year << "/" << month << "/" << day << " ";
+		cout << hour << ":" << minute  << ":" << second << endl;
+		cout << second << " < " << task.lastS << endl;
+	      }
+	    }
+	  }
+	}
+      }
+    }
+    if (dostuff)
     {
       safeIt = it;
+      cout << "[" << &task << "] Executing Callbacks" << endl;
       task.Interval.Emit();
+      cout << "[" << &task << "] Executed Callbacks" << endl;
       task.IntervalIt.Emit(++task.it);
       if (safeIt != it)
       {
+	cout << "[" << &task << "] Task has been deleted" << endl;
 	it = safeIt;
 	continue ;
       }
       if (!(task.loop))
       {
+	cout << "[" << &task << "] Task isn't looping" << endl;
 	it = tasks.erase(it);
 	continue ;
       }
       task.NextStep();
+      cout << "[" << &task << "] Next step will be at: ";
+      cout << task.lastY << "/" << task.lastMo << "/" << task.lastD << " ";
+      cout << task.lastH << ":" << task.lastM  << ":" << task.lastS << endl;
+      
     }
     ++it;
   }
@@ -130,7 +176,7 @@ void TimeManager::Task::NextStep(void)
   lastD  += timeD;
   lastM  += timeM;
   lastS  += timeS;
-  
+
   if (lastS > 59)
   {
     lastM += (lastS / 60);

@@ -152,16 +152,13 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   daylightTask->Interval.Connect(*this, &Level::RunDaylight);
 
   unsigned int taskIt = 0;
-  std::for_each(_characters.begin(), _characters.end(), [this, &taskIt](ObjectCharacter* character)
+  for_each(_characters.begin(), _characters.end(), [this, &taskIt](ObjectCharacter* character)
   {
-    if (character != GetPlayer())
-    {
-      TimeManager::Task* task = _timeManager.AddTask(TASK_LVL_CITY, true, 3);
+    TimeManager::Task* task = _timeManager.AddTask(TASK_LVL_CITY, true, 3);
 
-      task->lastS += (taskIt % 3);
-      ++taskIt;
-      task->Interval.Connect(*character, &ObjectCharacter::CheckFieldOfView);
-    }
+    task->lastS += (taskIt % 3);
+    ++taskIt;
+    task->Interval.Connect(*character, &ObjectCharacter::CheckFieldOfView);
   });
   
   _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());

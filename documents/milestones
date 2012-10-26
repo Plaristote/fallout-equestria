@@ -51,12 +51,12 @@ x --> Lockers
 x --> Shelfs
 x --> Saving/Loading of buffs
 
-  -> GameTask (Worldmap and Level handler)
+x -> GameTask (Worldmap and Level handler)
 x --> Player stored globally, and inserted into maps instead of loaded from there
 x ---> Saving and loading player globally
 x ---> Inventory access from  the WorldMap
 x ---> Inserting player into loaded maps when needed
-~ --> Worldmap/Level shared buffs
+x --> Worldmap/Level shared buffs
 x --> Shared "world clock" management for Worldmap and Levels
 
   -> PipBuck

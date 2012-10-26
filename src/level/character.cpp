@@ -835,7 +835,7 @@ void                ObjectCharacter::CallbackActionUse(InstanceDynamicObject*)
 
 void     ObjectCharacter::CheckFieldOfView(void)
 {
-  if (_hitPoints <= 0)
+  if (_hitPoints <= 0 || _level->GetPlayer() == this)
     return ;
   CollisionTraverser fovTraverser;
   float              fovRadius = 45;
@@ -883,7 +883,7 @@ void     ObjectCharacter::CheckFieldOfView(void)
 	  continue ;
 	if      (IsAlly(character))
 	  _fovAllies.push_back(character);
-	else if (IsEnemy(character) && HasLineOfSight(character))
+	else if ((true || IsEnemy(character)) && HasLineOfSight(character))
 	{
 	  list<FovEnemy>::iterator enemyIt = find(_fovEnemies.begin(), _fovEnemies.end(), character);
 

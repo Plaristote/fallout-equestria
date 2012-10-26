@@ -14,6 +14,7 @@ public:
   ~PlayerParty(void);
 
   bool                  Save(const std::string& savepath) const;
+  
   void                  Join(DynamicObject*);
   void                  Leave(DynamicObject*);
   

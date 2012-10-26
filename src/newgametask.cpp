@@ -59,7 +59,6 @@ UiNewGame::UiNewGame(WindowFramework* window, Core::Context* context) : UiBase(w
   _root = context->LoadDocument("data/new_game.rml");
   if (_root)
   {
-    cout << "Loading UiNewGame" << endl;
     ToggleEventListener(true, "button-start-from-scratch", "click", EventStartFromScratch);
     ToggleEventListener(true, "button-select-profile",     "click", EventSelectProfile);
     ToggleEventListener(true, "button-previous-profile",   "click", PreviousProfile);
@@ -102,8 +101,6 @@ void UiNewGame::GoToNextProfile(Rocket::Core::Event&)
 
 void UiNewGame::GoToProfile(const string& profile)
 {
-  // TODO
-  cout << "Load Profile " << profile << endl;
   Data profiles(_data_profiles);
   
   Core::Element* name        = _root->GetElementById("character-name");
