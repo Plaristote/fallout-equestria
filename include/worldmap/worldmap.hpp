@@ -39,6 +39,8 @@ public:
   
   void MoveTowardsCoordinates(float x, float y);
   void MoveTowardsPlace(const std::string&);
+  
+  DataEngine& GetDataEngine(void) { return (_dataEngine); }
 
   Observatory::Signal<void (std::string)> GoToPlace;
 
