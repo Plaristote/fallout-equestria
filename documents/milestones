@@ -59,7 +59,7 @@ x ---> Inserting player into loaded maps when needed
 x --> Worldmap/Level shared buffs
 x --> Shared "world clock" management for Worldmap and Levels
 
-~ -> PipBuck
+x -> PipBuck
 
 ? -> Music Manager
   -> Sound Manager
