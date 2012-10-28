@@ -26,8 +26,8 @@ private:
   void                  Serialize(Utils::Packet&) const;
   void                  UnSerialize(Utils::Packet&);
 
-  DynamicObjects _objects;
-  bool           _local_objects;
+  DynamicObjects        _objects;
+  bool                  _local_objects;
 };
 
 #endif

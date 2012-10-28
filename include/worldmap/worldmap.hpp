@@ -57,7 +57,7 @@ private:
 
   void                   SaveMapStatus(void) const;
 
-  RocketListener         MapClickedEvent, PartyCursorClicked, CityButtonClicked, ButtonInventory, ButtonCharacter, ButtonMenu;
+  RocketListener         MapClickedEvent, PartyCursorClicked, CityButtonClicked, ButtonInventory, ButtonCharacter, ButtonPipbuck, ButtonMenu;
   DataTree*              _mapTree;
   DataEngine&            _dataEngine;
   TimeManager&           _timeManager;

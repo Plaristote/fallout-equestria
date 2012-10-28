@@ -7,6 +7,7 @@
 # include "gameui.hpp"
 # include "saveuis.hpp"
 # include "statsheet.hpp"
+# include "pipbuck.hpp"
 
 class Buff
 {
@@ -113,6 +114,7 @@ private:
   DataEngine            _dataEngine;
   TimeManager           _timeManager;
   BuffManager           _buff_manager;
+  Pipbuck               _pipbuck;
   
   DataTree*             _charSheet;
   PlayerParty*          _playerParty;

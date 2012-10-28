@@ -1,4 +1,20 @@
 {
+"Pipbuck": {
+  "Apps": {
+    "helloworld": {
+      "type": 0,
+      "icon": "helloworld.png",
+      "src": "helloworld.as",
+      "hooks": {
+        "exit": "exit",
+        "focused": "focused",
+        "unfocused": "unfocused",
+        "run_background": "daemon",
+        "run_focused": "main"
+      }
+    }
+  }
+},
 "shielding spell": {
   "graphics": {
     "model": "sphere.obj",

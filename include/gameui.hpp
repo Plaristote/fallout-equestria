@@ -59,6 +59,7 @@ public:
   RocketListener         MenuButtonClicked;
   RocketListener         InventoryButtonClicked;
   RocketListener         PersButtonClicked;
+  RocketListener         PipbuckButtonClicked;
   
   Observatory::Signal<void (unsigned short)> UseEquipedItem;
   Observatory::Signal<void (unsigned short)> EquipedItemNextAction;
@@ -172,6 +173,7 @@ public:
   void                   OpenMenu(Rocket::Core::Event&);
   void                   OpenInventory(Rocket::Core::Event&);
   void                   OpenPers(Rocket::Core::Event&);
+  Observatory::Signal<void (Rocket::Core::Event&)> OpenPipbuck;
   
   PT(RocketRegion)       GetRocketRegion(void) { return (_rocket); }
 
@@ -211,7 +213,7 @@ private:
   GameUi&          _gameUi;
   GameMainBar*     _mainBar;
   
-  Observatory::ObserverId _observers[6];
+  Observatory::ObserverId _observers[7];
 };
 
 class GameOptions : public UiBase

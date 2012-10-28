@@ -243,7 +243,9 @@ void GameTask::PushBuff(const std::string& name, Data data)
   }
 }
 
-GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(window, generalUi.GetRocketRegion()), _buff_manager(_timeManager)
+GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(window, generalUi.GetRocketRegion()),
+                                                                    _buff_manager(_timeManager),
+                                                                    _pipbuck(window, generalUi.GetRocketRegion()->get_context(), _dataEngine)
 {
   CurrentGameTask  = this;
   _continue        = true;
@@ -261,6 +263,7 @@ GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(wind
   _gameUi.GetMenu().LoadClicked.Connect(*this, &GameTask::LoadClicked);
   _gameUi.GetMenu().ExitClicked.Connect(*this, &GameTask::Exit);
   _gameUi.GetMenu().OptionsClicked.Connect(generalUi.GetOptions(), &UiBase::FireShow);
+  _gameUi.OpenPipbuck.Connect(_pipbuck, &UiBase::FireShow);
   
   _is_level_buff   = [this](const string& name) -> bool
   {
@@ -355,6 +358,7 @@ AsyncTask::DoneStatus GameTask::do_task()
   }
   else if (_worldMap)
     _worldMap->Run();
+  _pipbuck.Run();
   _buff_manager.CollectGarbage();
   return (AsyncTask::DoneStatus::DS_cont);
 }
@@ -416,6 +420,7 @@ bool GameTask::LoadGame(const std::string& savepath)
   _dataEngine.Load(savepath + "/dataengine.json");
   currentLevel     = _dataEngine["system"]["current-level"];
   time             = _dataEngine["time"];
+  _pipbuck.Restart();
   _timeManager.ClearTasks(0);
   _timeManager.SetTime(time["seconds"], time["minutes"], time["hours"], time["days"], time["month"], time["year"]);
   _charSheet       = DataTree::Factory::JSON(savepath + "/stats-self.json");

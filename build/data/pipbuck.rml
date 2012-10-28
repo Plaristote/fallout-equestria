@@ -1,0 +1,21 @@
+<rml>
+	<head>
+		<title>Pipbuck</title>
+		<link type="text/template" href="tpl_mainbar.rml" />
+		<style>
+  body
+  {
+    width: 100%;
+    height: 100%;
+  }
+		</style>
+	</head>
+  <body id="body" template="tplmainbar">
+    <button class="button_menu" id="button-quit" i18n="Quit">Quit</button>
+    <button class="button_menu" id="button-home" i18n="Home">Home</button>
+    <br />
+    <div id="app_container">
+    </div>
+    <button class="button_menu" id="button-exit" i18n="Quit Pipbuck">Quit Pipbuck</button>
+  </body>
+</rml>

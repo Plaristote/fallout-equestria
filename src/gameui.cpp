@@ -59,10 +59,12 @@ LevelUi::LevelUi(WindowFramework* window, GameUi& gameUi) : _gameUi(gameUi)
   _observers[0] = _mainBar->MenuButtonClicked.EventReceived.Connect     (_gameUi, &GameUi::OpenMenu);
   _observers[1] = _mainBar->InventoryButtonClicked.EventReceived.Connect(_gameUi, &GameUi::OpenInventory);
   _observers[2] = _mainBar->PersButtonClicked.EventReceived.Connect     (_gameUi, &GameUi::OpenPers);
+  _observers[3] = _mainBar->PipbuckButtonClicked.EventReceived.Connect  (_gameUi.OpenPipbuck, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
+  
 
-  _observers[3] = _gameUi.GetInventory().VisibilityToggled.Connect(InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
-  _observers[4] = _gameUi.GetMenu().VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);  
-  _observers[5] = _gameUi.GetPers().VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  _observers[4] = _gameUi.GetInventory().VisibilityToggled.Connect(InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  _observers[5] = _gameUi.GetMenu().VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);  
+  _observers[6] = _gameUi.GetPers().VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
 }
 
 LevelUi::~LevelUi(void)
@@ -726,6 +728,7 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
 
     ToggleEventListener(true, "menu",      "click", MenuButtonClicked);
     ToggleEventListener(true, "inv",       "click", InventoryButtonClicked);
+    ToggleEventListener(true, "pipbuck",   "click", PipbuckButtonClicked);
     ToggleEventListener(true, "charsheet", "click", PersButtonClicked);
     ToggleEventListener(true, "equiped_1", "click", EquipedItem1Clicked);
     ToggleEventListener(true, "equiped_2", "click", EquipedItem2Clicked);
@@ -744,11 +747,12 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
 
 GameMainBar::~GameMainBar()
 {
-  ToggleEventListener(false, "menu",      "click", MenuButtonClicked);
-  ToggleEventListener(false, "inv",       "click", InventoryButtonClicked);
-  ToggleEventListener(false, "charsheet", "click", PersButtonClicked);
-  ToggleEventListener(false, "equiped_1", "click", EquipedItem1Clicked);
-  ToggleEventListener(false, "equiped_2", "click", EquipedItem2Clicked);
+  ToggleEventListener(false, "menu",       "click", MenuButtonClicked);
+  ToggleEventListener(false, "inv",        "click", InventoryButtonClicked);
+  ToggleEventListener(false, "pipbuck",    "click", PipbuckButtonClicked);
+  ToggleEventListener(false, "charsheet",  "click", PersButtonClicked);
+  ToggleEventListener(false, "equiped_1",  "click", EquipedItem1Clicked);
+  ToggleEventListener(false, "equiped_2",  "click", EquipedItem2Clicked);
   ToggleEventListener(false, "pass_turn",  "click", PassTurnClicked);
   ToggleEventListener(false, "stop_fight", "click", CombatEndClicked);  
 }
