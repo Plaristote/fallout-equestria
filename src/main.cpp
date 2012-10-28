@@ -25,15 +25,22 @@ using namespace std;
 #include <level/objects/shelf.hpp>
 #include <level/objects/locker.hpp>
 
+asIScriptContext* as_current_context;
+asIScriptModule*  as_current_module;
+
 class RocketAsListener : Rocket::Core::EventListener
 {
 public:
-  RocketAsListener(DataEngine& de, Rocket::Core::Element* elem, const std::string& event, Data script) : _element(elem), _event(event), _de(de)
+  RocketAsListener(DataEngine& de, Rocket::Core::Element* elem, const std::string& event, const std::string& func_name) : _element(elem), _event(event), _de(de)
   {
+    cout << "RocketAsListener::RocketAsListener" << endl;
     if (_element)
       _element->AddEventListener(_event.c_str(), this);
-    _callback = "void " + script["callback"].Value() + "(Data, RmlElement, string)";
-    _module   = Script::ModuleManager::Require(script["src"].Value(), "scripts/" + script["src"].Value());
+    else
+      cout << "RocketAsListener constructed with null RmlElement" << endl;
+    _callback = "void " + func_name + "(Data, RmlElement@, string)";
+    _context  = as_current_context;
+    _module   = as_current_module;
   }
 
   ~RocketAsListener()
@@ -44,20 +51,19 @@ public:
 
   void ProcessEvent(Rocket::Core::Event& event)
   {
+    cout << "RocketAsListener::ProcessEvent" << endl;
     if (_module)
     {
-      asIScriptContext*  context  = Script::Engine::Get()->CreateContext();
       asIScriptFunction* callback = _module->GetFunctionByDecl(_callback.c_str());
       
-      if (context && callback)
+      if (_context && callback)
       {
-	context->Prepare(callback);
-	context->SetArgObject(0, &_de);
-	context->SetArgObject(1, event.GetCurrentElement());
-	context->SetArgObject(2, &_event);
-	context->Execute();
+	_context->Prepare(callback);
+	_context->SetArgObject(0, &_de);
+	_context->SetArgObject(1, event.GetCurrentElement());
+	_context->SetArgObject(2, &_event);
+	_context->Execute();
       }
-      if (context)  context->Release();
       if (callback) callback->Release();
     }
   }
@@ -66,6 +72,7 @@ private:
   DataEngine&            _de;
   Rocket::Core::Element* _element;
   std::string            _event;
+  asIScriptContext*      _context;
   asIScriptModule*       _module;
   std::string            _callback;
 };
@@ -90,6 +97,7 @@ public:
   
   void          DelEventListener(Rocket::Core::Element* e)
   {
+    cout << "DelEventListener" << endl;
     bool keep_searching;
 
     do
@@ -103,6 +111,7 @@ public:
 	_event_listeners.erase(it);
       }
     } while (keep_searching);
+    cout << "DelEventListener /End" << endl;
   }
   
 private:
@@ -147,14 +156,15 @@ namespace asUtils
   void UnserializeString(Utils::Packet* packet, std::string& str)         { (*packet) >> str;   }
   void UnserializeStrArr(Utils::Packet* packet, std::list<string>& array) { (*packet) >> array; }
 
+  std::string            RocketGetId(Rocket::Core::Element* self)                            { return (self->GetId().CString());          }
   Rocket::Core::Element* RocketGetElementById(Rocket::Core::Element* self, const string& id) { return (self->GetElementById(id.c_str())); }
   void                   RocketSetInnerRML(Rocket::Core::Element* self, const string& rml)   { return (self->SetInnerRML(rml.c_str()));   }
-  void                   RocketClearListeners(Rocket::Core::Element* self) { RocketAsManager::self.DelEventListener(self); }
-  void                   RocketSetListener(Rocket::Core::Element* self, const string& event, Data script)
+  void                   RocketClearListeners(Rocket::Core::Element* self) { cout << "RocketClearListeners" << endl; RocketAsManager::self.DelEventListener(self); }
+  void                   RocketSetListener(Rocket::Core::Element* self, const string& event, const string& callback)
   {
     DataEngine&       data_engine = WorldMap::CurrentWorldMap->GetDataEngine();
-    RocketAsListener* listener    = new RocketAsListener(data_engine, self, event, script);
-    
+    RocketAsListener* listener    = new RocketAsListener(data_engine, self, event, callback);
+
     RocketAsManager::self.AddEventListener(self, listener);
   }
 }
@@ -323,10 +333,11 @@ static void AngelScriptInitialize(void)
   
   const char* rmlDocumentClass = "RmlElement";
   engine->RegisterObjectType(rmlDocumentClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(rmlDocumentClass, "RmlElement@ GetElementById(string)",         asFUNCTION(asUtils::RocketGetElementById), asCALL_CDECL_OBJFIRST);
-  engine->RegisterObjectMethod(rmlDocumentClass, "void        SetInnerRML(string)",            asFUNCTION(asUtils::RocketSetInnerRML),    asCALL_CDECL_OBJFIRST);
-  engine->RegisterObjectMethod(rmlDocumentClass, "void        ClearEventListeners()",          asFUNCTION(asUtils::RocketClearListeners), asCALL_CDECL_OBJFIRST);
-  engine->RegisterObjectMethod(rmlDocumentClass, "void        AddEventListener(string, Data)", asFUNCTION(asUtils::RocketSetListener),    asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(rmlDocumentClass, "string      GetId()",                          asFUNCTION(asUtils::RocketGetId),          asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(rmlDocumentClass, "RmlElement@ GetElementById(string)",           asFUNCTION(asUtils::RocketGetElementById), asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(rmlDocumentClass, "void        SetInnerRML(string)",              asFUNCTION(asUtils::RocketSetInnerRML),    asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(rmlDocumentClass, "void        ClearEventListeners()",            asFUNCTION(asUtils::RocketClearListeners), asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(rmlDocumentClass, "void        AddEventListener(string, string)", asFUNCTION(asUtils::RocketSetListener),    asCALL_CDECL_OBJFIRST);
 }
 
 int main(int argc, char *argv[])

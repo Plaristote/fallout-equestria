@@ -6,12 +6,25 @@
       "icon": "helloworld.png",
       "src": "helloworld.as",
       "hooks": {
+        "start": "start",
         "exit": "exit",
         "focused": "focused",
         "unfocused": "unfocused",
         "run_background": "daemon",
         "run_focused": "main"
       }
+    }
+  },
+  "Files": {
+    "firstfile": {
+      "type":    "text",
+      "header":  "First text file ever for the pipbuck",
+      "content": "<b>Rich text test</b> <i>Lorem ipsum</i> <u>dolor sit amet</u> and i don't know what comes next<br />- La prochaine fois, ce sera avec de vraies balles... et ca chauffera pour ton cul, sale francais.<br />- Euh, je suis meme pas francais, je suis american.<br />- Non, t'es francais ! MOI JE SUIS AMERICAN !"
+    },
+    "secondfile": {
+      "type":    "audio",
+      "header":  "First audio file ever for the pipbuck",
+      "src":     "test.ogg"
     }
   }
 },

@@ -50,6 +50,7 @@ private:
   void              StartApp(Rocket::Core::Event&);
   void              QuitApp(Rocket::Core::Event&);
   void              GoHome(Rocket::Core::Event&);
+  void              DoQuitApp(App*);
   
   void              AppAskedFocus(App*);
   void              AppAskedUnfocus(void);

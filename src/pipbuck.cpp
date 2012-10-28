@@ -2,6 +2,9 @@
 
 using namespace std;
 
+extern asIScriptContext* as_current_context;
+extern asIScriptModule*  as_current_module;
+
 Pipbuck::Pipbuck(WindowFramework* w, Rocket::Core::Context* c, DataEngine& data): UiBase(w, c), _data_engine(data)
 {
   _root          = c->LoadDocument("data/pipbuck.rml");
@@ -61,7 +64,7 @@ void Pipbuck::StartApp(Rocket::Core::Event& event)
       {
 	app      = *it;
 	to_start = false;
-	return ;
+	break ;
       }
     }
 
@@ -82,16 +85,21 @@ void Pipbuck::StartApp(Rocket::Core::Event& event)
     {
       if (to_start)
       {
+        cout << "Start Application" << endl;
 	app->AskFocus.Connect(*this, &Pipbuck::AppAskedFocus);
 	app->Exit.Connect    (*this, &Pipbuck::AppAskedExit);
 	app->Unfocus.Connect (*this, &Pipbuck::AppAskedUnfocus);
         if (!(app->Started(_data_engine))) // If starting the app failed
 	{
+          cout << "Failed to start application" << endl;
 	  delete app;
 	  return ;
 	}
+        cout << "Application Started Successfully" << endl;
         _running_apps.push_back(app);
       }
+      else
+        cout << "Application is executing as background task right now" << endl;
       app->Focused(_root->GetElementById("app_container"), _data_engine);
       _running_app = app;
     }
@@ -102,9 +110,20 @@ void Pipbuck::QuitApp(Rocket::Core::Event&)
 {
   if (_running_app)
   {
-    _running_app->Exited(_data_engine);
+    DoQuitApp(_running_app);
     _running_app = 0;
     ReloadApps();
+  }
+}
+
+void Pipbuck::DoQuitApp(App* to_quit)
+{
+  if (to_quit)
+  {
+    auto it = find(_running_apps.begin(), _running_apps.end(), _running_app);
+
+    _running_apps.erase(it);
+    to_quit->Exited(_data_engine);
   }
 }
 
@@ -150,15 +169,14 @@ void Pipbuck::Run(void)
   while ((it = _asked_exit.begin()) != _asked_exit.end())
   {
     App* to_exit = *it;
-    
-    to_exit->Exited(_data_engine);
-    delete to_exit;
+
+    DoQuitApp(to_exit); 
+    _asked_exit.erase(it);
     if (to_exit == _running_app)
     {
       _running_app = 0;
       ReloadApps();
     }
-    _asked_exit.erase(it);
   }
   
   // Handling if the running app has asked to be unfocused
@@ -196,7 +214,8 @@ void Pipbuck::ReloadApps(void)
   Data                   apps_data = _data_engine["Pipbuck"]["Apps"];
   list<string>           apps;
   stringstream           rml;
-  
+
+  apps_data.Output();  
   // Get App List from scripts
   if (_module)
   {
@@ -211,8 +230,12 @@ void Pipbuck::ReloadApps(void)
       apps = *(reinterpret_cast<list<string>*>(context->GetReturnObject()));
       func->Release();
     }
-    context->Release();
+    else
+      cout << "pipbuck.as: missing function StringList GetAvailableApps(Data)" << endl;
+    //context->Release();
   }
+  else
+    cout << "pipbuck.as: isn't loaded" << endl;
   unsigned int iterator = 0;
   rml << "<div id='app_list'>";
   if (apps.size() == 0)
@@ -256,7 +279,9 @@ void PipbuckAppScript::Exited(DataEngine& de)
   
   if (function)
   {
-    _context->Prepare(function);
+    as_current_context = _context;
+    as_current_module  = _module;
+     _context->Prepare(function);
     _context->SetArgObject(0, &de);
     _context->Execute();
   }
@@ -264,16 +289,21 @@ void PipbuckAppScript::Exited(DataEngine& de)
 
 void PipbuckAppScript::Focused(Rocket::Core::Element* root, DataEngine& de)
 {
-  const string       function_name = "void " + _data["hooks"]["focused"].Value() + "(RmlElement, Data)";
+  cout << "Application Focused" << endl;
+  const string       function_name = "void " + _data["hooks"]["focused"].Value() + "(RmlElement@, Data)";
   asIScriptFunction* function      = _module->GetFunctionByDecl(function_name.c_str());
   
   if (function)
   {
+    as_current_context = _context;
+    as_current_module  = _module;
     _context->Prepare(function);
     _context->SetArgObject(0, root);
     _context->SetArgObject(1, &de);
     _context->Execute();
   }
+  else
+    cout << "App missing focused hook (prototype is '" << function_name << "')" << endl;
 }
 
 void PipbuckAppScript::Unfocused(DataEngine& de)
@@ -283,6 +313,8 @@ void PipbuckAppScript::Unfocused(DataEngine& de)
   
   if (function)
   {
+    as_current_context = _context;
+    as_current_module  = _module;
     _context->Prepare(function);
     _context->SetArgObject(0, &de);
     _context->Execute();
@@ -291,24 +323,28 @@ void PipbuckAppScript::Unfocused(DataEngine& de)
 
 void PipbuckAppScript::RunAsBackgroundTask(DataEngine& de)
 {
-  const string       function_name = "void " + _data["hooks"]["run_background"].Value() + "(Data)";
+  const string       function_name = "int " + _data["hooks"]["run_background"].Value() + "(Data)";
   asIScriptFunction* function      = _module->GetFunctionByDecl(function_name.c_str());
   int                ret_value     = 0;
   
   if (function)
   {
+    as_current_context = _context;
+    as_current_module  = _module;
     _context->Prepare(function);
-    _context->SetArgObject(1, &de);
+    _context->SetArgObject(0, &de);
     _context->Execute();
     ret_value = _context->GetReturnDWord();
   }
   switch (ret_value)
   {
-    default:
     case 0:
+      break ;
+    default:
+    case 1:
       Exit.Emit(this);
       break ;
-    case 1:
+    case 2:
       AskFocus.Emit(this);
       break ;
   }
@@ -316,12 +352,14 @@ void PipbuckAppScript::RunAsBackgroundTask(DataEngine& de)
 
 void PipbuckAppScript::RunAsMainTask(Rocket::Core::Element* root, DataEngine& de)
 {
-  const string       function_name = "void " + _data["hooks"]["run_focused"].Value() + "(RmlElement, Data)";
+  const string       function_name = "int " + _data["hooks"]["run_focused"].Value() + "(RmlElement@, Data)";
   asIScriptFunction* function      = _module->GetFunctionByDecl(function_name.c_str());
   int                ret_value     = 0;
   
   if (function)
   {
+    as_current_context = _context;
+    as_current_module  = _module;
     _context->Prepare(function);
     _context->SetArgObject(0, root);
     _context->SetArgObject(1, &de);
@@ -330,11 +368,13 @@ void PipbuckAppScript::RunAsMainTask(Rocket::Core::Element* root, DataEngine& de
   }
   switch (ret_value)
   {
-    default:
     case 0:
+      break ;
+    default:
+    case 1:
       Exit.Emit(this);
       break ;
-    case 1:
+    case 2:
       Unfocus.Emit();
       break ;
   }
@@ -346,16 +386,20 @@ bool PipbuckAppScript::Started(DataEngine& de)
 
   if (_context && _module)
   {
-    const string       function_name = "void " + _data["hooks"]["start"].Value() + "(Data)";
+    const string       function_name = "bool " + _data["hooks"]["start"].Value() + "(Data)";
     asIScriptFunction* function      = _module->GetFunctionByDecl(function_name.c_str());
-    
+
     if (function)
     {
+      as_current_context = _context;
+      as_current_module  = _module;
       _context->Prepare(function);
       _context->SetArgObject(0, &de);
       _context->Execute();
       ret_value = _context->GetReturnByte();
     }
+    else
+      cout << "App missing start hook (prototype is configured to be: '" << function_name << "'" << endl;
   }
-  return (false);
+  return (ret_value);
 }
