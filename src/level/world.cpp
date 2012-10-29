@@ -337,7 +337,19 @@ EntryZone* World::GetEntryZoneByName(const std::string& name)
 // Lights
 void World::AddLight(WorldLight::Type type, const std::string& name)
 {
-  lights.push_back(WorldLight(type, rootLights, name));
+  lights.push_back(WorldLight(type, WorldLight::Type_None, rootLights, name));
+}
+
+void World::AddLight(WorldLight::Type type, const std::string& name, MapObject* parent)
+{
+  AddLight(type, name);
+  lights.rbegin()->ReparentTo(parent);
+}
+
+void World::AddLight(WorldLight::Type type, const std::string& name, DynamicObject* parent)
+{
+  AddLight(type, name);
+  lights.rbegin()->ReparentTo(parent);
 }
 
 void World::DeleteLight(const std::string& name)
@@ -847,6 +859,93 @@ void DynamicObject::Serialize(Utils::Packet& packet)
     }
 }
 
+/*
+ * WorldLights
+ */
+void WorldLight::Initialize(void)
+{
+  switch (type)
+  {
+    case Point:
+    {
+      PT(PointLight) pLight = new PointLight(name);
+
+      light    = pLight;
+      nodePath = parent.attach_new_node(pLight);
+    }
+      break ;
+    case Directional:
+    {
+      PT(DirectionalLight) pLight = new DirectionalLight(name);
+
+      light    = pLight;
+      nodePath = parent.attach_new_node(pLight);
+    }
+      break ;
+    case Ambient:
+    {
+      PT(AmbientLight) pLight = new AmbientLight(name);
+
+      light    = pLight;
+      nodePath = parent.attach_new_node(pLight);
+    }
+      break ;
+    case Spot:
+    {
+      PT(Spotlight) pLight = new Spotlight(name);
+
+      light    = pLight;
+      nodePath = parent.attach_new_node(pLight);
+    }
+      break ;
+  }  
+}
+
+void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
+{
+  float     r, g, b, a;
+  float     pos_x, pos_y, pos_z;
+  float     hpr_x, hpr_y, hpr_z;
+  string    parent_name;
+
+  packet >> name >> zoneSize;
+  packet.operator>> <char>(reinterpret_cast<char&>(type));
+  packet.operator>> <char>(reinterpret_cast<char&>(parent_type));
+  if (parent_type != Type_None)
+    packet >> parent_name;
+  packet >> r >> g >> b >> a;
+  packet >> pos_x >> pos_y >> pos_z;
+  packet >> hpr_x >> hpr_y >> hpr_z;
+  switch (parent_type)
+  {
+    case Type_MapObject:
+      ReparentTo(world->GetMapObjectFromName(parent_name));
+      break ;
+    case Type_DynamicObject:
+      ReparentTo(world->GetDynamicObjectFromName(parent_name));
+      break ;
+  }
+  Initialize();
+  SetColor(r, g, b, a);
+  nodePath.set_pos(LVecBase3(pos_x, pos_y, pos_z));
+  nodePath.set_hpr(LVecBase3(hpr_x, hpr_y, hpr_z));
+}
+
+void WorldLight::Serialize(Utils::Packet& packet)
+{
+  LColor color = light->get_color();
+
+  packet << name << zoneSize << (char)type << (char)parent_type;
+  if (parent_i)
+    packet << parent_i->nodePath.get_name();
+  packet << (float)color.get_x() << (float)color.get_y() << (float)color.get_z() << (float)color.get_w();
+  packet << (float)nodePath.get_x() << (float)nodePath.get_y() << (float)nodePath.get_z();
+  packet << (float)nodePath.get_hpr().get_x() << (float)nodePath.get_hpr().get_y() << (float)nodePath.get_hpr().get_z();
+}
+
+/*
+ * World
+ */
 void           World::UnSerialize(Utils::Packet& packet)
 {
   // Waypoints
@@ -910,6 +1009,20 @@ void           World::UnSerialize(Utils::Packet& packet)
       dynamicObjects.push_back(object);
     }
   }
+  
+  // Lights
+  {
+    int size;
+    
+    packet >> size;
+    for (int it = 0 ; it < size ; ++it)
+    {
+      WorldLight light(window->get_render());
+
+      light.UnSerialize(this, packet);
+      lights.push_back(light);
+    }
+  }
 
   // ExitZones
   {
@@ -964,6 +1077,9 @@ void           World::UnSerialize(Utils::Packet& packet)
       entryZones.push_back(zone);
     }
   }
+
+  // Post-loading stuff
+  for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light); });
 }
 
 void           World::Serialize(Utils::Packet& packet)
@@ -1016,6 +1132,17 @@ void           World::Serialize(Utils::Packet& packet)
       DynamicObjects::iterator end = dynamicObjects.end();
 
       for (; it != end ; ++it) { (*it).Serialize(packet); }
+  }
+  
+  // WorldLights
+  {
+    int size = lights.size();
+    
+    packet << size;
+    WorldLights::iterator it  = lights.begin();
+    WorldLights::iterator end = lights.end();
+    
+    for (; it != end ; ++it) { (*it).Serialize(packet); }
   }
 
   // ExitZones

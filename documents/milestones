@@ -43,7 +43,7 @@ x --> World clock moving forward in time while traveling
 x --> Displaying world time
 
   -> Levels
-~ /--> Lights
+~ --> Lights
 ~ --> Proper camera handling
 x --> Barter
   --> Stairs
@@ -61,7 +61,7 @@ x ---> Inserting player into loaded maps when needed
 x --> Worldmap/Level shared buffs
 x --> Shared "world clock" management for Worldmap and Levels
 
-  -> General
+x -> General
 x --> Music Manager
 x --> Sound Manager
 x --> i18n/Rocket interfaces dynamic translator
