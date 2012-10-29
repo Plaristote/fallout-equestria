@@ -175,6 +175,8 @@ struct asConsoleOutput
 };
 asConsoleOutput asConsole;
 
+#include "musicmanager.hpp"
+
 static void AngelScriptInitialize(void)
 {
   asIScriptEngine* engine = Script::Engine::Get();
@@ -188,6 +190,14 @@ static void AngelScriptInitialize(void)
   engine->RegisterGlobalFunction("void SetLanguage(const string& in)", asFUNCTION(i18n::Load), asCALL_CDECL);
 
   Script::StdList<string>::Register(engine, "StringList", "string");  
+  
+  const char* musicmanagerClass = "Music";
+  engine->RegisterObjectType(musicmanagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(musicmanagerClass, "void Play(string)",         asMETHODPR(MusicManager,Play, (const std::string&), void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(musicmanagerClass, "void Play(string, string)", asMETHODPR(MusicManager,Play, (const std::string&, const std::string&), void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(musicmanagerClass, "void PlayNext()",           asMETHOD(MusicManager,PlayNext),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(musicmanagerClass, "void SetVolume(float)",     asMETHOD(MusicManager,SetVolume), asCALL_THISCALL);
+  engine->RegisterGlobalFunction("Music@ MusicHandle(void)", asFUNCTION(MusicManager::Get), asCALL_CDECL);
 
   const char* packetClass = "Serializer";
   engine->RegisterObjectType(packetClass, 0, asOBJ_REF | asOBJ_NOCOUNT);

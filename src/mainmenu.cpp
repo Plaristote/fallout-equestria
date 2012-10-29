@@ -52,7 +52,7 @@ MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window
   _need_garbage_collect = false;
 
   MusicManager::Initialize();
-  MusicManager::Get()->Play("mainmenu", "traderslife");
+  MusicManager::Get()->Play("mainmenu");
 }
 
 MainMenu::~MainMenu()
@@ -89,9 +89,9 @@ void MainMenu::EndGame(void)
 
 AsyncTask::DoneStatus MainMenu::do_task()
 {
-  /*MusicManager* mm = MusicManager::Get();
+  MusicManager* mm = MusicManager::Get();
 
-  if (mm) { mm->Run(); }*/
+  if (mm) { mm->Run(); }
   if (createLevelPlz) AsyncCreateLevel();
   if (_levelTask)
   {

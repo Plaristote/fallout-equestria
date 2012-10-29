@@ -43,15 +43,17 @@ x --> World clock moving forward in time while traveling
 x --> Displaying world time
 
   -> Levels
+~ /--> Lights
 ~ --> Proper camera handling
 x --> Barter
-x --> Doors
   --> Stairs
+x --> Doors
 x --> Lockers
 x --> Shelfs
 x --> Saving/Loading of buffs
 
 x -> GameTask (Worldmap and Level handler)
+x --> PipBuck
 x --> Player stored globally, and inserted into maps instead of loaded from there
 x ---> Saving and loading player globally
 x ---> Inventory access from  the WorldMap
@@ -59,21 +61,17 @@ x ---> Inserting player into loaded maps when needed
 x --> Worldmap/Level shared buffs
 x --> Shared "world clock" management for Worldmap and Levels
 
-x -> PipBuck
-
-? -> Music Manager
-  -> Sound Manager
-x -> i18n/Rocket interfaces dynamic translator
-x -> Option Manager and user interface
-x -> Creating New Games
+  -> General
+x --> Music Manager
+~ --> Sound Manager
+x --> i18n/Rocket interfaces dynamic translator
+x --> Option Manager and user interface
+x --> Creating New Games
 
 Milestone III
   -> Worldmap
   --> Random encounters
   --> Various terrain and movement speed
-
-  -> Levels
-  --> Lights
 
   -> GameTask
   --> Quests
