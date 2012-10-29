@@ -63,7 +63,7 @@ x --> Shared "world clock" management for Worldmap and Levels
 
   -> General
 x --> Music Manager
-~ --> Sound Manager
+x --> Sound Manager
 x --> i18n/Rocket interfaces dynamic translator
 x --> Option Manager and user interface
 x --> Creating New Games

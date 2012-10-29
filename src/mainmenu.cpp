@@ -1,5 +1,6 @@
 #include "mainmenu.hpp"
 #include "musicmanager.hpp"
+#include <soundmanager.hpp>
 
 extern PandaFramework framework;
 
@@ -85,6 +86,7 @@ void MainMenu::EndGame(void)
   delete _levelTask;
   _levelTask            = 0;
   _need_garbage_collect = true;
+  MusicManager::Get()->Play("mainmenu");
 }
 
 AsyncTask::DoneStatus MainMenu::do_task()

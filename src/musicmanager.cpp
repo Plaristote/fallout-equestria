@@ -34,6 +34,7 @@ MusicManager::~MusicManager()
 
 void MusicManager::Play(const string& category)
 {
+  if (_current_category == category) return ;
   _current_category = category;
   PlayNext();
 }
