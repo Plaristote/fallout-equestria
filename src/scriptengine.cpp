@@ -119,4 +119,3 @@ void             ModuleManager::Release(asIScriptModule* ptr)
     }
   }
 }
-

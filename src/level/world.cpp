@@ -213,6 +213,7 @@ MapObject* World::GetMapObjectFromNodePath(NodePath path)
 // DYNAMIC OBJECTS
 DynamicObject* World::InsertDynamicObject(DynamicObject& object)
 {
+  object.waypoint = 0;
   object.nodePath = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + object.strModel);
   if (object.strTexture != "")
   {
@@ -782,9 +783,8 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
     locked = iLocked;
 
     packet >> iWaypoint;
-    if (world)
-      waypoint = world->GetWaypointFromId(iWaypoint);
-
+    waypoint = world->GetWaypointFromId(iWaypoint);
+    
     // Blocked Arcs
     {
         int size;

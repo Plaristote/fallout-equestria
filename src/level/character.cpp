@@ -833,6 +833,27 @@ void                ObjectCharacter::CallbackActionUse(InstanceDynamicObject*)
  */
 # define FOV_TTL 5
 
+Script::StdList<ObjectCharacter*>         ObjectCharacter::GetNearbyEnemies(void) const
+{
+  Script::StdList<ObjectCharacter*> ret;
+  
+  auto it  = _fovEnemies.begin();
+  auto end = _fovEnemies.end();
+  
+  while (it != end)
+  {
+    cout << "[" << it->enemy << "] FovEnemy: " << it->enemy->GetName() << endl;
+    ret.push_back(it->enemy);
+    it++;
+  }
+  return (ret);
+}
+
+Script::StdList<ObjectCharacter*> ObjectCharacter::GetNearbyAllies(void) const
+{
+  return (_fovAllies);
+}
+
 void     ObjectCharacter::CheckFieldOfView(void)
 {
   if (_hitPoints <= 0 || _level->GetPlayer() == this)

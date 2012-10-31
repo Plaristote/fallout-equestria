@@ -410,7 +410,7 @@ void Level::StopFight(void)
     
     for (; it != end ; ++it)
     {
-      list<ObjectCharacter::FovEnemy> listEnemies = (*it)->GetNearbyEnemies();
+      list<ObjectCharacter*> listEnemies = (*it)->GetNearbyEnemies();
 
       if (listEnemies.size() > 0 && (*it)->IsAlive())
       {
@@ -427,24 +427,20 @@ void Level::NextTurn(void)
 {
   if (_state != Fight)
     return ;
-  cout << "Next Turn" << endl;
   if (_itCharacter != _characters.end())
   {
     cout << "Playing animation idle" << endl;
     (*_itCharacter)->PlayAnimation("idle");
   }
-  cout << "Next Turn Step 2" << endl;
   if ((++_itCharacter) == _characters.end())
   {
     _itCharacter = _characters.begin();
     _timeManager.AddElapsedTime(WORLDTIME_TURN);
   }
-  cout << "Next Turn Step 3" << endl;
   if (_itCharacter != _characters.end())
     (*_itCharacter)->RestartActionPoints();
   else
     cout << "[FATAL ERROR][Level::NextTurn] Character Iterator points to nothing (n_characters = " << _characters.size() << ")" << endl;
-  cout << "Next Turn Step 4" << endl;
 }
 
 void Level::RunDaylight(void)
@@ -504,8 +500,8 @@ AsyncTask::DoneStatus Level::do_task(void)
       ForEach(_characters, [elapsedTime](ObjectCharacter* character)
       {
         character->Run(elapsedTime);
-        character->UnprocessCollisions();
-        character->ProcessCollisions();
+        //character->UnprocessCollisions();
+        //character->ProcessCollisions();
       });
       break ;
     case Interrupted:
@@ -1167,13 +1163,30 @@ void Level::SetEntryZone(PlayerParty& player_party, const std::string& name)
 
   if (!zone && _world->entryZones.size() > 0)
     zone = &(_world->entryZones.front());
+  else if (!zone)
+  {
+    cout << "[Map Error] This map has no entry zones. Generating a fake entry zone." << endl;  
+    _world->AddEntryZone("FakeEntryZone");
+    zone = _world->GetEntryZoneByName("FakeEntryZone");
+    for (unsigned int i = 1 ; i < 10 ; ++i)
+    {
+      Waypoint* wp = _world->GetWaypointFromId(i);
+
+      if (wp)
+        zone->waypoints.push_back(wp);
+      else
+	break ;
+    }
+  }
   if (zone)
   {
+    cout << "[Level][SetEntryZone] Inserting characters into entry zone '" << zone->name << "'" << endl;
     auto party_it  = player_party.GetObjects().begin();
     auto party_end = player_party.GetObjects().end();
     
     for (; party_it != party_end ; ++party_it)
     {
+      cout << "[Level][SetEntryZone] Trying to insert character " << (*party_it)->nodePath.get_name() << endl;
       list<Waypoint*>::iterator it  = zone->waypoints.begin();
       list<Waypoint*>::iterator end = zone->waypoints.end();
 
@@ -1200,8 +1213,6 @@ void Level::SetEntryZone(PlayerParty& player_party, const std::string& name)
       }
     }
   }
-  else
-    cout << "[Map Error] This map has no entry zones" << endl;
   _exitingZone = false;
   _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
   _camera.FollowObject(GetPlayer());
@@ -1334,6 +1345,11 @@ void Level::CheckCurrentFloor(float elapsedTime)
     Waypoint*      wp;
 
     wp = player->GetDynamicObject()->waypoint;
+    if (!wp)
+    {
+      cout << "[Level] Player doesn't have an occupied waypoint. Something went wrong somewhere" << endl;
+      return ;
+    }
     if (!_floor_lastWp || (wp != _floor_lastWp))
     {
       SetCurrentFloor(wp->floor);

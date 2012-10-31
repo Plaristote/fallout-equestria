@@ -188,19 +188,20 @@ void OptionsManager::Refresh(void)
     // Language
     Data language = data["language"];
 
-    if (!(language.Nil()))
+    if (language.NotNil())
       i18n::Load(language.Value());
     
     // Screen
     Data             screen        = data["screen"];
 
-    if (!(screen.Nil()))
+    if (screen.NotNil())
     {
       unsigned int     screen_width  = screen["x"];
       unsigned int     screen_height = screen["y"];
       bool             fullscreen    = screen["fullscreen"] == 1;
       WindowProperties props         = framework.get_window(0)->get_graphics_window()->get_properties();
 
+      props.set_cursor_hidden(false);
       props.set_fullscreen(fullscreen);
       props.set_size(screen_width, screen_height);
       framework.get_window(0)->get_graphics_window()->request_properties(props);

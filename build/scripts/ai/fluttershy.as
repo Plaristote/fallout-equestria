@@ -66,27 +66,34 @@ Character@ currentTarget = null;
 
 Character@ SelectTarget(Character@ self)
 {
+  Cout("Fluttershy Select Target");
   CharacterList         enemies  = self.GetNearbyEnemies();
-  CharacterListIterator it       = enemies.Begin();
   int                   nEnemies = enemies.Size();
+  int                   it       = 0;
   Character@            bestMatch;
 
-  while (nEnemies > 0)
+  Cout("Debug #1");
+  while (it < nEnemies)
   {
-    Character@ current = it.Value();
+    Cout("Debug #2");
+    Character@ current = enemies[it];
 
+    Cout("Debug #3");
     if (@bestMatch == null || current.GetHitPoints() < bestMatch.GetHitPoints())
-      @bestMatch = @(it.Value());
-
-    nEnemies--;
+      @bestMatch = @current;
+    Cout("Debug #4");
+ 
     it++;
-  }
+    Cout("Debug #5");
+   }
+  Cout("Selected enemy: " + bestMatch.GetName());
   Write("Selected enemy: " + bestMatch.GetName());
   return (bestMatch);
 }
 
 void combat(Character@ self)
 {
+  Cout("Fluttershy in Combat mode");
   if (self.IsMoving())
     return ;
 

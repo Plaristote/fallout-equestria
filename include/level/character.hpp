@@ -175,8 +175,8 @@ public:
   bool                IsEnemy(ObjectCharacter*) const;
   bool                IsAlly(ObjectCharacter*)  const;
   
-  Script::StdList<FovEnemy>         GetNearbyEnemies(void) { return (_fovEnemies); }
-  Script::StdList<ObjectCharacter*> GetNearbyAllies(void)  { return (_fovAllies);  }
+  Script::StdList<ObjectCharacter*> GetNearbyEnemies(void) const;
+  Script::StdList<ObjectCharacter*> GetNearbyAllies(void)  const;
   
   // Script Communication Tools
   void                RequestAttack(ObjectCharacter* attack, ObjectCharacter* from);

@@ -52,7 +52,7 @@ public:
   void ProcessEvent(Rocket::Core::Event& event)
   {
     cout << "RocketAsListener::ProcessEvent" << endl;
-    if (_module)
+    if (_module && _element)
     {
       asIScriptFunction* callback = _module->GetFunctionByDecl(_callback.c_str());
       
@@ -189,7 +189,7 @@ static void AngelScriptInitialize(void)
   engine->RegisterGlobalFunction("void Write(const string &in)", asFUNCTION(GameConsole::WriteOn), asCALL_CDECL);
   engine->RegisterGlobalFunction("void SetLanguage(const string& in)", asFUNCTION(i18n::Load), asCALL_CDECL);
 
-  Script::StdList<string>::Register(engine, "StringList", "string");  
+  Script::StdList<string>::Register(engine, "StringList", "string");
   
   const char* musicmanagerClass = "Music";
   engine->RegisterObjectType(musicmanagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);

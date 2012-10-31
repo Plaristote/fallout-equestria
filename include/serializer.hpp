@@ -92,7 +92,7 @@ private:
   {
     if ((canIHaz(sizeof(T), 1)))
       tmp = *(reinterpret_cast<T*>(reading));
-    reading = reinterpret_cast<void*>((int)reading + sizeof(T));
+    reading = reinterpret_cast<void*>((long)reading + sizeof(T));
   }
 
   // Association Type/TypeCode

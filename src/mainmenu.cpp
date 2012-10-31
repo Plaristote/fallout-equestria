@@ -25,10 +25,12 @@ void MouseCursor::Update(void)
   if (_cursor && IsVisible())
   {
     stringstream strTop, strLeft;
+    int          nTop,   nLeft;
+    string       top,    left;
     MouseData    pointer = _window->get_graphics_window()->get_pointer(0);
 
-    strTop  << (pointer.get_y() + 1);
-    strLeft << (pointer.get_x() + 1);
+    strLeft << ((int)pointer.get_x() + 1);
+    strTop  << ((int)pointer.get_y() + 1);
     _cursor->SetProperty("top",  strTop.str().c_str());
     _cursor->SetProperty("left", strLeft.str().c_str());
     _root->PullToFront();

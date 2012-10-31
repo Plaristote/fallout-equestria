@@ -153,9 +153,9 @@ void ObjectCharacter::Save(Utils::Packet& packet)
 
   InstanceDynamicObject::Save(packet);
   packet << _actionPoints << _hitPoints << _armorClass << _tmpArmorClass;
-  packet << _path.size();
+  packet << (unsigned int)_path.size();
   for_each(_path.begin(), _path.end(),   [this, &packet](Waypoint& wp)        { packet << wp.id;    });
-  packet << _buffs.size();
+  packet << (unsigned int)_buffs.size();
   for_each(_buffs.begin(), _buffs.end(), [this, &packet](CharacterBuff* buff) { buff->Save(packet); });
   
   if (saveFunc)
