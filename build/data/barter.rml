@@ -98,15 +98,15 @@
   <body id="body" template="tplmainbar">
   <p>
     <div id="inventory-items">
-      <p id="self-inventory"  class="window-inventory">
+      <p id="self-inventory"  class="console-bg">
       </p>
       <span id="value-player">0 caps</span>
       <span id="value-other">0 caps</span>
-      <p id="stack-player"    class="window-inventory">
+      <p id="stack-player"    class="console-bg">
       </p>
-      <p id="stack-other"     class="window-inventory">
+      <p id="stack-other"     class="console-bg">
       </p>
-       <p id="other-inventory" class="window-inventory">
+       <p id="other-inventory" class="console-bg">
       </p>
    </div>
     <div id="buttons">

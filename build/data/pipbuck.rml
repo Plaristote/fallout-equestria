@@ -14,7 +14,7 @@
     <button class="button_menu" id="button-quit" i18n="Quit">Quit</button>
     <button class="button_menu" id="button-home" i18n="Home">Home</button>
     <br />
-    <div id="app_container">
+    <div id="app_container" class="console-bg">
     </div>
     <button class="button_menu" id="button-exit" i18n="Quit Pipbuck">Quit Pipbuck</button>
   </body>

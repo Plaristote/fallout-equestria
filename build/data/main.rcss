@@ -161,8 +161,7 @@ button.francis
   tab-index: auto;
 
   background-decorator: image;
-  //background-image: hud.png 0px 0px 72px 21px;
-  background-image: hud.png 0px 0px 72px 21px;
+  background-image: hud.png 0px 0px 125px 39px;
 }
 
 button.francis:focus
@@ -175,30 +174,54 @@ button.francis:focus
 
 button.francis:hover
 {
-  background-image: hud.png 0px 23px 72px 44px;
+  background-image: hud.png 0px 40px 125px 79px;
 }
 
 button.francis:active
 {
-  background-image: hud.png 0px 46px 72px 65px;
+  background-image: hud.png 0px 80px 125px 119px;
+}
+
+button
+{
+  display: inline-block;
+
+  text-align: center;
+  tab-index:  auto;
+
+  background-decorator: image;
+  background-image:     hud.png 204px 32px 373px 58px;
+}
+
+button:hover
+{
+  background-image:     hud.png 204px 59px 373px 87px;
+}
+
+button:active
+{
+  background-image:     hud.png 204px 88px 373px 115px;
 }
 
 button.button_menu
 {
-	display: inline-block;
+  display: inline-block;
 
-	width: 159px;
-	height: 37px;
+  width: 185px;
+  height: 28px;
 
-	padding-top: 8px;
-	vertical-align: -18px;
+  vertical-align: -18px;
 
-	font-size: 18;
-	text-align: center;
-	tab-index: auto;
+  padding-left: 60px;
 
-	background-decorator: image;
-	background-image: invader.tga 247px 0px 406px 45px;
+  margin: 5px 5px 5px 5px;
+
+  font-size: 18;
+  text-align: center;
+  tab-index: auto;
+
+  background-decorator: image;
+  background-image: hud.png 0px 121px 185px 148px;
 }
 
 button.button_menu:focus,
@@ -212,12 +235,12 @@ button.button_menu:focus,
 
 button.button_menu:hover,
 {
-	background-image-t: 45px 90px;
+	background-image: hud.png 0px 149px 185px 175px;
 }
 
 button.button_menu:active,
 {
-	background-image-t: 90px 135px;
+	background-image: hud.png 0px 176px 185px 203px;
 }
 
 /*datagrid input.text
@@ -541,4 +564,90 @@ scrollbarhorizontal
 {
 	width: 0px;
 	height: 0px;
+}
+
+.console-bg
+{
+  background-decorator:          tiled-box;
+  background-top-left-image:     hud.png 126px 0px  136px 10px;
+  background-top-right-image:    hud.png 193px 0px  203px 10px;
+  background-top-image:          hud.png 136px 0px  193px 10px;
+  background-bottom-left-image:  hud.png 126px 50px 136px 61px;
+  background-bottom-right-image: hud.png 193px 50px 203px 61px;
+  background-bottom-image:       hud.png 136px 50px 193px 61px;
+  background-left-image:         hud.png 126px 10px 136px 49px;
+  background-right-image:        hud.png 193px 10px 203px 49px;
+  background-center-image:       hud.png 136px 10px 193px 49px;
+}
+
+.console-bg scrollbarvertical
+{
+	margin-top:    10px;
+	margin-bottom: 10px;
+	margin-right:  10px;
+	width:         10px;
+}
+
+.console-bg scrollbarvertical slidertrack
+{
+	background-decorator: tiled-vertical;
+	background-top-image: invader.tga 70px 199px 97px 201px;
+	background-center-image: invader.tga stretch 70px 201px 97px 202px;
+	background-bottom-image: invader.tga 70px 203px 97px 204px;
+}
+
+.console-bg scrollbarvertical sliderbar
+{
+	margin-left: 0px;
+	width:       10px;
+	min-height:  46px;
+
+	background-decorator: tiled-vertical;
+	background-top-image: invader.tga 56px 152px 79px 175px;
+	background-center-image: invader.tga stretch 56px 175px 79px 175px;
+	background-bottom-image: invader.tga 56px 176px 79px 198px;
+}
+
+.console-bg scrollbarvertical sliderbar:hover
+{
+	background-top-image-s: 80px 103px;
+	background-center-image-s: 80px 103px;
+	background-bottom-image-s: 80px 103px;
+}
+
+.console-bg scrollbarvertical sliderbar:active
+{
+	background-top-image-s: 104px 127px;
+	background-center-image-s: 104px 127px;
+	background-bottom-image-s: 104px 127px;
+}
+
+.console-bg scrollbarvertical sliderarrowdec
+{
+	width: 10px;
+	height: 10px;
+	
+	icon-decorator: image;
+	icon-image: invader.tga 0px 152px 27px 176px;
+}
+
+.console-bg scrollbarvertical sliderarrowdec:hover,
+.console-bg scrollbarvertical sliderarrowinc:hover
+{
+	icon-image-t: 177px 201px;
+}
+
+.console-bg scrollbarvertical sliderarrowdec:active,
+.console-bg scrollbarvertical sliderarrowinc:active
+{
+	icon-image-t: 202px 226px;
+}
+
+.console-bg scrollbarvertical sliderarrowinc
+{
+	width: 10px;
+	height: 10px;
+	
+	icon-decorator: image;
+	icon-image: invader.tga 28px 152px 55px 176px;
 }

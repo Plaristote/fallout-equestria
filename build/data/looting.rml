@@ -60,9 +60,9 @@
   <body id="body" template="tplmainbar">
   <p>
     <div id="inventory-items">
-      <p id="self-inventory"  class="window-inventory">
+      <p id="self-inventory"  class="console-bg">
       </p>
-      <p id="other-inventory" class="window-inventory">
+      <p id="other-inventory" class="console-bg">
       </p>
     </div>
     <div id="buttons">

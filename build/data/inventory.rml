@@ -49,7 +49,7 @@
 	</head>
   <body id="body" template="tplmainbar">
   <p>
-    <div id="body-inventory-items" class="window-inventory">
+    <div id="body-inventory-items" class="console-bg">
       <img src="../textures/itemIcons/key.png" class='inventory-item' />
     </div>
   </p>

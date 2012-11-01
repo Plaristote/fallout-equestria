@@ -36,6 +36,13 @@
       z-index: 2;
     }
 
+    button
+    {
+      width: 25%;
+      height: 30px;
+      padding-top: 8px;
+    }
+
   </style>
 
 </head>
@@ -47,10 +54,10 @@
       </div>
 
       <div id="button-container">
-        <button id="button-next-profile"     i18n="Next Character"    >Next Character</button><br />
-        <button id="button-previous-profile" i18n="Previous Character">Previous Character</button><br />
-        <button id="button-load-start-from-scratch" i18n="Create Character">Create Character</button><br />
-        <button id="button-select-profile" i18n="Select this character">Select this character</button><br />
+        <button id="button-previous-profile" i18n="Previous Character">Previous Character</button>
+        <button id="button-next-profile"     i18n="Next Character"    >Next Character</button>
+        <button id="button-load-start-from-scratch" i18n="Create Character">Create Character</button>
+        <button id="button-select-profile" i18n="Select this character">Select this character</button>
       </div>
 
       <div id="content" style="color: black;">

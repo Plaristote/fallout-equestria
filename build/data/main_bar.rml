@@ -39,17 +39,6 @@ body
   float: right;
   margin: auto;
   overflow-y: scroll;
-
-background-decorator:          tiled-box;
-background-top-left-image:     hud.png 72px 0px  78px 6x;
-background-top-right-image:    hud.png 83px 0px  89px 6px;
-background-top-image:          hud.png 78px 0px  89px 6px;
-background-bottom-left-image:  hud.png 72px 29px 78px 35px;
-background-bottom-right-image: hud.png 83px 29px 89px 35px;
-background-bottom-image:       hud.png 78px 29px 89px 35px;
-background-left-image:         hud.png 72px 6px  78px 35px;
-background-right-image:        hud.png 83px 6px  89px 35px;
-background-center-image:       hud.png 78px 6px  89px 29px;
 }
 
 #first_col
@@ -130,7 +119,7 @@ background-center-image:       hud.png 78px 6px  89px 29px;
   <body id="body" template="tplmainbar">
    <p>
       <div id="console-container">
-        <p id="console">
+        <p id="console" class="console-bg">
         </p>
       </div>
 
