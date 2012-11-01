@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -9,6 +9,7 @@ include_directories(include angelscript)
 if(UNIX)
   if(CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_CXX_FLAGS "-std=c++0x -Wno-deprecated-declarations")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DAUDIO_BACKEND_SFML")
   endif()
 endif()
 
@@ -27,4 +28,3 @@ if (UNIX)
 else()
   target_link_libraries(game libp3framework libpanda libpandafx libpandaexpress libp3dtoolconfig libp3dtool libp3direct libp3rocket RocketCore RocketControls angelscript sfml-audio)
 endif()
-

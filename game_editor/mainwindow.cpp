@@ -98,6 +98,8 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     ui->objectEdit->setIcon(iconEdit);
     ui->saveMap->setIcon(iconSave);
 
+    ui->progressBar->hide();
+
     setWindowTitle("Fallout Equestria Editor");
     setWindowIcon(QIcon("icons/app-icon.png"));
 
@@ -409,9 +411,28 @@ void MainWindow::PandaInitialized()
      connect(ui->interObjScaleY, SIGNAL(valueChanged(double)), this, SLOT(DynamicObjectScaleY()));
      connect(ui->interObjScaleZ, SIGNAL(valueChanged(double)), this, SLOT(DynamicObjectScaleZ()));
 
-     connect(my_task.mouse, SIGNAL(WaypointHovered(NodePath)), this, SLOT(WaypointHovered(NodePath)));
-     connect(my_task.mouse, SIGNAL(ObjectHovered(NodePath)),   this, SLOT(MapObjectHovered(NodePath)));
-     connect(my_task.mouse, SIGNAL(UnitHovered(NodePath)),     this, SLOT(DynamicObjectHovered(NodePath)));
+// LIGHTS
+     lightSelected      = 0;
+     lightIgnoreChanges = false;
+     connect(ui->lightsAdd,      SIGNAL(clicked()),                 this, SLOT(LightAdd()));
+     connect(ui->lightsDel,      SIGNAL(clicked()),                 this, SLOT(LightDelete()));
+     connect(ui->lightCompile,   SIGNAL(clicked()),                 this, SLOT(LightCompile()));
+     connect(ui->lightsSelect,   SIGNAL(currentIndexChanged(int)),  this, SLOT(LightSelected()));
+     connect(ui->lightTypesList, SIGNAL(currentIndexChanged(int)),  this, SLOT(LightUpdateType()));
+     connect(ui->lightColorR,    SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
+     connect(ui->lightColorG,    SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
+     connect(ui->lightColorB,    SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
+     connect(ui->lightColorA,    SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
+     connect(ui->lightPosX,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
+     connect(ui->lightPosY,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
+     connect(ui->lightPosZ,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
+     connect(ui->lightRotX,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
+     connect(ui->lightRotY,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
+     connect(ui->lightRotZ,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
+
+     connect(my_task.mouse,      SIGNAL(WaypointHovered(NodePath)), this, SLOT(WaypointHovered(NodePath)));
+     connect(my_task.mouse,      SIGNAL(ObjectHovered(NodePath)),   this, SLOT(MapObjectHovered(NodePath)));
+     connect(my_task.mouse,      SIGNAL(UnitHovered(NodePath)),     this, SLOT(DynamicObjectHovered(NodePath)));
 
      waypointSelected = 0;
      waypointHovered  = 0;
@@ -1063,6 +1084,10 @@ void MainWindow::LoadMap(const QString& path)
         ui->exitZoneList->clear();
         ForEach(world->exitZones,  [this](ExitZone& zone)  { ui->exitZoneList->addItem(zone.name.c_str());  });
 
+        ui->lightsSelect->clear();
+        ui->lightFrame->setEnabled(false);
+        ForEach(world->lights,     [this](WorldLight& l)   { ui->lightsSelect->addItem(l.name.c_str());     });
+
         for (int i = 0 ; i < ui->listMap->count() ; ++i)
         {
             if (ui->listMap->itemText(i) == levelName)
@@ -1177,6 +1202,103 @@ void MainWindow::ExitZoneChanged(QString string)
     }
 }
 
+void MainWindow::LightCompile()
+{
+    if (lightSelected != 0)
+        world->CompileLight(lightSelected);
+}
+
+void MainWindow::LightSelected(void)
+{
+    QString     name  = ui->lightsSelect->currentText();
+    WorldLight* light = world->GetLightByName(name.toStdString());
+
+    if (light)
+    {
+        NodePath np = light->nodePath;
+
+        lightIgnoreChanges = true;
+        ui->lightTypesList->setCurrentIndex((int)light->type);
+        ui->lightPosX->setValue(np.get_x());
+        ui->lightPosY->setValue(np.get_y());
+        ui->lightPosZ->setValue(np.get_z());
+        ui->lightRotX->setValue(np.get_hpr().get_x());
+        ui->lightRotY->setValue(np.get_hpr().get_y());
+        ui->lightRotZ->setValue(np.get_hpr().get_z());
+
+        LColor color = light->GetColor();
+        ui->lightColorR->setValue(color.get_x());
+        ui->lightColorG->setValue(color.get_y());
+        ui->lightColorB->setValue(color.get_z());
+        ui->lightColorA->setValue(0.f);
+
+        ui->lightRadius->setValue(light->zoneSize);
+
+        lightIgnoreChanges = false;
+        ui->lightFrame->setEnabled(true);
+    }
+    else
+        ui->lightFrame->setEnabled(false);
+    lightSelected = light;
+}
+
+void MainWindow::LightUpdateType(void)
+{
+    WorldLight::Type type = (WorldLight::Type)ui->lightTypesList->currentIndex();
+    QString          name = ui->lightsSelect->currentText();
+
+    if (lightIgnoreChanges || lightSelected == 0) return ;
+    if (lightSelected->type != type)
+    {
+        world->DeleteLight(lightSelected->name);
+        world->AddLight(type, name.toStdString());
+        lightSelected = world->GetLightByName(name.toStdString());
+        LightUpdatePosition();
+    }
+}
+
+void MainWindow::LightUpdatePosition(void)
+{
+    NodePath np;
+
+    if (lightIgnoreChanges || lightSelected == 0) return ;
+    np = lightSelected->nodePath;
+    np.set_x(ui->lightPosX->value());
+    np.set_y(ui->lightPosY->value());
+    np.set_z(ui->lightPosZ->value());
+    np.set_hpr(ui->lightRotX->value(),
+               ui->lightRotY->value(),
+               ui->lightRotZ->value());
+    lightSelected->SetColor(ui->lightColorR->value(),
+                            ui->lightColorG->value(),
+                            ui->lightColorB->value(),
+                            ui->lightColorA->value());
+    lightSelected->zoneSize = ui->lightRadius->value();
+}
+
+void MainWindow::LightAdd(void)
+{
+    QString name = QInputDialog::getText(this, "Add light", "Light name");
+
+    if (name != "")
+    {
+        world->AddLight(WorldLight::Directional, name.toStdString());
+        ui->lightsSelect->addItem(name);
+        ui->lightsSelect->setCurrentIndex(ui->lightsSelect->count() - 1);
+    }
+}
+
+void MainWindow::LightDelete(void)
+{
+    if (lightSelected)
+    {
+        int index = ui->lightsSelect->currentIndex();
+
+        world->DeleteLight(lightSelected->name);
+        lightSelected = 0;
+        ui->lightsSelect->removeItem(index);
+    }
+}
 
 void MainWindow::ExitZoneDestinationAdd()
 {
@@ -1224,7 +1346,10 @@ void MainWindow::SaveMap()
     {
       Utils::Packet packet;
 
-      world->Serialize(packet);
+      world->Serialize(packet, [this](float percentage)
+      {
+        ui->progressBar->setValue(percentage);
+      });
       packet.PrintContent();
       file.write(packet.raw(), packet.size());
       file.close();

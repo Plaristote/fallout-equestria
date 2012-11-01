@@ -416,7 +416,7 @@ struct World
     Waypoint*      GetWaypointAt(LPoint2f);
 
     void           UnSerialize(Utils::Packet& packet);
-    void           Serialize(Utils::Packet& packet);
+    void           Serialize(Utils::Packet& packet, std::function<void (float)> progress_callback);
 
     void           CompileWaypoints(void);
     void           CompileDoors(void);

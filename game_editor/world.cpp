@@ -924,6 +924,8 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
     case Type_DynamicObject:
       ReparentTo(world->GetDynamicObjectFromName(parent_name));
       break ;
+    case Type_None:
+      break ;
   }
   Initialize();
   SetColor(r, g, b, a);
@@ -1082,10 +1084,12 @@ void           World::UnSerialize(Utils::Packet& packet)
   for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light); });
 }
 
-void           World::Serialize(Utils::Packet& packet)
+void           World::Serialize(Utils::Packet& packet, std::function<void (float)> progress_callback)
 {
+  progress_callback(0);
   // Compile Step
   CompileWaypoints();
+  progress_callback(30);
 
   // Waypoints
   {
@@ -1109,6 +1113,7 @@ void           World::Serialize(Utils::Packet& packet)
       for (it = waypoints.begin() ; it != end ; ++it)
     (*it).Serialize(packet);
   }
+  progress_callback(35);
 
   // MapObjects
   {
@@ -1120,8 +1125,10 @@ void           World::Serialize(Utils::Packet& packet)
 
       for (; it != end ; ++it) { (*it).Serialize(packet); }
   }
+  progress_callback(40);
 
   CompileDoors();
+  progress_callback(70);
 
   // DynamicObjects
   {
@@ -1133,6 +1140,7 @@ void           World::Serialize(Utils::Packet& packet)
 
       for (; it != end ; ++it) { (*it).Serialize(packet); }
   }
+  progress_callback(75);
   
   // WorldLights
   {
@@ -1144,6 +1152,7 @@ void           World::Serialize(Utils::Packet& packet)
     
     for (; it != end ; ++it) { (*it).Serialize(packet); }
   }
+  progress_callback(80);
 
   // ExitZones
   {
@@ -1166,6 +1175,7 @@ void           World::Serialize(Utils::Packet& packet)
       packet << waypointsId;
     }
   }
+  progress_callback(85);
 
   // EntryZone
   {
@@ -1187,6 +1197,7 @@ void           World::Serialize(Utils::Packet& packet)
         packet << waypointsId;
       }
   }
+  progress_callback(100);
 }
 #include <panda3d/collisionHandlerQueue.h>
 // MAP COMPILING

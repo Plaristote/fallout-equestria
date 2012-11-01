@@ -142,6 +142,14 @@ private slots:
     void DynamicObjectScaleZ(void);
     void DynamicObjectSetWaypoint(void);
 
+    // LIGHTS
+    void LightSelected(void);
+    void LightAdd(void);
+    void LightDelete(void);
+    void LightUpdatePosition(void);
+    void LightUpdateType(void);
+    void LightCompile(void);
+
 public:
     void DrawMap(void);
 
@@ -173,6 +181,9 @@ private:
     DynamicObject*           dynamicObjectSelected;
     DynamicObject*           dynamicObjectHovered;
     void                     DynamicObjectSelect(void);
+
+    WorldLight*              lightSelected;
+    bool                     lightIgnoreChanges;
 
     DialogNewMap             dialogNewMap;
 
