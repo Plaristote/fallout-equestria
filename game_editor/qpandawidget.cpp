@@ -31,7 +31,7 @@ QPandaWidget::QPandaWidget(QWidget *parent) : QWidget(parent), _initialized(fals
         WindowProperties wp;
 
         QPandaApplication::Framework().get_default_window_props(wp);
-		wp.set_foreground(false);
+        wp.set_foreground(false);
         wp.set_parent_window((size_t)this->winId());
         _window = QPandaApplication::Framework().open_window(wp, 0);
 	}

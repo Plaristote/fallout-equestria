@@ -78,11 +78,11 @@ struct Waypoint
       virtual bool CanGoThrough(unsigned char type) = 0;
       virtual void GoingThrough(void*)              = 0;
     };
-
+    
     struct Arc
     {
         Arc(NodePath from, Waypoint* to);
-    ~Arc();
+	~Arc();
 
         bool operator==(Waypoint* other) { return (to == other); }
         void UpdateDirection(void);
@@ -144,7 +144,7 @@ struct MapObject
 {
     NodePath      nodePath;
     PT(Texture)   texture;
-
+    
     unsigned char floor;
 
     std::string   strModel;
@@ -174,7 +174,7 @@ struct DynamicObject : public MapObject
         Shelf,
         Locker,
         Character,
-    Item
+	Item
     };
 
     Waypoint* waypoint;
@@ -185,7 +185,7 @@ struct DynamicObject : public MapObject
 
     // Door / Locker
     bool                            locked;
-    std::string                     key;
+    std::string                     key; // Also used to store item names for DynamicObject::Item
     std::list<std::pair<int, int> > lockedArcs;
 
     // Shelf / Character
@@ -227,45 +227,20 @@ struct WorldLight
     Spot
   };
 
-  WorldLight(Type type, NodePath parent, const std::string& name) : name(name)
+  enum ParentType
   {
-    switch (type)
-    {
-      case Point:
-      {
-    PT(PointLight) pLight = new PointLight(name);
+    Type_None,
+    Type_MapObject,
+    Type_DynamicObject
+  };
 
-    light    = pLight;
-    nodePath = parent.attach_new_node(pLight);
-      }
-    break ;
-      case Directional:
-      {
-    PT(DirectionalLight) pLight = new DirectionalLight(name);
-
-    light    = pLight;
-    nodePath = parent.attach_new_node(pLight);
-      }
-    break ;
-      case Ambient:
-      {
-    PT(AmbientLight) pLight = new AmbientLight(name);
-
-    light    = pLight;
-    nodePath = parent.attach_new_node(pLight);
-      }
-    break ;
-      case Spot:
-      {
-    PT(Spotlight) pLight = new Spotlight(name);
-
-    light    = pLight;
-    nodePath = parent.attach_new_node(pLight);
-      }
-    break ;
-    }
+  WorldLight(Type type, ParentType ptype, NodePath parent, const std::string& name) : name(name), type(type), parent_type(ptype), parent(parent)
+  { 
+    Initialize();
   }
-
+  
+  WorldLight(NodePath parent) : parent(parent) {}
+  
   LColor GetColor(void) const
   {
     return (light->get_color());
@@ -274,20 +249,42 @@ struct WorldLight
   void   SetColor(float r, float g, float b, float a)
   {
     LColor color(r, g, b, a);
-
+    
     light->set_color(color);
   }
 
   bool operator==(const std::string& comp) { return (name == comp); }
 
+  void UnSerialize(World*, Utils::Packet& packet);
+  void Serialize(Utils::Packet& packet);
+  
+  void ReparentTo(DynamicObject* object)
+  {
+    parent_type = Type_DynamicObject;
+    parent      = object->nodePath;
+    parent_i    = object;
+  }
+  
+  void ReparentTo(MapObject* object)
+  {
+    parent_type = Type_MapObject;
+    parent      = object->nodePath;
+    parent_i    = object;
+  }
+  
   std::string name;
   NodePath    nodePath;
-  Type        types;
+  Type        type;
+  ParentType  parent_type;
   PT(Light)   light;
   Lens*       lens;
   float       zoneSize;
 
   std::list<NodePath> enlightened;
+private:
+  void Initialize(void);
+  NodePath    parent;
+  MapObject*  parent_i;
 };
 
 struct World
@@ -301,7 +298,7 @@ struct World
     typedef std::vector<NodePath>    Floors;
 
     WindowFramework* window;
-
+    
     Floors           floors;
 
     NodePath         rootWaypoints;
@@ -312,16 +309,16 @@ struct World
 
     NodePath         rootDynamicObjects;
     DynamicObjects   dynamicObjects;
-
+    
     NodePath         rootLights;
     WorldLights      lights;
-
+    
     ExitZones        exitZones;
     EntryZones       entryZones;
 
     World(WindowFramework* window);
     ~World(void);
-
+    
     void      FloorResize(int);
 
     Waypoint* AddWayPoint(float x, float y, float z);
@@ -331,6 +328,7 @@ struct World
     Waypoint* GetWaypointClosest(LPoint3);
     void      SetWaypointsVisible(bool v)
     { if (v) { rootWaypoints.show();  } else { rootWaypoints.hide();  } }
+    void           GetWaypointLimits(short currentFloor, LPoint3& upperRight, LPoint3& upperLeft, LPoint3& bottomLeft) const;
     LPlane         GetWaypointPlane(short currentFloor) const;
 
     template<class OBJTYPE>
@@ -370,12 +368,12 @@ struct World
         typename std::list<OBJTYPE>::iterator it  = list.begin();
         typename std::list<OBJTYPE>::iterator end = list.end();
 
-    if (path.is_empty())
-      return (0);
+	if (path.is_empty())
+	  return (0);
         for (; it != end ; ++it)
         {
-      if ((*it).nodePath.is_empty())
-        continue ;
+	  if ((*it).nodePath.is_empty())
+	    continue ;
           if ((*it).nodePath.is_ancestor_of(path))
             return (&(*it));
         }
@@ -391,6 +389,7 @@ struct World
     void           SetMapObjectsVisible(bool v);
     void           MapObjectChangeFloor(MapObject&, unsigned char floor);
 
+    DynamicObject* InsertDynamicObject(DynamicObject&);
     DynamicObject* AddDynamicObject(const std::string& name, DynamicObject::Type type, const std::string& model, const std::string& texture);
     void           DeleteDynamicObject(DynamicObject*);
     DynamicObject* GetDynamicObjectFromName(const std::string& name);
@@ -398,20 +397,22 @@ struct World
     void           SetDynamicObjectsVisible(bool v);
     void           DynamicObjectSetWaypoint(DynamicObject&, Waypoint&);
     void           DynamicObjectChangeFloor(DynamicObject&, unsigned char floor);
-
+    
     void           AddExitZone(const std::string&);
     void           DeleteExitZone(const std::string&);
     ExitZone*      GetExitZoneByName(const std::string&);
-
+    
     void           AddEntryZone(const std::string&);
     void           DeleteEntryZone(const std::string&);
     EntryZone*     GetEntryZoneByName(const std::string&);
-
+    
     void           AddLight(WorldLight::Type, const std::string&);
+    void           AddLight(WorldLight::Type, const std::string&, MapObject* parent);
+    void           AddLight(WorldLight::Type, const std::string&, DynamicObject* parent);
     void           DeleteLight(const std::string&);
     WorldLight*    GetLightByName(const std::string&);
     void           CompileLight(WorldLight*, unsigned char = ColMask::Object | ColMask::DynObject);
-
+    
     Waypoint*      GetWaypointAt(LPoint2f);
 
     void           UnSerialize(Utils::Packet& packet);

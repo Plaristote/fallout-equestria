@@ -155,8 +155,8 @@ namespace Utils
 
     newSize += sizeof(T) + sizeof(char);
     realloc(newSize);
-    typeCode = reinterpret_cast<char*>((int)buffer + sizeBuffer);
-    copy = reinterpret_cast<T*>((int)typeCode + sizeof(char));
+    typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
+    copy = reinterpret_cast<T*>((long)typeCode + sizeof(char));
     *typeCode = TypeToCode<T>::TypeCode;
     *copy = i;
     sizeBuffer = newSize;
@@ -173,8 +173,8 @@ namespace Utils
 
     newSize += sizeof(T) + sizeof(char);
     realloc(newSize);
-    typeCode = reinterpret_cast<char*>((int)buffer + sizeBuffer);
-    copy = reinterpret_cast<T*>((int)typeCode + sizeof(char));
+    typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
+    copy = reinterpret_cast<T*>((long)typeCode + sizeof(char));
     *typeCode = TypeToCode<T>::TypeCode;
     *copy = i;
     sizeBuffer = newSize;
@@ -194,9 +194,9 @@ namespace Utils
     newSize += (sizeof(my_int32));
     newSize += sizeof(char) * str.size() + 1;
     realloc(newSize);
-    typeCode = reinterpret_cast<char*>((int)buffer + sizeBuffer);
-    sizeString = reinterpret_cast<my_int32*>((int)typeCode + sizeof(char));
-    dupStr = reinterpret_cast<char*>((int)sizeString + sizeof(my_int32));
+    typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
+    sizeString = reinterpret_cast<my_int32*>((long)typeCode + sizeof(char));
+    dupStr = reinterpret_cast<char*>((long)sizeString + sizeof(my_int32));
     *typeCode = Packet::String;
     *sizeString = str.size();
     copy(tmp, &tmp[str.size()], dupStr);
@@ -225,8 +225,8 @@ namespace Utils
 
     newSize += sizeof(char) + sizeof(my_int32);
     realloc(newSize);
-    typeCode = reinterpret_cast<char*>((int)buffer + sizeBuffer);
-    sizeArray = reinterpret_cast<my_int32*>((int)typeCode + sizeof(char));
+    typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
+    sizeArray = reinterpret_cast<my_int32*>((long)typeCode + sizeof(char));
     *typeCode = Packet::Array;
     *sizeArray = tehList.size();
     sizeBuffer = newSize;
@@ -275,11 +275,11 @@ namespace Utils
     if (!(canIHaz(sizeof(my_int32), 1)))
       return (*this);
     size = *(reinterpret_cast<my_int32*>(reading));
-    reading = reinterpret_cast<void*>((int)reading + sizeof(my_int32));
+    reading = reinterpret_cast<void*>((long)reading + sizeof(my_int32));
     if (!(canIHaz(sizeof(char), size)))
       return (*this);
     str.append(static_cast<char*>(reading), size);
-    reading = reinterpret_cast<void*>((int)reading + sizeof(char) * size);
+    reading = reinterpret_cast<void*>((long)reading + sizeof(char) * size);
     return (*this);
   }
 
@@ -331,8 +331,8 @@ namespace Utils
   {
     int		endBuffer, request;
 
-    endBuffer = (int)buffer + sizeBuffer;
-    request = (int)reading + (size * n);
+    endBuffer = (long)buffer + sizeBuffer;
+    request = (long)reading + (size * n);
     if (endBuffer < request)
     {
       cerr << "[Serializer] Invalid Size: can't read on this Packet anymore." << endl;
@@ -348,7 +348,7 @@ namespace Utils
     read<char>(type);
     if (type != assumedType)
     {
-      int offset = (int)reading - (int)buffer;
+      int offset = (long)reading - (long)buffer;
 
       // Hex debug
       int   it  = 0;
@@ -380,7 +380,7 @@ namespace Utils
       delete[] (char*)buffer;
     }
     buffer  = reinterpret_cast<void*>(alloc);
-    reading = reinterpret_cast<void*>((int)buffer + sizeof(my_int32) + sizeof(char));
+    reading = reinterpret_cast<void*>((long)buffer + sizeof(my_int32) + sizeof(char));
   }
 
   void		Packet::updateHeader(void)
@@ -394,48 +394,6 @@ namespace Utils
   */
   void		Packet::PrintContent(void)
   {
-    void*		tmpReading = reading;
-    bool		coma = false;
-
-    cout << "[Packet content raw: " << (char*)buffer << "]" << endl;
-    cout << "[Packet content : ";
-    reading = reinterpret_cast<void*>((int)buffer + sizeof(int) * 2);
-    while ((int)reading + (int)sizeof(my_int32) < (int)buffer + (int)sizeBuffer)
-    {
-      char*	    typeCode;
-      int		i;
-      float	    f;
-      string	s;
-
-      if (coma)
-        cout << ", ";
-      typeCode = reinterpret_cast<char*>(reading);
-      switch (*typeCode)
-      {
-	case Packet::Int:
-	  *this >> i;
-	  cout << "(int)" << i;
-	  break ;
-	case Packet::Float:
-	  *this >> f;
-	  cout << "(float)" << f;
-	  break ;
-	case Packet::String:
-	  *this >> s;
-	  cout << "(string)\"" << s << "\"";
-	  break ;
-	case Packet::Array:
-	  cout << endl << "[PrintContent() failed : cannot read Array type yet]" << endl;
-	  reading = tmpReading;
-	  return ;
-	default:
-          cout << endl << "[PrintContent() failed : unknown type '" << (int)(*typeCode) << "']" << endl;
-	  reading = tmpReading;
-	  return ;
-      }
-      coma = true;
-    }
-    cout << "]" << endl;
-    reading = tmpReading;
+    std::cout << "[Packet::PrintContent] isn't implemented yet" << std::endl;
   }
 }

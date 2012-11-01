@@ -8,10 +8,12 @@
 # include <iostream>
 # include <fstream>
 
-# ifdef WIN32
+# ifdef _WIN32
 #  include <cstdint>
-# endif
+typedef std::int32_t my_int32;
+# else
 typedef int32_t	my_int32;
+# endif
 
 /*! \namespace Utils
  * \brief Various essentials utilities for all-purpose programming
@@ -90,7 +92,7 @@ private:
   {
     if ((canIHaz(sizeof(T), 1)))
       tmp = *(reinterpret_cast<T*>(reading));
-    reading = reinterpret_cast<void*>((int)reading + sizeof(T));
+    reading = reinterpret_cast<void*>((long)reading + sizeof(T));
   }
 
   // Association Type/TypeCode
