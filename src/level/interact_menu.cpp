@@ -36,7 +36,7 @@ InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* conte
 	for_each(interactions.begin(), interactions.end(), [&rml](InstanceDynamicObject::Interaction& interaction)
 	{
 	  rml << "<div id='interaction-" << interaction.name << "'>";
-	  rml << "<button id='" << interaction.name << "'>";
+	  rml << "<button id='" << interaction.name << "' class='interact_button'>";
 	  rml << "<img src='../textures/buttons/" + interaction.name + "-normal.png' />";
 	  rml << "</button></div>";
 	});
@@ -52,14 +52,60 @@ InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* conte
 	Rocket::Core::Element* button = _root->GetElementById(interaction.name.c_str());
 
 	_buttons.push_back(button);
-	button->AddEventListener("click", &_buttonListener);
+	button->AddEventListener("click",     &_buttonListener);
+	button->AddEventListener("mouseover", &_buttonHover);
+	button->AddEventListener("mouseout",  &_buttonHover);
+	button->AddEventListener("mousedown", &_buttonClick);
+	button->AddEventListener("mouseup",   &_buttonClick);
 	_listeners[it] = &interaction;
 	_obs.Connect(_buttonListener.EventReceived, *this, &InteractMenu::ButtonClicked);
+	_obs.Connect(_buttonHover.EventReceived,    *this, &InteractMenu::ButtonHovered);
+	_obs.Connect(_buttonClick.EventReceived,    *this, &InteractMenu::MouseButton);
 	++it;
       });
     }
   }
   Show();
+}
+
+void InteractMenu::ExecuteForButtonId(Rocket::Core::Event& event, std::function<bool (Rocket::Core::Event&, const std::string&, InstanceDynamicObject::Interaction*)> callback)
+{
+  string id         = event.GetCurrentElement()->GetId().CString();
+  string event_type = event.GetType().CString();
+
+  for (int i = 0 ; i < _listeners.size() ; ++i)
+  {
+    if (id == _listeners[i]->name && (callback(event, event_type, _listeners[i])))
+      break ;
+  }  
+}
+
+void InteractMenu::ButtonHovered(Rocket::Core::Event& event)
+{
+  ExecuteForButtonId(event, [this](Rocket::Core::Event& event, const string& event_type, InstanceDynamicObject::Interaction* interaction) -> bool
+  {
+    bool                   mouse_over = event_type == "mouseover";
+    Rocket::Core::Element* img        = event.GetCurrentElement()->GetChild(0);
+    string                 id         = event.GetCurrentElement()->GetId().CString();
+    string                 src        = "../textures/buttons/" + id + '-' + (mouse_over ? "active" : "normal") + ".png";
+
+    img->SetAttribute("src", src.c_str());
+    return (true);
+  });
+}
+
+void InteractMenu::MouseButton(Rocket::Core::Event& event)
+{
+  ExecuteForButtonId(event, [this](Rocket::Core::Event& event, const string& event_type, InstanceDynamicObject::Interaction* interaction) -> bool
+  {
+    bool                   mouse_over = event_type == "mousedown";
+    Rocket::Core::Element* img        = event.GetCurrentElement()->GetChild(0);
+    string                 id         = event.GetCurrentElement()->GetId().CString();
+    string                 src        = "../textures/buttons/" + id + '-' + (mouse_over ? "pressed" : "normal") + ".png";
+
+    img->SetAttribute("src", src.c_str());
+    return (true);
+  });
 }
 
 InteractMenu::~InteractMenu()
