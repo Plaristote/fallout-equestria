@@ -59,6 +59,7 @@ void TimeManager::DelTask(Task* task)
 
 void TimeManager::ExecuteTasks(void)
 {
+  Timer profiler;
   Tasks::iterator it  = tasks.begin();
   Tasks::iterator end = tasks.end();
 
@@ -130,6 +131,7 @@ void TimeManager::ExecuteTasks(void)
     }
     ++it;
   }
+  //profiler.Profile("Timer");
 }
 
 void TimeManager::CorrectValues(void)

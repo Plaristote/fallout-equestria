@@ -1,6 +1,7 @@
 {
   "mainmenu": {
-                "traderslife": "brel.ogg",
-                "brel":        "queen.wav"
-              }
+                "menu": "menu.ogg"
+              },
+  "test": { "test": "test.ogg" },
+  "worldmap": { "highwayman": "worldmap.ogg" }
 }

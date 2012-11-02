@@ -30,7 +30,7 @@ x --> Dialogs
 x --> Inventories
 x --> Saving/Loading
 
-Milestone II
+Milestone II [Started October 2012, Finished November 2012]
 x -> Statistics
 x --> i18n
 x --> Canceling modifications
@@ -43,10 +43,10 @@ x --> World clock moving forward in time while traveling
 x --> Displaying world time
 
   -> Levels
-~ --> Basic light management
-~ --> Proper camera handling
+x --> Basic light management
+x --> Proper camera handling
 x --> Barter
-  --> Stairs
+# --> Stairs
 x --> Doors
 x --> Lockers
 x --> Shelfs
@@ -69,10 +69,21 @@ x --> Option Manager and user interface
 x --> Creating New Games
 
 Milestone III
+  -> Statistics
+~ --> Diplomacy
+  --> Reputation
+  --> Kill count
+
   -> Worldmap
   --> Random encounters
   --> Various terrain and movement speed
 
+  -> Levels
+  --> Stairs
+
   -> GameTask
+  --> Pipbuck:
+  ---> File Manager App with text and audio files support (Scripted App)
+  ---> Clock App (Displaying time and allowing character to sleep) (C++ App)
   --> Quests
 ~ --> Party management

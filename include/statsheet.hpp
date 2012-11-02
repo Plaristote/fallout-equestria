@@ -137,8 +137,9 @@ class StatController
 public:
   StatController(Data statsheet);
   
-  StatModel&       Model(void)       { return (_model); }
-  const StatModel& Model(void) const { return (_model); }
+  StatModel&       Model(void)         { return (_model);          }
+  const StatModel& Model(void) const   { return (_model);          }
+  Data             GetData(void)       { return (_model.GetAll()); }
 
   void SetView(StatView*);
 
@@ -157,6 +158,7 @@ public:
 
   void TriggerSkillAffinity(const std::string& stat, bool);
 
+  Observatory::Signal<void (short)>          HpChanged;
   Observatory::Signal<void (unsigned short)> LevelUp;
   Observatory::Signal<void>                  ChangesAccepted;
 

@@ -151,6 +151,7 @@ public:
   
   short               GetHitPoints(void) const        { return (_hitPoints); }
   void                SetHitPoints(short hp);
+  void                StatHpUpdate(short);
   
   short               GetArmorClass(void) const        { return (_armorClass); }
   void                SetArmorClass(short ac)          { _armorClass = ac; ArmorClassChanged.Emit(_armorClass); }
@@ -197,6 +198,8 @@ private:
   void                RequestCharacter(ObjectCharacter*, ObjectCharacter*, asIScriptFunction*);
   
   void                CallbackActionUse(InstanceDynamicObject* object);
+  
+  Observatory::ObserverHandler _obs_handler;
 
   PT(Character)             _character;
   std::list<Waypoint>       _path;

@@ -39,8 +39,9 @@ void MouseCursor::Update(void)
 
 MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window), _mouseCursor(window, _generalUi.GetRocketRegion()->get_context()), _view(window, _generalUi.GetRocketRegion()->get_context())
 {
-  _uiLoad    = 0;
-  _levelTask = 0;
+  _new_game_task = 0;
+  _uiLoad        = 0;
+  _levelTask     = 0;
   AsyncTaskManager::get_global_ptr()->add(this);
   
   _view.Continue.Connect(*this, &MainMenu::Continue);

@@ -188,9 +188,10 @@ static void AngelScriptInitialize(void)
   engine->RegisterGlobalFunction("void PrintScenegraph()", asFUNCTION( GameConsole::PrintScenegraph ), asCALL_CDECL);
   engine->RegisterGlobalFunction("void Write(const string &in)", asFUNCTION(GameConsole::WriteOn), asCALL_CDECL);
   engine->RegisterGlobalFunction("void SetLanguage(const string& in)", asFUNCTION(i18n::Load), asCALL_CDECL);
+  engine->RegisterGlobalFunction("int  Random()", asFUNCTION(rand), asCALL_CDECL);
 
   Script::StdList<string>::Register(engine, "StringList", "string");
-  
+    
   const char* musicmanagerClass = "Music";
   engine->RegisterObjectType(musicmanagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(musicmanagerClass, "void Play(string)",         asMETHODPR(MusicManager,Play, (const std::string&), void), asCALL_THISCALL);
@@ -237,6 +238,13 @@ static void AngelScriptInitialize(void)
   engine->RegisterObjectMethod   (dataClass, "int    AsInt()",                 asFUNCTION(asData::getAsInt),       asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod   (dataClass, "float  AsFloat()",               asFUNCTION(asData::getAsFloat),     asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod   (dataClass, "void   Output()",                asMETHOD(Data,Output),              asCALL_THISCALL);
+
+  const char* statsheetClass = "Special";
+  engine->RegisterObjectType(statsheetClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(statsheetClass, "void SetCurrentHp(int)",         asMETHOD(StatController,SetCurrentHp),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void AddExperience(int)",        asMETHOD(StatController,AddExperience), asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void SetStatistic(string, int)", asMETHOD(StatController,SetStatistic),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "Data GetData()",                 asMETHOD(StatController,GetData),       asCALL_THISCALL);
 
   const char* itemClass      = "Item";
   const char* inventoryClass = "Inventory";

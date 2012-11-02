@@ -1,4 +1,5 @@
 #include "gametask.hpp"
+#include "musicmanager.hpp"
 #include <iostream>
 
 using namespace std;
@@ -67,7 +68,7 @@ void Buff::InitScripts(void)
     return ;
   script_src  = data_script["src"].Value();
   script_func = data_script["hook"].Value();
-  script_decl = "bool " + script_func + "(Data, Data)";
+  script_decl = "bool " + script_func + "(Data, Special@)";
   _context    = Script::Engine::Get()->CreateContext();
   _module     = Script::ModuleManager::Require(script_src, "scripts/buffs/" + script_src);
   if (!_module || !_context)
@@ -75,7 +76,6 @@ void Buff::InitScripts(void)
   _refresh    = _module->GetFunctionByDecl(script_decl.c_str());  
   if (_refresh == 0)
     cout << "[Fatal Error] Buff refresh function '" << script_decl << "' doesn't exist" << endl;
-  cout << "Successfully loaded scripts" << endl;
 }
 
 void Buff::Refresh(void)
@@ -83,25 +83,18 @@ void Buff::Refresh(void)
   bool  keep_going = false;
   bool  looping    = _buff["loop"].Value() == "1";
 
-  cout << "Refreshing Buff" << endl;
   if (_target_stats)
   {
-    cout << "Executing scripts" << endl;
-    Data  stats        = _target_stats->Model().GetAll();
-
     InitScripts();
     _context->Prepare(_refresh);
     _context->SetArgObject(0, &_buff);
-    _context->SetArgObject(1, &stats);
+    _context->SetArgObject(1, _target_stats);
     _context->Execute();
     keep_going = _context->GetReturnByte();
-    cout << "Returned " << (keep_going ? "true" : "false") << endl;
-    cout << "Looping is " << (looping ? "true" : "false") << endl;
   }
   if (!keep_going || !looping)
   {
     _buff.Output();
-    cout << "Buff is over" << endl;
     Over.Emit(this);
   }
 }
@@ -640,7 +633,7 @@ bool GameTask::SaveLevel(Level* level, const std::string& name)
   }
   else
   {
-    std::cerr << "　 Failed to open file '" << name << "', save failed !!" << std::endl;
+    std::cerr << "?? Failed to open file '" << name << "', save failed !!" << std::endl;
     return (false);
   }
   return (true);
@@ -684,14 +677,15 @@ Level* GameTask::DoLoadLevel(void)
     }
     catch (const char* error)
     {
-      std::cerr << "　 Failed to load file !! (" << error << ")" << std::endl;
+      std::cerr << "?? Failed to load file !! (" << error << ")" << std::endl;
       level = 0;
     }
   }
   else
-    std::cerr << "　 File not found !!" << std::endl;
+    std::cerr << "?? File not found !!" << std::endl;
   if (_level)
   {
+    MusicManager::Get()->Play(_loadLevelParams.name);
     _levelName = _loadLevelParams.name;
     _level->SetDataEngine(&_dataEngine);
     if (_loadLevelParams.entry_zone == "worldmap")
@@ -704,7 +698,7 @@ Level* GameTask::DoLoadLevel(void)
   }
   else
   {
-    cerr << "　 Can't open level !!" << endl;
+    cerr << "?? Can't open level !!" << endl;
     _worldMap->Show();
   }
   _loadLevelParams.entry_zone = "";

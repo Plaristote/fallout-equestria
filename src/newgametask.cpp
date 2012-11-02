@@ -6,8 +6,10 @@ using namespace Rocket;
 
 NewGameTask::NewGameTask(WindowFramework* window, Core::Context* rocket) : _ui_new_game(window, rocket)
 {
-  _window = window;
-  _rocket = rocket;
+  _stat_view  = 0;
+  _stat_sheet = 0;
+  _window     = window;
+  _rocket     = rocket;
   _ui_new_game.StartFromScratch.Connect(*this, &NewGameTask::StartFromScratch);
   _ui_new_game.SelectProfile.Connect   (*this, &NewGameTask::SelectProfile);
   _ui_new_game.Show();

@@ -658,9 +658,11 @@ void StatController::SetView(StatView* view)
 
 void StatController::SetCurrentHp(short hp)
 {
+  cout << "StatController::SetCurrentHp (" << hp << ")" << endl;
   _model.SetCurrentHp(hp);
   if (_view)
     _view->SetInformation("char-state-hp-id-value", hp);
+  HpChanged.Emit(hp);
 }
 
 void StatController::SetMaxHp(short hp)

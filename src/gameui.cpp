@@ -205,12 +205,13 @@ void OptionsManager::Refresh(void)
 
     if (screen.NotNil())
     {
+      bool             hide_cursor   = screen["debug-cursor"] == 1;
       unsigned int     screen_width  = screen["x"];
       unsigned int     screen_height = screen["y"];
       bool             fullscreen    = screen["fullscreen"] == 1;
       WindowProperties props         = framework.get_window(0)->get_graphics_window()->get_properties();
 
-      props.set_cursor_hidden(false);
+      props.set_cursor_hidden(hide_cursor);
       props.set_fullscreen(fullscreen);
       props.set_size(screen_width, screen_height);
       framework.get_window(0)->get_graphics_window()->request_properties(props);

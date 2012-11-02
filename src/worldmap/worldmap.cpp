@@ -1,4 +1,5 @@
 #include "worldmap/worldmap.hpp"
+#include "musicmanager.hpp"
 
 using namespace std;
 using namespace Rocket;
@@ -11,10 +12,20 @@ WorldMap::~WorldMap()
   
   ToggleEventListener(false, "button-inventory", "click", ButtonInventory);
   ToggleEventListener(false, "button-character", "click", ButtonCharacter);
+  ToggleEventListener(false, "button-pipbuck",   "click", ButtonPipbuck);
   ToggleEventListener(false, "button-menu",      "click", ButtonMenu);
   for_each(_cases.begin(), _cases.end(), [this](Core::Element* tile)
   { tile->RemoveEventListener("click", &MapClickedEvent); });
   _cursor->RemoveEventListener("click", &PartyCursorClicked);
+  
+  for_each(_cities.begin(), _cities.end(), [this](const City& city)
+  {
+    string         name        = "city-" + city.name;
+    Core::Element* city_button = _root->GetElementById(name.c_str());
+    
+    if (city_button)
+      city_button->RemoveEventListener("click", &CityButtonClicked);
+  });
 
   Destroy();
   delete _mapTree;
@@ -171,6 +182,7 @@ void WorldMap::Show(void)
   _current_pos_x = _dataEngine["worldmap"]["pos-x"];
   _current_pos_y = _dataEngine["worldmap"]["pos-y"];
   UpdateClock();
+  MusicManager::Get()->Play("worldmap");
 }
 
 void WorldMap::Run(void)

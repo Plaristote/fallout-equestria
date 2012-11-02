@@ -318,6 +318,14 @@ void ObjectCharacter::SetHitPoints(short hp)
     CharacterDied.Emit();
 }
 
+void ObjectCharacter::StatHpUpdate(short hp)
+{
+  _hitPoints = hp;
+  HitPointsChanged.Emit(_hitPoints);
+  if (hp <= 0)
+    CharacterDied.Emit();
+}
+
 void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* controller)
 {
   if (_stats)      delete _stats;
@@ -330,6 +338,7 @@ void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* contro
 
     ActionPointChanged.Emit(_actionPoints, data_stats["Statistics"]["Action Points"]);
     SetHitPoints(data_stats["Variables"]["Hit Points"]);
+    _obs_handler.Connect(_stats->HpChanged, *this, &ObjectCharacter::StatHpUpdate);
   }
 }
 

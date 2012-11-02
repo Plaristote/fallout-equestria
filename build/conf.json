@@ -1,4 +1,11 @@
 {
-"language": "French"
+"language": "French",
+"screen": {
+  "fullscreen": 1,
+  "x": 800,
+  "y": 600,
+  "debug-cursor": 1
+}
+
 
 }
