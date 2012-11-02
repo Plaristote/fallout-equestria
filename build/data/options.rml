@@ -36,6 +36,6 @@
       <option>Spanish</option>
     </select>
     <br />
-    <button class="button_menu" id="exit" i18n="Exit">Exit</button>
+    <button id="exit" i18n="Exit">Exit</button>
   </body>
 </rml>

@@ -39,7 +39,7 @@
   </head>
   <body id="body" template="tplmainbar">
   <p>
-    <div id="inventory-items" class="window-inventory">
+    <div id="inventory-items" class="console-bg">
       <div id="inventory">
       </div>
     </div>

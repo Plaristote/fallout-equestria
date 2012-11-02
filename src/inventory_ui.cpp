@@ -562,7 +562,7 @@ int  UiBarter::GetStackValue(Inventory::Content& content, StatController* stats_
       Data             data_self  = stats_self->Model().GetAll();
       Data             data_other = stats_other->Model().GetAll();
 
-      total += stats_self->Model().Action("barter_value", 3, &object, &data_self, &data_other);
+      total += stats_self->Model().Action("barter_value", "ooo", &object, &data_self, &data_other);
     }
     else
       total += 5;
@@ -644,7 +644,7 @@ void UiBarter::MakeDeal(Rocket::Core::Event& event)
     Data data_player  = _stats_player->Model().GetAll();
     Data data_other   = _stats_other->Model().GetAll();
 
-    success = _stats_player->Model().Action("barter_deal", 4, &data_player, total_player, &data_other, total_other);
+    success = _stats_player->Model().Action("barter_deal", "oioi", &data_player, total_player, &data_other, total_other);
   }
   else
     success = total_player >= total_other;

@@ -71,15 +71,16 @@ div#window
 	width: auto;
 	padding: 10px 15px;
 
-	background-decorator:          tiled-box;
-	background-top-left-image:     invader.tga 0px 0px 133px 140px;
-	background-top-right-image:    invader.tga 136px 0px 146px 140px;
-	background-top-image:          invader.tga stretch 134px 0px 135px 140px;
-	background-bottom-left-image:  invader.tga 0px 140px 11px 151px;
-	background-bottom-right-image: invader.tga 136px 140px 146px 151px;
-	background-bottom-image:       invader.tga clamp-truncate 11px 140px 12px 151px;
-	background-left-image:         invader.tga clamp-truncate 0px 139px 10px 140px;
-	background-center-image:       invader.tga clamp-truncate 11px 139px 12px 140px;
+        background-decorator: tiled-box;
+        background-top-left-image:     invader.tga           0px   0px  30px  30px;
+        background-top-right-image:    invader.tga         202px   0px 231px  30px;
+        background-top-image:          invader.tga stretch  30px   0px 201px  30px;
+        background-bottom-left-image:  invader.tga           0px  91px  30px 119px;
+        background-bottom-right-image: invader.tga         202px  91px 231px 119px;
+        background-bottom-image:       invader.tga stretch  30px  91px 201px 119px;
+        background-left-image:         invader.tga stretch   0px  30px  30px  90px;
+        background-right-image:        invader.tga stretch 202px  30px 231px  90px;
+        background-center-image:       invader.tga repeat-truncate  30px  30px 201px  90px;
 }
 
 .window-inventory
@@ -98,7 +99,7 @@ div#window
 
 .inventory-item-quantity
 {
-  font-family: JH_FALLOUT;
+  font-family: JH_Fallout;
   font-size:   8px;
   margin-left: -15px;
   top: 0px;
@@ -189,18 +190,28 @@ button
   text-align: center;
   tab-index:  auto;
 
+  height: 47px;
+  width:  247px;
+
+  font-family:  Fallout;
+  font-size:    20px;
+  padding-top:  12px;
+  padding-left: 30px;
+
   background-decorator: image;
-  background-image:     hud.png 204px 32px 373px 58px;
+  //background-image:     hud.png 204px 32px 373px 58px;
+  background-image: revelation-mod/menu_button.png 0px  0px 247px 47px;
 }
 
-button:hover
+/*button:hover
 {
   background-image:     hud.png 204px 59px 373px 87px;
-}
+}*/
 
 button:active
 {
-  background-image:     hud.png 204px 88px 373px 115px;
+  //background-image:     hud.png 204px 88px 373px 115px;
+  background-image: revelation-mod/menu_button.png 0xp 49px 247px 96px;
 }
 
 button.button_menu
@@ -580,7 +591,8 @@ scrollbarhorizontal
   background-center-image:       hud.png 136px 10px 193px 49px;
 }
 
-.console-bg scrollbarvertical
+.console-bg scrollbarvertical,
+.console-bg scrollbarvertical:hover
 {
 	margin-top:    10px;
 	margin-bottom: 10px;
@@ -588,24 +600,24 @@ scrollbarhorizontal
 	width:         10px;
 }
 
-.console-bg scrollbarvertical slidertrack
+.console-bg scrollbarvertical slidertrack,
 {
-	background-decorator: tiled-vertical;
-	background-top-image: invader.tga 70px 199px 97px 201px;
-	background-center-image: invader.tga stretch 70px 201px 97px 202px;
-	background-bottom-image: invader.tga 70px 203px 97px 204px;
+	background-decorator:    tiled-vertical;
+	background-top-image:    invader.tga         70px 320px 97px 322px;
+	background-center-image: invader.tga stretch 70px 322px 97px 323px;
+	background-bottom-image: invader.tga         70px 324px 97px 325px;
 }
 
-.console-bg scrollbarvertical sliderbar
+.console-bg scrollbarvertical sliderbar,
 {
 	margin-left: 0px;
 	width:       10px;
 	min-height:  46px;
 
-	background-decorator: tiled-vertical;
-	background-top-image: invader.tga 56px 152px 79px 175px;
-	background-center-image: invader.tga stretch 56px 175px 79px 175px;
-	background-bottom-image: invader.tga 56px 176px 79px 198px;
+	background-decorator:    tiled-vertical;
+	background-top-image:    invader.tga         56px 273px 79px 296px;
+	background-center-image: invader.tga stretch 56px 296px 79px 296px;
+	background-bottom-image: invader.tga         56px 296px 79px 319px;
 }
 
 .console-bg scrollbarvertical sliderbar:hover
@@ -622,13 +634,22 @@ scrollbarhorizontal
 	background-bottom-image-s: 104px 127px;
 }
 
-.console-bg scrollbarvertical sliderarrowdec
+.console-bg scrollbarvertical sliderarrowdec,
 {
 	width: 10px;
 	height: 10px;
 	
 	icon-decorator: image;
-	icon-image: invader.tga 0px 152px 27px 176px;
+	icon-image: invader.tga 0px 273px 27px 297px;
+}
+
+.console-bg scrollbarvertical sliderarrowinc,
+{
+	width: 10px;
+	height: 10px;
+	
+	icon-decorator: image;
+	icon-image: invader.tga 28px 273px 55px 297px;
 }
 
 .console-bg scrollbarvertical sliderarrowdec:hover,
@@ -643,11 +664,4 @@ scrollbarhorizontal
 	icon-image-t: 202px 226px;
 }
 
-.console-bg scrollbarvertical sliderarrowinc
-{
-	width: 10px;
-	height: 10px;
-	
-	icon-decorator: image;
-	icon-image: invader.tga 28px 152px 55px 176px;
-}
+

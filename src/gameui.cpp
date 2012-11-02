@@ -14,15 +14,24 @@ extern PandaFramework framework;
 GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
 {
   //HAIL MICROSOFT!!!
-	string fonts[] = { "JH_FALLOUT.TTF",
-                           "Delicious-Roman.otf",
-                           "Delicious-Italic.otf",
-                           "Delicious-Bold.otf",
-                           "Delicious-BoldItalic.otf" };
+  string fonts[] = { "JH_FALLOUT.TTF", // Fallout Console Font
+                     "fallout.ttf",    // Fallout Regular Font
+                     "Delicious-Roman.otf",
+                     "Delicious-Italic.otf",
+                     "Delicious-Bold.otf",
+                     "Delicious-BoldItalic.otf" };
 
-  //ForEach(fonts, [](string path) { Core::FontDatabase::LoadFontFace(Core::String(PATH_FONTS) + "/" + path.c_str()); });
+  string fonts_name[] = { "", "Fallout", "", "", "", "" };
+
   for (int i=0; i<GET_ARRAY_SIZE(fonts); i++)
-	  Core::FontDatabase::LoadFontFace(Core::String(PATH_FONTS) + "/" + fonts[i].c_str());
+  {
+    string path = string(PATH_FONTS) + "/" + fonts[i];
+
+    if (fonts_name[i] == "")
+      Core::FontDatabase::LoadFontFace(path.c_str());
+    else
+      Core::FontDatabase::LoadFontFace(path.c_str(), fonts_name[i].c_str(), Core::Font::STYLE_NORMAL, Rocket::Core::Font::WEIGHT_NORMAL);
+  }
 
   _rocket = RocketRegion::make("interface", window->get_graphics_output());
   _rocket->set_active(true);

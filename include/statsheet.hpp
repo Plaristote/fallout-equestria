@@ -15,7 +15,7 @@ public:
   void           Backup(void);
   void           RestoreBackup(void);
 
-  int            Action(const std::string& action, unsigned short n_args, ...);
+  int            Action(const std::string& action, const std::string& fmt, ...);
   Data           GetAll(void) { return (_statsheet); }
 
   void           SetName(const std::string& name)  { _statsheet["Name"]   = name;           }

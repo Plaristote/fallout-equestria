@@ -338,7 +338,7 @@ unsigned short StatModel::GetXpNextLevel(void)
   return (0);
 }
 
-int           StatModel::Action(const std::string& action, unsigned short n_args, ...)
+int           StatModel::Action(const std::string& action, const std::string& fmt, ...)
 {
   string             func_name   = "action_" + action;
   asIScriptFunction* action_func = _scriptModule->GetFunctionByName(func_name.c_str());
@@ -348,12 +348,30 @@ int           StatModel::Action(const std::string& action, unsigned short n_args
     va_list      ap;
 
     _scriptContext->Prepare(action_func);
-    va_start(ap, n_args);
-    for (unsigned short it = 0 ; it < n_args ; ++it)
+    va_start(ap, fmt);
+    for (unsigned short it = 0 ; it < fmt.size() ; ++it)
     {
-      void*      arg = va_arg(ap, void*);
-      
-      _scriptContext->SetArgObject(it, arg);
+      switch (fmt[it])
+      {
+        case 'o':
+          _scriptContext->SetArgObject(it, va_arg(ap, void*));
+          break ;
+        case 'i':
+          _scriptContext->SetArgDWord(it, va_arg(ap, int));
+          break ;
+        case 'b':
+          _scriptContext->SetArgByte(it, va_arg(ap, int));
+          break ;
+        case 'f':
+          _scriptContext->SetArgFloat(it, va_arg(ap, double));
+          break ;
+        case 'd':
+          _scriptContext->SetArgDouble(it, va_arg(ap, double));
+          break ;
+        default:
+          cout << "[StatModel][Action] Call will fail: unsuported argument '" << fmt[it] << "' provided" << endl;
+          break ;
+      }
     }
     va_end(ap);
     _scriptContext->Execute();

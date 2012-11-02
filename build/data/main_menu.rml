@@ -5,8 +5,8 @@
     <style>
       body
       {
-	width: 300px;
-	height: 225px;
+	width: 400px;
+	height: 325px;
 	margin: auto;
       }
       
@@ -18,10 +18,10 @@
     </style>
   </head>
   <body template="pywindow">
-    <button class="button_menu" id="continue" i18n="Continue">Continue</button><br />
-    <button class="button_menu" id="save"     i18n="Save">Save</button><br />
-    <button class="button_menu" id="load"     i18n="Load">Load</button><br />
-    <button class="button_menu" id="options"  i18n="Options">Options</button><br />
-    <button class="button_menu" id="exit"     i18n="Exit">Exit</button>
+    <button id="continue" i18n="Continue">Continue</button><br />
+    <button id="save"     i18n="Save">Save</button><br />
+    <button id="load"     i18n="Load">Load</button><br />
+    <button id="options"  i18n="Options">Options</button><br />
+    <button id="exit"     i18n="Exit">Exit</button>
   </body>
 </rml>

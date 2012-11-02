@@ -43,7 +43,7 @@ x --> World clock moving forward in time while traveling
 x --> Displaying world time
 
   -> Levels
-~ --> Lights
+~ --> Basic light management
 ~ --> Proper camera handling
 x --> Barter
   --> Stairs

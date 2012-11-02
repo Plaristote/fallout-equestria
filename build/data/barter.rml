@@ -26,7 +26,7 @@
         position: absolute;
         //drag:  clone;
         width: 20%;
-        left:  0px;
+        left:  10%;
         height: 80%;
         overflow-y: scroll;
       }
@@ -35,7 +35,7 @@
       {
         position: absolute;
         width: 20%;
-        left: 20%;
+        left: 30%;
         height: 70%;
         top: 5%;
         overflow-y: scroll;
@@ -45,7 +45,7 @@
       {
         position: absolute;
         width: 20%;
-        right: 20%;
+        right: 30%;
         height: 70%;
         top: 5%;
         overflow-y: scroll;
@@ -57,7 +57,7 @@
         top:      0px;
         height:   10%;
         width:    20%;
-        right:    20%;
+        right:    30%;
       }
 
       #value-player
@@ -66,7 +66,7 @@
         top:      0px;
         height:   10%;
         width:    20%;
-        left:     20%;
+        left:     30%;
       }
 
       #other-inventory
@@ -74,7 +74,7 @@
         position: absolute;
         //drag:  clone;
         width: 20%;
-        right: 0px;
+        right: 10%;
         height: 80%;
         overflow-y: scroll;
       }
@@ -110,8 +110,8 @@
       </p>
    </div>
     <div id="buttons">
-      <button class="button_menu" id="button_done" i18n="Barter">Barter</button>
-      <button class="button_menu" id="button_quit" i18n="Quit">Quit</button>
+      <button id="button_done" i18n="Barter">Barter</button>
+      <button id="button_quit" i18n="Quit">Quit</button>
     </div>
   </p>
   </body>
