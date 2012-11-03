@@ -62,72 +62,109 @@ void UiBase::FadeIn(void)
   }*/
 }
 
+string UiLoad::LoadSlotRml(const string& prefix, unsigned short it)
+{
+  DataTree*    tree;
+  stringstream dataengine_path;
+  stringstream rml;
+
+  dataengine_path << "saves/slot-" << it << "/dataengine.json";
+  tree = DataTree::Factory::JSON(dataengine_path.str());
+  rml << "<div class='" << prefix << "-slot' id='" << prefix << "-slot-" << it << "' data-slot='" << it << "'>\n";
+  rml << "  <div class='load-slot-title'>Slot " << it << "</div>\n";
+  rml << "  <div class='load-slot-data'>\n";
+  if (tree)
+  {
+    Data data_engine(tree);
+    Data time  = data_engine["time"];
+    Data place = data_engine["system"]["current-level"];
+
+    rml << "    <span class='load-slot-date'>" << time["year"].Value() << "/" << time["month"].Value() << "/" << time["days"].Value() << "</span>\n";
+    rml << "    <span class='load-slot-time'> - " << time["hours"].Value() << ":" << time["minutes"].Value() << ":" << time["seconds"].Value() << "</span>\n";
+    rml << "    <span class='load-slot-place'> - " << (place == 0 ? "Worldmap" : place.Value()) << "</span>\n";
+  }
+  else
+    rml << "    Empty slot\n";
+  rml << "  </div>\n";
+  rml << "</div>\n";
+  delete tree;
+  cout << rml.str() << endl;
+  return (rml.str());
+}
 
 /*
  * UiLoad
  */
-UiLoad::UiLoad(WindowFramework* window, Rocket::Core::Context* context, const std::string& savePath) : UiBase(window, context)
+UiLoad::UiLoad(WindowFramework* window, Rocket::Core::Context* context, const std::string& savePath) : UiBase(window, context), _savePath(savePath)
 {
+  cout << "UiLoad used" << endl;
   _selectedSlot = 0;
   _root         = context->LoadDocument("data/loadgame.rml");
   if (_root)
   {
-    Rocket::Core::Element* slotContainer = _root->GetElementById("slot-container");
-    
-    if (slotContainer)
-    {
-      Directory      dir;
-      unsigned short nSlots = 0;
-
-      dir.OpenDir(savePath);
-      std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [this, &nSlots](const Dirent& entry)
-      {
-	if (entry.d_type == DT_DIR)
-	{
-	  std::string str("slot-");
-	  bool        compare = true;
-
-	  for (int i = 0 ; i < str.length() ; ++i)
-	  {
-	    if (str[i] != entry.d_name[i])
-	    {
-	      compare = false;
-	      break ;
-	    }
-	  }
-	  if (compare)
-	    nSlots++;
-	}
-      });
-
-      std::stringstream rml;
-      for (int it = 0 ; it < nSlots ; ++it)
-      {
-	rml << "<div class='load-slot' id='load-slot-" << it << "' data-slot='" << it << "'>";
-	rml << "<div class='load-slot-title'>Slot " << it << "</div>";
-	rml << "</div>";
-      }
-      slotContainer->SetInnerRML(rml.str().c_str());
-      
-      for (int it = 0 ; it < nSlots ; ++it)
-      {
-	std::stringstream      idSlot;
-	Rocket::Core::Element* slotElement;
-
-	idSlot << "load-slot-" << it;
-	slotElement = _root->GetElementById(idSlot.str().c_str());
-	slotElement->AddEventListener("click",    &EventClickSlot);
-	slotElement->AddEventListener("dblclick", &EventClickSlot);
-	slotElement->AddEventListener("dblclick", &EventLoadGame);
-      }
-    }
+    LoadSlots(savePath);
     ToggleEventListener(true, "button-load",   "click", EventLoadGame);
     ToggleEventListener(true, "button-cancel", "click", EventCancel);
+    ToggleEventListener(true, "button-erase",  "click", EventErase);
   }
   EventClickSlot.EventReceived.Connect(*this, &UiLoad::ClickSlot);
   EventLoadGame.EventReceived.Connect(*this, &UiLoad::LoadGame);
   EventCancel.EventReceived.Connect(*this, &UiLoad::Cancel);
+  EventErase.EventReceived.Connect(*this, &UiLoad::Erase);
   Translate();
+}
+
+void UiLoad::LoadSlots(const string& savePath)
+{
+  Rocket::Core::Element* slotContainer = _root->GetElementById("slot-container");
+  
+  if (slotContainer)
+  {
+    Directory      dir;
+    unsigned short nSlots = 0;
+
+    dir.OpenDir(savePath);
+    std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [this, &nSlots](const Dirent& entry)
+    {
+      if (entry.d_type == DT_DIR)
+      {
+	std::string str("slot-");
+	bool        compare = true;
+
+	for (int i = 0 ; i < str.length() ; ++i)
+	{
+	  if (str[i] != entry.d_name[i])
+	  {
+	    compare = false;
+	    break ;
+	  }
+	}
+	if (compare)
+	  nSlots++;
+      }
+    });
+
+    std::stringstream rml;
+    for (int it = 0 ; it < nSlots ; ++it)
+    {
+      string str;
+      
+      rml << UiLoad::LoadSlotRml("load", it);
+    }
+    slotContainer->SetInnerRML(rml.str().c_str());
+    
+    for (int it = 0 ; it < nSlots ; ++it)
+    {
+      std::stringstream      idSlot;
+      Rocket::Core::Element* slotElement;
+
+      idSlot << "load-slot-" << it;
+      slotElement = _root->GetElementById(idSlot.str().c_str());
+      slotElement->AddEventListener("click",    &EventClickSlot);
+      slotElement->AddEventListener("dblclick", &EventClickSlot);
+      slotElement->AddEventListener("dblclick", &EventLoadGame);
+    }
+  }  
 }
 
 UiLoad::~UiLoad()
@@ -147,6 +184,7 @@ UiLoad::~UiLoad()
   }
   ToggleEventListener(false, "button-load",   "click", EventLoadGame);
   ToggleEventListener(false, "button-cancel", "click", EventCancel);
+  ToggleEventListener(false, "button-erase",  "click", EventErase);
 }
 
 void UiLoad::LoadGame(Rocket::Core::Event&)
@@ -156,9 +194,17 @@ void UiLoad::LoadGame(Rocket::Core::Event&)
   {
     Rocket::Core::Variant* varSlot = _selectedSlot->GetAttribute("data-slot");
     unsigned int           slot    = 0;
+    stringstream           dataengine_path;
+    DataTree*              tree;
 
     slot = varSlot->Get<unsigned int>();
-    LoadSlot.Emit((unsigned char)slot);
+    dataengine_path << "saves/slot-" << slot << "/dataengine.json";
+    tree = DataTree::Factory::JSON(dataengine_path.str());
+    if (tree)
+    {
+      delete tree;
+      LoadSlot.Emit((unsigned char)slot);
+    }
   }
 }
 
@@ -172,53 +218,72 @@ void UiLoad::Cancel(Rocket::Core::Event&)
   Hide();
 }
 
+void UiLoad::Erase(Rocket::Core::Event&)
+{
+  if (_selectedSlot)
+  {
+    Rocket::Core::Variant* varSlot = _selectedSlot->GetAttribute("data-slot");
+    unsigned int           slot    = 0;
+
+    slot = varSlot->Get<unsigned int>();
+    EraseSlot.Emit((unsigned char)slot);
+    LoadSlots(_savePath);
+    _selectedSlot = 0;
+  }
+}
+
 /*
  * UiSave
  */
-UiSave::UiSave(WindowFramework* window, Rocket::Core::Context* context, const std::string& savePath) : UiBase(window, context)
+UiSave::UiSave(WindowFramework* window, Rocket::Core::Context* context, const std::string& savePath) : UiBase(window, context), _savePath(savePath)
 {
   _root = context->LoadDocument("data/savegame.rml");
   if (_root)
   {
-    Rocket::Core::Element* slotContainer = _root->GetElementById("slot-container");
-    
-    if (slotContainer)
-    {
-      Directory      dir;
-      unsigned short nSlots = 0;
-
-      dir.OpenDir(savePath);
-      std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [this, &nSlots](const Dirent& entry)
-      { if (entry.d_type == DT_DIR && entry.d_name != "." && entry.d_name != "..") nSlots++; });
-
-      std::stringstream rml;
-      
-      for (unsigned short it = 0 ; it < nSlots ; ++it)
-      {
-	rml << "<div class='save-slot' id='save-slot-" << it << "' data-slot='" << it << "'>";
-	rml << "<div class='save-slot-title'>Slot " << it << "</div>";
-	rml << "</div>";
-      }
-      slotContainer->SetInnerRML(rml.str().c_str());
-      for (unsigned short it = 0 ; it < nSlots ; ++it)
-      {
-	std::stringstream      idSlot;
-	Rocket::Core::Element* slotElement;
-	
-	idSlot << "save-slot-" << it;
-	slotElement = _root->GetElementById(idSlot.str().c_str());
-	slotElement->AddEventListener("click",    &EventClickSlot);
-	slotElement->AddEventListener("dblclick", &EventClickSlot);
-	slotElement->AddEventListener("dblclick", &EventSaveGame);
-      }
-    }
+    LoadSlots(savePath);
     ToggleEventListener(true, "button-save",   "click", EventSaveGame);
     ToggleEventListener(true, "button-cancel", "click", EventCancel);
+    ToggleEventListener(true, "button-erase",  "click", EventErase);
     Translate();
   }
   EventClickSlot.EventReceived.Connect(*this, &UiSave::ClickSlot);
   EventSaveGame.EventReceived.Connect(*this, &UiSave::SaveGame);
   EventCancel.EventReceived.Connect(*this, &UiSave::Cancel);
+  EventErase.EventReceived.Connect(*this, &UiSave::Erase);
+}
+
+void UiSave::LoadSlots(const string& savePath)
+{
+  Rocket::Core::Element* slotContainer = _root->GetElementById("slot-container");
+  
+  if (slotContainer)
+  {
+    Directory      dir;
+    unsigned short nSlots = 0;
+
+    dir.OpenDir(savePath);
+    std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [this, &nSlots](const Dirent& entry)
+    { if (entry.d_type == DT_DIR && entry.d_name != "." && entry.d_name != "..") nSlots++; });
+
+    std::stringstream rml;
+    
+    for (unsigned short it = 0 ; it < nSlots ; ++it)
+    {
+      rml << UiLoad::LoadSlotRml("save", it);
+    }
+    slotContainer->SetInnerRML(rml.str().c_str());
+    for (unsigned short it = 0 ; it < nSlots ; ++it)
+    {
+      std::stringstream      idSlot;
+      Rocket::Core::Element* slotElement;
+      
+      idSlot << "save-slot-" << it;
+      slotElement = _root->GetElementById(idSlot.str().c_str());
+      slotElement->AddEventListener("click",    &EventClickSlot);
+      slotElement->AddEventListener("dblclick", &EventClickSlot);
+      slotElement->AddEventListener("dblclick", &EventSaveGame);
+    }
+  }
 }
 
 UiSave::~UiSave()
@@ -238,6 +303,21 @@ UiSave::~UiSave()
   }
   ToggleEventListener(false, "button-save",   "click", EventSaveGame);
   ToggleEventListener(false, "button-cancel", "click", EventCancel);
+  ToggleEventListener(false, "button-erase",  "click", EventErase);
+}
+
+void UiSave::Erase(Rocket::Core::Event&)
+{
+  if (_selectedSlot)
+  {
+    Rocket::Core::Variant* varSlot = _selectedSlot->GetAttribute("data-slot");
+    unsigned int           slot    = 0;
+
+    slot = varSlot->Get<unsigned int>();
+    EraseSlot.Emit((unsigned char)slot);
+    LoadSlots(_savePath);
+    _selectedSlot = 0;
+  }  
 }
 
 void UiSave::SaveGame(Rocket::Core::Event&)

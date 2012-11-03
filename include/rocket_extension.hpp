@@ -33,13 +33,14 @@ public:
   void         FireShow(Rocket::Core::Event&) { Show(); }
   void         FireHide(Rocket::Core::Event&) { Hide(); }
 
-  virtual void Show(void)    { if (_root) { _root->Show(); VisibilityToggled.Emit(true);  } }
-  virtual void Hide(void)    { if (_root) { _root->Hide(); _root->PushToBack(); VisibilityToggled.Emit(false); } }
+  virtual void Show(void)    { if (_root) { _root->Show(); VisibilityToggled.Emit(true); VisibilityToggledOn.Emit(); } }
+  virtual void Hide(void)    { if (_root) { _root->Hide(); _root->PushToBack(); VisibilityToggled.Emit(false); VisibilityToggledOff.Emit(); } }
   bool IsVisible(void) const { return (_root && _root->IsVisible()); }
 
   virtual void Destroy(void) { if (_root) { _root->Hide(); } }
 
   Observatory::Signal<void (bool)> VisibilityToggled;
+  Observatory::Signal<void>        VisibilityToggledOn, VisibilityToggledOff;
   
   static void SetPropertyOnAll(Rocket::Core::Element* elem, const std::string& property, const std::string& value)
   {

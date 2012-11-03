@@ -59,7 +59,6 @@
 
 #{RCSS}
 
-
     </style>
   </head>
 
@@ -76,7 +75,7 @@
     </div>
 
     <div id="clock-frame">
-      <span id="clock-year">0000</span> - <span id="clock-month">01</span> - <span id="clock-day">01</span>
+      <span class="console-value" id="clock-year">0000</span> <span class="console-value" id="clock-month">01</span> <span id="clock-day" class="console-value">01</span>
     </div>
 
     <div id="city-list">

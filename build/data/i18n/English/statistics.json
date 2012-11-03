@@ -11,7 +11,7 @@
   "Action Points":      "Action Points",
   "Armor Class":        "Armor Class",
   "Bonus Damage":       "Bonus Damage",
-  "Carry Weigth":       "Carry Weigth",
+  "Carry Weight":       "Carry Weight",
   "Critical Chance":    "Critical Chance",
   "Damage Resistance":  "Damage Resistance",
   "Healing Rate":       "Healing Rate",
@@ -19,6 +19,7 @@
   "Melee Damage":       "Melee Damage",
   "Perk Rate":          "Perk Rate",
   "Poison Resistance":  "Poison Resistance",
+  "Radiation Resistance": "Radiation Resistance",
   "Skill Rate":         "Skill Rate",
   
   "Small Guns":         "Small Guns",

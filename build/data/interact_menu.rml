@@ -1,7 +1,6 @@
 <template name="tplmainbar" content="content">
 <head>
   <link type="text/rcss" href="rkt.rcss"/>
-  <link type="text/rcss" href="invader.rcss"/>
 
   <style>
     #menu

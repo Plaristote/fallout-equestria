@@ -124,11 +124,16 @@
   right: 0px;
 }
 
-.current-level-label  { position: absolute; top: 54%; }
-.current-xp-label     { position: absolute; top: 51%; }
-.next-level-label     { position: absolute; top: 48%;  }
+#experience
+{
+  position: absolute; top: 54%;
+  width: 25%;
+}
 
-#special-points-title { position: absolute; top: 54%; }
+#special-points-title
+{
+  position: absolute; top: 54%;
+}
 
 #special
 {
@@ -160,6 +165,9 @@
 {
   position: absolute;
   left: 100px;
+  width: 100px;
+  padding-left: 20px;
+  margin-left: 20px;
 }
 
 #continue
@@ -276,15 +284,15 @@
 
       </p>
 
-      <p id="special-points-title">Special Points<span id="special-points">0</span></p>
+      <p id="special-points-title">Special Points <span id="special-points" class="console-value">0</span></p>
 
-      <p id="experience">
+      <div id="experience" class="console-bg">
         <p class='current-level-label'><span i18n='Level'>Level</span>: <span id='level'>999</span></p>
         <p class='current-xp-label'><span i18n='Experience'>Experience</span>: <span id='current-xp'>999</span></p>
         <p class='next-level-label'><span i18n='Next level'>Next level</span>: <span id='next-level'>999</span></p>
-      </p>
+      </div>
 
-      <p id="char-state">
+      <p id="char-state" class="console-bg">
         <span id="char-state-hp">Hit Points </span> <span id="char-state-hp-id-value">50</span>/<span id="char-state-hp-id-total">50</span><br />
         <span id="char-state-poisoned">Poisoned</span><br />
         <span id="char-state-radiated">Radiated</span><br />
@@ -295,7 +303,7 @@
         <span id="char-state-crippled-behind-right-leg">Crippled behind right leg</span><br />
       </p>
 
-      <p id="statistics">
+      <p id="statistics" class="console-bg">
 
         <datagrid>
           <col width="80%"><span class"statistics-key">Armor Class</span></col>
@@ -349,13 +357,13 @@
 
       </p>
       
-      <p id="skills">
+      <p id="skills" class="console-bg">
       </p>
       
       <p id="skill-points-title" i18n="Skill Points">Skill Points: <span id="skill-points">0</span></p>
 
-      <button class="button_menu" id="continue" i18n="Confirm">Done</button>
-      <button class="button_menu" id="cancel"   i18n="Close">Cancel</button>
+      <button id="continue" i18n="Confirm">Done</button>
+      <button id="cancel"   i18n="Close">Cancel</button>
 
     </p>
 

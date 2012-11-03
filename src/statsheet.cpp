@@ -1300,8 +1300,8 @@ void StatViewRocket::SetCategoryFields(const std::string& category, const std::v
 	{
 	  rml << "<p class='special-group' data-type='Special' data-key='" << keys[i] << "' style='top: " << topX << "px;'>\n";
           rml << "  <p class='special-key'>" << keys[i] << "</p>\n";
-	  rml << "  <p class='special-value' id='special-value-" << underscored << "'>0</p>\n";
-	  rml << "  <p class='special-commt' id='special-commt-" << underscored << "'>Great</p>\n";
+	  rml << "  <p class='special-value console-value' id='special-value-" << underscored << "'>0</p>\n";
+	  rml << "  <p class='special-commt console-value' id='special-commt-" << underscored << "'>Great</p>\n";
           rml << "</p>\n\n";
 	  topX += 40;
 	}

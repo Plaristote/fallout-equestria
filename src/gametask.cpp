@@ -293,6 +293,7 @@ void                  GameTask::SaveClicked(Rocket::Core::Event&)
     delete _uiSaveGame;
   _uiSaveGame = new UiSave(_window, _gameUi.GetContext(), _savePath);
   _uiSaveGame->SaveToSlot.Connect(*this, &GameTask::SaveToSlot);
+  _uiSaveGame->EraseSlot.Connect (*this, &GameTask::EraseSlot);
   _uiSaveGame->Show();
 }
 
@@ -302,6 +303,7 @@ void                  GameTask::LoadClicked(Rocket::Core::Event&)
     delete _uiLoadGame;
   _uiLoadGame = new UiLoad(_window, _gameUi.GetContext(), _savePath);
   _uiLoadGame->LoadSlot.Connect(*this, &GameTask::LoadSlot);
+  _uiLoadGame->EraseSlot.Connect (*this, &GameTask::EraseSlot);
   _uiLoadGame->Show();
 }
 
@@ -527,16 +529,24 @@ bool GameTask::CopySave(const std::string& savepath, const std::string& slotPath
 
 void GameTask::EraseSlot(unsigned char slot)
 {
-  std::stringstream stream;
-  Directory         dir;
+  stringstream stream;
+  string       dirname;
+  Directory    dir;
   
   stream << _savePath << "/slot-" << (int)slot;
-  dir.OpenDir(stream.str());
-  
-  std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [](const Dirent& entry)
+  cout << "Clearing Slot: " << stream.str() << endl;
+  dirname = stream.str();
+  dir.OpenDir(dirname);
+  for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [dirname](const Dirent& entry)
   {
-	std::string to_remove = entry.d_name;
-    remove(to_remove.c_str());
+    string to_remove = entry.d_name;
+    cout << "- Remove file " << to_remove << endl;
+    to_remove = dirname + "/" + to_remove;
+    int ret = remove(to_remove.c_str());
+    if (ret != 0)
+      cout << "--> Failed to remove file " << to_remove << endl;
+    else
+      cout << "--> Success" << endl;
   });
 }
 

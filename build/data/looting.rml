@@ -57,7 +57,7 @@
       }
      </style>
   </head>
-  <body id="body" template="tplmainbar">
+  <body id="body"><div id="window">
   <p>
     <div id="inventory-items">
       <p id="self-inventory"  class="console-bg">
@@ -70,5 +70,5 @@
       <button id="button_done"     i18n="Done">Done</button>
     </div>
   </p>
-  </body>
+  </div></body>
 </rml>

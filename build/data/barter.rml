@@ -11,6 +11,11 @@
         margin-top: 10px;
       }
 
+      #window
+      {
+        width: 600px; height: 100%;
+      }
+
       #body-inventory-items
       {
         width:          90%;
@@ -95,7 +100,8 @@
       }
      </style>
   </head>
-  <body id="body" template="tplmainbar">
+  <body id="body" class="window">
+  <div id="window">
   <p>
     <div id="inventory-items">
       <p id="self-inventory"  class="console-bg">
@@ -114,5 +120,6 @@
       <button id="button_quit" i18n="Quit">Quit</button>
     </div>
   </p>
+  </div>
   </body>
 </rml>

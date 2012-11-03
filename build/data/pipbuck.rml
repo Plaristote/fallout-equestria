@@ -12,6 +12,7 @@
   #app_container
   {
     height: 80%;
+    overflow: auto;
   }
 
   .app_button

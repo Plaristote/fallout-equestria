@@ -733,9 +733,11 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
     
     _currentRunningDialog = new DialogController(_window, _levelUi.GetContext(), talkTo, i18n::GetDialogs());
     _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningUi<UiItRunningDialog>);
+    _currentRunningDialog->DialogEnded.Connect(_levelUi.GetMainBar(), &UiBase::Show);
     _currentRunningDialog->StartBarter.Connect(*this, &Level::CallbackActionBarter);
     _mouseActionBlocked = true;
     _camera.SetEnabledScroll(false);
+    _levelUi.GetMainBar().Hide();
     SetInterrupted(true);
     _currentUis[UiItRunningDialog] = _currentRunningDialog;
   }
