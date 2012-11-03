@@ -29,6 +29,7 @@ public:
   void       EndGame(void);
   void       NewGame(Rocket::Core::Event&);
   void       StartGame(void);
+  void       CancelNewGame(void);
   DoneStatus do_task(void);
   
 private:

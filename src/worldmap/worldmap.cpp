@@ -138,8 +138,8 @@ void WorldMap::AddCityToList(Data cityData)
     stringstream   rml;
 
     rml << "<div class='city-entry'>";
-    rml << "<div class='city-button'><button id='city-" << cityData.Key() << "' data-city='" << cityData.Key() << "'>Go</button></div>";
-    rml << "<div class='city-name'>" << cityData.Key() << "</div>";
+    rml << "<div class='city-button'><button id='city-" << cityData.Key() << "' data-city='" << cityData.Key() << "' class='simple-button city-button-button'> </button>";
+    rml << "<span class='city-name'>" << cityData.Key() << "</span></div>";
     rml << "</div>";
     elem->GetInnerRML(innerRml);
     innerRml = innerRml + Rocket::Core::String(rml.str().c_str());

@@ -339,6 +339,7 @@ void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* contro
     ActionPointChanged.Emit(_actionPoints, data_stats["Statistics"]["Action Points"]);
     SetHitPoints(data_stats["Variables"]["Hit Points"]);
     _obs_handler.Connect(_stats->HpChanged, *this, &ObjectCharacter::StatHpUpdate);
+    _inventory->SetCapacity(275);
   }
 }
 

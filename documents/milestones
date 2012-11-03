@@ -54,6 +54,7 @@ x --> Saving/Loading of buffs
 
 x -> GameTask (Worldmap and Level handler)
 x --> PipBuck
+x ---> File Manager App with text and audio support (Scripted App)
 x --> Player stored globally, and inserted into maps instead of loaded from there
 x ---> Saving and loading player globally
 x ---> Inventory access from  the WorldMap
@@ -83,7 +84,6 @@ Milestone III
 
   -> GameTask
   --> Pipbuck:
-  ---> File Manager App with text and audio files support (Scripted App)
-  ---> Clock App (Displaying time and allowing character to sleep) (C++ App)
+ ---> Clock App (Displaying time and allowing character to sleep) (C++ App)
   --> Quests
 ~ --> Party management

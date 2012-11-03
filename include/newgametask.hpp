@@ -13,9 +13,10 @@ public:
 
   Observatory::Signal<void>                      StartFromScratch;
   Observatory::Signal<void (const std::string&)> SelectProfile;
-  
+  Observatory::Signal<void>                      Cancel;
+
 private:
-  RocketListener PreviousProfile, NextProfile, EventSelectProfile, EventStartFromScratch;
+  RocketListener PreviousProfile, NextProfile, EventSelectProfile, EventStartFromScratch, EventCancel;
   DataTree*      _data_profiles;
   
   void SelectedProfile(Rocket::Core::Event&);
@@ -23,6 +24,7 @@ private:
   void GoToPreviousProfile(Rocket::Core::Event&);
   void GoToNextProfile(Rocket::Core::Event&);
   void GoToProfile(const std::string&);
+  void GoCancel(Rocket::Core::Event&) { Cancel.Emit(); }
 
   std::vector<std::string>                 _profiles;
   std::vector<std::string>::const_iterator _current_profile;
@@ -35,6 +37,7 @@ public:
   ~NewGameTask();
 
   Observatory::Signal<void> StartGame;
+  Observatory::Signal<void> Cancel;
   
 private:
   void                      SelectProfile(const std::string&);

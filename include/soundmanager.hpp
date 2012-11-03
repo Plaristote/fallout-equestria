@@ -14,8 +14,17 @@ struct ISampleInstance
   virtual ~ISampleInstance() {}
   virtual void  Start(void)           = 0;
   virtual void  Stop(void)            = 0;
+  virtual void  Pause(void)           = 0;
   virtual void  SetVolume(float)      = 0;
   virtual float GetVolume(void) const = 0;
+  virtual bool  IsPlaying(void) const = 0;
+
+  void           AddReference(void)            { ref_count++;        }
+  void           DelReference(void)            { ref_count--;        }
+  unsigned short GetReferenceCount(void) const { return (ref_count); }
+  
+private:
+  unsigned short ref_count;
 };
 
 class SoundManager;
@@ -47,16 +56,24 @@ class SoundManager
   typedef std::list<Sound>            Sounds;
   typedef std::list<Sounds::iterator> SoundsIterators;
   typedef std::list<ISampleInstance*> SoundInstances;
+  typedef std::list<SoundManager*>    SoundManagers;
 public:
 
   SoundManager(void);
   ~SoundManager(void);
+  
+  static SoundManager* NewSoundManager(void) { return (new SoundManager); }
+  void                 Release(void) { delete this; }
 
   ISampleInstance* CreateInstance(const std::string& key);
   void             DeleteInstance(ISampleInstance*);
+  void             GarbageCollect(void);
+  static void      GarbageCollectAll(void);
 
   void             SetVolume(float);
   float            GetVolume(void) const { return (_volume); }
+
+  bool Require(const std::string& key);
 
   template<typename TSAMPLE>
   bool RequireSound(const std::string& key)
@@ -90,15 +107,17 @@ public:
   }
 
 private:
-  static Sounds    _sounds;
-  static DataTree* _data_audio;
-  SoundsIterators  _sounds_required;
-  float            _volume;
-  SoundInstances   _sounds_playing;
+  static SoundManagers _sound_managers;
+  static Sounds        _sounds;
+  static DataTree*     _data_audio;
+  SoundsIterators      _sounds_required;
+  float                _volume;
+  SoundInstances       _sounds_playing;
 };
 
 # ifdef AUDIO_BACKEND_SFML
 #  include <SFML/Audio.hpp>
+#  define AUDIO_SAMPLE_TYPE sf_Sample
 
 class sf_SampleInstance : public ISampleInstance
 {
@@ -118,6 +137,11 @@ public:
     instance.stop();
   }
   
+  void Pause(void)
+  {
+    instance.pause();
+  }
+  
   void SetVolume(float volume)
   {
     instance.setVolume(volume);
@@ -126,6 +150,11 @@ public:
   float GetVolume(void) const
   {
     return (instance.getVolume());
+  }
+  
+  bool IsPlaying(void) const
+  {
+    return (instance.getStatus() == sf::SoundSource::Status::Playing);
   }
 
 private:

@@ -97,7 +97,6 @@ public:
   
   void          DelEventListener(Rocket::Core::Element* e)
   {
-    cout << "DelEventListener" << endl;
     bool keep_searching;
 
     do
@@ -107,11 +106,11 @@ public:
       keep_searching = it != _event_listeners.end();
       if (keep_searching)
       {
+	cout << "Deleted an event listener" << endl;
 	delete it->listener;
 	_event_listeners.erase(it);
       }
     } while (keep_searching);
-    cout << "DelEventListener /End" << endl;
   }
   
 private:
@@ -176,6 +175,7 @@ struct asConsoleOutput
 asConsoleOutput asConsole;
 
 #include "musicmanager.hpp"
+#include <soundmanager.hpp>
 
 static void AngelScriptInitialize(void)
 {
@@ -191,7 +191,7 @@ static void AngelScriptInitialize(void)
   engine->RegisterGlobalFunction("int  Random()", asFUNCTION(rand), asCALL_CDECL);
 
   Script::StdList<string>::Register(engine, "StringList", "string");
-    
+
   const char* musicmanagerClass = "Music";
   engine->RegisterObjectType(musicmanagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(musicmanagerClass, "void Play(string)",         asMETHODPR(MusicManager,Play, (const std::string&), void), asCALL_THISCALL);
@@ -199,7 +199,28 @@ static void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(musicmanagerClass, "void PlayNext()",           asMETHOD(MusicManager,PlayNext),  asCALL_THISCALL);
   engine->RegisterObjectMethod(musicmanagerClass, "void SetVolume(float)",     asMETHOD(MusicManager,SetVolume), asCALL_THISCALL);
   engine->RegisterGlobalFunction("Music@ MusicHandle(void)", asFUNCTION(MusicManager::Get), asCALL_CDECL);
-
+  
+  const char* soundInstanceClass = "Sound";
+  engine->RegisterObjectType(soundInstanceClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(soundInstanceClass, "void  Play()",  asMETHOD(ISampleInstance,Start), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundInstanceClass, "void  Stop()",  asMETHOD(ISampleInstance,Stop),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundInstanceClass, "void  Pause()", asMETHOD(ISampleInstance,Pause), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundInstanceClass, "void  SetVolume(float)", asMETHOD(ISampleInstance,SetVolume), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundInstanceClass, "float GetVolume() const", asMETHOD(ISampleInstance,GetVolume), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundInstanceClass, "bool  IsPlaying()", asMETHOD(ISampleInstance,IsPlaying), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundInstanceClass, "void  AddReference()", asMETHOD(ISampleInstance,AddReference), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundInstanceClass, "void  DelReference()", asMETHOD(ISampleInstance,DelReference), asCALL_THISCALL);
+  
+  const char* soundManagerClass = "SoundManager";
+  engine->RegisterObjectType(soundManagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterGlobalFunction("SoundManager@ NewSoundManager()", asFUNCTION(SoundManager::NewSoundManager), asCALL_CDECL);
+  engine->RegisterObjectMethod(soundManagerClass, "void Release()", asMETHOD(SoundManager,Release), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundManagerClass, "bool   RequireSound(string)",   asMETHOD(SoundManager,Require),        asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundManagerClass, "Sound@ CreateInstance(string)", asMETHOD(SoundManager,CreateInstance), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundManagerClass, "void   DeleteInstance(Sound@)", asMETHOD(SoundManager,DeleteInstance), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundManagerClass, "void   SetVolume(float)",       asMETHOD(SoundManager,SetVolume),      asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundManagerClass, "float   GetVolume(void) const", asMETHOD(SoundManager,GetVolume),      asCALL_THISCALL);
+  
   const char* packetClass = "Serializer";
   engine->RegisterObjectType(packetClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(packetClass, "void Serialize(int)",               asFUNCTION(asUtils::SerializeInt),      asCALL_CDECL_OBJFIRST);

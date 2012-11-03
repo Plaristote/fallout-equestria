@@ -36,9 +36,9 @@
       z-index: 2;
     }
 
-    button
+    .control
     {
-      width: 25%;
+      width: 17%;
       height: 30px;
       padding-top: 8px;
     }
@@ -54,11 +54,15 @@
       </div>
 
       <div id="button-container">
-        <button id="button-previous-profile" i18n="Previous Character">Previous Character</button>
-        <button id="button-next-profile"     i18n="Next Character"    >Next Character</button>
-        <button id="button-load-start-from-scratch" i18n="Create Character">Create Character</button>
-        <button id="button-select-profile" i18n="Select this character">Select this character</button>
-      </div>
+        <button id="button-previous-profile"        class='control' i18n="Previous Character"   >Previous Character</button>
+        <button id="button-next-profile"            class='control' i18n="Next Character"       >Next Character</button>
+        <button id="button-load-start-from-scratch" class='control' i18n="Create Character"     >Create Character</button>
+        <button id="button-select-profile"          class='control' i18n="Select this character">Select this character</button>
+        <button id="quit-button"                    class='control' i18n="Quit"                 >Quit</button>
+       </div>
+
+      <div id="button-exit-container">
+     </div>
 
       <div id="content" style="color: black;">
         <span id="character-name">Character name</span><br />
@@ -69,6 +73,7 @@
         <span>Cons: </span>
         <span id="character-cons">character cons</span><br />
       </div>
+
     </div>
   </div>
 </body>

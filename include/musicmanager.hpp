@@ -1,8 +1,11 @@
 #ifndef  MUSICMANAGER_HPP
 # define MUSICMANAGER_HPP
 
-//# define AUDIO_BACKEND_PANDA3D
-# define AUDIO_BACKEND_SFML
+# ifndef AUDIO_BACKEND_SFML
+#  ifndef AUDIO_BACKEND_PANDA3D
+#    define AUDIO_BACKEND_SFML
+#  endif
+# endif
 
 # include <string>
 # include "datatree.hpp"

@@ -10,8 +10,10 @@ NewGameTask::NewGameTask(WindowFramework* window, Core::Context* rocket) : _ui_n
   _stat_sheet = 0;
   _window     = window;
   _rocket     = rocket;
-  _ui_new_game.StartFromScratch.Connect(*this, &NewGameTask::StartFromScratch);
-  _ui_new_game.SelectProfile.Connect   (*this, &NewGameTask::SelectProfile);
+  _ui_new_game.StartFromScratch.Connect(*this,        &NewGameTask::StartFromScratch);
+  _ui_new_game.SelectProfile.Connect   (*this,        &NewGameTask::SelectProfile);
+  _ui_new_game.Cancel.Connect          (_ui_new_game, &UiBase::Hide);
+  _ui_new_game.Cancel.Connect          (Cancel,       &Observatory::Signal<void>::Emit);
   _ui_new_game.Show();
 }
 
@@ -65,10 +67,12 @@ UiNewGame::UiNewGame(WindowFramework* window, Core::Context* context) : UiBase(w
     ToggleEventListener(true, "button-select-profile",     "click", EventSelectProfile);
     ToggleEventListener(true, "button-previous-profile",   "click", PreviousProfile);
     ToggleEventListener(true, "button-next-profile",       "click", NextProfile);
+    ToggleEventListener(true, "quit-button",               "click", EventCancel);
     EventSelectProfile.EventReceived.Connect   (*this, &UiNewGame::SelectedProfile);
     PreviousProfile.EventReceived.Connect      (*this, &UiNewGame::GoToPreviousProfile);
     NextProfile.EventReceived.Connect          (*this, &UiNewGame::GoToNextProfile);
     EventStartFromScratch.EventReceived.Connect(*this, &UiNewGame::ClickedStartFromScratch);
+    EventCancel.EventReceived.Connect          (*this, &UiNewGame::GoCancel);
   }
   else
     cout << "Missing file data/new_game.rml" << endl;
@@ -135,5 +139,6 @@ UiNewGame::~UiNewGame()
   ToggleEventListener(false, "button-start-from-scratch", "click", EventStartFromScratch);
   ToggleEventListener(false, "button-select-profile",     "click", EventSelectProfile);
   ToggleEventListener(false, "button-previous-profile",   "click", PreviousProfile);
-  ToggleEventListener(false, "button-next-profile",       "click", NextProfile);  
+  ToggleEventListener(false, "button-next-profile",       "click", NextProfile);
+  ToggleEventListener(false, "quit-button",               "click", EventCancel);  
 }

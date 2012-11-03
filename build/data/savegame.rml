@@ -11,6 +11,7 @@
 
 #slot-container
 {
+  font-family: JH_Fallout;
   color: white;
   overflow-y: auto;
   width: 70%;

@@ -67,8 +67,11 @@ MainMenu::~MainMenu()
 
 void MainMenu::NewGame(Rocket::Core::Event&)
 {
+  if (_new_game_task)
+    delete _new_game_task;
   _new_game_task = new NewGameTask(_window, _generalUi.GetRocketRegion()->get_context());
   _new_game_task->StartGame.Connect(*this, &MainMenu::StartGame);
+  _new_game_task->Cancel.Connect(*this, &MainMenu::CancelNewGame);
 }
 
 void MainMenu::StartGame(void)
@@ -76,6 +79,10 @@ void MainMenu::StartGame(void)
   delete _new_game_task;
   _new_game_task = 0;
   createLevelPlz = true;
+}
+
+void MainMenu::CancelNewGame(void)
+{
 }
 
 void MainMenu::Continue(Rocket::Core::Event&)
@@ -120,6 +127,7 @@ AsyncTask::DoneStatus MainMenu::do_task()
     _need_garbage_collect = false;
   }
   _mouseCursor.Update();
+  SoundManager::GarbageCollectAll();
   return (quitGamePlz ? AsyncTask::DoneStatus::DS_exit : AsyncTask::DoneStatus::DS_cont);
 }
 
