@@ -1,0 +1,16 @@
+<div id="clock_container">
+  <b>Date: </b> <span id="value-year">0</span>/<span id="value-month"></span>/<span id="value-day"></span><br />
+  <b>Time: </b> <span id="value-hour">0</span>:<span id="value-minute"></span>:<span id="value-second"></span><br />
+</div>
+
+<br /><br />
+
+<span id="span-error" style="color:white; background-color:red;"></span><br />
+
+<div id="clock_waiter">
+  <b>Wait for: </b><br />
+  <span id="value-wait-days"    data-value="0">0</span> days,<br />
+  <span id="value-wait-hours"   data-value="0">0</span> hours,<br />
+  <span id="value-wait-minutes" data-value="0">0</span> minutes.<br />
+  <button id="button-wait">Wait</button> <button id="wait-more">+</button> <button id="wait-less">-</button>
+</div>

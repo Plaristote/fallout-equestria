@@ -173,6 +173,10 @@
 
 "Pipbuck": {
   "Apps": {
+    "clock": {
+      "type": 1,
+      "icon": "clock.png"
+    },
     "helloworld": {
       "type": 0,
       "icon": "helloworld.png",

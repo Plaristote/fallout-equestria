@@ -189,7 +189,6 @@ void MusicManager::FadeOut(float elapsed_time)
 
 void MusicManager::SetVolume(float volume)
 {
-  cout << "SetVolume called" << endl;
   _volume_ref  = volume;
   _volume_goal = volume;
 }

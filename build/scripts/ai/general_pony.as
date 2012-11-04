@@ -15,5 +15,6 @@ StringList GetAvailableApps(Data data)
   StringList apps;
 
   apps.Add("helloworld");
+  apps.Add("clock");
   return (apps);
 }

@@ -44,6 +44,7 @@ x --> Displaying world time
 
   -> Levels
 x --> Basic light management
+x --> Daylight/Nightlight management
 x --> Proper camera handling
 x --> Barter
 # --> Stairs
@@ -55,6 +56,7 @@ x --> Saving/Loading of buffs
 x -> GameTask (Worldmap and Level handler)
 x --> PipBuck
 x ---> File Manager App with text and audio support (Scripted App)
+x ---> Clock App (Displaying time and allowing character to sleep) (C++ App)
 x --> Player stored globally, and inserted into maps instead of loaded from there
 x ---> Saving and loading player globally
 x ---> Inventory access from  the WorldMap
@@ -84,6 +86,5 @@ Milestone III
 
   -> GameTask
   --> Pipbuck:
- ---> Clock App (Displaying time and allowing character to sleep) (C++ App)
   --> Quests
 ~ --> Party management

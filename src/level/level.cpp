@@ -46,16 +46,25 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 
   _graphicWindow = _window->get_graphics_window();
 
-  _sunLight = new DirectionalLight("sun_light");
+  // TODO Implement map daylight/nodaylight system
+  if (true)
+  {
+    _sunLight = new DirectionalLight("sun_light");
 
-  _sunLight->set_color(LVecBase4f(0.8, 0.8, 0.8, 1));
-  //_sunLight->set_shadow_caster(true, 12, 12);
-  _sunLight->get_lens()->set_near_far(1.f, 2.f);
-  _sunLight->get_lens()->set_film_size(512);
+    _sunLight->set_color(LVecBase4f(0.8, 0.8, 0.8, 1));
+    //_sunLight->set_shadow_caster(true, 12, 12);
+    _sunLight->get_lens()->set_near_far(1.f, 2.f);
+    _sunLight->get_lens()->set_film_size(512);
 
-  _sunLightNode = window->get_render().attach_new_node(_sunLight);
-  _sunLightNode.set_hpr(-30, -80, 0);
-  window->get_render().set_light(_sunLightNode);
+    _sunLightNode = window->get_render().attach_new_node(_sunLight);
+    _sunLightNode.set_hpr(-30, -80, 0);
+    window->get_render().set_light(_sunLightNode);
+    
+    TimeManager::Task* daylightTask = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
+    daylightTask->Interval.Connect(*this, &Level::RunDaylight);
+    RunDaylight();
+  }
+
   window->get_render().set_shader_input("light", _sunLightNode);
 
   MouseInit();
@@ -147,9 +156,6 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   obs.Connect(InstanceDynamicObject::ActionUse,         *this, &Level::CallbackActionUse);
   obs.Connect(InstanceDynamicObject::ActionTalkTo,      *this, &Level::CallbackActionTalkTo);
   obs.Connect(InstanceDynamicObject::ActionUseObjectOn, *this, &Level::CallbackActionUseObjectOn);
-
-  TimeManager::Task* daylightTask = _timeManager.AddTask(TASK_LVL_CITY, true, 3);
-  daylightTask->Interval.Connect(*this, &Level::RunDaylight);
 
   unsigned int taskIt = 0;
   for_each(_characters.begin(), _characters.end(), [this, &taskIt](ObjectCharacter* character)
@@ -445,33 +451,23 @@ void Level::NextTurn(void)
 
 void Level::RunDaylight(void)
 {
-  static Timer         lightTimer;
-  static unsigned char dayStep    = 1;
-  static unsigned int  stepLength = 60;
+  LVecBase4f color_steps[6] = {
+    LVecBase4f(0.2, 0.2, 0.5, 1), // 00h00
+    LVecBase4f(0.2, 0.2, 0.3, 1), // 04h00
+    LVecBase4f(0.7, 0.7, 0.5, 1), // 08h00
+    LVecBase4f(1.0, 1.0, 1.0, 1), // 12h00
+    LVecBase4f(1.0, 0.8, 0.8, 1), // 16h00
+    LVecBase4f(0.4, 0.4, 0.6, 1)  // 20h00
+  };
 
-  LVecBase4f           colorSteps[3];
-
-  colorSteps[0] = LVecBase4f(0.2, 0.2, 0.2, 1);
-  colorSteps[1] = LVecBase4f(1.0, 1.0, 1.0, 1);
-  colorSteps[2] = LVecBase4f(0.6, 0.3, 0.3, 1);
-
-  if (lightTimer.GetElapsedTime() < stepLength)
-  {
-    LVecBase4f toSet = _sunLight->get_color();
-    LVecBase4f dif   = colorSteps[(dayStep == 2 ? 0 : dayStep + 1)] - colorSteps[dayStep];
-
-    toSet += ((dif * WORLDTIME_DAYLIGHT_STEP) / stepLength);
-    _sunLight->set_color(toSet);
-  }
-  else
-  {
-    cout << "Daylight Next step" << endl;
-    dayStep++;
-    if (dayStep >= 3)
-      dayStep = 0;
-    _sunLight->set_color(colorSteps[dayStep]);
-    lightTimer.Restart();
-  }
+  int it = _timeManager.GetHour() / 4;
+  
+  LVecBase4f to_set(0, 0, 0, 0);
+  LVecBase4f dif = (it == 5 ? color_steps[0] : color_steps[it + 1]) - color_steps[it];
+  
+  // dif / 5 * (it % 4) -> dif / 100 * (20 * (it % 4)) is this more clear ? I hope iti s.
+  to_set += color_steps[it] + (dif / 5 * (it % 4));
+  _sunLight->set_color(to_set);
 }
 
 extern void* mypointer;

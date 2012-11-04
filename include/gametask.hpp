@@ -94,6 +94,9 @@ public:
   void                  LoadLevelBuffs(Utils::Packet&);
   void                  LoadPartyBuffs(Utils::Packet&);
   std::function<bool (const std::string&)> _is_level_buff;
+  
+  // TIME MANAGEMENT
+  TimeManager&          GetTimeManager(void) { return (_timeManager); }
 
 private:
   void                  FinishLoad(void);

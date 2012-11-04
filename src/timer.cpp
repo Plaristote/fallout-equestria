@@ -129,7 +129,8 @@ void TimeManager::ExecuteTasks(void)
       cout << task.lastH << ":" << task.lastM  << ":" << task.lastS << endl;
       
     }
-    ++it;
+    else
+      ++it;
   }
   //profiler.Profile("Timer");
 }
