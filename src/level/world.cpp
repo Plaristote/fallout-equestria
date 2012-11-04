@@ -795,7 +795,10 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
             int id1, id2;
 
             packet >> id1 >> id2;
-        lockedArcs.push_back(std::pair<int, int>(id1, id2));
+	    auto it1 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id1, id2));
+	    auto it2 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id2, id1));
+	    if (it1 == lockedArcs.end() && it2 == lockedArcs.end())
+	    {  lockedArcs.push_back(std::pair<int, int>(id1, id2)); }
         }
     }
 

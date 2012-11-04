@@ -68,9 +68,25 @@ div#title_bar span
 
 div#window
 {
+        width: 100%;
+        height: 100%;
 	width: auto;
 	padding: 10px 15px;
 
+        background-decorator: tiled-box;
+        background-top-left-image:     invader.tga           0px   0px  30px  30px;
+        background-top-right-image:    invader.tga         202px   0px 231px  30px;
+        background-top-image:          invader.tga stretch  30px   0px 201px  30px;
+        background-bottom-left-image:  invader.tga           0px  91px  30px 119px;
+        background-bottom-right-image: invader.tga         202px  91px 231px 119px;
+        background-bottom-image:       invader.tga stretch  30px  91px 201px 119px;
+        background-left-image:         invader.tga stretch   0px  30px  30px  90px;
+        background-right-image:        invader.tga stretch 202px  30px 231px  90px;
+        background-center-image:       invader.tga repeat-truncate  30px  30px 201px  90px;
+}
+
+.window-background
+{
         background-decorator: tiled-box;
         background-top-left-image:     invader.tga           0px   0px  30px  30px;
         background-top-right-image:    invader.tga         202px   0px 231px  30px;
@@ -148,6 +164,21 @@ dataselect
 input.submit
 {
 	margin-left: 0px;
+}
+
+button.simple-button
+{
+  display: inline-block;
+  width:   40px;
+  height:  22px;
+  background-decorator: image;
+  background-image: button.png;
+}
+
+button.simple-button:active
+{
+  background-decorator: image;
+  background-image: button-pressed.png;
 }
 
 button.francis
@@ -577,6 +608,35 @@ scrollbarhorizontal
 	height: 0px;
 }
 
+.dialog-bg
+{
+  background-decorator:          tiled-box;
+  background-top-left-image:     revelation-mod/dialog_menu.png    0px    0px   40px   40px;
+  background-top-right-image:    revelation-mod/dialog_menu.png 1020px    0px 1092px   40px;
+  background-top-image:          revelation-mod/dialog_menu.png   40px    0px 1020px   40px;
+  background-bottom-left-image:  revelation-mod/dialog_menu.png    0px  250px  220px  416px;
+  background-bottom-right-image: revelation-mod/dialog_menu.png  950px  250px 1092px  416px;
+  background-bottom-image:       revelation-mod/dialog_menu.png  220px  250px  950px  416px;
+  background-left-image:         revelation-mod/dialog_menu.png    0px   40px   40px  250px;
+  background-right-image:        revelation-mod/dialog_menu.png 1020px   40px 1092px  250px;
+  background-center-image:       revelation-mod/dialog_menu.png   40px   40px 1020px  250px;
+}
+
+.console-value
+{
+  background-decorator:          tiled-box;
+  background-top-left-image:     hud.png 126px 0px  136px 10px;
+  background-top-right-image:    hud.png 193px 0px  203px 10px;
+  background-top-image:          hud.png 136px 0px  193px 10px;
+  background-bottom-left-image:  hud.png 126px 50px 136px 61px;
+  background-bottom-right-image: hud.png 193px 50px 203px 61px;
+  background-bottom-image:       hud.png 136px 50px 193px 61px;
+  background-left-image:         hud.png 126px 10px 136px 49px;
+  background-right-image:        hud.png 193px 10px 203px 49px;
+  background-center-image:       hud.png 136px 10px 193px 49px;
+  padding: 0px 5px 5px 5px;
+}
+
 .console-bg
 {
   background-decorator:          tiled-box;
@@ -589,6 +649,7 @@ scrollbarhorizontal
   background-left-image:         hud.png 126px 10px 136px 49px;
   background-right-image:        hud.png 193px 10px 203px 49px;
   background-center-image:       hud.png 136px 10px 193px 49px;
+  padding: 1px 3px 3px 3px;
 }
 
 .console-bg scrollbarvertical,

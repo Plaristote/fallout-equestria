@@ -14,7 +14,6 @@ public:
     LockWaypoints(false);
   }
 
-  void         ProcessCollisions(void) {}
   void         LockWaypoints(bool);
   GoToData     GetGoToData(InstanceDynamicObject*);
   Inventory&   GetInventory(void)      { return (_inventory); }

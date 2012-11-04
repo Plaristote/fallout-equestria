@@ -474,6 +474,8 @@ void Level::RunDaylight(void)
   }
 }
 
+extern void* mypointer;
+
 AsyncTask::DoneStatus Level::do_task(void)
 { 
   float elapsedTime = _timer.GetElapsedTime();
@@ -481,11 +483,16 @@ AsyncTask::DoneStatus Level::do_task(void)
   _mouse.Run();
   _camera.Run(elapsedTime);
   _timeManager.ExecuteTasks();
-
+  
   switch (_state)
   {
     case Fight:
-      ForEach(_objects,    [elapsedTime]      (InstanceDynamicObject* object) { object->Run(elapsedTime); });
+      ForEach(_objects,    [elapsedTime]      (InstanceDynamicObject* object)
+      {
+	object->Run(elapsedTime);
+	object->UnprocessCollisions();
+	object->ProcessCollisions();
+      });
       for_each(_characters.begin(), _characters.end(), [this, elapsedTime](ObjectCharacter* character)
       {
 	if (character == (*_itCharacter))
@@ -496,12 +503,17 @@ AsyncTask::DoneStatus Level::do_task(void)
       break ;
     case Normal:
       _timeManager.AddElapsedSeconds(elapsedTime);
-      ForEach(_objects,    [elapsedTime](InstanceDynamicObject* object) { object->Run(elapsedTime); });
+      ForEach(_objects,    [elapsedTime](InstanceDynamicObject* object)
+      {
+	object->Run(elapsedTime);
+	object->UnprocessCollisions();
+	object->ProcessCollisions();
+      });
       ForEach(_characters, [elapsedTime](ObjectCharacter* character)
       {
         character->Run(elapsedTime);
-        //character->UnprocessCollisions();
-        //character->ProcessCollisions();
+        character->UnprocessCollisions();
+        character->ProcessCollisions();
       });
       break ;
     case Interrupted:
@@ -945,15 +957,18 @@ struct XpFetcher
   void Execute(void)
   {
     Data            stats      = target->GetStatistics();
+    Data            xp_reward;
     StatController* controller = killer->GetStatController();
 
+    if (stats.NotNil())
+      xp_reward = stats["Variable"]["XpReward"];
     if (controller)
     {
-      if (stats.Nil())
+      if (xp_reward.Nil())
         controller->AddExperience(1001);
       else
-        controller->AddExperience(stats["Variable"]["XpReward"]);
-    }    
+        controller->AddExperience(xp_reward);
+    }
   }
 
   ObjectCharacter         *killer, *target;

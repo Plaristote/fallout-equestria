@@ -8,6 +8,7 @@ class ObjectLocker : public ObjectShelf, public Lockable
 {
 public:
   ObjectLocker(Level* level, DynamicObject* object);
+  ~ObjectLocker();
 
   virtual void CallbackActionUse(InstanceDynamicObject*);
   string       GetKeyName() const { return (_object->key); }

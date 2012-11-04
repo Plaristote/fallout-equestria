@@ -18,6 +18,7 @@ Buff::Buff(const string& name, StatController* stats, Data data, TimeManager& tm
 
   _buff.Duplicate(data);
   InitScripts();
+  _context      = 0;
   _target_name  = name;
   _target_stats = stats;
   //_looping    = _buff["loop"].Value() == "1";
@@ -38,13 +39,13 @@ Buff::Buff(Utils::Packet& packet, TimeManager& tm, function<StatController* (con
     _buff.Duplicate(data_tree);
     delete data_tree;
   }
+  _context      = 0;
   _target_stats = get_controller(_target_name);
   _looping      = _buff["loop"].Value() == "1";
   _task         = _tm.AddTask(TASK_LVL_WORLDMAP, _looping, 0);
   packet >> _task->lastS >> _task->lastM >> _task->lastH >> _task->lastD >> _task->lastMo >> _task->lastY;
   packet >> _task->timeS >> _task->timeM >> _task->timeH >> _task->timeD >> _task->timeMo >> _task->timeY;
   _task->Interval.Connect(*this, &Buff::Refresh);
-  InitScripts();
 }
 
 void Buff::Save(Utils::Packet& packet)
@@ -64,8 +65,11 @@ void Buff::InitScripts(void)
   Data           data_script  = _buff["script"];
   string         script_src, script_func, script_decl;
 
+  cout << "[Buff] Initializing scripts" << endl;
   if (data_script.Nil())
     return ;
+  cout << "[Buff] Script haz data" << endl;
+  data_script.Output();
   script_src  = data_script["src"].Value();
   script_func = data_script["hook"].Value();
   script_decl = "bool " + script_func + "(Data, Special@)";
@@ -86,11 +90,15 @@ void Buff::Refresh(void)
   if (_target_stats)
   {
     InitScripts();
-    _context->Prepare(_refresh);
-    _context->SetArgObject(0, &_buff);
-    _context->SetArgObject(1, _target_stats);
-    _context->Execute();
-    keep_going = _context->GetReturnByte();
+    if (_context)
+    {
+      cout << "Executing script" << endl;
+      _context->Prepare(_refresh);
+      _context->SetArgObject(0, &_buff);
+      _context->SetArgObject(1, _target_stats);
+      _context->Execute();
+      keep_going = _context->GetReturnByte();
+    }
   }
   if (!keep_going || !looping)
   {

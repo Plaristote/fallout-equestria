@@ -3,8 +3,11 @@
 
 using namespace std;
 
+extern void* mypointer;
+
 ObjectLocker::ObjectLocker(Level* level, DynamicObject* object) : ObjectShelf(level, object), Lockable(object)
 {
+  mypointer = this;
   _type   = ObjectTypes::Locker;
   _closed = true;
   InstanceDynamicObject::_object = object;
@@ -12,6 +15,10 @@ ObjectLocker::ObjectLocker(Level* level, DynamicObject* object) : ObjectShelf(le
   string anims[] = { "open", "close" };
   for (int i = 0 ; i < GET_ARRAY_SIZE(anims) ; ++i)
     LoadAnimation(anims[i]);
+}
+
+ObjectLocker::~ObjectLocker()
+{
 }
 
 void ObjectLocker::CallbackActionUse(InstanceDynamicObject* object)
