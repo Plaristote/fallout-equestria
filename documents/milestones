@@ -55,14 +55,17 @@ x --> Saving/Loading of buffs
 
 x -> GameTask (Worldmap and Level handler)
 x --> PipBuck
-x ---> File Manager App with text and audio support (Scripted App)
-x ---> Clock App (Displaying time and allowing character to sleep) (C++ App)
+x ----> File Manager App with text and audio support (Scripted App)
+x ----> Clock App (Displaying time and allowing character to sleep) (C++ App)
 x --> Player stored globally, and inserted into maps instead of loaded from there
-x ---> Saving and loading player globally
-x ---> Inventory access from  the WorldMap
-x ---> Inserting player into loaded maps when needed
+x ----> Saving and loading player globally
+x ----> Inventory access from  the WorldMap
+x ----> Inserting player into loaded maps when needed
+x --> DataEngine
+x ----> Factions and Diplomacy
 x --> Worldmap/Level shared buffs
 x --> Shared "world clock" management for Worldmap and Levels
+
 
 x -> General
 x --> Music Manager
@@ -73,7 +76,6 @@ x --> Creating New Games
 
 Milestone III
   -> Statistics
-~ --> Diplomacy
   --> Reputation
   --> Kill count
 

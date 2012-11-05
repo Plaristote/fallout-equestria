@@ -3,50 +3,51 @@
 "Age": 16,
 "Gender": "Male",
 "Race": "Unicorn",
+"Faction": "Player",
 "Special": {
-  "STR": 5,
-  "PER": 5,
-  "END": 5,
-  "CHA": 5,
-  "INT": 5,
-  "AGI": 5,
-  "LUC": 5
+  "STR": 10,
+  "PER": 6,
+  "END": 6,
+  "CHA": 6,
+  "INT": 7,
+  "AGI": 6,
+  "LUC": 6
 }
 ,
 "Statistics": {
-  "Action Points": 0,
-  "Armor Class": 0,
+  "Action Points": 6,
+  "Armor Class": 6,
   "Bonus Damage": 0,
-  "Carry Weight": 0,
-  "Critical Chance": 0,
+  "Carry Weight": 275,
+  "Critical Chance": 6,
   "Damage Resistance": 0,
-  "Healing Rate": 0,
-  "Hit Points": 0,
-  "Melee Damage": 0,
-  "Perk Rate": 0,
-  "Poison Resistance": 0,
-  "Radiation Resistance": 0,
-  "Skill Rate": 0
+  "Healing Rate": 2,
+  "Hit Points": 37,
+  "Melee Damage": 5,
+  "Perk Rate": 4,
+  "Poison Resistance": 30,
+  "Radiation Resistance": 10,
+  "Skill Rate": 18
 }
 ,
 "Skills": {
-  "Small Guns": 45,
-  "Big Guns": 20,
-  "Energy Guns": 20,
-  "Explosives": 100,
-  "Unarmed": 105,
-  "Lockpick": 100,
-  "Melee Weapons": 120,
+  "Small Guns": 41,
+  "Big Guns": 16,
+  "Energy Guns": 16,
+  "Explosives": 80,
+  "Unarmed": 120,
+  "Lockpick": 80,
+  "Melee Weapons": 135,
   "Medicine": 90,
-  "Repair": 29,
-  "Science": 43,
-  "Sneak": 35,
-  "Spellcasting": 53,
-  "Steal": 10,
-  "Barter": 38,
-  "Outdoorspony": 65,
-  "Speech": 43,
-  "Gambling": 50
+  "Repair": 27,
+  "Science": 39,
+  "Sneak": 31,
+  "Spellcasting": 45,
+  "Steal": 6,
+  "Barter": 40,
+  "Outdoorspony": 70,
+  "Speech": 37,
+  "Gambling": 38
 }
 ,
 "Skill Points": {
@@ -77,25 +78,28 @@
   "Critical Chance": 0,
   "Damage Resistance": 0,
   "Healing Rate": 0,
-  "Hit Points": 0,
+  "Hit Points": 1,
   "Melee Damage": 0,
-  "Perk Rate": 0,
+  "Perk Rate": 1,
   "Poison Resistance": 0,
   "Radiation Resistance": 0,
-  "Skill Rate": 0
+  "Skill Rate": "-1"
 }
 ,
 "Variables": {
-  "Level": 1,
-  "Experience": 0,
+  "Level": 3,
+  "Experience": 1001,
   "Skill Points": 0,
-  "Special Points": 5,
-  "Perks": 0,
-  "Traits": 2
+  "Special Points": 0,
+  "Perks": 1,
+  "Traits": 0,
+  "Hit Points": 2292
 }
 ,
 "Traits": {
+  "Skilled": 1,
+  "Gifted": 1
 }
-
+,
 
 }

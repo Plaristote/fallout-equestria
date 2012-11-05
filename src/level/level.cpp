@@ -498,20 +498,7 @@ AsyncTask::DoneStatus Level::do_task(void)
       });
       _mouse.ClosestWaypoint(_world, _currentFloor);
       if (_mouse.Hovering().hasWaypoint && _mouse.Hovering().waypoint != _last_combat_path)
-      {
-	_last_combat_path = _mouse.Hovering().waypoint;
-	for_each(_combat_path.begin(), _combat_path.end(), [](Waypoint& wp) { wp.nodePath.detach_node(); });
-	_combat_path = GetPlayer()->GetPath(_world->GetWaypointFromNodePath(_mouse.Hovering().waypoint));
-        for_each(_combat_path.begin(), _combat_path.end(), [this](Waypoint& wp)
-	{
-	  NodePath sphere = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
-	  sphere.set_pos(wp.nodePath.get_pos());
-	  sphere.reparent_to(_window->get_render());
-	  wp.nodePath = sphere;
-	  wp.nodePath.set_transparency(TransparencyAttrib::M_alpha);
-	  wp.nodePath.set_color(255, 125, 0, 0.5);
-	});
-      }
+        DisplayCombatPath();
       break ;
     case Normal:
       _timeManager.AddElapsedSeconds(elapsedTime);
@@ -536,6 +523,23 @@ AsyncTask::DoneStatus Level::do_task(void)
   
   _timer.Restart();
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);
+}
+
+void Level::DisplayCombatPath(void)
+{
+  _last_combat_path = _mouse.Hovering().waypoint;
+  for_each(_combat_path.begin(), _combat_path.end(), [](Waypoint& wp) { wp.nodePath.detach_node(); });
+  _combat_path = GetPlayer()->GetPath(_world->GetWaypointFromNodePath(_mouse.Hovering().waypoint));
+  for_each(_combat_path.begin(), _combat_path.end(), [this](Waypoint& wp)
+  {
+    NodePath sphere = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
+
+    sphere.set_pos(wp.nodePath.get_pos());
+    sphere.reparent_to(_window->get_render());
+    wp.nodePath = sphere;
+    wp.nodePath.set_transparency(TransparencyAttrib::M_alpha);
+    wp.nodePath.set_color(255, 125, 0, 200);
+  });
 }
 
 void Level::TaskCeiling(float elapsedTime)
@@ -1025,6 +1029,7 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
     XpFetcher xpFetcher(user, target);
     string    output;
     
+    user->SetAsEnemy(target, true);
     output = (item->UseAsWeapon(user, target, user->pendingActionObjectActionIt));
     MouseRightClicked();
     ConsoleWrite(output);

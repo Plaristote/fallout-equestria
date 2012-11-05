@@ -97,6 +97,7 @@ public:
   
   // TIME MANAGEMENT
   TimeManager&          GetTimeManager(void) { return (_timeManager); }
+  WorldDiplomacy&       GetDiplomacy(void)   { return (_dataEngine.GetDiplomacy()); }
 
 private:
   void                  FinishLoad(void);

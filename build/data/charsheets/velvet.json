@@ -1,8 +1,9 @@
 {
-  "Name":   "Velvet Remedy",
-  "Age":    16,
-  "Gender": "Mare",
-  "Race":   "Unicorn",
+  "Name":    "Velvet Remedy",
+  "Age":     16,
+  "Gender":  "Mare",
+  "Race":    "Unicorn",
+  "Faction": "Test Town",
   "Special":    {
                   "STR": 3,
                   "PER": 6,

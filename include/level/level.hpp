@@ -62,6 +62,7 @@ public:
   State                   GetState(void) const { return (_state); }
   void                    SetInterrupted(bool);
   void                    TaskCeiling(float elapsedTime);
+  void                    DisplayCombatPath(void);
   
   // World Interactions
   bool                   FindPath(std::list<Waypoint>&, Waypoint&, Waypoint&);

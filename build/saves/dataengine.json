@@ -1,4 +1,11 @@
 {
+"Factions": {
+  "Player": {
+  },
+  "Test Town": {
+  }
+},
+
 "shielding spell": {
   "graphics": {
     "model": "sphere.obj",

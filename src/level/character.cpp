@@ -200,8 +200,8 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _fovTraverser.add_collider(_fovNp, _fovHandlerQueue);
   
   // Faction
-  _diplomacy.SetFaction(0);
-  _diplomacy.SetEnemyMask(0);
+  _faction        = 0;
+  _self_enemyMask = 0;
 
   // Statistics
   _stats      = 0;
@@ -340,6 +340,10 @@ void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* contro
     SetHitPoints(data_stats["Variables"]["Hit Points"]);
     _obs_handler.Connect(_stats->HpChanged, *this, &ObjectCharacter::StatHpUpdate);
     _inventory->SetCapacity(275);
+    if (data_stats["Faction"].NotNil())
+      SetFaction(data_stats["Faction"].Value());
+    else
+      _faction = 0;
   }
 }
 
@@ -1005,62 +1009,49 @@ void     ObjectCharacter::RequestCharacter(ObjectCharacter* f, ObjectCharacter* 
 /*
  * Diplomacy
  */
+#include "gametask.hpp"
+void     ObjectCharacter::SetFaction(const std::string& name)
+{
+  WorldDiplomacy& diplomacy = GameTask::CurrentGameTask->GetDiplomacy();
+
+  _faction = diplomacy.GetFaction(name);
+}
+
+void     ObjectCharacter::SetFaction(unsigned int flag)
+{
+  WorldDiplomacy& diplomacy = GameTask::CurrentGameTask->GetDiplomacy();
+
+  _faction = diplomacy.GetFaction(flag);
+}
+
 void     ObjectCharacter::SetAsEnemy(ObjectCharacter* other, bool enemy)
 {
-  _diplomacy.SetAsEnemy(other->GetDiplomacy(), enemy);
-}
-
-bool     ObjectCharacter::IsEnemy(ObjectCharacter* other) const
-{
-  return (true);
-  return (_diplomacy.IsEnemyWith(other->GetDiplomacy()));
-}
-
-bool     ObjectCharacter::IsAlly(ObjectCharacter* other) const
-{
-  return (_diplomacy.IsAlly(other->GetDiplomacy()));
-}
-
-bool     ObjectCharacter::Diplomacy::IsEnemyWith(Diplomacy& other) const
-{
-  Faction*     otherFaction   = other.GetFaction();
-  unsigned int selfEnemyFlag  = (_faction ? _faction->enemyMask : _enemyMask);
-
-  if (otherFaction)
-    return (selfEnemyFlag & otherFaction->flag);
-  return (false);
-}
-
-bool     ObjectCharacter::Diplomacy::IsAlly(Diplomacy& other) const
-{
-  return (_faction != 0 && other.GetFaction() == _faction);
-}
-
-void     ObjectCharacter::Diplomacy::SetAsEnemy(Diplomacy& other, bool enemy)
-{
-  Faction* otherFaction = other.GetFaction();
-  
-  if (otherFaction)
+  if (_faction && other->GetFaction() != 0)
   {
-    if (_faction)
-    {
-      if (enemy)
-      {
-	_faction->enemyMask     |= otherFaction->flag;
-	otherFaction->enemyMask |= _faction->flag;
-      }
-      else
-      {
-	if (_faction->enemyMask & otherFaction->flag) { _faction->enemyMask -= otherFaction->flag; }
-	if (otherFaction->enemyMask & _faction->flag) { otherFaction->enemyMask -= _faction->flag; }
-      }
-    }
-    else
-    {
-      if (enemy)
-        _enemyMask |= otherFaction->flag;
-      else if (_enemyMask & otherFaction->flag)
-	_enemyMask -= otherFaction->flag;
-    }
+    WorldDiplomacy& diplomacy = GameTask::CurrentGameTask->GetDiplomacy();
+
+    diplomacy.SetAsEnemy(enemy, _faction->flag, other->GetFaction());
+  }
+  else
+  {
+    if (enemy)
+      _self_enemyMask &= other->GetFaction();
+    else if (_self_enemyMask & other->GetFaction());
+      _self_enemyMask -= other->GetFaction();
   }
 }
+
+bool     ObjectCharacter::IsEnemy(const ObjectCharacter* other) const
+{
+  if (other->GetFaction() == 0 && _faction)
+    return (other->IsEnemy(this));
+  if (_faction)
+    return (_faction->enemyMask & other->GetFaction());
+  return (_self_enemyMask & other->GetFaction());
+}
+
+bool     ObjectCharacter::IsAlly(const ObjectCharacter* other) const
+{
+  return (_faction && _faction->flag == other->GetFaction());
+}
+

@@ -6,6 +6,7 @@
 # include "inventory.hpp"
 # include "timer.hpp"
 # include "statsheet.hpp"
+# include "diplomacy.hpp"
 # include <panda3d/collisionRay.h>
 # include <panda3d/collisionSegment.h>
 # include <panda3d/collisionSphere.h>
@@ -52,27 +53,6 @@ private:
 class ObjectCharacter : public InstanceDynamicObject
 {
 public:
-  struct Faction
-  {
-    unsigned int flag;
-    unsigned int enemyMask;
-  };
-
-  class Diplomacy
-  {
-  public:
-    void     SetEnemyMask(unsigned int m) { _enemyMask = m;     }
-    void     SetFaction(Faction* faction) { _faction = faction; }
-    Faction* GetFaction(void) const       { return (_faction);  }
-    bool     IsEnemyWith(Diplomacy& other) const;
-    bool     IsAlly(Diplomacy& other)      const;
-    void     SetAsEnemy(Diplomacy& other, bool enemy = true);
-
-  private:
-    Faction*     _faction;
-    unsigned int _enemyMask;
-  };
-  
   struct FovEnemy
   {
     FovEnemy(ObjectCharacter* enemy, unsigned char ttl) : enemy(enemy), ttl(ttl) {}
@@ -133,13 +113,14 @@ public:
   int                 GetNearestWaypoint(InstanceDynamicObject* object);
   int                 GetFarthestWaypoint(InstanceDynamicObject* object);
   bool                HasLineOfSight(InstanceDynamicObject* object);
-  bool                IsMoving(void) const      { return (_path.size());          }
-  bool                IsAlive(void) const       { return (_hitPoints > 0);        }
-  bool                IsInterrupted(void) const { return (AnimationEnded.ObserverCount() > 0); }
-  Inventory&          GetInventory(void)        { return (*_inventory);           }
-  Data                GetStatistics(void)       { return (_statistics ? Data(_statistics) : Data()); }
-  StatController*     GetStatController(void)   { return (_stats);                }
-  Diplomacy&          GetDiplomacy(void)        { return (_diplomacy);            }
+  bool                IsMoving(void) const       { return (_path.size());          }
+  bool                IsAlive(void) const        { return (_hitPoints > 0);        }
+  bool                IsInterrupted(void) const  { return (AnimationEnded.ObserverCount() > 0); }
+  Inventory&          GetInventory(void)         { return (*_inventory);           }
+  Data                GetStatistics(void)        { return (_statistics ? Data(_statistics) : Data()); }
+  StatController*     GetStatController(void)    { return (_stats);                }
+  const std::string   GetFactionName(void) const { return (_faction ? _faction->name : ""); }
+  unsigned int        GetFaction(void) const     { return (_faction ? _faction->flag : 0);  }
 
   unsigned short      GetActionPoints(void) const        { return (_actionPoints); }
   void                SetActionPoints(unsigned short ap)
@@ -173,9 +154,11 @@ public:
   void                DelBuff(CharacterBuff* buff);
 
   void                CheckFieldOfView(void);
+  void                SetFaction(const std::string&);
+  void                SetFaction(unsigned int flag);
   void                SetAsEnemy(ObjectCharacter*, bool);
-  bool                IsEnemy(ObjectCharacter*) const;
-  bool                IsAlly(ObjectCharacter*)  const;
+  bool                IsEnemy(const ObjectCharacter*) const;
+  bool                IsAlly(const ObjectCharacter*)  const;
   
   Script::StdList<ObjectCharacter*> GetNearbyEnemies(void) const;
   Script::StdList<ObjectCharacter*> GetNearbyAllies(void)  const;
@@ -200,17 +183,18 @@ private:
   
   void                CallbackActionUse(InstanceDynamicObject* object);
   
-  Observatory::ObserverHandler _obs_handler;
+  Observatory::ObserverHandler   _obs_handler;
 
-  PT(Character)             _character;
-  std::list<Waypoint>       _path;
-  GoToData                  _goToData;
+  PT(Character)                  _character;
+  std::list<Waypoint>            _path;
+  GoToData                       _goToData;
 
-  DataTree*                 _statistics;
-  StatController*           _stats;
-  Diplomacy                 _diplomacy;
-  unsigned short            _actionPoints;
-  short                     _hitPoints, _armorClass, _tmpArmorClass;
+  DataTree*                      _statistics;
+  StatController*                _stats;
+  const WorldDiplomacy::Faction* _faction;
+  unsigned int                   _self_enemyMask;
+  unsigned short                 _actionPoints;
+  short                          _hitPoints, _armorClass, _tmpArmorClass;
   
 
   // Inventory and Equiped Items
