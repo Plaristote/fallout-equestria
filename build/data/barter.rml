@@ -33,7 +33,8 @@
         width: 20%;
         left:  10%;
         height: 80%;
-        overflow-y: scroll;
+        overflow-y: auto;
+        margin-right: 100px;
       }
 
       #stack-player
@@ -43,7 +44,8 @@
         left: 30%;
         height: 70%;
         top: 5%;
-        overflow-y: scroll;
+        overflow-y: auto;
+        margin-right: 50px;
       }
 
       #stack-other
@@ -53,7 +55,8 @@
         right: 30%;
         height: 70%;
         top: 5%;
-        overflow-y: scroll;
+        overflow-y: auto;
+        margin-left: 50px;
       }
 
       #value-other
@@ -81,7 +84,8 @@
         width: 20%;
         right: 10%;
         height: 80%;
-        overflow-y: scroll;
+        overflow-y: auto;
+        margin-left: 100px;
       }
 
       #buttons

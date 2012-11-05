@@ -525,6 +525,20 @@ unsigned short      ObjectCharacter::GetPathDistance(InstanceDynamicObject* obje
   return (ret);
 }
 
+list<Waypoint>     ObjectCharacter::GetPath(Waypoint* waypoint)
+{
+  list<Waypoint>   path;
+  
+  UnprocessCollisions();
+  _level->FindPath(path, *_waypointOccupied, *waypoint);
+  if (path.size() > 0)
+    path.erase(path.begin());
+  if (path.size() > _actionPoints)
+    path.resize(_actionPoints);
+  ProcessCollisions();
+  return (path);
+}
+
 unsigned short      ObjectCharacter::GetPathDistance(Waypoint* waypoint)
 {
   list<Waypoint> path;

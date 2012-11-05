@@ -51,8 +51,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   {
     _sunLight = new DirectionalLight("sun_light");
 
-    _sunLight->set_color(LVecBase4f(0.8, 0.8, 0.8, 1));
-    //_sunLight->set_shadow_caster(true, 12, 12);
+    _sunLight->set_shadow_caster(true, 12, 12);
     _sunLight->get_lens()->set_near_far(1.f, 2.f);
     _sunLight->get_lens()->set_film_size(512);
 
@@ -170,16 +169,15 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
   _camera.FollowObject(GetPlayer());
   
-//   _world->AddLight(WorldLight::Point, "toto");
-//   WorldLight* light = _world->GetLightByName("toto");
-//   
-//   light->zoneSize = 20;
-//   light->SetColor(255, 50, 50, 125);
-//   light->nodePath.reparent_to(GetPlayer()->GetNodePath());
-//   _world->CompileLight(light);
-// 
+   _world->AddLight(WorldLight::Point, "toto");
+   WorldLight* light = _world->GetLightByName("toto");
+   
+   light->zoneSize = 1000;
+   light->SetColor(255, 50, 50, 125);
+   light->nodePath.reparent_to(GetPlayer()->GetNodePath());
+   _world->CompileLight(light);
+ 
 //   PointLight* plight = dynamic_cast<PointLight*>(light->nodePath.node());
-//   plight->set_shadow_caster(true, 12, 12);
 //   plight->get_lens()->set_near_far(1.f, 2.f);
 //   plight->get_lens()->set_film_size(512);
   
@@ -213,7 +211,9 @@ void Level::InitPlayer(void)
   obs.Connect(_levelUi.GetInventory().UseObject,   *this,        &Level::PlayerUseObject);
   
   _levelUi.GetMainBar().SetEquipedItem(0, GetPlayer()->GetEquipedItem(0));
-  _levelUi.GetMainBar().SetEquipedItem(1, GetPlayer()->GetEquipedItem(1));  
+  _levelUi.GetMainBar().SetEquipedItem(1, GetPlayer()->GetEquipedItem(1));
+  
+  _world->CompileLight(_world->GetLightByName("toto"));
 }
 
 void Level::InsertParty(PlayerParty& party)
@@ -496,6 +496,22 @@ AsyncTask::DoneStatus Level::do_task(void)
         character->UnprocessCollisions();
         character->ProcessCollisions();
       });
+      _mouse.ClosestWaypoint(_world, _currentFloor);
+      if (_mouse.Hovering().hasWaypoint && _mouse.Hovering().waypoint != _last_combat_path)
+      {
+	_last_combat_path = _mouse.Hovering().waypoint;
+	for_each(_combat_path.begin(), _combat_path.end(), [](Waypoint& wp) { wp.nodePath.detach_node(); });
+	_combat_path = GetPlayer()->GetPath(_world->GetWaypointFromNodePath(_mouse.Hovering().waypoint));
+        for_each(_combat_path.begin(), _combat_path.end(), [this](Waypoint& wp)
+	{
+	  NodePath sphere = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
+	  sphere.set_pos(wp.nodePath.get_pos());
+	  sphere.reparent_to(_window->get_render());
+	  wp.nodePath = sphere;
+	  wp.nodePath.set_transparency(TransparencyAttrib::M_alpha);
+	  wp.nodePath.set_color(255, 125, 0, 0.5);
+	});
+      }
       break ;
     case Normal:
       _timeManager.AddElapsedSeconds(elapsedTime);

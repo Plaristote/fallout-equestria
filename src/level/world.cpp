@@ -873,6 +873,7 @@ void WorldLight::Initialize(void)
     {
       PT(PointLight) pLight = new PointLight(name);
 
+      pLight->set_shadow_caster(true, 12, 12);
       light    = pLight;
       nodePath = parent.attach_new_node(pLight);
     }

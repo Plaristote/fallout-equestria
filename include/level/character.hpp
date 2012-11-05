@@ -125,6 +125,7 @@ public:
   void                GoTo(InstanceDynamicObject* object, int max_distance = 0);
   void                GoToRandomWaypoint(void);
   void                TruncatePath(unsigned short max_length);
+  std::list<Waypoint> GetPath(Waypoint* waypoint);
   unsigned short      GetPathDistance(Waypoint* waypoint);
   unsigned short      GetPathDistance(InstanceDynamicObject* object);
   float               GetDistance(InstanceDynamicObject* object);

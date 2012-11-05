@@ -206,7 +206,15 @@ private:
   DataEngine*       _dataEngine;
   DataTree*         _items;
 
-  
+  /*
+   * Combat Path Shower
+   */
+  std::list<Waypoint> _combat_path;
+  NodePath            _last_combat_path;
+
+  /*
+   * Floor Management
+   */
   class HidingFloor
   {
     NodePath floor;

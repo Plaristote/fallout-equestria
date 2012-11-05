@@ -12,5 +12,5 @@
   <span id="value-wait-days"    data-value="0">0</span> days,<br />
   <span id="value-wait-hours"   data-value="0">0</span> hours,<br />
   <span id="value-wait-minutes" data-value="0">0</span> minutes.<br />
-  <button id="button-wait">Wait</button> <button id="wait-more">+</button> <button id="wait-less">-</button>
+  <button id="button-wait" class="button">Wait</button> <button id="wait-more" class="button">+</button> <button id="wait-less" class="button">-</button>
 </div>

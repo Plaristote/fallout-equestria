@@ -228,9 +228,9 @@ string display_file_audio(Data data)
   string rml  = "";
 
   rml += "<div id=file-header'>" + file["header"].AsString() + "</div>";
-  rml += "<button id='pipbuck-audio-play'>Play</button>";
-  rml += "<button id='pipbuck-audio-stop'>Stop</button>";
-  rml += "<button id='pipbuck-audio-pause'>Pause</button>";
+  rml += "<button id='pipbuck-audio-play' class='button'>Play</button>";
+  rml += "<button id='pipbuck-audio-stop' class='button'>Stop</button>";
+  rml += "<button id='pipbuck-audio-pause' class='button'>Pause</button>";
   return (rml);
 }
 
