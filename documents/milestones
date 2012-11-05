@@ -2,7 +2,6 @@ MILESTONES
 x -> Finished
 ~ -> In progress
 # -> Delayed
-? -> Finished but not working for obscure reasons
 
 Milestone I [Started May 2012, Finished October 2012]
 x -> Statistics
@@ -34,6 +33,7 @@ Milestone II [Started October 2012, Finished November 2012]
 x -> Statistics
 x --> i18n
 x --> Canceling modifications
+x --> Kill count
 x --> Support for:
 x ----> Skill afinities
 x ----> Perks
@@ -42,7 +42,7 @@ x -> Worldmap
 x --> World clock moving forward in time while traveling
 x --> Displaying world time
 
-  -> Levels
+x -> Levels
 x --> Basic light management
 x --> Daylight/Nightlight management
 x --> Proper camera handling
@@ -66,7 +66,6 @@ x ----> Factions and Diplomacy
 x --> Worldmap/Level shared buffs
 x --> Shared "world clock" management for Worldmap and Levels
 
-
 x -> General
 x --> Music Manager
 x --> Sound Manager
@@ -77,7 +76,6 @@ x --> Creating New Games
 Milestone III
   -> Statistics
   --> Reputation
-  --> Kill count
 
   -> Worldmap
   --> Random encounters
@@ -85,8 +83,13 @@ Milestone III
 
   -> Levels
   --> Stairs
+  --> Shader for hiding anything that hides the player
+  --> Shader for highlightning targets in combat mode
+  --> Shader for casting shadows
 
   -> GameTask
-  --> Pipbuck:
   --> Quests
 ~ --> Party management
+  --> Pipbuck
+  ----> Quest Application
+

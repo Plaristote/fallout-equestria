@@ -1,6 +1,7 @@
 #ifndef  STATSHEET_HPP
 # define STATSHEET_HPP
 
+# include "globals.hpp"
 # include "rocket_extension.hpp"
 # include "datatree.hpp"
 # include "scriptengine.hpp"
@@ -26,6 +27,9 @@ public:
   unsigned short GetAge(void) const                { return (_statsheet["Age"]);            }
   void           SetGender(const std::string& g)   { _statsheet["Gender"] = (g == "male" ? "Stallion" : "Mare"); }
   std::string    GetGender(void) const             { return (_statsheet["Gender"].Value()); }
+
+  void           AddKill(const std::string&);
+  unsigned int   GetKills(const std::string& race) const { return (_statsheet["Kills"][race]); }
 
   bool           AddPerk(const std::string& perk);
   void           ToggleTrait(const std::string& trait);
@@ -157,6 +161,8 @@ public:
   void SetCurrentHp(short hp);
 
   void TriggerSkillAffinity(const std::string& stat, bool);
+
+  void AddKill(const std::string& race);
 
   Observatory::Signal<void (short)>          HpChanged;
   Observatory::Signal<void (unsigned short)> LevelUp;

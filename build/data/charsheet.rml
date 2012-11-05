@@ -370,16 +370,16 @@
     <p id="char-bottom-box">
      <tabset>
       <tab id="tab-perks">Perks</tab>
-      <panel id="panel-perks">Nada</panel>
+      <panel id="panel-perks" class="console-bg">Nada</panel>
 
       <tab id="tab-traits">Traits</tab>
-      <panel id="panel-traits">Rien</panel>
+      <panel id="panel-traits" class="console-bg">Rien</panel>
 
       <tab id="tab-reputation">Reputation</tab>
-      <panel>Nothing</panel>
+      <panel class="console-bg">Nothing</panel>
 
       <tab id="tab-kills">Kills</tab>
-      <panel>Keine nicht ich spreche deutsh</panel>
+      <panel id="panel-kills" class="console-bg">Keine nicht ich spreche deutsh</panel>
      </tabset>
     </p>
   </body>

@@ -99,6 +99,14 @@ void StatModel::LoadFunctions(void)
   }
 }
 
+void           StatModel::AddKill(const string& race)
+{
+  if (_statsheet["Kills"][race].Nil())
+    _statsheet["Kills"][race] = 1;
+  else
+    _statsheet["Kills"][race] = (unsigned int)_statsheet["Kills"][race] + 1;
+}
+
 bool           StatModel::AddPerk(const string& perk)
 {
   bool         success = true;
@@ -508,10 +516,18 @@ void StatController::LevelChanged(unsigned short lvl)
   }
 }
 
+void StatController::AddKill(const string& race)
+{
+  _model.AddKill(race);
+  if (_view)
+    _view->SetFieldValue("Kills", race, _model.GetKills(race));
+}
+
 void StatController::AddExperience(unsigned short exp)
 {
   _model.SetExperience(_model.GetExperience() + exp);
-  _view->SetIdValue("current-xp", exp);
+  if (_view)
+    _view->SetIdValue("current-xp", exp);
 }
 
 void StatController::UpSpecial(const std::string& stat)
@@ -614,6 +630,9 @@ void StatController::SetView(StatView* view)
   
   for_each(traits.begin(), traits.end(), [this](const string& key)
   { _view->SetTraitActive(key, true); });
+
+  for_each(_model.GetAll()["Kills"].begin(), _model.GetAll()["Kills"].end(), [this](Data data)
+  { _view->SetFieldValue("Kills", data.Key(), data.Value()); });
 
   _view->SetInformation("Name",   _model.GetName());
   _view->SetInformation("Age",    _model.GetAge());
@@ -804,38 +823,6 @@ list<string> StatModel::GetAvailablePerks(void)
     delete file;
   }
   return (perks);
-}
-
-static string humanize(const std::string& str)
-{
-  string ret;
-  
-  for (unsigned short i = 0 ;  i < str.size() ; ++i)
-  {
-    if (i == 0 || str[i - 1] == '_')
-      ret += str[i] - 'a' + 'A';
-    else if (str[i] == '_')
-      ret += ' ';
-    else
-      ret += str[i];
-  }
-  return (ret);
-}
-
-static string underscore(const std::string& str)
-{
-  string ret;
-  
-  for (unsigned short i = 0 ;  i < str.size() ; ++i)
-  {
-    if      (str[i] >= 'A' && str[i] <= 'Z')
-      ret += str[i] - 'A' + 'a';
-    else if (str[i] == ' ')
-      ret += '_';
-    else
-      ret += str[i];
-  }
-  return (ret);
 }
 
 StatViewRocket::~StatViewRocket()
@@ -1145,7 +1132,23 @@ void StatViewRocket::SetFieldValue(const std::string& category, const std::strin
   if ((element = _root->GetElementById(strId.c_str())))
     element->SetInnerRML(value.c_str());
   else
+  {
+    if (category == "Kills")
+    {
+      stringstream rml;
+      Core::String old_rml;
+
+      element = _root->GetElementById("panel-kills");
+      element->GetInnerRML(old_rml);
+      rml << "<datagrid>";
+      rml << "<col width='80%'><span class='kills-key' i18n='" << key << "'>" << i18n::T(key) << "</span></col>";
+      rml << "<col width='20%'><span class='kills-value' id='" << strId << "'>" << value << "</span></col>";
+      rml << "</datagrid>";
+      element->SetInnerRML(old_rml + rml.str().c_str());
+      return ;
+    }
     cout << "[Warning] Element '" << strId << "' should exist but doesn't" << endl;
+  }
 }
 
 void StatViewRocket::SetFieldValue(const std::string& category, const std::string& key, short value)
