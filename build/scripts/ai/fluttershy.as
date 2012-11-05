@@ -85,9 +85,12 @@ Character@ SelectTarget(Character@ self)
  
     it++;
     Cout("Debug #5");
-   }
-  Cout("Selected enemy: " + bestMatch.GetName());
-  Write("Selected enemy: " + bestMatch.GetName());
+  }
+  if (@bestMatch != null)
+  {
+    Cout("Selected enemy: " + bestMatch.GetName());
+    Write("Selected enemy: " + bestMatch.GetName());
+  }
   return (bestMatch);
 }
 
@@ -100,9 +103,13 @@ void combat(Character@ self)
   if (@currentTarget == null || !(currentTarget.IsAlive()))
     @currentTarget = @SelectTarget(self);
   if (@currentTarget == null)
+  {
+    Cout("Fluttershy passing turn");
     level.NextTurn();
+  }
   else
   {
+    Cout("Fluttershy acting on an enemy");
     if (self.HasLineOfSight(currentTarget.AsObject()))
     {
       int   actionPoints = self.GetActionPoints();

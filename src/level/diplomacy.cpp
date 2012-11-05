@@ -36,6 +36,7 @@ void WorldDiplomacy::AddFaction(const string& name)
   faction.name      = name;
   faction.enemyMask = 0;
   _next_flag       *= 2;
+  _factions.push_back(faction);
 }
 
 WorldDiplomacy::Faction* WorldDiplomacy::GetFaction(const string& name)

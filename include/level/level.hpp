@@ -63,6 +63,7 @@ public:
   void                    SetInterrupted(bool);
   void                    TaskCeiling(float elapsedTime);
   void                    DisplayCombatPath(void);
+  void                    DestroyCombatPath(void);
   
   // World Interactions
   bool                   FindPath(std::list<Waypoint>&, Waypoint&, Waypoint&);

@@ -111,7 +111,13 @@ void InteractMenu::MouseButton(Rocket::Core::Event& event)
 InteractMenu::~InteractMenu()
 {
   for_each(_buttons.begin(), _buttons.end(), [this](Rocket::Core::Element* button)
-  { button->RemoveEventListener("click", &_buttonListener); });
+  {
+    button->RemoveEventListener("click",     &_buttonListener);
+    button->RemoveEventListener("mouseover", &_buttonHover);
+    button->RemoveEventListener("mouseout",  &_buttonHover);
+    button->RemoveEventListener("mousedown", &_buttonClick);
+    button->RemoveEventListener("mouseup",   &_buttonClick);
+  });
   Hide();
   _obs.DisconnectAll();
 }

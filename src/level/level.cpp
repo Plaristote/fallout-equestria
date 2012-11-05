@@ -476,7 +476,6 @@ AsyncTask::DoneStatus Level::do_task(void)
 { 
   float elapsedTime = _timer.GetElapsedTime();
 
-  _mouse.Run();
   _camera.Run(elapsedTime);
   _timeManager.ExecuteTasks();
   
@@ -497,7 +496,7 @@ AsyncTask::DoneStatus Level::do_task(void)
         character->ProcessCollisions();
       });
       _mouse.ClosestWaypoint(_world, _currentFloor);
-      if (_mouse.Hovering().hasWaypoint && _mouse.Hovering().waypoint != _last_combat_path)
+      if (_mouse.Hovering().hasWaypoint && _mouse.Hovering().waypoint != _last_combat_path && _mouseState == MouseAction)
         DisplayCombatPath();
       break ;
     case Normal:
@@ -520,15 +519,21 @@ AsyncTask::DoneStatus Level::do_task(void)
   }
   
   CheckCurrentFloor(elapsedTime);  
-  
+  _mouse.Run();
   _timer.Restart();
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);
+}
+
+void Level::DestroyCombatPath(void)
+{
+  for_each(_combat_path.begin(), _combat_path.end(), [](Waypoint& wp) { wp.nodePath.detach_node(); });
+  //for_each(_combat_path.begin(), _combat_path.end(), [](Waypoint& wp) { wp.nodePath.hide(); });
 }
 
 void Level::DisplayCombatPath(void)
 {
   _last_combat_path = _mouse.Hovering().waypoint;
-  for_each(_combat_path.begin(), _combat_path.end(), [](Waypoint& wp) { wp.nodePath.detach_node(); });
+  DestroyCombatPath();
   _combat_path = GetPlayer()->GetPath(_world->GetWaypointFromNodePath(_mouse.Hovering().waypoint));
   for_each(_combat_path.begin(), _combat_path.end(), [this](Waypoint& wp)
   {
@@ -611,6 +616,7 @@ void Level::MouseInit(void)
 
 void Level::SetMouseState(MouseState state)
 {
+  DestroyCombatPath();
   _mouseState = state;
   switch (state)
   {
@@ -743,8 +749,11 @@ void Level::CallbackActionBarter(ObjectCharacter* character)
 void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 {
   CloseRunningUi<UiItInteractMenu>();
-  //if (GetState() == Fight)
-  //  return ;
+  if (GetState() == Fight)
+  {
+    ConsoleWrite(i18n::T("Can't talk during fight."));
+    return ;
+  }
   if ((GetPlayer()->HasLineOfSight(object)) && GetPlayer()->GetPathDistance(object) <= 3)
   {
     string dialog = object->GetDialog();

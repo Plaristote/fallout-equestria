@@ -214,6 +214,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
     _armorClass = stats["Statistics"]["Armor Class"].Nil() ? 5  : (int)(stats["Statistics"]["Armor Class"]);
     _hitPoints  = stats["Statistics"]["Hit Points"].Nil()  ? 15 : (int)(stats["Statistics"]["Hit Points"]);
     _stats      = new StatController(stats);
+    SetStatistics(_statistics, _stats);
   }
   else
   {
@@ -328,8 +329,8 @@ void ObjectCharacter::StatHpUpdate(short hp)
 
 void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* controller)
 {
-  if (_stats)      delete _stats;
-  if (_statistics) delete _statistics;
+  if (_stats      && _stats      != controller) delete _stats;
+  if (_statistics && _statistics != statistics) delete _statistics;
   _statistics = statistics;
   _stats      = controller;
   if (_statistics)
@@ -337,9 +338,12 @@ void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* contro
     Data data_stats(_statistics);
 
     ActionPointChanged.Emit(_actionPoints, data_stats["Statistics"]["Action Points"]);
+    if (data_stats["Variables"]["Hit Points"].Nil())
+      data_stats["Variables"]["Hit Points"] = data_stats["Statistics"]["Hit Points"].Value();
     SetHitPoints(data_stats["Variables"]["Hit Points"]);
     _obs_handler.Connect(_stats->HpChanged, *this, &ObjectCharacter::StatHpUpdate);
     _inventory->SetCapacity(275);
+    cout << "Faction is named " << data_stats["Faction"].Value() << endl;
     if (data_stats["Faction"].NotNil())
       SetFaction(data_stats["Faction"].Value());
     else
@@ -932,7 +936,7 @@ void     ObjectCharacter::CheckFieldOfView(void)
 	  continue ;
 	if      (IsAlly(character))
 	  _fovAllies.push_back(character);
-	else if ((true || IsEnemy(character)) && HasLineOfSight(character))
+	else if (IsEnemy(character) && HasLineOfSight(character))
 	{
 	  list<FovEnemy>::iterator enemyIt = find(_fovEnemies.begin(), _fovEnemies.end(), character);
 
@@ -1015,6 +1019,7 @@ void     ObjectCharacter::SetFaction(const std::string& name)
   WorldDiplomacy& diplomacy = GameTask::CurrentGameTask->GetDiplomacy();
 
   _faction = diplomacy.GetFaction(name);
+  cout << "Faction pointer for " << name << " is " << _faction << endl;
 }
 
 void     ObjectCharacter::SetFaction(unsigned int flag)
@@ -1043,10 +1048,15 @@ void     ObjectCharacter::SetAsEnemy(ObjectCharacter* other, bool enemy)
 
 bool     ObjectCharacter::IsEnemy(const ObjectCharacter* other) const
 {
+  cout << "Calling IsEnemy" << endl;
   if (other->GetFaction() == 0 && _faction)
     return (other->IsEnemy(this));
   if (_faction)
+  {
+    cout << "I haz faction: " << _faction->enemyMask << " (" << _faction->flag << ")" << endl;
     return (_faction->enemyMask & other->GetFaction());
+  }
+  cout << "I haz no faction" << endl;
   return (_self_enemyMask & other->GetFaction());
 }
 

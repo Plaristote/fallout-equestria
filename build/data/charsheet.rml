@@ -203,6 +203,30 @@
   width:  30px;
   height: 30px;
 }
+
+#tabset-bottom-box
+{
+  display: block;
+  width:   100%;
+  height:  100%;
+}
+
+#tabset-bottom-box tabs
+{
+  display: block;
+  height:  40px;
+}
+
+#tabset-bottom-box tab
+{
+  font-family: JH_Fallout;
+  width: 20%;
+}
+
+#tabset-bottom-box tab:hover
+{
+  background-color: black;
+}
 		</style>
 	</head>
   <body id="body" template="tplmainbar">
@@ -368,7 +392,7 @@
     </p>
 
     <p id="char-bottom-box">
-     <tabset>
+     <tabset id="tabset-bottom-box">
       <tab id="tab-perks">Perks</tab>
       <panel id="panel-perks" class="console-bg">Nada</panel>
 
@@ -379,7 +403,7 @@
       <panel class="console-bg">Nothing</panel>
 
       <tab id="tab-kills">Kills</tab>
-      <panel id="panel-kills" class="console-bg">Keine nicht ich spreche deutsh</panel>
+      <panel id="panel-kills" class="console-bg"></panel>
      </tabset>
     </p>
   </body>
