@@ -45,6 +45,9 @@ x --> Displaying world time
 x -> Levels
 x --> Basic light management
 x --> Daylight/Nightlight management
+x --> Displaying pathfinding data while in combat mode
+x --> Outlining allies and enemies in green or red while in combat mode
+? --> Cutting out walls that are hiding the player's close surroundings
 x --> Proper camera handling
 x --> Barter
 # --> Stairs
@@ -83,8 +86,6 @@ Milestone III
 
   -> Levels
   --> Stairs
-  --> Shader for hiding anything that hides the player
-  --> Shader for highlightning targets in combat mode
   --> Shader for casting shadows
 
   -> GameTask

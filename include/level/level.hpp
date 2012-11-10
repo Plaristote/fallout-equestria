@@ -149,6 +149,7 @@ private:
 
   void              RunDaylight(void);
   void              MouseInit(void);
+  void              ToggleCharacterOutline(bool);
   
   Observatory::ObserverHandler obs;
 
@@ -233,9 +234,9 @@ private:
     void  SetFadingIn(bool set);
     void  Run(float elapsedTime);
   };
-  
+
   std::list<HidingFloor> _hidingFloors;
-  
+
   unsigned char     _currentFloor;
   Waypoint*         _floor_lastWp;
   

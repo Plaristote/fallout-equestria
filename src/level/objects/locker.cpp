@@ -3,11 +3,8 @@
 
 using namespace std;
 
-extern void* mypointer;
-
 ObjectLocker::ObjectLocker(Level* level, DynamicObject* object) : ObjectShelf(level, object), Lockable(object)
 {
-  mypointer = this;
   _type   = ObjectTypes::Locker;
   _closed = true;
   InstanceDynamicObject::_object = object;

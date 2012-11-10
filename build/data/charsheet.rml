@@ -1,398 +1,406 @@
 <rml>
-	<head>
-		<title>Main Menu</title>
-		<link type="text/template" href="tpl_mainbar.rml" />
-		<style>
-	        body
-		{
-		  width: 100%;
-		  height: 100%;
-		}
+        <head>
+                <title>Main Menu</title>
+                <link type="text/template" href="tpl_mainbar.rml" />
+                <style>
+                body
+                {
+                  width: 100%;
+                  height: 100%;
+                }
 #general-data
 {
-  position:    absolute;
-  width:       50%;
-  height:      7%;
+ 
+  width:       100%;
+  height:      5%;
 }
-
+#char-age,
+#char-gender,
 #char-name
 {
+  width: 20%;
+}
+
+#char-name-edit,
+#char-gender-edit,
+#char-age-edit
+{
+  top: 5%;
+  
   position: absolute;
-  width: 46%;
+  z-index: 99;
+  background-color: black;
+ 
 }
 
 #char-name-edit
 {
-  position: absolute;
-  width: 46%;
-  top:   7%;
-  z-index: 99;
-  background-color: black;
+        width: 15%;
 }
-
-#char-age
-{
-  position: absolute;
-  width: 20%;
-  left:  46%;
-}
-
-#char-age-edit
-{
-  position: absolute;
-  width: 20%;
-  left:  46%;
-  top:   7%;
-  z-index: 99;
-  background-color: black;
-}
-
-#char-gender
-{
-  position: absolute;
-  width: 33%;
-  left:  66%;
-}
-
 #char-gender-edit
 {
-  position: absolute;
-  width: 33%;
-  left:  66%;
-  top:   7%;
-  z-index: 99;
-  background-color: black;
+  left: 40%;
+  width: 10%;
 }
-
-
+#char-age-edit
+{
+ width: 9%;
+ left: 20%;
+}
+#char-botom-side,
 #char-bottom-box
 {
-  position: absolute;
-  width:  50%;
-  top:    67%;
-  height: 33%;
+  width:  46%;
+  height: 29%;
 }
 
 #char-state
 {
-  position: absolute;
-  width:    25%;
-  height:   25%;
-  top:      7%;
-  left:     25%;
+  overflow: auto;
+  display: block;
+  width:    100%;
+  height:   35%;
 }
 
 #statistics
 {
-  position: absolute;
-  top:       32%;
-  height:    25%;
-  width:     25%;
-  left:      25%;
+  overflow: auto;
+        display: block;
+  height:    59%;
+  width:     100%;
+}
+
+#skill-points-title
+{
+  display: block;
+  margin-left: 3px;
+  text-align: left;
+  
+}
+.skills-key{
+  left: 0px;
 }
 
 .statistics-key
 {
-  left: 0px;
+        width: 80%;
+        text-align: left;
 }
+
 
 .statistics-value
 {
-  position: absolute;
-  right:    0px;
+  width: 20%;
+  text-align: right;
 }
 
-#skill-points-title { position: absolute; left: 50%; top: 67%; }
+
+
 
 #skills
 {
-  position: absolute;
-  top:      7%;
-  height:   40%;
-  width:    50%;
-  left:     50%;
+  overflow: auto;
+  height:   80%;
+  width:    40%;
+
 }
 
-.skills-key
-{
-  left: 0px;
-}
-
-.statistics-value
-{
-  position: absolute;
-  right: 0px;
-}
-
+#special-points-title,
 #experience
 {
-  position: absolute; top: 54%;
-  width: 25%;
-}
-
-#special-points-title
-{
-  position: absolute; top: 54%;
+  height: 20%;
+  width: 100%;
 }
 
 #special
 {
-  position:    absolute;
-  width:       25%;
-  height:      40%;
-  top:         7%;
+  overflow: auto;
+  width:       100%;
+  height:      80%;
 }
 
 .special-group
 {
-  position: absolute;
+        height: 10%;
+        display: block;
+        width: 100%;
 }
 
-.special-key
-{
-  position: absolute;
-  width: 50px;
-}
-
+.special-key,
 .special-value
 {
-  position: absolute;
-  left:  50px;
-  width: 50px;
+  display: inline-block;
+  width: 20%;
+  text-align: center;
 }
 
 .special-commt
 {
-  position: absolute;
-  left: 100px;
-  width: 100px;
-  padding-left: 20px;
-  margin-left: 20px;
+  display: inline-block;
+  width: 40%;
+  text-align: center;
 }
 
+#cancel,
 #continue
 {
-  position: absolute;
-  bottom:   20px;
-  right:    25%;
-  width:    25%;
-}
-
-#cancel
-{
-  position: absolute;
-  bottom:   20px;
-  right:    0px;
+        display: block;
   width:    25%;
 }
 
 #edit-value-cursor
 {
-  right:  0px;
-}
 
+}
+#edit-value-cursor-less,
 #edit-value-cursor-plus
 {
-  width:  30px;
-  height: 30px;
+  width:  20px;
+  height: 20px;
   z-index: 99;
 }
 
-#edit-value-cursor-less
+
+tabset
 {
-  width:  30px;
-  height: 30px;
+        display: block;
+        width: 100%;
+        height: 100%;
 }
 
-#tabset-bottom-box
+tabset tabs
 {
-  display: block;
-  width:   100%;
-  height:  100%;
+        display: block;
+        height: 10%;
 }
 
-#tabset-bottom-box tabs
+tabset tab
 {
-  display: block;
-  height:  40px;
+        width: 20%;
 }
 
-#tabset-bottom-box tab
+tabset panels
 {
-  font-family: JH_Fallout;
+        display: block;
+        height: 80%;
+}
+
+tabset panels panel
+{
+        display:inline-block;
+        width: 100%;
+        height: 100%;
+        //overflow: auto;
+}
+.char-place-beneath
+{
+  display:block;
+}
+
+.char-place-next-to
+{
+  display:inline-block;
+  float: left;
+  padding: 0px 2%;
+}
+#stat-left-col
+{
+  height: 100%;
   width: 20%;
 }
-
-#tabset-bottom-box tab:hover
+#stat-mid-col
 {
-  background-color: black;
+  width: 20%;
 }
-		</style>
-	</head>
+.blocks{
+        display: inline-block;
+        float: left;
+}
+#stat-cols{
+        width: 100%;
+        height: 60%;
+}
+#placeholder
+{
+        width: 100%;
+        height: 70%;
+}
+.form-options
+{
+        text-align: center;
+        margin-left:  auto;
+        margin-right: auto;
+}
+
+                </style>
+        </head>
   <body id="body" template="tplmainbar">
-    <p>
+   
 
-      <p id="general-data">
-        <p id="char-name">Twilight</p>
-        <p id="char-age">16</p>
-        <p id="char-gender">Mare</p>
+      <p id="general-data" class="char-place-beneath">
+        <p id="char-name" class="blocks">Twilight</p>
+        <p id="char-age" class="blocks">16</p>
+        <p id="char-gender" class="blocks">Mare</p>
         
-        <p id="char-name-edit" style="display: none;">
-	  <input type="text" id="char-name-value" size="12" />
-	  <button class="francis" id="char-name-edit-ok">Ok</button>
-        </p>
+                        
+                        <p id="char-name-edit" style="display: none;">
+                                <input type="text" class="form-options" id="char-name-value" size="12" />
+                                <button class="francis form-options" id="char-name-edit-ok">Ok</button>
+                        </p>
+                        
+                        <p id="char-age-edit" style="display: none;">
+                                <input type="text" class="form-options" id="char-age-value" maxlength="2" />
+                                <button class="francis form-options" id="char-age-edit-ok">Ok</button>
+                        </p>
 
-        <p id="char-age-edit" style="display: none;">
-          <input type="text" id="char-age-value" maxlength="2" />
-	  <button class="francis" id="char-age-edit-ok">Ok</button>
-        </p>
-
-        <p id="char-gender-edit" style="display: none;">
-	  <form>
-	    <input type="radio" name="char-gender-radio" id="char-gender-option-male" /> Male<br />
-	    <input type="radio" name="char-gender-radio" id="char-gender-option-female" /> Female<br />
-	    <button class="francis" id="char-gender-edit-ok">Ok</button>
-	  </form>
+        
+        
+              <p id="char-gender-edit" style="display: none;">
+                          <form>
+                            <input type="radio" class="form-options" name="char-gender-radio" id="char-gender-option-male" /> Male<br />
+                            <input type="radio" class="form-options" name="char-gender-radio" id="char-gender-option-female" /> Female<br />
+                            <button class="francis form-options" id="char-gender-edit-ok">Ok</button>
+                          </form>
         </p>
       </p>
 
       <p id="edit-value-cursor">
-        <button id="edit-value-cursor-plus" class="button_menu">+</button>
-        <button id="edit-value-cursor-less" class="button_menu">-</button>
+        <button id="edit-value-cursor-plus" class="console-bg">+</button>
+        <button id="edit-value-cursor-less" class="console-bg">-</button>
       </p>
+      <div id="stat-cols"class="char-place-beneath" >
+                        <div id="stat-left-col" class="char-place-next-to ">
+                      <p id="special" class="char-place-beneath">
+                
+                          <p id="strength" class="special-group" >
+                            <p class="special-title blocks">ST</p>
+                            <p class="special-value blocks">10</p>
+                            <p class="special-commt blocks">Great</p>
+                
+                          </p>
+                
+                          <p id="perception" class="special-group" >
+                            <p class="special-title blocks">PE</p>
+                            <p class="special-value blocks">10</p>
+                            <p class="special-commt blocks">Great</p>
+                          </p>
+                
+                          <p id="endurance" class="special-group"  >
+                            <p class="special-title blocks">EN</p>
+                            <p class="special-value blocks">10</p>
+                            <p class="special-commt blocks">Great</p>
+                          </p>
+                
+                          <p id="charisma" class="special-group"   >
+                            <p class="special-title blocks">CH</p>
+                            <p class="special-value blocks">10</p>
+                            <p class="special-commt blocks">Great</p>
+                          </p>
+                
+                          <p id="intelligence" class="special-group"  >
+                            <p class="special-title blocks">IN</p>
+                            <p class="special-value blocks">10</p>
+                            <p class="special-commt blocks">Great</p>
+                          </p>
+                
+                          <p id="agility" class="special-group"  >
+                            <p class="special-title blocks">AG</p>
+                            <p class="special-value blocks">10</p>
+                            <p class="special-commt blocks">Great</p>
+                          </p>
+                
+                          <p id="luck" class="special-group"  >
+                            <p class="special-title blocks">LU</p>
+                            <p class="special-value blocks">10</p>
+                            <p class="special-commt blocks">Great</p>
+                          </p>
+                
+                      </p>
+        
+                      <p id="special-points-title" class="char-place-beneath">Special Points <span id="special-points" class="console-value">0</span></p>
+                                 <div id="experience" class="console-bg char-place-beneath">
+                        <p class='current-level-label'><span i18n='Level'>Level</span>: <span id='level'>999</span></p>
+                        <p class='current-xp-label'><span i18n='Experience'>Experience</span>: <span id='current-xp'>999</span></p>
+                        <p class='next-level-label'><span i18n='Next level'>Next level</span>: <span id='next-level'>999</span></p>
+                      </div>                    
+                        </div>
+                        <div id="stat-mid-col" class="char-place-next-to">
+                              <p id="char-state" class="console-bg">
+                                <span id="char-state-hp">Hit Points </span> <span id="char-state-hp-id-value">50</span>/<span id="char-state-hp-id-total">50</span><br />
+                                <span id="char-state-poisoned">Poisoned</span><br />
+                                <span id="char-state-radiated">Radiated</span><br />
+                                <span id="char-state-eye-damage">Eye damage</span><br />
+                                <span id="char-state-crippled-front-left-leg">Crippled front left leg</span><br />
+                                <span id="char-state-crippled-front-right-leg">Crippled front right leg</span><br />
+                                <span id="char-state-crippled-behind-left-leg">Crippled behind left leg</span><br />
+                                <span id="char-state-crippled-behind-right-leg">Crippled behind right leg</span><br />
+                              </p>
+                                
+                      <p id="statistics" class="console-bg">
+                
+                        <datagrid>
+                          <col><span class"statistics-key">Armor Class</span></col>
+                          <col><span class"statistics-value" id="armor-class">10</span></col>
+                        </datagrid>
+                
+                        <datagrid>
+                          <col><span class"statistics-key">Action Points</span></col>
+                          <col><span class"statistics-value" id="armor-class">10</span></col>
+                        </datagrid>
+                
+                        <datagrid>
+                          <col><span class"statistics-key">Carry Weight</span></col>
+                          <col><span class"statistics-value" id="carry-weight">275</span></col>
+                        </datagrid>
+                
+                        <datagrid>
+                          <col><span class"statistics-key">Melee Damage</span></col>
+                          <col><span class"statistics-value" id="melee-damage">1</span></col>
+                        </datagrid>
+                
+                        <datagrid>
+                          <col><span class"statistics-key">Damage Res.</span></col>
+                          <col><span class"statistics-value" id="damage-res">0%</span></col>
+                        </datagrid>
+                
+                        <datagrid>
+                          <col><span class"statistics-key">Poison Res.</span></col>
+                          <col><span class"statistics-value" id="poison-res">25%</span></col>
+                        </datagrid>
+                
+                        <datagrid>
+                          <col><span class"statistics-key">Radiation Res.</span></col>
+                          <col><span class"statistics-value" id="radiation-res">10%</span></col>
+                        </datagrid>
+                
+                        <datagrid>
+                          <col><span class"statistics-key">Sequence</span></col>
+                          <col><span class"statistics-value" id="sequence">10</span></col>
+                        </datagrid>
+                
+                        <datagrid>
+                          <col><span class"statistics-key">Healing Rate</span></col>
+                          <col><span class"statistics-value" id="healing-rate">1</span></col>
+                        </datagrid>
+                
+                        <datagrid>
+                          <col><span class"statistics-key">Critical Chance</span></col>
+                          <col><span class"statistics-value" id="critical-chance">15%</span></col>
+                        </datagrid>
+                
+                      </p>
+                   </div>
+              <div id="skills" class="console-bg char-place-next-to">
+              
+              
+                      <p id="skill-points-title" i18n="Skill Points">Skill Points: <span id="skill-points">0</span></p>
+                
+                      
+              </div>
+                </div>
 
-      <p id="special">
-
-          <p id="strength" class="special-group" style="top: 0px;">
-            <p class="special-title">ST</p>
-            <p class="special-value">10</p>
-            <p class="special-commt">Great</p>
-
-          </p>
-
-          <p id="perception" class="special-group" style="top: 40px;">
-            <p class="special-title">PE</p>
-            <p class="special-value">10</p>
-            <p class="special-commt">Great</p>
-          </p>
-
-          <p id="endurance" class="special-group"  style="top: 80px;">
-            <p class="special-title">EN</p>
-            <p class="special-value">10</p>
-            <p class="special-commt">Great</p>
-          </p>
-
-          <p id="charisma" class="special-group"   style="top: 120px;">
-            <p class="special-title">CH</p>
-            <p class="special-value">10</p>
-            <p class="special-commt">Great</p>
-          </p>
-
-          <p id="intelligence" class="special-group"  style="top: 160px;">
-            <p class="special-title">IN</p>
-            <p class="special-value">10</p>
-            <p class="special-commt">Great</p>
-          </p>
-
-          <p id="agility" class="special-group"  style="top: 200px;">
-            <p class="special-title">AG</p>
-            <p class="special-value">10</p>
-            <p class="special-commt">Great</p>
-          </p>
-
-          <p id="luck" class="special-group"  style="top: 240px;">
-            <p class="special-title">LU</p>
-            <p class="special-value">10</p>
-            <p class="special-commt">Great</p>
-          </p>
-
-      </p>
-
-      <p id="special-points-title">Special Points <span id="special-points" class="console-value">0</span></p>
-
-      <div id="experience" class="console-bg">
-        <p class='current-level-label'><span i18n='Level'>Level</span>: <span id='level'>999</span></p>
-        <p class='current-xp-label'><span i18n='Experience'>Experience</span>: <span id='current-xp'>999</span></p>
-        <p class='next-level-label'><span i18n='Next level'>Next level</span>: <span id='next-level'>999</span></p>
-      </div>
-
-      <p id="char-state" class="console-bg">
-        <span id="char-state-hp">Hit Points </span> <span id="char-state-hp-id-value">50</span>/<span id="char-state-hp-id-total">50</span><br />
-        <span id="char-state-poisoned">Poisoned</span><br />
-        <span id="char-state-radiated">Radiated</span><br />
-        <span id="char-state-eye-damage">Eye damage</span><br />
-        <span id="char-state-crippled-front-left-leg">Crippled front left leg</span><br />
-        <span id="char-state-crippled-front-right-leg">Crippled front right leg</span><br />
-        <span id="char-state-crippled-behind-left-leg">Crippled behind left leg</span><br />
-        <span id="char-state-crippled-behind-right-leg">Crippled behind right leg</span><br />
-      </p>
-
-      <p id="statistics" class="console-bg">
-
-        <datagrid>
-          <col width="80%"><span class"statistics-key">Armor Class</span></col>
-          <col width="20%"><span class"statistics-value" id="armor-class">10</span></col>
-        </datagrid>
-
-        <datagrid>
-          <col width="80%"><span class"statistics-key">Action Points</span></col>
-          <col width="20%"><span class"statistics-value" id="armor-class">10</span></col>
-        </datagrid>
-
-        <datagrid>
-          <col width="80%"><span class"statistics-key">Carry Weight</span></col>
-          <col width="20%"><span class"statistics-value" id="carry-weight">275</span></col>
-        </datagrid>
-
-        <datagrid>
-          <col width="80%"><span class"statistics-key">Melee Damage</span></col>
-          <col width="20%"><span class"statistics-value" id="melee-damage">1</span></col>
-        </datagrid>
-
-        <datagrid>
-          <col width="80%"><span class"statistics-key">Damage Res.</span></col>
-          <col width="20%"><span class"statistics-value" id="damage-res">0%</span></col>
-        </datagrid>
-
-        <datagrid>
-          <col width="80%"><span class"statistics-key">Poison Res.</span></col>
-          <col width="20%"><span class"statistics-value" id="poison-res">25%</span></col>
-        </datagrid>
-
-        <datagrid>
-          <col width="80%"><span class"statistics-key">Radiation Res.</span></col>
-          <col width="20%"><span class"statistics-value" id="radiation-res">10%</span></col>
-        </datagrid>
-
-        <datagrid>
-          <col width="80%"><span class"statistics-key">Sequence</span></col>
-          <col width="20%"><span class"statistics-value" id="sequence">10</span></col>
-        </datagrid>
-
-        <datagrid>
-          <col width="80%"><span class"statistics-key">Healing Rate</span></col>
-          <col width="20%"><span class"statistics-value" id="healing-rate">1</span></col>
-        </datagrid>
-
-        <datagrid>
-          <col width="80%"><span class"statistics-key">Critical Chance</span></col>
-          <col width="20%"><span class"statistics-value" id="critical-chance">15%</span></col>
-        </datagrid>
-
-      </p>
-      
-      <p id="skills" class="console-bg">
-      </p>
-      
-      <p id="skill-points-title" i18n="Skill Points">Skill Points: <span id="skill-points">0</span></p>
-
-      <button id="continue" i18n="Confirm">Done</button>
-      <button id="cancel"   i18n="Close">Cancel</button>
-
-    </p>
-
-    <p id="char-bottom-box">
-     <tabset id="tabset-bottom-box">
+    <p id="char-bottom-box" class="char-place-next-to">
+     <tabset>
       <tab id="tab-perks">Perks</tab>
       <panel id="panel-perks" class="console-bg">Nada</panel>
 
@@ -400,11 +408,17 @@
       <panel id="panel-traits" class="console-bg">Rien</panel>
 
       <tab id="tab-reputation">Reputation</tab>
-      <panel class="console-bg">Nothing</panel>
+      <panel id="panel-reputation" class="console-bg">Nothing</panel>
 
       <tab id="tab-kills">Kills</tab>
       <panel id="panel-kills" class="console-bg"></panel>
      </tabset>
     </p>
+    <p id="char-botom-side" class="char-place-next-to">
+        <p id="placeholder" class="console-bg">placeholder</p>
+                <button id="continue" i18n="Confirm" >Done</button>
+                <button id="cancel"   i18n="Close" >Cancel</button> 
+    </p>
+   
   </body>
 </rml>

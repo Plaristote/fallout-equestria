@@ -59,11 +59,20 @@ void TimeManager::DelTask(Task* task)
 
 void TimeManager::ExecuteTasks(void)
 {
-  Timer profiler;
+  //Timer           profiler;
   Tasks::iterator it  = tasks.begin();
   Tasks::iterator end = tasks.end();
 
-  //cout << "[ExecuteTasks] " << tasks.size() << " tasks to execute" << endl;
+  /*if (it != end)
+  {
+    Task& ftask = **it;
+    cout << "FTime" << endl;
+    cout << year << "/" << month << "/" << day << " ";
+    cout << hour << ":" << minute  << ":" << second << endl;
+    cout << "FTask" << endl;
+    cout << ftask.lastY << "/" << ftask.lastMo << "/" << ftask.lastD << " ";
+    cout << ftask.lastH << ":" << ftask.lastM  << ":" << ftask.lastS << endl << endl;
+  }*/
   // TODO Write that shit again while not drunk.
   while (it != end)
   {
@@ -88,18 +97,6 @@ void TimeManager::ExecuteTasks(void)
 	  {
 	    if (year == task.lastY && month == task.lastMo && hour == task.lastH && minute == task.lastM && second < task.lastS)
 	      dostuff = false;
-	    else
-	    {
-	      if (*it == *tasks.rbegin())
-	      {
-		cout << "[" << &task << "] " << task.lastY << "/" << task.lastMo << "/" << task.lastD << " ";
-		cout << task.lastH << ":" << task.lastM  << ":" << task.lastS << endl;
-
-		cout << year << "/" << month << "/" << day << " ";
-		cout << hour << ":" << minute  << ":" << second << endl;
-		cout << second << " < " << task.lastS << endl;
-	      }
-	    }
 	  }
 	}
       }

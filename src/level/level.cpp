@@ -169,11 +169,14 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
   _camera.FollowObject(GetPlayer());
   
-   _world->AddLight(WorldLight::Point, "toto");
-   WorldLight* light = _world->GetLightByName("toto");
-   
+   _world->AddLight(WorldLight::Directional, "toto");
+   WorldLight* light    = _world->GetLightByName("toto");
+   PT(DirectionalLight) slight = reinterpret_cast<DirectionalLight*>(&(*light->light));
+
    light->zoneSize = 1000;
    light->SetColor(255, 50, 50, 125);
+   //slight->set_shadow_caster(true, 12, 12);
+   //window->get_render().set_shader_input("light2", light->nodePath);
    light->nodePath.reparent_to(GetPlayer()->GetNodePath());
    _world->CompileLight(light);
  
@@ -215,7 +218,10 @@ void Level::InitPlayer(void)
   
   _world->CompileLight(_world->GetLightByName("toto"));
 }
-
+#include <panda3d/stencilAttrib.h>
+#include <panda3d/colorBlendAttrib.h>
+#include <panda3d/depthTestAttrib.h>
+NodePath player_halo;
 void Level::InsertParty(PlayerParty& party)
 {
   PlayerParty::DynamicObjects::reverse_iterator it, end;
@@ -233,8 +239,29 @@ void Level::InsertParty(PlayerParty& party)
     // Replace the Party DynamicObject pointer to the new one
     delete *it;
     *it = object;
+
+    //
+    // The black ball of wrath
+    //
+    PandaNode* node;
+    NodePath   map_objects = _world->floors[0].get_child(0);
+    CPT(RenderAttrib) atr1 = StencilAttrib::make(1, StencilAttrib::SCF_not_equal, StencilAttrib::SO_keep, StencilAttrib::SO_keep,    StencilAttrib::SO_keep,    1, 1, 0);
+    CPT(RenderAttrib) atr2 = StencilAttrib::make(1, StencilAttrib::SCF_always,    StencilAttrib::SO_zero, StencilAttrib::SO_replace, StencilAttrib::SO_replace, 1, 0, 1);
+
+    player_halo = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
+    player_halo.set_scale(5);
+    player_halo.set_bin("background", 0);
+    player_halo.set_depth_write(0);
+    player_halo.reparent_to(map_objects);
+    node        = player_halo.node();
+    node->set_attrib(atr2);
+    node->set_attrib(ColorBlendAttrib::make(ColorBlendAttrib::M_add));
+    map_objects.node()->set_attrib(atr1);
   }
   party.SetHasLocalObjects(false);
+  
+  //TODO delete this
+  _world->CompileLight(_world->GetLightByName("toto"));
 }
 
 // Takes the party's characters out of the map.
@@ -368,6 +395,11 @@ void Level::SetState(State state)
   _state = state;
   if (state == Normal)
     _itCharacter = _characters.end();
+  if (state != Fight)
+  {
+    DestroyCombatPath();
+    ToggleCharacterOutline(false);
+  }
 }
 
 void Level::SetInterrupted(bool set)
@@ -451,6 +483,8 @@ void Level::NextTurn(void)
 
 void Level::RunDaylight(void)
 {
+  //cout << "Run Day Light" << endl;
+  
   LVecBase4f color_steps[6] = {
     LVecBase4f(0.2, 0.2, 0.5, 1), // 00h00
     LVecBase4f(0.2, 0.2, 0.3, 1), // 04h00
@@ -465,7 +499,7 @@ void Level::RunDaylight(void)
   LVecBase4f to_set(0, 0, 0, 0);
   LVecBase4f dif = (it == 5 ? color_steps[0] : color_steps[it + 1]) - color_steps[it];
   
-  // dif / 5 * (it % 4) -> dif / 100 * (20 * (it % 4)) is this more clear ? I hope iti s.
+  // dif / 5 * (it % 4) -> dif / 100 * (20 * (it % 4)) is this more clear ? I hope it is.
   to_set += color_steps[it] + (dif / 5 * (it % 4));
   _sunLight->set_color(to_set);
 }
@@ -476,7 +510,13 @@ AsyncTask::DoneStatus Level::do_task(void)
 { 
   float elapsedTime = _timer.GetElapsedTime();
 
-  _camera.Run(elapsedTime);
+  // TEST Transparent Ball of Wrath
+  player_halo.set_pos(GetPlayer()->GetDynamicObject()->nodePath.get_pos());
+  player_halo.set_hpr(GetPlayer()->GetDynamicObject()->nodePath.get_hpr());
+  // TEST End
+  
+  //RunDaylight(); // Quick workaround for the daylight task not working
+  _camera.Run(elapsedTime);  
   _timeManager.ExecuteTasks();
   
   switch (_state)
@@ -527,7 +567,6 @@ AsyncTask::DoneStatus Level::do_task(void)
 void Level::DestroyCombatPath(void)
 {
   for_each(_combat_path.begin(), _combat_path.end(), [](Waypoint& wp) { wp.nodePath.detach_node(); });
-  //for_each(_combat_path.begin(), _combat_path.end(), [](Waypoint& wp) { wp.nodePath.hide(); });
 }
 
 void Level::DisplayCombatPath(void)
@@ -543,7 +582,9 @@ void Level::DisplayCombatPath(void)
     sphere.reparent_to(_window->get_render());
     wp.nodePath = sphere;
     wp.nodePath.set_transparency(TransparencyAttrib::M_alpha);
-    wp.nodePath.set_color(255, 125, 0, 200);
+    wp.nodePath.set_color(0.5, 0.5, 0.5, 0.5);
+    wp.nodePath.set_light_off();
+    wp.nodePath.set_attrib(DepthTestAttrib::make(DepthTestAttrib::M_always));
   });
 }
 
@@ -618,6 +659,7 @@ void Level::SetMouseState(MouseState state)
 {
   DestroyCombatPath();
   _mouseState = state;
+  ToggleCharacterOutline(false);
   switch (state)
   {
     case MouseAction:
@@ -628,6 +670,8 @@ void Level::SetMouseState(MouseState state)
       break ;
     case MouseTarget:
       _mouse.SetMouseState('t');
+      if (_state == Level::State::Fight)
+      { ToggleCharacterOutline(true); }
       break ;
   }
 }
@@ -1422,4 +1466,44 @@ void Level::CheckCurrentFloor(float elapsedTime)
     else
       ++cur;
   }
+}
+
+void Level::ToggleCharacterOutline(bool toggle)
+{
+  for_each(_characters.begin(), _characters.end(), [this, toggle](ObjectCharacter* character)
+  {
+    NodePath original = character->GetDynamicObject()->nodePath;
+    NodePath outline;
+
+    if (character == GetPlayer()) return ;
+    if (toggle)
+    {
+      if (!(character->IsAlive())) return ;
+      outline = original.copy_to(original);
+      outline.set_name("outline");
+      outline.set_texture_off();
+      outline.set_light_off();
+      outline.set_attrib(RenderModeAttrib::make(RenderModeAttrib::M_wireframe));
+      outline.set_attrib(DepthTestAttrib::make(DepthTestAttrib::M_always));
+      outline.set_transparency(TransparencyAttrib::M_alpha);
+      if (character->IsAlly(GetPlayer()))
+      { outline.set_color(0, 255, 0, 0.5); }
+      else
+      { outline.set_color(255, 0, 0, 0.5); }
+      outline.reparent_to(original);
+      outline.set_pos(0, 0, 0);
+      outline.set_hpr(0, 0, 0);
+      
+      NodePathCollection effects = outline.find_all_matches("graphical_effect");
+      
+      for(unsigned short i = 0 ; i < effects.get_num_paths() ; ++i)
+	effects.get_path(i).detach_node();
+    }
+    else
+    {
+      outline = original.find("outline");
+      if (!(outline.is_empty()))
+      { outline.detach_node(); }
+    }
+  });
 }

@@ -54,8 +54,21 @@ void CharacterBuff::Initialize(Level* level, ObjectCharacter* character, Data bu
     WindowFramework* window = level->GetWorld()->window;
 
     _graphicalEffect = window->load_model(window->get_panda_framework()->get_models(), "models/" + dataGraphics["model"].Value());
+    _graphicalEffect.set_name("graphical_effect");
     if (!(dataGraphics["scale"].Nil()))
       _graphicalEffect.set_scale((float)dataGraphics["scale"]);
+    if (dataGraphics["color"].NotNil())
+    {
+      Data color = dataGraphics["color"];
+      
+      if (color["alpha"].NotNil())
+      {
+	_graphicalEffect.set_transparency(TransparencyAttrib::M_alpha);
+	_graphicalEffect.set_color(color["red"], color["green"], color["blue"], color["alpha"]);
+      }
+      else
+        _graphicalEffect.set_color(color["red"], color["green"], color["alpha"]);
+    }
   }
 }
 
@@ -853,6 +866,7 @@ void                ObjectCharacter::RunDeath()
 
   GetNodePath().set_hpr(0, 0, 90);
   UnprocessCollisions();
+  _hitPoints = 0;
 }
 
 void                ObjectCharacter::CallbackActionUse(InstanceDynamicObject*)

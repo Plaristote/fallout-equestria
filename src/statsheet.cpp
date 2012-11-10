@@ -1138,14 +1138,16 @@ void StatViewRocket::SetFieldValue(const std::string& category, const std::strin
       stringstream rml;
       Core::String old_rml;
 
-      element = _root->GetElementById("panel-kills");
-      element->GetInnerRML(old_rml);
-      rml << "<datagrid>";
-      rml << "<col width='80%'><span class='kills-key' i18n='" << key << "'>" << i18n::T(key) << "</span></col>";
-      rml << "<col width='20%'><span class='kills-value' id='" << strId << "'>" << value << "</span></col>";
-      rml << "</datagrid>";
-      element->SetInnerRML(old_rml + rml.str().c_str());
-      return ;
+      if ((element = _root->GetElementById("panel-kills")))
+      {
+        element->GetInnerRML(old_rml);
+        rml << "<datagrid>";
+        rml << "<col width='80%'><span class='kills-key' i18n='" << key << "'>" << i18n::T(key) << "</span></col>";
+        rml << "<col width='20%'><span class='kills-value' id='" << strId << "'>" << value << "</span></col>";
+        rml << "</datagrid>";
+        element->SetInnerRML(old_rml + rml.str().c_str());
+        return ;
+      }
     }
     cout << "[Warning] Element '" << strId << "' should exist but doesn't" << endl;
   }

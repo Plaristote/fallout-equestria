@@ -2,8 +2,6 @@
 
 using namespace std;
 
-void* mypointer = 0;
-
 void         WaypointModifier::ProcessCollisions(void)
 {
   if (_waypointOccupied != 0)

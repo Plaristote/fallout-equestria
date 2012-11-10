@@ -13,8 +13,12 @@ void CastShield(Character@ self)
     Data dataEngine = level.GetDataEngine();
     Data buffData   = dataEngine["shielding spell"];
 
-    buffData["graphics"]["model"]    = "sphere.obj";
-    buffData["graphics"]["scale"]    = 3;
+    buffData["graphics"]["model"]          = "sphere.obj";
+    buffData["graphics"]["scale"]          = 5;
+    buffData["graphics"]["color"]["red"]   = 50;
+    buffData["graphics"]["color"]["green"] = 50;
+    buffData["graphics"]["color"]["blue"]  = 200;
+    buffData["graphics"]["color"]["alpha"] = 0.5;
     buffData["duration"] = 30;
 
     buffData["script"]["source"]    = "spell.as";
