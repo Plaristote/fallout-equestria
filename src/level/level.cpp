@@ -1189,12 +1189,18 @@ void Level::ActionDropObject(ObjectCharacter* user, InventoryObject* object)
   }
   if (!(UseActionPoints(AP_COST_USE)))
     return ;
-  user->GetInventory().DelObject(object);
   waypoint = user->GetOccupiedWaypoint();
-  item     = new ObjectItem(this, object->CreateDynamicObject(_world), object);
-  item->SetOccupiedWaypoint(waypoint);
-  item->GetDynamicObject()->nodePath.set_pos(waypoint->nodePath.get_pos());
-  _objects.push_back(item);
+  if (waypoint)
+  {
+    user->GetInventory().DelObject(object);
+    item     = new ObjectItem(this, object->CreateDynamicObject(_world), object);
+    item->SetOccupiedWaypoint(waypoint);
+    _world->DynamicObjectSetWaypoint(*(item->GetDynamicObject()), *waypoint);
+    item->GetDynamicObject()->nodePath.set_pos(waypoint->nodePath.get_pos());
+    _objects.push_back(item);
+  }
+  else
+    cerr << "User has no waypoint, thus the object can't be dropped" << endl;
 }
 
 bool Level::UseActionPoints(unsigned short ap)

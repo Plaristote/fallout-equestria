@@ -167,7 +167,7 @@ const Data& Data::operator=(const Data& var)
   else if (Nil())
   {
     if (_data && _data->pointers == 1)
-      ;//delete _data;
+      delete _data;
     _data = var._data;
     if (_data)
       _data->pointers++;
@@ -187,7 +187,7 @@ void Data::CutBranch(void)
     (*it)->nil    = true;
     (*it)->father = 0;
     if ((*it)->pointers == 0)
-      ;//delete (*it);
+      delete (*it);
     it = _data->children.erase(it);
   }
   Remove();
@@ -217,10 +217,10 @@ DataBranch::~DataBranch()
   {
     DataBranch* child = *children.begin();
 
-    if (child->pointers == 0)
-      ;//delete child;
-    children.erase(children.begin());
     child->father = 0;
+    if (child->pointers == 0)
+      delete child;
+    children.erase(children.begin());
   }
 }
 

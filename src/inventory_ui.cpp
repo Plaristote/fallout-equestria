@@ -590,6 +590,8 @@ UiBarter::~UiBarter()
 void UiBarter::BarterEnd(Rocket::Core::Event&)
 {
   Hide();
+  DropInventory(_stack_player, _inventory_player);
+  DropInventory(_stack_other,  _inventory_other);
   BarterEnded.Emit();
 }
 
