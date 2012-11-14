@@ -4,3 +4,5 @@ sync-video true
 model-path data
 
 audio-library-name p3openal_audio
+
+framebuffer-stencil #t

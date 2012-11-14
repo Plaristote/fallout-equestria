@@ -16,7 +16,7 @@ using namespace std;
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUse;
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseObjectOn;
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSkillOn;
-Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;  
+Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
 Level* Level::CurrentLevel = 0;
 
@@ -51,11 +51,12 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   {
     _sunLight = new DirectionalLight("sun_light");
 
-    _sunLight->set_shadow_caster(true, 12, 12);
-    _sunLight->get_lens()->set_near_far(1.f, 2.f);
-    _sunLight->get_lens()->set_film_size(512);
+    _sunLight->set_shadow_caster(true, 2048, 2048);
+    _sunLight->get_lens()->set_near_far(1.f, 50.f);
+    _sunLight->get_lens()->set_film_size(5096);
 
     _sunLightNode = window->get_render().attach_new_node(_sunLight);
+    _sunLightNode.set_pos(0, -10.f, 0);
     _sunLightNode.set_hpr(-30, -80, 0);
     window->get_render().set_light(_sunLightNode);
     
@@ -173,12 +174,12 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
    WorldLight* light    = _world->GetLightByName("toto");
    PT(DirectionalLight) slight = reinterpret_cast<DirectionalLight*>(&(*light->light));
 
-   light->zoneSize = 1000;
+   /*light->zoneSize = 1000;
    light->SetColor(255, 50, 50, 125);
    //slight->set_shadow_caster(true, 12, 12);
    //window->get_render().set_shader_input("light2", light->nodePath);
    light->nodePath.reparent_to(GetPlayer()->GetNodePath());
-   _world->CompileLight(light);
+   _world->CompileLight(light);*/
  
 //   PointLight* plight = dynamic_cast<PointLight*>(light->nodePath.node());
 //   plight->get_lens()->set_near_far(1.f, 2.f);
@@ -216,12 +217,12 @@ void Level::InitPlayer(void)
   _levelUi.GetMainBar().SetEquipedItem(0, GetPlayer()->GetEquipedItem(0));
   _levelUi.GetMainBar().SetEquipedItem(1, GetPlayer()->GetEquipedItem(1));
   
-  _world->CompileLight(_world->GetLightByName("toto"));
+  //_world->CompileLight(_world->GetLightByName("toto"));
 }
 #include <panda3d/stencilAttrib.h>
 #include <panda3d/colorBlendAttrib.h>
 #include <panda3d/depthTestAttrib.h>
-NodePath player_halo;
+
 void Level::InsertParty(PlayerParty& party)
 {
   PlayerParty::DynamicObjects::reverse_iterator it, end;
@@ -243,25 +244,37 @@ void Level::InsertParty(PlayerParty& party)
     //
     // The black ball of wrath
     //
-    PandaNode* node;
-    NodePath   map_objects = _world->floors[0].get_child(0);
+    PandaNode*         node;
+    //NodePath           map_objects    = _world->floors[0].get_child(0);
     CPT(RenderAttrib) atr1 = StencilAttrib::make(1, StencilAttrib::SCF_not_equal, StencilAttrib::SO_keep, StencilAttrib::SO_keep,    StencilAttrib::SO_keep,    1, 1, 0);
     CPT(RenderAttrib) atr2 = StencilAttrib::make(1, StencilAttrib::SCF_always,    StencilAttrib::SO_zero, StencilAttrib::SO_replace, StencilAttrib::SO_replace, 1, 0, 1);
 
-    player_halo = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
-    player_halo.set_scale(5);
-    player_halo.set_bin("background", 0);
-    player_halo.set_depth_write(0);
-    player_halo.reparent_to(map_objects);
-    node        = player_halo.node();
+    _player_halo = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
+    _player_halo.set_scale(5);
+    _player_halo.set_bin("background", 0);
+    _player_halo.set_depth_write(0);
+    _player_halo.reparent_to(_window->get_render());
+    node        = _player_halo.node();
     node->set_attrib(atr2);
     node->set_attrib(ColorBlendAttrib::make(ColorBlendAttrib::M_add));
-    map_objects.node()->set_attrib(atr1);
+    for_each(_world->floors.begin(), _world->floors.end(), [node, atr1](NodePath floor)
+    {
+      NodePath map_objects = floor.get_child(0);
+      
+      for (unsigned short i = 0 ; i < map_objects.get_num_children() ; ++i)
+      {
+	NodePath child = map_objects.get_child(i);
+
+	cout << "MapObjects(" << i << ")->name = " << child.get_name().substr(0, 6) << endl;
+	if (child.node() != node && child.get_name().substr(0, 6) != "Ground")
+	  child.set_attrib(atr1);
+      }
+    });
+    //_world->floors[0].get_child(1).set_attrib(atr1);
+    //_world->floors[0].get_child(2).set_attrib(atr1);
+    //map_objects.set_attrib(atr1);
   }
   party.SetHasLocalObjects(false);
-  
-  //TODO delete this
-  _world->CompileLight(_world->GetLightByName("toto"));
 }
 
 // Takes the party's characters out of the map.
@@ -314,6 +327,8 @@ void Level::SetPlayerInventory(Inventory* inventory)
 
 Level::~Level()
 {
+  _player_halo.remove_node();
+  
   _timeManager.ClearTasks(TASK_LVL_CITY);
   obs.DisconnectAll();
   ForEach(_objects,   [](InstanceDynamicObject* obj) { delete obj;  });
@@ -511,8 +526,8 @@ AsyncTask::DoneStatus Level::do_task(void)
   float elapsedTime = _timer.GetElapsedTime();
 
   // TEST Transparent Ball of Wrath
-  player_halo.set_pos(GetPlayer()->GetDynamicObject()->nodePath.get_pos());
-  player_halo.set_hpr(GetPlayer()->GetDynamicObject()->nodePath.get_hpr());
+  _player_halo.set_pos(GetPlayer()->GetDynamicObject()->nodePath.get_pos());
+  _player_halo.set_hpr(GetPlayer()->GetDynamicObject()->nodePath.get_hpr());
   // TEST End
   
   //RunDaylight(); // Quick workaround for the daylight task not working

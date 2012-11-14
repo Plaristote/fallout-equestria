@@ -8,7 +8,10 @@ using namespace std;
  */
 StatModel::StatModel(Data statsheet) : _statsheet(statsheet)
 {
-  _scriptContext = Script::Engine::Get()->CreateContext();
+  if (Script::Engine::Get())
+    _scriptContext = Script::Engine::Get()->CreateContext();
+  else
+    _scriptContext = 0;
   LoadFunctions();
 }
 

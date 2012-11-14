@@ -165,6 +165,7 @@ private:
   InstanceObjects      _objects;
   Characters           _characters;
   Characters::iterator _itCharacter;
+  NodePath             _player_halo;
   
   ExitZones            _exitZones;
   bool                 _exitingZone;

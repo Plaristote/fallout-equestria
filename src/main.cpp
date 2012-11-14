@@ -416,6 +416,7 @@ static void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(rmlDocumentClass, "void        AddEventListener(string, string)", asFUNCTION(asUtils::RocketSetListener),    asCALL_CDECL_OBJFIRST);
 }
 
+#ifndef UNIT_TESTER
 int main(int argc, char *argv[])
 {
   WindowFramework* window;
@@ -453,3 +454,4 @@ int main(int argc, char *argv[])
   Script::Engine::Finalize();
   return (0);
 }
+#endif
