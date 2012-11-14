@@ -17,6 +17,7 @@ void TimeManager::AddElapsedTime(unsigned short s, unsigned short m, unsigned sh
   second += s;
   minute += m;
   hour   += h;
+  day    += d;
   month  += mo;
   year   += y;
   CorrectValues();
@@ -151,12 +152,14 @@ void TimeManager::CorrectValues(void)
   }
   if (month > 12)
   {
-    year += (month / 13);
-    month = month % 13;
+    year += (month / 12);
+    month = month % 12;
+    if (month == 0)
+    { month = 1; }
   }
-  while (day > GetDaysPerMonth(month))
+  while (day > GetDaysPerMonth(month, year))
   {
-    day -= GetDaysPerMonth(month);
+    day -= GetDaysPerMonth(month, year);
     month += 1;
     if (month > 12)
     {

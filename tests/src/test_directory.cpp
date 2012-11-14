@@ -32,7 +32,7 @@ void TestsDirectory(UnitTest& tester)
     }
     return ("Filesystem::FileCopy returned false");
   });
-  tester.AddTest("Filesystem", "Failing at removing a directory containing files", []() -> string
+  tester.AddTest("Filesystem", "Not removing a directory containing files", []() -> string
   {
     string to_ret;
 

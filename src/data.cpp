@@ -65,7 +65,7 @@ Data::~Data()
     if (_data->pointers > 0)
       _data->pointers--;
     if ((_data->nil || !_data->father) && _data->root == false && _data->pointers == 0)
-      ;//delete _data;
+      delete _data;
   }
 }
 

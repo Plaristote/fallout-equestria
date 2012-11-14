@@ -68,11 +68,11 @@ public:
     ClearTasks(0);
   }
   
-  static unsigned short GetDaysPerMonth(unsigned short m)
+  static unsigned short GetDaysPerMonth(unsigned short m, unsigned short year = 1)
   {
     if (m == 2)
-      return (29);
-    return (m % 2 != 0 ? 30 : 31);
+      return (year % 4 == 0 ? 29 : 28);
+    return ((m <= 7 ? m % 2 == 0 : m % 2 != 0) ? 30 : 31); 
   }
   
   void            ClearTasks(unsigned char level)

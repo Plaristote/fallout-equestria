@@ -42,7 +42,7 @@ namespace Observatory
     class FunctionObserver : public InterfaceObserver
     {
       public:
-        typedef void (*Function)();
+        typedef std::function<void ()> Function;
 
         FunctionObserver(Function function) : _function(function) {}
 
@@ -684,6 +684,14 @@ namespace Observatory
     {
       ObserverId id = signal.Connect(observerInstance, method);
       
+      Add(signal, id);
+    }
+
+    template<class C>
+    inline void Connect(C& signal, typename C::FunctionObserver::Function function)
+    {
+      ObserverId id = signal.Connect(function);
+
       Add(signal, id);
     }
 

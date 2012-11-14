@@ -64,11 +64,11 @@ void       UnitTest::Execute(void)
       cout << str_success << " " << str_message << endl;
     });
   });
-  recap_stream << n_success << '/' << n_tests << endl;
+  recap_stream << n_success << '/' << n_tests;
   recap = recap_stream.str();
   recap.Blinking();
-  recap_head = "Recap";
+  recap_head = "Test Results";
   recap_head.Underlined();
-  cout << recap_head << ": " << recap << endl;
+  cout << recap_head << ": " << recap << " (" << (((float)n_success / n_tests) * 100) << "%)" << endl;
 }
 
