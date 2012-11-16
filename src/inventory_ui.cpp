@@ -189,10 +189,13 @@ void InventoryViewController::DragObserver(InventoryView* container, Rocket::Cor
     if (AllowDrop(view, *container))
     {
       object = view.GetObjectFromId(std::string(element->GetId().CString()));
-      view.GetInventory().DelObject(object);
-      container->GetInventory().AddObject(object);
-      view.UpdateView();
-      container->UpdateView();
+      if (container->GetInventory().CanCarry(object))
+      {
+        view.GetInventory().DelObject(object);
+        container->GetInventory().AddObject(object);
+        view.UpdateView();
+        container->UpdateView();
+      }
     }
   }
 }

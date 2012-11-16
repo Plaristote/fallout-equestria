@@ -6,6 +6,8 @@ using namespace std;
 
 GameTask* GameTask::CurrentGameTask = 0;
 
+extern PandaFramework framework;
+
 Buff::~Buff()
 {
   if (_task)
@@ -146,7 +148,7 @@ void BuffManager::Save(Utils::Packet& packet, function<bool (const string&)> cal
   while (it != end)
   {
     Buff* buff = *it;
-    
+
     if (callback(buff->GetTargetName()))
       n_buff++;
   }
@@ -298,11 +300,16 @@ GameTask::~GameTask()
 void                  GameTask::SaveClicked(Rocket::Core::Event&)
 {
   if (_uiSaveGame)
+  {
+    _signals.remove(&_uiSaveGame->SaveToSlot);
     delete _uiSaveGame;
+  }
   _uiSaveGame = new UiSave(_window, _gameUi.GetContext(), _savePath);
+  _uiSaveGame->SaveToSlot.SetAsync(false);
   _uiSaveGame->SaveToSlot.Connect(*this, &GameTask::SaveToSlot);
   _uiSaveGame->EraseSlot.Connect (*this, &GameTask::EraseSlot);
   _uiSaveGame->Show();
+  _signals.push_back(&_uiSaveGame->SaveToSlot);
 }
 
 void                  GameTask::LoadClicked(Rocket::Core::Event&)
@@ -335,8 +342,10 @@ AsyncTask::DoneStatus GameTask::do_task()
 {
   if (!_continue)
     return (AsyncTask::DS_done);
+  _signals.ExecuteRecordedCalls();
   if (_loadLevelParams.doLoad)
     DoLoadLevel();
+
   {
     Data charsheet(_charSheet);
     if ((int)charsheet["Variables"]["Hit Points"] <= 0)
@@ -371,6 +380,7 @@ bool GameTask::SaveGame(const std::string& savepath)
   bool success = true;
 
   _worldMap->Save(savepath);
+  cout << "Debug 1" << endl;
   if (_level)
   {
     _dataEngine["system"]["current-level"] = _levelName;
@@ -381,6 +391,7 @@ bool GameTask::SaveGame(const std::string& savepath)
     _dataEngine["system"]["current-level"] = 0;
     _playerParty->Save(savepath);
   }
+  cout << "Debug 2" << endl;
 
   {
     Data player_inventory = _dataEngine["player"]["inventory"];
@@ -393,6 +404,7 @@ bool GameTask::SaveGame(const std::string& savepath)
     }
     _playerInventory->SaveInventory(player_inventory);
   }
+  cout << "Debug 3" << endl;
   _dataEngine["time"]["seconds"] = _timeManager.GetSecond();
   _dataEngine["time"]["minutes"] = _timeManager.GetMinute();
   _dataEngine["time"]["hours"]   = _timeManager.GetHour();
@@ -400,11 +412,44 @@ bool GameTask::SaveGame(const std::string& savepath)
   _dataEngine["time"]["month"]   = _timeManager.GetMonth();
   _dataEngine["time"]["year"]    = _timeManager.GetYear();
   _dataEngine.Save(savepath + "/dataengine.json");
+  cout << "Debug 34" << endl;
 
   DataTree::Writers::JSON(_charSheet, savepath + "/stats-self.json");
 
+  if (_level != 0)
+  {
+    _window->get_render().set_transparency(TransparencyAttrib::M_alpha, 1);
+    MyRocket::SetVisibility(_gameUi.GetContext(), false);
+    framework.get_graphics_engine()->render_frame();
+    _window->get_graphics_window()->get_screenshot()->write(savepath + "/preview.png");
+    MyRocket::SetVisibility(_gameUi.GetContext(), true);
+  }
+
   return (success);
 }
+
+void MyRocket::SetVisibility(Rocket::Core::Context* context, bool visibility)
+  {
+    static std::vector<Rocket::Core::ElementDocument*> hidden_docs;
+    unsigned int max = context->GetNumDocuments();
+
+    for (unsigned int i = 0 ; i < max ; ++i)
+    {
+      Rocket::Core::ElementDocument* doc = context->GetDocument(i);
+      auto                           it  = !visibility ? hidden_docs.end() : find(hidden_docs.begin(), hidden_docs.end(), doc);
+      
+      if (!visibility && doc->IsVisible())
+      {
+        hidden_docs.push_back(doc);
+        doc->Hide();
+      }
+      else if (visibility && it != hidden_docs.end())
+      {
+        hidden_docs.erase(it);
+        doc->Show();
+      }
+    }
+  }
 
 bool GameTask::LoadGame(const std::string& savepath)
 {
@@ -560,6 +605,7 @@ void GameTask::EraseSlot(unsigned char slot)
 
 void GameTask::SaveToSlot(unsigned char slot)
 {
+  cout << "SaveToSlot Called" << endl;
   if (SaveGame(_savePath))
   {
     std::stringstream stream;
@@ -618,19 +664,6 @@ void GameTask::FinishLoad(void)
     // TODO Handle error while loading the game
     cout << "[NOT IMPLEMENTED] GameTask::FinishLoad -> LoadGame Failure" << endl;
   }
-}
-
-// LEVEL EVENTS
-void GameTask::UiSaveGame(const std::string& slotPath)
-{
-  SaveGame(_savePath);
-  CopySave(_savePath, slotPath);
-}
-
-void GameTask::UiLoadGame(const std::string& slotPath)
-{
-  CopySave(_savePath, slotPath);
-  LoadGame(_savePath);
 }
 
 bool GameTask::SaveLevel(Level* level, const std::string& name)

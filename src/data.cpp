@@ -65,7 +65,7 @@ Data::~Data()
     if (_data->pointers > 0)
       _data->pointers--;
     if ((_data->nil || !_data->father) && _data->root == false && _data->pointers == 0)
-      delete _data;
+      ;//delete _data;
   }
 }
 
@@ -148,7 +148,7 @@ void        Data::Duplicate(Data var)
   for (; it != end ; ++it)
   {
     Data        children = *it;
-    DataBranch* tmp      = new DataBranch();
+    DataBranch* tmp      = new DataBranch;
     
     tmp->father = _data;
     _data->children.push_back(tmp);

@@ -92,6 +92,12 @@ public:
     {
       if (_inventory) delete _inventory;
       _inventory = inventory;
+      if (_statistics)
+      {
+	Data statistics(_statistics);
+
+	inventory->SetCapacity(statistics["Statistics"]["Carry Weight"]);
+      }
     }
   }
   

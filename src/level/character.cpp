@@ -355,12 +355,12 @@ void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* contro
       data_stats["Variables"]["Hit Points"] = data_stats["Statistics"]["Hit Points"].Value();
     SetHitPoints(data_stats["Variables"]["Hit Points"]);
     _obs_handler.Connect(_stats->HpChanged, *this, &ObjectCharacter::StatHpUpdate);
-    _inventory->SetCapacity(275);
     cout << "Faction is named " << data_stats["Faction"].Value() << endl;
     if (data_stats["Faction"].NotNil())
       SetFaction(data_stats["Faction"].Value());
     else
       _faction = 0;
+    cout << GetName() << " has an inventory capacity of " << _inventory->GetCapacity() << endl;
   }
 }
 

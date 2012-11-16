@@ -210,7 +210,18 @@ void UiLoad::LoadGame(Rocket::Core::Event&)
 
 void UiLoad::ClickSlot(Rocket::Core::Event& event)
 {
+  Rocket::Core::Element* preview = _root->GetElementById("slot-preview");
+
   _selectedSlot = event.GetCurrentElement();
+  if (preview)
+  {
+    Rocket::Core::Variant* var_slot;
+    stringstream           rml_preview;
+
+    var_slot      = _selectedSlot->GetAttribute("data-slot");
+    rml_preview << "<img id='preview-picture' src='../saves/slot-" << var_slot->Get<unsigned int>() << "/preview.png' />";
+    preview->SetInnerRML(rml_preview.str().c_str());
+  }
 }
 
 void UiLoad::Cancel(Rocket::Core::Event&)
@@ -237,7 +248,8 @@ void UiLoad::Erase(Rocket::Core::Event&)
  */
 UiSave::UiSave(WindowFramework* window, Rocket::Core::Context* context, const std::string& savePath) : UiBase(window, context), _savePath(savePath)
 {
-  _root = context->LoadDocument("data/savegame.rml");
+  _selectedSlot = 0;
+  _root         = context->LoadDocument("data/savegame.rml");
   if (_root)
   {
     LoadSlots(savePath);
@@ -334,7 +346,18 @@ void UiSave::SaveGame(Rocket::Core::Event&)
 
 void UiSave::ClickSlot(Rocket::Core::Event& event)
 {
+  Rocket::Core::Element* preview = _root->GetElementById("slot-preview");
+
   _selectedSlot = event.GetCurrentElement();
+  if (preview)
+  {
+    Rocket::Core::Variant* var_slot;
+    stringstream           rml_preview;
+
+    var_slot      = _selectedSlot->GetAttribute("data-slot");
+    rml_preview << "<img id='preview-picture' src='../saves/slot-" << var_slot->Get<unsigned int>() << "/preview.png' />";
+    preview->SetInnerRML(rml_preview.str().c_str());
+  }
 }
 
 void UiSave::Cancel(Rocket::Core::Event&)

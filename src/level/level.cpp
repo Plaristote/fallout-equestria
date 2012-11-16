@@ -311,8 +311,7 @@ void Level::StripParty(PlayerParty& party)
 void Level::SetPlayerInventory(Inventory* inventory)
 {
   ObjectCharacter* player = GetPlayer();
-  
-  cout << "SetPlayerInventory" << endl;
+
   if (!inventory)
   {
     cout << "Using map's inventory" << endl;
@@ -524,10 +523,20 @@ extern void* mypointer;
 AsyncTask::DoneStatus Level::do_task(void)
 { 
   float elapsedTime = _timer.GetElapsedTime();
+  
+  // TEST Mouse Cursor automatic change while hovering interfaces
+  if (_levelUi.GetContext()->GetHoverElement() == _levelUi.GetContext()->GetRootElement())
+    SetMouseState(_mouseState);
+  else
+    _mouse.SetMouseState('i');
+  // TEST END
 
   // TEST Transparent Ball of Wrath
-  _player_halo.set_pos(GetPlayer()->GetDynamicObject()->nodePath.get_pos());
-  _player_halo.set_hpr(GetPlayer()->GetDynamicObject()->nodePath.get_hpr());
+  if (!(_player_halo.is_empty()))
+  {
+    _player_halo.set_pos(GetPlayer()->GetDynamicObject()->nodePath.get_pos());
+    _player_halo.set_hpr(GetPlayer()->GetDynamicObject()->nodePath.get_hpr());
+  }
   // TEST End
   
   //RunDaylight(); // Quick workaround for the daylight task not working
@@ -672,9 +681,12 @@ void Level::MouseInit(void)
 
 void Level::SetMouseState(MouseState state)
 {
-  DestroyCombatPath();
-  _mouseState = state;
-  ToggleCharacterOutline(false);
+  if (state != _mouseState)
+  {
+    DestroyCombatPath();
+    _mouseState = state;
+    ToggleCharacterOutline(_state == Level::State::Fight && _mouseState == MouseTarget && *_itCharacter == GetPlayer());
+  }
   switch (state)
   {
     case MouseAction:
@@ -685,8 +697,6 @@ void Level::SetMouseState(MouseState state)
       break ;
     case MouseTarget:
       _mouse.SetMouseState('t');
-      if (_state == Level::State::Fight)
-      { ToggleCharacterOutline(true); }
       break ;
   }
 }

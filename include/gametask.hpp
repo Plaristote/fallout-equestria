@@ -76,15 +76,11 @@ public:
   void                  OpenLevel(const std::string& savepath, const std::string& level);
   void                  ExitLevel(const std::string& savepath);
   bool                  CopySave(const std::string& savepath, const std::string& slotPath);
-  
+
   void                  SaveToSlot(unsigned char slot);
   void                  LoadSlot(unsigned char slot);
   void                  LoadLastState(void);
   void                  Exit(Rocket::Core::Event&) { _continue = false; }
-  
-  // LEVEL EVENTS
-  void                  UiSaveGame(const std::string& slotPath);
-  void                  UiLoadGame(const std::string& slotPath);
 
   // BUFF MANAGEMENT
   void                  PushBuff(ObjectCharacter* character, Data buff);
@@ -94,7 +90,7 @@ public:
   void                  LoadLevelBuffs(Utils::Packet&);
   void                  LoadPartyBuffs(Utils::Packet&);
   std::function<bool (const std::string&)> _is_level_buff;
-  
+
   // TIME MANAGEMENT
   TimeManager&          GetTimeManager(void) { return (_timeManager); }
   WorldDiplomacy&       GetDiplomacy(void)   { return (_dataEngine.GetDiplomacy()); }
@@ -112,6 +108,7 @@ private:
   
   void                  EraseSlot(unsigned char slot);
 
+  Observatory::Signals  _signals;
   bool                  _continue;
   WindowFramework*      _window;
   GameUi                _gameUi;
@@ -139,6 +136,7 @@ private:
   { LoadLevelParams() : doLoad(false) {} bool doLoad; std::string name; std::string path; bool isSaveFile; std::string entry_zone; };
 
   LoadLevelParams       _loadLevelParams;
+  std::string           _save_game_slot;
 };
 
 #endif

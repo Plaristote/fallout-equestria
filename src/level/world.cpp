@@ -748,8 +748,9 @@ void MapObject::Serialize(Utils::Packet& packet)
   float  posX,   posY,   posZ;
   float  rotX,   rotY,   rotZ;
   float  scaleX, scaleY, scaleZ;
-  string name = nodePath.get_name();
-
+  string name;
+  
+  name   = nodePath.get_name();
   posX   = nodePath.get_pos().get_x();
   posY   = nodePath.get_pos().get_y();
   posZ   = nodePath.get_pos().get_z();
@@ -1089,53 +1090,66 @@ void           World::UnSerialize(Utils::Packet& packet)
 void           World::Serialize(Utils::Packet& packet)
 {
   // Compile Step
+# ifdef GAME_EDITOR
   CompileWaypoints();
+# endif
 
   // Waypoints
   {
-      Waypoints::iterator it  = waypoints.begin();
-      Waypoints::iterator end = waypoints.end();
-      unsigned int        id  = 0;
-      int                 size;
+    Waypoints::iterator it  = waypoints.begin();
+    Waypoints::iterator end = waypoints.end();
+    unsigned int        id  = 0;
+    int                 size;
 
-      while (it != end)
-      {
-    if ((*it).arcs.size() == 0)
-      it = waypoints.erase(it);
-    else
+    while (it != end)
     {
-      (*it).id = ++id;
-      ++it;
-    }
+      if ((*it).arcs.size() == 0)
+	it = waypoints.erase(it);
+      else
+      {
+	(*it).id = ++id;
+	++it;
       }
-      size = waypoints.size();
-      packet << size;
-      for (it = waypoints.begin() ; it != end ; ++it)
-    (*it).Serialize(packet);
+    }
+    size = waypoints.size();
+    packet << size;
+    for (it = waypoints.begin() ; it != end ; ++it)
+  (*it).Serialize(packet);
   }
 
   // MapObjects
   {
-      int size = objects.size();
+    MapObjects::iterator it  = objects.begin();
+    MapObjects::iterator end = objects.end();
 
-      packet << size;
-      MapObjects::iterator it  = objects.begin();
-      MapObjects::iterator end = objects.end();
-
-      for (; it != end ; ++it) { (*it).Serialize(packet); }
+    while (it != end)
+    {
+      if (it->nodePath.is_empty())
+        it = objects.erase(it);
+      else
+        ++it;
+    }
+    packet << ((int)objects.size());
+    for (it = objects.begin() ; it != end ; ++it) { (*it).Serialize(packet); }
   }
-
+# ifdef GAME_EDITOR
   CompileDoors();
+# endif
 
   // DynamicObjects
   {
-      int size = dynamicObjects.size();
+    DynamicObjects::iterator it  = dynamicObjects.begin();
+    DynamicObjects::iterator end = dynamicObjects.end();
 
-      packet << size;
-      DynamicObjects::iterator it  = dynamicObjects.begin();
-      DynamicObjects::iterator end = dynamicObjects.end();
-
-      for (; it != end ; ++it) { (*it).Serialize(packet); }
+    while (it != end)
+    {
+      if (it->nodePath.is_empty())
+        it = dynamicObjects.erase(it);
+      else
+        ++it;
+    }
+    packet << ((int)dynamicObjects.size());
+    for (it = dynamicObjects.begin() ; it != end ; ++it) { (*it).Serialize(packet); }
   }
   
   // WorldLights
@@ -1173,24 +1187,24 @@ void           World::Serialize(Utils::Packet& packet)
 
   // EntryZone
   {
-      EntryZones::iterator it   = entryZones.begin();
-      EntryZones::iterator end  = entryZones.end();
-      int                  size = entryZones.size();
+    EntryZones::iterator it   = entryZones.begin();
+    EntryZones::iterator end  = entryZones.end();
+    int                  size = entryZones.size();
 
-      packet << size;
-      for (; it != end ; ++it)
-      {
-        EntryZone&                     zone  = *it;
-        std::list<int>                 waypointsId;
-        std::list<Waypoint*>::iterator wpIt  = zone.waypoints.begin();
-        std::list<Waypoint*>::iterator wpEnd = zone.waypoints.end();
+    packet << size;
+    for (; it != end ; ++it)
+    {
+      EntryZone&                     zone  = *it;
+      std::list<int>                 waypointsId;
+      std::list<Waypoint*>::iterator wpIt  = zone.waypoints.begin();
+      std::list<Waypoint*>::iterator wpEnd = zone.waypoints.end();
 
-        for (; wpIt != wpEnd ; ++wpIt)
-          waypointsId.push_back((*wpIt)->id);
-        packet << zone.name;
-        packet << waypointsId;
-      }
-  }
+      for (; wpIt != wpEnd ; ++wpIt)
+        waypointsId.push_back((*wpIt)->id);
+      packet << zone.name;
+      packet << waypointsId;
+    }
+  }  
 }
 #include <panda3d/collisionHandlerQueue.h>
 // MAP COMPILING
@@ -1246,52 +1260,52 @@ void           World::CompileWaypoints(void)
 
 void World::CompileDoors(void)
 {
-    Waypoints::iterator it  = waypoints.begin();
-    Waypoints::iterator end = waypoints.end();
+  Waypoints::iterator it  = waypoints.begin();
+  Waypoints::iterator end = waypoints.end();
 
-    for (; it != end ; ++it)
+  for (; it != end ; ++it)
+  {
+    Waypoint::Arcs::iterator itArc  = (*it).arcs.begin();
+    Waypoint::Arcs::iterator endArc = (*it).arcs.end();
+
+    while (itArc != endArc)
     {
-        Waypoint::Arcs::iterator itArc  = (*it).arcs.begin();
-        Waypoint::Arcs::iterator endArc = (*it).arcs.end();
+      NodePath          np;
+      NodePath          other  = (*itArc).to->nodePath;
+      NodePath          parent = (*it).nodePath;
+      LVecBase3         rot    = parent.get_hpr();
+      PT(CollisionTube) ctube  = new CollisionTube(LPoint3(0, 0, 0),
+                                                    parent.get_relative_vector(other, other.get_pos() - parent.get_pos()),
+                                                    2.f);
+      PT(CollisionNode) cnode  = new CollisionNode("compileWaypointsNode");
+      cnode->set_into_collide_mask(CollideMask(ColMask::DynObject));
+      cnode->set_from_collide_mask(CollideMask(ColMask::None));
+      cnode->add_solid(ctube);
 
-        while (itArc != endArc)
-        {
-            NodePath          np;
-            NodePath          other  = (*itArc).to->nodePath;
-            NodePath          parent = (*it).nodePath;
-            LVecBase3         rot    = parent.get_hpr();
-            PT(CollisionTube) ctube  = new CollisionTube(LPoint3(0, 0, 0),
-                                                         parent.get_relative_vector(other, other.get_pos() - parent.get_pos()),
-                                                         2.f);
-            PT(CollisionNode) cnode  = new CollisionNode("compileWaypointsNode");
-            cnode->set_into_collide_mask(CollideMask(ColMask::DynObject));
-            cnode->set_from_collide_mask(CollideMask(ColMask::None));
-            cnode->add_solid(ctube);
+      np.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
+      np.set_pos(0, 0, 0);
+      np.set_scale(1 / parent.get_scale().get_x());
 
-            np.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
-            np.set_pos(0, 0, 0);
-            np.set_scale(1 / parent.get_scale().get_x());
+      np = (*it).nodePath.attach_new_node(cnode);
 
-            np = (*it).nodePath.attach_new_node(cnode);
+      PT(CollisionHandlerQueue) handlerQueue = new CollisionHandlerQueue();
+      CollisionTraverser        traverser;
 
-            PT(CollisionHandlerQueue) handlerQueue = new CollisionHandlerQueue();
-            CollisionTraverser        traverser;
+      traverser.add_collider(np, handlerQueue);
+      traverser.traverse(window->get_render());
+      for (int i = 0 ; i < handlerQueue->get_num_entries() ; ++i)
+      {
+        CollisionEntry* entry  = handlerQueue->get_entry(i);
+        NodePath        into   = entry->get_into_node_path();
+        DynamicObject*  object = GetDynamicObjectFromNodePath(into);
 
-            traverser.add_collider(np, handlerQueue);
-            traverser.traverse(window->get_render());
-            for (int i = 0 ; i < handlerQueue->get_num_entries() ; ++i)
-            {
-              CollisionEntry* entry  = handlerQueue->get_entry(i);
-              NodePath        into   = entry->get_into_node_path();
-              DynamicObject*  object = GetDynamicObjectFromNodePath(into);
-
-              if (object->type != DynamicObject::Character)
-                object->lockedArcs.push_back(pair<int, int>((*it).id, (*itArc).to->id));
-            }
-            ++itArc;
-            np.remove_node();
-        }
+        if (object->type != DynamicObject::Character)
+          object->lockedArcs.push_back(pair<int, int>((*it).id, (*itArc).to->id));
+      }
+      ++itArc;
+      np.remove_node();
     }
+  }
 }
 
 void           World::SetMapObjectsVisible(bool v)

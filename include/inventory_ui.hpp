@@ -48,9 +48,10 @@ public:
   void Update(void);
 
   virtual bool AllowDrop(InventoryView& from, InventoryView& to) { return (true); }
-  
+
 private:
-  std::vector<InventoryView*> _views;
+  std::vector<InventoryView*>                          _views;
+  std::function<bool (InventoryView&, InventoryView&)> _allow_drop;
 };
 
 class UiUseObjectOn : public UiBase

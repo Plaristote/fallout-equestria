@@ -69,7 +69,8 @@ void Level::Save(Utils::Packet& packet)
   });
   for_each(_characters.begin(), _characters.end(), [&packet](ObjectCharacter* character)    { character->Save(packet); });
 
-  GameTask::CurrentGameTask->SaveLevelBuffs(packet);
+  if (GameTask::CurrentGameTask)
+    GameTask::CurrentGameTask->SaveLevelBuffs(packet);
 }
 
 /*

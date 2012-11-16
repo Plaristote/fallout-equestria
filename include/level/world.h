@@ -234,12 +234,12 @@ struct WorldLight
     Type_DynamicObject
   };
 
-  WorldLight(Type type, ParentType ptype, NodePath parent, const std::string& name) : name(name), type(type), parent_type(ptype), parent(parent)
-  { 
+  WorldLight(Type type, ParentType ptype, NodePath parent, const std::string& name) : name(name), type(type), parent_type(ptype), parent(parent), parent_i(0)
+  {
     Initialize();
   }
   
-  WorldLight(NodePath parent) : parent(parent) {}
+  WorldLight(NodePath parent) : parent(parent), parent_i(0) {}
   
   LColor GetColor(void) const
   {

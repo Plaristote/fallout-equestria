@@ -19,6 +19,14 @@ namespace Observatory
     virtual void ExecuteRecordedCalls(void) = 0;
   };
   
+  struct Signals : public std::list<ISignal*>
+  {
+    void ExecuteRecordedCalls(void)
+    {
+      for_each(begin(), end(), [](ISignal* signal) { signal->ExecuteRecordedCalls(); });
+    }
+  };
+  
   template<class p1 = void>
   class Signal : public ISignal
   {
@@ -82,6 +90,9 @@ namespace Observatory
       for (; it != end ; ++it)
         delete *it;
     }
+    
+    void       SetAsync(bool set)  { _async = set;    }
+    bool       IsAsync(void) const { return (_async); }
 
     void       Emit()
     {
@@ -238,6 +249,9 @@ namespace Observatory
       for (; it != end ; ++it)
         delete *it;
     }
+    
+    void       SetAsync(bool set)  { _async = set;    }
+    bool       IsAsync(void) const { return (_async); }    
 
     void       Emit(P2 p2)
     {
@@ -389,6 +403,9 @@ namespace Observatory
         delete *it;
     }
 
+    void       SetAsync(bool set)  { _async = set;    }
+    bool       IsAsync(void) const { return (_async); }    
+    
     void       Emit(P2 p2, P3 p3)
     {
       if (_async)
@@ -539,6 +556,9 @@ namespace Observatory
       for (; it != end ; ++it)
         delete *it;
     }
+    
+    void       SetAsync(bool set)  { _async = set;    }
+    bool       IsAsync(void) const { return (_async); }    
 
     void       Emit(P2 p2, P3 p3, P4 p4)
     {

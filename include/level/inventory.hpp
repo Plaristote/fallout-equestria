@@ -101,7 +101,7 @@ public:
   unsigned short   GetCurrentWeight(void) const      { return (_currentWeight); }
   unsigned short   GetCapacity(void)      const      { return (_capacity);      }
   void             SetCapacity(unsigned short value) { _capacity = value;       }
-  bool             CanCarry(InventoryObject*);
+  bool             CanCarry(InventoryObject*, unsigned short quantity = 1);
   
   Observatory::Signal<void> ContentChanged;
 

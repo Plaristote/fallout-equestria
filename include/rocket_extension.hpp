@@ -6,6 +6,13 @@
 # include "observatory.hpp"
 # include "i18n.hpp"
 
+struct MyRocket
+{
+  static void SetVisibility(Rocket::Core::Context* context, bool visibility);
+private:
+  MyRocket() {}
+};
+
 struct RocketListener : public Rocket::Core::EventListener
 {
   void ProcessEvent(Rocket::Core::Event& event) { EventReceived.Emit(event); }

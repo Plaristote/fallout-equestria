@@ -435,7 +435,7 @@ InventoryObject* Inventory::GetObject(const std::string& name)
   return (0);
 }
 
-bool Inventory::CanCarry(InventoryObject* object)
+bool Inventory::CanCarry(InventoryObject* object, unsigned short quantity)
 {
-  return (_capacity >= _currentWeight + (unsigned short)((*object)["weight"]));
+  return ((_capacity >= _currentWeight + (unsigned short)((*object)["weight"]) * quantity) || (_capacity == 0));
 }
