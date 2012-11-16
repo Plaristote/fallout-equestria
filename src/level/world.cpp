@@ -222,8 +222,8 @@ DynamicObject* World::InsertDynamicObject(DynamicObject& object)
       object.nodePath.set_texture(object.texture);
   }
   object.nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
-  dynamicObjects.push_back(object);
-  return (&(*dynamicObjects.rbegin()));
+  dynamicObjects.insert(dynamicObjects.begin(), object);
+  return (&(*dynamicObjects.begin()));
 }
 
 DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type type, const string &model, const string &texture)

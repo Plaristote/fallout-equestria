@@ -63,6 +63,8 @@ private:
 
 class GameTask
 {
+  struct LoadLevelParams
+  { LoadLevelParams() {} std::string name; std::string path; bool isSaveFile; std::string entry_zone; };
 public:
   static GameTask* CurrentGameTask;
   GameTask(WindowFramework* window, GeneralUi&);
@@ -73,7 +75,7 @@ public:
   AsyncTask::DoneStatus do_task();
   bool                  SaveGame(const std::string& savepath);
   bool                  LoadGame(const std::string& savepath);  
-  void                  OpenLevel(const std::string& savepath, const std::string& level);
+  void                  OpenLevel(const std::string& savepath, const std::string& level, const std::string& entry_zone = "");
   void                  ExitLevel(const std::string& savepath);
   bool                  CopySave(const std::string& savepath, const std::string& slotPath);
 
@@ -100,8 +102,8 @@ private:
   void                  LoadClicked(Rocket::Core::Event&);
   void                  SaveClicked(Rocket::Core::Event&);
   static bool           SaveLevel(Level* level, const std::string& name);
-  Level*                LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& path, const std::string& name, bool isSaveFile = false);  
-  Level*                DoLoadLevel(void);
+  void                  LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& path, const std::string& name, const std::string& entry_zone = "", bool isSaveFile = false);
+  void                  DoLoadLevel(LoadLevelParams);
   void                  GameOver(void);
   
   void                  SetPlayerInventory(void);
@@ -128,15 +130,11 @@ private:
   Level*                _level;
 
   std::string           _savePath;
-  
+
   UiSave*               _uiSaveGame;
   UiLoad*               _uiLoadGame;
-
-  struct LoadLevelParams
-  { LoadLevelParams() : doLoad(false) {} bool doLoad; std::string name; std::string path; bool isSaveFile; std::string entry_zone; };
-
-  LoadLevelParams       _loadLevelParams;
-  std::string           _save_game_slot;
+  
+  Observatory::Signal<void (LoadLevelParams)> SyncLoadLevel;
 };
 
 #endif

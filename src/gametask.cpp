@@ -283,6 +283,10 @@ GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(wind
     }
     return (character != 0);
   };
+  
+  SyncLoadLevel.SetAsync(false);
+  SyncLoadLevel.Connect(*this, &GameTask::DoLoadLevel);
+  _signals.push_back(&SyncLoadLevel);
 }
 
 GameTask::~GameTask()
@@ -324,8 +328,7 @@ void                  GameTask::LoadClicked(Rocket::Core::Event&)
 
 void                  GameTask::MapOpenLevel(std::string name)
 {
-  OpenLevel(_savePath, name);
-  _loadLevelParams.entry_zone = "worldmap";
+  OpenLevel(_savePath, name, "worldmap");
 }
 
 void                  GameTask::SetLevel(Level* level)
@@ -343,8 +346,6 @@ AsyncTask::DoneStatus GameTask::do_task()
   if (!_continue)
     return (AsyncTask::DS_done);
   _signals.ExecuteRecordedCalls();
-  if (_loadLevelParams.doLoad)
-    DoLoadLevel();
 
   {
     Data charsheet(_charSheet);
@@ -360,10 +361,7 @@ AsyncTask::DoneStatus GameTask::do_task()
 
       ExitLevel(_savePath);
       if (nextZone != "")
-      {
-	OpenLevel(_savePath, nextZone);
-	_loadLevelParams.entry_zone = exitPoint;
-      }
+	OpenLevel(_savePath, nextZone, exitPoint);
     }
     if (!_level && _worldMap)
       _worldMap->Show();
@@ -489,14 +487,14 @@ bool GameTask::LoadGame(const std::string& savepath)
   if (!(currentLevel.Nil()) && currentLevel.Value() != "0")
   {
     _worldMap->Hide();
-    LoadLevel(_window, _gameUi, savepath + "/" + currentLevel.Value() + ".blob", currentLevel.Value(), true);
+    LoadLevel(_window, _gameUi, savepath + "/" + currentLevel.Value() + ".blob", currentLevel.Value(), "", true);
   }
   else
     _worldMap->Show();
   return (true);
 }
 
-void GameTask::OpenLevel(const std::string& savepath, const std::string& level)
+void GameTask::OpenLevel(const std::string& savepath, const std::string& level, const std::string& entry_zone)
 {
   std::ifstream fileTest;
 
@@ -505,10 +503,10 @@ void GameTask::OpenLevel(const std::string& savepath, const std::string& level)
   if (fileTest.is_open())
   {
     fileTest.close();
-    _level = LoadLevel(_window, _gameUi, savepath + "/" + level + ".blob", level, true);
+    LoadLevel(_window, _gameUi, savepath + "/" + level + ".blob", level, entry_zone, true);
   }
   else
-    _level = LoadLevel(_window, _gameUi, "maps/" + level + ".blob", level, false);
+    LoadLevel(_window, _gameUi, "maps/" + level + ".blob",        level, entry_zone, false);
 }
 
 void GameTask::ExitLevel(const std::string& savepath)
@@ -706,12 +704,11 @@ void   GameTask::SetPlayerInventory(void)
   _level->SetPlayerInventory(_playerInventory);
 }
 
-Level* GameTask::DoLoadLevel(void)
+void GameTask::DoLoadLevel(LoadLevelParams params)
 {
-  std::cout << "DoLoadLevel" << std::endl;
-  Level*        level = 0;
-  std::ifstream file;
-  std::string   name  = _loadLevelParams.path;
+  Level*   level = 0;
+  ifstream file;
+  string   name  = params.path;
   
   file.open(name.c_str(), std::ios::binary);
   if (file.is_open())
@@ -721,7 +718,7 @@ Level* GameTask::DoLoadLevel(void)
     try
     {
       level = new Level(_window, _gameUi, packet, _timeManager);
-      if (_loadLevelParams.isSaveFile)
+      if (params.isSaveFile)
 	level->Load(packet);
       SetLevel(level);
       file.close();
@@ -736,15 +733,16 @@ Level* GameTask::DoLoadLevel(void)
     std::cerr << "?? File not found !!" << std::endl;
   if (_level)
   {
-    MusicManager::Get()->Play(_loadLevelParams.name);
-    _levelName = _loadLevelParams.name;
+    cout << "Level finishing the loading" << endl;
+    MusicManager::Get()->Play(params.name);
+    _levelName = params.name;
     _level->SetDataEngine(&_dataEngine);
-    if (_loadLevelParams.entry_zone == "worldmap")
+    if (params.entry_zone == "worldmap")
       _level->InsertParty(*_playerParty);
     _level->InitPlayer();
     _level->GetPlayer()->SetStatistics(_charSheet, _playerStats);
     SetPlayerInventory();
-    _level->SetEntryZone(*_playerParty, _loadLevelParams.entry_zone);
+    _level->SetEntryZone(*_playerParty, params.entry_zone);
     SetLevel(_level);
   }
   else
@@ -752,16 +750,15 @@ Level* GameTask::DoLoadLevel(void)
     cerr << "?? Can't open level !!" << endl;
     _worldMap->Show();
   }
-  _loadLevelParams.entry_zone = "";
-  _loadLevelParams.doLoad     = false;
-  return (level);  
 }
 
-Level* GameTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& path, const std::string& name, bool isSaveFile)
+void GameTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& path, const std::string& name, const std::string& entry_zone, bool isSaveFile)
 {
-  _loadLevelParams.name       = name;
-  _loadLevelParams.path       = path;
-  _loadLevelParams.isSaveFile = isSaveFile;
-  _loadLevelParams.doLoad     = true;
-  return (0);
+  LoadLevelParams params;
+  
+  params.name       = name;
+  params.path       = path;
+  params.isSaveFile = isSaveFile;
+  params.entry_zone = entry_zone;
+  SyncLoadLevel.Emit(params);
 }

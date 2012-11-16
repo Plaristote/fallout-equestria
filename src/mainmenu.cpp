@@ -133,11 +133,8 @@ AsyncTask::DoneStatus MainMenu::do_task()
 
 void MainMenu::AsyncCreateLevel(void)
 {
-  cout << "AsyncCreateLevel 1" << endl;
   _levelTask = new GameTask(_window, _generalUi);
-  cout << "AsyncCreateLevel 2" << endl;
   _view.Hide();
-  cout << "AsyncCreateLevel 3" << endl;
   if (slotToLoadPlz >= 0)
     _levelTask->LoadSlot(slotToLoadPlz);
   else

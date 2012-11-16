@@ -28,6 +28,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   loadingScreen->FadeIn();
   CurrentLevel = this;
   _state       = Normal;
+  _mouseState  = MouseAction;
 
   obs.Connect(_levelUi.InterfaceOpened, *this, &Level::SetInterrupted);
 

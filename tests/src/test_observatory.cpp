@@ -60,6 +60,22 @@ void TestsObservatory(UnitTest& tester)
       return ("The callback wasn't removed properly");
     return ("");
   });
+
+  tester.AddTest("Observatory", "Synchronous callback", []() -> string
+  {
+    Observatory::Signal<void> mysignal;
+    bool                      called = false;
+
+    mysignal.SetAsync(false);
+    mysignal.Connect([&called]() { called = true; });
+    mysignal.Emit();
+    if (called)
+      return ("The callback was directly called instead of being put on queue");
+    mysignal.ExecuteRecordedCalls();
+    if (!called)
+      return ("The queued calls didn't get called by ExecuteRecordedCalls");
+    return ("");
+  });
 }
 
 
