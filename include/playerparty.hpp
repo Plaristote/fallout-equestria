@@ -12,6 +12,8 @@ public:
   typedef std::list<DynamicObject*> DynamicObjects;
   PlayerParty(const std::string& savepath);
   ~PlayerParty(void);
+  
+  static void           Create(const std::string& savepath, const std::string& name, const std::string& model, const std::string& texture);
 
   bool                  Save(const std::string& savepath) const;
   
@@ -23,6 +25,8 @@ public:
   const DynamicObjects& ConstGetObjects(void) const { return (_objects); }
   DynamicObjects&       GetObjects(void)            { return (_objects); }
 private:
+  PlayerParty() {};
+  
   void                  Serialize(Utils::Packet&) const;
   void                  UnSerialize(Utils::Packet&);
 

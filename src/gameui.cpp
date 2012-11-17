@@ -64,28 +64,19 @@ GeneralUi::~GeneralUi(void)
 LevelUi::LevelUi(WindowFramework* window, GameUi& gameUi) : _gameUi(gameUi)
 {
   _mainBar = new GameMainBar(window, _gameUi.GetRocketRegion()->get_context());
-  
-  _observers[0] = _mainBar->MenuButtonClicked.EventReceived.Connect     (_gameUi, &GameUi::OpenMenu);
-  _observers[1] = _mainBar->InventoryButtonClicked.EventReceived.Connect(_gameUi, &GameUi::OpenInventory);
-  _observers[2] = _mainBar->PersButtonClicked.EventReceived.Connect     (_gameUi, &GameUi::OpenPers);
-  _observers[3] = _mainBar->PipbuckButtonClicked.EventReceived.Connect  (_gameUi.OpenPipbuck, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
-  
 
-  _observers[4] = _gameUi.GetInventory().VisibilityToggled.Connect(InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
-  _observers[5] = _gameUi.GetMenu().VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);  
-  _observers[6] = _gameUi.GetPers().VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  _obs.Connect(_mainBar->MenuButtonClicked.EventReceived,      _gameUi,             &GameUi::OpenMenu);
+  _obs.Connect(_mainBar->InventoryButtonClicked.EventReceived, _gameUi,             &GameUi::OpenInventory);
+  _obs.Connect(_mainBar->PersButtonClicked.EventReceived,      _gameUi,             &GameUi::OpenPers);
+  _obs.Connect(_mainBar->PipbuckButtonClicked.EventReceived,   _gameUi.OpenPipbuck, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
+  _obs.Connect(_gameUi.GetInventory().VisibilityToggled, InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  _obs.Connect(_gameUi.GetMenu().VisibilityToggled,      InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  _obs.Connect(_gameUi.GetPers().VisibilityToggled,      InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
 }
 
 LevelUi::~LevelUi(void)
 {
-  _gameUi.GetInventory().VisibilityToggled.Disconnect(_observers[0]);
-  _gameUi.GetMenu().VisibilityToggled.Disconnect     (_observers[1]);
-  _gameUi.GetPers().VisibilityToggled.Disconnect     (_observers[2]);
-  
-  _gameUi.GetInventory().VisibilityToggled.Disconnect(_observers[3]);
-  _gameUi.GetMenu().VisibilityToggled.Disconnect     (_observers[4]);
-  _gameUi.GetPers().VisibilityToggled.Disconnect     (_observers[5]);
-
+  _obs.DisconnectAll();
   delete _mainBar;
 }
 

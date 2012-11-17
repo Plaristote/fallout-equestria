@@ -25,6 +25,8 @@ void Level::Load(Utils::Packet& packet)
   }
 
   for_each(_objects.begin(),    _objects.end(),    [&packet](InstanceDynamicObject* object) { object->Load(packet);    });
+  cout << ">>>> Objects: " << _world->dynamicObjects.size() << endl;
+  cout << ">>>> Loading " << _characters.size() << " characters" << endl;
   for_each(_characters.begin(), _characters.end(), [&packet](ObjectCharacter* character)    { character->Load(packet); });
 
   GameTask::CurrentGameTask->LoadLevelBuffs(packet);
@@ -34,7 +36,7 @@ void Level::SaveUpdateWorld(void)
 {
   /*
    * This is saving the inventories in the DynamicObject structure, thus they will be saved
-   * in the World part of the save file. This information consequently need to be processed before everything else.
+   * in the World part of the save file. This information consequently needs to be processed before everything else.
    */
   for_each(_characters.begin(), _characters.end(), [this](ObjectCharacter* character)
   {
@@ -67,6 +69,8 @@ void Level::Save(Utils::Packet& packet)
     if (object)
       object->Save(packet);
   });
+  cout << ">>>> Objects: " << _world->dynamicObjects.size() << endl;
+  cout << ">>>> Saving " << _characters.size() << " characters" << endl;
   for_each(_characters.begin(), _characters.end(), [&packet](ObjectCharacter* character)    { character->Save(packet); });
 
   if (GameTask::CurrentGameTask)

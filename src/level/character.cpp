@@ -340,6 +340,12 @@ void ObjectCharacter::StatHpUpdate(short hp)
     CharacterDied.Emit();
 }
 
+void ObjectCharacter::NullifyStatistics(void)
+{
+  _stats      = 0;
+  _statistics = 0;
+}
+
 void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* controller)
 {
   if (_stats      && _stats      != controller) delete _stats;
@@ -360,7 +366,7 @@ void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* contro
       SetFaction(data_stats["Faction"].Value());
     else
       _faction = 0;
-    cout << GetName() << " has an inventory capacity of " << _inventory->GetCapacity() << endl;
+    GetDynamicObject()->nodePath.set_name(data_stats["Name"].Value());
   }
 }
 

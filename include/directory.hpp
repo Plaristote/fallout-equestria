@@ -36,7 +36,21 @@ public:
 
     if (stream_src.is_open() && stream_dest.is_open())
     {
-      stream_dest << stream_src;
+      long           begin, end;
+      long           size;
+      char*          raw;
+
+      begin       = stream_src.tellg();
+      stream_src.seekg(0, std::ios::end);
+      end         = stream_src.tellg();
+      stream_src.seekg(0, std::ios::beg);
+      size        = end - begin;
+      raw         = new char[size + 1];
+      stream_src.read(raw, size);
+      stream_src.close();
+      raw[size]   = 0;
+      stream_dest << raw;
+      delete[] raw;
       return (true);
     }
     return (false);

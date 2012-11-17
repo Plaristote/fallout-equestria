@@ -598,6 +598,7 @@ void StatController::CancelChanges(void)
   _view->Hide();
   if (_view->GetEditMode() == StatView::Update)
     _model.RestoreBackup();
+  ChangesCanceled.Emit();
 }
 
 void StatController::MakeBackup(void)
@@ -1047,7 +1048,7 @@ void StatViewRocket::GeneralClicked(Rocket::Core::Event& event)
 
 void StatViewRocket::SetEditMode(EditMode mode)
 {
-  const char*    createElems[]  = { "continue", "special-points-title", 0 };
+  const char*    createElems[]  = { "continue", "cancel", "special-points-title", 0 };
   const char*    updateElems[]  = { "continue", "cancel", "experience", "skill-points-title", 0 };
   const char*    displayElems[] = { "cancel",   "experience", 0 };
   const char**   toShow;
@@ -1104,7 +1105,6 @@ void StatViewRocket::SetEditMode(EditMode mode)
 
     if (elem) elem->SetProperty("display", "block");
   }
-
   _editMode = mode;
 }
 

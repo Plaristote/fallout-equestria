@@ -1,5 +1,6 @@
 #include "newgametask.hpp"
 #include <directory.hpp>
+#include <playerparty.hpp>
 
 using namespace std;
 using namespace Rocket;
@@ -15,12 +16,12 @@ NewGameTask::NewGameTask(WindowFramework* window, Core::Context* rocket) : _ui_n
   _ui_new_game.Cancel.Connect          (_ui_new_game, &UiBase::Hide);
   _ui_new_game.Cancel.Connect          (Cancel,       &Observatory::Signal<void>::Emit);
   _ui_new_game.Show();
+  StartGame.Connect(*this, &NewGameTask::Done);
 }
 
 NewGameTask::~NewGameTask()
 {
-  // TODO Fix StatController deletion issues
-  //if (_stat_controller) { delete _stat_controller; }
+  if (_stat_controller) { delete _stat_controller; }
   if (_stat_view)       { delete _stat_view;       }
   if (_stat_sheet)      { delete _stat_sheet;      }
 }
@@ -32,8 +33,10 @@ void NewGameTask::SelectProfile(const std::string& profile)
   {
     _stat_controller = new StatController(_stat_sheet);
     _stat_view       = new StatViewRocket(_window, _rocket);
+    _stat_view->SetEditMode(StatView::Create);
     _stat_controller->SetView(_stat_view);
-    _stat_controller->ChangesAccepted.Connect(*this,     &NewGameTask::Done);
+    _stat_controller->ChangesCanceled.Connect(Cancel,    &Observatory::Signal<void>::Emit);
+    //_stat_controller->ChangesAccepted.Connect(*this,     &NewGameTask::Done);
     _stat_controller->ChangesAccepted.Connect(StartGame, &Observatory::Signal<void>::Emit);
     _stat_view->Show();
     _ui_new_game.Hide();
@@ -47,12 +50,25 @@ void NewGameTask::StartFromScratch(void)
 
 void NewGameTask::Done(void)
 {
-  string savepath  = OptionsManager::Get()["savepath"];
-  string to_copy[] = { "dataengine.json", "map.json", "cities.json", "player-party.blob" };
+  Directory savedir;
+  string    savepath  = OptionsManager::Get()["savepath"];
+  string    to_copy[] = { "dataengine.json", "map.json", "cities.json", "player-party.blob" };
 
-  _stat_sheet->Save(savepath + "/stats-self.json");
-  for (unsigned short i = 0 ; i < 3 ; ++i)
-    Filesystem::FileCopy("data/newgame/" + to_copy[i], savepath + "/" + to_copy[i]);
+  if (savedir.OpenDir(savepath))
+  {
+    for_each(savedir.GetEntries().begin(), savedir.GetEntries().end(), [savepath](const Dirent entry)
+    {
+      if (entry.d_type == DT_REG)
+      {
+        cout << "[Clearing old game save] Removing file " << entry.d_name << endl;
+        remove(string(savepath + "/" + entry.d_name).c_str());
+      }
+    });
+    DataTree::Writers::JSON(_stat_sheet, savepath + "/stats-self.json");
+    for (unsigned short i = 0 ; i < 3 ; ++i)
+      Filesystem::FileCopy("data/newgame/" + to_copy[i], savepath + "/" + to_copy[i]);
+    PlayerParty::Create(savepath, _stat_sheet->operator[]("Name"), "lpip.egg", "characters/lpip.png");
+  }
 }
 
 /*

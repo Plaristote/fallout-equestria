@@ -167,6 +167,7 @@ public:
   Observatory::Signal<void (short)>          HpChanged;
   Observatory::Signal<void (unsigned short)> LevelUp;
   Observatory::Signal<void>                  ChangesAccepted;
+  Observatory::Signal<void>                  ChangesCanceled;
 
 private:
   void      SetMaxHp(short hp);

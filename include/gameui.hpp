@@ -210,10 +210,9 @@ public:
   Observatory::Signal<void (bool)> InterfaceOpened;  
 
 private:
-  GameUi&          _gameUi;
-  GameMainBar*     _mainBar;
-  
-  Observatory::ObserverId _observers[7];
+  GameUi&                      _gameUi;
+  GameMainBar*                 _mainBar;  
+  Observatory::ObserverHandler _obs;
 };
 
 class GameOptions : public UiBase

@@ -67,8 +67,9 @@ public:
   
   void Load(Utils::Packet&);
   void Save(Utils::Packet&);
-  
+
   void SetStatistics(DataTree* stats, StatController* statsController);
+  void NullifyStatistics(void);
 
   Observatory::Signal<void (InstanceDynamicObject*)>         ReachedDestination;
   Observatory::Signal<void (unsigned short, unsigned short)> ActionPointChanged;

@@ -11,6 +11,12 @@
 #define WORLDTIME_TURN          10
 #define WORLDTIME_DAYLIGHT_STEP 3
 
+// REQUIREMENT FOR THE WALL-EATING BALL OF WRATH
+#include <panda3d/stencilAttrib.h>
+#include <panda3d/colorBlendAttrib.h>
+#include <panda3d/depthTestAttrib.h>
+// END
+
 using namespace std;
 
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUse;
@@ -202,10 +208,10 @@ void Level::InitPlayer(void)
     if (!(stats["Statistics"]["Action Points"].Nil()))
       _levelUi.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
   }
-  GetPlayer()->HitPointsChanged.Connect        (_levelUi.GetMainBar(), &GameMainBar::SetCurrentHp);
-  GetPlayer()->ActionPointChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
-  GetPlayer()->EquipedItemActionChanged.Connect(_levelUi.GetMainBar(), &GameMainBar::SetEquipedItemAction);
-  GetPlayer()->EquipedItemChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetEquipedItem);
+  obs_player.Connect(GetPlayer()->HitPointsChanged,         _levelUi.GetMainBar(), &GameMainBar::SetCurrentHp);
+  obs_player.Connect(GetPlayer()->ActionPointChanged,       _levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
+  obs_player.Connect(GetPlayer()->EquipedItemActionChanged, _levelUi.GetMainBar(), &GameMainBar::SetEquipedItemAction);
+  obs_player.Connect(GetPlayer()->EquipedItemChanged,       _levelUi.GetMainBar(), &GameMainBar::SetEquipedItem);
   _levelUi.GetMainBar().EquipedItemNextAction.Connect(*GetPlayer(), &ObjectCharacter::ItemNextUseType);
   _levelUi.GetMainBar().UseEquipedItem.Connect       (*this, &Level::CallbackActionTargetUse);
   _levelUi.GetMainBar().CombatEnd.Connect            (*this, &Level::StopFight);
@@ -218,11 +224,37 @@ void Level::InitPlayer(void)
   _levelUi.GetMainBar().SetEquipedItem(0, GetPlayer()->GetEquipedItem(0));
   _levelUi.GetMainBar().SetEquipedItem(1, GetPlayer()->GetEquipedItem(1));
   
+  //
+  // The wall-eating ball of wrath
+  //
+  PandaNode*         node;
+  CPT(RenderAttrib) atr1 = StencilAttrib::make(1, StencilAttrib::SCF_not_equal, StencilAttrib::SO_keep, StencilAttrib::SO_keep,    StencilAttrib::SO_keep,    1, 1, 0);
+  CPT(RenderAttrib) atr2 = StencilAttrib::make(1, StencilAttrib::SCF_always,    StencilAttrib::SO_zero, StencilAttrib::SO_replace, StencilAttrib::SO_replace, 1, 0, 1);
+
+  _player_halo = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
+  _player_halo.set_scale(5);
+  _player_halo.set_bin("background", 0);
+  _player_halo.set_depth_write(0);
+  _player_halo.reparent_to(_window->get_render());
+  node        = _player_halo.node();
+  node->set_attrib(atr2);
+  node->set_attrib(ColorBlendAttrib::make(ColorBlendAttrib::M_add));
+  for_each(_world->floors.begin(), _world->floors.end(), [node, atr1](NodePath floor)
+  {
+    NodePath map_objects = floor.get_child(0);
+    
+    for (unsigned short i = 0 ; i < map_objects.get_num_children() ; ++i)
+    {
+      NodePath child = map_objects.get_child(i);
+
+      cout << "MapObjects(" << i << ")->name = " << child.get_name().substr(0, 6) << endl;
+      if (child.node() != node && child.get_name().substr(0, 6) != "Ground")
+        child.set_attrib(atr1);
+    }
+  });  
+  
   //_world->CompileLight(_world->GetLightByName("toto"));
 }
-#include <panda3d/stencilAttrib.h>
-#include <panda3d/colorBlendAttrib.h>
-#include <panda3d/depthTestAttrib.h>
 
 void Level::InsertParty(PlayerParty& party)
 {
@@ -241,40 +273,40 @@ void Level::InsertParty(PlayerParty& party)
     // Replace the Party DynamicObject pointer to the new one
     delete *it;
     *it = object;
-
-    //
-    // The black ball of wrath
-    //
-    PandaNode*         node;
-    //NodePath           map_objects    = _world->floors[0].get_child(0);
-    CPT(RenderAttrib) atr1 = StencilAttrib::make(1, StencilAttrib::SCF_not_equal, StencilAttrib::SO_keep, StencilAttrib::SO_keep,    StencilAttrib::SO_keep,    1, 1, 0);
-    CPT(RenderAttrib) atr2 = StencilAttrib::make(1, StencilAttrib::SCF_always,    StencilAttrib::SO_zero, StencilAttrib::SO_replace, StencilAttrib::SO_replace, 1, 0, 1);
-
-    _player_halo = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
-    _player_halo.set_scale(5);
-    _player_halo.set_bin("background", 0);
-    _player_halo.set_depth_write(0);
-    _player_halo.reparent_to(_window->get_render());
-    node        = _player_halo.node();
-    node->set_attrib(atr2);
-    node->set_attrib(ColorBlendAttrib::make(ColorBlendAttrib::M_add));
-    for_each(_world->floors.begin(), _world->floors.end(), [node, atr1](NodePath floor)
-    {
-      NodePath map_objects = floor.get_child(0);
-      
-      for (unsigned short i = 0 ; i < map_objects.get_num_children() ; ++i)
-      {
-	NodePath child = map_objects.get_child(i);
-
-	cout << "MapObjects(" << i << ")->name = " << child.get_name().substr(0, 6) << endl;
-	if (child.node() != node && child.get_name().substr(0, 6) != "Ground")
-	  child.set_attrib(atr1);
-      }
-    });
-    //_world->floors[0].get_child(1).set_attrib(atr1);
-    //_world->floors[0].get_child(2).set_attrib(atr1);
-    //map_objects.set_attrib(atr1);
   }
+  party.SetHasLocalObjects(false);
+}
+
+void Level::FetchParty(PlayerParty& party)
+{
+  PlayerParty::DynamicObjects::iterator it  = party.GetObjects().begin();
+  PlayerParty::DynamicObjects::iterator end = party.GetObjects().end();
+
+  cout << "Debug: Fetch Party" << endl;
+  for (; it != end ; ++it)
+  {
+    Characters::iterator cit    = _characters.begin();
+    Characters::iterator cend   = _characters.end();
+
+    cout << "Fetching character: " << (*it)->nodePath.get_name() << endl;
+    (*it)->nodePath.set_name(GetPlayer()->GetName());
+    cout << "Fetching character: " << (*it)->nodePath.get_name() << endl;
+    while (cit != cend)
+    {
+      ObjectCharacter* character = *cit;
+
+      cout << "--> Comparing with " << (*cit)->GetDynamicObject()->nodePath.get_name() << endl;
+      if (character->GetDynamicObject()->nodePath.get_name() == (*it)->nodePath.get_name())
+      {
+        cout << "--> SUCCESS" << endl;
+        *it = character->GetDynamicObject();
+        break ;
+      }
+      ++cit;
+    }
+    cout << "My primary function is failure..." << endl;
+  }
+  //*it = GetPlayer()->GetDynamicObject();
   party.SetHasLocalObjects(false);
 }
 
@@ -285,6 +317,8 @@ void Level::StripParty(PlayerParty& party)
   PlayerParty::DynamicObjects::iterator it  = party.GetObjects().begin();
   PlayerParty::DynamicObjects::iterator end = party.GetObjects().end();
   
+  obs_player.DisconnectAll(); // Character is gonna get deleted: we must disconnect him.
+  cout << "Debug: Strip Party" << endl;
   for (; it != end ; ++it)
   {
     DynamicObject*       backup = new DynamicObject;
@@ -292,18 +326,25 @@ void Level::StripParty(PlayerParty& party)
     Characters::iterator cend   = _characters.end();
 
     *backup = **it;
+    cout << "Stripping character: " << (*it)->nodePath.get_name() << endl;
     while (cit != cend)
     {
       ObjectCharacter* character = *cit;
 
+      cout << "--> Comparing with: " << (*cit)->GetDynamicObject()->nodePath.get_name() << endl;
       if (character->GetDynamicObject() == *it)
       {
+        cout << "--> SUCCESS" << endl;
+        character->UnprocessCollisions();
+        character->NullifyStatistics();
 	delete character;
 	_characters.erase(cit);
 	_world->DeleteDynamicObject(*it);
 	break ;
       }
+      ++cit;
     }
+    cout << "My primary function is failure..." << endl;
     *it = backup;
   }
   party.SetHasLocalObjects(true);
@@ -331,6 +372,7 @@ Level::~Level()
   
   _timeManager.ClearTasks(TASK_LVL_CITY);
   obs.DisconnectAll();
+  obs_player.DisconnectAll();
   ForEach(_objects,   [](InstanceDynamicObject* obj) { delete obj;  });
   ForEach(_exitZones, [](LevelExitZone* zone)        { delete zone; });
   CurrentLevel = 0;

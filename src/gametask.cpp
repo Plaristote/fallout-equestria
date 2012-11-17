@@ -338,6 +338,7 @@ void                  GameTask::SetLevel(Level* level)
 
 void                  GameTask::GameOver(void)
 {
+  // TODO Implement Game Over Interface
   _continue = false;
 }
 
@@ -378,18 +379,14 @@ bool GameTask::SaveGame(const std::string& savepath)
   bool success = true;
 
   _worldMap->Save(savepath);
-  cout << "Debug 1" << endl;
   if (_level)
   {
     _dataEngine["system"]["current-level"] = _levelName;
     success = success && SaveLevel(_level, savepath + "/" + _levelName + ".blob");
   }
   else
-  {
     _dataEngine["system"]["current-level"] = 0;
-    _playerParty->Save(savepath);
-  }
-  cout << "Debug 2" << endl;
+  _playerParty->Save(savepath);
 
   {
     Data player_inventory = _dataEngine["player"]["inventory"];
@@ -402,7 +399,6 @@ bool GameTask::SaveGame(const std::string& savepath)
     }
     _playerInventory->SaveInventory(player_inventory);
   }
-  cout << "Debug 3" << endl;
   _dataEngine["time"]["seconds"] = _timeManager.GetSecond();
   _dataEngine["time"]["minutes"] = _timeManager.GetMinute();
   _dataEngine["time"]["hours"]   = _timeManager.GetHour();
@@ -410,18 +406,19 @@ bool GameTask::SaveGame(const std::string& savepath)
   _dataEngine["time"]["month"]   = _timeManager.GetMonth();
   _dataEngine["time"]["year"]    = _timeManager.GetYear();
   _dataEngine.Save(savepath + "/dataengine.json");
-  cout << "Debug 34" << endl;
 
   DataTree::Writers::JSON(_charSheet, savepath + "/stats-self.json");
 
   if (_level != 0)
   {
+    cout << "debug#3" << endl;
     _window->get_render().set_transparency(TransparencyAttrib::M_alpha, 1);
     MyRocket::SetVisibility(_gameUi.GetContext(), false);
     framework.get_graphics_engine()->render_frame();
     _window->get_graphics_window()->get_screenshot()->write(savepath + "/preview.png");
     MyRocket::SetVisibility(_gameUi.GetContext(), true);
   }
+  cout << "debug#4" << endl;
 
   return (success);
 }
@@ -737,10 +734,12 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     MusicManager::Get()->Play(params.name);
     _levelName = params.name;
     _level->SetDataEngine(&_dataEngine);
-    if (params.entry_zone == "worldmap")
+    if (params.entry_zone != "")
       _level->InsertParty(*_playerParty);
     _level->InitPlayer();
     _level->GetPlayer()->SetStatistics(_charSheet, _playerStats);
+    if (params.entry_zone == "")
+      _level->FetchParty(*_playerParty);
     SetPlayerInventory();
     _level->SetEntryZone(*_playerParty, params.entry_zone);
     SetLevel(_level);

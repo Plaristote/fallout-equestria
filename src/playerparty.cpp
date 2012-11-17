@@ -26,6 +26,7 @@ PlayerParty::~PlayerParty()
 
 bool PlayerParty::Save(const string& savepath) const
 {
+  cout << "PlayerParty::Save" << endl;
   string        path = savepath + "/player-party.blob";
   ofstream      file;
   Utils::Packet packet;
@@ -66,6 +67,7 @@ void PlayerParty::Serialize(Utils::Packet& packet) const
     auto it       = object->inventory.begin();
     auto end      = object->inventory.end();
 
+    packet << object->nodePath.get_name();
     packet << (int)object->type << object->charsheet << object->dialog << object->interactions;
     packet << object->strModel << object->strTexture;
     packet << inv_size;
@@ -83,7 +85,9 @@ void PlayerParty::UnSerialize(Utils::Packet& packet)
   {
     DynamicObject* object = new DynamicObject;
     int            inv_size, type;
+    string         name;
 
+    packet >> name;
     packet >> type >> object->charsheet >> object->dialog >> object->interactions;
     packet >> object->strModel >> object->strTexture;
     packet >> inv_size;
@@ -91,11 +95,26 @@ void PlayerParty::UnSerialize(Utils::Packet& packet)
     {
       string json_src;
       int    quantity;
-      
+
       packet >> json_src >> quantity;
       object->inventory.push_back(pair<string, int>(json_src, quantity));
     }
+    object->nodePath = NodePath(name);
     object->type = (DynamicObject::Type)type;
     _objects.push_back(object);
   }
+}
+
+void PlayerParty::Create(const string& savepath, const string& name, const string& model, const string& texture)
+{
+  PlayerParty   party;
+  DynamicObject player;
+  
+  player.nodePath      = NodePath(name);
+  player.strModel      = model;
+  player.strTexture    = texture;
+  player.type          = DynamicObject::Character;
+  party._local_objects = false;
+  party._objects.push_back(&player);
+  party.Save(savepath);
 }

@@ -76,8 +76,6 @@ void MainMenu::NewGame(Rocket::Core::Event&)
 
 void MainMenu::StartGame(void)
 {
-  delete _new_game_task;
-  _new_game_task = 0;
   createLevelPlz = true;
 }
 
@@ -141,7 +139,11 @@ void MainMenu::AsyncCreateLevel(void)
     _levelTask->LoadLastState();
   slotToLoadPlz  = -1;
   createLevelPlz = false;
-  cout << "AsyncCreateLevel 4" << endl;
+  if (_new_game_task)
+  {
+    delete _new_game_task;
+    _new_game_task = 0;
+  }
 }
 
 void MainMenu::OpenUiLoad(Rocket::Core::Event&)

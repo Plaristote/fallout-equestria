@@ -46,6 +46,7 @@ public:
   void Load(Utils::Packet&);
   
   void InsertParty(PlayerParty& party);
+  void FetchParty(PlayerParty& party);
   void StripParty(PlayerParty& party);
 
   ~Level();
@@ -152,6 +153,7 @@ private:
   void              ToggleCharacterOutline(bool);
   
   Observatory::ObserverHandler obs;
+  Observatory::ObserverHandler obs_player;
 
   WindowFramework*     _window;
   GraphicsWindow*      _graphicWindow;
