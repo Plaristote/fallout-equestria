@@ -658,6 +658,8 @@ void GameTask::FinishLoad(void)
   {
     // TODO Handle error while loading the game
     cout << "[NOT IMPLEMENTED] GameTask::FinishLoad -> LoadGame Failure" << endl;
+    AlertUi::NewAlert.Emit(i18n::T("There was nothing to load"));
+    _continue = false;
   }
 }
 

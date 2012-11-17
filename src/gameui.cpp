@@ -908,32 +908,33 @@ void GameMainBar::SetEquipedItemAction(unsigned short it, InventoryObject* item,
 }
 
 /*
- * UiBase
+ * AlertUi
  */
-void UiBase::RecursiveTranslate(Core::Element* root)
+Observatory::Signal<void (const string)> AlertUi::NewAlert;
+
+AlertUi::AlertUi(WindowFramework* window, Core::Context* context, const string& message) : UiBase(window, context)
 {
-  unsigned short it;
-  Core::Element* child;
-
-  if (!root)
-    return ;
-  for (it = 0 ; (child = root->GetChild(it)) ; ++it)
+  _continue = true;
+  _root     = context->LoadDocument("data/alert.rml");
+  if (_root)
   {
-    Core::Variant* attr = child->GetAttribute("i18n");
+    Core::Element* elem_message = _root->GetElementById("message");
 
-    if (attr)
-    {
-      string key = attr->Get<Core::String>().CString();
-
-      child->SetInnerRML(i18n::T(key).c_str());
-    }
-    else
-      RecursiveTranslate(child);
+    elem_message->SetInnerRML(message.c_str());
+    ToggleEventListener(true, "button-ok", "click", ButtonClicked);
+    ButtonClicked.EventReceived.Connect([this](Core::Event&) { _continue = false; });
   }
 }
 
-void UiBase::Translate(void)
+AlertUi::~AlertUi()
+{
+}
+
+bool AlertUi::Run(void)
 {
   if (_root)
-    RecursiveTranslate(_root);
+  {
+    _root->PullToFront();
+  }
+  return (_continue);
 }

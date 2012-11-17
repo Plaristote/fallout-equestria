@@ -231,6 +231,21 @@ private:
   std::list<Rocket::Core::Element*> _language_options;
 };
 
+class AlertUi : public UiBase
+{
+public:
+  static Observatory::Signal<void (const std::string)> NewAlert;
+  
+  AlertUi(WindowFramework* window, Rocket::Core::Context* context, const std::string& message);
+  ~AlertUi();
+
+  bool Run(void);
+
+private:
+  RocketListener ButtonClicked;
+  bool           _continue;
+};
+
 class GeneralUi
 {
 public:

@@ -43,7 +43,10 @@ MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window
   _uiLoad        = 0;
   _levelTask     = 0;
   AsyncTaskManager::get_global_ptr()->add(this);
-  
+
+  AlertUi::NewAlert.Connect([this](const string message)
+  { _alerts.push_back(new AlertUi(_window, _generalUi.GetRocketRegion()->get_context(), message)); });
+
   _view.Continue.Connect(*this, &MainMenu::Continue);
   _view.LoadGame.Connect(*this, &MainMenu::OpenUiLoad);
   _view.NewGame.Connect (*this, &MainMenu::NewGame);
@@ -97,32 +100,49 @@ void MainMenu::EndGame(void)
   MusicManager::Get()->Play("mainmenu");
 }
 
+void MainMenu::DisplayAlerts(void)
+{
+  AlertUi* alert = _alerts.front();
+  
+  alert->Show();
+  if (!(alert->Run()))
+  {
+    delete alert;
+    _alerts.erase(_alerts.begin());
+  }  
+}
+
 AsyncTask::DoneStatus MainMenu::do_task()
 {
   MusicManager* mm = MusicManager::Get();
 
-  if (mm) { mm->Run(); }
-  if (createLevelPlz) AsyncCreateLevel();
-  if (_levelTask)
+  if (_alerts.size() > 0)
+    DisplayAlerts();
+  else
   {
-    DoneStatus done = _levelTask->do_task();
-
-    switch (done)
+    if (mm) { mm->Run(); }
+    if (createLevelPlz) AsyncCreateLevel();
+    if (_levelTask)
     {
-      case AsyncTask::DoneStatus::DS_exit:
-	quitGamePlz = true;
-	break ;
-      case AsyncTask::DoneStatus::DS_done:
-	EndGame();
-	break ;
-      default:
-	break ;
+      DoneStatus done = _levelTask->do_task();
+
+      switch (done)
+      {
+        case AsyncTask::DoneStatus::DS_exit:
+          quitGamePlz = true;
+          break ;
+        case AsyncTask::DoneStatus::DS_done:
+          EndGame();
+          break ;
+        default:
+          break ;
+      }
     }
-  }
-  else if (_need_garbage_collect)
-  {
-    TexturePool::get_global_ptr()->garbage_collect();
-    _need_garbage_collect = false;
+    else if (_need_garbage_collect)
+    {
+      TexturePool::get_global_ptr()->garbage_collect();
+      _need_garbage_collect = false;
+    }
   }
   _mouseCursor.Update();
   SoundManager::GarbageCollectAll();

@@ -21,6 +21,8 @@ class MainMenu : public AsyncTask
     RocketListener NewGameClicked, QuitClicked, LoadGameClicked, OptionsClicked, ContinueClicked;
   };
   
+  typedef std::list<AlertUi*> Alerts;
+  
 public:
   MainMenu(WindowFramework* window);
   ~MainMenu();
@@ -31,14 +33,15 @@ public:
   void       StartGame(void);
   void       CancelNewGame(void);
   DoneStatus do_task(void);
-  
-private:
+
+private:  
   WindowFramework* _window;
   GeneralUi        _generalUi;
   MouseCursor      _mouseCursor;
   NewGameTask*     _new_game_task;
   GameTask*        _levelTask;
   View             _view;
+  Alerts           _alerts;
 
   UiLoad*          _uiLoad;
   
@@ -47,6 +50,8 @@ private:
   void             QuitGame(Rocket::Core::Event&);
   void             OpenUiLoad(Rocket::Core::Event&);
   void             LoadSlot(unsigned char slot);
+
+  void             DisplayAlerts(void);  
   
   bool             _need_garbage_collect;
   bool             quitGamePlz;
