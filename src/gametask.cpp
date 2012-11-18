@@ -363,6 +363,7 @@ AsyncTask::DoneStatus GameTask::do_task()
       ExitLevel(_savePath);
       if (nextZone != "")
 	OpenLevel(_savePath, nextZone, exitPoint);
+      SaveGame(_savePath); // Auto-save for the Continue feature
     }
     if (!_level && _worldMap)
       _worldMap->Show();
@@ -510,9 +511,7 @@ void GameTask::ExitLevel(const std::string& savepath)
 {
   _level->StripParty(*_playerParty);
   if (!(SaveGame(savepath)))
-  {
-    cerr << "!! Couldn't save level state on ExitLevel !!" << endl;
-  }
+    AlertUi::NewAlert.Emit(i18n::T("Fatal Error") + ": " + i18n::T("Cannot save level"));
   delete _level;
   _level = 0;
   cout << "Exited Level" << endl;
@@ -656,8 +655,6 @@ void GameTask::FinishLoad(void)
 {
   if (!(LoadGame(_savePath)))
   {
-    // TODO Handle error while loading the game
-    cout << "[NOT IMPLEMENTED] GameTask::FinishLoad -> LoadGame Failure" << endl;
     AlertUi::NewAlert.Emit(i18n::T("There was nothing to load"));
     _continue = false;
   }

@@ -258,6 +258,7 @@ void Level::InitPlayer(void)
 
 void Level::InsertParty(PlayerParty& party)
 {
+  cout << "[Level] Insert Party" << endl;
   PlayerParty::DynamicObjects::reverse_iterator it, end;
 
   // Inserting progressively the last of PlayerParty's character at the beginning of the characters list
@@ -279,6 +280,7 @@ void Level::InsertParty(PlayerParty& party)
 
 void Level::FetchParty(PlayerParty& party)
 {
+  cout << "[Level] Fetch Party" << endl;
   PlayerParty::DynamicObjects::iterator it  = party.GetObjects().begin();
   PlayerParty::DynamicObjects::iterator end = party.GetObjects().end();
 
