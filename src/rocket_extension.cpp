@@ -13,7 +13,11 @@ UiBase::~UiBase()
   if (_root)
   {
     std::for_each(_listeners.begin(), _listeners.end(), [this](const Listener& listener)
-    { listener.elem->RemoveEventListener(listener.event.c_str(), &(listener.instance)); });
+    {
+      Rocket::Core::Element* elem = _root->GetElementById(listener.elem.c_str());
+      
+      elem->RemoveEventListener(listener.event.c_str(), &(listener.instance));
+    });
     _root->Close();
     _root->RemoveReference();
     _root = 0;

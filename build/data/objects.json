@@ -1,6 +1,5 @@
 {
 "hooves": {
-  "icon": "hooves.png",
   "script": {
     "file": "objectsUnarmed.as"
   }

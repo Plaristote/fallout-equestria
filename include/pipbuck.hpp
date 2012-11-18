@@ -104,8 +104,6 @@ private:
   RocketListener        EventWaitMore, EventWaitLess, EventTimeUnitSelected, EventWait;
   
   void                  WaitChange(int chance);
-  void                  WaitMore(Rocket::Core::Event&);
-  void                  WaitLess(Rocket::Core::Event&);
   void                  Wait(Rocket::Core::Event&);
   void                  SelectTimeUnit(Rocket::Core::Event&);
   

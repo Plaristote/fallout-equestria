@@ -29,6 +29,30 @@ struct Dirent
 class Filesystem
 {
 public:
+  static bool FileContent(const std::string& filepath, std::string& out)
+  {
+    ifstream file(filepath.c_str());
+
+    if (file.is_open())
+    {
+      long           size, begin, end;
+      char*          raw;
+
+      begin       = file.tellg();
+      file.seekg(0, std::ios::end);
+      end         = file.tellg();
+      file.seekg(0, std::ios::beg);
+      size        = end - begin;
+      raw         = new char[size + 1];
+      file.read(raw, size);
+      file.close();
+      out = raw;
+      delete[] raw;
+      return (true);
+    }
+    return (false);
+  }
+  
   static bool FileCopy(const std::string& from, const std::string& dest)
   {
     std::ifstream stream_src(from.c_str());

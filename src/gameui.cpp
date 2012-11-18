@@ -706,28 +706,6 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
   if (doc)
   {
     doc->Show();
-
-    Rocket::Core::Element* elementWindow;
-    Rocket::Core::Element* element;
-
-    elementWindow = doc->GetElementById("window");
-
-    for (unsigned int i = 0 ; element = elementWindow->GetChild(i) ; ++i)
-    {
-      cout << "Element[" << i << "] tag: '" << element->GetTagName().CString() << "' id: " << element->GetId().CString() << endl;
-    }
-    
-    if (!elementWindow)
-    {
-      cout << "Window element doesn't exist" << endl;
-      return ;
-    }
-
-    element = doc->GetElementById("first_col");
-
-    if (!element)
-      cout << "first_col doesn't exist" << endl;
-
     ToggleEventListener(true, "menu",      "click", MenuButtonClicked);
     ToggleEventListener(true, "inv",       "click", InventoryButtonClicked);
     ToggleEventListener(true, "pipbuck",   "click", PipbuckButtonClicked);
@@ -813,9 +791,9 @@ void GameMainBar::SetCurrentAP(unsigned short ap, unsigned short max)
     if (apbar)
     {
       for (unsigned short i = 0  ; i < ap ; ++i)
-	rml += "<img src='../textures/ap-active.png' /> ";
+	rml += "<img class='img-ap'   height='20px' src='../textures/ap-active.png' /> ";
       for (unsigned short i = ap ; i < _apMax ; ++i)
-	rml += "<img src='../textures/ap-inactive.png' /> ";
+	rml += "<img class='img-ap' height='20px' src='../textures/ap-inactive.png' /> ";
       apbar->SetInnerRML(rml.c_str());
     }
   }
@@ -830,7 +808,7 @@ void GameMainBar::SetMaxAP(unsigned short ap)
   if (apbar)
   {
     for (unsigned short i = 0 ; i < ap ; ++i)
-      rml += "<img src='../textures/ap-inactive.png' /> ";
+      rml += "<img class='img-ap' src='../textures/ap-inactive.png' /> ";
     apbar->SetInnerRML(rml.c_str());
   }
 }
@@ -898,9 +876,8 @@ void GameMainBar::SetEquipedItemAction(unsigned short it, InventoryObject* item,
       stringstream rml;
       bool         actionExists = (*item)["actions"].Count() > actionIt;
 
-      std::cout << "Action It is " << (int)actionIt << std::endl;
       if (actionExists) rml << "<p class='equiped_action'>" << (*item)["actions"][actionIt].Key() << "</p>";
-      rml << "<p class='equiped_image'><img src='../textures/itemIcons/" << (*item)["icon"].Value() << "' /></p>";
+      rml << "<p class='equiped_image'><img class='equiped_image' src='../textures/itemIcons/" << (*item)["icon"].Value() << "' /></p>";
       if (actionExists) rml << "<p class='equiped_apcost'>" << (*item)["actions"][actionIt]["ap-cost"].Value() << "AP</p>";
       elem->SetInnerRML(rml.str().c_str());
     }

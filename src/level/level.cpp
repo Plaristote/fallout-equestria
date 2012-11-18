@@ -25,7 +25,7 @@ Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::Action
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
 Level* Level::CurrentLevel = 0;
-
+#include <panda3d/cullFaceAttrib.h>
 Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
   _timeManager(tm), _camera(window, window->get_camera_group()), _levelUi(window, gameUi)
 {
@@ -66,7 +66,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     _sunLightNode.set_pos(0, -10.f, 0);
     _sunLightNode.set_hpr(-30, -80, 0);
     window->get_render().set_light(_sunLightNode);
-    
+
     TimeManager::Task* daylightTask = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
     daylightTask->Interval.Connect(*this, &Level::RunDaylight);
     RunDaylight();
@@ -515,6 +515,8 @@ void Level::StopFight(void)
 	return ;
       }
     }
+    if (_mouseState == MouseTarget)
+      SetMouseState(MouseAction);
     SetState(Normal);
     _levelUi.GetMainBar().SetEnabledAP(false);
   }
@@ -522,6 +524,8 @@ void Level::StopFight(void)
 
 void Level::NextTurn(void)
 {
+  if (*_itCharacter == GetPlayer())
+    StopFight();
   if (_state != Fight)
     return ;
   if (_itCharacter != _characters.end())

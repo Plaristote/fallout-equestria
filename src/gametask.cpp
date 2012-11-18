@@ -1,5 +1,6 @@
 #include "gametask.hpp"
 #include "musicmanager.hpp"
+#include <options.hpp>
 #include <iostream>
 
 using namespace std;
@@ -254,7 +255,7 @@ GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(wind
   _continue        = true;
   _window          = window;
   _level           = 0;
-  _savePath        = "saves";
+  _savePath        = OptionsManager::Get()["savepath"].Value();
   _worldMap        = 0;
   _charSheet       = 0;
   _playerParty     = 0;

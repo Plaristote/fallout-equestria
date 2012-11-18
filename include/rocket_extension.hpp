@@ -28,11 +28,11 @@ class UiBase
   
   struct Listener
   {
-    Listener(Rocket::Core::Element* elem, const std::string& event, RocketListener& instance) : elem(elem), event(event), instance(instance) {}
+    Listener(Rocket::Core::Element* elem, const std::string& event, RocketListener& instance) : elem(elem->GetId().CString()), event(event), instance(instance) {}
 
     bool operator==(const Listener& listener) const { return (listener.elem == elem && listener.event == event && &listener.instance == &instance); }
 
-    Rocket::Core::Element* elem;
+    const std::string      elem;
     const std::string      event;
     RocketListener&        instance;
   };

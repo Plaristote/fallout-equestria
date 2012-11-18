@@ -1,20 +1,20 @@
 <rml>
   <head>
     <title>Main Menu</title>
-    <link type="text/template" href="tpl_mainbar.rml" />
+    <link type="text/template" href="tpl_hud.rml" />
     <style>
 body
 {
   width: 100%;
-  height: 120px;
-  bottom: 0px;
+  height: 140px;
+  bottom: 10px;
 }
 
 #console-container
 {
   position: absolute;
   width: 20%;
-  height: 110px;
+  height: 130px;
   //overflow-y: scroll;
   margin-top: 5px;
   font-family: JH_Fallout;
@@ -53,6 +53,7 @@ body
 {
   position: absolute;
   left:     33%;
+  top:      40px;
   height:   20px;
 }
 
@@ -60,18 +61,18 @@ body
 {
   position:    absolute;
   left:        33%;
-  width:       25%;
-  padding-top: 25px;
-  height:      100px;
+  width:       20%;
+  top:         70px;
+  height:      70px;
 }
 
 #equiped_2
 {
   position:    absolute;
   left:        53%;
-  width:       25%;
-  padding-top: 25px;
-  height:      100px;
+  width:       20%;
+  top:         70px;
+  height:      70px;
 }
 
 #second_col
@@ -98,25 +99,47 @@ body
 
 .equiped_action
 {
+  font-family: JH_Fallout;
+  color: rgba(60%, 95%, 60%, 85%);
   position: absolute;
-  left:  0px;
+  margin-right: 10px;
   top:   10px;
-}
-
-.equiped_image
-{
+  z-index: 2;
+  text-align: right;
 }
 
 .equiped_apcost
 {
+  font-family: JH_Fallout;
+  color: rgba(60%, 95%, 60%, 85%);
   position: absolute;
-  right:  0px;
+  margin-right: 10px;
   bottom: 0px;
+  z-index: 2;
+  text-align: right;
 }
- 
+
+.equiped_image
+{
+  position: absolute;
+  top: 2.5%;
+  height: 95%;
+  left: 5px;
+}
+
+.equiped
+{
+  background-decorator: image;
+  background-image: main_bar.png 0px 217px 516px 354px;
+  outline-font-effect: outline;
+  outline-width: 1px;
+  outline-color: black;
+  text-align: right;
+}
+
     </style>
   </head>
-  <body id="body" template="tplmainbar">
+  <body id="body" template="tplhud">
    <p>
       <div id="console-container">
         <p id="console" class="console-bg">
@@ -125,20 +148,17 @@ body
 
       <p id="first_col">
         <br />
-        <button class="francis" id="inv" >INV</button><br />
-        <button class="francis" id="menu">Q</button>
+        <button class="francis" id="inv"  style="width: 10%;">INV</button><br />
+        <button class="francis" id="menu" style="width: 10%;">Q</button>
       </p>
 
       <p id="action_points">
-        oooooooooo
       </p>
 
       <p class="equiped" id="equiped_1">
-        Equiped One
       </p>
 
       <p class="equiped" id="equiped_2">
-        Equiped Two
       </p>
 
       <p id="second_col">
