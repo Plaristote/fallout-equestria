@@ -7,6 +7,16 @@
 # include <algorithm>
 # include <iostream>
 
+# include "semaphore.hpp"
+
+# define S1P_TPL                class P1 = void
+# define S1P_TFUN               P1 (void)
+# define S1P_PARAMS             
+# define S1P_VALUES             
+# define S1P_RECORD_CON         foe(true)
+# define S1P_RECORD_ATTR        bool foe;
+# define S1P_RECORD_VAL         
+
 # define S2P_TPL                class P1, class P2
 # define S2P_TFUN               P1 (P2)
 # define S2P_PARAMS             P2 p1
@@ -30,6 +40,30 @@
 # define S4P_RECORD_CON         p1(p1), p2(p2), p3(p3)
 # define S4P_RECORD_ATTR        P2 p1; P3 p2; P4 p3;
 # define S4P_RECORD_VAL         params.p1, params.p2, params.p3
+
+# define S5P_TPL                class P1, class P2, class P3, class P4, class P5
+# define S5P_TFUN               P1 (P2, P3, P4, P5)
+# define S5P_PARAMS             P2 p1, P3 p2, P4 p3, P5 p4
+# define S5P_VALUES             p1, p2, p3, p4
+# define S5P_RECORD_CON         p1(p1), p2(p2), p3(p3), p4(p4)
+# define S5P_RECORD_ATTR        P2 p1; P3 p2; P4 p3; P5 p4;
+# define S5P_RECORD_VAL         params.p1, params.p2, params.p3, params.p4
+
+# define S6P_TPL                class P1, class P2, class P3, class P4, class P5, class P6
+# define S6P_TFUN               P1 (P2, P3, P4, P5, P6)
+# define S6P_PARAMS             P2 p1, P3 p2, P4 p3, P5 p4, P6 p5
+# define S6P_VALUES             p1, p2, p3, p4, p5
+# define S6P_RECORD_CON         p1(p1), p2(p2), p3(p3), p4(p4), p5(p5)
+# define S6P_RECORD_ATTR        P2 p1; P3 p2; P4 p3; P5 p4; P6 p5;
+# define S6P_RECORD_VAL         params.p1, params.p2, params.p3, params.p4, params.p5
+
+# define S7P_TPL                class P1, class P2, class P3, class P4, class P5, class P6, class P7
+# define S7P_TFUN               P1 (P2, P3, P4, P5, P6, P7)
+# define S7P_PARAMS             P2 p1, P3 p2, P4 p3, P5 p4, P6 p5, P7 p6
+# define S7P_VALUES             p1, p2, p3, p4, p5, p6
+# define S7P_RECORD_CON         p1(p1), p2(p2), p3(p3), p4(p4), p5(p5), p6(p6)
+# define S7P_RECORD_ATTR        P2 p1; P3 p2; P4 p3; P5 p4; P6 p5; P7 p6;
+# define S7P_RECORD_VAL         params.p1, params.p2, params.p3, params.p4, params.p5, params.p6
 
 # define DECL_SIGNAL(TPL, TFUN, PARAMS, VALUES, RECORD_CON, RECORD_ATTR, RECORD_VAL) \
   template<TPL>                                                         \
@@ -113,7 +147,11 @@
         }                                                               \
       }                                                                 \
       else                                                              \
+      {                                                                 \
+        Semaphore::Lock lock(_semaphore);                               \
+                                                                        \
         _recordedCalls.push(RecordedCall(VALUES));                      \
+      }                                                                 \
     }                                                                   \
                                                                         \
     template<typename ObserverClass>                                    \
@@ -172,6 +210,8 @@
                                                                         \
     void       ExecuteRecordedCalls(void)                               \
     {                                                                   \
+      Semaphore::Lock lock(_semaphore);                                 \
+                                                                        \
       while (_recordedCalls.size())                                     \
       {                                                                 \
         RecordedCall& params = _recordedCalls.front();                  \
@@ -202,6 +242,7 @@
     Observers                    _observers;                            \
     RecordedCalls                _recordedCalls;                        \
     bool                         _async;                                \
+    Semaphore                    _semaphore;                            \
   };
 
 namespace Observatory
@@ -396,10 +437,14 @@ namespace Observatory
     RecordedCalls                _recordedCalls;
     bool                         _async;
   };
-  
+ 
+  //DECL_SIGNAL(S1P_TPL, S1P_TFUN, S1P_PARAMS, S1P_VALUES, S1P_RECORD_CON, S1P_RECORD_ATTR, S1P_RECORD_VAL) 
   DECL_SIGNAL(S2P_TPL, S2P_TFUN, S2P_PARAMS, S2P_VALUES, S2P_RECORD_CON, S2P_RECORD_ATTR, S2P_RECORD_VAL)
   DECL_SIGNAL(S3P_TPL, S3P_TFUN, S3P_PARAMS, S3P_VALUES, S3P_RECORD_CON, S3P_RECORD_ATTR, S3P_RECORD_VAL)
   DECL_SIGNAL(S4P_TPL, S4P_TFUN, S4P_PARAMS, S4P_VALUES, S4P_RECORD_CON, S4P_RECORD_ATTR, S4P_RECORD_VAL)
+  DECL_SIGNAL(S5P_TPL, S5P_TFUN, S5P_PARAMS, S5P_VALUES, S5P_RECORD_CON, S5P_RECORD_ATTR, S5P_RECORD_VAL)
+  DECL_SIGNAL(S6P_TPL, S6P_TFUN, S6P_PARAMS, S6P_VALUES, S6P_RECORD_CON, S6P_RECORD_ATTR, S6P_RECORD_VAL)
+  DECL_SIGNAL(S7P_TPL, S7P_TFUN, S7P_PARAMS, S7P_VALUES, S7P_RECORD_CON, S7P_RECORD_ATTR, S7P_RECORD_VAL)
   
   class ObserverHandler
   {

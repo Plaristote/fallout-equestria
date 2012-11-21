@@ -32,6 +32,16 @@
   "year": 2472
 }
 ,
+"Factions": {
+  "Player Party": {
+    "Enemies": {
+    }
+  },
+  "Test Town": {
+    "Enemies": {
+    }
+  }
+},
 "Pipbuck": {
   "Apps": {
     "clock": {
