@@ -50,11 +50,11 @@
 		</style>
 	</head>
   <body id="body" template="tplmainbar">
-    <button id="button-quit" i18n="Quit">Quit</button>
-    <button id="button-home" i18n="Home">Home</button>
+    <button id="button-quit" i18n="Quit" class="universal_button">Quit</button>
+    <button id="button-home" i18n="Home" class="universal_button">Home</button>
     <br />
     <div id="app_container" class="console-bg">
     </div>
-    <button id="button-exit" i18n="Quit Pipbuck">Quit Pipbuck</button>
+    <button id="button-exit" i18n="Quit Pipbuck" class="universal_button">Quit Pipbuck</button>
   </body>
 </rml>

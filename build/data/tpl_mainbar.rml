@@ -3,7 +3,8 @@
   <link type="text/rcss" href="rkt.rcss"/>
   <link type="text/rcss" href="main.rcss"/>
 </head>
-<body class="window">
+
+<body>
     <div id="window">
       <div id="content">
       </div>

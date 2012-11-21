@@ -3,22 +3,7 @@
   <link type="text/rcss" href="rkt.rcss"/>
   <link type="text/rcss" href="main.rcss"/>
 
-  <style>
-#body_mainbar
-{
-  padding: 10px 10px 10px 10px;
-  background-decorator: tiled-box;
-  background-top-left-image:     main_bar.png    0px    0px 470px   50px;
-  background-top-right-image:    main_bar.png 1110px    0px 1448px  50px;
-  background-bottom-left-image:  main_bar.png    0px  180px  470px 210px;
-  background-bottom-right-image: main_bar.png 1110px  180px 1448px 210px;
-  background-top-image:          main_bar.png  470px    0px 1110px  50px;
-  background-bottom-image:       main_bar.png  470px  180px 1110px 210px;
-  background-left-image:         main_bar.png    0px   50px  470px 180px;
-  background-right-image:        main_bar.png 1110px   50px 1448px 180px;
-  background-center-image:       main_bar.png  470px   50px 1110px 180px;
-}
-  </style>
+
 
 </head>
 <body>

@@ -18,22 +18,6 @@
   height: 90%;
 }
 
-#slot-preview
-{
-  position: absolute;
-  right:  15px;
-  top:    15px;
-  width:  25%;
-  height: 25%;
-  background: white;
-}
-
-#preview-picture
-{
-  width:  100%;
-  height: 100%;
-}
-
 #controls-container
 {
   position: absolute;
@@ -68,9 +52,9 @@
     </div>
 
     <div id="controls-container">
-      <button id="button-load"   i18n="Load">Load</button>
-      <button id="button-erase"  i18n="Delete">Erase</button><br />
-      <button id="button-cancel" i18n="Cancel">Cancel</button>
+      <button id="button-load"   i18n="Load" class="universal_button">Load</button>
+      <button id="button-erase"  i18n="Delete" class="universal_button">Erase</button><br />
+      <button id="button-cancel" i18n="Cancel" class="universal_button">Cancel</button>
     </div>
 
   </div>
