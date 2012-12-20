@@ -1,4 +1,5 @@
 #include "world.h"
+#include <panda3d/collisionHandlerQueue.h>
 
 using namespace std;
 
@@ -222,8 +223,8 @@ DynamicObject* World::InsertDynamicObject(DynamicObject& object)
       object.nodePath.set_texture(object.texture);
   }
   object.nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
-  dynamicObjects.push_back(object);
-  return (&(*dynamicObjects.rbegin()));
+  dynamicObjects.insert(dynamicObjects.begin(), object);
+  return (&(*dynamicObjects.begin()));
 }
 
 DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type type, const string &model, const string &texture)
@@ -748,8 +749,9 @@ void MapObject::Serialize(Utils::Packet& packet)
   float  posX,   posY,   posZ;
   float  rotX,   rotY,   rotZ;
   float  scaleX, scaleY, scaleZ;
-  string name = nodePath.get_name();
+  string name;
 
+  name   = nodePath.get_name();
   posX   = nodePath.get_pos().get_x();
   posY   = nodePath.get_pos().get_y();
   posZ   = nodePath.get_pos().get_z();
@@ -795,7 +797,10 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
             int id1, id2;
 
             packet >> id1 >> id2;
-        lockedArcs.push_back(std::pair<int, int>(id1, id2));
+            auto it1 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id1, id2));
+            auto it2 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id2, id1));
+            if (it1 == lockedArcs.end() && it2 == lockedArcs.end())
+            {  lockedArcs.push_back(std::pair<int, int>(id1, id2)); }
         }
     }
 
@@ -870,6 +875,7 @@ void WorldLight::Initialize(void)
     {
       PT(PointLight) pLight = new PointLight(name);
 
+      pLight->set_shadow_caster(true, 12, 12);
       light    = pLight;
       nodePath = parent.attach_new_node(pLight);
     }
@@ -1088,7 +1094,9 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (float
 {
   progress_callback(0);
   // Compile Step
+#ifdef GAME_EDITOR
   CompileWaypoints();
+#endif
   progress_callback(30);
 
   // Waypoints
@@ -1127,7 +1135,9 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (float
   }
   progress_callback(40);
 
+#ifdef GAME_EDITOR
   CompileDoors();
+#endif
   progress_callback(70);
 
   // DynamicObjects
@@ -1199,7 +1209,7 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (float
   }
   progress_callback(100);
 }
-#include <panda3d/collisionHandlerQueue.h>
+
 // MAP COMPILING
 void           World::CompileWaypoints(void)
 {

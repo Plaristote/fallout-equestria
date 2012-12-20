@@ -13,7 +13,7 @@ TEMPLATE = app
 
 QMAKE_CXXFLAGS += -std=c++0x
 
-LIBS      += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3pystub -lp3direct
+LIBS      += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3direct
 unix:LIBS += -lX11
 
 SOURCES += main.cpp\
@@ -37,7 +37,9 @@ SOURCES += main.cpp\
     tabdialog.cpp \
     tabl18n.cpp \
     dialogwaypointgenerate.cpp \
-    serializer.cpp
+    serializer.cpp \
+    itemeditor.cpp \
+    dialoginventoryitem.cpp
 
 HEADERS  += mainwindow.h \
     qpandawidget.h \
@@ -59,7 +61,9 @@ HEADERS  += mainwindow.h \
     tabdialog.h \
     tabl18n.h \
     dialogwaypointgenerate.h \
-    serializer.hpp
+    serializer.hpp \
+    itemeditor.h \
+    dialoginventoryitem.h
 
 FORMS    += mainwindow.ui \
     dialognewscript.ui \
@@ -69,4 +73,6 @@ FORMS    += mainwindow.ui \
     forminternationalization.ui \
     wizardobject.ui \
     dialogobject.ui \
-    dialogwaypointgenerate.ui
+    dialogwaypointgenerate.ui \
+    itemeditor.ui \
+    dialoginventoryitem.ui

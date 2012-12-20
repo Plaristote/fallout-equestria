@@ -877,7 +877,7 @@ void GameMainBar::SetEquipedItemAction(unsigned short it, InventoryObject* item,
       bool         actionExists = (*item)["actions"].Count() > actionIt;
 
       if (actionExists) rml << "<p class='equiped_action'>" << (*item)["actions"][actionIt].Key() << "</p>";
-      rml << "<p class='equiped_image'><img class='equiped_image' src='../textures/itemIcons/" << (*item)["icon"].Value() << "' /></p>";
+      rml << "<p class='equiped_image'><img src='../textures/itemIcons/" << (*item)["icon"].Value() << "' /></p>";
       if (actionExists) rml << "<p class='equiped_apcost'>" << (*item)["actions"][actionIt]["ap-cost"].Value() << "AP</p>";
       elem->SetInnerRML(rml.str().c_str());
     }

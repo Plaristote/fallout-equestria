@@ -59,14 +59,18 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     _sunLight = new DirectionalLight("sun_light");
 
     _sunLight->set_shadow_caster(true, 2048, 2048);
-    _sunLight->get_lens()->set_near_far(1.f, 25.f);
+    _sunLight->get_lens()->set_near_far(50.f, 100.f);
     _sunLight->get_lens()->set_film_size(512);
 
     _sunLightNode = window->get_render().attach_new_node(_sunLight);
-    _sunLightNode.set_pos(0.f, -10.f, 10.f);
-    _sunLightNode.set_hpr(-30, -80, 0);
+    _sunLightNode.set_pos(50.f, 50, 50.f);
+    _sunLightNode.set_hpr(127, -31,  0);
     window->get_render().set_light(_sunLightNode);
     window->get_render().set_two_sided(false);
+
+    /*NodePath np = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
+    np.set_scale(5);
+    np.reparent_to(_sunLightNode);*/
 
     TimeManager::Task* daylightTask = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
     daylightTask->Interval.Connect(*this, &Level::RunDaylight);
@@ -573,6 +577,10 @@ extern void* mypointer;
 AsyncTask::DoneStatus Level::do_task(void)
 { 
   float elapsedTime = _timer.GetElapsedTime();
+  
+  //(++(++(++(++(_world->objects.begin())))))->nodePath.hide();
+  //_sunLightNode.look_at(GetPlayer()->GetDynamicObject()->nodePath);
+  //cout << _sunLightNode.get_hpr().get_x() << "," << _sunLightNode.get_hpr().get_y() << "," << _sunLightNode.get_hpr().get_z() << endl;
   
   // TEST Mouse Cursor automatic change while hovering interfaces
   if (_levelUi.GetContext()->GetHoverElement() == _levelUi.GetContext()->GetRootElement())

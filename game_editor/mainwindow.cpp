@@ -44,7 +44,7 @@ QString pathScriptCategories[5] = {
     "dialogs", "quests", "ai", "objects", "buffs"
 };
 
-MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), tabScript(this, ui), tabDialog(this, ui), tabL18n(this, ui), splashScreen(this), wizardObject(this), dialogObject(this)
+MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(parent), _app(*app), ui(new Ui::MainWindow), tabScript(this, ui), tabDialog(this, ui), tabL18n(this, ui), splashScreen(this), wizardObject(this), dialogObject(this)
 {
     QIcon iconScript("icons/script.png");
     QIcon iconItems("icons/item.png");
@@ -105,6 +105,8 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
 
     splashScreen.open();
 
+    connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(CurrentTabChanged(int)));
+
     connect(&splashScreen, SIGNAL(rejected()), app,  SLOT(Terminate()));
     connect(&splashScreen, SIGNAL(accepted()), this, SLOT(LoadProject()));
 
@@ -159,6 +161,11 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::CurrentTabChanged(int ntab)
+{
+    _app.SetPandaEnabled(ntab == 0); // The first tab is the only one using Panda3D
 }
 
 void MainWindow::CreateMap(void)

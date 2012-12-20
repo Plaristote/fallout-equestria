@@ -1,4 +1,5 @@
 #include "level/world.h"
+#include <panda3d/collisionHandlerQueue.h>
 
 using namespace std;
 
@@ -793,13 +794,13 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
         packet >> size;
         for (int i = 0 ; i < size ; ++i)
         {
-            int id1, id2;
+          int id1, id2;
 
-            packet >> id1 >> id2;
-	    auto it1 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id1, id2));
-	    auto it2 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id2, id1));
-	    if (it1 == lockedArcs.end() && it2 == lockedArcs.end())
-	    {  lockedArcs.push_back(std::pair<int, int>(id1, id2)); }
+          packet >> id1 >> id2;
+          auto it1 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id1, id2));
+          auto it2 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id2, id1));
+          if (it1 == lockedArcs.end() && it2 == lockedArcs.end())
+          {  lockedArcs.push_back(std::pair<int, int>(id1, id2)); }
         }
     }
 
@@ -928,6 +929,8 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
       break ;
     case Type_DynamicObject:
       ReparentTo(world->GetDynamicObjectFromName(parent_name));
+      break ;
+    case Type_None:
       break ;
   }
   Initialize();
@@ -1206,7 +1209,7 @@ void           World::Serialize(Utils::Packet& packet)
     }
   }  
 }
-#include <panda3d/collisionHandlerQueue.h>
+
 // MAP COMPILING
 void           World::CompileWaypoints(void)
 {

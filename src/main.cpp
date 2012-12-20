@@ -60,7 +60,7 @@ string underscore(const std::string& str)
 asIScriptContext* as_current_context;
 asIScriptModule*  as_current_module;
 
-class RocketAsListener : Rocket::Core::EventListener
+class RocketAsListener : public Rocket::Core::EventListener
 {
 public:
   RocketAsListener(DataEngine& de, Rocket::Core::Element* elem, const std::string& event, const std::string& func_name) : _element(elem), _event(event), _de(de)

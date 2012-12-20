@@ -3,6 +3,7 @@
 
 # include <panda3d/cmath.h>
 # include <QApplication>
+# include <QTimer>
 # include <panda3d/pandaFramework.h>
 # include <panda3d/pandaSystem.h>
 
@@ -18,12 +19,19 @@ public:
     static PandaFramework& Framework(void) { return (_framework); }
     static void            Close(void);
 
+    void                   SetPandaEnabled(bool enabled);
+
 public slots:
     void                   Terminate(void) { Close(); }
+    void                   PandaRefresh(void);
+    void                   EnablePanda(void)  { SetPandaEnabled(true);  }
+    void                   DisablePanda(void) { SetPandaEnabled(false); }
 
 private:
     static bool           _continue;
     static PandaFramework _framework;
+    QTimer                _timer;
+    bool                  _panda_enabled;
 };
 
 #endif // QPANDAAPPLICATION_H

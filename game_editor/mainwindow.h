@@ -61,6 +61,7 @@ private slots:
     void PandaInitialized(void);
     void LoadProject(void);
     void FilterInit(void);
+    void CurrentTabChanged(int);
 
     // MAPS
     void LoadMap(const QString&);
@@ -154,6 +155,7 @@ public:
     void DrawMap(void);
 
 private:
+    QPandaApplication&       _app;
     WindowFramework*         _window;
     Ui::MainWindow*          ui;
     TabScript                tabScript;
