@@ -17,8 +17,6 @@ Buff::~Buff()
 
 Buff::Buff(const string& name, StatController* stats, Data data, TimeManager& tm) : _tm(tm)
 {
-  unsigned short refresh_time = 1;
-
   _buff.Duplicate(data);
   InitScripts();
   _context      = 0;

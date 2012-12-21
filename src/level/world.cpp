@@ -1316,13 +1316,13 @@ void           World::SetMapObjectsVisible(bool v)
   if (v)
   {
     rootMapObjects.show();
-    for (int i = 0 ; i < floors.size() ; ++i)
+    for (unsigned int i = 0 ; i < floors.size() ; ++i)
       floors[i].get_child(0).show();
   }
   else
   {
     rootMapObjects.hide();
-    for (int i = 0 ; i < floors.size() ; ++i)
+    for (unsigned int i = 0 ; i < floors.size() ; ++i)
      floors[i].get_child(0).hide();
   }
 }
@@ -1332,13 +1332,13 @@ void           World::SetDynamicObjectsVisible(bool v)
   if (v)
   {
     rootDynamicObjects.show();
-    for (int i = 0 ; i < floors.size() ; ++i)
+    for (unsigned int i = 0 ; i < floors.size() ; ++i)
       floors[i].get_child(1).show();
   }
   else
   {
     rootDynamicObjects.hide();
-    for (int i = 0 ; i < floors.size() ; ++i)
+    for (unsigned int i = 0 ; i < floors.size() ; ++i)
       floors[i].get_child(1).hide();
   }
 }

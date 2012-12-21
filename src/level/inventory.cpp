@@ -147,7 +147,7 @@ InventoryObject::EquipedModel::EquipedModel(WindowFramework* window, InventoryOb
   Texture*    texfile;
 
   _modelName   = object["model"].Value();
-  for (short i = 0 ; i < _modelName.size() ; ++i)
+  for (unsigned short i = 0 ; i < _modelName.size() ; ++i)
   {
     if (_modelName[i] == '/' || _modelName[i] == '\\')
     {

@@ -21,7 +21,7 @@ InstanceDynamicObject::InstanceDynamicObject(Level* level, DynamicObject* object
 
   // Get model name from path
   _modelName            = object->strModel;
-  for (short i = 0 ; i < _modelName.size() ; ++i)
+  for (unsigned short i = 0 ; i < _modelName.size() ; ++i)
   {
     if (_modelName[i] == '/' || _modelName[i] == '\\')
     {

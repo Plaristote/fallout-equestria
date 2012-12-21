@@ -25,7 +25,6 @@ void MouseCursor::Update(void)
   if (_cursor && IsVisible())
   {
     stringstream strTop, strLeft;
-    int          nTop,   nLeft;
     string       top,    left;
     MouseData    pointer = _window->get_graphics_window()->get_pointer(0);
 
@@ -198,7 +197,6 @@ MainMenu::View::View(WindowFramework* window, Rocket::Core::Context* context) : 
     std::string                      idz[]                        = { "button-continue", "button-new-game", "button-load-game", "button-options", "button-quit" };
     Observatory::Signal<void (Rocket::Core::Event&)>* signalz[]   = { &Continue, &NewGame, &LoadGame, &Options, &Quit };
     RocketListener*                  listenerz[]                  = { &ContinueClicked, &NewGameClicked, &LoadGameClicked, &OptionsClicked, &QuitClicked };
-    Rocket::Core::Element*           buttons[5];
 
     for (int it = 0 ; it < 5 ; ++it)
     {

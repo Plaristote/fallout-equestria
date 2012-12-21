@@ -22,7 +22,7 @@ public:
   struct EquipedModel : public AnimatedObject
   {
     EquipedModel(WindowFramework* win, InventoryObject* pObject);
-    ~EquipedModel();
+    virtual ~EquipedModel();
     
     NodePath GetNodePath(void) const { return (np); }
     void     ResetAnimation(void)    {}

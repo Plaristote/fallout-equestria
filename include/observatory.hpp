@@ -408,7 +408,7 @@ namespace Observatory
     {
       while (_recordedCalls.size())
       {
-        RecordedCall& params = _recordedCalls.front();
+        /*RecordedCall& params = */_recordedCalls.front();
 
         _iterator = _observers.begin();
         while (_iterator != _observers.end())

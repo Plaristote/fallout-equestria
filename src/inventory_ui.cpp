@@ -458,7 +458,7 @@ UiNextZone::UiNextZone(WindowFramework* window, Rocket::Core::Context* context, 
 
     {
       ToggleEventListener(true, "cancel", "click", CancelSelected);
-      for (short n = 1 ; n <= zones.size() ; ++n)
+      for (unsigned short n = 1 ; n <= zones.size() ; ++n)
       {
 	stringstream           name;
 	Rocket::Core::Element* zoneButton;

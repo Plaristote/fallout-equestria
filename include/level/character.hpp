@@ -207,7 +207,7 @@ private:
   // Inventory and Equiped Items
   struct ItemEquiped
   {
-    ItemEquiped(void) : equiped(0), default_(0), graphics(0), actionIt(0) {}
+    ItemEquiped(void) : actionIt(0), equiped(0), default_(0), graphics(0) {}
     unsigned char                  actionIt;
     EquipedMode                    mode;
     InventoryObject*               equiped;

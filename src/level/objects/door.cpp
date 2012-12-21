@@ -59,7 +59,7 @@ InstanceDynamicObject::GoToData ObjectDoor::GetGoToData(InstanceDynamicObject* c
 
       if (waypoint1 && (_level->FindPath(path, *waypoint, *waypoint1)))
       {
-	if (ret.max_distance > path.size() || ret.max_distance == -1)
+	if (ret.max_distance > (int)path.size() || ret.max_distance == -1)
 	{
 	  ret.nearest      = waypoint1;
 	  ret.max_distance = path.size();
@@ -68,7 +68,7 @@ InstanceDynamicObject::GoToData ObjectDoor::GetGoToData(InstanceDynamicObject* c
 
       if (waypoint2 && (_level->FindPath(path, *waypoint, *waypoint2)))
       {
-	if (ret.max_distance > path.size() || ret.max_distance == -1)
+	if (ret.max_distance > (int)path.size() || ret.max_distance == -1)
 	{
 	  ret.nearest      = waypoint2;
 	  ret.max_distance = path.size();

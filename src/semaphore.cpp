@@ -28,7 +28,7 @@ bool Semaphore::Post(void)
 
   if (!(sem_getvalue(&_handle, &value)))
   {
-    if (value < _max_count)
+    if (value < (int)_max_count)
       return (sem_post(&_handle) == 0);
   }
   return (false);

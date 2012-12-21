@@ -92,7 +92,7 @@ public:
       // GetFunctionByDecl doesn't find the function declaration for some unknown reason.
       // The function declaration is valid and should be present in the module, unless
       // we're using the wrong module. Which is unlikely, but is the last explanation.
-      
+
       if (_context && callback)
       {
 	_context->Prepare(callback);
@@ -101,7 +101,6 @@ public:
 	_context->SetArgObject(2, &_event);
 	_context->Execute();
       }
-      if (callback) callback->Release();
     }
   }
 

@@ -139,13 +139,11 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   NodePath bodyNP = object->nodePath.find("**/+Character");
   _character      = dynamic_cast<Character*>(bodyNP.node());
 
-  CharacterJoint* joint = _character->find_joint("Horn");
-
   PT(CharacterJointBundle) bodyBundle = _character->get_bundle(0);
 
   //HAIL MICROSOFT
   string listJoints[] = { "Horn", "Mouth", "BattleSaddle" };
-  for (int i= 0; i<GET_ARRAY_SIZE(listJoints); i++) {
+  for (unsigned int i = 0; i<GET_ARRAY_SIZE(listJoints); i++) {
     for (unsigned short it = 0 ; it < 2 ; ++it)
     {
       stringstream       jointName;
@@ -304,7 +302,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   string anims[] = { "idle", "walk", "run", "use" };
   /*for_each(anims.begin(), anims.end(), [this](string anim)
   { LoadAnimation(anim); });*/
-  for (int i=0; i<GET_ARRAY_SIZE(anims); i++)
+  for (unsigned int i = 0; i<GET_ARRAY_SIZE(anims); i++)
 	  LoadAnimation(anims[i]);
 
   // Others
@@ -513,7 +511,7 @@ int                 ObjectCharacter::GetBestWaypoint(InstanceDynamicObject* obje
 	float compDistance = waypoint->GetDistanceEstimate(*other);
 	bool  comp         = (farthest ? currentDistance < compDistance : currentDistance > compDistance);
 
-	if (currentDistance < compDistance)
+	if (comp)
 	  wp = waypoint;
       });
     }
@@ -849,7 +847,7 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
   //_losPath.show();
   _losHandlerQueue->sort_entries();
 
-  for (unsigned int i = 0 ; i < _losHandlerQueue->get_num_entries() ; ++i)
+  for (int i = 0 ; i < _losHandlerQueue->get_num_entries() ; ++i)
   {
     CollisionEntry* entry = _losHandlerQueue->get_entry(i);
     NodePath        node  = entry->get_into_node_path();

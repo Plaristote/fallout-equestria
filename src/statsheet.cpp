@@ -574,8 +574,6 @@ void StatController::SetSkill(const std::string& stat, short value)
 
 void StatController::AcceptChanges(void)
 {
-  StatView::EditMode editMode = _view->GetEditMode();
-
   if (!(_model.IsReady()))
   {
     cout << "[StatController] Thou art not ready" << endl;

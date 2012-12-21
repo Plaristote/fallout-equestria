@@ -73,7 +73,7 @@ void InteractMenu::ExecuteForButtonId(Rocket::Core::Event& event, std::function<
   string id         = event.GetCurrentElement()->GetId().CString();
   string event_type = event.GetType().CString();
 
-  for (int i = 0 ; i < _listeners.size() ; ++i)
+  for (unsigned int i = 0 ; i < _listeners.size() ; ++i)
   {
     if (id == _listeners[i]->name && (callback(event, event_type, _listeners[i])))
       break ;
@@ -125,7 +125,7 @@ InteractMenu::~InteractMenu()
 void InteractMenu::ButtonClicked(Rocket::Core::Event& event)
 {
   if (_done) return;
-  for (int i = 0 ; i < _listeners.size() ; ++i)
+  for (unsigned int i = 0 ; i < _listeners.size() ; ++i)
   {
     if (event.GetCurrentElement()->GetId() == _listeners[i]->name.c_str())
     {

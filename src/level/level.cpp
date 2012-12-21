@@ -27,7 +27,7 @@ Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::Action
 Level* Level::CurrentLevel = 0;
 #include <panda3d/cullFaceAttrib.h>
 Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
-  _timeManager(tm), _camera(window, window->get_camera_group()), _levelUi(window, gameUi)
+  _camera(window, window->get_camera_group()), _timeManager(tm), _levelUi(window, gameUi)
 {
   LoadingScreen* loadingScreen = new LoadingScreen(window, gameUi.GetContext());
 
@@ -915,8 +915,6 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 
 void Level::CallbackActionUseObjectOn(InstanceDynamicObject* target)
 {
-  InventoryObject* object;
-  
   CloseRunningUi<UiItInteractMenu>();
   if (_currentUis[UiItUseObjectOn])
     delete _currentUis[UiItUseObjectOn];
@@ -1306,10 +1304,10 @@ void Level::CallbackGoToZone(const string& nextZone)
   
   if (_currentUis[UiItNextZone])
     _currentUis[UiItNextZone]->Destroy();
-  _exitingZone     = true;
-  _exitingZoneTo   = nextZone;
-  /*if (zone)
-    _exitingZoneName = zone->GetName();*/
+  _exitingZone       = true;
+  _exitingZoneTo     = nextZone;
+  if (zone)
+    _exitingZoneName = zone->GetName();
 }
 
 void Level::CallbackSelectNextZone(const vector<string>& nextZoneChoices)
@@ -1498,10 +1496,10 @@ void Level::SetCurrentFloor(unsigned char floor)
   unsigned char floorAbove       = 0;
   bool          isInsideBuilding = IsInsideBuilding(floorAbove);
 
-  for (int it = 0 ; it < floor ; ++it)
+  for (unsigned int it = 0 ; it < floor ; ++it)
     FloorFade(showLowerFloors, _world->floors[it]);
 
-  for (int it = floor + 1 ; it < _world->floors.size() ; ++it)
+  for (unsigned int it = floor + 1 ; it < _world->floors.size() ; ++it)
     FloorFade(isInsideBuilding, _world->floors[it]);
   
   if (_world->floors.size() > floor)

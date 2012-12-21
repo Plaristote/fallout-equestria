@@ -119,3 +119,17 @@ void             ModuleManager::Release(asIScriptModule* ptr)
     }
   }
 }
+
+void ModuleManager::OutputFunctionList(asIScriptModule* ptr)
+{
+  unsigned int count = ptr->GetFunctionCount();
+
+  cout << "Function for module " << ptr->GetName() << endl;
+  for (unsigned int it = 0 ; it < count ; ++it)
+  {
+    const string declaration(ptr->GetFunctionByIndex(it)->GetDeclaration());
+
+    cout << "  " << declaration << endl;
+  }
+  cout << endl;
+}

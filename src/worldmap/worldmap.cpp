@@ -40,7 +40,7 @@ void WorldMap::Save(const string& savepath)
   DataTree::Writers::JSON(_mapTree, "saves/map.json");
 }
 
-WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, TimeManager& tm) : UiBase(window, gameUi->GetContext()), _gameUi(*gameUi), _dataEngine(de), _timeManager(tm)
+WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, TimeManager& tm) : UiBase(window, gameUi->GetContext()), _dataEngine(de), _timeManager(tm), _gameUi(*gameUi)
 {
   cout << "Building worldmap" << endl;
   _current_pos_x = _goal_x = _dataEngine["worldmap"]["pos-x"];
@@ -297,7 +297,7 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
 
 Core::Element* WorldMap::GetCaseAt(int x, int y) const
 {
-  int it = y * _size_x + x;
+  unsigned int it = y * _size_x + x;
 
   if (_cases.size() > it)
     return (_cases[it]);

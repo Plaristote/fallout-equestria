@@ -59,7 +59,7 @@ public:
   {
     Rocket::Core::Element* child;
     
-    for (int it = 0 ; child = elem->GetChild(it) ; ++it)
+    for (int it = 0 ; (child = elem->GetChild(it)) ; ++it)
     {
       child->SetProperty(property.c_str(), value.c_str());
       SetPropertyOnAll(child, property, value);

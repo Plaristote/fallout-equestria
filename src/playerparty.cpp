@@ -62,7 +62,7 @@ void PlayerParty::Serialize(Utils::Packet& packet) const
   packet << size;
   for_each(_objects.begin(), _objects.end(), [&packet](const DynamicObject* object)
   {
-    int  iType    = object->type;
+    //int  iType    = object->type;
     int  inv_size = object->inventory.size();
     auto it       = object->inventory.begin();
     auto end      = object->inventory.end();

@@ -9,8 +9,6 @@
 void Level::Load(Utils::Packet& packet)
 {
   char tmpState;
-  int  countObject;
-  int  countCharacters;
 
   packet >> tmpState;
   _state = (State)tmpState;
@@ -153,7 +151,6 @@ void ObjectCharacter::Load(Utils::Packet& packet)
 
 void ObjectCharacter::Save(Utils::Packet& packet)
 {
-  int                tmpPathSize = _path.size();
   asIScriptFunction* saveFunc    = (_scriptContext && _scriptModule ? _scriptModule->GetFunctionByDecl("void Save(Serializer@)") : 0);
 
   InstanceDynamicObject::Save(packet);
