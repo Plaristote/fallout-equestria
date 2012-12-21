@@ -87,6 +87,11 @@ public:
     if (_module && _element)
     {
       asIScriptFunction* callback = _module->GetFunctionByDecl(_callback.c_str());
+
+      // WARNING About the present bug
+      // GetFunctionByDecl doesn't find the function declaration for some unknown reason.
+      // The function declaration is valid and should be present in the module, unless
+      // we're using the wrong module. Which is unlikely, but is the last explanation.
       
       if (_context && callback)
       {

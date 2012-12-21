@@ -36,18 +36,23 @@ void UiBase::ToggleEventListener(bool toggle_on, const std::string& id, const st
       Listener             registered(element, event, listener);
       auto                 it      = std::find(_listeners.begin(), _listeners.end(), registered);
 
-      if (toggle_on && it == _listeners.end())
+      if (toggle_on)
       {
+        if (it == _listeners.end())
+          _listeners.push_back(registered);
+        else
+          element->RemoveEventListener(event.c_str(), &listener);
         element->AddEventListener(event.c_str(), &listener);
-        _listeners.push_back(registered);
       }
-      else if (!toggle_on)
+      else
       {
         element->RemoveEventListener(event.c_str(), &listener);
         if (it != _listeners.end())
           _listeners.erase(it);
       }
     }
+    else
+      cout << "[WARNING] Element '" << id << "' doesn't exist." << endl;
   }
 }
 
