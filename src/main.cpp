@@ -25,6 +25,106 @@ using namespace std;
 #include <level/objects/shelf.hpp>
 #include <level/objects/locker.hpp>
 
+/*struct Quest
+{
+  Data                                           data;
+  Observatory::Signal<void (const std::string&)> Completed;
+
+  void ActionCompleted(const std::string& type, const std::string& target, unsigned short quantity);
+  
+private:
+  bool CheckIfCompleted(void);
+};
+
+
+class QuestManager
+{
+  typedef std::list<Quest> Quests;
+public:
+  QuestManager(DataEngine& de, StatController* player_controller) : _data_engine(de), _stats_controller(player_controller)
+  {
+  }
+
+  void   AddQuest(Data);
+
+private:
+  void   QuestCompleted(const std::string&);
+
+  DataEngine&     _data_engine;
+  Quests          _quests;
+  StatController* _stats_controller;
+};
+
+void QuestManager::AddQuest(Data data)
+{
+  Quest quest;
+  
+  _data_engine["Quests"][data.Key()].Duplicate(data);
+  quest.data = _data_engine["Quests"][data.Key()];
+  quest.Completed.Connect(*this, &QuestManager::QuestCompleted);
+  _quests.push_back(quest);
+}
+
+void QuestManager::QuestCompleted(const string& name)
+{
+  Data quest = _data_engine["Quests"][name];
+
+  quest["complete"] = 1;
+  _stats_controller->AddExperience(quest["reward"]);
+}
+
+void Quest::ActionCompleted(const string& type, const string& target, unsigned short quantity)
+{
+  Data objectives = data["objectives"];
+
+  for_each(objectives.begin(), objectives.end(), [this, type, target, &quantity](Data objective)
+  {
+    Data conditions = objective["conditions"];
+    
+    for_each(conditions.begin(), conditions.end(), [this, type, target, &quantity](Data condition)
+    {
+      if (condition["type"].Value() == type && condition["target"].Value() == target)
+      {
+        unsigned short quantity_left = condition["quantity_left"];
+        
+        if (quantity_left < quantity)
+        {
+          quantity      -= quantity_left;
+          quantity_left  = 0;
+        }
+        else
+        {
+          quantity       = 0;
+          quantity_left -= quantity;
+        }
+      }
+    });
+  });
+  if (CheckIfCompleted())
+    Completed.Emit(data.Key());
+}
+
+bool Quest::CheckIfCompleted(void)
+{
+  bool success    = true;
+  Data objectives = data["objectives"];
+
+  for_each(objectives.begin(), objectives.end(), [this](Data objective)
+  {
+    Data conditions = objective["conditions"];
+    
+    for_each(conditions.begin(), conditions.end(), [this](Data condition)
+    {
+      unsigned short quantity_left = condition["quantity_left"];
+      
+      if (quantity_left > 0)
+        success = false;
+    });
+  });
+  return (success);
+}*/
+
+
 string humanize(const std::string& str)
 {
   string ret;

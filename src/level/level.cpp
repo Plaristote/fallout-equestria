@@ -1118,6 +1118,7 @@ struct XpFetcher
         controller->AddExperience(1001);
       else
         controller->AddExperience(xp_reward);
+      controller->AddKill(stats["Race"].Value());
     }
   }
 

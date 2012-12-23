@@ -5,7 +5,7 @@
 </head>
 
 <body>
-    <div id="mainbar">
+    <div id="window">
       <div id="content">
       </div>
     </div>

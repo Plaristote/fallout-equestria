@@ -1,7 +1,7 @@
 <rml>
 	<head>
 		<title>Iventory</title>
-		<link type="text/template" href="tpl_mainbar.rml" />
+		<link type="text/template" href="tpl_window.rml" />
 		<style>
 	        #body
 		{

@@ -732,6 +732,8 @@ void MapObject::UnSerialize(WindowFramework* window, Utils::Packet& packet)
   packet >> floor;
 
   nodePath   = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + strModel);
+  nodePath.set_depth_offset(1);
+  nodePath.set_two_sided(false);
   if (strTexture != "")
   {
     texture    = TexturePool::load_texture(TEXT_ROOT + strTexture);
@@ -1316,13 +1318,13 @@ void           World::SetMapObjectsVisible(bool v)
   if (v)
   {
     rootMapObjects.show();
-    for (unsigned int i = 0 ; i < floors.size() ; ++i)
+    for (int i = 0 ; i < floors.size() ; ++i)
       floors[i].get_child(0).show();
   }
   else
   {
     rootMapObjects.hide();
-    for (unsigned int i = 0 ; i < floors.size() ; ++i)
+    for (int i = 0 ; i < floors.size() ; ++i)
      floors[i].get_child(0).hide();
   }
 }
@@ -1332,13 +1334,13 @@ void           World::SetDynamicObjectsVisible(bool v)
   if (v)
   {
     rootDynamicObjects.show();
-    for (unsigned int i = 0 ; i < floors.size() ; ++i)
+    for (int i = 0 ; i < floors.size() ; ++i)
       floors[i].get_child(1).show();
   }
   else
   {
     rootDynamicObjects.hide();
-    for (unsigned int i = 0 ; i < floors.size() ; ++i)
+    for (int i = 0 ; i < floors.size() ; ++i)
       floors[i].get_child(1).hide();
   }
 }
