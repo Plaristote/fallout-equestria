@@ -1270,8 +1270,8 @@ void StatViewRocket::SetTraits(list<string> traits)
       
       for_each(traits.begin(), traits.end(), [this, &rml](const string trait)
       {
-	rml << "<button id='" << underscore(trait) << "'>O</button>";
-	rml << "<span class='text-trait' id='text-" << underscore(trait) << "'>" << _i18n[trait].Value() << "</span><br />";
+	rml << "<div class='traits-row'><button id='" << underscore(trait) << "' class='small_button'>O</button>";
+	rml << "<span class='text-trait' id='text-" << underscore(trait) << "'>" << _i18n[trait].Value() << "</span><br /></div>";
       });
       element->SetInnerRML(rml.str().c_str());
 
@@ -1312,16 +1312,17 @@ void StatViewRocket::SetCategoryFields(const std::string& category, const std::v
 	}
 	else if (category == "Statistics")
 	{
-	  rml << "<datagrid>\n";
-          rml << "  <col width='80%'><span class'statistics-key'>" << _i18n[keys[i]].Value() << "</span></col>\n";
-          rml << "  <col width='20%'><span class'statistics-value' id='statistics-value-" << underscored << "'>0</span></col>\n";
+	  rml << "<datagrid  class='statistics-datagrid'>\n";
+          rml << "  <col width='80%'><span class='statistics-key'>" << _i18n[keys[i]].Value() << "</span></col>\n";
+          rml << "  <col width='15%'><span class='statistics-value' id='statistics-value-" << underscored << "'></span></col>\n";
           rml << "</datagrid>\n\n";
 	}
 	else if (category == "Skills")
 	{
 	  rml << "<datagrid id='skill-datagrid-" << underscored << "' class='skill-datagrid' data-type='Skills' data-key='" << keys[i] << "'>\n";
-          rml << "  <col width='80%'><span class='skill-key'>" << _i18n[keys[i]].Value() << "</span></col>\n";
-          rml << "  <col width='20%'><span class='skill-value' id='skills-value-" << underscored << "'>0</span>%</col>\n";
+          rml << "  <col width='70%'><span class='skill-key'>" << _i18n[keys[i]].Value() << "</span></col>\n";
+          rml << "  <col width='20%'><span class='skill-value' id='skills-value-" << underscored << "'>0</span></col>\n";
+          rml << "  <col width='5%'><span>%</span></col>";
           rml << "</datagrid>\n\n";
 	}
       }

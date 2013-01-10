@@ -2,6 +2,24 @@
 <head>
   <link type="text/rcss" href="rkt.rcss"/>
   <link type="text/rcss" href="main.rcss"/>
+  <style>
+    #main_bar-left{
+      icon-decorator: image;
+      icon-image: menu.png 0px 0px 171px 135px;
+    }
+
+    #main_bar-mid{
+      icon-decorator: image;
+      icon-image: menu.png 172px 0px 790px 135px;
+    }
+
+    #main_bar-right{
+      icon-decorator: image;
+      icon-image: menu.png 791px 0px px 135px;
+    }
+  </style>  
+  
+  
 </head>
 
 <body>

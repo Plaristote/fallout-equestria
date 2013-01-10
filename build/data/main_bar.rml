@@ -33,14 +33,14 @@ body
   height: 90%;
 }
 
-#mid-col{
+#main_bar-mid{
 	width: 50%;
 	height: 100%;
 	z-index: 5;
 	
 }
-#left-col,
-#right-col{
+#main_bar-left,
+#main_bar-right{
 	width: 22%;
 	height: 100%;
 	z-index: 5;
@@ -132,29 +132,29 @@ body
     </style>
   </head>
   <body template="tplmainbar">
-   	<div id="left-col" class="char-place-next-to ">
+   	<div id="main_bar-left" class="  place-next-to ">
 			<p id="console" class="console-bg"></p>
    	</div>
-		<div id="mid-col" class="char-place-next-to ">
-			<div id="team-row" class="char-place-beneath">
+		<div id="main_bar-mid" class="  place-next-to ">
+			<div id="team-row" class="  place-beneath">
 
 			</div>
 			<div id="inv-and-weapons" class="char-place-beneat">
-				<div id="inv-col" class="char-place-next-to">
+				<div id="inv-col" class="  place-next-to">
 					<button class="francis" id="inv" ><p>INV</p></button>
 					<button class="francis" id="charsheet">Char</button>
         			<button class="francis" id="menu">Q</button>
 				</div>
-				<div id="weapons-col" class="char-place-next-to">				
-					<div id="moves-row" class="char-place-beneath">
+				<div id="weapons-col" class="  place-next-to">				
+					<div id="moves-row" class="  place-beneath">
 						<p id="action_points">oooooooooo</p>
 					</div>
-					<div id="weapons-row"  class="char-place-beneath">
-						<p class="equiped char-place-next-to metal-bg" id="equiped_1">Equiped One</p>
-      				<p class="equiped char-place-next-to metal-bg" id="equiped_2">Equiped Two</p>
+					<div id="weapons-row"  class="  place-beneath">
+						<p class="equiped   place-next-to metal-bg" id="equiped_1">Equiped One</p>
+      				<p class="equiped   place-next-to metal-bg" id="equiped_2">Equiped Two</p>
 					</div>
 				</div>
-				<div id="hp-col" class="char-place-next-to">
+				<div id="hp-col" class="  place-next-to">
 					<p>PV</p>
 					<span id="current-hp" class="points">99</span>
         			<p>AC</p>
@@ -162,16 +162,16 @@ body
 				</div>
 			</div>
 		</div>
-		<div id="right-col"  class="char-place-next-to ">
+		<div id="main_bar-right"  class="  place-next-to ">
 
-			<div id="combat-col" class="char-place-next-to">
+			<div id="combat-col" class="  place-next-to">
 				<div style="height: 30%;"></div>
 				<div id="combat-holder" class="metal-bg">
 					<button id="pass_turn" >Turn</button>
         			<button id="stop_fight" >Cmbt</button>
         		</div>
 			</div>
-			<div id="skills-col" class="char-place-next-to">
+			<div id="skills-col" class="  place-next-to">
 				<button class="button_menu" id="skilldex">Skilldex</button>
         		<button class="button_menu" id="spellbook"> Spell Book</button>
         		<button class="button_menu" id="barding">Barding</button>

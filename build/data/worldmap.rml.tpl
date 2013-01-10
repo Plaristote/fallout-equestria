@@ -1,7 +1,7 @@
 <rml>
   <head>
     <title>World Map</title>
-    <link type="text/template" href="tpl_window.rml" />
+    <link type="text/template" href="tpl_mainbar.rml" />
     <style>
 
 #main
@@ -58,8 +58,9 @@
   text-align: center;
   font-size: 20px;
 }
-.something_button{
-	height: 20%;
+.universal_button{
+	width: 20%;
+	padding-left: 4%;
 }
 #quest-locator{
 	width: 80%;
@@ -84,15 +85,15 @@
 
   <body id="body">
     
-	  <div id="main" class="char-place-beneath">
+	  <div id="main" class="  place-beneath">
 	
-	    <div id="map-frame" class="char-place-next-to">
+	    <div id="map-frame" class="  place-next-to">
 	      <div id="party-cursor">-</div>
 	      <p id="pworldmap">
 	        #{RML}
 	      </p>
 	    </div>
-		 <div id="map-side" class="char-place-next-to">
+		 <div id="map-side" class="  place-next-to">
 		    <div id="clock-frame" class="window-background place-beneath">
 		      <span class="console-value" id="clock-year">0000</span> <span class="console-value" id="clock-month">01</span> <span id="clock-day" class="console-value">01</span>
 		    </div>
@@ -102,14 +103,14 @@
 		    </div>
 		  </div>
 	  </div>
-	  <div id="rest" class="char-place-beneath window-background">
-	    <div id="main-bar" class=" char-place-beneath">
+	  <div id="rest" class="  place-beneath window-background">
+	    <div id="main-bar" class="   place-beneath">
 	      <button id="button-inventory" class="universal_button" i18n="Inventory">Inventory</button>
 	      <button id="button-character" class="universal_button" i18n="Character">Character</button>
 	      <button id="button-pipbuck"  class="universal_button" i18n="Pipbuck">Pipbuck</button>
 	      <button id="button-menu"     class="universal_button" i18n="Menu">Menu</button>
 	    </div>
-		 <div id="quest-locator" class="console-bg char-place-beneath">
+		 <div id="quest-locator" class="console-bg   place-beneath">
 				 Placeholder for quest tracer
 		 </div>
 	  </div>
