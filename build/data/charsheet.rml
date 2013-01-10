@@ -157,7 +157,7 @@ col{
 #cancel,
 #continue
 {
-	display: block;
+  display: block;
   width:    25%;
 }
 

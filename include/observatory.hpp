@@ -8,6 +8,7 @@
 # include <iostream>
 
 # include "semaphore.hpp"
+#include "serializer.hpp"
 
 # define S1P_TPL                class P1 = void
 # define S1P_TFUN               P1 (void)
@@ -16,6 +17,8 @@
 # define S1P_RECORD_CON         foe(true)
 # define S1P_RECORD_ATTR        bool foe;
 # define S1P_RECORD_VAL         
+# define S1P_RECORD_SERI        foe
+# define S1P_RECORD_UNSERI      foe
 
 # define S2P_TPL                class P1, class P2
 # define S2P_TFUN               P1 (P2)
@@ -24,6 +27,8 @@
 # define S2P_RECORD_CON         p1(p1)
 # define S2P_RECORD_ATTR        P2 p1;
 # define S2P_RECORD_VAL         params.p1
+# define S2P_RECORD_SERI        p1
+# define S2P_RECORD_UNSERI      p1
 
 # define S3P_TPL                class P1, class P2, class P3
 # define S3P_TFUN               P1 (P2, P3)
@@ -32,6 +37,8 @@
 # define S3P_RECORD_CON         p1(p1), p2(p2)
 # define S3P_RECORD_ATTR        P2 p1; P3 p2;
 # define S3P_RECORD_VAL         params.p1, params.p2
+# define S3P_RECORD_SERI        p1 << p2
+# define S3P_RECORD_UNSERI      p1 >> p2
 
 # define S4P_TPL                class P1, class P2, class P3, class P4
 # define S4P_TFUN               P1 (P2, P3, P4)
@@ -40,6 +47,8 @@
 # define S4P_RECORD_CON         p1(p1), p2(p2), p3(p3)
 # define S4P_RECORD_ATTR        P2 p1; P3 p2; P4 p3;
 # define S4P_RECORD_VAL         params.p1, params.p2, params.p3
+# define S4P_RECORD_SERI        p1 << p2 << p3
+# define S4P_RECORD_UNSERI      p1 >> p2 >> p3
 
 # define S5P_TPL                class P1, class P2, class P3, class P4, class P5
 # define S5P_TFUN               P1 (P2, P3, P4, P5)
@@ -48,6 +57,8 @@
 # define S5P_RECORD_CON         p1(p1), p2(p2), p3(p3), p4(p4)
 # define S5P_RECORD_ATTR        P2 p1; P3 p2; P4 p3; P5 p4;
 # define S5P_RECORD_VAL         params.p1, params.p2, params.p3, params.p4
+# define S5P_RECORD_SERI        p1 << p2 << p3 << p4
+# define S5P_RECORD_UNSERI      p1 >> p2 >> p3 >> p4
 
 # define S6P_TPL                class P1, class P2, class P3, class P4, class P5, class P6
 # define S6P_TFUN               P1 (P2, P3, P4, P5, P6)
@@ -56,6 +67,8 @@
 # define S6P_RECORD_CON         p1(p1), p2(p2), p3(p3), p4(p4), p5(p5)
 # define S6P_RECORD_ATTR        P2 p1; P3 p2; P4 p3; P5 p4; P6 p5;
 # define S6P_RECORD_VAL         params.p1, params.p2, params.p3, params.p4, params.p5
+# define S6P_RECORD_SERI        p1 << p2 << p3 << p4 << p5
+# define S6P_RECORD_UNSERI      p1 >> p2 >> p3 >> p4 >> p5
 
 # define S7P_TPL                class P1, class P2, class P3, class P4, class P5, class P6, class P7
 # define S7P_TFUN               P1 (P2, P3, P4, P5, P6, P7)
@@ -64,21 +77,14 @@
 # define S7P_RECORD_CON         p1(p1), p2(p2), p3(p3), p4(p4), p5(p5), p6(p6)
 # define S7P_RECORD_ATTR        P2 p1; P3 p2; P4 p3; P5 p4; P6 p5; P7 p6;
 # define S7P_RECORD_VAL         params.p1, params.p2, params.p3, params.p4, params.p5, params.p6
+# define S7P_RECORD_SERI        p1 << p2 << p3 << p4 << p5 << p6
+# define S7P_RECORD_UNSERI      p1 >> p2 >> p3 >> p4 >> p5 >> p6
 
-# define DECL_SIGNAL(TPL, TFUN, PARAMS, VALUES, RECORD_CON, RECORD_ATTR, RECORD_VAL) \
+# define DECL_SIGNAL(TPL, TFUN, PARAMS, VALUES, RECORD_CON, RECORD_ATTR, RECORD_VAL, RECORD_SERI, RECORD_UNSERI) \
   template<TPL>                                                         \
   class Signal<TFUN> : public ISignal                                   \
   {                                                                     \
     friend class ObserverHandler;                                       \
-                                                                        \
-    struct RecordedCall                                                 \
-    {                                                                   \
-      RecordedCall(PARAMS) : RECORD_CON {}                              \
-                                                                        \
-      RECORD_ATTR                                                       \
-    };                                                                  \
-                                                                        \
-    typedef std::queue<RecordedCall> RecordedCalls;                     \
                                                                         \
     struct InterfaceObserver                                            \
     {                                                                   \
@@ -118,6 +124,26 @@
                                                                         \
     typedef std::list<InterfaceObserver*> Observers;                    \
   public:                                                               \
+    struct RecordedCall                                                 \
+    {                                                                   \
+      RecordedCall(PARAMS) : RECORD_CON {}                              \
+      RecordedCall(void) {}                                             \
+                                                                        \
+      void Serialize(Utils::Packet& packet)                             \
+      {                                                                 \
+        packet << RECORD_SERI;                                          \
+      }                                                                 \
+                                                                        \
+      void Unserialize(Utils::Packet& packet)                           \
+      {                                                                 \
+        packet >> RECORD_UNSERI;                                        \
+      }                                                                 \
+                                                                        \
+      RECORD_ATTR                                                       \
+    };                                                                  \
+                                                                        \
+    typedef std::queue<RecordedCall> RecordedCalls;                     \
+                                                                        \
     Signal(bool async = true) : _async(async) {}                        \
                                                                         \
     ~Signal()                                                           \
@@ -206,6 +232,19 @@
     inline int ObserverCount(void) const                                \
     {                                                                   \
       return (_observers.size());                                       \
+    }                                                                   \
+                                                                        \
+    void       PushRecordCall(void* raw)                                \
+    {                                                                   \
+      RecordedCall params;                                              \
+                                                                        \
+      memcpy(&params, raw, sizeof(RecordedCall));                       \
+      _recordedCalls.push(params);                                      \
+    }                                                                   \
+                                                                        \
+    inline RecordedCalls& GetRecordedCalls(void)                        \
+    {                                                                   \
+      return (_recordedCalls);                                          \
     }                                                                   \
                                                                         \
     void       ExecuteRecordedCalls(void)                               \
@@ -438,14 +477,14 @@ namespace Observatory
     bool                         _async;
   };
  
-  //DECL_SIGNAL(S1P_TPL, S1P_TFUN, S1P_PARAMS, S1P_VALUES, S1P_RECORD_CON, S1P_RECORD_ATTR, S1P_RECORD_VAL) 
-  DECL_SIGNAL(S2P_TPL, S2P_TFUN, S2P_PARAMS, S2P_VALUES, S2P_RECORD_CON, S2P_RECORD_ATTR, S2P_RECORD_VAL)
-  DECL_SIGNAL(S3P_TPL, S3P_TFUN, S3P_PARAMS, S3P_VALUES, S3P_RECORD_CON, S3P_RECORD_ATTR, S3P_RECORD_VAL)
-  DECL_SIGNAL(S4P_TPL, S4P_TFUN, S4P_PARAMS, S4P_VALUES, S4P_RECORD_CON, S4P_RECORD_ATTR, S4P_RECORD_VAL)
-  DECL_SIGNAL(S5P_TPL, S5P_TFUN, S5P_PARAMS, S5P_VALUES, S5P_RECORD_CON, S5P_RECORD_ATTR, S5P_RECORD_VAL)
-  DECL_SIGNAL(S6P_TPL, S6P_TFUN, S6P_PARAMS, S6P_VALUES, S6P_RECORD_CON, S6P_RECORD_ATTR, S6P_RECORD_VAL)
-  DECL_SIGNAL(S7P_TPL, S7P_TFUN, S7P_PARAMS, S7P_VALUES, S7P_RECORD_CON, S7P_RECORD_ATTR, S7P_RECORD_VAL)
-  
+  //DECL_SIGNAL(S1P_TPL, S1P_TFUN, S1P_PARAMS, S1P_VALUES, S1P_RECORD_CON, S1P_RECORD_ATTR, S1P_RECORD_VAL, S1P_RECORD_SERI, S1P_RECORD_UNSERI) 
+  DECL_SIGNAL(S2P_TPL, S2P_TFUN, S2P_PARAMS, S2P_VALUES, S2P_RECORD_CON, S2P_RECORD_ATTR, S2P_RECORD_VAL, S2P_RECORD_SERI, S2P_RECORD_UNSERI)
+  DECL_SIGNAL(S3P_TPL, S3P_TFUN, S3P_PARAMS, S3P_VALUES, S3P_RECORD_CON, S3P_RECORD_ATTR, S3P_RECORD_VAL, S3P_RECORD_SERI, S3P_RECORD_UNSERI)
+  DECL_SIGNAL(S4P_TPL, S4P_TFUN, S4P_PARAMS, S4P_VALUES, S4P_RECORD_CON, S4P_RECORD_ATTR, S4P_RECORD_VAL, S4P_RECORD_SERI, S4P_RECORD_UNSERI)
+  DECL_SIGNAL(S5P_TPL, S5P_TFUN, S5P_PARAMS, S5P_VALUES, S5P_RECORD_CON, S5P_RECORD_ATTR, S5P_RECORD_VAL, S5P_RECORD_SERI, S5P_RECORD_UNSERI)
+  DECL_SIGNAL(S6P_TPL, S6P_TFUN, S6P_PARAMS, S6P_VALUES, S6P_RECORD_CON, S6P_RECORD_ATTR, S6P_RECORD_VAL, S6P_RECORD_SERI, S6P_RECORD_UNSERI)
+  DECL_SIGNAL(S7P_TPL, S7P_TFUN, S7P_PARAMS, S7P_VALUES, S7P_RECORD_CON, S7P_RECORD_ATTR, S7P_RECORD_VAL, S7P_RECORD_SERI, S7P_RECORD_UNSERI)
+
   class ObserverHandler
   {
     struct IObserverPair
@@ -505,6 +544,96 @@ namespace Observatory
   private:
     Observers _observers;
   };
+
+  
+//   class Socket
+//   {
+//   public:
+//     void Send(void*, unsigned short size);
+//     void Send(const Utils::Packet& packet);
+//   private:
+//   };
+//   
+//   class NetworkObserver
+//   {
+//     typedef std::list<Socket*> Observers;
+//   public:
+//     NetworkObserver(unsigned int id) : _id(id) {}
+//     virtual ~NetworkObserver() {}
+//     virtual void ExecutePendingCalls(void) = 0;
+//     virtual void SendPendingCalls(void)    = 0;
+// 
+//     bool         operator==(unsigned int id) const { return (_id == id); }
+//     unsigned int Id(void)                    const { return (_id); }
+//     void         AddSocket(Socket* socket)         { _observers.push_back(socket); }
+//     void         DelSocket(Socket* socket)         { _observers.remove(socket);    }
+//     
+//   protected:
+//     void         SendToObservers(const Utils::Packet& packet)
+//     {
+//       std::for_each(_observers.begin(), _observers.end(), [packet](Socket* socket)
+//       { socket->Send(packet); });
+//     }
+// 
+//   private:
+//     Observers    _observers;
+//     unsigned int _id;
+//   };
+// 
+//   class NetworkObserverManager
+//   {
+//     typedef std::list<NetworkObserver*> Observers;
+//   public:
+//     
+//   private:
+//     Observers _observers;
+//   };
+//   
+//   template<typename SIG>
+//   class NetworkSignal : public NetworkObserver
+//   {
+//   public:
+//     NetworkSignal(SIG& sig) : _signal(sig) {}
+// 
+//     void ReceivePendingCalls(Utils::Packet& packet)
+//     {
+//       unsigned int to_receive;
+// 
+//       packet >> to_receive;
+//       for (unsigned int i = 0 ; i < to_receive ; ++i)
+//       {
+//         RecordedCall call;
+// 
+//         call.Unserialize(packet);
+//         _signal.PushRecordCall(call);
+//       }
+//       _signal.ExecuteRecordedCalls();
+//     }
+// 
+//     void SendPendingCalls(void)
+//     {
+//       SIG::RecordedCalls& calls = _signal.GetRecordedCalls();
+//       unsigned int        to_send = calls.size();
+// 
+//       if (to_send > 0)
+//       {
+//         Utils::Packet     packet;
+// 
+//         packet << Id() << to_send;
+//         while (calls.size())
+//         {
+//           const SIG::RecordedCall& call = calls.front();
+// 
+//           call.Serialize(packet);
+//           calls.pop();
+//         }
+//         SendToObservers(packet);
+//     }
+// 
+//   private:
+//     SIG& _signal;
+//   };
+
 }
 
 #endif

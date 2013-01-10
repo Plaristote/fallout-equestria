@@ -12,8 +12,7 @@ body
 div#window
 {
 	icon-decorator: image;
-  icon-image:  menu.png  0px 0px 1025px   135px;
-       /* width: auto;
+        width: auto;
         height: 100%;
 		  padding: 10px 15px;
         background-decorator: tiled-box;
@@ -25,7 +24,13 @@ div#window
         background-bottom-image:       invader.tga stretch  30px  91px 201px 119px;
         background-left-image:         invader.tga stretch   0px  30px  30px  90px;
         background-right-image:        invader.tga stretch 202px  30px 231px  90px;
-        background-center-image:       invader.tga repeat-truncate  30px  30px 201px  90px;*/
+        background-center-image:       invader.tga repeat-truncate  30px  30px 201px  90px;
+}
+
+div#mainbar
+{
+  icon-decorator: image;
+  icon-image:  menu.png  0px 0px 1025px   135px;  
 }
 
 .inventory-item-quantity
