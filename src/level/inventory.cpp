@@ -435,6 +435,20 @@ InventoryObject* Inventory::GetObject(const std::string& name)
   return (0);
 }
 
+unsigned short Inventory::ContainsHowMany(const std::string& name) const
+{
+  Content::const_iterator it    = _content.begin();
+  Content::const_iterator end   = _content.end();
+  unsigned short          count = 0;
+
+  for (; it != end ; ++it)
+  {
+    if ((*(*it)).GetName() == name)
+      count++;
+  }
+  return (count);
+}
+
 bool Inventory::CanCarry(InventoryObject* object, unsigned short quantity)
 {
   return ((_capacity >= _currentWeight + (unsigned short)((*object)["weight"]) * quantity) || (_capacity == 0));

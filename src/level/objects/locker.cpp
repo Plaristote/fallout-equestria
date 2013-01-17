@@ -8,7 +8,7 @@ ObjectLocker::ObjectLocker(Level* level, DynamicObject* object) : ObjectShelf(le
   _type   = ObjectTypes::Locker;
   _closed = true;
   InstanceDynamicObject::_object = object;
-  
+
   string anims[] = { "open", "close" };
   for (unsigned int i = 0 ; i < GET_ARRAY_SIZE(anims) ; ++i)
     LoadAnimation(anims[i]);

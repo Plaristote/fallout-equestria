@@ -97,6 +97,7 @@ public:
   const Content&   GetContent(void) const { return (_content); }
   Content&         GetContent(void)       { return (_content); }
   InventoryObject* GetObject(const std::string& name);
+  unsigned short   ContainsHowMany(const std::string& name) const;
 
   unsigned short   GetCurrentWeight(void) const      { return (_currentWeight); }
   unsigned short   GetCapacity(void)      const      { return (_capacity);      }

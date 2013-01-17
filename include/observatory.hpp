@@ -8,7 +8,7 @@
 # include <iostream>
 
 # include "semaphore.hpp"
-#include "serializer.hpp"
+# include "serializer.hpp"
 
 # define S1P_TPL                class P1 = void
 # define S1P_TFUN               P1 (void)
@@ -308,13 +308,6 @@ namespace Observatory
   class Signal : public ISignal
   {
     friend class ObserverHandler;
-    
-    struct RecordedCall
-    {
-      bool byte;
-    };
-
-    typedef std::queue<RecordedCall> RecordedCalls;
 
     struct InterfaceObserver
     {
@@ -357,8 +350,16 @@ namespace Observatory
 
     typedef std::list<InterfaceObserver*> Observers;
   public:
-    Signal(bool async = true) : _async(async) {}    
-    
+    struct RecordedCall
+    {
+      void Serialize(Utils::Packet& packet)   {}
+      void Unserialize(Utils::Packet& packet) {}
+      bool byte;
+    };
+    typedef std::queue<RecordedCall> RecordedCalls;
+
+    Signal(bool async = true) : _async(async) {}
+
     ~Signal()
     {
       typename Observers::iterator it  = _observers.begin();

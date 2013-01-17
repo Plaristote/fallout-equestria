@@ -81,5 +81,4 @@ void ObjectShelf::CallbackActionUse(InstanceDynamicObject* object)
 {
   if (object == _level->GetPlayer())
     _level->PlayerLoot(&_inventory);
-    //_level->SignalShelfOpened.Emit(_inventory);
 }

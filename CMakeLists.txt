@@ -8,7 +8,7 @@ include_directories(include angelscript)
 
 if(UNIX)
   if(CMAKE_COMPILER_IS_GNUCC)
-    set(CMAKE_CXX_FLAGS "-std=c++0x -Wno-deprecated-declarations")
+    set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -Wno-deprecated-declarations -pedantic")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DAUDIO_BACKEND_SFML")
   endif()
 endif()

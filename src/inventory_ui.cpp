@@ -259,7 +259,8 @@ void UiUseObjectOn::Destroy(void)
  */
 UiLoot::UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventory& looter, Inventory& looted) : UiBase(window, context), _looter(looter), _looted(looted)
 {
-  _root = context->LoadDocument("data/looting.rml");
+  _quantity_picker = 0;
+  _root            = context->LoadDocument("data/looting.rml");
   if (_root)
   {
     Rocket::Core::Element* eInvLooter = _root->GetElementById("self-inventory");
@@ -280,6 +281,7 @@ UiLoot::UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventor
 
 UiLoot::~UiLoot()
 {
+  if (_quantity_picker) delete _quantity_picker;
   _viewController.Destroy();
   if (_root)
   {
@@ -306,16 +308,31 @@ void UiLoot::SwapObjects(InventoryObject* object)
     if (object == ptr)
       fromLooted = true;
   });
-  
-  Inventory& looted = (fromLooted ? _looted : _looter);
-  Inventory& looter = (fromLooted ? _looter : _looted);
-  
-  if (looter.CanCarry(object))
+
+  string     object_name = object->GetName();
+  Inventory& looted      = (fromLooted ? _looted : _looter);
+  Inventory& looter      = (fromLooted ? _looter : _looted);
+  function<void (unsigned short)> loot_callback([this, &looted, &looter, object_name](unsigned short quantity)
   {
-    looter.AddObject(object);
-    looted.DelObject(object);
+    while (quantity--)
+    {
+      InventoryObject* booty = looted.GetObject(object_name);
+
+      looter.AddObject(booty);
+      looted.DelObject(booty);
+    }
+    _viewController.Update();
+  });
+
+  if (looted.ContainsHowMany(object->GetName()) > 1)
+  {
+    if (_quantity_picker) delete _quantity_picker;
+    _quantity_picker = new UiObjectQuantityPicker(_window, _context, looted, object->GetName());
+    _quantity_picker->Show();
+    _quantity_picker->QuantityPicked.Connect(loot_callback);
   }
-  _viewController.Update();
+  else
+    loot_callback(1);
 }
 
 void UiLoot::RocketTakeAllClicked(Rocket::Core::Event&)
@@ -504,9 +521,10 @@ UiNextZone::~UiNextZone()
  */
 UiBarter::UiBarter(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* player, ObjectCharacter* other) : UiBase(window, context), _inventory_player(player->GetInventory()), _inventory_other(other->GetInventory())
 {
-  _root = context->LoadDocument("data/barter.rml");
-  _stats_player = player->GetStatController();
-  _stats_other  = other->GetStatController();
+  _root            = context->LoadDocument("data/barter.rml");
+  _quantity_picker = 0;
+  _stats_player    = player->GetStatController();
+  _stats_other     = other->GetStatController();
   if (_root)
   {
     Rocket::Core::Element* eInvLooter   = _root->GetElementById("self-inventory");
@@ -586,6 +604,7 @@ void UiBarter::UpdateInterface(void)
 
 UiBarter::~UiBarter()
 {
+  if (_quantity_picker) delete _quantity_picker;
   ToggleEventListener(false, "button_done", "click", EventMakeDeal);
   ToggleEventListener(false, "button_quit", "click", EventBarterEnd);
 }
@@ -616,9 +635,27 @@ bool UiBarter::SwapFunctor(InventoryObject* object, Inventory& from, Inventory& 
 {
   if (from.IncludesObject(object))
   {
-    to.AddObject(object);
-    from.DelObject(object);
-    Update();
+    string                          object_name = object->GetName();
+    function<void (unsigned short)> swap_callback([this, &from, &to, object_name](unsigned short quantity)
+    {
+      while (quantity--)
+      {
+        InventoryObject* swapping = from.GetObject(object_name);
+
+        to.AddObject(swapping);
+        from.DelObject(swapping);
+      }
+      Update();
+    });
+    
+    if (from.ContainsHowMany(object->GetName()) > 1)
+    {
+      if (_quantity_picker) delete _quantity_picker;
+      _quantity_picker = new UiObjectQuantityPicker(_window, _context, from, object->GetName());
+      _quantity_picker->QuantityPicked.Connect(swap_callback);
+    }
+    else
+      swap_callback(1);
     return (true);
   }
   return (false);
@@ -673,5 +710,47 @@ void UiBarter::DropInventory(Inventory& from, Inventory& to)
     to.AddObject(*it);
     from.DelObject(*it);
     it = from.GetContent().begin();
+  }
+}
+
+/*
+ * UiObjectQuantityPicker
+ */
+#include <Rocket/Controls.h>
+
+UiObjectQuantityPicker::UiObjectQuantityPicker(WindowFramework* window, Rocket::Core::Context* context, const Inventory& inventory, const string& object_name) : UiBase(window, context)
+{
+  _max_quantity = inventory.ContainsHowMany(object_name);
+  _root         = context->LoadDocument("data/object_quantity_picker.rml");
+  if (_root)
+  {
+    _line_edit  = _root->GetElementById("line-edit");
+    if (_line_edit)
+    {
+      ToggleEventListener(true, "validate", "click", EventAccepted);
+      EventAccepted.EventReceived.Connect(*this, &UiObjectQuantityPicker::Accepted);
+    }
+    _root->Show();
+  }
+}
+
+UiObjectQuantityPicker::~UiObjectQuantityPicker()
+{
+  ToggleEventListener(false, "validate", "click", EventAccepted);
+}
+
+void UiObjectQuantityPicker::Accepted(Rocket::Core::Event&)
+{
+  Rocket::Controls::ElementFormControl* control = reinterpret_cast<Rocket::Controls::ElementFormControl*>(_line_edit);
+  Rocket::Core::String                  string = control->GetValue();
+  std::stringstream                     stream;
+  unsigned short                        amount;
+
+  stream << string.CString();
+  stream >> amount;
+  if (amount <= _max_quantity)
+  {
+    QuantityPicked.Emit(amount);
+    Hide();
   }
 }

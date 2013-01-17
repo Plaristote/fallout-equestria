@@ -10,6 +10,23 @@
 # include "level/character.hpp"
 # include <sstream>
 
+class UiObjectQuantityPicker : public UiBase
+{
+public:
+  UiObjectQuantityPicker(WindowFramework* window, Rocket::Core::Context* context, const Inventory& inventory, const std::string& object_name);
+  ~UiObjectQuantityPicker();
+
+  Observatory::Signal<void (unsigned short)> QuantityPicked;
+
+private:
+  RocketListener          EventAccepted;
+  
+  void                    Accepted(Rocket::Core::Event& event);
+
+  unsigned short         _max_quantity;
+  Rocket::Core::Element* _line_edit;
+};
+
 class InventoryView : public Rocket::Core::EventListener
 {
 public:
@@ -93,12 +110,13 @@ private:
   void DropInventory(Inventory& from, Inventory& to);
   bool SwapFunctor(InventoryObject* object, Inventory& from, Inventory& to);
   
-  RocketListener   EventMakeDeal, EventBarterEnd;
-  
-  Inventory        _stack_player,  _stack_other;
-  StatController  *_stats_player, *_stats_other;
-  Inventory&       _inventory_player;
-  Inventory&       _inventory_other;
+  RocketListener          EventMakeDeal, EventBarterEnd;
+
+  Inventory               _stack_player,  _stack_other;
+  StatController         *_stats_player, *_stats_other;
+  Inventory&              _inventory_player;
+  Inventory&              _inventory_other;
+  UiObjectQuantityPicker* _quantity_picker;
 };
 
 class UiLoot : public UiBase
@@ -118,6 +136,7 @@ private:
 
   RocketListener                               DoneClicked, TakeAllClicked;
   InventoryViewController                      _viewController;
+  UiObjectQuantityPicker*                      _quantity_picker;
 
   Inventory& _looter;
   Inventory& _looted;
