@@ -327,9 +327,10 @@ void UiLoot::SwapObjects(InventoryObject* object)
   if (looted.ContainsHowMany(object->GetName()) > 1)
   {
     if (_quantity_picker) delete _quantity_picker;
-    _quantity_picker = new UiObjectQuantityPicker(_window, _context, looted, object->GetName());
+    _quantity_picker = new UiObjectQuantityPicker(_window, _context, looted, object);
     _quantity_picker->Show();
     _quantity_picker->QuantityPicked.Connect(loot_callback);
+    _quantity_picker->Observer.Connect(VisibilityToggledOff, *_quantity_picker, &UiBase::Hide);
   }
   else
     loot_callback(1);
@@ -651,8 +652,9 @@ bool UiBarter::SwapFunctor(InventoryObject* object, Inventory& from, Inventory& 
     if (from.ContainsHowMany(object->GetName()) > 1)
     {
       if (_quantity_picker) delete _quantity_picker;
-      _quantity_picker = new UiObjectQuantityPicker(_window, _context, from, object->GetName());
+      _quantity_picker = new UiObjectQuantityPicker(_window, _context, from, object);
       _quantity_picker->QuantityPicked.Connect(swap_callback);
+      _quantity_picker->Observer.Connect(VisibilityToggledOff, *_quantity_picker, &UiBase::Hide);
     }
     else
       swap_callback(1);
@@ -663,14 +665,10 @@ bool UiBarter::SwapFunctor(InventoryObject* object, Inventory& from, Inventory& 
 
 void UiBarter::SwapObjects(InventoryObject* object)
 {
-  cout << "Swap Objects Executed" << endl;
-  cout << "Swap player stack/inventory" << endl;
   if (SwapFunctor(object, _stack_player, _inventory_player)) return ;
-  cout << "Swap player inventory/stack" << endl;
   if (SwapFunctor(object, _inventory_player, _stack_player)) return ;
   if (SwapFunctor(object, _stack_other, _inventory_other))   return ;
   if (SwapFunctor(object, _inventory_other, _stack_other))   return ;
-  cout << "No swap were executed" << endl;
 }
 
 void UiBarter::MakeDeal(Rocket::Core::Event& event)
@@ -718,25 +716,46 @@ void UiBarter::DropInventory(Inventory& from, Inventory& to)
  */
 #include <Rocket/Controls.h>
 
-UiObjectQuantityPicker::UiObjectQuantityPicker(WindowFramework* window, Rocket::Core::Context* context, const Inventory& inventory, const string& object_name) : UiBase(window, context)
+UiObjectQuantityPicker::UiObjectQuantityPicker(WindowFramework* window, Rocket::Core::Context* context, const Inventory& inventory, const InventoryObject* object) : UiBase(window, context)
 {
-  _max_quantity = inventory.ContainsHowMany(object_name);
+  _max_quantity = inventory.ContainsHowMany(object->GetName());
   _root         = context->LoadDocument("data/object_quantity_picker.rml");
   if (_root)
   {
-    _line_edit  = _root->GetElementById("line-edit");
+    Rocket::Core::Element* icon = _root->GetElementById("item_icon");
+
+    _line_edit  = _root->GetElementById("item_quantity");
     if (_line_edit)
     {
-      ToggleEventListener(true, "validate", "click", EventAccepted);
+      ToggleEventListener(true, "button_confirm", "click", EventAccepted);
       EventAccepted.EventReceived.Connect(*this, &UiObjectQuantityPicker::Accepted);
     }
+    if (icon)
+    {
+      Rocket::Core::String src("../textures/itemIcons/");
+
+      src += object->GetIcon().c_str();
+      icon->SetAttribute("src", src);
+    }
+    ToggleEventListener(true, "item_minus",    "click",  EventIncrement);
+    ToggleEventListener(true, "item_plus",     "click",  EventIncrement);
+    ToggleEventListener(true, "item_quantity", "change", EventValueChanged);
+    ToggleEventListener(true, "button_cancel", "click",  EventCanceled);
+    EventIncrement.EventReceived.Connect(*this, &UiObjectQuantityPicker::Increment);
+    EventValueChanged.EventReceived.Connect([this](Rocket::Core::Event&) { SetQuantity(GetQuantity()); });
+    EventCanceled.EventReceived.Connect(    [this](Rocket::Core::Event&) { Canceled.Emit();            });
+    Canceled.Connect(*this, &UiBase::Hide);
     _root->Show();
   }
 }
 
 UiObjectQuantityPicker::~UiObjectQuantityPicker()
 {
-  ToggleEventListener(false, "validate", "click", EventAccepted);
+  ToggleEventListener(false, "button_confirm", "click",  EventAccepted);
+  ToggleEventListener(false, "button_cancel",  "click",  EventCanceled);
+  ToggleEventListener(false, "item_quantity",  "change", EventValueChanged);
+  ToggleEventListener(false, "item_minus",     "click",  EventIncrement);
+  ToggleEventListener(false, "item_plus",      "click",  EventIncrement);
 }
 
 void UiObjectQuantityPicker::Accepted(Rocket::Core::Event&)
@@ -753,4 +772,38 @@ void UiObjectQuantityPicker::Accepted(Rocket::Core::Event&)
     QuantityPicked.Emit(amount);
     Hide();
   }
+}
+
+unsigned short UiObjectQuantityPicker::GetQuantity(void) const
+{
+  Rocket::Controls::ElementFormControl* control = reinterpret_cast<Rocket::Controls::ElementFormControl*>(_line_edit);
+  Rocket::Core::String                  string = control->GetValue();
+  std::stringstream                     stream;
+  unsigned short                        amount;
+
+  stream << string.CString();
+  stream >> amount;
+  return (amount);
+}
+
+void UiObjectQuantityPicker::SetQuantity(unsigned short value)
+{
+  Rocket::Controls::ElementFormControl* control = reinterpret_cast<Rocket::Controls::ElementFormControl*>(_line_edit);
+  std::stringstream                     stream;
+  std::string                           str;
+
+  if (value > _max_quantity)
+    value = _max_quantity;
+  stream << value;
+  stream >> str;
+  control->SetValue(str.c_str());
+}
+
+void UiObjectQuantityPicker::Increment(Rocket::Core::Event& event)
+{
+  const short                           value_change = (event.GetCurrentElement()->GetId() == "item_plus" ? 1 : -1);
+  const unsigned short                  quantity     = GetQuantity();
+
+  if (quantity > 0 || value_change != -1)
+    SetQuantity(quantity + value_change);
 }

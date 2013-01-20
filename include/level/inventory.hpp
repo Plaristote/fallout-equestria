@@ -37,7 +37,8 @@ public:
   const std::string UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType);
   const std::string UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType);
   const std::string Use(ObjectCharacter* user, unsigned char useType);
-  const std::string GetName(void) const { return (this->Key()); }
+  const std::string GetName(void) const { return (this->Key());             }
+  const std::string GetIcon(void) const { return ((*this)["icon"].Value()); }
   DynamicObject*    CreateDynamicObject(World* world) const;
   EquipedModel*     CreateEquipedModel(World* world);
 

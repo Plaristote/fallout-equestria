@@ -58,7 +58,7 @@ button.simple-button
   height: 35;
   background-decorator: image;
   background-image: button.png;
-}
+}francis
 
 button.simple-button:active
 {
@@ -66,7 +66,7 @@ button.simple-button:active
   background-image: button-pressed.png;
 }
 /*####### FRANCIS ######*/
-button.francis
+.francis
 {
   display: inline-block;
   font-size: 10px;
@@ -78,7 +78,7 @@ button.francis
   background-image: hud.png 0px 0px 125px 39px;
 }
 
-button.francis:focus
+.francis:focus
 {
   font-weight: bold;
   shadow-font-effect: shadow;
@@ -86,7 +86,7 @@ button.francis:focus
   shadow-color: black;
 }
 
-button.francis:hover
+.francis:hover
 {
   background-image: hud.png 0px 40px 125px 79px;
 }

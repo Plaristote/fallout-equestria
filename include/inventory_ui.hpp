@@ -13,15 +13,22 @@
 class UiObjectQuantityPicker : public UiBase
 {
 public:
-  UiObjectQuantityPicker(WindowFramework* window, Rocket::Core::Context* context, const Inventory& inventory, const std::string& object_name);
+  UiObjectQuantityPicker(WindowFramework* window, Rocket::Core::Context* context, const Inventory& inventory, const InventoryObject* object);
   ~UiObjectQuantityPicker();
 
   Observatory::Signal<void (unsigned short)> QuantityPicked;
+  Observatory::Signal<void>                  Canceled;  
+  Observatory::ObserverHandler               Observer;
 
 private:
-  RocketListener          EventAccepted;
+  RocketListener          EventAccepted, EventCanceled, EventIncrement, EventDecrement;
+  RocketListener          EventValueChanged;
   
   void                    Accepted(Rocket::Core::Event& event);
+  void                    Increment(Rocket::Core::Event& event);
+
+  unsigned short          GetQuantity(void) const;
+  void                    SetQuantity(unsigned short);
 
   unsigned short         _max_quantity;
   Rocket::Core::Element* _line_edit;

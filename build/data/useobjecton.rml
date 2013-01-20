@@ -11,39 +11,39 @@
         margin-top: 10px;
       }
 
-      #body-inventory-items
+      #inventory-items
       {
-        width:          90%;
+        width:          80%;
         height:         80%;
-        margin-left:    10px;
-        margin-right:   10px;
-        margin-top:     10px;
-        margin-bottom:  10px;
+        margin-left:    10%;
+        margin-bottom: 5%;
+        margin-top:     5%;
+        
       }
 
       #inventory
       {
         drag:         clone;
-        overflow-y:   scroll;
+        overflow-y:   auto;
         margin-right: 10px;
         height:       90%;
       }         
 
       #button_cancel
       {
-        position:       absolute;
-        bottom:         5px;
-        right:          5px;
+        width: 20%;
+        margin-left: 40%;
       }
+      
     </style>
   </head>
   <body id="body">
-  <div id="window"><p>
+  <div id="window">
     <div id="inventory-items" class="console-bg">
       <div id="inventory">
       </div>
     </div>
-    <button class="button_menu" id="button_cancel" i18n="Cancel">Cancel</button>
-  </p>
+    <button class="universal_button" id="button_cancel" i18n="Cancel">Cancel</button>
+ 
   </div></body>
 </rml>
