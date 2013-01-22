@@ -1,6 +1,8 @@
 #include "mainmenu.hpp"
 #include "musicmanager.hpp"
-#include <soundmanager.hpp>
+#include "soundmanager.hpp"
+#include "executor.hpp"
+#include <ui_dialog.hpp>
 
 extern PandaFramework framework;
 
@@ -145,6 +147,7 @@ AsyncTask::DoneStatus MainMenu::do_task()
   }
   _mouseCursor.Update();
   SoundManager::GarbageCollectAll();
+  Executor::Run(); // Executor does not have any specific application. It just executes lambdas collected here and there.
   return (quitGamePlz ? AsyncTask::DoneStatus::DS_exit : AsyncTask::DoneStatus::DS_cont);
 }
 

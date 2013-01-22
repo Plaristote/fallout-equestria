@@ -49,6 +49,7 @@ public:
   virtual void Show(void)            { if (_root) { _root->Show(); VisibilityToggled.Emit(true); VisibilityToggledOn.Emit(); } }
   virtual void Hide(void)            { if (_root) { _root->Hide(); _root->PushToBack(); VisibilityToggled.Emit(false); VisibilityToggledOff.Emit(); } }
   bool         IsVisible(void) const { return (_root && _root->IsVisible()); }
+  void         SetModal(bool modal)  { if (_root) { _root->Show(modal ? Rocket::Core::ElementDocument::MODAL : Rocket::Core::ElementDocument::NONE); } }
 
   virtual void Destroy(void) { if (_root) { _root->Hide(); } }
 
@@ -65,7 +66,7 @@ public:
       SetPropertyOnAll(child, property, value);
     }
   }
-  
+
   void FadeOut(void);
   void FadeIn(void);
   

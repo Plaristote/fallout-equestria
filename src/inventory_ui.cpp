@@ -329,6 +329,7 @@ void UiLoot::SwapObjects(InventoryObject* object)
     if (_quantity_picker) delete _quantity_picker;
     _quantity_picker = new UiObjectQuantityPicker(_window, _context, looted, object);
     _quantity_picker->Show();
+    _quantity_picker->SetModal(true);
     _quantity_picker->QuantityPicked.Connect(loot_callback);
     _quantity_picker->Observer.Connect(VisibilityToggledOff, *_quantity_picker, &UiBase::Hide);
   }
@@ -653,6 +654,7 @@ bool UiBarter::SwapFunctor(InventoryObject* object, Inventory& from, Inventory& 
     {
       if (_quantity_picker) delete _quantity_picker;
       _quantity_picker = new UiObjectQuantityPicker(_window, _context, from, object);
+      _quantity_picker->SetModal(true);
       _quantity_picker->QuantityPicked.Connect(swap_callback);
       _quantity_picker->Observer.Connect(VisibilityToggledOff, *_quantity_picker, &UiBase::Hide);
     }
@@ -745,12 +747,13 @@ UiObjectQuantityPicker::UiObjectQuantityPicker(WindowFramework* window, Rocket::
     EventValueChanged.EventReceived.Connect([this](Rocket::Core::Event&) { SetQuantity(GetQuantity()); });
     EventCanceled.EventReceived.Connect(    [this](Rocket::Core::Event&) { Canceled.Emit();            });
     Canceled.Connect(*this, &UiBase::Hide);
-    _root->Show();
+    _root->Show(Rocket::Core::ElementDocument::MODAL);
   }
 }
 
 UiObjectQuantityPicker::~UiObjectQuantityPicker()
 {
+  SetModal(false);
   ToggleEventListener(false, "button_confirm", "click",  EventAccepted);
   ToggleEventListener(false, "button_cancel",  "click",  EventCanceled);
   ToggleEventListener(false, "item_quantity",  "change", EventValueChanged);
@@ -807,3 +810,4 @@ void UiObjectQuantityPicker::Increment(Rocket::Core::Event& event)
   if (quantity > 0 || value_change != -1)
     SetQuantity(quantity + value_change);
 }
+
