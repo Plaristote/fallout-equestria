@@ -178,10 +178,10 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     ++taskIt;
     task->Interval.Connect(*character, &ObjectCharacter::CheckFieldOfView);
   });
-  
-  _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
-  _camera.FollowObject(GetPlayer());
-  
+
+  /*_camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
+  _camera.FollowObject(GetPlayer());*/
+
    _world->AddLight(WorldLight::Directional, "toto");
    WorldLight* light    = _world->GetLightByName("toto");
    PT(DirectionalLight) slight = reinterpret_cast<DirectionalLight*>(&(*light->light));
