@@ -691,7 +691,7 @@ void   GameTask::SetPlayerInventory(void)
     Data       save      = _dataEngine["player"]["inventory"];
 
     inventory.SaveInventory(save);
-    save.Output();
+    //save.Output();
     _playerInventory = new Inventory;
     _playerInventory->LoadInventory(save);
     _gameUi.GetInventory().SetInventory(*_playerInventory);

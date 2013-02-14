@@ -6,10 +6,10 @@
   "radius": 20
 }
 ,
-"Hoofington": {
-  "visible": 0,
-  "pos_x": 500,
-  "pos_y": 500,
+"random-desert-1": {
+  "visible": 1,
+  "pos_x": 200,
+  "pos_y": 200,
   "radius": 20
 }
 

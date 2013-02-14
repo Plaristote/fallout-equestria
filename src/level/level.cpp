@@ -253,7 +253,9 @@ void Level::InitPlayer(void)
       NodePath child = map_objects.get_child(i);
 
       cout << "MapObjects(" << i << ")->name = " << child.get_name().substr(0, 6) << endl;
-      if (child.node() != node && child.get_name().substr(0, 6) != "Ground")
+      if (child.get_name() == "Terrain")
+        continue ;
+      if (child.node() != node && (child.get_name().substr(0, 6) != "Ground"))
         child.set_attrib(atr1);
     }
   });  
@@ -1379,7 +1381,7 @@ void Level::SetEntryZone(PlayerParty& player_party, const std::string& name)
 
       for (; it != end ; ++it)
       {
-	// TODO if something
+	// TODO if something. Maybe this ? -> if (it->arcs.size() > 1)
 	{
 	  ObjectCharacter* character = GetCharacter(*party_it);
 

@@ -192,14 +192,15 @@ public:
       // GetFunctionByDecl doesn't find the function declaration for some unknown reason.
       // The function declaration is valid and should be present in the module, unless
       // we're using the wrong module. Which is unlikely, but is the last explanation.
+      // TODO isn't this bug fixed ? investigate
 
       if (_context && callback)
       {
-	_context->Prepare(callback);
-	_context->SetArgObject(0, &_de);
-	_context->SetArgObject(1, event.GetCurrentElement());
-	_context->SetArgObject(2, &_event);
-	_context->Execute();
+        _context->Prepare(callback);
+        _context->SetArgObject(0, &_de);
+        _context->SetArgObject(1, event.GetCurrentElement());
+        _context->SetArgObject(2, &_event);
+        _context->Execute();
       }
     }
   }
