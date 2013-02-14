@@ -159,6 +159,8 @@ void OptionsManager::Initialize(void)
   if (!_data)
   {
     _data = DataTree::Factory::JSON("conf.json");
+    if (!_data)
+      _data = new DataTree;
     Refresh();
   }
 }
