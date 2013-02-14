@@ -359,6 +359,11 @@ void MainWindow::PandaInitialized()
      connect(ui->waypointSelFloor,   SIGNAL(valueChanged(int)),    this, SLOT(WaypointSelFloor()));
      connect(ui->waypointSelDelete,  SIGNAL(clicked()),            this, SLOT(WaypointSelDelete()));
 
+
+     connect(ui->waypointSelectAll,  SIGNAL(clicked()), this, SLOT(WaypointSelectAll()));
+     connect(ui->waypointDiscardSelection, SIGNAL(clicked()), this, SLOT(WaypointDiscardSelection()));
+     connect(ui->waypointSyncTerrain, SIGNAL(clicked()), this, SLOT(WaypointSyncTerrain()));
+
      waypointGenerate.SetWorld(world);
      connect(ui->waypointGenerate,   SIGNAL(clicked()), &waypointGenerate, SLOT(open()));
 
@@ -1036,6 +1041,68 @@ void MainWindow::WaypointUpdateSelZ()
     waypointSelZ = ui->waypointSelZ->value();
 }
 
+void MainWindow::WaypointDiscardSelection(void)
+{
+    while (waypointsSelection.size())
+      WaypointSelect(waypointsSelection.front());
+}
+
+void MainWindow::WaypointSelectAll(void)
+{
+  std::list<Waypoint>::iterator it;
+
+  for (it = world->waypoints.begin() ; it != world->waypoints.end() ; ++it)
+  {
+      std::list<Waypoint*>::iterator exists = std::find(waypointsSelection.begin(), waypointsSelection.end(), &(*it));
+
+    if (exists == waypointsSelection.end())
+      WaypointSelect(&(*it));
+  }
+}
+#include <panda3d/collisionRay.h>
+void MainWindow::WaypointSyncTerrain(void)
+{
+  std::list<Waypoint*>::iterator it;
+
+  for (it = waypointsSelection.begin() ; it != waypointsSelection.end() ; ++it)
+  {
+    NodePath wp = (*it)->nodePath;
+    LPoint3  min_pos;
+
+    CollisionTraverser col_traverser;
+    PT(CollisionHandlerQueue) col_queue = new CollisionHandlerQueue;
+
+    PT(CollisionNode) cnode = new CollisionNode("waypointSyncTerrainNode");
+    cnode->set_from_collide_mask(CollideMask(ColMask::Object));
+
+    PT(CollisionSegment) segment = new CollisionSegment;
+    cnode->add_solid(segment);
+
+    NodePath np = world->window->get_render().attach_new_node(cnode);
+
+    segment->set_point_a(wp.get_x(), wp.get_y(), wp.get_z());
+    segment->set_point_b(wp.get_x(), wp.get_y(), wp.get_z() - 100000.f);
+
+    col_traverser.add_collider(np, col_queue);
+    col_traverser.traverse(world->window->get_render());
+    if (col_queue->get_num_entries())
+    {
+      col_queue->sort_entries();
+      min_pos = col_queue->get_entry(0)->get_surface_point(world->window->get_render());
+      std::cout << "Found a collision" << std::endl;
+      std::cout << min_pos.get_x() << ", " << min_pos.get_y() << ", " << min_pos.get_z() << std::endl;
+
+      // ALMOST DONE !
+      LPoint3 min_point, max_point;
+      wp.calc_tight_bounds(min_point, max_point);
+      float height = max_point.get_y() - min_point.get_y();
+
+      wp.set_z(min_pos.get_z() + (height / 2));
+    }
+    np.show();
+    np.remove_node();
+  }
+}
 
 void MainWindow::LoadMap(const QString& path)
 {
@@ -1103,6 +1170,8 @@ void MainWindow::LoadMap(const QString& path)
                break ;
             }
         }
+
+        waypointGenerate.SetWorld(world);
     }
 }
 
@@ -1353,10 +1422,12 @@ void MainWindow::SaveMap()
     {
       Utils::Packet packet;
 
+      ui->progressBar->show();
       world->Serialize(packet, [this](float percentage)
       {
         ui->progressBar->setValue(percentage);
       });
+      ui->progressBar->hide();
       packet.PrintContent();
       file.write(packet.raw(), packet.size());
       file.close();

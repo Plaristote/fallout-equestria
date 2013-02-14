@@ -90,6 +90,9 @@ private slots:
     void WaypointHovered(NodePath);
     void WaypointSelect(Waypoint*);
     void UpdateSelection(void);
+    void WaypointDiscardSelection(void);
+    void WaypointSelectAll(void);
+    void WaypointSyncTerrain(void);
 
     // ENTRY/EXIT ZONES
     void EntryZoneAdd(void);

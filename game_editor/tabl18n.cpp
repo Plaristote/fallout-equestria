@@ -15,8 +15,8 @@ DataTree* TabL18n::GetDefaultLanguage()
 		//Otherwise, we load the first language on the list
 		LoadLanguage( languages.begin().key() );
 		return lang_default;
-	};
-};
+    }
+}
 
 void TabL18n::LoadAllLanguages()
 {
