@@ -1,0 +1,97 @@
+{
+  "Name":    "Timberwolf",
+  "Age":     8,
+  "Gender":  "Male",
+  "Race":    "Timberwolf",
+  "Faction": "Timberwolves",
+  "Special":    {
+                  "STR": 6,
+                  "PER": 8,
+                  "END": 5,
+                  "CHA": 1,
+                  "INT": 5,
+                  "AGI": 9,
+                  "LUC": 5
+                },
+  "Statistics": {
+                  "Action Points":        9,
+                  "Armor Class":          9,
+                  "Bonus Damage":         0,
+                  "Carry Weight":         175,
+                  "Critical Chance":      5,
+                  "Damage Resistance":    0,
+                  "Healing Rate":         1,
+                  "Hit Points":           31,
+                  "Melee Damage":         1,
+                  "Perk Rate":            3,
+                  "Poison Resistance":    15,
+                  "Radiation Resistance": 6,
+                  "Skill Rate":           19
+                },
+  "Skills":     {
+                  "Small Guns":    0,
+                  "Big Guns":      0,
+                  "Energy Guns":   0,
+                  "Explosives":    0,
+                  "Unarmed":       100,
+                  "Lockpick":      0,
+                  "Melee Weapons": 10,
+                  "Medicine":      10,
+                  "Repair":        0,
+                  "Science":       0,
+                  "Sneak":         100,
+                  "Spellcasting":  50,
+                  "Steal":         10,
+                  "Barter":        0,
+                  "Outdoorspony":  100,
+                  "Speech":        50,
+                  "Gambling":      80
+                },
+  "Skill Points": {
+                  "Small Guns":    0,
+                  "Big Guns":      0,
+                  "Energy Guns":   0,
+                  "Explosives":    0,
+                  "Unarmed":       0,
+                  "Lockpick":      0,
+                  "Melee Weapons": 0, 
+                  "Medicine":      0,
+                  "Repair":        0,
+                  "Science":       0,
+                  "Sneak":         0,
+                  "Spellcasting":  0, 
+                  "Steal":         0,
+                  "Barter":        0,
+                  "Outdoorspony":  0,
+                  "Speech":        0,
+                  "Gambling":      0
+                },
+
+  "Statistics Modifiers": {
+                  "Action Points":        0,
+                  "Armor Class":          0,
+                  "Bonus Damage":         0,
+                  "Carry Weight":         0,
+                  "Critical Chance":      0,
+                  "Damage Resistance":    0,
+                  "Healing Rate":         0,
+                  "Hit Points":           0,
+                  "Melee Damage":         0,
+                  "Perk Rate":            0,
+                  "Poison Resistance":    0,
+                  "Radiation Resistance": 0,
+                  "Skill Rate":           0
+                },
+
+  "Variables":  {
+                  "Hit Points":     31,
+                  "Level":          1,
+                  "Experience":     0,
+                  "Skill Points":   0,
+                  "Special Points": 0,
+                  "Perks":          0,
+                  "Traits":         0
+                },
+
+  "Traits": { }
+}

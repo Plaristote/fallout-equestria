@@ -114,52 +114,8 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     exitZone->SelectNextZone.Connect(*this, &Level::CallbackSelectNextZone);
   });
   _exitingZone = false;
-  
-  ForEach(_world->dynamicObjects, [this](DynamicObject& object)
-  {
-    InstanceDynamicObject* instance = 0;
-    
-    switch (object.type)
-    {
-      case DynamicObject::Character:
-        {
-	  ObjectCharacter* character = new ObjectCharacter(this, &object);
 
-	  _characters.push_back(character);
-	  cout << "Added an instance: " << character << endl;
-        }
-	break ;
-      case DynamicObject::Door:
-	instance = new ObjectDoor(this, &object);
-	cout << "LOADING A DOOR" << endl;
-	break ;
-      case DynamicObject::Shelf:
-	instance = new ObjectShelf(this, &object);
-	cout << "LOADING A SHELF" << endl;
-	break ;
-      case DynamicObject::Item:
-      {
-	DataTree*        item_data = DataTree::Factory::StringJSON(object.inventory.front().first);
-	InventoryObject* item;
-
-	item_data->key = object.key;
-	item           = new InventoryObject(item_data);
-	instance       = new ObjectItem(this, &object, item);
-	delete item_data;
-	break ;
-      }
-      case DynamicObject::Locker:
-	cout << "INSTANTIATING A LOCKER" << endl;
-	instance = new ObjectLocker(this, &object);
-	cout << "LOADING A LOCKER" << endl;
-	break ;
-      default:
-	cout << "[FATAL ERROR:] Unimplemented object type " << object.type << endl;
-    }
-    cout << "Added an instance => " << instance << endl;
-    if (instance != 0)
-      _objects.push_back(instance);
-  });
+  ForEach(_world->dynamicObjects, [this](DynamicObject& dobj) { InsertDynamicObject(dobj); });
   _itCharacter = _characters.end();
 
   _world->SetWaypointsVisible(false);
@@ -169,24 +125,11 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   obs.Connect(InstanceDynamicObject::ActionTalkTo,      *this, &Level::CallbackActionTalkTo);
   obs.Connect(InstanceDynamicObject::ActionUseObjectOn, *this, &Level::CallbackActionUseObjectOn);
 
-  unsigned int taskIt = 0;
-  for_each(_characters.begin(), _characters.end(), [this, &taskIt](ObjectCharacter* character)
-  {
-    TimeManager::Task* task = _timeManager.AddTask(TASK_LVL_CITY, true, 3);
-
-    task->lastS += (taskIt % 3);
-    ++taskIt;
-    task->Interval.Connect(*character, &ObjectCharacter::CheckFieldOfView);
-  });
-
-  /*_camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
-  _camera.FollowObject(GetPlayer());*/
-
-   _world->AddLight(WorldLight::Directional, "toto");
+   /*_world->AddLight(WorldLight::Directional, "toto");
    WorldLight* light    = _world->GetLightByName("toto");
    PT(DirectionalLight) slight = reinterpret_cast<DirectionalLight*>(&(*light->light));
 
-   /*light->zoneSize = 1000;
+   light->zoneSize = 1000;
    light->SetColor(255, 50, 50, 125);
    //slight->set_shadow_caster(true, 12, 12);
    //window->get_render().set_shader_input("light2", light->nodePath);
@@ -196,12 +139,65 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 //   PointLight* plight = dynamic_cast<PointLight*>(light->nodePath.node());
 //   plight->get_lens()->set_near_far(1.f, 2.f);
 //   plight->get_lens()->set_film_size(512);
-  
+
   window->get_render().set_shader_auto();
   loadingScreen->AppendText("-- Done --");
   loadingScreen->FadeOut();
   loadingScreen->Destroy();
   delete loadingScreen;
+}
+
+void Level::InsertCharacter(ObjectCharacter* character)
+{
+  static unsigned short task_it = 0;
+  TimeManager::Task*    task    = _timeManager.AddTask(TASK_LVL_CITY, true, 3);
+
+  task->lastS += (task_it % 2);
+  task->Interval.Connect(*character, &ObjectCharacter::CheckFieldOfView);  
+  ++task_it;
+  _characters.push_back(character);
+}
+
+void Level::InsertDynamicObject(DynamicObject& object)
+{
+  InstanceDynamicObject* instance = 0;
+  
+  switch (object.type)
+  {
+    case DynamicObject::Character:
+      InsertCharacter(new ObjectCharacter(this, &object));
+      break ;
+    case DynamicObject::Door:
+      instance = new ObjectDoor(this, &object);
+      break ;
+    case DynamicObject::Shelf:
+      instance = new ObjectShelf(this, &object);
+      break ;
+    case DynamicObject::Item:
+    {
+      DataTree*        item_data = DataTree::Factory::StringJSON(object.inventory.front().first);
+      InventoryObject* item;
+
+      item_data->key = object.key;
+      item           = new InventoryObject(item_data);
+      instance       = new ObjectItem(this, &object, item);
+      delete item_data;
+      break ;
+    }
+    case DynamicObject::Locker:
+      instance = new ObjectLocker(this, &object);
+      break ;
+    default:
+    {
+      stringstream stream;
+
+      stream << "Inserted unimplemented dynamic object type (" << object.type << ')';
+      AlertUi::NewAlert.Emit(stream.str());
+    }
+  }
+  cout << "Added an instance => " << instance << endl;
+  if (instance != 0)
+    _objects.push_back(instance);
 }
 
 void Level::InitPlayer(void)
@@ -232,7 +228,7 @@ void Level::InitPlayer(void)
   //
   // The wall-eating ball of wrath
   //
-  PandaNode*         node;
+  PandaNode*        node;
   CPT(RenderAttrib) atr1 = StencilAttrib::make(1, StencilAttrib::SCF_not_equal, StencilAttrib::SO_keep, StencilAttrib::SO_keep,    StencilAttrib::SO_keep,    1, 1, 0);
   CPT(RenderAttrib) atr2 = StencilAttrib::make(1, StencilAttrib::SCF_always,    StencilAttrib::SO_zero, StencilAttrib::SO_replace, StencilAttrib::SO_replace, 1, 0, 1);
 
@@ -252,7 +248,6 @@ void Level::InitPlayer(void)
     {
       NodePath child = map_objects.get_child(i);
 
-      cout << "MapObjects(" << i << ")->name = " << child.get_name().substr(0, 6) << endl;
       if (child.get_name() == "Terrain")
         continue ;
       if (child.node() != node && (child.get_name().substr(0, 6) != "Ground"))
@@ -1346,8 +1341,37 @@ const string& Level::GetExitZone(void) const
   return (_exitingZoneName);
 }
 
-void Level::SetEntryZone(PlayerParty& player_party, const std::string& name)
+void Level::SpawnEnemies(const std::string& type, unsigned short quantity, unsigned short n_spawn)
 {
+  Party        spawn_party;
+  stringstream entry_zone;
+
+  entry_zone << "spawn_" << n_spawn;
+  for (unsigned short i = 0 ; i < quantity ; ++i)
+  {
+    stringstream   character_name;
+    DynamicObject* object;
+    Data           data = (*_dataEngine)["bestiary"][type];
+
+    character_name << type << ' ' << i;
+    object = _world->AddDynamicObject(character_name.str(), DynamicObject::Character, "lpip.egg", "lpip.png");
+    object->charsheet   = data["charsheet"].Value();
+    object->dialog      = data["dialog"].Value();
+    //object->script      = data["script"].Value();
+    cout << "Creating " << character_name.str() << " with charsheet '" << object->charsheet << "' and AI '" << object->script << "'" << endl;
+    InsertCharacter(new ObjectCharacter(this, object));
+    spawn_party.Join(object);
+    ObjectCharacter* tmp = (*_characters.rbegin());
+    tmp->PlayAnimation("Run");
+  }
+  SetEntryZone(spawn_party, entry_zone.str());
+}
+
+void Level::SetEntryZone(Party& player_party, const std::string& name)
+{
+  //GenerateEnemy
+  // END
+
   EntryZone* zone               = _world->GetEntryZoneByName(name);
 
   if (!zone && _world->entryZones.size() > 0)
@@ -1381,13 +1405,14 @@ void Level::SetEntryZone(PlayerParty& player_party, const std::string& name)
 
       for (; it != end ; ++it)
       {
-	// TODO if something. Maybe this ? -> if (it->arcs.size() > 1)
+	// TODO if something. Maybe this ? ->
+        if (!(IsWaypointOccupied((*it)->id)))
 	{
 	  ObjectCharacter* character = GetCharacter(*party_it);
 
 	  if (character)
 	  {
-	    cout << "Some character entry zone haz been set" << endl;
+	    cout << "[Level][SetEntryZone][" << character->GetName() << " is now on waypoint " << (*it)->id << endl;
 	    (*party_it)->waypoint = *it;
 	    (*party_it)->floor    = -1;
 	    (*party_it)->nodePath.set_alpha_scale(1.f);
@@ -1406,6 +1431,24 @@ void Level::SetEntryZone(PlayerParty& player_party, const std::string& name)
   _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
   _camera.FollowObject(GetPlayer());
   _floor_lastWp = 0;
+}
+
+bool Level::IsWaypointOccupied(unsigned int id) const
+{
+  InstanceObjects::const_iterator it_object;
+  Characters::const_iterator      it_character;
+  
+  for (it_object = _objects.begin() ; it_object != _objects.end() ; ++it_object)
+  {
+    if ((*it_object)->HasOccupiedWaypoint() && (int)id == ((*it_object)->GetOccupiedWaypointAsInt()))
+      return (true);
+  }
+  for (it_character = _characters.begin() ; it_character != _characters.end() ; ++it_character)
+  {
+    if ((*it_character)->HasOccupiedWaypoint() && (int)id == ((*it_character)->GetOccupiedWaypointAsInt()))
+      return (true);
+  }
+  return (false);
 }
 
 /*

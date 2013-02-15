@@ -436,7 +436,7 @@ void ObjectCharacter::ItemNextUseType(unsigned short it)
 
     if (!(actionData.Nil()))
     {
-      if (actionData.Count() <= action + 1)
+      if (actionData.Count() <= (unsigned int)action + 1)
 	_equiped[it].actionIt = 0;
       else
 	_equiped[it].actionIt++;
@@ -475,9 +475,7 @@ void ObjectCharacter::Run(float elapsedTime)
     }
     else if (state == Level::Fight)
     {
-      if (_hitPoints <= 0)
-	_level->NextTurn();
-      else if (_actionPoints == 0)
+      if (_hitPoints <= 0 || _actionPoints == 0)
 	_level->NextTurn();
       else if (!(IsMoving()) && _scriptFight) // replace with something more appropriate
       {
@@ -667,7 +665,7 @@ void                ObjectCharacter::GoToRandomWaypoint(void)
 
 void                ObjectCharacter::TruncatePath(unsigned short max_size)
 {
-  if ((_path.size() > 0) && (*_path.begin()).id == GetOccupiedWaypointAsInt())
+  if ((_path.size() > 0) && (*_path.begin()).id == (unsigned int)GetOccupiedWaypointAsInt())
     max_size++;
   if (_path.size() > max_size)
     _path.resize(max_size);
@@ -700,7 +698,7 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
   // Has reached object objective, if there is one ?
   if (_goToData.objective)
   {
-    if (_path.size() <= _goToData.max_distance && HasLineOfSight(_goToData.objective))
+    if (_path.size() <= (unsigned int)_goToData.max_distance && HasLineOfSight(_goToData.objective))
     {
       _path.clear();
       ReachedDestination.Emit(this);

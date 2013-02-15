@@ -91,7 +91,7 @@ public:
   void                   CallbackCancelSelectZone(void);
   const std::string&     GetNextZone(void) const;
   const std::string&     GetExitZone(void) const;
-  void                   SetEntryZone(PlayerParty&, const std::string&);
+  void                   SetEntryZone(Party&, const std::string&);
 
   // Interaction Management
   void                   CallbackActionBarter(ObjectCharacter*);
@@ -143,6 +143,10 @@ public:
 
   MouseState        _mouseState;
 
+  // Misc
+  void              SpawnEnemies(const std::string& type, unsigned short quantity, unsigned short n_spawn);
+  bool              IsWaypointOccupied(unsigned int id) const;
+
 private:
   typedef std::list<InstanceDynamicObject*> InstanceObjects;
   typedef std::list<ObjectCharacter*>       Characters;
@@ -151,6 +155,9 @@ private:
   void              RunDaylight(void);
   void              MouseInit(void);
   void              ToggleCharacterOutline(bool);
+  
+  void              InsertDynamicObject(DynamicObject&);
+  void              InsertCharacter(ObjectCharacter*);
   
   Observatory::ObserverHandler obs;
   Observatory::ObserverHandler obs_player;

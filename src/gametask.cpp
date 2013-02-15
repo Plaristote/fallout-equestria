@@ -741,6 +741,9 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     SetPlayerInventory();
     _level->SetEntryZone(*_playerParty, params.entry_zone);
     SetLevel(_level);
+
+    // TODO remove this when we're done with deploying creeps
+    //_level->SpawnEnemies("critters", 10, 1);
   }
   else
   {

@@ -27,8 +27,9 @@ struct WaypointModifier
 {  
   virtual void ProcessCollisions(void);
   void         UnprocessCollisions(void);
-  int          GetOccupiedWaypointAsInt(void) const { return (_waypointOccupied->id); }
-  Waypoint*    GetOccupiedWaypoint(void)     const  { return (_waypointOccupied);     }
+  bool         HasOccupiedWaypoint(void)      const { return (_waypointOccupied != 0); }
+  int          GetOccupiedWaypointAsInt(void) const { return (_waypointOccupied->id);  }
+  Waypoint*    GetOccupiedWaypoint(void)      const { return (_waypointOccupied);      }
   void         SetOccupiedWaypoint(Waypoint* wp);
 
 protected:

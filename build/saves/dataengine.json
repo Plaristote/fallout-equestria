@@ -1,11 +1,4 @@
 {
-"Factions": {
-  "Player": {
-  },
-  "Test Town": {
-  }
-},
-
 "shielding spell": {
   "graphics": {
     "model": "sphere.obj",
@@ -26,92 +19,152 @@
 }
 ,
 "worldmap": {
-  "pos-x": 98,
-  "pos-y": 108
+  "pos-x": 200,
+  "pos-y": 200
 }
 ,
 "time": {
-  "seconds": 12,
-  "minutes": 49,
-  "hours": 0,
-  "days": 22,
+  "seconds": 6,
+  "minutes": 23,
+  "hours": 10,
+  "days": 28,
   "month": 8,
   "year": 2472
 }
 ,
+"Factions": {
+  "Player Party": {
+    "Enemies": ""
+  }
+,
+  "Test Town": {
+    "Enemies": ""
+  },
+  
+  "Timberwolves": {
+    "Enemies": [ "PlayerParty" ]
+  }
+
+}
+,
+"Pipbuck": {
+  "Apps": {
+    "clock": {
+      "type": 1,
+      "icon": "clock.png"
+    }
+,
+    "helloworld": {
+      "type": 0,
+      "icon": "helloworld.png",
+      "src": "helloworld.as",
+      "hooks": {
+        "start": "start",
+        "exit": "exit",
+        "focused": "focused",
+        "unfocused": "unfocused",
+        "run_background": "daemon",
+        "run_focused": "main"
+      }
+
+    }
+
+  }
+,
+  "Files": {
+    "firstfile": {
+      "type": "text",
+      "header": "First text file ever for the pipbuck",
+      "content": "Chapter One: Sustinex<br /><br />
+
+
+\"Damn the torpedoes! Full speed ahead!\"-General Feckmane<br /><br />
+
+
+
+
+***<br /><br />
+
+
+It was either the heaviest rainstorm or the pussiest tornado that Glyphmark had ever experienced.<br /><br />
+
+
+As I lay awake in my top bunk -which is a crappy-ass bed- the storm refused to get the best of me. I heard the rain pour down onto the Favela rooftops in a torrential downpour as I read my copy of ?Guns and Ammo?. With the wind?s savage pounding and the rain?s deafening downpour rocking our home, it felt like the building we were in would have collapsed at any second. Considering how crappily this place was built, that occurrence was actually very likely.<br /><br />
+
+
+I propped myself up on my scratchy hay mattress; I was careful not to knock the candle on my nightstand into my bedding. I reached out and nudged the candle at a slightly safer distance away from me. Reassured, I continued to read my prewar copy of \"Guns and Ammo\", picking up where I had left off at an article about the short-stroke piston NRF- MD2 rifle. At that moment in time life was good.<br /><br />
+
+
+Far away I heard the distant echoes of the skeleton crew moving our supply of gunpowder into a dry storage area, since soaked gunpowder is bad gunpowder. I heard grunts and several colourful curses in heavy Zebraic through the rain. It was times like these that made me glad to be a day shift town guard.<br /><br />
+
+
+On the opposite side of the room I saw my roommate, and marefriend, Xephyr, sleeping peacefully on her bed. I could see her small, muscular black striped body poking out from under her sheet.<br /><br />
+
+
+On her bedstand stood a picture of her parents -two unknown zebras- handing Xephyr as a baby, wrapped in a bundle, to my father, Lancer, who was a teenager at the time. The photo on my nightstand is that of my dead mother, Iota and my, Lancer, who was halfway invisible under a stealth cloak.<br /><br />
+
+
+As the storm raged on, I decided it was time to get some shut eye. After all, the cold moisture of rain always makes them the best time to sleep. So I blew out my candle, tried to make myself comfortable in my crappy bed, and fell asleep.<br /><br />
+
+
+
+
+*** *** ***<br /><br />
+
+
+
+
+
+
+*** *** ***<br /><br />
+
+
+I awoke.<br />
+
+
+Normally it?s not very pretty when I wake up in the morning; my brain gets fuzzy, my muscles don?t work, and by vision gets blurry; it?s just a large-ass mess. Today was no exception to that rule; I rolled over in my bed, my teared-up eyes making the whole world seem like I was hopped up on the ?shrooms. My barrel bedstand looked like a giant brown blob.<br /><br />
+
+
+I stretched out my cramped muscles, flexing them methodically, as was my morning routine. Right quad, left quad. Right calf, left calf.  As I stretched out my final muscle, I heard a few voices from outside, to the west side of our building; the skeleton crew was switching out with the day shift.<br /><br />
+
+
+ The first zebra said, ?Habere bonum trabea! Populatores sunt supposted ad esse male hoc tempore anno?, which roughly translated  into: ?Have a nice day, the raiders are abundant at this time of the year.?<br /><br />
+
+
+He was right; around spring, raiders, both diseased and professional, were at their strongest. As for why... well, I really don?t know.<br /><br />
+
+
+The day worker, who's voice I recognized as the guard captain's, shouted, straining his voice: ?LANTHE! GET THE HELL TO YOUR POST!? His voice echoed throughout the Favela, probably waking up even those who had another two hours to sleep. The surprised gasps and muffled swearing from the areas nearby told me that was most likely the case.<br /><br />
+
+
+?Well, that woke me up.? I took a look at the old, analog watch strapped onto my left leg, towards the hoof, and immediately yelled: ?Oh, shit!? when I saw the time. I needed to be at my guard post ten minutes ago! If I was late again, the captain was going to have my hide!<br /><br />
+
+
+Newly refreshed and woken up, not to mention fearing for my skin, I ran to my barrel bedstand, opened the top drawer with my mouth, and frantically rummaged through the contents, looking for a certain something.<br /><br />
+
+
+?No... no... no... n-is that a thong? No... no... YES!?"
+    }
+,
+    "secondfile": {
+      "type": "audio",
+      "header": "First audio file ever for the pipbuck",
+      "src": "audiofile"
+    }
+
+  }
+
+}
+,
+"bestiary": {
+  "critters": {
+    "charsheet": "timberwolf",
+    "script":    "timberwolf"
+  }
+},
 "player": {
   "inventory": {
-    "Shotgun": {
-      "script": {
-        "file": ""
-      }
-,
-      "icon": "shotgun.png",
-      "model": "",
-      "texture": "",
-      "scale": 0,
-      "weight": 0,
-      "mode-mouth": 0,
-      "mode-magic": 1,
-      "mode-battlesaddle": 1,
-      "actions": {
-        "Shoot": {
-          "ap-cost": 5,
-          "range": 25,
-          "combat": 1,
-          "targeted": 1,
-          "damage": 15,
-          "damage-max": 20
-        }
-,
-        "Reload": {
-          "ap-cost": 2,
-          "range": 0,
-          "combat": 0,
-          "targeted": 0,
-          "damage": 0,
-          "damage-max": 0
-        }
-
-      }
-,
-      "interactions": {
-        "use": 1
-      }
-,
-      "quantity": 1,
-      "hidden": "",
-      "Name": "Shotgun"
-    }
-,
-    "ammoCaliber22": {
-      "script": {
-        "file": "",
-        "hookWeildMouth": "",
-        "hookWeildMagic": "",
-        "hookWeildBattleSaddle": ""
-      }
-,
-      "icon": "22caliber.png",
-      "model": "",
-      "texture": "",
-      "scale": 0,
-      "weight": 0,
-      "mode-mouth": 0,
-      "mode-magic": 0,
-      "mode-battlesaddle": 0,
-      "interactions": {
-        "use": 1
-      }
-,
-      "quantity": 36,
-      "actions": "",
-      "hidden": "",
-      "Name": "ammoCaliber22"
-    }
-,
     "hooves": {
-      "icon": "hooves.png",
       "script": {
         "file": "objectsUnarmed.as"
       }
@@ -122,7 +175,7 @@
           "ap-cost": 3,
           "combat": 1,
           "range": 10,
-          "danage": 5,
+          "damage": 5,
           "hookWeapon": "HoovesHit",
           "targeted": 1
         }
@@ -136,8 +189,7 @@
 ,
       "mode-mouth": 1,
       "mode-magic": 1,
-      "quantity": 1,
-      "Name": "hooves"
+      "quantity": 1
     }
 ,
     "buck": {
@@ -170,90 +222,11 @@
         "use": 1
       }
 ,
-      "quantity": 1,
-      "Name": "buck"
+      "quantity": 1
     }
 
   }
 
-},
-
-"Pipbuck": {
-  "Apps": {
-    "clock": {
-      "type": 1,
-      "icon": "clock.png"
-    },
-    "helloworld": {
-      "type": 0,
-      "icon": "helloworld.png",
-      "src": "helloworld.as",
-      "hooks": {
-        "start": "start",
-        "exit": "exit",
-        "focused": "focused",
-        "unfocused": "unfocused",
-        "run_background": "daemon",
-        "run_focused": "main"
-      }
-    }
-  },
-  "Files": {
-    "firstfile": {
-      "type":    "text",
-      "header":  "First text file ever for the pipbuck",
-      "content": "Chapter One: Sustinex<br /><br />
-
-\"Damn the torpedoes! Full speed ahead!\"-General Feckmane<br /><br />
-
-
-***<br /><br />
-
-It was either the heaviest rainstorm or the pussiest tornado that Glyphmark had ever experienced.<br /><br />
-
-As I lay awake in my top bunk -which is a crappy-ass bed- the storm refused to get the best of me. I heard the rain pour down onto the Favela rooftops in a torrential downpour as I read my copy of ?Guns and Ammo?. With the wind?s savage pounding and the rain?s deafening downpour rocking our home, it felt like the building we were in would have collapsed at any second. Considering how crappily this place was built, that occurrence was actually very likely.<br /><br />
-
-I propped myself up on my scratchy hay mattress; I was careful not to knock the candle on my nightstand into my bedding. I reached out and nudged the candle at a slightly safer distance away from me. Reassured, I continued to read my prewar copy of \"Guns and Ammo\", picking up where I had left off at an article about the short-stroke piston NRF- MD2 rifle. At that moment in time life was good.<br /><br />
-
-Far away I heard the distant echoes of the skeleton crew moving our supply of gunpowder into a dry storage area, since soaked gunpowder is bad gunpowder. I heard grunts and several colourful curses in heavy Zebraic through the rain. It was times like these that made me glad to be a day shift town guard.<br /><br />
-
-On the opposite side of the room I saw my roommate, and marefriend, Xephyr, sleeping peacefully on her bed. I could see her small, muscular black striped body poking out from under her sheet.<br /><br />
-
-On her bedstand stood a picture of her parents -two unknown zebras- handing Xephyr as a baby, wrapped in a bundle, to my father, Lancer, who was a teenager at the time. The photo on my nightstand is that of my dead mother, Iota and my, Lancer, who was halfway invisible under a stealth cloak.<br /><br />
-
-As the storm raged on, I decided it was time to get some shut eye. After all, the cold moisture of rain always makes them the best time to sleep. So I blew out my candle, tried to make myself comfortable in my crappy bed, and fell asleep.<br /><br />
-
-
-*** *** ***<br /><br />
-
-
-
-*** *** ***<br /><br />
-
-I awoke.<br />
-
-Normally it?s not very pretty when I wake up in the morning; my brain gets fuzzy, my muscles don?t work, and by vision gets blurry; it?s just a large-ass mess. Today was no exception to that rule; I rolled over in my bed, my teared-up eyes making the whole world seem like I was hopped up on the ?shrooms. My barrel bedstand looked like a giant brown blob.<br /><br />
-
-I stretched out my cramped muscles, flexing them methodically, as was my morning routine. Right quad, left quad. Right calf, left calf.  As I stretched out my final muscle, I heard a few voices from outside, to the west side of our building; the skeleton crew was switching out with the day shift.<br /><br />
-
- The first zebra said, ?Habere bonum trabea! Populatores sunt supposted ad esse male hoc tempore anno?, which roughly translated  into: ?Have a nice day, the raiders are abundant at this time of the year.?<br /><br />
-
-He was right; around spring, raiders, both diseased and professional, were at their strongest. As for why... well, I really don?t know.<br /><br />
-
-The day worker, who's voice I recognized as the guard captain's, shouted, straining his voice: ?LANTHE! GET THE HELL TO YOUR POST!? His voice echoed throughout the Favela, probably waking up even those who had another two hours to sleep. The surprised gasps and muffled swearing from the areas nearby told me that was most likely the case.<br /><br />
-
-?Well, that woke me up.? I took a look at the old, analog watch strapped onto my left leg, towards the hoof, and immediately yelled: ?Oh, shit!? when I saw the time. I needed to be at my guard post ten minutes ago! If I was late again, the captain was going to have my hide!<br /><br />
-
-Newly refreshed and woken up, not to mention fearing for my skin, I ran to my barrel bedstand, opened the top drawer with my mouth, and frantically rummaged through the contents, looking for a certain something.<br /><br />
-
-?No... no... no... n-is that a thong? No... no... YES!?"
-    },
-    "secondfile": {
-      "type":    "audio",
-      "header":  "First audio file ever for the pipbuck",
-      "src":     "audiofile"
-    }
-  }
 }
 
 
