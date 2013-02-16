@@ -55,8 +55,8 @@ private:
   
   bool               _equiped;
 
-  asIScriptContext*  _scriptContext;
-  asIScriptModule*   _scriptModule;
+  asIScriptContext*  _script_context;
+  asIScriptModule*   _script_module;
   
   struct ActionHooks
   {

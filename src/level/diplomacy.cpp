@@ -15,6 +15,7 @@ void WorldDiplomacy::Initialize(void)
 {
   Data factions = _data_engine["Factions"];
 
+  factions.Output();
   _next_flag = 1;
   _factions.clear();
   for_each(factions.begin(), factions.end(), [this](Data faction)
@@ -23,8 +24,14 @@ void WorldDiplomacy::Initialize(void)
   {
     Data enemies = faction["Enemies"];
 
-    for_each(enemies.begin(), enemies.end(), [this, faction](Data enemy)
-    { SetAsEnemy(enemy.Value() == "1", enemy.Key(), faction.Key()); });
+    for_each(enemies.begin(), enemies.end(), [this, faction](Data array)
+    {
+      SetAsEnemy(array.Value() == "1", array.Key(), faction.Key());
+      for_each(array.begin(), array.end(), [this, faction](Data enemy)
+      {
+        SetAsEnemy(enemy.Value() == "1", enemy.Key(), faction.Key()); cout << faction.Key() << " enemies with " << enemy.Value() << endl;
+      });
+    });
   });
 }
 

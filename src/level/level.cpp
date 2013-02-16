@@ -54,7 +54,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   _graphicWindow = _window->get_graphics_window();
 
   // TODO Implement map daylight/nodaylight system
-  if (true)
+  if (false)
   {
     _sunLight = new DirectionalLight("sun_light");
 
@@ -574,10 +574,6 @@ extern void* mypointer;
 AsyncTask::DoneStatus Level::do_task(void)
 { 
   float elapsedTime = _timer.GetElapsedTime();
-  
-  //(++(++(++(++(_world->objects.begin())))))->nodePath.hide();
-  //_sunLightNode.look_at(GetPlayer()->GetDynamicObject()->nodePath);
-  //cout << _sunLightNode.get_hpr().get_x() << "," << _sunLightNode.get_hpr().get_y() << "," << _sunLightNode.get_hpr().get_z() << endl;
   
   // TEST Mouse Cursor automatic change while hovering interfaces
   if (_levelUi.GetContext()->GetHoverElement() == _levelUi.GetContext()->GetRootElement())
@@ -1357,21 +1353,19 @@ void Level::SpawnEnemies(const std::string& type, unsigned short quantity, unsig
     object = _world->AddDynamicObject(character_name.str(), DynamicObject::Character, "lpip.egg", "lpip.png");
     object->charsheet   = data["charsheet"].Value();
     object->dialog      = data["dialog"].Value();
-    //object->script      = data["script"].Value();
+    object->script      = data["script"].Value();
     cout << "Creating " << character_name.str() << " with charsheet '" << object->charsheet << "' and AI '" << object->script << "'" << endl;
     InsertCharacter(new ObjectCharacter(this, object));
     spawn_party.Join(object);
     ObjectCharacter* tmp = (*_characters.rbegin());
     tmp->PlayAnimation("Run");
+    tmp->SetAsEnemy(GetPlayer(), true); // TODO remove that when enemies flag loading is fixed
   }
   SetEntryZone(spawn_party, entry_zone.str());
 }
 
 void Level::SetEntryZone(Party& player_party, const std::string& name)
 {
-  //GenerateEnemy
-  // END
-
   EntryZone* zone               = _world->GetEntryZoneByName(name);
 
   if (!zone && _world->entryZones.size() > 0)

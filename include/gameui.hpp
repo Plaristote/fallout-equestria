@@ -154,7 +154,7 @@ private:
   Rocket::Core::ElementDocument* _root;
   Rocket::Core::Element*         _input;
   std::string                    _currentLine;
-  asIScriptContext*              _scriptContext;
+  asIScriptContext*              _script_context;
   Observatory::ObserverId        _observerError;
 };
 

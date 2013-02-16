@@ -250,6 +250,7 @@ bool WorldMap::IsPartyInCity(string& cityname) const
     float       dist_y = city.pos_y - _current_pos_y;
     float       dist   = SQRT(dist_x * dist_x + dist_y * dist_y);
 
+    cout << "IsPartyInCity " << city.name << endl;
     if (dist <= city.radius)
     {
       cityname = city.name;

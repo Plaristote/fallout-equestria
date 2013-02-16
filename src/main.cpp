@@ -206,9 +206,9 @@ public:
   }
 
 private:
-  DataEngine&            _de;
   Rocket::Core::Element* _element;
   std::string            _event;
+  DataEngine&            _de;
   asIScriptContext*      _context;
   asIScriptModule*       _module;
   std::string            _callback;
@@ -444,6 +444,7 @@ static void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "Data GetStatistics()",                     asMETHOD(ObjectCharacter,GetStatistics), asCALL_THISCALL);
   //MSVC2010 strangeness for this function: Base/Derived thingymajig complications
   engine->RegisterObjectMethod(charClass, "int  GetCurrentWaypoint() const",          asMETHODPR(WaypointModifier,GetOccupiedWaypointAsInt, (void) const, int), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "int  GetPathSize() const",                 asMETHOD(ObjectCharacter,GetPathSize), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool IsMoving() const",                    asMETHOD(ObjectCharacter,IsMoving), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool IsAlive() const",                     asMETHOD(ObjectCharacter,IsAlive),  asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "DynamicObject@ AsObject()",                asFUNCTION(asUtils::CharacterAsObject), asCALL_CDECL_OBJLAST);

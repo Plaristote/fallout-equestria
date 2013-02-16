@@ -6,35 +6,9 @@ int   initWaypoint = 0;
 
 bool shieldCasted = false;
 
-void CastShield(Character@ self)
-{
-  if (shieldCasted == false)
-  {
-    Data dataEngine = level.GetDataEngine();
-    Data buffData   = dataEngine["shielding spell"];
-
-    buffData["graphics"]["model"]          = "sphere.obj";
-    buffData["graphics"]["scale"]          = 5;
-    buffData["graphics"]["color"]["red"]   = 50;
-    buffData["graphics"]["color"]["green"] = 50;
-    buffData["graphics"]["color"]["blue"]  = 200;
-    buffData["graphics"]["color"]["alpha"] = 0.5;
-    buffData["duration"] = 30;
-
-    buffData["script"]["source"]    = "spell.as";
-    buffData["script"]["hookBegin"] = "shieldBegin";
-    buffData["script"]["hookEnd"]   = "shieldEnd";
-
-    self.PushBuff(buffData, self);
-    shieldCasted = true;
-  }
-}
-
 void main(Character@ self, float elaspedTime)
 {
-  if (myTimer.GetElapsedTime() > 2.5)
-    CastShield(self);
-  /*if (!(self.IsMoving()) && myTimer.GetElapsedTime() > 2.5)
+  if (!(self.IsMoving()) && myTimer.GetElapsedTime() > 2.5)
   {
     if (initWaypoint == 0)
       initWaypoint = self.GetCurrentWaypoint();
@@ -51,18 +25,6 @@ void main(Character@ self, float elaspedTime)
     }
 
     myTimer.Restart();
-  }*/
-  if (!(self.IsMoving()))
-  {
-    float distance = self.GetDistance(level.GetPlayer().AsObject());
-
-    if (distance < 30)
-    {
-      int waypoint = self.GetFarthestWaypoint(level.GetPlayer().AsObject());
-
-      if (waypoint != self.GetCurrentWaypoint())
-        self.GoTo(waypoint);
-    }
   }
 }
 
@@ -70,50 +32,40 @@ Character@ currentTarget = null;
 
 Character@ SelectTarget(Character@ self)
 {
-  Cout("Fluttershy Select Target");
   CharacterList         enemies  = self.GetNearbyEnemies();
   int                   nEnemies = enemies.Size();
   int                   it       = 0;
   Character@            bestMatch;
 
-  Cout("Debug #1");
   while (it < nEnemies)
   {
-    Cout("Debug #2");
     Character@ current = enemies[it];
 
-    Cout("Debug #3");
     if (@bestMatch == null || current.GetHitPoints() < bestMatch.GetHitPoints())
       @bestMatch = @current;
-    Cout("Debug #4");
  
     it++;
-    Cout("Debug #5");
-  }
-  if (@bestMatch != null)
-  {
-    Cout("Selected enemy: " + bestMatch.GetName());
-    Write("Selected enemy: " + bestMatch.GetName());
   }
   return (bestMatch);
 }
 
+void MyOutput(string str)
+{
+  Cout(str);
+  Write(str);
+}
+
 void combat(Character@ self)
 {
-  Cout("Fluttershy in Combat mode");
   if (self.IsMoving())
     return ;
 
   if (@currentTarget == null || !(currentTarget.IsAlive()))
     @currentTarget = @SelectTarget(self);
   if (@currentTarget == null)
-  {
-    Cout("Fluttershy passing turn");
     level.NextTurn();
-  }
   else
   {
-    Cout("Fluttershy acting on an enemy");
     if (self.HasLineOfSight(currentTarget.AsObject()))
     {
       int   actionPoints = self.GetActionPoints();
@@ -179,15 +131,25 @@ void combat(Character@ self)
           level.NextTurn();
         else
         {
-          self.GoTo(level.GetPlayer().AsObject(), 1);
+          self.GoTo(currentTarget.AsObject(), 1);
           self.TruncatePath(1);
+          /*if (self.GetPathSize() != 1)
+            level.NextTurn();*/
         }
       }
     }
     else
     {
-      self.GoTo(level.GetPlayer().AsObject(), 1);
+      //Cout("Timberwolf GoTo Player");
+      self.GoTo(currentTarget.AsObject(), 1);
       self.TruncatePath(1);
+      if (self.GetPathSize() != 1)
+      {
+        //Cout("Timberwolf didn't find any path");
+        level.NextTurn();
+      }
+      else
+        Cout("Timberwolf found a path");
     }
   }
 }

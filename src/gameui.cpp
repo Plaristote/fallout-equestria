@@ -382,10 +382,10 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
   GConsole= this;
 
   if (Script::Engine::Get())
-    _scriptContext = Script::Engine::Get()->CreateContext();
+    _script_context = Script::Engine::Get()->CreateContext();
   else
   {
-    _scriptContext = 0;
+    _script_context = 0;
     cerr << "/!\\ [GameConsole] No Script::Engine" << endl;
   }
 
@@ -417,8 +417,8 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
 
 GameConsole::~GameConsole()
 {
-  if (_scriptContext)
-    _scriptContext->Release();
+  if (_script_context)
+    _script_context->Release();
   Script::Engine::ScriptError.Disconnect(_observerError);
 }
 
@@ -432,12 +432,12 @@ void GameConsole::Execute(Rocket::Core::Event&)
     _history.push_back(string.CString());
     _histIter= _history.end();
 
-    if (_scriptContext)
+    if (_script_context)
     {
       stringstream stream;
 
       _currentLine = string.CString();
-      int ret = ExecuteString(Script::Engine::Get(), _currentLine.c_str(), 0, _scriptContext);
+      int ret = ExecuteString(Script::Engine::Get(), _currentLine.c_str(), 0, _script_context);
       if (ret == asEXECUTION_ABORTED || ret == asEXECUTION_EXCEPTION)
       {
 	stream << "<span class='console-as-error'>[AngelScript]</span> ";

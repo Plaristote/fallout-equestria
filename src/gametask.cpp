@@ -743,7 +743,7 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     SetLevel(_level);
 
     // TODO remove this when we're done with deploying creeps
-    //_level->SpawnEnemies("critters", 10, 1);
+    _level->SpawnEnemies("critters", 10, 1);
   }
   else
   {

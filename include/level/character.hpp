@@ -50,7 +50,7 @@ private:
   NodePath           _graphicalEffect;
 };
 
-class ObjectCharacter : public InstanceDynamicObject
+class ObjectCharacter : public InstanceDynamicObject, public Scriptable
 {
 public:
   struct FovEnemy
@@ -119,6 +119,7 @@ public:
   int                 GetBestWaypoint(InstanceDynamicObject* object, bool farthest);
   int                 GetNearestWaypoint(InstanceDynamicObject* object);
   int                 GetFarthestWaypoint(InstanceDynamicObject* object);
+  unsigned int        GetPathSize(void) const    { return (_path.size());          }
   bool                HasLineOfSight(InstanceDynamicObject* object);
   bool                IsMoving(void) const       { return (_path.size());          }
   bool                IsAlive(void) const        { return (_hitPoints > 0);        }
@@ -163,7 +164,7 @@ public:
   void                CheckFieldOfView(void);
   void                SetFaction(const std::string&);
   void                SetFaction(unsigned int flag);
-  void                SetAsEnemy(ObjectCharacter*, bool);
+  void                SetAsEnemy(const ObjectCharacter*, bool);
   bool                IsEnemy(const ObjectCharacter*) const;
   bool                IsAlly(const ObjectCharacter*)  const;
   
@@ -242,8 +243,6 @@ private:
   std::list<ObjectCharacter*> _fovAllies;
   
   // Script
-  asIScriptContext*  _scriptContext;
-  asIScriptModule*   _scriptModule;
   asIScriptFunction* _scriptMain;
   asIScriptFunction* _scriptFight;
 

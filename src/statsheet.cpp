@@ -8,16 +8,13 @@ using namespace std;
  */
 StatModel::StatModel(Data statsheet) : _statsheet(statsheet)
 {
-  if (Script::Engine::Get())
-    _scriptContext = Script::Engine::Get()->CreateContext();
-  else
-    _scriptContext = 0;
+  _script_context = 0;
   LoadFunctions();
 }
 
 StatModel::~StatModel(void)
 {
-  if (_scriptContext) _scriptContext->Release();
+  if (_script_context) _script_context->Release();
 }
 
 void StatModel::Backup(void)
@@ -63,10 +60,20 @@ void StatModel::RestoreBackup(void)
   UpdateAllValues();
 }
 
-void StatModel::ReloadFunction(asIScriptFunction** pointer)
+void Scriptable::LoadScript(string module_name, string filepath)
+{
+  asIScriptEngine* engine = Script::Engine::Get();
+
+  _script_context = (engine          ? engine->CreateContext()                           : 0);
+  _script_module  = (_script_context ? Script::Engine::LoadModule(module_name, filepath) : 0);
+  std::for_each(_script_func_ptrs.begin(), _script_func_ptrs.end(), [](ScriptFuncPtr& func_ptr)
+  { *func_ptr.first = 0; });
+}
+
+void Scriptable::ReloadFunction(asIScriptFunction** pointer)
 {
   *pointer = 0;
-  if (_scriptContext && _scriptModule)
+  if (_script_context && _script_module)
   {
     ScriptFuncPtrs::iterator cur, end;
 
@@ -74,7 +81,7 @@ void StatModel::ReloadFunction(asIScriptFunction** pointer)
     {
       if (cur->first == pointer)
       {
-	*pointer = _scriptModule->GetFunctionByDecl(cur->second.c_str());
+	*pointer = _script_module->GetFunctionByDecl(cur->second.c_str());
 	break ;
       }
     }
@@ -84,10 +91,10 @@ void StatModel::ReloadFunction(asIScriptFunction** pointer)
 void StatModel::LoadFunctions(void)
 {
   _scriptUpdateAllValues = _scriptAvailableTraits = _scriptActivateTraits = _scriptAddExperience = _scriptAddSpecialPoint = _scriptIsReady = _scriptLevelUp = _scriptXpNextLevel = _scriptAddPerk = 0;
-  if (_scriptContext)
+  if (_script_context)
   {
-    _scriptModule = Script::Engine::LoadModule("special", "scripts/ai/special.as");
-    if (_scriptModule)
+    LoadScript("special", "scripts/ai/special.as");
+    if (_script_module)
     {
       _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAvailableTraits, "StringList AvailableTraits(Data)"));
       _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptActivateTraits,  "bool ActivateTraits(Data, string, bool)"));
@@ -119,11 +126,11 @@ bool           StatModel::AddPerk(const string& perk)
   {
     string tmp = perk;
 
-    _scriptContext->Prepare(_scriptAddPerk);
-    _scriptContext->SetArgObject(0, &_statsheet);
-    _scriptContext->SetArgObject(1, &tmp);
-    _scriptContext->Execute();
-    success = _scriptContext->GetReturnByte();
+    _script_context->Prepare(_scriptAddPerk);
+    _script_context->SetArgObject(0, &_statsheet);
+    _script_context->SetArgObject(1, &tmp);
+    _script_context->Execute();
+    success = _script_context->GetReturnByte();
   }
   else
   {
@@ -155,9 +162,9 @@ void           StatModel::LevelUp(void)
   ReloadFunction(&_scriptLevelUp);
   if (_scriptLevelUp)
   {
-    _scriptContext->Prepare(_scriptLevelUp);
-    _scriptContext->SetArgObject(0, &_statsheet);
-    _scriptContext->Execute();
+    _script_context->Prepare(_scriptLevelUp);
+    _script_context->SetArgObject(0, &_statsheet);
+    _script_context->Execute();
   }
   else
     _statsheet["Variables"]["Level"] = GetLevel() + 1;
@@ -171,10 +178,10 @@ bool           StatModel::IsReady(void)
   ReloadFunction(&_scriptIsReady);
   if (_scriptIsReady)
   {
-    _scriptContext->Prepare(_scriptIsReady);
-    _scriptContext->SetArgObject(0, &_statsheet);
-    _scriptContext->Execute();
-    is_ready = _scriptContext->GetReturnByte();
+    _script_context->Prepare(_scriptIsReady);
+    _script_context->SetArgObject(0, &_statsheet);
+    _script_context->Execute();
+    is_ready = _script_context->GetReturnByte();
   }
   return (is_ready);
 }
@@ -186,10 +193,10 @@ list<string>   StatModel::GetAvailableTraits(void)
   ReloadFunction(&_scriptAvailableTraits);
   if (_scriptAvailableTraits)
   {
-    _scriptContext->Prepare(_scriptAvailableTraits);
-    _scriptContext->SetArgObject(0, &_statsheet);
-    _scriptContext->Execute();
-    ret = *((list<string>*)_scriptContext->GetReturnObject());
+    _script_context->Prepare(_scriptAvailableTraits);
+    _script_context->SetArgObject(0, &_statsheet);
+    _script_context->Execute();
+    ret = *((list<string>*)_script_context->GetReturnObject());
   }
   return (ret);
 }
@@ -216,12 +223,12 @@ void           StatModel::ToggleTrait(const string& trait)
   {
     string tmp = trait;
     
-    _scriptContext->Prepare(_scriptActivateTraits);
-    _scriptContext->SetArgObject(0, &_statsheet);
-    _scriptContext->SetArgObject(1, &tmp);
-    _scriptContext->SetArgByte(2, !is_active);
-    _scriptContext->Execute();
-    if (_scriptContext->GetReturnByte())
+    _script_context->Prepare(_scriptActivateTraits);
+    _script_context->SetArgObject(0, &_statsheet);
+    _script_context->SetArgObject(1, &tmp);
+    _script_context->SetArgByte(2, !is_active);
+    _script_context->Execute();
+    if (_script_context->GetReturnByte())
       UpdateAllValues();
   }
 }
@@ -235,20 +242,20 @@ void           StatModel::SetExperience(unsigned short e)
   ReloadFunction(&_scriptAddExperience);
   if (_scriptAddExperience)
   {
-    _scriptContext->Prepare(_scriptAddExperience);
-    _scriptContext->SetArgObject(0, &_statsheet);
-    _scriptContext->SetArgDWord(1, e - currentXp);
-    _scriptContext->Execute();
+    _script_context->Prepare(_scriptAddExperience);
+    _script_context->SetArgObject(0, &_statsheet);
+    _script_context->SetArgDWord(1, e - currentXp);
+    _script_context->Execute();
   }
   else
     _statsheet["Variables"]["Experience"] = currentXp + e;
   ReloadFunction(&_scriptXpNextLevel);
   if (_scriptXpNextLevel)
   {
-    _scriptContext->Prepare(_scriptXpNextLevel);
-    _scriptContext->SetArgObject(0, &_statsheet);
-    _scriptContext->Execute();
-    nextLevel = _scriptContext->GetReturnDWord();
+    _script_context->Prepare(_scriptXpNextLevel);
+    _script_context->SetArgObject(0, &_statsheet);
+    _script_context->Execute();
+    nextLevel = _script_context->GetReturnDWord();
   }
   if (nextLevel && e >= nextLevel)
     LevelUp();
@@ -269,12 +276,12 @@ void           StatModel::SetSpecial(const std::string& stat, short value)
   {
     string stat_      = stat;
 
-    _scriptContext->Prepare(_scriptAddSpecialPoint);
-    _scriptContext->SetArgObject(0, &_statsheet);
-    _scriptContext->SetArgObject(1, &stat_);
-    _scriptContext->SetArgDWord(2, (value - currentValue));
-    _scriptContext->Execute();
-    sendSignal = _scriptContext->GetReturnByte();
+    _script_context->Prepare(_scriptAddSpecialPoint);
+    _script_context->SetArgObject(0, &_statsheet);
+    _script_context->SetArgObject(1, &stat_);
+    _script_context->SetArgDWord(2, (value - currentValue));
+    _script_context->Execute();
+    sendSignal = _script_context->GetReturnByte();
   }
   else
     _statsheet["Special"][stat] = value;
@@ -315,9 +322,9 @@ bool          StatModel::UpdateAllValues(void)
   ReloadFunction(&_scriptUpdateAllValues);
   if (_scriptUpdateAllValues)
   {
-    _scriptContext->Prepare(_scriptUpdateAllValues);
-    _scriptContext->SetArgObject(0, &_statsheet);
-    _scriptContext->Execute();
+    _script_context->Prepare(_scriptUpdateAllValues);
+    _script_context->SetArgObject(0, &_statsheet);
+    _script_context->Execute();
     
     std::for_each(_statsheet["Special"].begin(), _statsheet["Special"].end(), [this](Data value)
     { SpecialChanged.Emit(value.Key(), value); });
@@ -341,10 +348,10 @@ unsigned short StatModel::GetXpNextLevel(void)
   ReloadFunction(&_scriptXpNextLevel);
   if (_scriptXpNextLevel)
   {
-    _scriptContext->Prepare(_scriptXpNextLevel);
-    _scriptContext->SetArgObject(0, &_statsheet);
-    _scriptContext->Execute();
-    return (_scriptContext->GetReturnDWord());
+    _script_context->Prepare(_scriptXpNextLevel);
+    _script_context->SetArgObject(0, &_statsheet);
+    _script_context->Execute();
+    return (_script_context->GetReturnDWord());
   }
   return (0);
 }
@@ -352,32 +359,32 @@ unsigned short StatModel::GetXpNextLevel(void)
 int           StatModel::Action(const std::string& action, const std::string& fmt, ...)
 {
   string             func_name   = "action_" + action;
-  asIScriptFunction* action_func = _scriptModule->GetFunctionByName(func_name.c_str());
+  asIScriptFunction* action_func = _script_module->GetFunctionByName(func_name.c_str());
   
   if (action_func)
   {
     va_list      ap;
 
-    _scriptContext->Prepare(action_func);
+    _script_context->Prepare(action_func);
     va_start(ap, fmt);
     for (unsigned short it = 0 ; it < fmt.size() ; ++it)
     {
       switch (fmt[it])
       {
         case 'o':
-          _scriptContext->SetArgObject(it, va_arg(ap, void*));
+          _script_context->SetArgObject(it, va_arg(ap, void*));
           break ;
         case 'i':
-          _scriptContext->SetArgDWord(it, va_arg(ap, int));
+          _script_context->SetArgDWord(it, va_arg(ap, int));
           break ;
         case 'b':
-          _scriptContext->SetArgByte(it, va_arg(ap, int));
+          _script_context->SetArgByte(it, va_arg(ap, int));
           break ;
         case 'f':
-          _scriptContext->SetArgFloat(it, va_arg(ap, double));
+          _script_context->SetArgFloat(it, va_arg(ap, double));
           break ;
         case 'd':
-          _scriptContext->SetArgDouble(it, va_arg(ap, double));
+          _script_context->SetArgDouble(it, va_arg(ap, double));
           break ;
         default:
           cout << "[StatModel][Action] Call will fail: unsuported argument '" << fmt[it] << "' provided" << endl;
@@ -385,8 +392,8 @@ int           StatModel::Action(const std::string& action, const std::string& fm
       }
     }
     va_end(ap);
-    _scriptContext->Execute();
-    return (_scriptContext->GetReturnWord());
+    _script_context->Execute();
+    return (_script_context->GetReturnWord());
   }
   return (0);
 }

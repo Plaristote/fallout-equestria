@@ -3,6 +3,7 @@
 #include <panda3d/nodePathCollection.h>
 
 #include "level/level.hpp"
+#include <options.hpp>
 
 #define DEFAULT_WEAPON_1 "hooves"
 #define DEFAULT_WEAPON_2 "buck"
@@ -235,8 +236,8 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   }
   
   // Script
-  _scriptContext = 0;
-  _scriptModule  = 0;
+  _script_context = 0;
+  _script_module  = 0;
   _scriptMain    = 0;
   _scriptFight   = 0;
   _scriptRequestAttack = _scriptRequestFollow = _scriptRequestHeal = _scriptRequestStopFollowing = _scriptSendMessage = _scriptAskMorale = 0;
@@ -245,38 +246,34 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
     string prefixName = "IA_";
     string prefixPath = "scripts/ai/";
 
-    _scriptContext = Script::Engine::Get()->CreateContext();
-    if (_scriptContext)
+    LoadScript(prefixName + GetName(), prefixPath + object->script + ".as");
+    if (_script_module)
     {
-      _scriptModule  = Script::Engine::LoadModule(prefixName + GetName(), prefixPath + object->script + ".as");
-      if (_scriptModule)
+      // Get the running functions
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptMain,  "void main(Character@, float)"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptFight, "void combat(Character@)"));
+
+      // Get the communication functions
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestStopFollowing, "void RequestStopFollowing(Character@, Character@)"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestFollow,        "void RequestFollow(Character@, Character@)"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestAttack,        "void RequestAttack(Character@, Character@)"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestHeal,          "void RequestHeal(Character@, Character@)"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAskMorale,            "int  AskMorale()"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptSendMessage,          "void ReceiveMessage(string)"));
+
+      // Get Default Weapons from script
+      asIScriptFunction* funcGetDefWeapon[2];
+
+      funcGetDefWeapon[0] = _script_module->GetFunctionByDecl("string default_weapon_1()");
+      funcGetDefWeapon[1] = _script_module->GetFunctionByDecl("string default_weapon_2()");
+      for (int i = 0 ; i < 2 ; ++i)
       {
-	// Get the running functions
-        _scriptMain    = _scriptModule->GetFunctionByDecl("void main(Character@, float)");
-	_scriptFight   = _scriptModule->GetFunctionByDecl("void combat(Character@)");
-	
-	// Get the communication functions
-	_scriptRequestStopFollowing = _scriptModule->GetFunctionByDecl("void RequestStopFollowing(Character@, Character@)");
-	_scriptRequestFollow        = _scriptModule->GetFunctionByDecl("void RequestFollow(Character@, Character@)");
-	_scriptRequestAttack        = _scriptModule->GetFunctionByDecl("void RequestAttack(Character@, Character@)");
-	_scriptRequestHeal          = _scriptModule->GetFunctionByDecl("void RequestHeal(Character@, Character@)");
-	_scriptAskMorale            = _scriptModule->GetFunctionByDecl("int  AskMorale()");
-	_scriptSendMessage          = _scriptModule->GetFunctionByDecl("void ReceiveMessage(string)");
-
-	// Get Default Weapons from script
-	asIScriptFunction* funcGetDefWeapon[2];
-
-	funcGetDefWeapon[0] = _scriptModule->GetFunctionByDecl("string default_weapon_1()");
-	funcGetDefWeapon[1] = _scriptModule->GetFunctionByDecl("string default_weapon_2()");
-	for (int i = 0 ; i < 2 ; ++i)
-	{
-	  if (funcGetDefWeapon[i])
-	  {
-	    _scriptContext->Prepare(funcGetDefWeapon[i]);
-	    _scriptContext->Execute();
-	    defEquiped[i] = *(reinterpret_cast<string*>(_scriptContext->GetReturnAddress()));
-	  }
-	}
+        if (funcGetDefWeapon[i])
+        {
+          _script_context->Prepare(funcGetDefWeapon[i]);
+          _script_context->Execute();
+          defEquiped[i] = *(reinterpret_cast<string*>(_script_context->GetReturnAddress()));
+        }
       }
     }
   }
@@ -466,22 +463,30 @@ void ObjectCharacter::Run(float elapsedTime)
   {
     Level::State state = _level->GetState();
 
-    if (state == Level::Normal && _scriptMain && _hitPoints > 0)
+    if (state == Level::Normal && _hitPoints > 0)
     {
-      _scriptContext->Prepare(_scriptMain);
-      _scriptContext->SetArgObject(0, this);
-      _scriptContext->SetArgFloat(1, elapsedTime);
-      _scriptContext->Execute();
+      ReloadFunction(&_scriptMain);
+      if (_scriptMain)
+      {
+        _script_context->Prepare(_scriptMain);
+        _script_context->SetArgObject(0, this);
+        _script_context->SetArgFloat(1, elapsedTime);
+        _script_context->Execute();
+      }
     }
     else if (state == Level::Fight)
     {
+      if (this != _level->GetPlayer())
+        cout << "Movement count: " << _path.size() << endl;
+      ReloadFunction(&_scriptFight);
       if (_hitPoints <= 0 || _actionPoints == 0)
 	_level->NextTurn();
       else if (!(IsMoving()) && _scriptFight) // replace with something more appropriate
       {
-	_scriptContext->Prepare(_scriptFight);
-	_scriptContext->SetArgObject(0, this);
-	_scriptContext->Execute();
+        ReloadFunction(&_scriptFight);
+	_script_context->Prepare(_scriptFight);
+	_script_context->SetArgObject(0, this);
+	_script_context->Execute();
       }
     }
     if (_path.size() > 0)
@@ -593,7 +598,8 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
     if (!(_level->FindPath(_path, *_waypointOccupied, *waypoint)))
     {
       if (_level->GetPlayer() == this)
-        _level->ConsoleWrite("No path.");
+        _level->ConsoleWrite(i18n::T("No path."));
+      cout << "No path" << endl;
     }
     else
       StartRunAnimation();
@@ -601,6 +607,7 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
   else
     cout << "Character doesn't have a waypointOccupied" << endl;
   ProcessCollisions();
+  cout << _path.size() << endl;
 }
 
 void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max_distance)
@@ -700,6 +707,7 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
   {
     if (_path.size() <= (unsigned int)_goToData.max_distance && HasLineOfSight(_goToData.objective))
     {
+      cout << "Reached destination" << endl;
       _path.clear();
       ReachedDestination.Emit(this);
       ReachedDestination.DisconnectAll();
@@ -760,7 +768,8 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
 {
   Waypoint&         next = *(_path.begin());
   // TODO: Speed walking / running / combat
-  float             max_speed = 30.f * elapsedTime;
+  float             combat_speed = OptionsManager::Get()["combat-speed"];
+  float             max_speed = (_level->GetState() == Level::Fight && combat_speed > 0 ? combat_speed : 20.f) * elapsedTime;
   LPoint3           distance;
   float             max_distance;    
   LPoint3           speed, axis_speed, dest;
@@ -890,7 +899,7 @@ Script::StdList<ObjectCharacter*>         ObjectCharacter::GetNearbyEnemies(void
   
   while (it != end)
   {
-    cout << "[" << it->enemy << "] FovEnemy: " << it->enemy->GetName() << endl;
+    //cout << "[" << it->enemy << "] FovEnemy: " << it->enemy->GetName() << endl;
     ret.push_back(it->enemy);
     it++;
   }
@@ -925,7 +934,7 @@ void     ObjectCharacter::CheckFieldOfView(void)
     // Decrement TTL of nearby enemies
   }
 
-  Timer timer;
+  //Timer timer;
   
   _fovSphere->set_radius(fovRadius);
   _fovTraverser.traverse(_level->GetWorld()->window->get_render());
@@ -966,7 +975,7 @@ void     ObjectCharacter::CheckFieldOfView(void)
   }
   if (_fovEnemies.size() > 0 && _level->GetState() != Level::Fight)
     _level->StartFight(this);
-  timer.Profile("Field of view");
+  //timer.Profile("Field of view");
 }
 
 /*
@@ -978,9 +987,9 @@ void     ObjectCharacter::SendMessage(const string& str)
   {
     string cpy = str;
 
-    _scriptContext->Prepare(_scriptSendMessage);
-    _scriptContext->SetArgObject(0, &cpy);
-    _scriptContext->Execute();
+    _script_context->Prepare(_scriptSendMessage);
+    _script_context->SetArgObject(0, &cpy);
+    _script_context->Execute();
   }
 }
 
@@ -988,9 +997,9 @@ int      ObjectCharacter::AskMorale(void)
 {
   if (_scriptAskMorale)
   {
-    _scriptContext->Prepare(_scriptAskMorale);
-    _scriptContext->Execute();
-    return (_scriptContext->GetReturnByte());
+    _script_context->Prepare(_scriptAskMorale);
+    _script_context->Execute();
+    return (_script_context->GetReturnByte());
   }
   return (0);
 }
@@ -1019,10 +1028,10 @@ void     ObjectCharacter::RequestCharacter(ObjectCharacter* f, ObjectCharacter* 
 {
   if (func)
   {
-    _scriptContext->Prepare(func);
-    _scriptContext->SetArgObject(0, f);
-    _scriptContext->SetArgObject(1, s);
-    _scriptContext->Execute();
+    _script_context->Prepare(func);
+    _script_context->SetArgObject(0, f);
+    _script_context->SetArgObject(1, s);
+    _script_context->Execute();
   }
 }
 
@@ -1045,7 +1054,7 @@ void     ObjectCharacter::SetFaction(unsigned int flag)
   _faction = diplomacy.GetFaction(flag);
 }
 
-void     ObjectCharacter::SetAsEnemy(ObjectCharacter* other, bool enemy)
+void     ObjectCharacter::SetAsEnemy(const ObjectCharacter* other, bool enemy)
 {
   if (_faction && other->GetFaction() != 0)
   {
@@ -1064,15 +1073,15 @@ void     ObjectCharacter::SetAsEnemy(ObjectCharacter* other, bool enemy)
 
 bool     ObjectCharacter::IsEnemy(const ObjectCharacter* other) const
 {
-  cout << "Calling IsEnemy" << endl;
+  //cout << "Calling IsEnemy" << endl;
   if (other->GetFaction() == 0 && _faction)
     return (other->IsEnemy(this));
   if (_faction)
   {
-    cout << "I haz faction: " << _faction->enemyMask << " (" << _faction->flag << ")" << endl;
+    //cout << "I haz faction: " << _faction->enemyMask << " (" << _faction->flag << ")" << endl;
     return (_faction->enemyMask & other->GetFaction());
   }
-  cout << "I haz no faction" << endl;
+  //cout << "I haz no faction" << endl;
   return (_self_enemyMask & other->GetFaction());
 }
 

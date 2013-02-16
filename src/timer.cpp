@@ -105,27 +105,26 @@ void TimeManager::ExecuteTasks(void)
     if (dostuff)
     {
       safeIt = it;
-      cout << "[" << &task << "] Executing Callbacks" << endl;
+      //cout << "[" << &task << "] Executing Callbacks" << endl;
       task.Interval.Emit();
-      cout << "[" << &task << "] Executed Callbacks" << endl;
+      //cout << "[" << &task << "] Executed Callbacks" << endl;
       task.IntervalIt.Emit(++task.it);
       if (safeIt != it)
       {
-	cout << "[" << &task << "] Task has been deleted" << endl;
+	//cout << "[" << &task << "] Task has been deleted" << endl;
 	it = safeIt;
 	continue ;
       }
       if (!(task.loop))
       {
-	cout << "[" << &task << "] Task isn't looping" << endl;
+	//cout << "[" << &task << "] Task isn't looping" << endl;
 	it = tasks.erase(it);
 	continue ;
       }
       task.NextStep();
-      cout << "[" << &task << "] Next step will be at: ";
-      cout << task.lastY << "/" << task.lastMo << "/" << task.lastD << " ";
-      cout << task.lastH << ":" << task.lastM  << ":" << task.lastS << endl;
-      
+      //cout << "[" << &task << "] Next step will be at: ";
+      //cout << task.lastY << "/" << task.lastMo << "/" << task.lastD << " ";
+      //cout << task.lastH << ":" << task.lastM  << ":" << task.lastS << endl;
     }
     else
       ++it;

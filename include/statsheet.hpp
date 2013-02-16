@@ -5,9 +5,10 @@
 # include "rocket_extension.hpp"
 # include "datatree.hpp"
 # include "scriptengine.hpp"
+# include "scriptable.hpp"
 # include <cstdarg>
 
-class StatModel
+class StatModel : public Scriptable
 {
 public:
   StatModel(Data statsheet);
@@ -77,18 +78,12 @@ public:
   bool           UpdateAllValues(void);  
   
 private:
-  typedef std::pair<asIScriptFunction**, std::string> ScriptFuncPtr;
-  typedef std::list<ScriptFuncPtr>                    ScriptFuncPtrs;
   void           LoadFunctions(void);
-  void           ReloadFunction(asIScriptFunction**);
-  ScriptFuncPtrs _script_func_ptrs;
   
   std::vector<std::string> GetStatKeys(Data stats) const;
 
   Data               _statsheet;
   Data               _statsheet_backup;
-  asIScriptContext*  _scriptContext;
-  asIScriptModule*   _scriptModule;
   asIScriptFunction *_scriptAddSpecialPoint, *_scriptActivateTraits,  *_scriptAddExperience;
   asIScriptFunction *_scriptXpNextLevel,     *_scriptLevelUp,         *_scriptUpdateAllValues;
   asIScriptFunction *_scriptIsReady,         *_scriptAvailableTraits, *_scriptAddPerk;
