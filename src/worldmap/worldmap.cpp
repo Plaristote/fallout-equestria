@@ -148,6 +148,29 @@ void WorldMap::AddCityToList(Data cityData)
     elem = _root->GetElementById(string("city-" + cityData.Key()).c_str());
     elem->AddEventListener("click", &CityButtonClicked);
   }
+  if (cityData["hidden"].Value() != "1")
+  {
+    Core::Element* elem = _root->GetElementById("pworldmap");
+    Core::String inner_rml;
+    stringstream rml, css, elem_id;
+    int          radius = city.radius * 2.5f;
+    
+    elem_id << "city-halo-" << cityData.Key();
+
+    css << "position: absolute;";
+    css << "top: "  << (city.pos_y - radius / 2.f) << "px;";
+    css << "left: " << (city.pos_x - radius / 2.f) << "px;";
+    css << "height: " << radius << "px;";
+    css << "width: "  << radius << "px;";
+    
+    rml << "<div id='" << elem_id.str() << "' class='city-indicator' style='" << css.str() << "'>";
+    rml << "<img src='worldmap-city.png' style='width:" << radius << "px;height:" << radius << "px;' />";
+    rml << "</div>";
+
+    // NOTE might need to do something about Rocket::Core::Factory and Windows (replace with RFactory ?)
+    if ((Rocket::Core::Factory::InstanceElementText(elem, Core::String(rml.str().c_str()))))
+      ToggleEventListener(true, elem_id.str(), "click", MapClickedEvent);
+  }
 }
 
 void WorldMap::UpdateClock(void)
