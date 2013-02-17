@@ -895,7 +895,7 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
           if (_level)
           {
             _level->SetPersistent(false);
-            _level->SpawnEnemies(encounter_type, n_creeps, 1);
+            //_level->SpawnEnemies(encounter_type, n_creeps, 1);
           }
           SyncLoadLevel.Disconnect(obs_id);
         });

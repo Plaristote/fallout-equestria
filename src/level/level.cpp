@@ -24,6 +24,8 @@ Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::Action
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSkillOn;
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
+PT(DirectionalLight) sunlight;
+
 Level* Level::CurrentLevel = 0;
 #include <panda3d/cullFaceAttrib.h>
 Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
@@ -55,23 +57,20 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   _graphicWindow = _window->get_graphics_window();
 
   // TODO Implement map daylight/nodaylight system
-  if (false)
+  if (true)
   {
     _sunLight = new DirectionalLight("sun_light");
+    sunlight = _sunLight;
 
-    _sunLight->set_shadow_caster(true, 2048, 2048);
-    _sunLight->get_lens()->set_near_far(50.f, 100.f);
-    _sunLight->get_lens()->set_film_size(512);
-
+    _sunLight->set_shadow_caster(true, 8192, 8192);
+    _sunLight->get_lens()->set_near_far(10.f, 200.f);
+    _sunLight->get_lens()->set_film_size(768);
+    
     _sunLightNode = window->get_render().attach_new_node(_sunLight);
     _sunLightNode.set_pos(50.f, 50, 50.f);
     _sunLightNode.set_hpr(127, -31,  0);
     window->get_render().set_light(_sunLightNode);
     window->get_render().set_two_sided(false);
-
-    /*NodePath np = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
-    np.set_scale(5);
-    np.reparent_to(_sunLightNode);*/
 
     TimeManager::Task* daylightTask = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
     daylightTask->Interval.Connect(*this, &Level::RunDaylight);
