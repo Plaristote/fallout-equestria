@@ -66,7 +66,7 @@ void TimeManager::ExecuteTasks(void)
 
   /*if (it != end)
   {
-    Task& ftask = **it;
+    Task& ftask = **tasks.rbegin();
     cout << "FTime" << endl;
     cout << year << "/" << month << "/" << day << " ";
     cout << hour << ":" << minute  << ":" << second << endl;
@@ -92,15 +92,15 @@ void TimeManager::ExecuteTasks(void)
           dostuff = false;
         else
         {
-          if (year == task.lastY && month == task.lastMo && hour < task.lastH)
+          if (year == task.lastY && month == task.lastMo && day == task.lastD && hour < task.lastH)
             dostuff = false;
           else
           {
-            if (year == task.lastY && month == task.lastMo && hour == task.lastH && minute < task.lastM)
+            if (year == task.lastY && month == task.lastMo && day == task.lastD && hour == task.lastH && minute < task.lastM)
               dostuff = false;
             else
             {
-              if (year == task.lastY && month == task.lastMo && hour == task.lastH && minute == task.lastM && second < task.lastS)
+              if (year == task.lastY && month == task.lastMo && day == task.lastD && hour == task.lastH && minute == task.lastM && second < task.lastS)
                 dostuff = false;
             }
           }
@@ -178,9 +178,11 @@ void TimeManager::CorrectValues(void)
  */
 void TimeManager::Task::NextStep(void)
 {
+  cout << "PrevStep  -> " << lastY << "/" << lastMo << "/" << lastD << ' ' << lastH << ':' << lastM << ':' << lastS << endl;
   lastY  += timeY;
   lastMo += timeMo;
   lastD  += timeD;
+  lastH  += timeH;
   lastM  += timeM;
   lastS  += timeS;
 
@@ -214,4 +216,8 @@ void TimeManager::Task::NextStep(void)
       lastY  += 1;
     }
   }
+  
+  cout << "TimeStep -> " << timeY << "/" << timeMo << "/" << timeD << ' ' << timeH << ':' << timeM << ':' << timeS << endl;
+  cout << "NextStep -> " << lastY << "/" << lastMo << "/" << lastD << ' ' << lastH << ':' << lastM << ':' << lastS << endl;
+  cout << endl;
 }

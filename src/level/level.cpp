@@ -25,6 +25,7 @@ Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::Action
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
 PT(DirectionalLight) workaround_sunlight;
+TimeManager::Task* daylightTask;
 
 Level* Level::CurrentLevel = 0;
 #include <panda3d/cullFaceAttrib.h>
@@ -74,7 +75,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     window->get_render().set_light(_sunLightNode);
     window->get_render().set_two_sided(false);
 
-    TimeManager::Task* daylightTask = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
+    /*TimeManager::Task* */daylightTask = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
     daylightTask->Interval.Connect(*this, &Level::RunDaylight);
     RunDaylight();
   }
@@ -562,9 +563,9 @@ void Level::NextTurn(void)
 
 void Level::RunDaylight(void)
 {
+  //cout << "Running daylight task" << endl;
   if (_sunLightNode.is_empty())
     return ;
-  //cout << "Run Day Light" << endl;
   
   LVecBase4f color_steps[6] = {
     LVecBase4f(0.2, 0.2, 0.5, 1), // 00h00
@@ -575,14 +576,20 @@ void Level::RunDaylight(void)
     LVecBase4f(0.4, 0.4, 0.6, 1)  // 20h00
   };
 
-  int it = _timeManager.GetHour() / 4;
-  
+  int   current_hour    = daylightTask->lastH + daylightTask->timeH;
+  int   current_minute  = daylightTask->lastM + daylightTask->timeM;
+  int   current_second  = daylightTask->lastS + daylightTask->timeS;
+  int   it              = current_hour / 4;
+  float total_seconds   = 60 * 60 * 4;
+  float elapsed_seconds = current_second + (current_minute * 60) + ((current_hour - (it * 4)) * 60 * 60);
+
   LVecBase4f to_set(0, 0, 0, 0);
   LVecBase4f dif = (it == 5 ? color_steps[0] : color_steps[it + 1]) - color_steps[it];
-  
+
   // dif / 5 * (it % 4) -> dif / 100 * (20 * (it % 4)) is this more clear ? I hope it is.
-  to_set += color_steps[it] + (dif / 5 * (it % 4));
+  to_set += color_steps[it] + (dif / total_seconds * elapsed_seconds);
   _sunLight->set_color(to_set);
+  //cout << "Sunlight color [" << _timeManager.GetHour() << "]->[" << it << "]: " << to_set.get_x() << "," << to_set.get_y() << "," << to_set.get_z() << endl;
 }
 
 extern void* mypointer;
