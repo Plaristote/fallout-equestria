@@ -868,8 +868,8 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
       Data   bad_encounters = case_data["bad-encounters"];
       Data   map_encounters = case_data["map-encounters"];
 
-      if (n_creeps > 13)
-        n_creeps = 13;
+      if (n_creeps > 5)
+        n_creeps = 5;
       for_each(bad_encounters.begin(), bad_encounters.end(), [this, &encounter_type, encounter_type_dice](Data encounter_data)
       {
         if ((int)encounter_data["min"] >= encounter_type_dice && (int)encounter_data["max"] <= encounter_type_dice)
