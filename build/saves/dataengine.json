@@ -2,7 +2,14 @@
 "shielding spell": {
   "graphics": {
     "model": "sphere.obj",
-    "scale": 3
+    "scale": 5,
+    "color": {
+      "red": 50,
+      "green": 50,
+      "blue": 200,
+      "alpha": 0.5
+    }
+
   }
 ,
   "duration": 30,
@@ -19,17 +26,17 @@
 }
 ,
 "worldmap": {
-  "pos-x": 315.348,
-  "pos-y": 247.015
+  "pos-x": 116,
+  "pos-y": 120
 }
 ,
 "time": {
-  "seconds": 51,
-  "minutes": 39,
-  "hours": 1,
-  "days": 9,
-  "month": 12,
-  "year": 2472
+  "seconds": 1,
+  "minutes": 37,
+  "hours": 22,
+  "days": 15,
+  "month": 1,
+  "year": 2473
 }
 ,
 "Factions": {

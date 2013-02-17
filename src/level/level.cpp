@@ -24,6 +24,8 @@ Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::Action
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSkillOn;
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
+PT(DirectionalLight) workaround_sunlight;
+
 Level* Level::CurrentLevel = 0;
 #include <panda3d/cullFaceAttrib.h>
 Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
@@ -57,7 +59,10 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   // TODO Implement map daylight/nodaylight system
   if (true)
   {
-    _sunLight = new DirectionalLight("sun_light");
+    if (workaround_sunlight.is_null())
+      workaround_sunlight = new DirectionalLight("sun_light");
+    _sunLight = workaround_sunlight;
+    //_sunLight = new DirectionalLight("sun_light");
 
     _sunLight->set_shadow_caster(true, 8192, 8192);
     _sunLight->get_lens()->set_near_far(10.f, 200.f);
@@ -91,6 +96,16 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     loadingScreen->AppendText("/!\\ Failed to load world file");
     std::cout << "Failed to load file" << std::endl;
   }
+  
+  /*if (!(_sunLightNode.is_empty()))
+  {
+    _world->rootMapObjects.set_light(_sunLightNode);
+    _world->rootDynamicObjects.set_light(_sunLightNode);
+    std::for_each(_world->floors.begin(), _world->floors.end(), [this](NodePath floor)
+    {
+      floor.set_light(_sunLightNode);
+    });
+  }*/
 
   ForEach(_world->exitZones, [this](ExitZone& zone)
   {
