@@ -503,7 +503,7 @@ static void AngelScriptInitialize(void)
   const char* worldmapClass = "WorldMap";
   engine->RegisterObjectType(worldmapClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(worldmapClass, "void SetCityVisible(string)", asMETHOD(WorldMap,SetCityVisible), asCALL_THISCALL);
-  //engine->RegisterObjectMethod(worldmapClass, "Data GetDataEngine()",        asMETHOD(WorldMap,GetDataEngine),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldmapClass, "Data GetDataEngine()",        asMETHOD(WorldMap,GetDataEngine),  asCALL_THISCALL);
 
   const char* gametaskClass = "Game";
   engine->RegisterObjectType(gametaskClass, 0, asOBJ_REF | asOBJ_NOCOUNT);

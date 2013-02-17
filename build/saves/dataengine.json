@@ -19,16 +19,16 @@
 }
 ,
 "worldmap": {
-  "pos-x": 200,
-  "pos-y": 200
+  "pos-x": 315.348,
+  "pos-y": 247.015
 }
 ,
 "time": {
-  "seconds": 6,
-  "minutes": 23,
-  "hours": 10,
-  "days": 28,
-  "month": 8,
+  "seconds": 51,
+  "minutes": 39,
+  "hours": 1,
+  "days": 9,
+  "month": 12,
   "year": 2472
 }
 ,
@@ -38,11 +38,21 @@
   }
 ,
   "Test Town": {
-    "Enemies": ""
-  },
-  
+    "Enemies": {
+      "Timberwolves": 1
+    }
+
+  }
+,
   "Timberwolves": {
-    "Enemies": [ "PlayerParty" ]
+    "Enemies": {
+      "": {
+        "PlayerParty": 1
+      }
+,
+      "Test Town": 1
+    }
+
   }
 
 }
@@ -159,9 +169,24 @@ Newly refreshed and woken up, not to mention fearing for my skin, I ran to my ba
 "bestiary": {
   "critters": {
     "charsheet": "timberwolf",
-    "script":    "timberwolf"
+    "script": "timberwolf",
+    "model": "lpip.egg",
+    "texture": "lpip.png"
   }
-},
+
+}
+,
+"random-encounters": {
+  "timberwolves": {
+    "critters": 10
+  }
+
+}
+,
+"special-encounters": [
+"special-test"
+]
+,
 "player": {
   "inventory": {
     "hooves": {

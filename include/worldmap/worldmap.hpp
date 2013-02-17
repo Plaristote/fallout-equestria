@@ -29,6 +29,8 @@ public:
   void Show(void);
   
   void SetCityVisible(const std::string&);
+  void AddCity(const std::string&, float pos_x, float pos_y, float radius);
+  bool HasCity(const std::string&) const;
 
   void MapClicked(Rocket::Core::Event& event);
   void PartyClicked(Rocket::Core::Event& event);
@@ -40,9 +42,10 @@ public:
   
   void MoveTowardsCoordinates(float x, float y);
   void MoveTowardsPlace(const std::string&);
-  
+
   DataEngine& GetDataEngine(void) { return (_dataEngine); }
   Data        GetCaseData(int x, int y) const;
+  void        GetCurrentPosition(float& x, float& y) const { x = _current_pos_x; y = _current_pos_y; }
 
   Observatory::Signal<void (std::string)> GoToPlace;
   Observatory::Signal<void (int, int)>    RequestRandomEncounterCheck;

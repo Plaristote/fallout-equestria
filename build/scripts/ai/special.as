@@ -213,6 +213,21 @@ StringList AvailableTraits(Data sheet)
   return (toRet);
 }
 
+string SelectRandomEncounter(Data sheet)
+{
+  Data data_engine        = worldmap.GetDataEngine();
+  Data special_encounters = data_engine["special-encounters"];
+  int  it                 = 0;
+
+  special_encounters.Output();
+  while (it < special_encounters.Count())
+  {
+    special_encounters[it].Output();
+    return (special_encounters[it].AsString());
+  }
+  return ("");
+}
+
 int action_barter_value(Item@ item, Data stats_owner, Data stats_buyer)
 {
   return (5);
@@ -225,3 +240,4 @@ int action_barter_deal(Data stats_first, int total_first, Data stats_second, int
     return (0);
   return (1);
 }
+

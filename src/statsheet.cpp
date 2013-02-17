@@ -1,5 +1,6 @@
 #include "statsheet.hpp"
 #include <i18n.hpp>
+#include <gameui.hpp>
 
 using namespace std;
 
@@ -90,7 +91,7 @@ void Scriptable::ReloadFunction(asIScriptFunction** pointer)
 
 void StatModel::LoadFunctions(void)
 {
-  _scriptUpdateAllValues = _scriptAvailableTraits = _scriptActivateTraits = _scriptAddExperience = _scriptAddSpecialPoint = _scriptIsReady = _scriptLevelUp = _scriptXpNextLevel = _scriptAddPerk = 0;
+  _selectRandomEncounter = _scriptUpdateAllValues = _scriptAvailableTraits = _scriptActivateTraits = _scriptAddExperience = _scriptAddSpecialPoint = _scriptIsReady = _scriptLevelUp = _scriptXpNextLevel = _scriptAddPerk = 0;
   if (_script_context)
   {
     LoadScript("special", "scripts/ai/special.as");
@@ -105,6 +106,7 @@ void StatModel::LoadFunctions(void)
       _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptIsReady,         "bool IsReady(Data)"));
       _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptUpdateAllValues, "void UpdateAllValues(Data)"));
       _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAddPerk,         "bool AddPerk(Data, string)"));
+      _script_func_ptrs.push_back(ScriptFuncPtr(&_selectRandomEncounter, "string SelectRandomEncounter(Data)"));
     }
   }
 }
@@ -440,6 +442,20 @@ vector<string> StatModel::GetStatKeys(Data stats) const
   
   for_each(stats.begin(), stats.end(), [&keys](Data field) { keys.push_back(field.Key()); });
   return (keys);
+}
+
+string StatModel::SelectRandomEncounter(void)
+{
+  ReloadFunction(&_selectRandomEncounter);
+  if (_selectRandomEncounter)
+  {
+    _script_context->Prepare(_selectRandomEncounter);
+    _script_context->SetArgObject(1, &_statsheet);
+    _script_context->Execute();
+  }
+  else
+    AlertUi::NewAlert.Emit("Missing special.as function `string SelectRandomEncounter(Data)`");
+  return ("");
 }
 
 /*

@@ -809,8 +809,55 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
     if (Dices::Throw(20) <= luck)
     {
       // Launch an unhostile encounter
-      if (dialog)
-        ;
+
+      // Launch a special encounter
+      if (Dices::Throw(100) <= 4 + luck)
+      {
+        string special_encounter = _playerStats->Model().SelectRandomEncounter();
+
+        if (special_encounter == "") // Abort
+        {
+          Data special_encounters = _dataEngine["special-encounters"];
+          
+          if (special_encounters.Count() > 0)
+            special_encounter = special_encounters[0].Value();
+          else
+          {
+            if (dialog) delete dialog;
+            return ;
+          }
+        }
+        if (_worldMap->HasCity(special_encounter))
+        {
+          if (dialog) delete dialog;
+          return ;
+        }
+        callback = [this, special_encounter](void)
+        {
+          Observatory::ObserverId obs_id;
+
+          MapOpenLevel(special_encounter);
+          obs_id = SyncLoadLevel.Connect([this, &obs_id, special_encounter](LoadLevelParams)
+          {
+            if (_level)
+            {
+              float x, y;
+
+              _level->SetPersistent(true);
+              _worldMap->GetCurrentPosition(x, y);
+              _worldMap->AddCity(special_encounter, x, y, 10);
+              _worldMap->SetCityVisible(special_encounter);
+            }
+            SyncLoadLevel.Disconnect(obs_id);
+          });
+        };
+        if (dialog)
+          dialog->SetMessage(i18n::T("You discovered ") + i18n::T(special_encounter) + ". Do you want to go in ?");
+      }
+      // Launch a regular good encounter
+      else
+      {
+      }
     }
     else
     {

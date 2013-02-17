@@ -61,7 +61,7 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, Time
       std::for_each(cities.begin(), cities.end(), [this](Data city) { AddCityToList(city); });
     }
     delete cityTree;
-    
+
     //
     // Get some required elements
     //
@@ -91,6 +91,13 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, Time
   CurrentWorldMap = this;
 }
 
+bool WorldMap::HasCity(const string& name) const
+{
+  Cities::const_iterator it = find(_cities.begin(), _cities.end(), name);
+  
+  return (it != _cities.end());
+}
+
 void WorldMap::SetCityVisible(const string& name)
 {
   Cities::iterator it = find(_cities.begin(), _cities.end(), name);
@@ -114,6 +121,24 @@ void WorldMap::SetCityVisible(const string& name)
       }
       delete cityTree;
     }
+  }
+}
+
+void WorldMap::AddCity(const string& name, float x, float y, float radius)
+{
+  DataTree* cityTree = DataTree::Factory::JSON("saves/cities.json");
+
+  if (cityTree)
+  {
+    Data      cities(cityTree);
+
+    cities[name]["visible"] = 0;
+    cities[name]["pos_x"]   = x;
+    cities[name]["pos_y"]   = y;
+    cities[name]["radius"]  = radius;
+    AddCityToList(cities[name]);
+    DataTree::Writers::JSON(cityTree, cityTree->GetSourceFile());
+    delete cityTree;  
   }
 }
 
@@ -141,12 +166,10 @@ void WorldMap::AddCityToList(Data cityData)
     rml << "<div class='city-button'><button id='city-" << cityData.Key() << "' data-city='" << cityData.Key() << "' class='simple-button city-button-button'> </button>";
     rml << "<span class='city-name'>" << cityData.Key() << "</span></div>";
     rml << "</div>";
-    elem->GetInnerRML(innerRml);
     innerRml = innerRml + Rocket::Core::String(rml.str().c_str());
-    elem->SetInnerRML(innerRml);
-    
-    elem = _root->GetElementById(string("city-" + cityData.Key()).c_str());
-    elem->AddEventListener("click", &CityButtonClicked);
+
+    if ((Rocket::Core::Factory::InstanceElementText(elem, innerRml)))
+      ToggleEventListener(true, "city-" + cityData.Key(), "click", CityButtonClicked);
   }
   if (cityData["hidden"].Value() != "1")
   {
@@ -275,7 +298,6 @@ bool WorldMap::IsPartyInCity(string& cityname) const
     float       dist_y = city.pos_y - _current_pos_y;
     float       dist   = SQRT(dist_x * dist_x + dist_y * dist_y);
 
-    cout << "IsPartyInCity " << city.name << endl;
     if (dist <= city.radius)
     {
       cityname = city.name;

@@ -48,6 +48,8 @@ public:
   short          GetSpecial(const std::string& stat)   const;
   short          GetSkill(const std::string& stat)     const;
   
+  std::string    SelectRandomEncounter(void);
+  
   unsigned short GetSpecialPoints(void)                const { return (_statsheet["Variables"]["Special Points"]); }
   unsigned short GetSkillPoints(void)                  const { return (_statsheet["Variables"]["Skill Points"]);   }
   unsigned short GetPerksPoints(void)                  const { return (_statsheet["Variables"]["Perks"]);          }
@@ -87,6 +89,7 @@ private:
   asIScriptFunction *_scriptAddSpecialPoint, *_scriptActivateTraits,  *_scriptAddExperience;
   asIScriptFunction *_scriptXpNextLevel,     *_scriptLevelUp,         *_scriptUpdateAllValues;
   asIScriptFunction *_scriptIsReady,         *_scriptAvailableTraits, *_scriptAddPerk;
+  asIScriptFunction *_selectRandomEncounter;
 };
 
 class StatView
