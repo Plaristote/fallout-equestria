@@ -322,7 +322,7 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
     string which_city;
     
     UpdateClock();
-    if (IsPartyInCity(which_city))
+    if (!(IsPartyInCity(which_city)))
     {
       int x, y;
 

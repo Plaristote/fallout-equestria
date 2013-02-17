@@ -372,6 +372,7 @@ AsyncTask::DoneStatus GameTask::do_task()
   else if (_worldMap)
     _worldMap->Run();
   _pipbuck.Run();
+  _timeManager.ExecuteTasks();
   _buff_manager.CollectGarbage();
   return (AsyncTask::DoneStatus::DS_cont);
 }
@@ -491,6 +492,9 @@ bool GameTask::LoadGame(const std::string& savepath)
   }
   else
     _worldMap->Show();
+  
+  _timeManager.AddTask(TASK_LVL_WORLDMAP, true, 0, 0, 0, 1)->Interval.Connect(*this, &GameTask::RunMetabolism);
+  
   return (true);
 }
 
@@ -771,6 +775,23 @@ void GameTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::str
   SyncLoadLevel.Emit(params);
 }
 
+void GameTask::RunMetabolism(void)
+{
+  stringstream stream, stream_hp;
+  int          hp, max_hp;
+  StatModel&   stats = _playerStats->Model();
+
+  stream << stats.GetStatistic("Healing Rate");
+  stream >> hp;
+  cout << "Healing Rate => " << hp << endl;
+  stream_hp << stats.GetStatistic("Hit Points");
+  stream_hp >> max_hp;
+  hp = (int)(stats.GetAll()["Variables"]["Hit Points"]) + hp;
+  hp = hp > max_hp ? max_hp : hp;
+  _playerStats->SetCurrentHp(hp);
+  //_timeManager.AddTask(TASK_LVL_WORLDMAP, false, 0, 0, 0, 2)->Interval.Connect(*this, &GameTask::RunMetabolism);  
+}
+
 void GameTask::DoCheckRandomEncounter(int x, int y)
 {
   short encounter_chance  = 25;
@@ -794,11 +815,14 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
     else
     {
       // Launch a hostile encounter
+      short  n_creeps            = 5 + Dices::Throw(20) - (luck * Dices::Throw(2));
       short  encounter_type_dice = Dices::Throw(100);
       string encounter_type, encounter_map;
       Data   bad_encounters = case_data["bad-encounters"];
       Data   map_encounters = case_data["map-encounters"];
 
+      if (n_creeps > 13)
+        n_creeps = 13;
       for_each(bad_encounters.begin(), bad_encounters.end(), [this, &encounter_type, encounter_type_dice](Data encounter_data)
       {
         if ((int)encounter_data["min"] >= encounter_type_dice && (int)encounter_data["max"] <= encounter_type_dice)
@@ -809,28 +833,27 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
         if ((int)encounter_data["min"] >= encounter_type_dice && (int)encounter_data["max"] <= encounter_type_dice)
           encounter_map = encounter_data["type"].Value();
       });
-      
+
       // TEST testing stuff
       encounter_map  = "random-desert-1";
-      encounter_type = "critters";
+      encounter_type = "timberwolves";
 
-      callback = [this, encounter_type, encounter_map](void)
+      callback = [this, encounter_type, encounter_map, n_creeps](void)
       {
-        MapOpenLevel(encounter_map);
-        
         Observatory::ObserverId obs_id;
-        
-        obs_id = SyncLoadLevel.Connect([this, &obs_id, encounter_type](LoadLevelParams)
+
+        MapOpenLevel(encounter_map);
+        obs_id = SyncLoadLevel.Connect([this, &obs_id, encounter_type, n_creeps](LoadLevelParams)
         {
           if (_level)
           {
             _level->SetPersistent(false);
-            //_level->SpawnEnemies(encounter_type, 10, 1);
+            _level->SpawnEnemies(encounter_type, n_creeps, 1);
           }
           SyncLoadLevel.Disconnect(obs_id);
         });
       };
-      
+
       if (dialog)
         dialog->SetMessage(i18n::T("Do you want to encounter ") + i18n::T(encounter_type) + " ?");
     }

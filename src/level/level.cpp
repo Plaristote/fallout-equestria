@@ -593,7 +593,7 @@ AsyncTask::DoneStatus Level::do_task(void)
   
   //RunDaylight(); // Quick workaround for the daylight task not working
   _camera.Run(elapsedTime);  
-  _timeManager.ExecuteTasks();
+  //_timeManager.ExecuteTasks();
   
   switch (_state)
   {
@@ -1340,27 +1340,37 @@ const string& Level::GetExitZone(void) const
 
 void Level::SpawnEnemies(const std::string& type, unsigned short quantity, unsigned short n_spawn)
 {
-  Party        spawn_party;
-  stringstream entry_zone;
+  Party          spawn_party;
+  stringstream   entry_zone;
+  Data           random_party = (*_dataEngine)["random-encounters"][type];
+  unsigned short i            = 0; 
 
   entry_zone << "spawn_" << n_spawn;
-  for (unsigned short i = 0 ; i < quantity ; ++i)
+  for (unsigned short ii = 0 ; ii < random_party.Count() ; ++ii)
   {
-    stringstream   character_name;
-    DynamicObject* object;
-    Data           data = (*_dataEngine)["bestiary"][type];
-
-    character_name << type << ' ' << i;
-    object = _world->AddDynamicObject(character_name.str(), DynamicObject::Character, "lpip.egg", "lpip.png");
-    object->charsheet   = data["charsheet"].Value();
-    object->dialog      = data["dialog"].Value();
-    object->script      = data["script"].Value();
-    cout << "Creating " << character_name.str() << " with charsheet '" << object->charsheet << "' and AI '" << object->script << "'" << endl;
-    InsertCharacter(new ObjectCharacter(this, object));
-    spawn_party.Join(object);
-    ObjectCharacter* tmp = (*_characters.rbegin());
-    tmp->PlayAnimation("Run");
-    tmp->SetAsEnemy(GetPlayer(), true); // TODO remove that when enemies flag loading is fixed
+    string         critter_type = random_party[ii].Key();
+    unsigned short same_critter = 0;
+    
+    for (; same_critter < (unsigned short)random_party[ii] && i < quantity ; ++same_critter, ++i)
+    {
+      Data           data         = (*_dataEngine)["bestiary"][critter_type];
+      DynamicObject* object;
+      string         str_model    = data["model"].Value();
+      string         str_texture  = data["texture"].Value();
+      
+      object = _world->AddDynamicObject(type, DynamicObject::Character, str_model, str_texture);
+      object->strModel  = str_model;
+      object->strTexture= str_texture;
+      object->charsheet = data["charsheet"].Value();
+      object->dialog    = data["dialog"].Value();
+      object->script    = data["script"].Value();
+      InsertCharacter(new ObjectCharacter(this, object));
+      spawn_party.Join(object);
+      
+      ObjectCharacter* tmp = (*_characters.rbegin());
+      tmp->PlayAnimation("Run");
+      tmp->SetAsEnemy(GetPlayer(), true); // TODO remove that when enemies flag loading is fixed      
+    }
   }
   SetEntryZone(spawn_party, entry_zone.str());
 }

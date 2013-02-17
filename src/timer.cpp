@@ -88,18 +88,23 @@ void TimeManager::ExecuteTasks(void)
 	dostuff = false;
       else
       {
-	if (year == task.lastY && month == task.lastMo && hour < task.lastH)
-	  dostuff = false;
-	else
-	{
-	  if (year == task.lastY && month == task.lastMo && hour == task.lastH && minute < task.lastM)
-	    dostuff = false;
-	  else
-	  {
-	    if (year == task.lastY && month == task.lastMo && hour == task.lastH && minute == task.lastM && second < task.lastS)
-	      dostuff = false;
-	  }
-	}
+        if (year == task.lastY && month == task.lastMo && day < task.lastD)
+          dostuff = false;
+        else
+        {
+          if (year == task.lastY && month == task.lastMo && hour < task.lastH)
+            dostuff = false;
+          else
+          {
+            if (year == task.lastY && month == task.lastMo && hour == task.lastH && minute < task.lastM)
+              dostuff = false;
+            else
+            {
+              if (year == task.lastY && month == task.lastMo && hour == task.lastH && minute == task.lastM && second < task.lastS)
+                dostuff = false;
+            }
+          }
+        }
       }
     }
     if (dostuff)
