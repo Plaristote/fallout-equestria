@@ -820,12 +820,6 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
 
     dest = pos - speed;
 
-// Displaying characters at correct height
-//     dest.set_z(dest.get_z() + u);
-//     if (_level->GetPlayer() == this)
-//       cout << u << endl;
-//
-    
     LookAt(dest);
     _object->nodePath.set_pos(dest);
   }
@@ -838,6 +832,7 @@ void                ObjectCharacter::LookAt(LVecBase3 pos)
    _object->nodePath.look_at(pos);
    rot = _object->nodePath.get_hpr();
    rot.set_x(rot.get_x() - 180);
+   rot.set_y(-rot.get_y());
    _object->nodePath.set_hpr(rot);  
 }
 
