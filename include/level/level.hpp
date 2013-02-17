@@ -183,8 +183,8 @@ private:
   bool                 _exitingZone;
   std::string          _exitingZoneTo, _exitingZoneName;
 
-  DirectionalLight* _sunLight;
-  NodePath          _sunLightNode;
+  PT(DirectionalLight) _sunLight;
+  NodePath             _sunLightNode;
 
   enum UiIterator
   {

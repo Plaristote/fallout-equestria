@@ -238,30 +238,27 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   // Script
   _script_context = 0;
   _script_module  = 0;
-  _scriptMain    = 0;
-  _scriptFight   = 0;
-  _scriptRequestAttack = _scriptRequestFollow = _scriptRequestHeal = _scriptRequestStopFollowing = _scriptSendMessage = _scriptAskMorale = 0;
   if (object->script != "")
   {
     string prefixName = "IA_";
     string prefixPath = "scripts/ai/";
 
+    // Get the running functions
+    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptMain,  "void main(Character@, float)"));
+    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptFight, "void combat(Character@)"));
+
+    // Get the communication functions
+    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestStopFollowing, "void RequestStopFollowing(Character@, Character@)"));
+    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestFollow,        "void RequestFollow(Character@, Character@)"));
+    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestAttack,        "void RequestAttack(Character@, Character@)"));
+    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestHeal,          "void RequestHeal(Character@, Character@)"));
+    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAskMorale,            "int  AskMorale()"));
+    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptSendMessage,          "void ReceiveMessage(string)"));
     LoadScript(prefixName + GetName(), prefixPath + object->script + ".as");
+
+    // Get Default Weapons from script
     if (_script_module)
     {
-      // Get the running functions
-      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptMain,  "void main(Character@, float)"));
-      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptFight, "void combat(Character@)"));
-
-      // Get the communication functions
-      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestStopFollowing, "void RequestStopFollowing(Character@, Character@)"));
-      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestFollow,        "void RequestFollow(Character@, Character@)"));
-      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestAttack,        "void RequestAttack(Character@, Character@)"));
-      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestHeal,          "void RequestHeal(Character@, Character@)"));
-      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAskMorale,            "int  AskMorale()"));
-      _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptSendMessage,          "void ReceiveMessage(string)"));
-
-      // Get Default Weapons from script
       asIScriptFunction* funcGetDefWeapon[2];
 
       funcGetDefWeapon[0] = _script_module->GetFunctionByDecl("string default_weapon_1()");
@@ -476,8 +473,8 @@ void ObjectCharacter::Run(float elapsedTime)
     }
     else if (state == Level::Fight)
     {
-      if (this != _level->GetPlayer())
-        cout << "Movement count: " << _path.size() << endl;
+//       if (this != _level->GetPlayer())
+//         cout << "Movement count: " << _path.size() << endl;
       ReloadFunction(&_scriptFight);
       if (_hitPoints <= 0 || _actionPoints == 0)
 	_level->NextTurn();
@@ -707,7 +704,7 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
   {
     if (_path.size() <= (unsigned int)_goToData.max_distance && HasLineOfSight(_goToData.objective))
     {
-      cout << "Reached destination" << endl;
+//      cout << "Reached destination" << endl;
       _path.clear();
       ReachedDestination.Emit(this);
       ReachedDestination.DisconnectAll();
@@ -764,6 +761,8 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
   }
 }
 
+LPoint3 NodePathSize(NodePath);
+
 void                ObjectCharacter::RunMovement(float elapsedTime)
 {
   Waypoint&         next = *(_path.begin());
@@ -775,9 +774,17 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
   LPoint3           speed, axis_speed, dest;
   LPoint3           pos = _object->nodePath.get_pos();
   int               dirX, dirY, dirZ;
+  LPoint3           objective = next.nodePath.get_pos();
 
-  distance  = pos - next.nodePath.get_pos();
+  //
+  LPoint3 wp_size = NodePathSize(next.nodePath);
 
+  float z = (objective.get_z() - wp_size.get_z());
+  objective.set_z(z + (_idle_size.get_z() / 2));
+  //
+  
+  distance  = pos - objective;
+  
   if (distance.get_x() == 0 && distance.get_y() == 0 && distance.get_z() == 0)
     RunMovementNext(elapsedTime);
   else
@@ -798,7 +805,7 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
       distance.set_z(-(distance.get_z()));
       dirZ = -1;
     }
-
+    
     max_distance = (distance.get_x() > distance.get_y() ? distance.get_x() : distance.get_y());
     max_distance = (distance.get_z() > max_distance     ? distance.get_z() : max_distance);
 
@@ -813,6 +820,12 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
 
     dest = pos - speed;
 
+// Displaying characters at correct height
+//     dest.set_z(dest.get_z() + u);
+//     if (_level->GetPlayer() == this)
+//       cout << u << endl;
+//
+    
     LookAt(dest);
     _object->nodePath.set_pos(dest);
   }

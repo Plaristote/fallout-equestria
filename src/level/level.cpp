@@ -24,8 +24,6 @@ Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::Action
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSkillOn;
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
-PT(DirectionalLight) sunlight;
-
 Level* Level::CurrentLevel = 0;
 #include <panda3d/cullFaceAttrib.h>
 Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
@@ -60,7 +58,6 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   if (true)
   {
     _sunLight = new DirectionalLight("sun_light");
-    sunlight = _sunLight;
 
     _sunLight->set_shadow_caster(true, 8192, 8192);
     _sunLight->get_lens()->set_near_far(10.f, 200.f);
@@ -372,8 +369,10 @@ void Level::SetPlayerInventory(Inventory* inventory)
 
 Level::~Level()
 {
+  _sunLightNode.remove_node();
   _player_halo.remove_node();
-  
+  _window->get_render().clear_light();
+
   _timeManager.ClearTasks(TASK_LVL_CITY);
   obs.DisconnectAll();
   obs_player.DisconnectAll();
@@ -548,6 +547,8 @@ void Level::NextTurn(void)
 
 void Level::RunDaylight(void)
 {
+  if (_sunLightNode.is_empty())
+    return ;
   //cout << "Run Day Light" << endl;
   
   LVecBase4f color_steps[6] = {
@@ -648,6 +649,8 @@ void Level::DisplayCombatPath(void)
 {
   _last_combat_path = _mouse.Hovering().waypoint;
   DestroyCombatPath();
+  if (*_itCharacter != GetPlayer())
+    return ;
   _combat_path = GetPlayer()->GetPath(_world->GetWaypointFromNodePath(_mouse.Hovering().waypoint));
   for_each(_combat_path.begin(), _combat_path.end(), [this](Waypoint& wp)
   {

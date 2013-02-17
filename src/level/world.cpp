@@ -606,7 +606,7 @@ void Waypoint::SetMouseBox(void)
   mouseBox.height = max_y * 2;
 }
 
-#define WAYPOINT_DEBUG
+//#define WAYPOINT_DEBUG
 
 // WAYPOINTS ARCS
 Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
@@ -629,8 +629,8 @@ Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
 Waypoint::Arc::~Arc()
 {
 #ifdef WAYPOINT_DEBUG
-  //node->remove_solid(0);
-  //nodePath.remove_node();
+  node->remove_solid(0);
+  nodePath.remove_node();
 #endif
 }
 

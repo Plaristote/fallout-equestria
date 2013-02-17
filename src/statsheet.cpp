@@ -61,12 +61,24 @@ void StatModel::RestoreBackup(void)
   UpdateAllValues();
 }
 
+Scriptable::Scriptable(void) : _script_context(0), _script_module(0)
+{
+}
+
+Scriptable::~Scriptable(void)
+{
+  if (_script_module)
+    Script::ModuleManager::Release(_script_module);
+}
+
 void Scriptable::LoadScript(string module_name, string filepath)
 {
   asIScriptEngine* engine = Script::Engine::Get();
 
-  _script_context = (engine          ? engine->CreateContext()                           : 0);
-  _script_module  = (_script_context ? Script::Engine::LoadModule(module_name, filepath) : 0);
+  if (_script_module)
+    Script::ModuleManager::Release(_script_module);
+  _script_context = (engine          ? engine->CreateContext() : 0);
+  _script_module  = (_script_context ? Script::ModuleManager::Require(module_name, filepath) : 0);
   std::for_each(_script_func_ptrs.begin(), _script_func_ptrs.end(), [](ScriptFuncPtr& func_ptr)
   { *func_ptr.first = 0; });
 }
@@ -526,14 +538,17 @@ void StatController::LevelChanged(unsigned short lvl)
 {
   unsigned short skill_points;
 
-  _view->SetIdValue("level", lvl);
-  _view->SetIdValue("next-level", _model.GetXpNextLevel());
-  if (((skill_points = _model.GetSkillPoints()) > 0) || (_model.GetPerksPoints() > 0))
+  if (_view)
   {
-    _view->SetEditMode(StatView::Update);
-    _view->SetIdValue("skill-points", skill_points);
-    _view->SetNumPerks(_model.GetPerksPoints());
-    _view->SetPerks(_model.GetAvailablePerks());
+    _view->SetIdValue("level", lvl);
+    _view->SetIdValue("next-level", _model.GetXpNextLevel());
+    if (((skill_points = _model.GetSkillPoints()) > 0) || (_model.GetPerksPoints() > 0))
+    {
+      _view->SetEditMode(StatView::Update);
+      _view->SetIdValue("skill-points", skill_points);
+      _view->SetNumPerks(_model.GetPerksPoints());
+      _view->SetPerks(_model.GetAvailablePerks());
+    }
   }
 }
 

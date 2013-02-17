@@ -315,40 +315,11 @@ asConsoleOutput asConsole;
 #include <soundmanager.hpp>
 #include <dices.hpp>
 
-extern PT(DirectionalLight) sunlight;
-
-void sun_shadow_caster(int x, int y)
-{
-  sunlight->set_shadow_caster(true, x, y);
-}
-
-void loop_shadow_caster(int from, int to)
-{
-  for (int i = from ; i < to ; ++i)
-    sun_shadow_caster(i, i);
-}
-
-void sun_near_far(int a, int b)
-{
-  sunlight->get_lens()->set_near_far(a, b);
-}
-
-void sun_film_size(int size)
-{
-  sunlight->get_lens()->set_film_size(size);
-}
-
-
 static void AngelScriptInitialize(void)
 {
   asIScriptEngine* engine = Script::Engine::Get();
 
   Script::Engine::ScriptError.Connect(asConsole, &asConsoleOutput::OutputError);
-  
-  engine->RegisterGlobalFunction("void sun_shadow(int, int)", asFUNCTION(sun_shadow_caster), asCALL_CDECL);
-  engine->RegisterGlobalFunction("void loop_shadow(int, int)", asFUNCTION(loop_shadow_caster), asCALL_CDECL);
-  engine->RegisterGlobalFunction("void sun_near_far(int, int)", asFUNCTION(sun_near_far), asCALL_CDECL);
-  engine->RegisterGlobalFunction("void sun_film_size(int)", asFUNCTION(sun_film_size), asCALL_CDECL);
   
   engine->RegisterGlobalFunction("void Cout(string)", asFUNCTION(AngelCout), asCALL_CDECL);
   engine->RegisterGlobalFunction("void LF()", asFUNCTION( GameConsole::ListFunctions ), asCALL_CDECL);

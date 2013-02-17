@@ -10,6 +10,18 @@ using namespace ObjectTypes;
 
 void InstanceDynamicObject::ThatDoesNothing() { _level->ConsoleWrite("That does nothing"); }
 
+LPoint3 NodePathSize(NodePath np)
+{
+  LPoint3 min_point, max_point;
+  LPoint3 ret;
+  
+  np.calc_tight_bounds(min_point, max_point);
+  ret.set_x(max_point.get_x() - min_point.get_x());
+  ret.set_y(max_point.get_y() - min_point.get_y());
+  ret.set_z(max_point.get_z() - min_point.get_z());
+  return (ret);
+}
+
 InstanceDynamicObject::InstanceDynamicObject(Level* level, DynamicObject* object) : AnimatedObject(level->GetWorld()->window), _object(object)
 {
   _type                 = Other;
@@ -18,6 +30,7 @@ InstanceDynamicObject::InstanceDynamicObject(Level* level, DynamicObject* object
   _level                = level;
   _waypointDisconnected = object->lockedArcs;
   _waypointOccupied     = object->waypoint;
+  _idle_size            = NodePathSize(object->nodePath);
 
   // Get model name from path
   _modelName            = object->strModel;

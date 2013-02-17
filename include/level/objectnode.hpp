@@ -143,6 +143,7 @@ protected:
   void                     ThatDoesNothing();
 
   InteractionList          _interactions;
+  LPoint3                  _idle_size;
 
 private:
   void CallbackAnimationEnded(void) { AnimationEnded.Emit(this); }

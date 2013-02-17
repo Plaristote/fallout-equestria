@@ -798,7 +798,7 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
 
   if (Dices::Throw(100) <= encounter_chance)
   {
-    short     luck        = _playerStats->Model().GetSpecial("Luck");
+    short     luck        = _playerStats->Model().GetSpecial("LUC");
     short     outdoorsman = _playerStats->Model().GetSkill("Outdoorspony");
     bool      has_choice  = Dices::Throw(200) <= outdoorsman;
     UiDialog* dialog      = (has_choice ? new UiDialog(_window, _gameUi.GetContext()) : 0);
@@ -857,6 +857,9 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
       // Launch a regular good encounter
       else
       {
+        // TODO Implement good encounters
+        if (dialog) delete dialog;
+        return ;
       }
     }
     else
@@ -895,7 +898,7 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
           if (_level)
           {
             _level->SetPersistent(false);
-            //_level->SpawnEnemies(encounter_type, n_creeps, 1);
+            _level->SpawnEnemies(encounter_type, n_creeps, 1);
           }
           SyncLoadLevel.Disconnect(obs_id);
         });

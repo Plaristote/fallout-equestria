@@ -4,6 +4,9 @@
 class Scriptable
 {
 public:
+  Scriptable(void);
+  virtual ~Scriptable(void);
+
   void LoadScript(std::string module_name, std::string filepath);
   void ReloadFunction(asIScriptFunction** pointer);
   
