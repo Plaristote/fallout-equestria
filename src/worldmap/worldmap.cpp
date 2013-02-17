@@ -1,5 +1,6 @@
 #include "worldmap/worldmap.hpp"
 #include "musicmanager.hpp"
+#include <dices.hpp>
 
 using namespace std;
 using namespace Rocket;
@@ -20,13 +21,10 @@ WorldMap::~WorldMap()
   
   for_each(_cities.begin(), _cities.end(), [this](const City& city)
   {
-    string         name        = "city-" + city.name;
-    Core::Element* city_button = _root->GetElementById(name.c_str());
-    
-    if (city_button)
-      city_button->RemoveEventListener("click", &CityButtonClicked);
+    ToggleEventListener(false, "city-"      + city.name, "click", CityButtonClicked);
+    ToggleEventListener(false, "city-halo-" + city.name, "click", MapClickedEvent);
   });
-
+  
   Destroy();
   delete _mapTree;
   CurrentWorldMap = 0;
@@ -335,16 +333,19 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
     _cursor->SetProperty("top",  str_y.str().c_str());
   }
 
+  unsigned short lastHour       = _timeManager.GetHour();
   unsigned short lastDay        = _timeManager.GetDay();
   unsigned short elapsedHours   = movementTime;
   unsigned short elapsedMinutes = (((movementTime * 100) - (elapsedHours * 100)) / 100) * 60;
   _timeManager.AddElapsedTime(0, elapsedMinutes, elapsedHours);
   if (lastDay != _timeManager.GetDay())
+    UpdateClock();
+  if (lastHour != _timeManager.GetHour())
   {
     string which_city;
     
     UpdateClock();
-    if (!(IsPartyInCity(which_city)))
+    if (!(IsPartyInCity(which_city)) && Dices::Throw(24) < 3)
     {
       int x, y;
 

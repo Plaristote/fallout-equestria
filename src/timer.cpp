@@ -178,7 +178,6 @@ void TimeManager::CorrectValues(void)
  */
 void TimeManager::Task::NextStep(void)
 {
-  cout << "PrevStep  -> " << lastY << "/" << lastMo << "/" << lastD << ' ' << lastH << ':' << lastM << ':' << lastS << endl;
   lastY  += timeY;
   lastMo += timeMo;
   lastD  += timeD;
@@ -216,8 +215,4 @@ void TimeManager::Task::NextStep(void)
       lastY  += 1;
     }
   }
-  
-  cout << "TimeStep -> " << timeY << "/" << timeMo << "/" << timeD << ' ' << timeH << ':' << timeM << ':' << timeS << endl;
-  cout << "NextStep -> " << lastY << "/" << lastMo << "/" << lastD << ' ' << lastH << ':' << lastM << ':' << lastS << endl;
-  cout << endl;
 }

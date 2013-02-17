@@ -408,13 +408,13 @@ void PipbuckClockApp::RunAsMainTask(Rocket::Core::Element* root, DataEngine& de)
   if (_second) SetValue(_second, _time_manager.GetSecond());
   if (_minutes_to_spend > 0)
   {
-    Level::CurrentLevel->SetState(Level::Interrupted);
-    if (Level::CurrentLevel != 0 && Level::CurrentLevel->GetState() == Level::Fight)
+     if (Level::CurrentLevel != 0 && Level::CurrentLevel->GetState() == Level::Fight)
      {
        _span_error->SetInnerRML(i18n::T("You can't wait while fighting").c_str());
        _minutes_to_spend = 0;
        return ;
      }
+     Level::CurrentLevel->SetState(Level::Interrupted);
      _span_error->SetInnerRML("");
      if (_minutes_to_spend > 60)
      {
