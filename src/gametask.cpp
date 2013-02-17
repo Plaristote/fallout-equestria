@@ -1,6 +1,8 @@
 #include "gametask.hpp"
 #include "musicmanager.hpp"
 #include <options.hpp>
+#include <dices.hpp>
+#include <ui_dialog.hpp>
 #include <iostream>
 
 using namespace std;
@@ -480,6 +482,7 @@ bool GameTask::LoadGame(const std::string& savepath)
 
   _worldMap    = new WorldMap(_window, &_gameUi, _dataEngine, _timeManager);
   _worldMap->GoToPlace.Connect(*this, &GameTask::MapOpenLevel);
+  _worldMap->RequestRandomEncounterCheck.Connect(*this, &GameTask::DoCheckRandomEncounter);
 
   if (!(currentLevel.Nil()) && currentLevel.Value() != "0")
   {
@@ -509,11 +512,15 @@ void GameTask::OpenLevel(const std::string& savepath, const std::string& level, 
 void GameTask::ExitLevel(const std::string& savepath)
 {
   _level->StripParty(*_playerParty);
-  if (!(SaveGame(savepath)))
-    AlertUi::NewAlert.Emit(i18n::T("Fatal Error") + ": " + i18n::T("Cannot save level"));
+  if (_level->IsPersistent())
+  {
+    cout << "Level is persistent" << endl;
+    if (!(SaveGame(savepath)))
+      AlertUi::NewAlert.Emit(i18n::T("Fatal Error") + ": " + i18n::T("Cannot save level"));
+  }
   delete _level;
   _level = 0;
-  cout << "Exited Level" << endl;
+  _worldMap->SetInterrupted(false);
 }
 
 bool GameTask::CopySave(const std::string& savepath, const std::string& slotPath)
@@ -661,6 +668,7 @@ void GameTask::FinishLoad(void)
 
 bool GameTask::SaveLevel(Level* level, const std::string& name)
 {
+  cout << "Saving level" << endl;
   Utils::Packet packet;
   std::ofstream file;
 
@@ -743,7 +751,7 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     SetLevel(_level);
 
     // TODO remove this when we're done with deploying creeps
-    _level->SpawnEnemies("critters", 10, 1);
+    //_level->SpawnEnemies("critters", 10, 1);
   }
   else
   {
@@ -761,4 +769,81 @@ void GameTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::str
   params.isSaveFile = isSaveFile;
   params.entry_zone = entry_zone;
   SyncLoadLevel.Emit(params);
+}
+
+void GameTask::DoCheckRandomEncounter(int x, int y)
+{
+  short encounter_chance  = 25;
+
+  if (Dices::Throw(100) <= encounter_chance)
+  {
+    short     luck        = _playerStats->Model().GetSpecial("Luck");
+    short     outdoorsman = _playerStats->Model().GetSkill("Outdoorspony");
+    bool      has_choice  = Dices::Throw(200) <= outdoorsman;
+    UiDialog* dialog      = (has_choice ? new UiDialog(_window, _gameUi.GetContext()) : 0);
+    Data      case_data   = _worldMap->GetCaseData(x, y);
+
+    function<void ()> callback;
+
+    if (Dices::Throw(20) <= luck)
+    {
+      // Launch an unhostile encounter
+      if (dialog)
+        ;
+    }
+    else
+    {
+      // Launch a hostile encounter
+      short  encounter_type_dice = Dices::Throw(100);
+      string encounter_type, encounter_map;
+      Data   bad_encounters = case_data["bad-encounters"];
+      Data   map_encounters = case_data["map-encounters"];
+
+      for_each(bad_encounters.begin(), bad_encounters.end(), [this, &encounter_type, encounter_type_dice](Data encounter_data)
+      {
+        if ((int)encounter_data["min"] >= encounter_type_dice && (int)encounter_data["max"] <= encounter_type_dice)
+          encounter_type = encounter_data["type"].Value();
+      });
+      for_each(map_encounters.begin(), map_encounters.end(), [this, &encounter_map, encounter_type_dice](Data encounter_data)
+      {
+        if ((int)encounter_data["min"] >= encounter_type_dice && (int)encounter_data["max"] <= encounter_type_dice)
+          encounter_map = encounter_data["type"].Value();
+      });
+      
+      // TEST testing stuff
+      encounter_map  = "random-desert-1";
+      encounter_type = "critters";
+
+      callback = [this, encounter_type, encounter_map](void)
+      {
+        MapOpenLevel(encounter_map);
+        
+        Observatory::ObserverId obs_id;
+        
+        obs_id = SyncLoadLevel.Connect([this, &obs_id, encounter_type](LoadLevelParams)
+        {
+          if (_level)
+          {
+            _level->SetPersistent(false);
+            //_level->SpawnEnemies(encounter_type, 10, 1);
+          }
+          SyncLoadLevel.Disconnect(obs_id);
+        });
+      };
+      
+      if (dialog)
+        dialog->SetMessage(i18n::T("Do you want to encounter ") + i18n::T(encounter_type) + " ?");
+    }
+    if (has_choice)
+    {
+      _playerStats->AddExperience(50); // Xp for detecting a threat with outdoorsman
+      dialog->AddChoice(i18n::T("Yes"), [this, callback](Rocket::Core::Event&) { callback(); });
+      dialog->AddChoice(i18n::T("No"),  [this](Rocket::Core::Event&) { _worldMap->SetInterrupted(false); });
+      dialog->Show();
+      dialog->SetModal(true);
+      _worldMap->SetInterrupted(true);
+    }
+    else
+      callback();
+  }
 }

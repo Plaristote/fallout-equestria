@@ -42,7 +42,7 @@ void WorldMap::Save(const string& savepath)
 
 WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, TimeManager& tm) : UiBase(window, gameUi->GetContext()), _dataEngine(de), _timeManager(tm), _gameUi(*gameUi)
 {
-  cout << "Building worldmap" << endl;
+  _interrupted   = false;
   _current_pos_x = _goal_x = _dataEngine["worldmap"]["pos-x"];
   _current_pos_y = _goal_y = _dataEngine["worldmap"]["pos-y"];
   
@@ -210,6 +210,8 @@ void WorldMap::Show(void)
 
 void WorldMap::Run(void)
 {
+  if (_interrupted)
+    return ;
   float elapsedTime = _timer.GetElapsedTime();
 
   if (_current_pos_x != _goal_x || _current_pos_y != _goal_y)
@@ -316,7 +318,18 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
   unsigned short elapsedMinutes = (((movementTime * 100) - (elapsedHours * 100)) / 100) * 60;
   _timeManager.AddElapsedTime(0, elapsedMinutes, elapsedHours);
   if (lastDay != _timeManager.GetDay())
+  {
+    string which_city;
+    
     UpdateClock();
+    if (IsPartyInCity(which_city))
+    {
+      int x, y;
+
+      GetCurrentCase(x, y);
+      RequestRandomEncounterCheck.Emit(x, y);
+    }
+  }
 }
 
 Core::Element* WorldMap::GetCaseAt(int x, int y) const
@@ -334,11 +347,18 @@ void WorldMap::GetCurrentCase(int& x, int& y) const
   y = _current_pos_y / _tsize_y;
 }
 
-void WorldMap::SetCaseVisibility(int x, int y, char visibility) const
+Data WorldMap::GetCaseData(int x, int y) const
 {
   int            it       = (y * _size_x) + x;
+  
+  return (Data(_mapTree)["tiles"][it]);
+}
+
+void WorldMap::SetCaseVisibility(int x, int y, char visibility) const
+{
+  //int            it       = (y * _size_x) + x;
   Core::Element* element  = GetCaseAt(x, y);
-  Data           dataCase = Data(_mapTree)["tiles"][it];
+  Data           dataCase = GetCaseData(x, y);
   stringstream   stream;
 
   if (!element) return ;
@@ -527,4 +547,11 @@ void WorldMap::MapTileGenerator(Data map)
       }
     }
   }
+}
+
+void WorldMap::SetInterrupted(bool set)
+{
+  _interrupted = set;
+  if (!set)
+    _timer.Restart();
 }

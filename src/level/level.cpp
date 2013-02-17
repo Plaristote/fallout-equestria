@@ -35,6 +35,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   CurrentLevel = this;
   _state       = Normal;
   _mouseState  = MouseAction;
+  _persistent  = true;
 
   obs.Connect(_levelUi.InterfaceOpened, *this, &Level::SetInterrupted);
 

@@ -35,14 +35,17 @@ public:
   void CityClicked(Rocket::Core::Event& event);
 
   void Run(void);
+  void SetInterrupted(bool set);
   void Save(const std::string&);
   
   void MoveTowardsCoordinates(float x, float y);
   void MoveTowardsPlace(const std::string&);
   
   DataEngine& GetDataEngine(void) { return (_dataEngine); }
+  Data        GetCaseData(int x, int y) const;
 
   Observatory::Signal<void (std::string)> GoToPlace;
+  Observatory::Signal<void (int, int)>    RequestRandomEncounterCheck;
 
 private:
   void                   MapTileGenerator(Data map);
@@ -56,6 +59,8 @@ private:
   void                   AddCityToList(Data);
 
   void                   SaveMapStatus(void) const;
+  
+  bool                   CheckRandomEncounter(void) const;
 
   RocketListener         MapClickedEvent, PartyCursorClicked, CityButtonClicked, ButtonInventory, ButtonCharacter, ButtonPipbuck, ButtonMenu;
   DataTree*              _mapTree;
@@ -63,6 +68,7 @@ private:
   TimeManager&           _timeManager;
   GameUi&                _gameUi;
   Timer                  _timer;
+  bool                   _interrupted;
 
   int                    _size_x,  _size_y;
   int                    _tsize_x, _tsize_y;

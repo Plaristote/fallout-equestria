@@ -59,6 +59,8 @@ public:
   };
 
   AsyncTask::DoneStatus   do_task(void);
+  void                    SetPersistent(bool set)  { _persistent = set;    }
+  bool                    IsPersistent(void) const { return (_persistent); }
   void                    SetState(State);
   State                   GetState(void) const { return (_state); }
   void                    SetInterrupted(bool);
@@ -169,6 +171,7 @@ private:
   Timer                _timer;
   TimeManager&         _timeManager;
   State                _state;
+  bool                 _persistent;
 
   World*               _world;
   InstanceObjects      _objects;

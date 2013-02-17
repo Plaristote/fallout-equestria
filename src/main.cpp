@@ -313,6 +313,7 @@ asConsoleOutput asConsole;
 
 #include "musicmanager.hpp"
 #include <soundmanager.hpp>
+#include <dices.hpp>
 
 static void AngelScriptInitialize(void)
 {
@@ -545,6 +546,7 @@ int main(int argc, char *argv[])
     window->get_graphics_window()->request_properties(props);
   }
 
+  Dices::Initialize();
   Script::Engine::Initialize();
   AngelScriptInitialize();
   OptionsManager::Initialize();
