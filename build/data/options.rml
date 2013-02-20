@@ -70,6 +70,14 @@ select selectbox{height: 100px; overflow: auto;}
 		      	<select id="screen-select" class="char-place-beneath">
    				</select>
     				<div class="char-place-beneath"><input type="checkbox" id="fullscreen" /> Fullscreen</div>
+                        <select id="graphics-quality" class="char-place-beneath">
+                          <option value="1">Incredibly low quality</option>
+                          <option value="2">Very low quality</option>
+                          <option value="3">Low quality</option>
+                          <option value="4">Average quality</option>
+                          <option value="5">Good quality</option>
+                          <option value="6">Quality with capital Q</option>
+                        </select>
 		      </panel>
 		
 		      <tab id="tab-options-sound" class="tab-tab">SOUND</tab>

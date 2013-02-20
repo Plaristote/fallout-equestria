@@ -27,6 +27,7 @@ Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::Action
 PT(DirectionalLight) workaround_sunlight;
 TimeManager::Task* daylightTask;
 
+#include "options.hpp"
 Level* Level::CurrentLevel = 0;
 #include <panda3d/cullFaceAttrib.h>
 Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
@@ -65,9 +66,20 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     _sunLight = workaround_sunlight;
     //_sunLight = new DirectionalLight("sun_light");
 
-    _sunLight->set_shadow_caster(true, 8192, 8192);
+    unsigned int shadow_caster_buffer = 128;
+    unsigned int film_size            = 128;
+
+    unsigned int graphics_quality     = OptionsManager::Get()["graphics-quality"];
+
+    while (graphics_quality --)
+    {
+      shadow_caster_buffer *= 2;
+      film_size            += 128;
+    }
+
+    _sunLight->set_shadow_caster(true, shadow_caster_buffer, shadow_caster_buffer);
     _sunLight->get_lens()->set_near_far(10.f, 200.f);
-    _sunLight->get_lens()->set_film_size(768);
+    _sunLight->get_lens()->set_film_size(film_size);
     
     _sunLightNode = window->get_render().attach_new_node(_sunLight);
     _sunLightNode.set_pos(50.f, 50, 50.f);

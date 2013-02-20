@@ -77,6 +77,12 @@ x --> Option Manager and user interface
 x --> Creating New Games
 
 Milestone III [Started December 2012]
+  -> Game Editor
+~ --> Worldmap Editor
+  --> Graphical representation of lights
+x --> Selection tools for waypoints
+x --> Automatic leveling of waypoints
+
   -> Statistics
   --> Reputation
 
@@ -87,14 +93,20 @@ x --> Special encounters
   --> Various terrain and movement speed
 
   -> Levels
+x --> Quantity Picker for inventories
   --> Stairs
 x --> Shader for casting shadows
+  --> Advance Light Management
 x --> Scatter inserted parties in the spawning zones
 
   -> GameTask
+x --> Temporaries levels
 ~ --> Healing Rate Task
   --> Quests
 ~ --> Party management
   --> Pipbuck
   ----> Quest Application
 
+Milestone IV
+  -> GameTask
+  --> Compression for save slots
