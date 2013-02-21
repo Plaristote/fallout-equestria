@@ -1,5 +1,6 @@
 #include "world.h"
 #include <panda3d/collisionHandlerQueue.h>
+#include <functional>
 
 using namespace std;
 
@@ -13,6 +14,9 @@ World::World(WindowFramework* window)
   rootMapObjects     = window->get_render().attach_new_node("mapobjects");
   rootDynamicObjects = window->get_render().attach_new_node("dynamicobjects");
   rootLights         = window->get_render().attach_new_node("lights");
+#ifdef GAME_EDITOR
+  lightSymbols       = window->get_render().attach_new_node("lightSymbols");
+#endif
 }
 
 World::~World()
@@ -20,6 +24,7 @@ World::~World()
   ForEach(waypoints,      [](Waypoint& wp)      { wp.nodePath.remove_node(); });
   ForEach(objects,        [](MapObject& mo)     { mo.nodePath.remove_node(); });
   ForEach(dynamicObjects, [](DynamicObject& dy) { dy.nodePath.remove_node(); });
+  ForEach(lights,         [](WorldLight& wl)    { wl.Destroy();              });
 }
 
 Waypoint* World::AddWayPoint(float x, float y, float z)
@@ -339,7 +344,10 @@ EntryZone* World::GetEntryZoneByName(const std::string& name)
 // Lights
 void World::AddLight(WorldLight::Type type, const std::string& name)
 {
-  lights.push_back(WorldLight(type, WorldLight::Type_None, rootLights, name));
+  lights.push_back(WorldLight(window, type, WorldLight::Type_None, rootLights, name));
+#ifdef GAME_EDITOR
+  lights.rbegin()->symbol.reparent_to(lightSymbols);
+#endif
 }
 
 void World::AddLight(WorldLight::Type type, const std::string& name, MapObject* parent)
@@ -360,7 +368,7 @@ void World::DeleteLight(const std::string& name)
 
   if (it != lights.end())
   {
-    it->nodePath.detach_node();
+    it->Destroy();
     lights.erase(it);
   }
 }
@@ -399,6 +407,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
     if (npmask & colmask)
     {
       np.set_light_off(light->nodePath);
+      np.clear_light(light->nodePath);
       it = light->enlightened.erase(it);
     }
     else
@@ -427,8 +436,9 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
       alreadyRegistered = find(light->enlightened.begin(), light->enlightened.end(), node);
       if (alreadyRegistered == light->enlightened.end())
       {
-    light->enlightened.push_back(node);
-    node.set_light(light->nodePath);
+        light->enlightened.push_back(node);
+        if (light->enabled)
+          node.set_light(light->nodePath);
       }
     }
   }
@@ -436,6 +446,26 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
   cout << "Number of enlightened objects -> " << light->enlightened.size() << endl;
 
   colNp.detach_node();
+}
+
+void WorldLight::SetEnabled(bool set_enabled)
+{
+  std::function<void (NodePath)> set_light;
+  std::function<void (NodePath)> unset_light;
+
+  enabled       = set_enabled;
+  set_light     = [this](NodePath object) { object.set_light(nodePath); };
+  unset_light   = [this](NodePath object) { object.clear_light(nodePath); };
+  for_each(enlightened.begin(), enlightened.end(), enabled ? set_light : unset_light);
+}
+
+void WorldLight::Destroy(void)
+{
+  SetEnabled(false);
+  nodePath.detach_node();
+#ifdef GAME_EDITOR
+  symbol.detach_node();
+#endif
 }
 
 // WAYPOINTS
@@ -867,8 +897,12 @@ void DynamicObject::Serialize(Utils::Packet& packet)
 /*
  * WorldLights
  */
-void WorldLight::Initialize(void)
+void WorldLight::Initialize(WindowFramework* window)
 {
+#ifdef GAME_EDITOR
+    symbol = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
+    symbol.set_color(1, 0, 0, 0.8);
+#endif
   switch (type)
   {
     case Point:
@@ -904,7 +938,7 @@ void WorldLight::Initialize(void)
       nodePath = parent.attach_new_node(pLight);
     }
       break ;
-  }  
+  }
 }
 
 void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
@@ -913,8 +947,10 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
   float     pos_x, pos_y, pos_z;
   float     hpr_x, hpr_y, hpr_z;
   string    parent_name;
+  char      tmp_enabled;
 
-  packet >> name >> zoneSize;
+  packet >> name >> tmp_enabled >> zoneSize;
+  enabled = tmp_enabled;
   packet.operator>> <char>(reinterpret_cast<char&>(type));
   packet.operator>> <char>(reinterpret_cast<char&>(parent_type));
   if (parent_type != Type_None)
@@ -933,7 +969,7 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
     case Type_None:
       break ;
   }
-  Initialize();
+  Initialize(world->window);
   SetColor(r, g, b, a);
   nodePath.set_pos(LVecBase3(pos_x, pos_y, pos_z));
   nodePath.set_hpr(LVecBase3(hpr_x, hpr_y, hpr_z));
@@ -943,7 +979,7 @@ void WorldLight::Serialize(Utils::Packet& packet)
 {
   LColor color = light->get_color();
 
-  packet << name << zoneSize << (char)type << (char)parent_type;
+  packet << name << (char)enabled << zoneSize << (char)type << (char)parent_type;
   if (parent_i)
     packet << parent_i->nodePath.get_name();
   packet << (float)color.get_x() << (float)color.get_y() << (float)color.get_z() << (float)color.get_w();

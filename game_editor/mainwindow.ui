@@ -306,7 +306,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>272</width>
+             <width>165</width>
              <height>92</height>
             </rect>
            </property>
@@ -358,7 +358,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>272</width>
+             <width>165</width>
              <height>215</height>
             </rect>
            </property>
@@ -827,32 +827,32 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>295</width>
-             <height>267</height>
+             <width>361</width>
+             <height>317</height>
             </rect>
            </property>
            <attribute name="label">
             <string>Lights</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_14">
-            <item row="0" column="0">
+            <item row="1" column="0">
              <widget class="QPushButton" name="lightsAdd">
               <property name="text">
                <string>Add</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
+            <item row="1" column="1">
              <widget class="QComboBox" name="lightsSelect"/>
             </item>
-            <item row="0" column="2">
+            <item row="1" column="2">
              <widget class="QPushButton" name="lightsDel">
               <property name="text">
                <string>Del</string>
               </property>
              </widget>
             </item>
-            <item row="4" column="0" colspan="3">
+            <item row="5" column="0" colspan="3">
              <widget class="QFrame" name="lightFrame">
               <property name="frameShape">
                <enum>QFrame::StyledPanel</enum>
@@ -861,7 +861,7 @@
                <enum>QFrame::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout_13">
-               <item row="4" column="0" colspan="3">
+               <item row="5" column="0" colspan="3">
                 <widget class="QLabel" name="label_12">
                  <property name="maximumSize">
                   <size>
@@ -874,8 +874,12 @@
                  </property>
                 </widget>
                </item>
-               <item row="1" column="1" colspan="2">
-                <widget class="QDoubleSpinBox" name="lightRadius"/>
+               <item row="2" column="1" colspan="2">
+                <widget class="QDoubleSpinBox" name="lightRadius">
+                 <property name="maximum">
+                  <double>500.000000000000000</double>
+                 </property>
+                </widget>
                </item>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_13">
@@ -884,19 +888,38 @@
                  </property>
                 </widget>
                </item>
-               <item row="5" column="0">
-                <widget class="QDoubleSpinBox" name="lightRotX"/>
+               <item row="6" column="0">
+                <widget class="QDoubleSpinBox" name="lightRotX">
+                 <property name="maximum">
+                  <double>359.000000000000000</double>
+                 </property>
+                </widget>
                </item>
-               <item row="3" column="2">
-                <widget class="QDoubleSpinBox" name="lightPosZ"/>
+               <item row="4" column="2">
+                <widget class="QDoubleSpinBox" name="lightPosZ">
+                 <property name="minimum">
+                  <double>-9999.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>9999.000000000000000</double>
+                 </property>
+                </widget>
                </item>
-               <item row="7" column="1">
-                <widget class="QDoubleSpinBox" name="lightColorG"/>
+               <item row="8" column="1">
+                <widget class="QDoubleSpinBox" name="lightColorG">
+                 <property name="maximum">
+                  <double>255.000000000000000</double>
+                 </property>
+                </widget>
                </item>
-               <item row="5" column="1">
-                <widget class="QDoubleSpinBox" name="lightRotY"/>
+               <item row="6" column="1">
+                <widget class="QDoubleSpinBox" name="lightRotY">
+                 <property name="maximum">
+                  <double>359.000000000000000</double>
+                 </property>
+                </widget>
                </item>
-               <item row="2" column="0" colspan="3">
+               <item row="3" column="0" colspan="3">
                 <widget class="QLabel" name="label_11">
                  <property name="minimumSize">
                   <size>
@@ -939,16 +962,28 @@
                  </item>
                 </widget>
                </item>
-               <item row="7" column="3">
-                <widget class="QDoubleSpinBox" name="lightColorA"/>
+               <item row="8" column="3">
+                <widget class="QDoubleSpinBox" name="lightColorA">
+                 <property name="maximum">
+                  <double>255.000000000000000</double>
+                 </property>
+                </widget>
                </item>
-               <item row="5" column="2">
-                <widget class="QDoubleSpinBox" name="lightRotZ"/>
+               <item row="6" column="2">
+                <widget class="QDoubleSpinBox" name="lightRotZ">
+                 <property name="maximum">
+                  <double>359.000000000000000</double>
+                 </property>
+                </widget>
                </item>
-               <item row="7" column="2">
-                <widget class="QDoubleSpinBox" name="lightColorB"/>
+               <item row="8" column="2">
+                <widget class="QDoubleSpinBox" name="lightColorB">
+                 <property name="maximum">
+                  <double>255.000000000000000</double>
+                 </property>
+                </widget>
                </item>
-               <item row="6" column="0" colspan="3">
+               <item row="7" column="0" colspan="3">
                 <widget class="QLabel" name="label_14">
                  <property name="maximumSize">
                   <size>
@@ -961,13 +996,27 @@
                  </property>
                 </widget>
                </item>
-               <item row="7" column="0">
-                <widget class="QDoubleSpinBox" name="lightColorR"/>
+               <item row="8" column="0">
+                <widget class="QDoubleSpinBox" name="lightColorR">
+                 <property name="maximum">
+                  <double>255.000000000000000</double>
+                 </property>
+                </widget>
                </item>
-               <item row="3" column="1">
-                <widget class="QDoubleSpinBox" name="lightPosY"/>
+               <item row="4" column="1">
+                <widget class="QDoubleSpinBox" name="lightPosY">
+                 <property name="minimum">
+                  <double>-9999.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>9999.000000000000000</double>
+                 </property>
+                 <property name="value">
+                  <double>0.000000000000000</double>
+                 </property>
+                </widget>
                </item>
-               <item row="1" column="0">
+               <item row="2" column="0">
                 <widget class="QLabel" name="label_15">
                  <property name="maximumSize">
                   <size>
@@ -980,17 +1029,48 @@
                  </property>
                 </widget>
                </item>
-               <item row="3" column="0">
-                <widget class="QDoubleSpinBox" name="lightPosX"/>
+               <item row="4" column="0">
+                <widget class="QDoubleSpinBox" name="lightPosX">
+                 <property name="minimum">
+                  <double>-9999.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>9999.000000000000000</double>
+                 </property>
+                </widget>
                </item>
-               <item row="8" column="0" colspan="4">
+               <item row="9" column="0" colspan="4">
                 <widget class="QPushButton" name="lightCompile">
                  <property name="text">
                   <string>Apply changes</string>
                  </property>
                 </widget>
                </item>
+               <item row="1" column="0" colspan="2">
+                <widget class="QRadioButton" name="lightSetEnabled">
+                 <property name="text">
+                  <string>On</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2" colspan="2">
+                <widget class="QRadioButton" name="lightSetDisabled">
+                 <property name="text">
+                  <string>Off</string>
+                 </property>
+                </widget>
+               </item>
               </layout>
+             </widget>
+            </item>
+            <item row="0" column="0" colspan="3">
+             <widget class="QCheckBox" name="lightsVisible">
+              <property name="text">
+               <string>Visible</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
              </widget>
             </item>
            </layout>
@@ -1053,6 +1133,16 @@
            <bool>false</bool>
           </property>
          </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabWorldmap">
+       <attribute name="title">
+        <string>Worldmap Editor</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="WorldmapEditor" name="worldmapEditor" native="true"/>
         </item>
        </layout>
       </widget>
@@ -1292,6 +1382,12 @@
    <class>ItemEditor</class>
    <extends>QWidget</extends>
    <header>itemeditor.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WorldmapEditor</class>
+   <extends>QWidget</extends>
+   <header>worldmapeditor.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

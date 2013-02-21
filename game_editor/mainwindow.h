@@ -147,6 +147,9 @@ private slots:
     void DynamicObjectSetWaypoint(void);
 
     // LIGHTS
+    void LightVisible(void);
+    void LightSetEnabled(void);
+    void LightSetDisabled(void);
     void LightSelected(void);
     void LightAdd(void);
     void LightDelete(void);

@@ -50,6 +50,7 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     QIcon iconItems("icons/item.png");
     QIcon iconDialogs("icons/dialogs.png");
     QIcon iconLevel("icons/level.png");
+    QIcon iconWorldmap("icons/worldmap.png");
     QIcon iconDelete("icons/delete.png");
     QIcon iconSave("icons/save.png");
     QIcon iconAdd("icons/add.png");
@@ -79,10 +80,11 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     ui->objectRemove->setIcon(iconDelete);
 
     ui->tabWidget->setTabIcon(0, iconLevel);
-    ui->tabWidget->setTabIcon(1, iconScript);
-    ui->tabWidget->setTabIcon(2, iconItems);
-    ui->tabWidget->setTabIcon(3, iconDialogs);
-    ui->tabWidget->setTabIcon(4, iconLanguage);
+    ui->tabWidget->setTabIcon(1, iconWorldmap);
+    ui->tabWidget->setTabIcon(2, iconScript);
+    ui->tabWidget->setTabIcon(3, iconItems);
+    ui->tabWidget->setTabIcon(4, iconDialogs);
+    ui->tabWidget->setTabIcon(5, iconLanguage);
     ui->scriptNew->setIcon(iconAdd);
     ui->dialogNew->setIcon(iconAdd);
     ui->mapNew->setIcon(iconAdd);
@@ -231,6 +233,7 @@ void MainWindow::LoadProject()
 		tabL18n.LoadAllLanguages();
         tabDialog.LoadAllDialogs();
         ui->itemEditor->LoadAllItems();
+        ui->worldmapEditor->Load();
         LoadAllMaps();
     }
     else
@@ -441,6 +444,9 @@ void MainWindow::PandaInitialized()
      connect(ui->lightRotX,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
      connect(ui->lightRotY,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
      connect(ui->lightRotZ,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
+     connect(ui->lightsVisible,  SIGNAL(toggled(bool)),             this, SLOT(LightVisible()));
+     connect(ui->lightSetEnabled,  SIGNAL(toggled(bool)),           this, SLOT(LightSetEnabled()));
+     connect(ui->lightSetDisabled, SIGNAL(toggled(bool)),           this, SLOT(LightSetDisabled()));
 
      connect(my_task.mouse,      SIGNAL(WaypointHovered(NodePath)), this, SLOT(WaypointHovered(NodePath)));
      connect(my_task.mouse,      SIGNAL(ObjectHovered(NodePath)),   this, SLOT(MapObjectHovered(NodePath)));
@@ -1106,6 +1112,7 @@ void MainWindow::WaypointSyncTerrain(void)
 
 void MainWindow::LoadMap(const QString& path)
 {
+    waypointsSelection.clear();
     levelName = path;
 
     std::ifstream file;
@@ -1278,10 +1285,38 @@ void MainWindow::ExitZoneChanged(QString string)
     }
 }
 
-void MainWindow::LightCompile()
+void MainWindow::LightCompile(void)
 {
     if (lightSelected != 0)
-        world->CompileLight(lightSelected);
+      world->CompileLight(lightSelected);
+}
+
+void MainWindow::LightVisible(void)
+{
+    if (ui->lightsVisible->isChecked())
+      world->lightSymbols.show();
+    else
+      world->lightSymbols.hide();
+}
+
+void MainWindow::LightSetDisabled()
+{
+  if (ui->lightSetDisabled->isChecked())
+  {
+    ui->lightSetEnabled->setChecked(false);
+    if (lightSelected)
+      lightSelected->SetEnabled(false);
+  }
+}
+
+void MainWindow::LightSetEnabled()
+{
+  if (ui->lightSetEnabled->isChecked())
+  {
+    ui->lightSetDisabled->setChecked(false);
+    if (lightSelected)
+      lightSelected->SetEnabled(true);
+  }
 }
 
 void MainWindow::LightSelected(void)
@@ -1339,9 +1374,8 @@ void MainWindow::LightUpdatePosition(void)
 
     if (lightIgnoreChanges || lightSelected == 0) return ;
     np = lightSelected->nodePath;
-    np.set_x(ui->lightPosX->value());
-    np.set_y(ui->lightPosY->value());
-    np.set_z(ui->lightPosZ->value());
+    LPoint3 pos(ui->lightPosX->value(), ui->lightPosY->value(), ui->lightPosZ->value());
+    lightSelected->SetPosition(pos);
     np.set_hpr(ui->lightRotX->value(),
                ui->lightRotY->value(),
                ui->lightRotZ->value());
