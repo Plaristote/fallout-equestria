@@ -79,7 +79,7 @@ x --> Creating New Games
 Milestone III [Started December 2012]
   -> Game Editor
 ~ --> Worldmap Editor
-  --> Graphical representation of lights
+x --> Graphical representation of lights
 x --> Selection tools for waypoints
 x --> Automatic leveling of waypoints
 
@@ -96,7 +96,7 @@ x --> Special encounters
 x --> Quantity Picker for inventories
   --> Stairs
 x --> Shader for casting shadows
-  --> Advance Light Management
+  --> Advanced Light Management
 x --> Scatter inserted parties in the spawning zones
 
   -> GameTask

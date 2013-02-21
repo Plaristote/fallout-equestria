@@ -17,7 +17,7 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
   _mouseWatcher = dynamic_cast<MouseWatcher*>(window->get_mouse().node());
   _pickerNode   = new CollisionNode("mouseRay");
   _pickerPath   = _camera.attach_new_node(_pickerNode);
-  _pickerNode->set_from_collide_mask(CollideMask(ColMask::Waypoint | ColMask::DynObject));
+  _pickerNode->set_from_collide_mask(CollideMask(/*ColMask::Waypoint | */ColMask::DynObject));
   _pickerNode->set_into_collide_mask(0);
   _pickerRay    = new CollisionRay();
   _pickerNode->add_solid(_pickerRay);
@@ -71,6 +71,7 @@ void Mouse::SetMouseState(char i)
 
 void Mouse::ClosestWaypoint(World* world, short currentFloor)
 {
+  NodePath                  collision_context;
   PT(CollisionPlane)        pickerPlane;
   PT(CollisionRay)          pickerRay;
   PT(CollisionNode)         planeNode;
@@ -79,25 +80,23 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
   NodePath                  pickerPath;
   CollisionTraverser        collisionTraverser;
   PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
-  
-  pickerNode   = new CollisionNode("mouseRay2");
-  pickerPath   = _camera.attach_new_node(_pickerNode);
-  //pickerNode->set_from_collide_mask(CollideMask(ColMask::WpPlane));
-  //pickerNode->set_into_collide_mask(CollideMask(ColMask::WpPlane));
-  pickerRay    = new CollisionRay();
+  LPlane                    plane                 = world->GetWaypointPlane(currentFloor);
+
+  collision_context = _window->get_render().attach_new_node("MouseCollisionContext");
+
+  pickerNode        = new CollisionNode("mouseRay2");
+  pickerPath        = _camera.attach_new_node(_pickerNode);
+  pickerRay         = new CollisionRay();
   pickerNode->add_solid(pickerRay);
 
-  LPlane plane = world->GetWaypointPlane(currentFloor);
-
-  pickerPlane = new CollisionPlane(plane);
-  planeNode = new CollisionNode("pickerPlane");
-  // TODO? It would be cool to have a collide mask (ColMask::WpPlane), but they don't work with planeNode...
+  planeNode         = new CollisionNode("pickerPlane");
+  planePath         = collision_context.attach_new_node(planeNode);
+  pickerPlane       = new CollisionPlane(plane);
   planeNode->add_solid(pickerPlane);
-  planePath = _window->get_render().attach_new_node(planeNode);
-  
+
   collisionTraverser.add_collider(pickerPath, collisionHandlerQueue);
-  collisionTraverser.traverse(_window->get_render());
-  
+  collisionTraverser.traverse(collision_context);
+
   collisionHandlerQueue->sort_entries();
 
   _hovering.hasWaypoint = false;
@@ -121,6 +120,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
   //pickerPath.detach_node(); // TODO find out why hasDynObject stops working after this...
 			      //      this leak has to go away
   planePath.detach_node();
+  collision_context.detach_node();
 }
 
 void Mouse::Run(void)
