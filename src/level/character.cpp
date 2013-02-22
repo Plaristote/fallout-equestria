@@ -779,7 +779,7 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
   //
   LPoint3 wp_size = NodePathSize(next.nodePath);
 
-  float z = (objective.get_z() - wp_size.get_z());
+  float z = (objective.get_z() - wp_size.get_z()) + 0.25;
   objective.set_z(z + (_idle_size.get_z() / 2));
   //
   

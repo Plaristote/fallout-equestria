@@ -34,11 +34,26 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
+       <widget class="QPushButton" name="buttonSave">
+        <property name="text">
+         <string>Save</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolBox" name="toolBox">
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
-        <widget class="QWidget" name="page_3">
+        <widget class="QWidget" name="pageMap">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>305</width>
+           <height>248</height>
+          </rect>
+         </property>
          <attribute name="label">
           <string>Map</string>
          </attribute>
@@ -109,13 +124,13 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="page">
+        <widget class="QWidget" name="pageCity">
          <property name="geometry">
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>305</width>
-           <height>276</height>
+           <width>288</width>
+           <height>260</height>
           </rect>
          </property>
          <attribute name="label">
@@ -159,7 +174,11 @@
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QDoubleSpinBox" name="cityPosY"/>
+              <widget class="QDoubleSpinBox" name="cityPosY">
+               <property name="maximum">
+                <double>99999.990000000005239</double>
+               </property>
+              </widget>
              </item>
              <item row="3" column="1">
               <widget class="QDoubleSpinBox" name="cityRadius"/>
@@ -186,7 +205,11 @@
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QDoubleSpinBox" name="cityPosX"/>
+              <widget class="QDoubleSpinBox" name="cityPosX">
+               <property name="maximum">
+                <double>99999.990000000005239</double>
+               </property>
+              </widget>
              </item>
              <item row="3" column="0">
               <widget class="QLabel" name="label_3">
@@ -200,7 +223,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="page_2">
+        <widget class="QWidget" name="pageTiles">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -247,10 +270,26 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+              <widget class="QDoubleSpinBox" name="movementSpeed">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>9.990000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.100000000000000</double>
+               </property>
+               <property name="value">
+                <double>1.000000000000000</double>
+               </property>
+              </widget>
              </item>
              <item row="2" column="0" colspan="2">
-              <widget class="QFrame" name="frame_3">
+              <widget class="QFrame" name="frameEncounters">
                <property name="enabled">
                 <bool>false</bool>
                </property>

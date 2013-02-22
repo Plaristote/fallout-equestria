@@ -3,6 +3,7 @@
 		<title>Main Menu</title>
 		<link type="text/template" href="tpl_window.rml" />
 		<style>
+.place-next-to{padding: 0px 1%;}
 body
 {
   width: 100%;

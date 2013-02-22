@@ -29,22 +29,20 @@ body
 #equiped_1,
 #equiped_2
 {
-	width: 48%;
+	width: 47%;
   height: 90%;
 }
-
+.place-next-to{padding: 0px 1%;}
 #main_bar-mid{
 	width: 50%;
 	height: 100%;
 	z-index: 5;
-	
 }
 #main_bar-left,
 #main_bar-right{
 	width: 22%;
 	height: 100%;
 	z-index: 5;
-	
 }
 #team-row{
 	height: 20%;

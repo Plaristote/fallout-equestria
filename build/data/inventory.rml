@@ -3,68 +3,118 @@
 		<title>Iventory</title>
 		<link type="text/template" href="tpl_window.rml" />
 		<style>
-	        #body
-		{
-		  width:  520px;
-		  height: 70%;
-                  margin: auto;
-                  margin-top: 10px;
+		.texts {
+      	width: 100%; 
+      	height: 15%; 
+      	display: block; 
+      	font-family:  Fallout;
+      	text-align: center;
+      	color: yellow;
+      }
+      .eq-type{height: 30%; width: 100%;}
+      .eq-type-selection{
+      	display: inline-block;
+      	width: 20%;
+      	height: 85%;
+     		margin: 5%;
+      }
+	   #body{
+			width:  60%;
+			height: 70%;
+      	margin: 	auto;
 		}
-
-                #body-inventory-items
-                {
-                  width:          210px;
-                  height:         90%;
-                  margin-top:     10px;
-                  margin-bottom:  10px;
-                  overflow-y:     auto;
-                  #drag: clone;
-                }
-
-                #inventory-capacity
-                {
-                  position:absolute;
-                  bottom: 0;
-                  left: 20px;
-                }
-
-                #item-description
-                {
-                  position: absolute;
-                  width: 250px;
-                  height: 80%;
-                  right: 10px;
-                  top: 10px;
-                }
-
-                #item-actions
-                {
-                  position: absolute;
-                  width: 250px;
-                  height: 20%;
-                  right: 10px;
-                  bottom: 10px;
-                }
+      #body-inventory-items
+      {
+      	width:          	25%;
+      	height:         	90%;
+      	margin: 				2% 0px;
+      	overflow-y:     	auto;
+      	#drag: clone;
+      }
+		#rest{
+			width: 70%; 
+			height: 100%; 
+			margin: 2% 0px;
+			margin-left: 2%;
+		}
+      #inventory-capacity{
+      	position:	absolute;
+      	bottom: 		0;
+      	left: 		20px;
+      }
+      #item-description{width: 100%; height: 20%;}
+      #item-actions{
+      position: absolute;
+      width: 	250px;
+      height: 	20%;
+      right: 	10px;
+      bottom: 10px;
+      }
+      #eq-type{width: 100%; height: 10%;}
+      #eq-containers{width: 100%; height: 25%;}
+      #eq1,#eq2{height: 100%; width: 40%; display: inline-block;}
+      #eq1-equiped,
+      #eq2-equiped{
+      	display: inline-block;
+			width: 	94%;
+			height: 69%;   
+			margin: 3%;             
+      }
+      #eq-other{width: 100%; height: 45%; padding-top: 2%;}
+      #sadle-armour{width: 25%; height: 92%; margin: 2%;}
+      #sadlebag-container,
+      #armour-container{width: 100%; height: 33%; margin: 1%;}
+      #pip-barding{width: 67%; height: 92%; margin: 2%;}
+      #pipbuck-container,
+      #barding-container{width: 90%; height: 80%; margin: 4%;}
+      #pip-barding span{width: 48%; height: 100%;}
 		</style>
 	</head>
   <body id="body" template="tplmainbar">
-  <p>
-    <div id="body-inventory-items" class="console-bg">
-      <img src="../textures/itemIcons/key.png" class='inventory-item' />
-    </div>
-  </p>
-  <p id="item-description">
-    Item description goes here
-  </p>
-  <div id="item-actions">
-    <button id="button_use"     class="francis">Use</button>
-    <button id="button_drop"    class="francis">Drop</button>
-    <button id="button_equip_1" class="francis">Equip 1</button>
-    <button id="button_equip_2" class="francis">Equip 2</button>
-    <br />
-    <button id="button_unequip_1" class="francis">Unequip 1</button>
-    <button id="button_unequip_2" class="francis">Unequip 2</button>
-  </div>
+  	<div id="body-inventory-items" class="console-bg place-next-to">
+  		<img src="../textures/itemIcons/key.png" class='inventory-item' />
+  	</div>
+  	<div id="rest" class="place-next-to">
+  		<div id="item-description" class="console-bg place-beneath"></div>
+  		<div id="eq-containers" class="place-beneath">
+  			<div id="eq1" class="place-next-to">
+	  			<div class="eq-type place-beneath">
+  					<button id="eq1-hoof" class="eq-type-selection place-next-to francis">Hoof</button>
+  					<button id="eq1-battlesadle" class="eq-type-selection place-next-to francis">Sadle</button>
+  					<button id="eq1-magick" class="eq-type-selection place-next-to francis">Mag</button>
+  				</div>
+  				<div id="eq1-equiped" class="metal-bg place-beneath"></div>
+  			</div>
+  			<div id="eq2" class="palce-next-to">
+	  			<div class="eq-type place-beneath" >
+  					<button id="eq2-hoof" class="eq-type-selection place-next-to francis">Hoof</button>
+  					<button id="eq2-battlesadle" class="eq-type-selection place-next-to francis">Sadle</button>
+  					<button id="eq2-magick" class="eq-type-selection place-next-to francis">Mag</button>
+  				</div>
+  				<div id="eq2-equiped" class="metal-bg place-beneath"></div>
+  			</div>
+  		</div>
+  		<div id="eq-other" class="place-beneath">
+  			<div id="sadle-armour" class="place-next-to">
+  				<p class="texts place-beneath">BATTLESADLE</p>
+  				<div id="sadlebag-container" class="place-beneath metal-bg"></div>
+  				<p class="texts place-beneath">ARMOUR</p>
+  				<div id="armour-container" class="place-beneath metal-bg"></div>
+  			</div>
+  			<div id="pip-barding" class="place-next-to">
+  				<span class="place-next-to">
+  					<p class="place-beneath texts">PIPBUCK</p>
+  					<div id="pipbuck-container" class="place-beneath console-bg"></div>
+  				</span>
+  				<span class="place-next-to">
+  					<p class="place-beneath texts">BARDING</p>
+  					<div id="barding-container" class="place-next-to console-bg"></div>
+  				</span>
+  			</div>
+  		</div>
+  	</div>
+  
+  
   <p id="inventory-capacity">
   </p>
   </body>

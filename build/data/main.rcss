@@ -779,7 +779,6 @@ scrollbarhorizontal sliderarrowinc
 {
   display:inline-block;
   float: left;
-  padding: 0px 1%;
 }
 
 .place-beneath

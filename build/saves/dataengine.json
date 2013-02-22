@@ -26,16 +26,16 @@
 }
 ,
 "worldmap": {
-  "pos-x": 116,
-  "pos-y": 120
+  "pos-x": 311.805,
+  "pos-y": 448.635
 }
 ,
 "time": {
-  "seconds": 1,
-  "minutes": 37,
-  "hours": 22,
-  "days": 15,
-  "month": 1,
+  "seconds": 0,
+  "minutes": 35,
+  "hours": 0,
+  "days": 26,
+  "month": 4,
   "year": 2473
 }
 ,
@@ -178,7 +178,7 @@ Newly refreshed and woken up, not to mention fearing for my skin, I ran to my ba
     "charsheet": "timberwolf",
     "script": "timberwolf",
     "model": "lpip.egg",
-    "texture": "lpip.png"
+    "texture": "lpip.png",
   }
 
 }

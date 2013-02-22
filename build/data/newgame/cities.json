@@ -7,10 +7,17 @@
 }
 ,
 "random-desert-1": {
-  "visible": 1,
+  "visible": 0,
   "pos_x": 200,
   "pos_y": 200,
-  "radius": 20
+  "radius": 10
+}
+,
+"special-test": {
+  "visible": 1,
+  "pos_x": 113.717,
+  "pos_y": 120.129,
+  "radius": 10
 }
 
 

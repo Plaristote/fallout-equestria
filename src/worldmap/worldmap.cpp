@@ -310,8 +310,12 @@ bool WorldMap::IsPartyInCity(string& cityname) const
 
 void WorldMap::UpdatePartyCursor(float elapsedTime)
 {
+  int   current_case_x, current_case_y;
+  GetCurrentCase(current_case_x, current_case_y);
+  Data  case_data     = GetCaseData(current_case_x, current_case_y);
   float movementTime  = elapsedTime * 50;
-  float movementSpeed = movementTime;
+  float caseSpeed     = case_data["movement-speed"].Nil() ? 1.f : case_data["movement-speed"];
+  float movementSpeed = movementTime * (caseSpeed >= 0.1f ? caseSpeed : 1);
   float a             = _current_pos_x - _goal_x;
   float b             = _goal_y        - _current_pos_y;
   float distance      = SQRT(a * a + b * b);
