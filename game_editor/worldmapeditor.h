@@ -85,6 +85,8 @@ public slots:
     void SelectedCity(QString);
     void UpdateCityData(void);
     void UpdateMapData(void);
+    void AddCity(void);
+    void DelCity(void);
 
     void MapClicked(int x, int y);
     void SelectCase(unsigned int x, unsigned int y);
@@ -119,7 +121,7 @@ private:
     CityHalos           city_halos;
     Tiles               tile_selection;
 
-    bool                lock_cities;
+    bool                lock_cities, lock_mspeed;
 };
 
 #endif // WORLDMAPEDITOR_H

@@ -28,6 +28,8 @@ void Level::Load(Utils::Packet& packet)
   for_each(_characters.begin(), _characters.end(), [&packet](ObjectCharacter* character)    { character->Load(packet); });
 
   GameTask::CurrentGameTask->LoadLevelBuffs(packet);
+
+  _task_metabolism->Unserialize(packet);  
 }
 
 void Level::SaveUpdateWorld(void)
@@ -73,6 +75,8 @@ void Level::Save(Utils::Packet& packet)
 
   if (GameTask::CurrentGameTask)
     GameTask::CurrentGameTask->SaveLevelBuffs(packet);
+
+  _task_metabolism->Serialize(packet);
 }
 
 /*

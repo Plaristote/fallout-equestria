@@ -20,14 +20,16 @@ WorldmapEditor::WorldmapEditor(QWidget *parent) :
 
     connect(ui->cityList, SIGNAL(currentTextChanged(QString)), this, SLOT(SelectedCity(QString)));
 
-    connect(ui->cityPosX,    SIGNAL(valueChanged(double)), this, SLOT(UpdateCityData()));
-    connect(ui->cityPosY,    SIGNAL(valueChanged(double)), this, SLOT(UpdateCityData()));
-    connect(ui->cityRadius,  SIGNAL(valueChanged(double)), this, SLOT(UpdateCityData()));
-    connect(ui->cityVisible, SIGNAL(toggled(bool)),        this, SLOT(UpdateCityData()));
+    connect(ui->cityPosX,         SIGNAL(valueChanged(double)), this, SLOT(UpdateCityData()));
+    connect(ui->cityPosY,         SIGNAL(valueChanged(double)), this, SLOT(UpdateCityData()));
+    connect(ui->cityRadius,       SIGNAL(valueChanged(double)), this, SLOT(UpdateCityData()));
+    connect(ui->cityVisible,      SIGNAL(toggled(bool)),        this, SLOT(UpdateCityData()));
+    connect(ui->buttonAddCity,    SIGNAL(clicked()),            this, SLOT(AddCity()));
+    connect(ui->buttonDeleteCity, SIGNAL(clicked()),            this, SLOT(DelCity()));
 
-    connect(ui->mapSizeX,  SIGNAL(valueChanged(int)), this, SLOT(UpdateMapData()));
-    connect(ui->mapSizeY,  SIGNAL(valueChanged(int)), this, SLOT(UpdateMapData()));
-    connect(ui->tileSizeX, SIGNAL(valueChanged(int)), this, SLOT(UpdateMapData()));
+    connect(ui->mapSizeX,         SIGNAL(valueChanged(int)),    this, SLOT(UpdateMapData()));
+    connect(ui->mapSizeY,         SIGNAL(valueChanged(int)),    this, SLOT(UpdateMapData()));
+    connect(ui->tileSizeX,        SIGNAL(valueChanged(int)),    this, SLOT(UpdateMapData()));
 
     connect(ui->terrainDiscardSelection, SIGNAL(clicked()), this, SLOT(UnselectAllCases()));
     connect(ui->terrainSelectAll, SIGNAL(clicked()), this, SLOT(SelectAllCases()));
@@ -41,6 +43,7 @@ WorldmapEditor::WorldmapEditor(QWidget *parent) :
     connect(ui->buttonSave, SIGNAL(clicked()), this, SLOT(Save()));
 
     lock_cities = false;
+    lock_mspeed = false;
 }
 
 WorldmapEditor::~WorldmapEditor()
@@ -307,7 +310,7 @@ void WorldmapEditor::SelectCase(unsigned int x, unsigned int y)
 {
     MapTile* tile = GetTile(x, y);
 
-    if (ui->mapSizeX->value() <= x || ui->mapSizeY->value() <= y || ui->toolBox->currentWidget() != ui->pageTiles)
+    if (ui->mapSizeX->value() <= (int)x || ui->mapSizeY->value() <= (int)y || ui->toolBox->currentWidget() != ui->pageTiles)
       return ;
     if (tile)
     {
@@ -341,15 +344,21 @@ void WorldmapEditor::SelectCase(unsigned int x, unsigned int y)
 
 void WorldmapEditor::UpdateCaseInterface(void)
 {
-  MapTile* tile = tile_selection.last();
-  Data     data = GetTileData(tile->pos_x, tile->pos_y);
-  Data     maps = data["map-encounters"];
+  MapTile* tile  = tile_selection.last();
+  Data     data  = GetTileData(tile->pos_x, tile->pos_y);
+  Data     maps  = data["map-encounters"];
+  Data     types = data["type-encounters"];
 
   data.Output();
   ui->encounterTypes->clear();
   ui->encounterMapList->clear();
   for (unsigned short i = 0 ; i < maps.Count() ; ++i)
     ui->encounterMapList->addItem(QString::fromStdString(maps[i].Value()));
+  for (unsigned short i = 0 ; i < types.Count() ; ++i)
+    ui->encounterTypes->addItem(QString::fromStdString(types[i].Value()));
+  lock_mspeed = true;
+  ui->movementSpeed->setValue(data["movement-speed"].Nil() ? 1.f : (float)data["movement-speed"]);
+  lock_mspeed = false;
 }
 
 void WorldmapEditor::MapClicked(int x, int y)
@@ -411,22 +420,110 @@ void WorldmapEditor::CaseDelMap()
       }
     }
     ui->encounterMapList->removeItemWidget(item);
+    delete item;
   }
 }
 
 void WorldmapEditor::CaseAddEncounter()
-{}
+{
+  QString     map_name = QInputDialog::getText(this, "Add encounter type", "Encounter name");
+  std::string value    = map_name.toStdString();
+
+  if (map_name != "")
+  {
+    foreach(MapTile* tile, tile_selection)
+    {
+      Data           case_data = GetTileData(tile->pos_x, tile->pos_y);
+      unsigned short i;
+
+      for (i = 0 ; i < case_data.Count() ; ++i)
+      {
+        if (case_data["type-encounters"][i].Value() == value)
+          break ;
+      }
+      if (i == case_data.Count())
+      {
+          case_data["type-encounters"][value] = value;
+          case_data["type-encounters"][value].SetKey("");
+      }
+    }
+    ui->encounterTypes->addItem(map_name);
+  }
+}
 
 void WorldmapEditor::CaseDelEncounter()
 {
+  QListWidgetItem* item = ui->encounterTypes->currentItem();
+
+  if (item)
+  {
+    QString map_name = item->text();
+
+    foreach(MapTile* tile, tile_selection)
+    {
+      Data           case_data = GetTileData(tile->pos_x, tile->pos_y);
+      unsigned short i;
+
+      for (i = 0 ; i < case_data.Count() ; ++i)
+      {
+        if (case_data["type-encounters"][i].Value() == map_name.toStdString())
+        {
+          case_data["type-encounters"][i] = "";
+          case_data["type-encounters"][i].Remove();
+          break ;
+        }
+      }
+    }
+    ui->encounterTypes->removeItemWidget(item);
+    delete item;
+  }
 }
 
 void WorldmapEditor::UpdateCaseData()
 {
-  foreach(MapTile* tile, tile_selection)
+  if (!lock_mspeed)
   {
-    Data case_data = GetTileData(tile->pos_x, tile->pos_y);
+    foreach(MapTile* tile, tile_selection)
+    {
+      Data case_data = GetTileData(tile->pos_x, tile->pos_y);
 
-    case_data["movement-speed"] = ui->movementSpeed->value();
+      case_data["movement-speed"] = ui->movementSpeed->value();
+    }
   }
+}
+
+void WorldmapEditor::AddCity(void)
+{
+  QString     map_name = QInputDialog::getText(this, "Add city", "Map name");
+
+  if (map_name != "")
+  {
+    std::string name = map_name.toStdString();
+    Data        cities(file_cities);
+
+    if (cities[name].Nil())
+    {
+      cities[name]["radius"] = 20;
+      cities[name]["pos_x"]  = 0;
+      cities[name]["pos_y"]  = 0;
+      ui->cityList->addItem(map_name);
+      ui->cityList->setCurrentRow(ui->cityList->count() - 1);
+    }
+  }
+}
+
+void WorldmapEditor::DelCity(void)
+{
+  QListWidgetItem* item = ui->cityList->currentItem();
+
+  if (item)
+  {
+    QString map_name = item->text();
+    Data    cities(file_cities);
+
+    DelCityHalo(map_name);
+    cities[map_name.toStdString()].Remove();
+    ui->encounterTypes->removeItemWidget(item);
+    delete item;
+   }
 }

@@ -161,6 +161,7 @@ public:
   void TriggerSkillAffinity(const std::string& stat, bool);
 
   void AddKill(const std::string& race);
+  void RunMetabolism(void);
 
   Observatory::Signal<void (short)>          HpChanged;
   Observatory::Signal<void (unsigned short)> LevelUp;

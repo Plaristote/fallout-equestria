@@ -322,6 +322,8 @@ void UiLoot::SwapObjects(InventoryObject* object)
       looted.DelObject(booty);
     }
     _viewController.Update();
+    if (_quantity_picker)
+      _quantity_picker->SetModal(false);
   });
 
   if (looted.ContainsHowMany(object->GetName()) > 1)
@@ -648,6 +650,8 @@ bool UiBarter::SwapFunctor(InventoryObject* object, Inventory& from, Inventory& 
         from.DelObject(swapping);
       }
       Update();
+      if (_quantity_picker)
+        _quantity_picker->SetModal(false);
     });
     
     if (from.ContainsHowMany(object->GetName()) > 1)

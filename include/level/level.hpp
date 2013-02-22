@@ -157,6 +157,7 @@ private:
   typedef std::list<LevelExitZone*>         ExitZones;
 
   void              RunDaylight(void);
+  void              RunMetabolism(void);
   void              MouseInit(void);
   void              ToggleCharacterOutline(bool);
   
@@ -188,6 +189,9 @@ private:
 
   PT(DirectionalLight) _sunLight;
   NodePath             _sunLightNode;
+  
+  TimeManager::Task*   _task_daylight;
+  TimeManager::Task*   _task_metabolism;
 
   enum UiIterator
   {

@@ -25,7 +25,6 @@ Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::Action
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
 PT(DirectionalLight) workaround_sunlight;
-TimeManager::Task* daylightTask;
 
 #include "options.hpp"
 Level* Level::CurrentLevel = 0;
@@ -87,8 +86,12 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     window->get_render().set_light(_sunLightNode);
     window->get_render().set_two_sided(false);
 
-    /*TimeManager::Task* */daylightTask = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
-    daylightTask->Interval.Connect(*this, &Level::RunDaylight);
+    _task_daylight   = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
+    _task_daylight->Interval.Connect(*this, &Level::RunDaylight);
+
+    _task_metabolism = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 0, 1);
+    _task_metabolism->Interval.Connect(*this, &Level::RunMetabolism);
+    
     RunDaylight();
   }
 
@@ -178,7 +181,7 @@ void Level::InsertCharacter(ObjectCharacter* character)
   TimeManager::Task*    task    = _timeManager.AddTask(TASK_LVL_CITY, true, 3);
 
   task->lastS += (task_it % 2);
-  task->Interval.Connect(*character, &ObjectCharacter::CheckFieldOfView);  
+  task->Interval.Connect(*character, &ObjectCharacter::CheckFieldOfView);
   ++task_it;
   _characters.push_back(character);
 }
@@ -573,6 +576,19 @@ void Level::NextTurn(void)
     cout << "[FATAL ERROR][Level::NextTurn] Character Iterator points to nothing (n_characters = " << _characters.size() << ")" << endl;
 }
 
+void Level::RunMetabolism(void)
+{
+  for_each(_characters.begin(), _characters.end(), [this](ObjectCharacter* character)
+  {
+    if (character != GetPlayer())
+    {
+      StatController* controller = character->GetStatController();
+
+      controller->RunMetabolism();
+    }
+  });
+}
+
 void Level::RunDaylight(void)
 {
   //cout << "Running daylight task" << endl;
@@ -588,9 +604,9 @@ void Level::RunDaylight(void)
     LVecBase4f(0.4, 0.4, 0.6, 1)  // 20h00
   };
 
-  int   current_hour    = daylightTask->lastH + daylightTask->timeH;
-  int   current_minute  = daylightTask->lastM + daylightTask->timeM;
-  int   current_second  = daylightTask->lastS + daylightTask->timeS;
+  int   current_hour    = _task_daylight->lastH + _task_daylight->timeH;
+  int   current_minute  = _task_daylight->lastM + _task_daylight->timeM;
+  int   current_second  = _task_daylight->lastS + _task_daylight->timeS;
   int   it              = current_hour / 4;
   float total_seconds   = 60 * 60 * 4;
   float elapsed_seconds = current_second + (current_minute * 60) + ((current_hour - (it * 4)) * 60 * 60);

@@ -552,6 +552,21 @@ void StatController::LevelChanged(unsigned short lvl)
   }
 }
 
+void StatController::RunMetabolism(void)
+{
+  stringstream stream, stream_hp;
+  int          hp, max_hp;
+
+  stream << _model.GetStatistic("Healing Rate");
+  stream >> hp;
+  cout << "Healing Rate => " << hp << endl;
+  stream_hp << _model.GetStatistic("Hit Points");
+  stream_hp >> max_hp;
+  hp = (int)(_model.GetAll()["Variables"]["Hit Points"]) + hp;
+  hp = hp > max_hp ? max_hp : hp;
+  SetCurrentHp(hp);  
+}
+
 void StatController::AddKill(const string& race)
 {
   _model.AddKill(race);

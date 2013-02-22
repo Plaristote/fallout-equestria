@@ -50,8 +50,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>305</width>
-           <height>248</height>
+           <width>127</width>
+           <height>186</height>
           </rect>
          </property>
          <attribute name="label">
@@ -129,7 +129,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>288</width>
+           <width>176</width>
            <height>260</height>
           </rect>
          </property>
@@ -227,7 +227,7 @@
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>0</y>
+           <y>-26</y>
            <width>288</width>
            <height>388</height>
           </rect>
@@ -291,7 +291,7 @@
              <item row="2" column="0" colspan="2">
               <widget class="QFrame" name="frameEncounters">
                <property name="enabled">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
                <property name="frameShape">
                 <enum>QFrame::StyledPanel</enum>
@@ -317,7 +317,7 @@
                 <item row="1" column="1">
                  <widget class="QPushButton" name="encounterDelMap">
                   <property name="enabled">
-                   <bool>false</bool>
+                   <bool>true</bool>
                   </property>
                   <property name="text">
                    <string>Delete</string>
@@ -327,7 +327,7 @@
                 <item row="4" column="1">
                  <widget class="QPushButton" name="encounterDelType">
                   <property name="enabled">
-                   <bool>false</bool>
+                   <bool>true</bool>
                   </property>
                   <property name="text">
                    <string>Delete</string>

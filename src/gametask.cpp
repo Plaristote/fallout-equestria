@@ -492,9 +492,7 @@ bool GameTask::LoadGame(const std::string& savepath)
   }
   else
     _worldMap->Show();
-  
-  _timeManager.AddTask(TASK_LVL_WORLDMAP, true, 0, 0, 0, 1)->Interval.Connect(*this, &GameTask::RunMetabolism);
-  
+  _timeManager.AddTask(TASK_LVL_WORLDMAP, true, 0, 0, 0, 1)->Interval.Connect(*_playerStats, &StatController::RunMetabolism);
   return (true);
 }
 
@@ -775,23 +773,6 @@ void GameTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::str
   SyncLoadLevel.Emit(params);
 }
 
-void GameTask::RunMetabolism(void)
-{
-  stringstream stream, stream_hp;
-  int          hp, max_hp;
-  StatModel&   stats = _playerStats->Model();
-
-  stream << stats.GetStatistic("Healing Rate");
-  stream >> hp;
-  cout << "Healing Rate => " << hp << endl;
-  stream_hp << stats.GetStatistic("Hit Points");
-  stream_hp >> max_hp;
-  hp = (int)(stats.GetAll()["Variables"]["Hit Points"]) + hp;
-  hp = hp > max_hp ? max_hp : hp;
-  _playerStats->SetCurrentHp(hp);
-  //_timeManager.AddTask(TASK_LVL_WORLDMAP, false, 0, 0, 0, 2)->Interval.Connect(*this, &GameTask::RunMetabolism);  
-}
-
 void GameTask::DoCheckRandomEncounter(int x, int y)
 {
   short encounter_chance  = 25;
@@ -868,7 +849,7 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
       short  n_creeps            = 5 + Dices::Throw(20) - (luck * Dices::Throw(2));
       short  encounter_type_dice = Dices::Throw(100);
       string encounter_type, encounter_map;
-      Data   bad_encounters = case_data["bad-encounters"];
+      Data   bad_encounters = case_data["type-encounters"];
       Data   map_encounters = case_data["map-encounters"];
 
       if (map_encounters.Count() > 0)
@@ -880,10 +861,6 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
         if ((int)encounter_data["min"] >= encounter_type_dice && (int)encounter_data["max"] <= encounter_type_dice)
           encounter_type = encounter_data["type"].Value();
       });
-
-      // TEST testing stuff
-      //encounter_map  = "random-desert-1";
-      encounter_type = "timberwolves";
 
       if (encounter_map == "" || encounter_type == "")
       {

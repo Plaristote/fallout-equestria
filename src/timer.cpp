@@ -216,3 +216,18 @@ void TimeManager::Task::NextStep(void)
     }
   }
 }
+
+void TimeManager::Task::Serialize(Utils::Packet& packet)
+{
+  char looping = loop;
+
+  packet << lastY << lastMo << lastD << lastH << lastM << lastS << level << it << looping;
+}
+
+void TimeManager::Task::Unserialize(Utils::Packet& packet)
+{
+  char looping;
+  
+  packet >> lastY >> lastMo >> lastD >> lastH >> lastM >> lastS >> level >> it >> looping;
+  loop = looping;
+}

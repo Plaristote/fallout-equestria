@@ -48,6 +48,9 @@ public:
 
     Observatory::Signal<void>                  Interval;
     Observatory::Signal<void (unsigned short)> IntervalIt;
+    
+    void Serialize(Utils::Packet&);
+    void Unserialize(Utils::Packet&);
 
   private:
     friend class TimeManager;
