@@ -27,6 +27,7 @@
 # include "inventory_ui.hpp"
 
 # include "world.h"
+#include <soundmanager.hpp>
 
 class Level
 {
@@ -148,6 +149,7 @@ public:
   // Misc
   void              SpawnEnemies(const std::string& type, unsigned short quantity, unsigned short n_spawn);
   bool              IsWaypointOccupied(unsigned int id) const;
+  ISampleInstance*  PlaySound(const std::string& name);
 
 private:
   typedef std::list<InstanceDynamicObject*> InstanceObjects;
@@ -174,6 +176,7 @@ private:
   bool                 _persistent;
 
   World*               _world;
+  SoundManager         _sound_manager;
   InstanceObjects      _objects;
   Characters           _characters;
   Characters::iterator _itCharacter;

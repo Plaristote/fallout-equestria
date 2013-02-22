@@ -1681,3 +1681,15 @@ void Level::ToggleCharacterOutline(bool toggle)
     }
   });
 }
+
+ISampleInstance* Level::PlaySound(const string& name)
+{
+  if (_sound_manager.Require(name))
+  {
+    ISampleInstance* instance = _sound_manager.CreateInstance(name);
+
+    instance->Start();
+    return (instance);
+  }
+  return (0);
+}
