@@ -37,6 +37,7 @@ public:
   
   Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& data, TimeManager& tm);
   
+  void InitSun(void);
   void InitPlayer(void);
 
   // Saving/Loading

@@ -104,7 +104,6 @@ void SceneCamera::Run(float elapsedTime)
     RunSlideHeight(elapsedTime);
   if (_currentHpr != _objectiveHpr)
   {
-
     if      (_objectiveHpr.get_x() > _currentHpr.get_x())
       _currentHpr.set_x(_currentHpr.get_x() + 1);
     else if (_objectiveHpr.get_x() < _currentHpr.get_x())
@@ -198,6 +197,14 @@ void SceneCamera::RunScroll(float elapsedTime)
 
     movement.set_z(0);
     _camera.set_pos(_camera.get_pos() + movement);
+  }
+  
+  if (_maxPosX != 0 || _minPosX != 0 || _maxPosY != 0 || _minPosY != 0)
+  {
+    if      (_camera.get_x() > _maxPosX) { _camera.set_x(_maxPosX); }
+    else if (_camera.get_x() < _minPosX) { _camera.set_x(_minPosX); }
+    if      (_camera.get_y() > _maxPosY) { _camera.set_y(_maxPosY); }
+    else if (_camera.get_y() < _minPosY) { _camera.set_y(_minPosY); }
   }
 }
 

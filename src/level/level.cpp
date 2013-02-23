@@ -26,6 +26,43 @@ Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::Action
 
 PT(DirectionalLight) workaround_sunlight;
 
+class Circle
+{
+public:
+  void     SetPosition(float x, float y) { this->cx = x; this->cy = y; }
+  void     SetRadius(float radius) { this->radius = radius; }
+
+  LPoint3f GetPosition(void) const
+  {
+    return (LPoint3f(cx, cy, 0));
+  }
+  
+  LPoint2f PointAtAngle(float angle)
+  {
+    LPoint2f ret;
+
+    ret.set_x(cx + radius * cos(angle));
+    ret.set_y(cy + radius * sin(angle));
+    return (ret);
+  }
+
+  void    SetFromWorld(World* world)
+  {
+    LPoint3 upper_left, bottom_left, upper_right;
+
+    world->GetWaypointLimits(0, upper_right, upper_left, bottom_left);
+    
+    cx     = (bottom_left.get_x() + upper_right.get_x()) / 2;
+    cy     = (bottom_left.get_y() + upper_right.get_y()) / 2;
+    radius = upper_right.get_x() - cx;
+  }
+
+private:
+  float cx, cy, radius;
+};
+
+Circle solar_circle;
+
 #include "options.hpp"
 Level* Level::CurrentLevel = 0;
 #include <panda3d/cullFaceAttrib.h>
@@ -57,46 +94,6 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 
   _graphicWindow = _window->get_graphics_window();
 
-  // TODO Implement map daylight/nodaylight system
-  if (true)
-  {
-    if (workaround_sunlight.is_null())
-      workaround_sunlight = new DirectionalLight("sun_light");
-    _sunLight = workaround_sunlight;
-    //_sunLight = new DirectionalLight("sun_light");
-
-    unsigned int shadow_caster_buffer = 128;
-    unsigned int film_size            = 128;
-
-    unsigned int graphics_quality     = OptionsManager::Get()["graphics-quality"];
-
-    while (graphics_quality --)
-    {
-      shadow_caster_buffer *= 2;
-      film_size            += 128;
-    }
-
-    _sunLight->set_shadow_caster(true, shadow_caster_buffer, shadow_caster_buffer);
-    _sunLight->get_lens()->set_near_far(10.f, 200.f);
-    _sunLight->get_lens()->set_film_size(film_size);
-    
-    _sunLightNode = window->get_render().attach_new_node(_sunLight);
-    _sunLightNode.set_pos(50.f, 50, 50.f);
-    _sunLightNode.set_hpr(127, -31,  0);
-    window->get_render().set_light(_sunLightNode);
-    window->get_render().set_two_sided(false);
-
-    _task_daylight   = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
-    _task_daylight->Interval.Connect(*this, &Level::RunDaylight);
-
-    _task_metabolism = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 0, 1);
-    _task_metabolism->Interval.Connect(*this, &Level::RunMetabolism);
-    
-    RunDaylight();
-  }
-
-  window->get_render().set_shader_input("light", _sunLightNode);
-
   MouseInit();
   _timer.Restart();
 
@@ -113,15 +110,13 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     std::cout << "Failed to load file" << std::endl;
   }
   
-  /*if (!(_sunLightNode.is_empty()))
-  {
-    _world->rootMapObjects.set_light(_sunLightNode);
-    _world->rootDynamicObjects.set_light(_sunLightNode);
-    std::for_each(_world->floors.begin(), _world->floors.end(), [this](NodePath floor)
-    {
-      floor.set_light(_sunLightNode);
-    });
-  }*/
+  // TODO Implement map daylight/nodaylight system
+  if (true)
+    InitSun();
+
+  LPoint3 upperLeft, upperRight, bottomLeft;
+  _world->GetWaypointLimits(0, upperRight, upperLeft, bottomLeft);
+  _camera.SetLimits(bottomLeft.get_x() - 50, bottomLeft.get_y() - 50, upperRight.get_x() - 50, upperRight.get_y() - 50);  
 
   ForEach(_world->exitZones, [this](ExitZone& zone)
   {
@@ -153,20 +148,8 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   obs.Connect(InstanceDynamicObject::ActionTalkTo,      *this, &Level::CallbackActionTalkTo);
   obs.Connect(InstanceDynamicObject::ActionUseObjectOn, *this, &Level::CallbackActionUseObjectOn);
 
-   /*_world->AddLight(WorldLight::Directional, "toto");
-   WorldLight* light    = _world->GetLightByName("toto");
-   PT(DirectionalLight) slight = reinterpret_cast<DirectionalLight*>(&(*light->light));
-
-   light->zoneSize = 1000;
-   light->SetColor(255, 50, 50, 125);
-   //slight->set_shadow_caster(true, 12, 12);
-   //window->get_render().set_shader_input("light2", light->nodePath);
-   light->nodePath.reparent_to(GetPlayer()->GetNodePath());
-   _world->CompileLight(light);*/
- 
-//   PointLight* plight = dynamic_cast<PointLight*>(light->nodePath.node());
-//   plight->get_lens()->set_near_far(1.f, 2.f);
-//   plight->get_lens()->set_film_size(512);
+  _task_metabolism = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 0, 1);
+  _task_metabolism->Interval.Connect(*this, &Level::RunMetabolism);  
 
   window->get_render().set_shader_auto();
   loadingScreen->AppendText("-- Done --");
@@ -226,6 +209,42 @@ void Level::InsertDynamicObject(DynamicObject& object)
   cout << "Added an instance => " << instance << endl;
   if (instance != 0)
     _objects.push_back(instance);
+}
+
+void Level::InitSun(void)
+{
+  if (workaround_sunlight.is_null())
+    workaround_sunlight = new DirectionalLight("sun_light");
+  _sunLight = workaround_sunlight;
+  //_sunLight = new DirectionalLight("sun_light");
+
+  unsigned int shadow_caster_buffer = 128;
+  unsigned int film_size            = 128;
+
+  unsigned int graphics_quality     = OptionsManager::Get()["graphics-quality"];
+
+  while (graphics_quality--)
+  {
+    shadow_caster_buffer *= 2;
+    film_size            += 128;
+  }
+
+  _sunLight->set_shadow_caster(true, shadow_caster_buffer, shadow_caster_buffer);
+  _sunLight->get_lens()->set_near_far(10.f, 200.f);
+  _sunLight->get_lens()->set_film_size(film_size);
+
+  _sunLightNode = _window->get_render().attach_new_node(_sunLight);
+  _sunLightNode.set_pos(50.f, 50, 50.f);
+  _sunLightNode.set_hpr(127, -31,  0);
+  _window->get_render().set_light(_sunLightNode);
+  _window->get_render().set_two_sided(false);
+
+  _task_daylight   = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
+  _task_daylight->Interval.Connect(*this, &Level::RunDaylight);
+
+  solar_circle.SetFromWorld(_world);
+
+  RunDaylight();
 }
 
 void Level::InitPlayer(void)
@@ -603,7 +622,7 @@ void Level::RunDaylight(void)
     LVecBase4f(1.0, 0.8, 0.8, 1), // 16h00
     LVecBase4f(0.4, 0.4, 0.6, 1)  // 20h00
   };
-
+  
   int   current_hour    = _task_daylight->lastH + _task_daylight->timeH;
   int   current_minute  = _task_daylight->lastM + _task_daylight->timeM;
   int   current_second  = _task_daylight->lastS + _task_daylight->timeS;
@@ -618,6 +637,17 @@ void Level::RunDaylight(void)
   to_set += color_steps[it] + (dif / total_seconds * elapsed_seconds);
   _sunLight->set_color(to_set);
   //cout << "Sunlight color [" << _timeManager.GetHour() << "]->[" << it << "]: " << to_set.get_x() << "," << to_set.get_y() << "," << to_set.get_z() << endl;
+
+  // Angle va de 0/180 de 8h/20h à 20h/8h
+  float    step  = (current_hour) % 12 + (current_minute / 60.f);
+  float    angle = ((180.f / 120.f) / 12.f) * step;
+  LPoint2f pos   = solar_circle.PointAtAngle(angle);
+
+  //cout << "Sun Step: " << step << endl;
+  //cout << "Sun Position is (" << pos.get_x() << "," << pos.get_y() << ')' << endl;
+  _sunLightNode.set_z(pos.get_x());
+  _sunLightNode.set_y(pos.get_y());
+  _sunLightNode.look_at(solar_circle.GetPosition());
 }
 
 extern void* mypointer;
@@ -1486,7 +1516,7 @@ void Level::SetEntryZone(Party& player_party, const std::string& name)
   }
   _exitingZone = false;
   _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
-  _camera.FollowObject(GetPlayer());
+  //_camera.FollowObject(GetPlayer());
   _floor_lastWp = 0;
 }
 
