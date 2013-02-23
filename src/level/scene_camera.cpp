@@ -98,6 +98,10 @@ void SceneCamera::SwapCameraView(void)
 
 void SceneCamera::Run(float elapsedTime)
 {
+  PStatCollector collector("Level:SceneCamera");
+
+  collector.set_level(2);
+  collector.start();  
   if (_scrollEnabled)
     RunScroll(elapsedTime);
   if (_destHeight != _camera.get_z())
@@ -123,6 +127,7 @@ void SceneCamera::Run(float elapsedTime)
   }
   if (_centeringCamera || _followingNodePath)
     RunFollow(elapsedTime);
+  collector.stop();
 }
 
 void SceneCamera::RunScroll(float elapsedTime)

@@ -71,6 +71,7 @@ void Mouse::SetMouseState(char i)
 
 void Mouse::ClosestWaypoint(World* world, short currentFloor)
 {
+  PStatCollector collector("Level:Mouse:FindWaypoint"); collector.start();
   NodePath                  collision_context;
   PT(CollisionPlane)        pickerPlane;
   PT(CollisionRay)          pickerRay;
@@ -121,37 +122,42 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
 			      //      this leak has to go away
   planePath.detach_node();
   collision_context.detach_node();
+  collector.stop();
 }
 
 void Mouse::Run(void)
 {
+  PStatCollector collector("Level:Mouse:Run");
+
+  collector.start();
   if (_mouseWatcher->has_mouse())
   {
     LPoint2f cursorPos   = _mouseWatcher->get_mouse();
 
-    if (cursorPos == _lastMousePos)
-      return ;
-
-    _lastMousePos = cursorPos;
-    _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
-    _collisionTraverser.traverse(_window->get_render());
-    _collisionHandlerQueue->sort_entries();
-    _hovering.Reset();
-    for (int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; ++i)
+    if (cursorPos != _lastMousePos)
     {
-      CollisionEntry* entry = _collisionHandlerQueue->get_entry(i);
-
-      NodePath into          = entry->get_into_node_path();
-
-      switch (into.get_collide_mask().get_word())
+      _lastMousePos = cursorPos;
+      _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
+      _collisionTraverser.traverse(_window->get_render());
+      _collisionHandlerQueue->sort_entries();
+      _hovering.Reset();
+      for (int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; ++i)
       {
-	case ColMask::DynObject:
-	  if (!(_hovering.hasDynObject))
-	  {
-	    _hovering.SetDynObject(into);
-	  }
-	  break ;
+        CollisionEntry* entry = _collisionHandlerQueue->get_entry(i);
+
+        NodePath into          = entry->get_into_node_path();
+
+        switch (into.get_collide_mask().get_word())
+        {
+          case ColMask::DynObject:
+            if (!(_hovering.hasDynObject))
+            {
+              _hovering.SetDynObject(into);
+            }
+            break ;
+        }
       }
     }
   }
+  collector.stop();
 }

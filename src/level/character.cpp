@@ -456,6 +456,8 @@ void ObjectCharacter::RestartActionPoints(void)
 
 void ObjectCharacter::Run(float elapsedTime)
 {
+  PStatCollector collector_ai("Level:Characters:AI");
+  
   if (!(IsInterrupted()))
   {
     Level::State state = _level->GetState();
@@ -465,10 +467,12 @@ void ObjectCharacter::Run(float elapsedTime)
       ReloadFunction(&_scriptMain);
       if (_scriptMain)
       {
+        collector_ai.start();
         _script_context->Prepare(_scriptMain);
         _script_context->SetArgObject(0, this);
         _script_context->SetArgFloat(1, elapsedTime);
         _script_context->Execute();
+        collector_ai.stop();
       }
     }
     else if (state == Level::Fight)
@@ -480,10 +484,12 @@ void ObjectCharacter::Run(float elapsedTime)
 	_level->NextTurn();
       else if (!(IsMoving()) && _scriptFight) // replace with something more appropriate
       {
+        collector_ai.start();
         ReloadFunction(&_scriptFight);
 	_script_context->Prepare(_scriptFight);
 	_script_context->SetArgObject(0, this);
 	_script_context->Execute();
+        collector_ai.stop();
       }
     }
     if (_path.size() > 0)
@@ -585,14 +591,19 @@ void                ObjectCharacter::GoTo(unsigned int id)
 
 void                ObjectCharacter::GoTo(Waypoint* waypoint)
 {
+  PStatCollector collector("Level:Characters:Pathfinding");
+  Waypoint*      start_from = _waypointOccupied;
+
+  collector.start();
   ReachedDestination.DisconnectAll();
   _goToData.objective = 0;
-
   UnprocessCollisions();
+  if (_path.size() > 0)
+    start_from = _level->GetWorld()->GetWaypointFromId(_path.front().id);
   _path.clear();
-  if (_waypointOccupied && waypoint)
+  if (start_from && waypoint)
   {
-    if (!(_level->FindPath(_path, *_waypointOccupied, *waypoint)))
+    if (!(_level->FindPath(_path, *start_from, *waypoint)))
     {
       if (_level->GetPlayer() == this)
         _level->ConsoleWrite(i18n::T("No path."));
@@ -604,7 +615,7 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
   else
     cout << "Character doesn't have a waypointOccupied" << endl;
   ProcessCollisions();
-  cout << _path.size() << endl;
+  collector.stop();
 }
 
 void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max_distance)
@@ -765,6 +776,7 @@ LPoint3 NodePathSize(NodePath);
 
 void                ObjectCharacter::RunMovement(float elapsedTime)
 {
+  PStatCollector    collector("Level:Characters:Movement"); collector.start();
   Waypoint&         next = *(_path.begin());
   // TODO: Speed walking / running / combat
   float             combat_speed = OptionsManager::Get()["combat-speed"];
@@ -823,6 +835,7 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
     LookAt(dest);
     _object->nodePath.set_pos(dest);
   }
+  collector.stop();
 }
 
 void                ObjectCharacter::LookAt(LVecBase3 pos)

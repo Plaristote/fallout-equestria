@@ -4,19 +4,25 @@ using namespace std;
 
 void         WaypointModifier::ProcessCollisions(void)
 {
+  PStatCollector collector("Level:Waypoints:ProcessCollisions");
+  
+  collector.start();
   if (_waypointOccupied != 0)
     WithdrawAllArcs(_waypointOccupied);
   for_each(_waypointDisconnected.begin(), _waypointDisconnected.end(), [this](std::pair<int, int> waypoints)
   {
     WithdrawArc(waypoints.first, waypoints.second);
   });
+  collector.stop();
 }
 
 void         WaypointModifier::UnprocessCollisions(void)
 {
+  PStatCollector collector("Level:Waypoints:UnprocessCollisions");
   //static float average = 0;
   Timer timer;
 
+  collector.start();
   std::for_each(_withdrawedArcs.begin(), _withdrawedArcs.end(), [this](WithdrawedArc& arcs)
   {
     Waypoint::Arcs::iterator it;
@@ -34,6 +40,7 @@ void         WaypointModifier::UnprocessCollisions(void)
     average = timer.GetElapsedTime();
   else
     average = (average + timer.GetElapsedTime()) / 2;*/
+  collector.stop();
 }
 
 void        WaypointModifier::WithdrawAllArcs(unsigned int id)

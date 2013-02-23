@@ -853,15 +853,14 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
       Data   map_encounters = case_data["map-encounters"];
 
       if (map_encounters.Count() > 0)
-        encounter_map = map_encounters[Dices::Throw(map_encounters.Count()) - 1].Value();
+        encounter_map  = map_encounters[Dices::Throw(map_encounters.Count()) - 1].Value();
+      if (bad_encounters.Count() > 0)
+        encounter_type = bad_encounters[Dices::Throw(bad_encounters.Count()) - 1].Value(); 
       if (n_creeps > 5)
         n_creeps = 5;
-      for_each(bad_encounters.begin(), bad_encounters.end(), [this, &encounter_type, encounter_type_dice](Data encounter_data)
-      {
-        if ((int)encounter_data["min"] >= encounter_type_dice && (int)encounter_data["max"] <= encounter_type_dice)
-          encounter_type = encounter_data["type"].Value();
-      });
 
+      encounter_map  = "random-desert-1";
+      encounter_type = "timberwolves";
       if (encounter_map == "" || encounter_type == "")
       {
         if (dialog) delete dialog;

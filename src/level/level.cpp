@@ -444,9 +444,9 @@ bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
   AstarPathfinding<Waypoint>        astar;
   int                               max_iterations = 0;
   AstarPathfinding<Waypoint>::State state;
-  
+
   astar.SetStartAndGoalStates(from, to);
-  while ((state = astar.SearchStep()) == AstarPathfinding<Waypoint>::Searching && max_iterations++ < 500);
+  while ((state = astar.SearchStep()) == AstarPathfinding<Waypoint>::Searching && max_iterations++ < 50);
 
   if (state == AstarPathfinding<Waypoint>::Succeeded)
   {
@@ -650,12 +650,10 @@ void Level::RunDaylight(void)
   _sunLightNode.look_at(solar_circle.GetPosition());
 }
 
-extern void* mypointer;
-
 AsyncTask::DoneStatus Level::do_task(void)
 { 
   float elapsedTime = _timer.GetElapsedTime();
-  
+
   // TEST Mouse Cursor automatic change while hovering interfaces
   if (_levelUi.GetContext()->GetHoverElement() == _levelUi.GetContext()->GetRootElement())
     SetMouseState(_mouseState);
