@@ -859,8 +859,11 @@ void                ObjectCharacter::LookAt(InstanceDynamicObject* object)
 
 bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* object)
 {
+  PStatCollector collector("Level:Characters:LineOfSight");
+  
   if (object == this)
     return (true);
+  collector.start();
   NodePath root  = _object->nodePath;
   NodePath other = object->GetNodePath();
   bool ret = true;
@@ -886,6 +889,7 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
       ret = false;
     break ;
   }
+  collector.stop();
   return (ret);
 }
 
@@ -936,9 +940,11 @@ void     ObjectCharacter::CheckFieldOfView(void)
 {
   if (_hitPoints <= 0 || _level->GetPlayer() == this)
     return ;
+  PStatCollector     collector("Level:Characters:FieldOfView");
   CollisionTraverser fovTraverser;
   float              fovRadius = 45;
   
+  collector.start();
   // Prepare all the FOV data
   {
     list<FovEnemy>::iterator it = _fovEnemies.begin();
@@ -996,7 +1002,7 @@ void     ObjectCharacter::CheckFieldOfView(void)
   }
   if (_fovEnemies.size() > 0 && _level->GetState() != Level::Fight)
     _level->StartFight(this);
-  //timer.Profile("Field of view");
+  collector.stop();
 }
 
 /*

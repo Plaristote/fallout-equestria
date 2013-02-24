@@ -6,6 +6,7 @@
 #include "scenecamera.h"
 #include "mouse.h"
 #include <QElapsedTimer>
+#include "functorthread.h"
 
 extern PandaFramework framework;
 
@@ -152,10 +153,15 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(ui->languageList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), &tabL18n, SLOT(SwapLanguage(QListWidgetItem*)));
 
     connect(ui->listMap, SIGNAL(currentIndexChanged(QString)), this, SLOT(LoadMap(QString)));
-    connect(ui->saveMap, SIGNAL(clicked()),                    this, SLOT(SaveMap()));
+    connect(ui->saveMap, SIGNAL(clicked()),                    &dialogSaveMap, SLOT(open()));
+    connect(&dialogSaveMap, SIGNAL(accepted()),                this, SLOT(SaveMap()));
     connect(ui->mapNew,  SIGNAL(clicked()),                    &dialogNewMap, SLOT(open()));
 
     connect(&dialogNewMap, SIGNAL(CreateMap()), this, SLOT(CreateMap()));
+
+    connect(this, SIGNAL(SigDisplayError(QString,QString)),     this, SLOT(DisplayError(QString,QString)),     Qt::QueuedConnection);
+    connect(this, SIGNAL(SigUpdateProgressBar(QString, float)), this, SLOT(UpdateProgressBar(QString, float)), Qt::QueuedConnection);
+    save_map_use_thread = true;
 
     ui->scriptList->header()->hide();
 }
@@ -174,12 +180,13 @@ void MainWindow::CreateMap(void)
 {
     QString name = dialogNewMap.GetMapName();
 
-    QMessageBox::warning(this, "creating map", "i'm creating yo map bitch");
     if (world)
       delete world;
     world     = new World(_window);
     levelName = name;
+    save_map_use_thread = false;
     SaveMap();
+    save_map_use_thread = true;
     ui->listMap->addItem(name);
     LoadMap(name);
 }
@@ -1068,46 +1075,58 @@ void MainWindow::WaypointSelectAll(void)
 #include <panda3d/collisionRay.h>
 void MainWindow::WaypointSyncTerrain(void)
 {
-  std::list<Waypoint*>::iterator it;
+  ui->tabLevelDesigner->setEnabled(false);
+  ui->progressBar->show();
 
-  for (it = waypointsSelection.begin() ; it != waypointsSelection.end() ; ++it)
+  FunctorThread& thread = *FunctorThread::Create([this](void)
   {
-    NodePath wp = (*it)->nodePath;
-    LPoint3  min_pos;
+    float                          i = 0;
+    std::list<Waypoint*>::iterator it;
 
-    CollisionTraverser col_traverser;
-    PT(CollisionHandlerQueue) col_queue = new CollisionHandlerQueue;
-
-    PT(CollisionNode) cnode = new CollisionNode("waypointSyncTerrainNode");
-    cnode->set_from_collide_mask(CollideMask(ColMask::Object));
-
-    PT(CollisionSegment) segment = new CollisionSegment;
-    cnode->add_solid(segment);
-
-    NodePath np = world->window->get_render().attach_new_node(cnode);
-
-    segment->set_point_a(wp.get_x(), wp.get_y(), wp.get_z());
-    segment->set_point_b(wp.get_x(), wp.get_y(), wp.get_z() - 100000.f);
-
-    col_traverser.add_collider(np, col_queue);
-    col_traverser.traverse(world->window->get_render());
-    if (col_queue->get_num_entries())
+    for (it = waypointsSelection.begin() ; it != waypointsSelection.end() ; ++it, ++i)
     {
-      col_queue->sort_entries();
-      min_pos = col_queue->get_entry(0)->get_surface_point(world->window->get_render());
-      std::cout << "Found a collision" << std::endl;
-      std::cout << min_pos.get_x() << ", " << min_pos.get_y() << ", " << min_pos.get_z() << std::endl;
+      NodePath wp = (*it)->nodePath;
+      LPoint3  min_pos;
 
-      // ALMOST DONE !
-      LPoint3 min_point, max_point;
-      wp.calc_tight_bounds(min_point, max_point);
-      float height = max_point.get_y() - min_point.get_y();
+      CollisionTraverser col_traverser;
+      PT(CollisionHandlerQueue) col_queue = new CollisionHandlerQueue;
 
-      wp.set_z(min_pos.get_z() + (height / 2));
+      PT(CollisionNode) cnode = new CollisionNode("waypointSyncTerrainNode");
+      cnode->set_from_collide_mask(CollideMask(ColMask::Object));
+
+      PT(CollisionSegment) segment = new CollisionSegment;
+      cnode->add_solid(segment);
+
+      NodePath np = world->window->get_render().attach_new_node(cnode);
+
+      segment->set_point_a(wp.get_x(), wp.get_y(), wp.get_z());
+      segment->set_point_b(wp.get_x(), wp.get_y(), wp.get_z() - 100000.f);
+
+      col_traverser.add_collider(np, col_queue);
+      col_traverser.traverse(world->window->get_render());
+      if (col_queue->get_num_entries())
+      {
+        col_queue->sort_entries();
+        min_pos = col_queue->get_entry(0)->get_surface_point(world->window->get_render());
+        /*std::cout << "Found a collision" << std::endl;
+        std::cout << min_pos.get_x() << ", " << min_pos.get_y() << ", " << min_pos.get_z() << std::endl;*/
+
+        // ALMOST DONE !
+        LPoint3 min_point, max_point;
+        wp.calc_tight_bounds(min_point, max_point);
+        float height = max_point.get_y() - min_point.get_y();
+
+        wp.set_z(min_pos.get_z() + (height / 2));
+
+      }
+      np.show();
+      np.remove_node();
+      SigUpdateProgressBar("Waypoints Level Terrain: %p%", i / waypointsSelection.size() * 100.f);
     }
-    np.show();
-    np.remove_node();
-  }
+  });
+  connect(&thread, SIGNAL(Done()), this,            SLOT(EnableLevelEditor()), Qt::QueuedConnection);
+  connect(&thread, SIGNAL(Done()), ui->progressBar, SLOT(hide()),              Qt::QueuedConnection);
+  thread.start();
 }
 
 void MainWindow::LoadMap(const QString& path)
@@ -1444,30 +1463,60 @@ void MainWindow::ExitZoneDestinationDelete()
     }
 }
 
+void MainWindow::EnableLevelEditor(void)
+{
+    ui->tabLevelDesigner->setEnabled(true);
+}
+
+void MainWindow::UpdateProgressBar(QString fmt, float percentage)
+{
+    ui->progressBar->setFormat(fmt);
+    ui->progressBar->setValue(percentage);
+}
+
+void MainWindow::DisplayError(QString title, QString message)
+{
+  QMessageBox::warning(this, title, message);
+}
+
 void MainWindow::SaveMap()
 {
   if (world)
   {
-    std::ofstream file;
-    std::string   path = (QDir::currentPath() + "/maps/" + levelName + ".blob").toStdString();
+    ui->tabLevelDesigner->setEnabled(false);
+    world->do_compile_doors     = dialogSaveMap.DoCompileDoors();
+    world->do_compile_waypoints = dialogSaveMap.DoCompileWaypoints();
 
-    file.open(path.c_str(),ios::binary);
-    if (file.is_open())
+    FunctorThread& thread = *FunctorThread::Create([this, &thread](void)
     {
-      Utils::Packet packet;
+      std::ofstream file;
+      std::string   path = (QDir::currentPath() + "/maps/" + levelName + ".blob").toStdString();
 
-      ui->progressBar->show();
-      world->Serialize(packet, [this](float percentage)
+      file.open(path.c_str(),ios::binary);
+      if (world)
       {
-        ui->progressBar->setValue(percentage);
-      });
-      ui->progressBar->hide();
-      packet.PrintContent();
-      file.write(packet.raw(), packet.size());
-      file.close();
-    }
+        Utils::Packet packet;
+
+        world->Serialize(packet, [this, &thread](const std::string& label, float percentage)
+        {
+          QString format = QString::fromStdString(label) + "%p%";
+
+          SigUpdateProgressBar(format, percentage);
+        });
+        packet.PrintContent();
+        file.write(packet.raw(), packet.size());
+        file.close();
+      }
+      else
+        SigDisplayError("Fatal Error", "Cannot save map");
+    });
+    ui->progressBar->show();
+    connect(&thread, SIGNAL(Done()), ui->progressBar, SLOT(hide()), Qt::QueuedConnection);
+    connect(&thread, SIGNAL(Done()), this, SLOT(EnableLevelEditor()), Qt::QueuedConnection);
+    if (save_map_use_thread)
+      thread.start();
     else
-      QMessageBox::warning(this, "Fatal Error", "Cannot save map");
+      thread.start_sync();
   }
 }
 

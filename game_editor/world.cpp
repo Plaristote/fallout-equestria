@@ -9,13 +9,15 @@ void*                 gPathfindingData     = 0;
 
 World::World(WindowFramework* window)
 {
-  this->window       = window;
-  rootWaypoints      = window->get_render().attach_new_node("waypoints");
-  rootMapObjects     = window->get_render().attach_new_node("mapobjects");
-  rootDynamicObjects = window->get_render().attach_new_node("dynamicobjects");
-  rootLights         = window->get_render().attach_new_node("lights");
+  this->window         = window;
+  rootWaypoints        = window->get_render().attach_new_node("waypoints");
+  rootMapObjects       = window->get_render().attach_new_node("mapobjects");
+  rootDynamicObjects   = window->get_render().attach_new_node("dynamicobjects");
+  rootLights           = window->get_render().attach_new_node("lights");
 #ifdef GAME_EDITOR
-  lightSymbols       = window->get_render().attach_new_node("lightSymbols");
+  lightSymbols         = window->get_render().attach_new_node("lightSymbols");
+  do_compile_doors     = true;
+  do_compile_waypoints = true;
 #endif
 }
 
@@ -1126,14 +1128,15 @@ void           World::UnSerialize(Utils::Packet& packet)
   for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light); });
 }
 
-void           World::Serialize(Utils::Packet& packet, std::function<void (float)> progress_callback)
+void           World::Serialize(Utils::Packet& packet, std::function<void (const std::string&, float)> progress_callback)
 {
-  progress_callback(0);
+  //progress_callback(0);
   // Compile Step
 #ifdef GAME_EDITOR
-  CompileWaypoints();
+  if (do_compile_waypoints)
+    CompileWaypoints(progress_callback);
 #endif
-  progress_callback(30);
+  //progress_callback(30);
 
   // Waypoints
   {
@@ -1144,20 +1147,21 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (float
 
       while (it != end)
       {
-    if ((*it).arcs.size() == 0)
-      it = waypoints.erase(it);
-    else
-    {
-      (*it).id = ++id;
-      ++it;
-    }
+        if ((*it).arcs.size() == 0)
+          it = waypoints.erase(it);
+        else
+        {
+          (*it).id = ++id;
+          ++it;
+        }
+        progress_callback("Serializing Waypoints: ", (float)id / waypoints.size() * 100.f);
       }
       size = waypoints.size();
       packet << size;
       for (it = waypoints.begin() ; it != end ; ++it)
     (*it).Serialize(packet);
   }
-  progress_callback(35);
+  //progress_callback(35);
 
   // MapObjects
   {
@@ -1169,12 +1173,13 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (float
 
       for (; it != end ; ++it) { (*it).Serialize(packet); }
   }
-  progress_callback(40);
+  //progress_callback(40);
 
 #ifdef GAME_EDITOR
-  CompileDoors();
+  if (do_compile_doors)
+    CompileDoors(progress_callback);
 #endif
-  progress_callback(70);
+  //progress_callback(70);
 
   // DynamicObjects
   {
@@ -1186,7 +1191,7 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (float
 
       for (; it != end ; ++it) { (*it).Serialize(packet); }
   }
-  progress_callback(75);
+  //progress_callback(75);
   
   // WorldLights
   {
@@ -1198,7 +1203,7 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (float
     
     for (; it != end ; ++it) { (*it).Serialize(packet); }
   }
-  progress_callback(80);
+  //progress_callback(80);
 
   // ExitZones
   {
@@ -1221,7 +1226,7 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (float
       packet << waypointsId;
     }
   }
-  progress_callback(85);
+  //progress_callback(85);
 
   // EntryZone
   {
@@ -1243,16 +1248,17 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (float
         packet << waypointsId;
       }
   }
-  progress_callback(100);
+  //progress_callback(100);
 }
 
 // MAP COMPILING
-void           World::CompileWaypoints(void)
+void           World::CompileWaypoints(ProgressCallback progress_callback)
 {
+    unsigned int        i   = 0;
     Waypoints::iterator it  = waypoints.begin();
     Waypoints::iterator end = waypoints.end();
 
-    for (; it != end ; ++it)
+    for (; it != end ; ++it, ++i)
     {
         Waypoint::Arcs::iterator itArc  = (*it).arcs.begin();
         Waypoint::Arcs::iterator endArc = (*it).arcs.end();
@@ -1294,11 +1300,13 @@ void           World::CompileWaypoints(void)
             //np.show();
             np.remove_node();
         }
+        progress_callback("Compiling Waypoints: ", (float)i / waypoints.size() * 100.f);
     }
 }
 
-void World::CompileDoors(void)
+void World::CompileDoors(ProgressCallback progress_callback)
 {
+    unsigned int        i   = 0;
     Waypoints::iterator it  = waypoints.begin();
     Waypoints::iterator end = waypoints.end();
 
@@ -1344,6 +1352,7 @@ void World::CompileDoors(void)
             ++itArc;
             np.remove_node();
         }
+        progress_callback("Compiling Doors: ", (float)i / waypoints.size() * 100.f);
     }
 }
 

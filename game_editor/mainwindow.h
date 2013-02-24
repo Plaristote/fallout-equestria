@@ -24,6 +24,7 @@
 #include "tabdialog.h"
 #include "tabl18n.h"
 #include "serializer.hpp"
+#include "dialogsavemap.h"
 
 namespace Ui {
 class MainWindow;
@@ -50,6 +51,8 @@ public:
 
 signals:
     void Closed(void);
+    void SigDisplayError(QString title, QString message);
+    void SigUpdateProgressBar(QString label, float value);
 
 public slots:
     //void WaypointHovered(NodePath);
@@ -62,6 +65,9 @@ private slots:
     void LoadProject(void);
     void FilterInit(void);
     void CurrentTabChanged(int);
+    void EnableLevelEditor(void);
+    void UpdateProgressBar(QString label, float value);
+    void DisplayError(QString title, QString message);
 
     // MAPS
     void LoadMap(const QString&);
@@ -177,6 +183,8 @@ private:
     Waypoint*                waypointHovered;
     float                    waypointSelX, waypointSelY, waypointSelZ;
     DialogWaypointGenerate   waypointGenerate;
+    DialogSaveMap            dialogSaveMap;
+    bool                     save_map_use_thread;
 
     WizardObject             wizardObject;
 

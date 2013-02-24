@@ -82,6 +82,7 @@ Milestone III [Started December 2012]
 x --> Graphical representation of lights
 x --> Selection tools for waypoints
 x --> Automatic leveling of waypoints
+x --> Execute heavy tasks in threads, show progress with progress bar
 
   -> Statistics
   --> Reputation

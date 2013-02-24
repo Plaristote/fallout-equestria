@@ -434,11 +434,18 @@ struct World
     
     Waypoint*      GetWaypointAt(LPoint2f);
 
-    void           UnSerialize(Utils::Packet& packet);
-    void           Serialize(Utils::Packet& packet, std::function<void (float)> progress_callback);
+    typedef std::function<void (const std::string&, float)> ProgressCallback;
 
-    void           CompileWaypoints(void);
-    void           CompileDoors(void);
+    void           UnSerialize(Utils::Packet& packet);
+    void           Serialize(Utils::Packet& packet, ProgressCallback progress_callback);
+
+    void           CompileWaypoints(ProgressCallback);
+    void           CompileDoors(ProgressCallback);
+
+#ifdef GAME_EDITOR
+    bool           do_compile_waypoints;
+    bool           do_compile_doors;
+#endif
 };
 
 #endif // WORLD_H
