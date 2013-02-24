@@ -163,6 +163,13 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(this, SIGNAL(SigUpdateProgressBar(QString, float)), this, SLOT(UpdateProgressBar(QString, float)), Qt::QueuedConnection);
     save_map_use_thread = true;
 
+    connect(&this->waypointGenerate, SIGNAL(SigUpdateProgressbar(QString, float)), this,            SIGNAL(SigUpdateProgressBar(QString,float)), Qt::QueuedConnection);
+    connect(&this->waypointGenerate, SIGNAL(StartedGeneration()),                  this,            SLOT(DisableLevelEditor()),                  Qt::QueuedConnection);
+    connect(&this->waypointGenerate, SIGNAL(StartedGeneration()),                  ui->progressBar, SLOT(show()),                                Qt::QueuedConnection);
+    connect(&this->waypointGenerate, SIGNAL(EndedGeneration()),                    this,            SLOT(EnableLevelEditor()),                   Qt::QueuedConnection);
+    connect(&this->waypointGenerate, SIGNAL(EndedGeneration()),                    ui->progressBar, SLOT(hide()),                                Qt::QueuedConnection);
+    connect(&this->waypointGenerate, SIGNAL(EndedGeneration()),                    this,            SLOT(SelectGeneratedWaypoints()),            Qt::QueuedConnection);
+
     ui->scriptList->header()->hide();
 }
 
@@ -1072,6 +1079,18 @@ void MainWindow::WaypointSelectAll(void)
       WaypointSelect(&(*it));
   }
 }
+
+void MainWindow::SelectGeneratedWaypoints(void)
+{
+  WaypointList to_select = waypointGenerate.GetToSelect();
+
+  WaypointDiscardSelection();
+  foreach(Waypoint* wp, to_select)
+  {
+    WaypointSelect(wp);
+  }
+}
+
 #include <panda3d/collisionRay.h>
 void MainWindow::WaypointSyncTerrain(void)
 {
@@ -1466,6 +1485,11 @@ void MainWindow::ExitZoneDestinationDelete()
 void MainWindow::EnableLevelEditor(void)
 {
     ui->tabLevelDesigner->setEnabled(true);
+}
+
+void MainWindow::DisableLevelEditor(void)
+{
+    ui->tabLevelDesigner->setEnabled(false);
 }
 
 void MainWindow::UpdateProgressBar(QString fmt, float percentage)

@@ -39,7 +39,10 @@ SOURCES += main.cpp\
     dialogwaypointgenerate.cpp \
     serializer.cpp \
     itemeditor.cpp \
-    dialoginventoryitem.cpp
+    dialoginventoryitem.cpp \
+    worldmapeditor.cpp \
+    functorthread.cpp \
+    dialogsavemap.cpp
 
 HEADERS  += mainwindow.h \
     qpandawidget.h \
@@ -63,7 +66,10 @@ HEADERS  += mainwindow.h \
     dialogwaypointgenerate.h \
     serializer.hpp \
     itemeditor.h \
-    dialoginventoryitem.h
+    dialoginventoryitem.h \
+    worldmapeditor.h \
+    functorthread.h \
+    dialogsavemap.h
 
 FORMS    += mainwindow.ui \
     dialognewscript.ui \
@@ -75,4 +81,6 @@ FORMS    += mainwindow.ui \
     dialogobject.ui \
     dialogwaypointgenerate.ui \
     itemeditor.ui \
-    dialoginventoryitem.ui
+    dialoginventoryitem.ui \
+    worldmapeditor.ui \
+    dialogsavemap.ui

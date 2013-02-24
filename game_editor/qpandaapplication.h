@@ -19,7 +19,7 @@ public:
     static PandaFramework& Framework(void) { return (_framework); }
     static void            Close(void);
 
-    void                   SetPandaEnabled(bool enabled);
+    static void            SetPandaEnabled(bool enabled);
 
 public slots:
     void                   Terminate(void) { Close(); }
@@ -31,7 +31,7 @@ private:
     static bool           _continue;
     static PandaFramework _framework;
     QTimer                _timer;
-    bool                  _panda_enabled;
+    static bool           _panda_enabled;
 };
 
 #endif // QPANDAAPPLICATION_H

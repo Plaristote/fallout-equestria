@@ -66,6 +66,7 @@ private slots:
     void FilterInit(void);
     void CurrentTabChanged(int);
     void EnableLevelEditor(void);
+    void DisableLevelEditor(void);
     void UpdateProgressBar(QString label, float value);
     void DisplayError(QString title, QString message);
 
@@ -95,6 +96,7 @@ private slots:
     void WaypointSelDelete(void);
     void WaypointHovered(NodePath);
     void WaypointSelect(Waypoint*);
+    void SelectGeneratedWaypoints(void);
     void UpdateSelection(void);
     void WaypointDiscardSelection(void);
     void WaypointSelectAll(void);

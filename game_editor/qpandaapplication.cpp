@@ -2,6 +2,7 @@
 
 PandaFramework QPandaApplication::_framework;
 bool           QPandaApplication::_continue;
+bool           QPandaApplication::_panda_enabled;
 
 QPandaApplication::QPandaApplication(int argc, char **argv) : QApplication(argc, argv)
 {
@@ -19,13 +20,13 @@ QPandaApplication::~QPandaApplication()
 
 void           QPandaApplication::PandaRefresh(void)
 {
-    if (_continue)
-    {
-      Thread* current_thread = Thread::get_current_thread();
+  if (_continue && _panda_enabled)
+  {
+    Thread* current_thread = Thread::get_current_thread();
 
-      _framework.do_frame(current_thread);
-      _timer.start();
-    }
+    _framework.do_frame(current_thread);
+    _timer.start();
+  }
 }
 
 int            QPandaApplication::exec(void)
@@ -41,7 +42,7 @@ void           QPandaApplication::Close(void)
 
 void           QPandaApplication::SetPandaEnabled(bool enabled)
 {
-  if (_panda_enabled == false && enabled)
-    _timer.start();
+  /*if (_panda_enabled == false && enabled)
+    _timer.start();*/
   _panda_enabled = enabled;
 }
