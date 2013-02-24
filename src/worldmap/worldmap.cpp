@@ -2,6 +2,12 @@
 #include "musicmanager.hpp"
 #include <dices.hpp>
 
+#ifdef _WIN32
+# define ROCKET_FACTORY Rocket::Core::RFactory
+#else
+# define ROCKET_FACTORY Rocket::Core::Factory
+#endif
+
 using namespace std;
 using namespace Rocket;
 
@@ -166,7 +172,7 @@ void WorldMap::AddCityToList(Data cityData)
     rml << "</div>";
     innerRml = innerRml + Rocket::Core::String(rml.str().c_str());
 
-    if ((Rocket::Core::Factory::InstanceElementText(elem, innerRml)))
+    if ((ROCKET_FACTORY::InstanceElementText(elem, innerRml)))
       ToggleEventListener(true, "city-" + cityData.Key(), "click", CityButtonClicked);
   }
   if (cityData["hidden"].Value() != "1")
@@ -189,7 +195,7 @@ void WorldMap::AddCityToList(Data cityData)
     rml << "</div>";
 
     // NOTE might need to do something about Rocket::Core::Factory and Windows (replace with RFactory ?)
-    if ((Rocket::Core::Factory::InstanceElementText(elem, Core::String(rml.str().c_str()))))
+    if ((ROCKET_FACTORY::InstanceElementText(elem, Core::String(rml.str().c_str()))))
       ToggleEventListener(true, elem_id.str(), "click", MapClickedEvent);
   }
 }

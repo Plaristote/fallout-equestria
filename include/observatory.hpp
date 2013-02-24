@@ -6,6 +6,7 @@
 # include <queue>
 # include <algorithm>
 # include <iostream>
+# include <functional>
 
 # include "semaphore.hpp"
 # include "serializer.hpp"

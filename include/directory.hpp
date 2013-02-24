@@ -9,11 +9,13 @@
 typedef struct dirent Dirent;
 # else
 #  define _WINSOCKAPI_
+//#  include "semaphore.hpp"
 #  include <Windows.h>
 #  include <tchar.h>
 #  include <stdio.h>
 #  include <strsafe.h>
 #  include <direct.h>
+#  include <string>
 
 #  define DT_DIR 1
 #  define DT_REG 2

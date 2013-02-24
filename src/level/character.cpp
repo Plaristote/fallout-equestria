@@ -1093,7 +1093,7 @@ void     ObjectCharacter::SetAsEnemy(const ObjectCharacter* other, bool enemy)
   {
     if (enemy)
       _self_enemyMask &= other->GetFaction();
-    else if (_self_enemyMask & other->GetFaction());
+    else if (_self_enemyMask & other->GetFaction())
       _self_enemyMask -= other->GetFaction();
   }
 }

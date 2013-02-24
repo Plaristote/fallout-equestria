@@ -97,8 +97,8 @@ bool Directory::RemoveDir(const string& str)
 
 bool Directory::OpenDir(const string& str)
 {
-  HANDLE          dir = FindFirstFile(str.c_str(), NULL);
   WIN32_FIND_DATA ffd;
+  HANDLE          dir = FindFirstFile(str.c_str(), &ffd);
 
   if (dir != INVALID_HANDLE_VALUE)
   {

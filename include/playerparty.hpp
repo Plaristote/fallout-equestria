@@ -4,7 +4,7 @@
 # include "globals.hpp"
 # include "serializer.hpp"
 
-class DynamicObject;
+struct DynamicObject;
 
 class Party
 {

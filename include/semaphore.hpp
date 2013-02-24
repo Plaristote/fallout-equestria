@@ -6,8 +6,9 @@
 # endif
 
 # ifdef _WIN32
-#  include <windows.h>
-#  include <stdio.h>
+#  include "directory.hpp"
+//#  include <Windows.h>
+//#  include <stdio.h>
 # endif
 
 class Semaphore
