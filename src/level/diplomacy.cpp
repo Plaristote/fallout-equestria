@@ -24,12 +24,18 @@ void WorldDiplomacy::Initialize(void)
   {
     Data enemies = faction["Enemies"];
 
-    for_each(enemies.begin(), enemies.end(), [this, faction](Data array)
+	// MSVC DOES NOT SUPPORT LAMBDAS PROPERLY
+	auto _this = this;
+    for_each(enemies.begin(), enemies.end(), [_this, faction](Data array)
     {
-      SetAsEnemy(array.Value() == "1", array.Key(), faction.Key());
-      for_each(array.begin(), array.end(), [this, faction](Data enemy)
+      _this->SetAsEnemy(array.Value() == "1", array.Key(), faction.Key());
+
+	  // MSVC DOES NOT SUPPORT LAMBDAS PROPERLY
+	  auto __this   = _this;
+	  Data _faction = faction;
+      for_each(array.begin(), array.end(), [__this, _faction](Data enemy)
       {
-        SetAsEnemy(enemy.Value() == "1", enemy.Key(), faction.Key()); cout << faction.Key() << " enemies with " << enemy.Value() << endl;
+        __this->SetAsEnemy(enemy.Value() == "1", enemy.Key(), _faction.Key()); cout << _faction.Key() << " enemies with " << enemy.Value() << endl;
       });
     });
   });

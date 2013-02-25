@@ -52,7 +52,7 @@ void NewGameTask::StartFromScratch(void)
 void NewGameTask::Done(void)
 {
   Directory savedir;
-  string    savepath  = OptionsManager::Get()["savepath"];
+  string    savepath  = OptionsManager::Get()["savepath"].Value();
   string    to_copy[] = { "dataengine.json", "map.json", "cities.json", "player-party.blob" };
 
   if (savedir.OpenDir(savepath))
