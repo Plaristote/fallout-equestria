@@ -1099,13 +1099,15 @@ void MainWindow::WaypointSyncTerrain(void)
 
   FunctorThread& thread = *FunctorThread::Create([this](void)
   {
-    float                          i = 0;
+    unsigned short                 attempt = 0;
+    float                          i       = 0;
     std::list<Waypoint*>::iterator it;
 
     for (it = waypointsSelection.begin() ; it != waypointsSelection.end() ; ++it, ++i)
     {
       NodePath wp = (*it)->nodePath;
       LPoint3  min_pos;
+      float    new_height = wp.get_z();
 
       CollisionTraverser col_traverser;
       PT(CollisionHandlerQueue) col_queue = new CollisionHandlerQueue;
@@ -1135,9 +1137,24 @@ void MainWindow::WaypointSyncTerrain(void)
         wp.calc_tight_bounds(min_point, max_point);
         float height = max_point.get_y() - min_point.get_y();
 
-        wp.set_z(min_pos.get_z() + (height / 2));
-
+        new_height = min_pos.get_z() + (height / 2);
       }
+      if (new_height != wp.get_z()) // Success
+      {
+        wp.set_z(new_height);
+        attempt = 0;
+      }
+      else if (attempt < 20) // Failure: let's try with a slightly different position
+      {
+        if (attempt % 2)
+          wp.set_x(wp.get_x() + 0.01);
+        else
+          wp.set_y(wp.get_y() + 0.01);
+        --it; --i;
+        ++attempt;
+      }
+      else // Failure: 10 consecutive failures, let's give up
+        attempt = 0;
       np.show();
       np.remove_node();
       SigUpdateProgressBar("Waypoints Level Terrain: %p%", i / waypointsSelection.size() * 100.f);
