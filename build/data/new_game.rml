@@ -13,14 +13,6 @@
       z-index:  1;
     }
 
-    #content
-    {
-      color: black;
-      outline-font-effect: outline;
-      outline-width: 1px;
-      outline-color: white;
-      z-index: 2;
-    }
 
     #newgame-window
     {
@@ -29,24 +21,32 @@
       background-color: black;
       z-index: 0;
     }
-
+	#char_info{
+		width: 40%;
+		height: 20%;
+		position: absolute;
+		bottom: 3%;
+		z-index: 3;
+		background-color: black;
+		overflow: hidden;
+	}
     #button-container
     {
+    	width: 100%;
       background-color: black;
       z-index: 2;
     }
 
     .control
     {
+    	float: left;
       width: 17%;
-      height: 30px;
-      padding-top: 8px;
     }
 
   </style>
 
 </head>
-<body class="window">
+<body>
   <div id="canvas" style="width:100%;height:100%;">
     <div id="newgame-window">
 
@@ -54,17 +54,14 @@
       </div>
 
       <div id="button-container">
-        <button id="button-previous-profile"        class='control' i18n="Previous Character"   >Previous Character</button>
-        <button id="button-next-profile"            class='control' i18n="Next Character"       >Next Character</button>
-        <button id="button-load-start-from-scratch" class='control' i18n="Create Character"     >Create Character</button>
-        <button id="button-select-profile"          class='control' i18n="Select this character">Select this character</button>
-        <button id="quit-button"                    class='control' i18n="Quit"                 >Quit</button>
+        <button id="button-previous-profile"        class='control universal_button' i18n="Previous Character"   >Previous Character</button>
+        <button id="button-next-profile"            class='control universal_button' i18n="Next Character"       >Next Character</button>
+        <button id="button-load-start-from-scratch" class='control universal_button' i18n="Create Character"     >Create Character</button>
+        <button id="button-select-profile"          class='control universal_button' i18n="Select this character">Select this character</button>
+        <button id="quit-button"                    class='control universal_button' i18n="Quit"                 >Quit</button>
        </div>
 
-      <div id="button-exit-container">
-     </div>
-
-      <div id="content" style="color: black;">
+      <div id="char_info" style="color: green;">
         <span id="character-name">Character name</span><br />
         <span>Description: </span>
         <span id="character-description">character description</span><br />

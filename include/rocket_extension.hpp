@@ -28,11 +28,11 @@ class UiBase
   
   struct Listener
   {
-    Listener(Rocket::Core::Element* elem, const std::string& event, RocketListener& instance) : elem(elem), event(event), instance(instance) {}
+    Listener(Rocket::Core::Element* elem, const std::string& event, RocketListener& instance) : elem(elem->GetId().CString()), event(event), instance(instance) {}
 
     bool operator==(const Listener& listener) const { return (listener.elem == elem && listener.event == event && &listener.instance == &instance); }
 
-    Rocket::Core::Element* elem;
+    const std::string      elem;
     const std::string      event;
     RocketListener&        instance;
   };
@@ -49,6 +49,7 @@ public:
   virtual void Show(void)            { if (_root) { _root->Show(); VisibilityToggled.Emit(true); VisibilityToggledOn.Emit(); } }
   virtual void Hide(void)            { if (_root) { _root->Hide(); _root->PushToBack(); VisibilityToggled.Emit(false); VisibilityToggledOff.Emit(); } }
   bool         IsVisible(void) const { return (_root && _root->IsVisible()); }
+  void         SetModal(bool modal)  { if (_root) { _root->Show(modal ? Rocket::Core::ElementDocument::MODAL : Rocket::Core::ElementDocument::NONE); } }
 
   virtual void Destroy(void) { if (_root) { _root->Hide(); } }
 
@@ -59,13 +60,13 @@ public:
   {
     Rocket::Core::Element* child;
     
-    for (int it = 0 ; child = elem->GetChild(it) ; ++it)
+    for (int it = 0 ; (child = elem->GetChild(it)) ; ++it)
     {
       child->SetProperty(property.c_str(), value.c_str());
       SetPropertyOnAll(child, property, value);
     }
   }
-  
+
   void FadeOut(void);
   void FadeIn(void);
   

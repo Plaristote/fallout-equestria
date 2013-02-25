@@ -25,6 +25,106 @@ using namespace std;
 #include <level/objects/shelf.hpp>
 #include <level/objects/locker.hpp>
 
+/*struct Quest
+{
+  Data                                           data;
+  Observatory::Signal<void (const std::string&)> Completed;
+
+  void ActionCompleted(const std::string& type, const std::string& target, unsigned short quantity);
+  
+private:
+  bool CheckIfCompleted(void);
+};
+
+
+class QuestManager
+{
+  typedef std::list<Quest> Quests;
+public:
+  QuestManager(DataEngine& de, StatController* player_controller) : _data_engine(de), _stats_controller(player_controller)
+  {
+  }
+
+  void   AddQuest(Data);
+
+private:
+  void   QuestCompleted(const std::string&);
+
+  DataEngine&     _data_engine;
+  Quests          _quests;
+  StatController* _stats_controller;
+};
+
+void QuestManager::AddQuest(Data data)
+{
+  Quest quest;
+  
+  _data_engine["Quests"][data.Key()].Duplicate(data);
+  quest.data = _data_engine["Quests"][data.Key()];
+  quest.Completed.Connect(*this, &QuestManager::QuestCompleted);
+  _quests.push_back(quest);
+}
+
+void QuestManager::QuestCompleted(const string& name)
+{
+  Data quest = _data_engine["Quests"][name];
+
+  quest["complete"] = 1;
+  _stats_controller->AddExperience(quest["reward"]);
+}
+
+void Quest::ActionCompleted(const string& type, const string& target, unsigned short quantity)
+{
+  Data objectives = data["objectives"];
+
+  for_each(objectives.begin(), objectives.end(), [this, type, target, &quantity](Data objective)
+  {
+    Data conditions = objective["conditions"];
+    
+    for_each(conditions.begin(), conditions.end(), [this, type, target, &quantity](Data condition)
+    {
+      if (condition["type"].Value() == type && condition["target"].Value() == target)
+      {
+        unsigned short quantity_left = condition["quantity_left"];
+        
+        if (quantity_left < quantity)
+        {
+          quantity      -= quantity_left;
+          quantity_left  = 0;
+        }
+        else
+        {
+          quantity       = 0;
+          quantity_left -= quantity;
+        }
+      }
+    });
+  });
+  if (CheckIfCompleted())
+    Completed.Emit(data.Key());
+}
+
+bool Quest::CheckIfCompleted(void)
+{
+  bool success    = true;
+  Data objectives = data["objectives"];
+
+  for_each(objectives.begin(), objectives.end(), [this](Data objective)
+  {
+    Data conditions = objective["conditions"];
+    
+    for_each(conditions.begin(), conditions.end(), [this](Data condition)
+    {
+      unsigned short quantity_left = condition["quantity_left"];
+      
+      if (quantity_left > 0)
+        success = false;
+    });
+  });
+  return (success);
+}*/
+
+
 string humanize(const std::string& str)
 {
   string ret;
@@ -60,7 +160,7 @@ string underscore(const std::string& str)
 asIScriptContext* as_current_context;
 asIScriptModule*  as_current_module;
 
-class RocketAsListener : Rocket::Core::EventListener
+class RocketAsListener : public Rocket::Core::EventListener
 {
 public:
   RocketAsListener(DataEngine& de, Rocket::Core::Element* elem, const std::string& event, const std::string& func_name) : _element(elem), _event(event), _de(de)
@@ -87,23 +187,28 @@ public:
     if (_module && _element)
     {
       asIScriptFunction* callback = _module->GetFunctionByDecl(_callback.c_str());
-      
+
+      // WARNING About the present bug
+      // GetFunctionByDecl doesn't find the function declaration for some unknown reason.
+      // The function declaration is valid and should be present in the module, unless
+      // we're using the wrong module. Which is unlikely, but is the last explanation.
+      // TODO isn't this bug fixed ? investigate
+
       if (_context && callback)
       {
-	_context->Prepare(callback);
-	_context->SetArgObject(0, &_de);
-	_context->SetArgObject(1, event.GetCurrentElement());
-	_context->SetArgObject(2, &_event);
-	_context->Execute();
+        _context->Prepare(callback);
+        _context->SetArgObject(0, &_de);
+        _context->SetArgObject(1, event.GetCurrentElement());
+        _context->SetArgObject(2, &_event);
+        _context->Execute();
       }
-      if (callback) callback->Release();
     }
   }
 
 private:
-  DataEngine&            _de;
   Rocket::Core::Element* _element;
   std::string            _event;
+  DataEngine&            _de;
   asIScriptContext*      _context;
   asIScriptModule*       _module;
   std::string            _callback;
@@ -208,13 +313,14 @@ asConsoleOutput asConsole;
 
 #include "musicmanager.hpp"
 #include <soundmanager.hpp>
+#include <dices.hpp>
 
 static void AngelScriptInitialize(void)
 {
   asIScriptEngine* engine = Script::Engine::Get();
 
   Script::Engine::ScriptError.Connect(asConsole, &asConsoleOutput::OutputError);
-
+  
   engine->RegisterGlobalFunction("void Cout(string)", asFUNCTION(AngelCout), asCALL_CDECL);
   engine->RegisterGlobalFunction("void LF()", asFUNCTION( GameConsole::ListFunctions ), asCALL_CDECL);
   engine->RegisterGlobalFunction("void PrintScenegraph()", asFUNCTION( GameConsole::PrintScenegraph ), asCALL_CDECL);
@@ -339,6 +445,7 @@ static void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "Data GetStatistics()",                     asMETHOD(ObjectCharacter,GetStatistics), asCALL_THISCALL);
   //MSVC2010 strangeness for this function: Base/Derived thingymajig complications
   engine->RegisterObjectMethod(charClass, "int  GetCurrentWaypoint() const",          asMETHODPR(WaypointModifier,GetOccupiedWaypointAsInt, (void) const, int), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "int  GetPathSize() const",                 asMETHOD(ObjectCharacter,GetPathSize), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool IsMoving() const",                    asMETHOD(ObjectCharacter,IsMoving), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool IsAlive() const",                     asMETHOD(ObjectCharacter,IsAlive),  asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "DynamicObject@ AsObject()",                asFUNCTION(asUtils::CharacterAsObject), asCALL_CDECL_OBJLAST);
@@ -386,17 +493,18 @@ static void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(levelClass, "DynamicObject@ GetObject(string)",                     asMETHOD(Level,GetObject),           asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           ActionUseWeaponOn(Character@, Character@, Item@, int)",     asMETHOD(Level,ActionUseWeaponOn), asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           ActionUseObjectOn(Character@, DynamicObject@, Item@, int)", asMETHOD(Level,ActionUseObjectOn), asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "void           ActionUse(Character@, DynamicObject@)",                     asMETHOD(Level,ActionUse),           asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "void           ActionUse(Character@, DynamicObject@)",                     asMETHOD(Level,ActionUse),         asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           ActionDropObject(Character@, Item@)",   asMETHOD(Level,ActionDropObject),    asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           PlayerLoot(Inventory@)",                asMETHOD(Level,PlayerLoot),          asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           StartFight(Character@)",                asMETHOD(Level,StartFight),          asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           StopFight()",                           asMETHOD(Level,StopFight),           asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           NextTurn()",                            asMETHOD(Level,NextTurn),            asCALL_THISCALL);
-  
+  engine->RegisterObjectMethod(levelClass, "Sound@         PlaySound(string)",                     asMETHOD(Level,PlaySound),           asCALL_THISCALL);
+
   const char* worldmapClass = "WorldMap";
   engine->RegisterObjectType(worldmapClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(worldmapClass, "void SetCityVisible(string)", asMETHOD(WorldMap,SetCityVisible), asCALL_THISCALL);
-  //engine->RegisterObjectMethod(worldmapClass, "Data GetDataEngine()",        asMETHOD(WorldMap,GetDataEngine),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldmapClass, "Data GetDataEngine()",        asMETHOD(WorldMap,GetDataEngine),  asCALL_THISCALL);
 
   const char* gametaskClass = "Game";
   engine->RegisterObjectType(gametaskClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
@@ -439,6 +547,7 @@ int main(int argc, char *argv[])
     window->get_graphics_window()->request_properties(props);
   }
 
+  Dices::Initialize();
   Script::Engine::Initialize();
   AngelScriptInitialize();
   OptionsManager::Initialize();

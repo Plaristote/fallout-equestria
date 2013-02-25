@@ -106,6 +106,8 @@ private:
   void                  DoLoadLevel(LoadLevelParams);
   void                  GameOver(void);
   
+  void                  DoCheckRandomEncounter(int x, int y);
+  
   void                  SetPlayerInventory(void);
   
   void                  EraseSlot(unsigned char slot);

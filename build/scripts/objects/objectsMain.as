@@ -5,10 +5,11 @@ string UseKeyOnDoor(Item@ item, Character@ user, Door@ door)
     return ("Close the door first");
   if (door.GetKeyName() == item.GetName())
   {
-    string postStr = (door.IsLocked() ? " unlocked a door" : " locked a door");
+    bool   current_state = door.IsLocked();
+    string postStr       = (current_state ? " unlocked a door" : " locked a door");
 
     door.Unlock();
-    if (door.IsLocked())
+    if (door.IsLocked() != current_state)
       return (user.GetName() + postStr);
     else
       return ("FATAL ERROR UseKeyOnDoor");

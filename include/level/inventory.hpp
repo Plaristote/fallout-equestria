@@ -22,7 +22,7 @@ public:
   struct EquipedModel : public AnimatedObject
   {
     EquipedModel(WindowFramework* win, InventoryObject* pObject);
-    ~EquipedModel();
+    virtual ~EquipedModel();
     
     NodePath GetNodePath(void) const { return (np); }
     void     ResetAnimation(void)    {}
@@ -37,7 +37,8 @@ public:
   const std::string UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType);
   const std::string UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType);
   const std::string Use(ObjectCharacter* user, unsigned char useType);
-  const std::string GetName(void) const { return (this->Key()); }
+  const std::string GetName(void) const { return (this->Key());             }
+  const std::string GetIcon(void) const { return ((*this)["icon"].Value()); }
   DynamicObject*    CreateDynamicObject(World* world) const;
   EquipedModel*     CreateEquipedModel(World* world);
 
@@ -54,8 +55,8 @@ private:
   
   bool               _equiped;
 
-  asIScriptContext*  _scriptContext;
-  asIScriptModule*   _scriptModule;
+  asIScriptContext*  _script_context;
+  asIScriptModule*   _script_module;
   
   struct ActionHooks
   {
@@ -97,6 +98,7 @@ public:
   const Content&   GetContent(void) const { return (_content); }
   Content&         GetContent(void)       { return (_content); }
   InventoryObject* GetObject(const std::string& name);
+  unsigned short   ContainsHowMany(const std::string& name) const;
 
   unsigned short   GetCurrentWeight(void) const      { return (_currentWeight); }
   unsigned short   GetCapacity(void)      const      { return (_capacity);      }

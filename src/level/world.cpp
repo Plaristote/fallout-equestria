@@ -1,4 +1,5 @@
 #include "level/world.h"
+#include <panda3d/collisionHandlerQueue.h>
 
 using namespace std;
 
@@ -605,6 +606,8 @@ void Waypoint::SetMouseBox(void)
   mouseBox.height = max_y * 2;
 }
 
+//#define WAYPOINT_DEBUG
+
 // WAYPOINTS ARCS
 Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
 {
@@ -650,6 +653,62 @@ void Waypoint::Arc::Destroy(void)
 #endif
 }
 
+void Waypoint::WithdrawArc(Waypoint* other)
+{
+  ArcsWithdrawed::iterator it, end;
+
+  for (it = arcs_withdrawed.begin(), end = arcs_withdrawed.end() ; it != end ; ++it)
+  {
+    const Arc& arc = (*it).first;
+
+    if (arc.to == other)
+    {
+      if (GetArcTo(arc.to->id))
+        Disconnect(arc.to);
+      (*it).second++;
+      break ;
+    }
+  }
+}
+
+void Waypoint::UnwithdrawArc(Waypoint* other, ArcObserver* observer)
+{
+  ArcsWithdrawed::iterator it, end;
+
+  //cout << "Unwithdraw arc" << endl;
+  for (it = arcs_withdrawed.begin(), end = arcs_withdrawed.end() ; it != end ; ++it)
+  {
+    const Arc& arc = (*it).first;
+
+    if (arc.to == other)
+    {
+      if ((*it).second != 0)
+        (*it).second--;
+      if ((*it).second == 0)
+      {
+        std::list<Waypoint::Arc>::iterator it = Connect(arc.to);
+        
+        it->observer = observer;
+      }
+      break ;
+    }
+  }
+}
+
+std::pair<Waypoint::Arc, unsigned short>* Waypoint::GetWithdrawable(Waypoint* other)
+{
+  ArcsWithdrawed::iterator it, end;
+
+  for (it = arcs_withdrawed.begin(), end = arcs_withdrawed.end() ; it != end ; ++it)
+  {
+    const Arc& arc = (*it).first;
+
+    if (arc.to == other)
+      return (&(*it));
+  }
+  return (0);
+}
+
 /* MySqrt */
 float my_sqrt(const float x)
 {
@@ -689,11 +748,15 @@ void Waypoint::UnserializeLoadArcs(World* world)
 
   for (; it != end ; ++it)
   {
-      Waypoint* waypoint = world->GetWaypointFromId((*it));
+    Waypoint* waypoint = world->GetWaypointFromId((*it));
 
-      if (waypoint)
-    Connect(waypoint);
+    if (waypoint)
+      Connect(waypoint);
   }
+  std::for_each(arcs.begin(), arcs.end(), [this](Arc& arc)
+  {
+    arcs_withdrawed.push_back(std::pair<Arc, unsigned short>(arc, 0));
+  });
   tmpArcs.clear();
 }
 
@@ -731,6 +794,8 @@ void MapObject::UnSerialize(WindowFramework* window, Utils::Packet& packet)
   packet >> floor;
 
   nodePath   = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + strModel);
+  nodePath.set_depth_offset(1);
+  nodePath.set_two_sided(false);
   if (strTexture != "")
   {
     texture    = TexturePool::load_texture(TEXT_ROOT + strTexture);
@@ -793,13 +858,13 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
         packet >> size;
         for (int i = 0 ; i < size ; ++i)
         {
-            int id1, id2;
+          int id1, id2;
 
-            packet >> id1 >> id2;
-	    auto it1 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id1, id2));
-	    auto it2 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id2, id1));
-	    if (it1 == lockedArcs.end() && it2 == lockedArcs.end())
-	    {  lockedArcs.push_back(std::pair<int, int>(id1, id2)); }
+          packet >> id1 >> id2;
+          auto it1 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id1, id2));
+          auto it2 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id2, id1));
+          if (it1 == lockedArcs.end() && it2 == lockedArcs.end())
+          {  lockedArcs.push_back(std::pair<int, int>(id1, id2)); }
         }
     }
 
@@ -928,6 +993,8 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
       break ;
     case Type_DynamicObject:
       ReparentTo(world->GetDynamicObjectFromName(parent_name));
+      break ;
+    case Type_None:
       break ;
   }
   Initialize();
@@ -1206,7 +1273,7 @@ void           World::Serialize(Utils::Packet& packet)
     }
   }  
 }
-#include <panda3d/collisionHandlerQueue.h>
+
 // MAP COMPILING
 void           World::CompileWaypoints(void)
 {
@@ -1313,13 +1380,13 @@ void           World::SetMapObjectsVisible(bool v)
   if (v)
   {
     rootMapObjects.show();
-    for (int i = 0 ; i < floors.size() ; ++i)
+    for (unsigned int i = 0 ; i < floors.size() ; ++i)
       floors[i].get_child(0).show();
   }
   else
   {
     rootMapObjects.hide();
-    for (int i = 0 ; i < floors.size() ; ++i)
+    for (unsigned int i = 0 ; i < floors.size() ; ++i)
      floors[i].get_child(0).hide();
   }
 }
@@ -1329,13 +1396,13 @@ void           World::SetDynamicObjectsVisible(bool v)
   if (v)
   {
     rootDynamicObjects.show();
-    for (int i = 0 ; i < floors.size() ; ++i)
+    for (unsigned int i = 0 ; i < floors.size() ; ++i)
       floors[i].get_child(1).show();
   }
   else
   {
     rootDynamicObjects.hide();
-    for (int i = 0 ; i < floors.size() ; ++i)
+    for (unsigned int i = 0 ; i < floors.size() ; ++i)
       floors[i].get_child(1).hide();
   }
 }

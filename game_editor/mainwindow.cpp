@@ -6,6 +6,7 @@
 #include "scenecamera.h"
 #include "mouse.h"
 #include <QElapsedTimer>
+#include "functorthread.h"
 
 extern PandaFramework framework;
 
@@ -44,12 +45,13 @@ QString pathScriptCategories[5] = {
     "dialogs", "quests", "ai", "objects", "buffs"
 };
 
-MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), tabScript(this, ui), tabDialog(this, ui), tabL18n(this, ui), splashScreen(this), wizardObject(this), dialogObject(this)
+MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(parent), _app(*app), ui(new Ui::MainWindow), tabScript(this, ui), tabDialog(this, ui), tabL18n(this, ui), splashScreen(this), wizardObject(this), dialogObject(this)
 {
     QIcon iconScript("icons/script.png");
     QIcon iconItems("icons/item.png");
     QIcon iconDialogs("icons/dialogs.png");
     QIcon iconLevel("icons/level.png");
+    QIcon iconWorldmap("icons/worldmap.png");
     QIcon iconDelete("icons/delete.png");
     QIcon iconSave("icons/save.png");
     QIcon iconAdd("icons/add.png");
@@ -79,10 +81,11 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     ui->objectRemove->setIcon(iconDelete);
 
     ui->tabWidget->setTabIcon(0, iconLevel);
-    ui->tabWidget->setTabIcon(1, iconScript);
-    ui->tabWidget->setTabIcon(2, iconItems);
-    ui->tabWidget->setTabIcon(3, iconDialogs);
-    ui->tabWidget->setTabIcon(4, iconLanguage);
+    ui->tabWidget->setTabIcon(1, iconWorldmap);
+    ui->tabWidget->setTabIcon(2, iconScript);
+    ui->tabWidget->setTabIcon(3, iconItems);
+    ui->tabWidget->setTabIcon(4, iconDialogs);
+    ui->tabWidget->setTabIcon(5, iconLanguage);
     ui->scriptNew->setIcon(iconAdd);
     ui->dialogNew->setIcon(iconAdd);
     ui->mapNew->setIcon(iconAdd);
@@ -104,6 +107,8 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     setWindowIcon(QIcon("icons/app-icon.png"));
 
     splashScreen.open();
+
+    connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(CurrentTabChanged(int)));
 
     connect(&splashScreen, SIGNAL(rejected()), app,  SLOT(Terminate()));
     connect(&splashScreen, SIGNAL(accepted()), this, SLOT(LoadProject()));
@@ -148,10 +153,22 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(ui->languageList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)), &tabL18n, SLOT(SwapLanguage(QListWidgetItem*)));
 
     connect(ui->listMap, SIGNAL(currentIndexChanged(QString)), this, SLOT(LoadMap(QString)));
-    connect(ui->saveMap, SIGNAL(clicked()),                    this, SLOT(SaveMap()));
+    connect(ui->saveMap, SIGNAL(clicked()),                    &dialogSaveMap, SLOT(open()));
+    connect(&dialogSaveMap, SIGNAL(accepted()),                this, SLOT(SaveMap()));
     connect(ui->mapNew,  SIGNAL(clicked()),                    &dialogNewMap, SLOT(open()));
 
     connect(&dialogNewMap, SIGNAL(CreateMap()), this, SLOT(CreateMap()));
+
+    connect(this, SIGNAL(SigDisplayError(QString,QString)),     this, SLOT(DisplayError(QString,QString)),     Qt::QueuedConnection);
+    connect(this, SIGNAL(SigUpdateProgressBar(QString, float)), this, SLOT(UpdateProgressBar(QString, float)), Qt::QueuedConnection);
+    save_map_use_thread = true;
+
+    connect(&this->waypointGenerate, SIGNAL(SigUpdateProgressbar(QString, float)), this,            SIGNAL(SigUpdateProgressBar(QString,float)), Qt::QueuedConnection);
+    connect(&this->waypointGenerate, SIGNAL(StartedGeneration()),                  this,            SLOT(DisableLevelEditor()),                  Qt::QueuedConnection);
+    connect(&this->waypointGenerate, SIGNAL(StartedGeneration()),                  ui->progressBar, SLOT(show()),                                Qt::QueuedConnection);
+    connect(&this->waypointGenerate, SIGNAL(EndedGeneration()),                    this,            SLOT(EnableLevelEditor()),                   Qt::QueuedConnection);
+    connect(&this->waypointGenerate, SIGNAL(EndedGeneration()),                    ui->progressBar, SLOT(hide()),                                Qt::QueuedConnection);
+    connect(&this->waypointGenerate, SIGNAL(EndedGeneration()),                    this,            SLOT(SelectGeneratedWaypoints()),            Qt::QueuedConnection);
 
     ui->scriptList->header()->hide();
 }
@@ -161,16 +178,22 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::CurrentTabChanged(int ntab)
+{
+    _app.SetPandaEnabled(ntab == 0); // The first tab is the only one using Panda3D
+}
+
 void MainWindow::CreateMap(void)
 {
     QString name = dialogNewMap.GetMapName();
 
-    QMessageBox::warning(this, "creating map", "i'm creating yo map bitch");
     if (world)
       delete world;
     world     = new World(_window);
     levelName = name;
+    save_map_use_thread = false;
     SaveMap();
+    save_map_use_thread = true;
     ui->listMap->addItem(name);
     LoadMap(name);
 }
@@ -224,6 +247,7 @@ void MainWindow::LoadProject()
 		tabL18n.LoadAllLanguages();
         tabDialog.LoadAllDialogs();
         ui->itemEditor->LoadAllItems();
+        ui->worldmapEditor->Load();
         LoadAllMaps();
     }
     else
@@ -352,6 +376,11 @@ void MainWindow::PandaInitialized()
      connect(ui->waypointSelFloor,   SIGNAL(valueChanged(int)),    this, SLOT(WaypointSelFloor()));
      connect(ui->waypointSelDelete,  SIGNAL(clicked()),            this, SLOT(WaypointSelDelete()));
 
+
+     connect(ui->waypointSelectAll,  SIGNAL(clicked()), this, SLOT(WaypointSelectAll()));
+     connect(ui->waypointDiscardSelection, SIGNAL(clicked()), this, SLOT(WaypointDiscardSelection()));
+     connect(ui->waypointSyncTerrain, SIGNAL(clicked()), this, SLOT(WaypointSyncTerrain()));
+
      waypointGenerate.SetWorld(world);
      connect(ui->waypointGenerate,   SIGNAL(clicked()), &waypointGenerate, SLOT(open()));
 
@@ -429,6 +458,9 @@ void MainWindow::PandaInitialized()
      connect(ui->lightRotX,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
      connect(ui->lightRotY,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
      connect(ui->lightRotZ,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
+     connect(ui->lightsVisible,  SIGNAL(toggled(bool)),             this, SLOT(LightVisible()));
+     connect(ui->lightSetEnabled,  SIGNAL(toggled(bool)),           this, SLOT(LightSetEnabled()));
+     connect(ui->lightSetDisabled, SIGNAL(toggled(bool)),           this, SLOT(LightSetDisabled()));
 
      connect(my_task.mouse,      SIGNAL(WaypointHovered(NodePath)), this, SLOT(WaypointHovered(NodePath)));
      connect(my_task.mouse,      SIGNAL(ObjectHovered(NodePath)),   this, SLOT(MapObjectHovered(NodePath)));
@@ -1029,9 +1061,96 @@ void MainWindow::WaypointUpdateSelZ()
     waypointSelZ = ui->waypointSelZ->value();
 }
 
+void MainWindow::WaypointDiscardSelection(void)
+{
+    while (waypointsSelection.size())
+      WaypointSelect(waypointsSelection.front());
+}
+
+void MainWindow::WaypointSelectAll(void)
+{
+  std::list<Waypoint>::iterator it;
+
+  for (it = world->waypoints.begin() ; it != world->waypoints.end() ; ++it)
+  {
+      std::list<Waypoint*>::iterator exists = std::find(waypointsSelection.begin(), waypointsSelection.end(), &(*it));
+
+    if (exists == waypointsSelection.end())
+      WaypointSelect(&(*it));
+  }
+}
+
+void MainWindow::SelectGeneratedWaypoints(void)
+{
+  WaypointList to_select = waypointGenerate.GetToSelect();
+
+  WaypointDiscardSelection();
+  foreach(Waypoint* wp, to_select)
+  {
+    WaypointSelect(wp);
+  }
+}
+
+#include <panda3d/collisionRay.h>
+void MainWindow::WaypointSyncTerrain(void)
+{
+  ui->tabLevelDesigner->setEnabled(false);
+  ui->progressBar->show();
+
+  FunctorThread& thread = *FunctorThread::Create([this](void)
+  {
+    float                          i = 0;
+    std::list<Waypoint*>::iterator it;
+
+    for (it = waypointsSelection.begin() ; it != waypointsSelection.end() ; ++it, ++i)
+    {
+      NodePath wp = (*it)->nodePath;
+      LPoint3  min_pos;
+
+      CollisionTraverser col_traverser;
+      PT(CollisionHandlerQueue) col_queue = new CollisionHandlerQueue;
+
+      PT(CollisionNode) cnode = new CollisionNode("waypointSyncTerrainNode");
+      cnode->set_from_collide_mask(CollideMask(ColMask::Object));
+
+      PT(CollisionSegment) segment = new CollisionSegment;
+      cnode->add_solid(segment);
+
+      NodePath np = world->window->get_render().attach_new_node(cnode);
+
+      segment->set_point_a(wp.get_x(), wp.get_y(), wp.get_z());
+      segment->set_point_b(wp.get_x(), wp.get_y(), wp.get_z() - 100000.f);
+
+      col_traverser.add_collider(np, col_queue);
+      col_traverser.traverse(world->window->get_render());
+      if (col_queue->get_num_entries())
+      {
+        col_queue->sort_entries();
+        min_pos = col_queue->get_entry(0)->get_surface_point(world->window->get_render());
+        /*std::cout << "Found a collision" << std::endl;
+        std::cout << min_pos.get_x() << ", " << min_pos.get_y() << ", " << min_pos.get_z() << std::endl;*/
+
+        // ALMOST DONE !
+        LPoint3 min_point, max_point;
+        wp.calc_tight_bounds(min_point, max_point);
+        float height = max_point.get_y() - min_point.get_y();
+
+        wp.set_z(min_pos.get_z() + (height / 2));
+
+      }
+      np.show();
+      np.remove_node();
+      SigUpdateProgressBar("Waypoints Level Terrain: %p%", i / waypointsSelection.size() * 100.f);
+    }
+  });
+  connect(&thread, SIGNAL(Done()), this,            SLOT(EnableLevelEditor()), Qt::QueuedConnection);
+  connect(&thread, SIGNAL(Done()), ui->progressBar, SLOT(hide()),              Qt::QueuedConnection);
+  thread.start();
+}
 
 void MainWindow::LoadMap(const QString& path)
 {
+    waypointsSelection.clear();
     levelName = path;
 
     std::ifstream file;
@@ -1096,6 +1215,8 @@ void MainWindow::LoadMap(const QString& path)
                break ;
             }
         }
+
+        waypointGenerate.SetWorld(world);
     }
 }
 
@@ -1202,10 +1323,38 @@ void MainWindow::ExitZoneChanged(QString string)
     }
 }
 
-void MainWindow::LightCompile()
+void MainWindow::LightCompile(void)
 {
     if (lightSelected != 0)
-        world->CompileLight(lightSelected);
+      world->CompileLight(lightSelected);
+}
+
+void MainWindow::LightVisible(void)
+{
+    if (ui->lightsVisible->isChecked())
+      world->lightSymbols.show();
+    else
+      world->lightSymbols.hide();
+}
+
+void MainWindow::LightSetDisabled()
+{
+  if (ui->lightSetDisabled->isChecked())
+  {
+    ui->lightSetEnabled->setChecked(false);
+    if (lightSelected)
+      lightSelected->SetEnabled(false);
+  }
+}
+
+void MainWindow::LightSetEnabled()
+{
+  if (ui->lightSetEnabled->isChecked())
+  {
+    ui->lightSetDisabled->setChecked(false);
+    if (lightSelected)
+      lightSelected->SetEnabled(true);
+  }
 }
 
 void MainWindow::LightSelected(void)
@@ -1263,9 +1412,8 @@ void MainWindow::LightUpdatePosition(void)
 
     if (lightIgnoreChanges || lightSelected == 0) return ;
     np = lightSelected->nodePath;
-    np.set_x(ui->lightPosX->value());
-    np.set_y(ui->lightPosY->value());
-    np.set_z(ui->lightPosZ->value());
+    LPoint3 pos(ui->lightPosX->value(), ui->lightPosY->value(), ui->lightPosZ->value());
+    lightSelected->SetPosition(pos);
     np.set_hpr(ui->lightRotX->value(),
                ui->lightRotY->value(),
                ui->lightRotZ->value());
@@ -1334,28 +1482,65 @@ void MainWindow::ExitZoneDestinationDelete()
     }
 }
 
+void MainWindow::EnableLevelEditor(void)
+{
+    ui->tabLevelDesigner->setEnabled(true);
+}
+
+void MainWindow::DisableLevelEditor(void)
+{
+    ui->tabLevelDesigner->setEnabled(false);
+}
+
+void MainWindow::UpdateProgressBar(QString fmt, float percentage)
+{
+    ui->progressBar->setFormat(fmt);
+    ui->progressBar->setValue(percentage);
+}
+
+void MainWindow::DisplayError(QString title, QString message)
+{
+  QMessageBox::warning(this, title, message);
+}
+
 void MainWindow::SaveMap()
 {
   if (world)
   {
-    std::ofstream file;
-    std::string   path = (QDir::currentPath() + "/maps/" + levelName + ".blob").toStdString();
+    ui->tabLevelDesigner->setEnabled(false);
+    world->do_compile_doors     = dialogSaveMap.DoCompileDoors();
+    world->do_compile_waypoints = dialogSaveMap.DoCompileWaypoints();
 
-    file.open(path.c_str(),ios::binary);
-    if (file.is_open())
+    FunctorThread& thread = *FunctorThread::Create([this, &thread](void)
     {
-      Utils::Packet packet;
+      std::ofstream file;
+      std::string   path = (QDir::currentPath() + "/maps/" + levelName + ".blob").toStdString();
 
-      world->Serialize(packet, [this](float percentage)
+      file.open(path.c_str(),ios::binary);
+      if (world)
       {
-        ui->progressBar->setValue(percentage);
-      });
-      packet.PrintContent();
-      file.write(packet.raw(), packet.size());
-      file.close();
-    }
+        Utils::Packet packet;
+
+        world->Serialize(packet, [this, &thread](const std::string& label, float percentage)
+        {
+          QString format = QString::fromStdString(label) + "%p%";
+
+          SigUpdateProgressBar(format, percentage);
+        });
+        packet.PrintContent();
+        file.write(packet.raw(), packet.size());
+        file.close();
+      }
+      else
+        SigDisplayError("Fatal Error", "Cannot save map");
+    });
+    ui->progressBar->show();
+    connect(&thread, SIGNAL(Done()), ui->progressBar, SLOT(hide()), Qt::QueuedConnection);
+    connect(&thread, SIGNAL(Done()), this, SLOT(EnableLevelEditor()), Qt::QueuedConnection);
+    if (save_map_use_thread)
+      thread.start();
     else
-      QMessageBox::warning(this, "Fatal Error", "Cannot save map");
+      thread.start_sync();
   }
 }
 

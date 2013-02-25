@@ -9,8 +9,6 @@
 void Level::Load(Utils::Packet& packet)
 {
   char tmpState;
-  int  countObject;
-  int  countCharacters;
 
   packet >> tmpState;
   _state = (State)tmpState;
@@ -30,6 +28,8 @@ void Level::Load(Utils::Packet& packet)
   for_each(_characters.begin(), _characters.end(), [&packet](ObjectCharacter* character)    { character->Load(packet); });
 
   GameTask::CurrentGameTask->LoadLevelBuffs(packet);
+
+  _task_metabolism->Unserialize(packet);  
 }
 
 void Level::SaveUpdateWorld(void)
@@ -75,6 +75,8 @@ void Level::Save(Utils::Packet& packet)
 
   if (GameTask::CurrentGameTask)
     GameTask::CurrentGameTask->SaveLevelBuffs(packet);
+
+  _task_metabolism->Serialize(packet);
 }
 
 /*
@@ -111,7 +113,7 @@ void InstanceDynamicObject::Save(Utils::Packet& packet)
 void ObjectCharacter::Load(Utils::Packet& packet)
 {
   unsigned int       pathSize, buffs_size;
-  asIScriptFunction* loadFunc = (_scriptContext && _scriptModule ? _scriptModule->GetFunctionByDecl("void Load(Serializer@)") : 0);
+  asIScriptFunction* loadFunc = (_script_context && _script_module ? _script_module->GetFunctionByDecl("void Load(Serializer@)") : 0);
 
   InstanceDynamicObject::Load(packet);
   packet >> _actionPoints >> _hitPoints >> _armorClass >> _tmpArmorClass;
@@ -139,9 +141,9 @@ void ObjectCharacter::Load(Utils::Packet& packet)
   {
     if (!loadFunc)
     {
-      _scriptContext->Prepare(loadFunc);
-      _scriptContext->SetArgAddress(0, &packet);
-      _scriptContext->Execute();
+      _script_context->Prepare(loadFunc);
+      _script_context->SetArgAddress(0, &packet);
+      _script_context->Execute();
     }
     else
       std::cerr << "/!\\ FATAL ERROR: " << this->GetName() << "'s Script Load function couldn't be loaded, and the whole loading will probably screw up starting now.";
@@ -153,8 +155,7 @@ void ObjectCharacter::Load(Utils::Packet& packet)
 
 void ObjectCharacter::Save(Utils::Packet& packet)
 {
-  int                tmpPathSize = _path.size();
-  asIScriptFunction* saveFunc    = (_scriptContext && _scriptModule ? _scriptModule->GetFunctionByDecl("void Save(Serializer@)") : 0);
+  asIScriptFunction* saveFunc    = (_script_context && _script_module ? _script_module->GetFunctionByDecl("void Save(Serializer@)") : 0);
 
   InstanceDynamicObject::Save(packet);
   packet << _actionPoints << _hitPoints << _armorClass << _tmpArmorClass;
@@ -166,9 +167,9 @@ void ObjectCharacter::Save(Utils::Packet& packet)
   if (saveFunc)
   {
     packet << '1'; // Haz script save
-    _scriptContext->Prepare(saveFunc);
-    _scriptContext->SetArgAddress(0, &packet);
-    _scriptContext->Execute();
+    _script_context->Prepare(saveFunc);
+    _script_context->SetArgAddress(0, &packet);
+    _script_context->Execute();
   }
   else
     packet << '0'; // Haz not script save

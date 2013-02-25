@@ -35,7 +35,7 @@ struct ISample
   virtual ~ISample() {}
   virtual ISampleInstance* NewInstance(void) = 0;
   virtual bool             LoadFromFile(const std::string& filename)
-  { this->filename = filename; }
+  { this->filename = filename; return (true); }
   const std::string&       GetFilename(void) const { return (filename); }
 
 protected:

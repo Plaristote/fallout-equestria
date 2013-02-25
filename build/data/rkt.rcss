@@ -12,11 +12,6 @@ p
 	display: block;
 }
 
-h1
-{
-	display: block;
-}
-
 em
 {
 	font-style: italic;

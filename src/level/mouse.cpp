@@ -17,7 +17,7 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
   _mouseWatcher = dynamic_cast<MouseWatcher*>(window->get_mouse().node());
   _pickerNode   = new CollisionNode("mouseRay");
   _pickerPath   = _camera.attach_new_node(_pickerNode);
-  _pickerNode->set_from_collide_mask(CollideMask(ColMask::Waypoint | ColMask::DynObject));
+  _pickerNode->set_from_collide_mask(CollideMask(/*ColMask::Waypoint | */ColMask::DynObject));
   _pickerNode->set_into_collide_mask(0);
   _pickerRay    = new CollisionRay();
   _pickerNode->add_solid(_pickerRay);
@@ -71,6 +71,8 @@ void Mouse::SetMouseState(char i)
 
 void Mouse::ClosestWaypoint(World* world, short currentFloor)
 {
+  PStatCollector collector("Level:Mouse:FindWaypoint"); collector.start();
+  NodePath                  collision_context;
   PT(CollisionPlane)        pickerPlane;
   PT(CollisionRay)          pickerRay;
   PT(CollisionNode)         planeNode;
@@ -79,25 +81,23 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
   NodePath                  pickerPath;
   CollisionTraverser        collisionTraverser;
   PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
-  
-  pickerNode   = new CollisionNode("mouseRay2");
-  pickerPath   = _camera.attach_new_node(_pickerNode);
-  //pickerNode->set_from_collide_mask(CollideMask(ColMask::WpPlane));
-  //pickerNode->set_into_collide_mask(CollideMask(ColMask::WpPlane));
-  pickerRay    = new CollisionRay();
+  LPlane                    plane                 = world->GetWaypointPlane(currentFloor);
+
+  collision_context = _window->get_render().attach_new_node("MouseCollisionContext");
+
+  pickerNode        = new CollisionNode("mouseRay2");
+  pickerPath        = _camera.attach_new_node(_pickerNode);
+  pickerRay         = new CollisionRay();
   pickerNode->add_solid(pickerRay);
 
-  LPlane plane = world->GetWaypointPlane(currentFloor);
-
-  pickerPlane = new CollisionPlane(plane);
-  planeNode = new CollisionNode("pickerPlane");
-  // TODO? It would be cool to have a collide mask (ColMask::WpPlane), but they don't work with planeNode...
+  planeNode         = new CollisionNode("pickerPlane");
+  planePath         = collision_context.attach_new_node(planeNode);
+  pickerPlane       = new CollisionPlane(plane);
   planeNode->add_solid(pickerPlane);
-  planePath = _window->get_render().attach_new_node(planeNode);
-  
+
   collisionTraverser.add_collider(pickerPath, collisionHandlerQueue);
-  collisionTraverser.traverse(_window->get_render());
-  
+  collisionTraverser.traverse(collision_context);
+
   collisionHandlerQueue->sort_entries();
 
   _hovering.hasWaypoint = false;
@@ -121,37 +121,43 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
   //pickerPath.detach_node(); // TODO find out why hasDynObject stops working after this...
 			      //      this leak has to go away
   planePath.detach_node();
+  collision_context.detach_node();
+  collector.stop();
 }
 
 void Mouse::Run(void)
 {
+  PStatCollector collector("Level:Mouse:Run");
+
+  collector.start();
   if (_mouseWatcher->has_mouse())
   {
     LPoint2f cursorPos   = _mouseWatcher->get_mouse();
 
-    if (cursorPos == _lastMousePos)
-      return ;
-
-    _lastMousePos = cursorPos;
-    _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
-    _collisionTraverser.traverse(_window->get_render());
-    _collisionHandlerQueue->sort_entries();
-    _hovering.Reset();
-    for (int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; ++i)
+    if (cursorPos != _lastMousePos)
     {
-      CollisionEntry* entry = _collisionHandlerQueue->get_entry(i);
-
-      NodePath into          = entry->get_into_node_path();
-
-      switch (into.get_collide_mask().get_word())
+      _lastMousePos = cursorPos;
+      _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
+      _collisionTraverser.traverse(_window->get_render());
+      _collisionHandlerQueue->sort_entries();
+      _hovering.Reset();
+      for (int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; ++i)
       {
-	case ColMask::DynObject:
-	  if (!(_hovering.hasDynObject))
-	  {
-	    _hovering.SetDynObject(into);
-	  }
-	  break ;
+        CollisionEntry* entry = _collisionHandlerQueue->get_entry(i);
+
+        NodePath into          = entry->get_into_node_path();
+
+        switch (into.get_collide_mask().get_word())
+        {
+          case ColMask::DynObject:
+            if (!(_hovering.hasDynObject))
+            {
+              _hovering.SetDynObject(into);
+            }
+            break ;
+        }
       }
     }
   }
+  collector.stop();
 }

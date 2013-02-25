@@ -1,116 +1,28 @@
+/*##############################################################
+                     Generic id decorators
+##############################################################*/
 body
 {
-	font-family: Delicious;
-	font-weight: normal;
-	font-style: normal;
-	font-size: 15;
+  font-family: Delicious;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 15;
 }
-
-body.window
-{
-	//padding-top: 43px;
-	padding-bottom: 20px;
-	
-	//min-width: 250px;
-	//max-width: 800px;
-	
-	//min-height: 135px;
-	//max-height: 700px;
-}
-
-
-
-div#title_bar
-{
-	z-index: 1;
-
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	
-	text-align: left;
-}
-
-div#title_bar div#icon
-{
-	position: absolute;
-	left: 20px;
-	top: 2px;
-	
-	width: 51px;
-	height: 39px;
-	
-	icon-decorator: image;
-	icon-image-src: invader.tga;
-}
-
-div#title_bar span
-{
-	padding-left: 85px;
-	padding-right: 25px;
-	padding-top: 17px;
-	padding-bottom: 48px;
-
-	font-size: 22;
-	font-weight: bold;
-
-	outline-font-effect: outline;
-	outline-width: 1px;
-	outline-color: black;
-
-	background-decorator: tiled-horizontal;
-	background-left-image: invader.tga 147px 0px 229px 85px;
-	background-center-image: invader.tga stretch 229px 0px 230px 85px;
-	background-right-image: invader.tga 231px 0px 246px 85px;
-}
-
-
 
 div#window
 {
-        width: 100%;
-        height: 100%;
-	width: auto;
-	padding: 10px 15px;
-
-        background-decorator: tiled-box;
-        background-top-left-image:     invader.tga           0px   0px  30px  30px;
-        background-top-right-image:    invader.tga         202px   0px 231px  30px;
-        background-top-image:          invader.tga stretch  30px   0px 201px  30px;
-        background-bottom-left-image:  invader.tga           0px  91px  30px 119px;
-        background-bottom-right-image: invader.tga         202px  91px 231px 119px;
-        background-bottom-image:       invader.tga stretch  30px  91px 201px 119px;
-        background-left-image:         invader.tga stretch   0px  30px  30px  90px;
-        background-right-image:        invader.tga stretch 202px  30px 231px  90px;
-        background-center-image:       invader.tga repeat-truncate  30px  30px 201px  90px;
-}
-
-.window-background
-{
-        background-decorator: tiled-box;
-        background-top-left-image:     invader.tga           0px   0px  30px  30px;
-        background-top-right-image:    invader.tga         202px   0px 231px  30px;
-        background-top-image:          invader.tga stretch  30px   0px 201px  30px;
-        background-bottom-left-image:  invader.tga           0px  91px  30px 119px;
-        background-bottom-right-image: invader.tga         202px  91px 231px 119px;
-        background-bottom-image:       invader.tga stretch  30px  91px 201px 119px;
-        background-left-image:         invader.tga stretch   0px  30px  30px  90px;
-        background-right-image:        invader.tga stretch 202px  30px 231px  90px;
-        background-center-image:       invader.tga repeat-truncate  30px  30px 201px  90px;
-}
-
-.window-inventory
-{
-	background-decorator: tiled-box;
-	background-top-left-image:     invader.tga         0px   275px 10px  350px;
-	background-top-right-image:    invader.tga         130px 275px 140px 350px;
-	background-top-image:          invader.tga         10px  275px 130px 350px;
-	background-bottom-left-image:  invader.tga         0px   352px 10px  420px;
-	background-bottom-right-image: invader.tga         130px 352px 140px 420px;
-	background-bottom-image:       invader.tga         10px  352px 130px 420px;
-	background-left-image:         invader.tga         0px   350px 10px  351px;
-	background-right-image:        invader.tga         130px 350px 140px 351px;
-	background-center-image:       invader.tga stretch 10px  350px 130px 351px;
+  height: 100%;
+  padding: 10px 15px;
+  background-decorator: tiled-box;
+  background-top-left-image:     invader.tga           0px   0px  30px  30px;
+  background-top-right-image:    invader.tga         202px   0px 231px  30px;
+  background-top-image:          invader.tga repeat-truncate  30px   0px 201px  30px;
+  background-bottom-left-image:  invader.tga           0px  91px  30px 119px;
+  background-bottom-right-image: invader.tga         202px  91px 231px 119px;
+  background-bottom-image:       invader.tga repeat-truncate  30px  91px 201px 119px;
+  background-left-image:         invader.tga repeat-truncate   0px  30px  30px  90px;
+  background-right-image:        invader.tga repeat-truncate 202px  30px 231px  90px;
+  background-center-image:       invader.tga repeat-truncate  30px  30px 201px  90px;
 }
 
 .inventory-item-quantity
@@ -123,80 +35,50 @@ div#window
 
 div#content
 {
-	z-index: 2;
-
-	width: auto;
-	height: 100%;
-
-	overflow: hidden auto;
-
-	text-align: center;
-}
-
-
-
-p
-{
-	text-align: left;
-	margin-bottom: 1em;
-}
-
-h1
-{
-	margin-left: 0.4em;
-	margin-bottom: 0.4em;
-
-	text-align: left;
-	font-size: 16;
-	font-weight: bold;
-
-	shadow-font-effect: shadow;
-	shadow-offset: 1px 1px;
-	shadow-color: black;
+  z-index: 2;
+  overflow: hidden auto;
+  text-align: center;
 }
 
 select,
 dataselect
 {
-	margin-left: 20px;
+  margin-left: 20px;
 }
 
-input.submit
-{
-	margin-left: 0px;
-}
 
+/*################################################
+         BUTTONS
+################################################*/
+/*####### SIMPLE ######*/
 button.simple-button
 {
   display: inline-block;
-  width:   40px;
-  height:  22px;
+  width: 79;
+  height: 35;
   background-decorator: image;
   background-image: button.png;
-}
+}francis
 
 button.simple-button:active
 {
   background-decorator: image;
   background-image: button-pressed.png;
 }
-
-button.francis
+/*####### FRANCIS ######*/
+.francis
 {
   display: inline-block;
-  width:   60px;
-  height:  20px;
-
-  padding-top: 15px;
-  font-size: 10;
+  font-size: 10px;
   text-align: center;
   tab-index: auto;
-
+  width: 60px;
+  height: 20px;
   background-decorator: image;
   background-image: hud.png 0px 0px 125px 39px;
 }
 
-button.francis:focus
+.francis:focus
 {
   font-weight: bold;
   shadow-font-effect: shadow;
@@ -204,7 +86,7 @@ button.francis:focus
   shadow-color: black;
 }
 
-button.francis:hover
+.francis:hover
 {
   background-image: hud.png 0px 40px 125px 79px;
 }
@@ -213,22 +95,16 @@ button.francis:active
 {
   background-image: hud.png 0px 80px 125px 119px;
 }
-
-button
+/*####### UNIVERSAL ######*/
+.universal_button
 {
   display: inline-block;
-
+  height: 47px;
+  width: 247px;
   text-align: center;
   tab-index:  auto;
-
-  height: 47px;
-  width:  247px;
-
   font-family:  Fallout;
   font-size:    20px;
-  padding-top:  12px;
-  padding-left: 30px;
-
   background-decorator: image;
   //background-image:     hud.png 204px 32px 373px 58px;
   background-image: revelation-mod/menu_button.png 0px  0px 247px 47px;
@@ -239,78 +115,247 @@ button
   background-image:     hud.png 204px 59px 373px 87px;
 }*/
 
-button:active
+.universal_button:active
 {
   //background-image:     hud.png 204px 88px 373px 115px;
   background-image: revelation-mod/menu_button.png 0xp 49px 247px 96px;
 }
 
+/*####### BUTTON_MENU ######*/
 button.button_menu
 {
   display: inline-block;
-
-  width: 185px;
-  height: 28px;
-
-  vertical-align: -18px;
-
-  padding-left: 60px;
-
-  margin: 5px 5px 5px 5px;
-
-  font-size: 18;
+  font-size: 18px;
   text-align: center;
   tab-index: auto;
-
   background-decorator: image;
   background-image: hud.png 0px 121px 185px 148px;
 }
 
 button.button_menu:focus,
 {
-    font-weight: bold;
-    
-    shadow-font-effect: shadow;
-    shadow-offset: 1px 1px;
-    shadow-color: black;
+  font-weight: bold;
+  shadow-font-effect: shadow;
+  shadow-offset: 1px 1px;
+  shadow-color: black;
 }
 
 button.button_menu:hover,
 {
-	background-image: hud.png 0px 149px 185px 175px;
+  background-image: hud.png 0px 149px 185px 175px;
 }
 
 button.button_menu:active,
 {
-	background-image: hud.png 0px 176px 185px 203px;
+  background-image: hud.png 0px 176px 185px 203px;
 }
+
+/*####### SMALL_BUTTON ######*/
+.small_button
+{
+  display: inline-block;
+  text-align: right;
+  font-family:  Fallout;
+  font-size:    18px;
+  icon-decorator: image;
+  icon-image: hud.png 0px 205px 65px 224px;
+}
+
+.small_button:active
+{	
+  icon-image-t: 225px 242px;
+}
+
+/*####### TAB BUTTON ######*/
+.tab-tab{
+  icon-decorator:          image;
+  icon-image:     hud.png 67px 204px  126px 244px; 
+}
+
+/*####### LONG_BUTTON ######*/
+.long_button
+{
+  background-decorator:          tiled-box;
+  background-top-left-image:     hud.png 204px 32px  209px 37px;
+  background-top-right-image:    hud.png 368px 32px  373px 37px;
+  background-top-image:          hud.png 210px 32px  368px 37px;
+  background-bottom-left-image:  hud.png 204px 54px  209px 59px;
+  background-bottom-right-image: hud.png 368px 54px  373px 59px;
+  background-bottom-image:       hud.png 210px 54px  368px 59px;
+  background-left-image:         hud.png 204px 38px  209px 54px;
+  background-right-image:        hud.png 368px 38px  373px 54px;
+  background-center-image:       hud.png 209px 37px  368px 54px;
+}
+
+
+/*####### SOMETHING_BUTTON (a placeholder button) ######*/
+
+.something_button
+{
+  background-decorator:          tiled-box;
+  background-top-left-image:     hud.png 126px 60px  136px 70px;
+  background-top-right-image:    hud.png 193px 60px  203px 70px;
+  background-top-image:          hud.png 136px 60px  143px 70px;
+  background-bottom-left-image:  hud.png 126px 110px 136px 120px;
+  background-bottom-right-image: hud.png 192px 110px 202px 120px;
+  background-bottom-image:       hud.png 137px 110px 191px 120px;
+  background-left-image:         hud.png 127px  71px 137px 111px;
+  background-right-image:        hud.png 193px 71px 203px 111px;
+  background-center-image:       hud.png 137px 71px 191px 111px;
+}
+
+/*############################################################
+             INPUT
+############################################################*/
+input.radio,
+input.checkbox
+{
+  width: 30px;
+  height: 30px;
+}
+
+input.radio
+{
+  icon-decorator: image;
+  icon-image: hud.png 374px 92px 404px 122px;
+}
+
+input.radio:active
+{
+  icon-image-s: 405px 434px;
+}
+
+input.radio:checked
+{
+  icon-image-s: 405px 434px;
+}
+
+input.checkbox
+{
+  icon-decorator: image;
+  icon-image: hud.png 374px 62px 404px 92px;
+}
+
+input.checkbox:active
+{
+  icon-image-s: 405px 434px;
+}
+
+input.checkbox:checked
+{
+  icon-image-s: 405px 434px;
+}
+
+/*###########################################################
+            SELECT
+###########################################################*/
+
+select
+{
+  width: 175px;
+  height: 37px;
+}
+
+select selectvalue
+{
+  width: auto;
+  margin-right: 30px;
+  height: 28px;
+  padding: 9px 10px 0px 10px;
+  background-decorator: image;
+  background-image: hud.png 250px 119px 342px 150px;
+}
+
+select selectvalue:hover
+{
+}
+
+select selectarrow
+{
+  width: 30px;
+  height: 37px;
+  icon-decorator: image;
+  icon-image: hud.png 342px 119px 373px 150px;
+}
+
+select selectarrow:hover
+{
+}
+
+select selectarrow:active,
+select selectarrow:checked
+{
+  icon-image-t: 152px 182px;
+}
+
+select selectbox
+{
+  margin-left: 1px;
+  margin-top: -7px;
+  width: 162px;
+  padding: 1px 4px 4px 4px;
+}
+
+/*select selectbox
+
+{
+  background-decorator: tiled-box;
+  background-top-left-image: invader.tga 281px 275px 292px 284px;
+  background-top-right-image: invader.tga 294px 275px 305px 284px;
+  background-top-image: invader.tga stretch 292px 275px 293px 284px;
+  background-bottom-left-image: invader.tga 281px 285px 292px 296px;
+  background-bottom-right-image: invader.tga 294px 285px 305px 296px;
+  background-bottom-image: invader.tga stretch 292px 285px 293px 296px;
+  background-left-image: invader.tga stretch 281px 283px 292px 284px;
+  background-center-image: invader.tga stretch 292px 283px 293px 284px;
+}*/
+
+select selectbox option
+{
+  width: auto;
+  padding-left: 3px;
+}
+
+select selectbox option:nth-child(even)
+{
+  background: #FFFFFFA0;
+}
+
+select selectbox option:hover
+{
+  background: #FF5D5D;
+}
+
+/*######################################################
+          DATAGRID (CURRENTLY UNUSED)
+######################################################*/
 
 /*datagrid input.text
 {
 	width: 100%;
 	height: auto;
 	margin: 0px;
+
 	padding: 0px 2px 0px;
+
 
 	border-width: 1px;
 	border-color: black;
+
 	background-color: white;
 
 	font-size: 15;
 	
 	background-decorator: none;
-}*/
 
+}
 
-
-select,
 dataselect
 {
 	width: 175px;
 	height: 37px;
 }
 
-select selectvalue,
 dataselect selectvalue
 {
 	width: auto;
@@ -320,40 +365,34 @@ dataselect selectvalue
 	padding: 9px 10px 0px 10px;
 
 	background-decorator: image;
-	background-image: invader.tga 162px 192px 307px 229px;
+	background-image: hud.png 250px 119px 342px 150px;
 }
 
-select selectvalue:hover,
 dataselect selectvalue:hover
 {
-	background-image-t: 230px 267px;
+	
 }
 
-select selectarrow,
 dataselect selectarrow
 {
 	width: 30px;
 	height: 37px;
 	
 	icon-decorator: image;
-	icon-image: invader.tga 307px 192px 337px 229px;
+	icon-image: hud.png 342px 119px 373px 150px;
 }
 
-select selectarrow:hover,
 dataselect selectarrow:hover
 {
-	icon-image-t: 230px 267px;
+
 }
 
-select selectarrow:active,
-select selectarrow:checked,
 dataselect selectarrow:active,
 dataselect selectarrow:checked
 {
-	icon-image-t: 268px 305px;
+	icon-image-t: 152px 182px;
 }
 
-select selectbox,
 dataselect selectbox
 {
 	margin-left: 1px;
@@ -361,136 +400,56 @@ dataselect selectbox
 	width: 162px;
 	padding: 1px 4px 4px 4px;
 }
-
-select selectbox,
-dataselect selectbox,
-/*datagrid datagridbody
+datagrid datagridbody
 {
 	background-decorator: tiled-box;
 	background-top-left-image: invader.tga 281px 275px 292px 284px;
 	background-top-right-image: invader.tga 294px 275px 305px 284px;
 	background-top-image: invader.tga stretch 292px 275px 293px 284px;
+
 	background-bottom-left-image: invader.tga 281px 285px 292px 296px;
 	background-bottom-right-image: invader.tga 294px 285px 305px 296px;
 	background-bottom-image: invader.tga stretch 292px 285px 293px 296px;
 	background-left-image: invader.tga stretch 281px 283px 292px 284px;
 	background-center-image: invader.tga stretch 292px 283px 293px 284px;
-}*/
 
-select selectbox option,
+}
+
 dataselect selectbox option
 {
 	width: auto;
 	padding-left: 3px;
 }
 
-select selectbox option:nth-child(even),
 dataselect selectbox option:nth-child(even),
-/*datagrid datagridrow:nth-child(even)
+datagrid datagridrow:nth-child(even)
 {
 	background: #FFFFFFA0;
-}*/
+}
 
-select selectbox option:hover,
 dataselect selectbox option:hover
 {
 	background: #FF5D5D;
 }
 
-
-
-input.radio,
-input.checkbox
-{
-	width: 30px;
-	height: 30px;
-
-	vertical-align: -11px;
-}
-
-input.radio
-{
-	icon-decorator: image;
-	icon-image: invader.tga 407px 0px 437px 30px;
-}
-
-input.radio:hover
-{
-	icon-image-s: 437px 467px;
-}
-
-input.radio:active
-{
-	icon-image-s: 467px 497px;
-}
-
-input.radio:checked
-{
-	icon-image-t: 30px 60px;
-}
-
-input.radio:checked:hover
-{
-	icon-image-s: 437px 467px;
-	icon-image-t: 30px 60px;
-}
-
-input.radio:checked:active
-{
-	icon-image-s: 467px 497px;
-	icon-image-t: 30px 60px;
-}
-
-input.checkbox
-{
-	icon-decorator: image;
-	icon-image: invader.tga 407px 60px 437px 90px;
-}
-
-input.checkbox:hover
-{
-	icon-image-s: 437px 467px;
-}
-
-input.checkbox:active
-{
-	icon-image-s: 467px 497px;
-}
-
-input.checkbox:checked
-{
-	icon-image-t: 90px 120px;
-}
-
-input.checkbox:checked:hover
-{
-	icon-image-s: 437px 467px;
-	icon-image-t: 90px 120px;
-}
-
-input.checkbox:checked:active
-{
-	icon-image-s: 467px 497px;
-	icon-image-t: 90px 120px;
-}
-
-
-
-/*datagrid datagridheader
+datagrid datagridheader
 {
 	width: auto;
 	height: 25px;
 	padding: 5px 10px 0px 10px;
 
+
 	background-decorator: tiled-horizontal;
 	background-left-image: invader.tga 127px 192px 143px 223px;
 	background-center-image: invader.tga stretch 143px 192px 145px 223px;
 	background-right-image: invader.tga 145px 192px 160px 223px;
+
 }
 
 datagrid datagridbody
 {
 	color: black;
+
 
 	margin-left: 4px;
 	margin-right: 3px;
@@ -499,113 +458,162 @@ datagrid datagridbody
 
 
 
+
 datagridexpand
 {
 	display: block;
 	
+
 	margin: 1px 0px 1px 5px;
 	height: 17px;
 	width: 17px;
 	
 	icon-decorator: image;
+
 	icon-image: invader.tga 3px 232px 20px 249px;
 }
 
 datagridexpand:hover
 {
+
 	icon-image-s: 21px 38px;
 }
 
 datagridexpand:active
 {
 	icon-image-s: 39px 56px;
+
 }
 
 datagridexpand.collapsed
 {
 	icon-image-t: 250px 267px;
+
 }*/
 
-
-
+/*######################################################
+          SCROLLBAR
+######################################################*/
 scrollbarvertical
 {
-	margin-top: -6px;
-	margin-bottom: -6px;
-	margin-right: -11px;
-	width: 27px;
+  width: 28px;
 }
 
 scrollbarvertical slidertrack
 {
-	background-decorator: tiled-vertical;
-	background-top-image: invader.tga 70px 199px 97px 201px;
-	background-center-image: invader.tga stretch 70px 201px 97px 202px;
-	background-bottom-image: invader.tga 70px 203px 97px 204px;
+  background-decorator: tiled-vertical;
+  background-top-image: hud.png 469px 119px 497px 148px;
+  background-center-image: hud.png 469px 149px 497px 225px;
+  background-bottom-image: hud.png 469px 226px 497px 255px;
 }
 
 scrollbarvertical sliderbar
 {
-	margin-left: 4px;
-	width: 23px;
-	min-height: 46px;
-
-	background-decorator: tiled-vertical;
-	background-top-image: invader.tga 56px 152px 79px 175px;
-	background-center-image: invader.tga stretch 56px 175px 79px 175px;
-	background-bottom-image: invader.tga 56px 176px 79px 198px;
-}
-
-scrollbarvertical sliderbar:hover
-{
-	background-top-image-s: 80px 103px;
-	background-center-image-s: 80px 103px;
-	background-bottom-image-s: 80px 103px;
+  margin: auto;
+  background-decorator: tiled-vertical;
+  background-top-image: hud.png 440px 0px 469px 30px;
+  background-center-image: hud.png 440px 31px 469px 86px;
+  background-bottom-image: hud.png 440px 87px 469px 117px;
 }
 
 scrollbarvertical sliderbar:active
 {
-	background-top-image-s: 104px 127px;
-	background-center-image-s: 104px 127px;
-	background-bottom-image-s: 104px 127px;
+  background-top-image-s: 470px 498px;
+  background-center-image-s: 470px 498px;
+  background-bottom-image-s: 470px 498px;
 }
 
 scrollbarvertical sliderarrowdec
 {
-	width: 27px;
-	height: 24px;
-	
-	icon-decorator: image;
-	icon-image: invader.tga 0px 152px 27px 176px;
-}
-
-scrollbarvertical sliderarrowdec:hover,
-scrollbarvertical sliderarrowinc:hover
-{
-	icon-image-t: 177px 201px;
+  width: 27px;
+  height: 24px;
+  icon-decorator: image;
+  icon-image: hud.png 404px 122px 434px 152px;
 }
 
 scrollbarvertical sliderarrowdec:active,
 scrollbarvertical sliderarrowinc:active
 {
-	icon-image-t: 202px 226px;
+ icon-image-t: 152px 182px;
 }
 
 scrollbarvertical sliderarrowinc
 {
-	width: 27px;
-	height: 24px;
-	
-	icon-decorator: image;
-	icon-image: invader.tga 28px 152px 55px 176px;
+  width: 27px;
+  height: 24px;
+  icon-decorator: image;
+  icon-image: hud.png 374px 122px 404px 152px;
 }
 
 
-
+/*############### HORIZONTAL ##############*/
 scrollbarhorizontal
 {
-	width: 0px;
-	height: 0px;
+  width: 28px;
+  height: 28px;
+}
+
+scrollbarhorizontal slidertrack
+{
+  background-decorator: tiled-horizontal;
+  background-left-image: hud.png 251px 251px 278px 278px;
+  background-center-image: hud.png 279px 251px 361px 278px;
+  background-right-image: hud.png 362px 251px 389px 278px;
+}
+
+scrollbarhorizontal sliderbar
+{
+  margin: auto;
+  background-decorator: tiled-horizontal;
+  background-left-image: hud.png 251px 192px 280px 221px;
+  background-center-image: hud.png 281px 192px 337px 221px;
+  background-right-image: hud.png 338px 192px 367px 221px;
+} 
+
+scrollbarhorizontal sliderbar:active
+{
+  background-left-image-t: 222px 250px;
+  background-center-image-t: 222px 250px;
+  background-right-image-t: 222px 250px;
+}
+
+scrollbarhorizontal sliderarrowdec
+{
+  width: 27px;
+  height: 24px;
+  icon-decorator: image;
+  icon-image: hud.png 374px 181px 403px 211px;
+}
+
+scrollbarhorizontal sliderarrowdec:active,
+scrollbarhorizontal sliderarrowinc:active
+{
+  icon-image-t: 211px 241px;
+}
+
+scrollbarhorizontal sliderarrowinc
+{
+  width: 27px;
+  height: 24px;
+  icon-decorator: image;
+  icon-image: hud.png 404px 181px 434px 211px;
+}
+
+/*#################################################################
+                BACKGROUNDS
+#################################################################*/
+.window-background
+{
+  background-decorator: tiled-box;
+  background-top-left-image:     invader.tga           0px   0px  30px  30px;
+  background-top-right-image:    invader.tga         202px   0px 231px  30px;
+  background-top-image:          invader.tga repeat-truncate  30px   0px 201px  30px;
+  background-bottom-left-image:  invader.tga           0px  91px  30px 119px;
+  background-bottom-right-image: invader.tga         202px  91px 231px 119px;
+  background-bottom-image:       invader.tga repeat-truncate  30px  91px 201px 119px;
+  background-left-image:         invader.tga repeat-truncate   0px  30px  30px  90px;
+  background-right-image:        invader.tga repeat-truncate 202px  30px 231px  90px;
+  background-center-image:       invader.tga repeat-truncate  30px  30px 201px  90px;
 }
 
 .dialog-bg
@@ -637,6 +645,7 @@ scrollbarhorizontal
   padding: 0px 5px 5px 5px;
 }
 
+/*####### CONSOLE BACKGROUND ######*/
 .console-bg
 {
   background-decorator:          tiled-box;
@@ -655,74 +664,124 @@ scrollbarhorizontal
 .console-bg scrollbarvertical,
 .console-bg scrollbarvertical:hover
 {
-	margin-top:    10px;
-	margin-bottom: 10px;
-	margin-right:  10px;
-	width:         10px;
+  margin-top:    10px;
+  margin-bottom: 10px;
+  margin-right:  10px;
+  width:         10px;
 }
 
 .console-bg scrollbarvertical slidertrack,
 {
-	background-decorator:    tiled-vertical;
-	background-top-image:    invader.tga         70px 320px 97px 322px;
-	background-center-image: invader.tga stretch 70px 322px 97px 323px;
-	background-bottom-image: invader.tga         70px 324px 97px 325px;
+  background-decorator:    tiled-vertical;
+  background-top-image:    invader.tga         70px 320px 97px 322px;
+  background-center-image: invader.tga stretch 70px 322px 97px 323px;
+  background-bottom-image: invader.tga         70px 324px 97px 325px;
 }
 
 .console-bg scrollbarvertical sliderbar,
 {
-	margin-left: 0px;
-	width:       10px;
-	min-height:  46px;
-
-	background-decorator:    tiled-vertical;
-	background-top-image:    invader.tga         56px 273px 79px 296px;
-	background-center-image: invader.tga stretch 56px 296px 79px 296px;
-	background-bottom-image: invader.tga         56px 296px 79px 319px;
+  margin-left: 0px;
+  width:       10px;
+  min-height:  46px;
+  background-decorator:    tiled-vertical;
+  background-top-image:    invader.tga         56px 273px 79px 296px;
+  background-center-image: invader.tga stretch 56px 296px 79px 296px;
+  background-bottom-image: invader.tga         56px 296px 79px 319px;
 }
 
 .console-bg scrollbarvertical sliderbar:hover
 {
-	background-top-image-s: 80px 103px;
-	background-center-image-s: 80px 103px;
-	background-bottom-image-s: 80px 103px;
+  background-top-image-s: 80px 103px;
+  background-center-image-s: 80px 103px;
+  background-bottom-image-s: 80px 103px;
 }
 
 .console-bg scrollbarvertical sliderbar:active
 {
-	background-top-image-s: 104px 127px;
-	background-center-image-s: 104px 127px;
-	background-bottom-image-s: 104px 127px;
+  background-top-image-s: 104px 127px;
+  background-center-image-s: 104px 127px;
+  background-bottom-image-s: 104px 127px;
 }
 
 .console-bg scrollbarvertical sliderarrowdec,
 {
-	width: 10px;
-	height: 10px;
-	
-	icon-decorator: image;
-	icon-image: invader.tga 0px 273px 27px 297px;
+  width: 10px;
+  height: 10px;
+  icon-decorator: image;
+  icon-image: invader.tga 0px 273px 27px 297px;
 }
 
 .console-bg scrollbarvertical sliderarrowinc,
 {
-	width: 10px;
-	height: 10px;
-	
-	icon-decorator: image;
-	icon-image: invader.tga 28px 273px 55px 297px;
+  width: 10px;
+  height: 10px;
+  icon-decorator: image;
+  icon-image: invader.tga 28px 273px 55px 297px;
 }
 
 .console-bg scrollbarvertical sliderarrowdec:hover,
 .console-bg scrollbarvertical sliderarrowinc:hover
 {
-	icon-image-t: 177px 201px;
+  icon-image-t: 177px 201px;
 }
 
 .console-bg scrollbarvertical sliderarrowdec:active,
 .console-bg scrollbarvertical sliderarrowinc:active
 {
-	icon-image-t: 202px 226px;
+  icon-image-t: 202px 226px;
 }
 
+/*#######################################*/
 
+.points
+{
+  display: inline-block;
+  text-align: center;
+  font-family:  Fallout;
+  font-size:    18px;
+  icon-decorator: image;
+  icon-image: hud.png 250px 152px 340px 191px;
+}
+
+.metal-bg
+{
+  background-decorator:          tiled-box;
+  background-top-left-image:     hud.png 498px 0px  508px 10px;
+  background-top-right-image:    hud.png 577px 0px  587px 10px;
+  background-top-image:          hud.png 509px 0px  576px 10px;
+  background-bottom-left-image:  hud.png 498px 49px 508px 59px;
+  background-bottom-right-image: hud.png 576px 49px 586px 59px;
+  background-bottom-image:       hud.png 509px 49px 576px 59px;
+  background-left-image:         hud.png 498px 10px 508px 48px;
+  background-right-image:        hud.png 576px 10px 586px 48px;
+  background-center-image:       hud.png 509px 11px 575px 49px;
+  padding: 1px 3px 3px 3px;
+}
+
+/*############# PAPER #############*/
+
+.paper
+{
+  icon-decorator: image;
+  icon-image: revelation-mod/paper.png 0px 0px 200px 160px;
+}
+
+/*###################################################
+          PLACEMENT CLASESS
+###################################################*/
+
+.blocks{
+  display: inline-block;
+  float: left;
+}
+
+.place-next-to
+{
+  display:inline-block;
+  float: left;
+}
+
+.place-beneath
+{
+  display:block;
+}

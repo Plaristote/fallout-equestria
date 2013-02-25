@@ -64,6 +64,7 @@ string ProcessAttack(Item@ item, string action, string type, Character@ user, Ch
         message += " critically";
       message += " for " + item_data["tmp"].AsString() + " hit points";
       target.SetHitPoints(target.GetHitPoints() - damage);
+      level.PlaySound("hoof2hoof/punch");
     }
     else
       message = user.GetName() + " attacked " + target.GetName() + " but missed.";
@@ -88,7 +89,9 @@ string BuckHit(Item@ item, Character@ user, Character@ target)
 
     user.SetActionPoints(ap - 4);
     target.SetHitPoints(target.GetHitPoints() - damage);
-    
+
+    level.PlaySound("hoof2hoof/whack");    
+
     Write("Putting buff on target");
     Data poison_buff = level.GetDataEngine()["poisoning"];
     game.PushBuff(target, poison_buff);

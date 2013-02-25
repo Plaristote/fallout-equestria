@@ -7,43 +7,32 @@
 #main
 {
   background-color: black;
+  width: 100%;
+  height: 80%;
 }
 
 #map-frame
 {
-  position:   absolute;
-  top:        0px;
-  left:       0px;
-  width:      80%;
-  height:     80%;
-  overflow: scroll;
+  width:      60%;
+  height:     100%;
+  overflow: auto;
 }
 
 #clock-frame
 {
-  position: absolute;
-  top:      0px;
-  right:    0px;
-  width:    20%;
-  height:   10%;
-  padding-top:  15px;
-  padding-left: 15px;
+  width:    100%;
+  height:   20%;
+  
 }
 
 #city-list
 {
-  position: absolute;
-  top:      10%;
-  right:    0px;
-  width:    20%;
-  height:   70%;
+  width:    100%;
+  height:   80%;
 }
 
 #main-bar
 {
-  position: absolute;
-  bottom: 0px;
-  left:   0px;
   width:  100%;
   height: 20%;
 }
@@ -51,8 +40,8 @@
 #party-cursor
 {
   position: absolute;
-  top:      0px;
-  left:     0px;
+  top: 0px;
+  left: 0px;
   height:   10px;
   width:    10px;
   background-color: red;
@@ -69,7 +58,25 @@
   text-align: center;
   font-size: 20px;
 }
+.universal_button{
+	width: 20%;
+	padding-left: 4%;
+}
+#quest-locator{
+	width: 80%;
+	height: 65%;
+	margin: 10%;
 
+	
+}
+#map-side{
+	width: 32%;
+	height: 100%;
+}
+#rest{
+	height: 20%;
+	width: 100%;
+}
 #{RCSS}
 
     </style>
@@ -77,32 +84,36 @@
 
 
   <body id="body">
-
-  <div id="main" style="width:100%; height:100%;">
-
-    <div id="map-frame">
-      <div id="party-cursor">-</div>
-      <p id="pworldmap">
-        #{RML}
-      </p>
-    </div>
-
-    <div id="clock-frame" class="window-background">
-      <span class="console-value" id="clock-year">0000</span> <span class="console-value" id="clock-month">01</span> <span id="clock-day" class="console-value">01</span>
-    </div>
-
-    <div id="city-list" class="window-background">
-      City list
-    </div>
-
-    <div id="main-bar" class="window-background">
-      <button id="button-inventory" i18n="Inventory">Inventory</button>
-      <button id="button-character" i18n="Character">Character</button>
-      <button id="button-pipbuck"   i18n="Pipbuck">Pipbuck</button>
-      <button id="button-menu"      i18n="Menu">Menu</button>
-    </div>
-
-  </div>
+    
+	  <div id="main" class="  place-beneath">
+	
+	    <div id="map-frame" class="  place-next-to">
+	      <div id="party-cursor">-</div>
+	      <p id="pworldmap">
+	        #{RML}
+	      </p>
+	    </div>
+		 <div id="map-side" class="  place-next-to">
+		    <div id="clock-frame" class="window-background place-beneath">
+		      <span class="console-value" id="clock-year">0000</span> <span class="console-value" id="clock-month">01</span> <span id="clock-day" class="console-value">01</span>
+		    </div>
+		
+		    <div id="city-list" class="window-background place-beneath">
+		      City list
+		    </div>
+		  </div>
+	  </div>
+	  <div id="rest" class="  place-beneath window-background">
+	    <div id="main-bar" class="   place-beneath">
+	      <button id="button-inventory" class="universal_button" i18n="Inventory">Inventory</button>
+	      <button id="button-character" class="universal_button" i18n="Character">Character</button>
+	      <button id="button-pipbuck"  class="universal_button" i18n="Pipbuck">Pipbuck</button>
+	      <button id="button-menu"     class="universal_button" i18n="Menu">Menu</button>
+	    </div>
+		 <div id="quest-locator" class="console-bg   place-beneath">
+				 Placeholder for quest tracer
+		 </div>
+	  </div>
 
   </body>
 </rml>

@@ -66,7 +66,7 @@ void TimeManager::ExecuteTasks(void)
 
   /*if (it != end)
   {
-    Task& ftask = **it;
+    Task& ftask = **tasks.rbegin();
     cout << "FTime" << endl;
     cout << year << "/" << month << "/" << day << " ";
     cout << hour << ":" << minute  << ":" << second << endl;
@@ -88,44 +88,48 @@ void TimeManager::ExecuteTasks(void)
 	dostuff = false;
       else
       {
-	if (year == task.lastY && month == task.lastMo && hour < task.lastH)
-	  dostuff = false;
-	else
-	{
-	  if (year == task.lastY && month == task.lastMo && hour == task.lastH && minute < task.lastM)
-	    dostuff = false;
-	  else
-	  {
-	    if (year == task.lastY && month == task.lastMo && hour == task.lastH && minute == task.lastM && second < task.lastS)
-	      dostuff = false;
-	  }
-	}
+        if (year == task.lastY && month == task.lastMo && day < task.lastD)
+          dostuff = false;
+        else
+        {
+          if (year == task.lastY && month == task.lastMo && day == task.lastD && hour < task.lastH)
+            dostuff = false;
+          else
+          {
+            if (year == task.lastY && month == task.lastMo && day == task.lastD && hour == task.lastH && minute < task.lastM)
+              dostuff = false;
+            else
+            {
+              if (year == task.lastY && month == task.lastMo && day == task.lastD && hour == task.lastH && minute == task.lastM && second < task.lastS)
+                dostuff = false;
+            }
+          }
+        }
       }
     }
     if (dostuff)
     {
       safeIt = it;
-      cout << "[" << &task << "] Executing Callbacks" << endl;
+      //cout << "[" << &task << "] Executing Callbacks" << endl;
       task.Interval.Emit();
-      cout << "[" << &task << "] Executed Callbacks" << endl;
+      //cout << "[" << &task << "] Executed Callbacks" << endl;
       task.IntervalIt.Emit(++task.it);
       if (safeIt != it)
       {
-	cout << "[" << &task << "] Task has been deleted" << endl;
+	//cout << "[" << &task << "] Task has been deleted" << endl;
 	it = safeIt;
 	continue ;
       }
       if (!(task.loop))
       {
-	cout << "[" << &task << "] Task isn't looping" << endl;
+	//cout << "[" << &task << "] Task isn't looping" << endl;
 	it = tasks.erase(it);
 	continue ;
       }
       task.NextStep();
-      cout << "[" << &task << "] Next step will be at: ";
-      cout << task.lastY << "/" << task.lastMo << "/" << task.lastD << " ";
-      cout << task.lastH << ":" << task.lastM  << ":" << task.lastS << endl;
-      
+      //cout << "[" << &task << "] Next step will be at: ";
+      //cout << task.lastY << "/" << task.lastMo << "/" << task.lastD << " ";
+      //cout << task.lastH << ":" << task.lastM  << ":" << task.lastS << endl;
     }
     else
       ++it;
@@ -177,6 +181,7 @@ void TimeManager::Task::NextStep(void)
   lastY  += timeY;
   lastMo += timeMo;
   lastD  += timeD;
+  lastH  += timeH;
   lastM  += timeM;
   lastS  += timeS;
 
@@ -210,4 +215,19 @@ void TimeManager::Task::NextStep(void)
       lastY  += 1;
     }
   }
+}
+
+void TimeManager::Task::Serialize(Utils::Packet& packet)
+{
+  char looping = loop;
+
+  packet << lastY << lastMo << lastD << lastH << lastM << lastS << level << it << looping;
+}
+
+void TimeManager::Task::Unserialize(Utils::Packet& packet)
+{
+  char looping;
+  
+  packet >> lastY >> lastMo >> lastD >> lastH >> lastM >> lastS >> level >> it >> looping;
+  loop = looping;
 }

@@ -4,6 +4,19 @@
 
 using namespace std;
 
+void Party::Join(DynamicObject* object)
+{
+  if (object)
+    _objects.push_back(object);
+}
+
+void Party::Leave(DynamicObject* object)
+{
+  DynamicObjects::iterator it = find(_objects.begin(), _objects.end(), object);
+
+  _objects.erase(it);
+}
+
 PlayerParty::PlayerParty(const string& savepath)
 {
   string        save_party = savepath + "/player-party.blob";
@@ -42,19 +55,6 @@ bool PlayerParty::Save(const string& savepath) const
   return (false);
 }
 
-void PlayerParty::Join(DynamicObject* object)
-{
-  if (object)
-    _objects.push_back(object);
-}
-
-void PlayerParty::Leave(DynamicObject* object)
-{
-  DynamicObjects::iterator it = find(_objects.begin(), _objects.end(), object);
-
-  _objects.erase(it);
-}
-
 void PlayerParty::Serialize(Utils::Packet& packet) const
 {
   unsigned short size     = _objects.size();
@@ -62,7 +62,7 @@ void PlayerParty::Serialize(Utils::Packet& packet) const
   packet << size;
   for_each(_objects.begin(), _objects.end(), [&packet](const DynamicObject* object)
   {
-    int  iType    = object->type;
+    //int  iType    = object->type;
     int  inv_size = object->inventory.size();
     auto it       = object->inventory.begin();
     auto end      = object->inventory.end();

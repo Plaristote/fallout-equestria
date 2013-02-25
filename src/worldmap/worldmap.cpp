@@ -1,5 +1,12 @@
 #include "worldmap/worldmap.hpp"
 #include "musicmanager.hpp"
+#include <dices.hpp>
+
+#ifdef _WIN32
+# define ROCKET_FACTORY Rocket::Core::RFactory
+#else
+# define ROCKET_FACTORY Rocket::Core::Factory
+#endif
 
 using namespace std;
 using namespace Rocket;
@@ -20,13 +27,10 @@ WorldMap::~WorldMap()
   
   for_each(_cities.begin(), _cities.end(), [this](const City& city)
   {
-    string         name        = "city-" + city.name;
-    Core::Element* city_button = _root->GetElementById(name.c_str());
-    
-    if (city_button)
-      city_button->RemoveEventListener("click", &CityButtonClicked);
+    ToggleEventListener(false, "city-"      + city.name, "click", CityButtonClicked);
+    ToggleEventListener(false, "city-halo-" + city.name, "click", MapClickedEvent);
   });
-
+  
   Destroy();
   delete _mapTree;
   CurrentWorldMap = 0;
@@ -40,9 +44,9 @@ void WorldMap::Save(const string& savepath)
   DataTree::Writers::JSON(_mapTree, "saves/map.json");
 }
 
-WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, TimeManager& tm) : UiBase(window, gameUi->GetContext()), _gameUi(*gameUi), _dataEngine(de), _timeManager(tm)
+WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, TimeManager& tm) : UiBase(window, gameUi->GetContext()), _dataEngine(de), _timeManager(tm), _gameUi(*gameUi)
 {
-  cout << "Building worldmap" << endl;
+  _interrupted   = false;
   _current_pos_x = _goal_x = _dataEngine["worldmap"]["pos-x"];
   _current_pos_y = _goal_y = _dataEngine["worldmap"]["pos-y"];
   
@@ -61,7 +65,7 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, Time
       std::for_each(cities.begin(), cities.end(), [this](Data city) { AddCityToList(city); });
     }
     delete cityTree;
-    
+
     //
     // Get some required elements
     //
@@ -91,6 +95,13 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, Time
   CurrentWorldMap = this;
 }
 
+bool WorldMap::HasCity(const string& name) const
+{
+  Cities::const_iterator it = find(_cities.begin(), _cities.end(), name);
+  
+  return (it != _cities.end());
+}
+
 void WorldMap::SetCityVisible(const string& name)
 {
   Cities::iterator it = find(_cities.begin(), _cities.end(), name);
@@ -114,6 +125,24 @@ void WorldMap::SetCityVisible(const string& name)
       }
       delete cityTree;
     }
+  }
+}
+
+void WorldMap::AddCity(const string& name, float x, float y, float radius)
+{
+  DataTree* cityTree = DataTree::Factory::JSON("saves/cities.json");
+
+  if (cityTree)
+  {
+    Data      cities(cityTree);
+
+    cities[name]["visible"] = 0;
+    cities[name]["pos_x"]   = x;
+    cities[name]["pos_y"]   = y;
+    cities[name]["radius"]  = radius;
+    AddCityToList(cities[name]);
+    DataTree::Writers::JSON(cityTree, cityTree->GetSourceFile());
+    delete cityTree;  
   }
 }
 
@@ -141,12 +170,33 @@ void WorldMap::AddCityToList(Data cityData)
     rml << "<div class='city-button'><button id='city-" << cityData.Key() << "' data-city='" << cityData.Key() << "' class='simple-button city-button-button'> </button>";
     rml << "<span class='city-name'>" << cityData.Key() << "</span></div>";
     rml << "</div>";
-    elem->GetInnerRML(innerRml);
     innerRml = innerRml + Rocket::Core::String(rml.str().c_str());
-    elem->SetInnerRML(innerRml);
+
+    if ((ROCKET_FACTORY::InstanceElementText(elem, innerRml)))
+      ToggleEventListener(true, "city-" + cityData.Key(), "click", CityButtonClicked);
+  }
+  if (cityData["hidden"].Value() != "1")
+  {
+    Core::Element* elem = _root->GetElementById("pworldmap");
+    Core::String inner_rml;
+    stringstream rml, css, elem_id;
+    int          radius = city.radius * 2.5f;
     
-    elem = _root->GetElementById(string("city-" + cityData.Key()).c_str());
-    elem->AddEventListener("click", &CityButtonClicked);
+    elem_id << "city-halo-" << cityData.Key();
+
+    css << "position: absolute;";
+    css << "top: "  << (city.pos_y - radius / 2.f) << "px;";
+    css << "left: " << (city.pos_x - radius / 2.f) << "px;";
+    css << "height: " << radius << "px;";
+    css << "width: "  << radius << "px;";
+    
+    rml << "<div id='" << elem_id.str() << "' class='city-indicator' style='" << css.str() << "'>";
+    rml << "<img src='worldmap-city.png' style='width:" << radius << "px;height:" << radius << "px;' />";
+    rml << "</div>";
+
+    // NOTE might need to do something about Rocket::Core::Factory and Windows (replace with RFactory ?)
+    if ((ROCKET_FACTORY::InstanceElementText(elem, Core::String(rml.str().c_str()))))
+      ToggleEventListener(true, elem_id.str(), "click", MapClickedEvent);
   }
 }
 
@@ -187,6 +237,8 @@ void WorldMap::Show(void)
 
 void WorldMap::Run(void)
 {
+  if (_interrupted)
+    return ;
   float elapsedTime = _timer.GetElapsedTime();
 
   if (_current_pos_x != _goal_x || _current_pos_y != _goal_y)
@@ -264,8 +316,12 @@ bool WorldMap::IsPartyInCity(string& cityname) const
 
 void WorldMap::UpdatePartyCursor(float elapsedTime)
 {
+  int   current_case_x, current_case_y;
+  GetCurrentCase(current_case_x, current_case_y);
+  Data  case_data     = GetCaseData(current_case_x, current_case_y);
   float movementTime  = elapsedTime * 50;
-  float movementSpeed = movementTime;
+  float caseSpeed     = case_data["movement-speed"].Nil() ? 1.f : case_data["movement-speed"];
+  float movementSpeed = movementTime * (caseSpeed >= 0.1f ? caseSpeed : 1);
   float a             = _current_pos_x - _goal_x;
   float b             = _goal_y        - _current_pos_y;
   float distance      = SQRT(a * a + b * b);
@@ -287,17 +343,31 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
     _cursor->SetProperty("top",  str_y.str().c_str());
   }
 
+  unsigned short lastHour       = _timeManager.GetHour();
   unsigned short lastDay        = _timeManager.GetDay();
   unsigned short elapsedHours   = movementTime;
   unsigned short elapsedMinutes = (((movementTime * 100) - (elapsedHours * 100)) / 100) * 60;
   _timeManager.AddElapsedTime(0, elapsedMinutes, elapsedHours);
   if (lastDay != _timeManager.GetDay())
     UpdateClock();
+  if (lastHour != _timeManager.GetHour())
+  {
+    string which_city;
+    
+    UpdateClock();
+    if (!(IsPartyInCity(which_city)) && Dices::Throw(24) < 3)
+    {
+      int x, y;
+
+      GetCurrentCase(x, y);
+      RequestRandomEncounterCheck.Emit(x, y);
+    }
+  }
 }
 
 Core::Element* WorldMap::GetCaseAt(int x, int y) const
 {
-  int it = y * _size_x + x;
+  unsigned int it = y * _size_x + x;
 
   if (_cases.size() > it)
     return (_cases[it]);
@@ -310,11 +380,18 @@ void WorldMap::GetCurrentCase(int& x, int& y) const
   y = _current_pos_y / _tsize_y;
 }
 
-void WorldMap::SetCaseVisibility(int x, int y, char visibility) const
+Data WorldMap::GetCaseData(int x, int y) const
 {
   int            it       = (y * _size_x) + x;
+  
+  return (Data(_mapTree)["tiles"][it]);
+}
+
+void WorldMap::SetCaseVisibility(int x, int y, char visibility) const
+{
+  //int            it       = (y * _size_x) + x;
   Core::Element* element  = GetCaseAt(x, y);
-  Data           dataCase = Data(_mapTree)["tiles"][it];
+  Data           dataCase = GetCaseData(x, y);
   stringstream   stream;
 
   if (!element) return ;
@@ -503,4 +580,11 @@ void WorldMap::MapTileGenerator(Data map)
       }
     }
   }
+}
+
+void WorldMap::SetInterrupted(bool set)
+{
+  _interrupted = set;
+  if (!set)
+    _timer.Restart();
 }

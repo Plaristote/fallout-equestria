@@ -13,13 +13,9 @@
       background-decorator: image;
       background-image: loading.jpg;
     }
-
-    #content
-    {
-      color: black;
-      outline-font-effect: outline;
-      outline-width: 1px;
-      outline-color: white;
+    #button-container{
+		width:  20%;
+		margin: 10%;    
     }
 
   </style>
@@ -30,14 +26,14 @@
     <div id="loading_screen">
 
       <div id="button-container">
-        <button id="button-continue"   i18n="Continue">Continue</button><br />
-        <button id="button-new-game"   i18n="New Game">New Game</button><br />
-        <button id="button-load-game"  i18n="Load">Load game</button><br />
-        <button id="button-options"    i18n="Options">Options</button><br />
-        <button id="button-quit"       i18n="Exit">Quit</button>
+        <button id="button-continue"   i18n="Continue" class="universal_button">Continue</button><br />
+        <button id="button-new-game"   i18n="New Game" class="universal_button">New Game</button><br />
+        <button id="button-load-game"  i18n="Load" class="universal_button">Load game</button><br />
+        <button id="button-options"    i18n="Options" class="universal_button">Options</button><br />
+        <button id="button-quit"       i18n="Exit" class="universal_button">Quit</button>
       </div>
 
-      <div id="content" style="color: black;">
+      <div id="content">
       </div>
     </div>
   </div>

@@ -7,43 +7,32 @@
 #main
 {
   background-color: black;
+  width: 100%;
+  height: 80%;
 }
 
 #map-frame
 {
-  position:   absolute;
-  top:        0px;
-  left:       0px;
-  width:      80%;
-  height:     80%;
-  overflow: scroll;
+  width:      60%;
+  height:     100%;
+  overflow: auto;
 }
 
 #clock-frame
 {
-  position: absolute;
-  top:      0px;
-  right:    0px;
-  width:    20%;
-  height:   10%;
-  padding-top:  15px;
-  padding-left: 15px;
+  width:    100%;
+  height:   20%;
+  
 }
 
 #city-list
 {
-  position: absolute;
-  top:      10%;
-  right:    0px;
-  width:    20%;
-  height:   70%;
+  width:    100%;
+  height:   80%;
 }
 
 #main-bar
 {
-  position: absolute;
-  bottom: 0px;
-  left:   0px;
   width:  100%;
   height: 20%;
 }
@@ -51,8 +40,8 @@
 #party-cursor
 {
   position: absolute;
-  top:      0px;
-  left:     0px;
+  top: 0px;
+  left: 0px;
   height:   10px;
   width:    10px;
   background-color: red;
@@ -69,7 +58,25 @@
   text-align: center;
   font-size: 20px;
 }
+.universal_button{
+	width: 20%;
+	padding-left: 4%;
+}
+#quest-locator{
+	width: 80%;
+	height: 65%;
+	margin: 10%;
 
+	
+}
+#map-side{
+	width: 32%;
+	height: 100%;
+}
+#rest{
+	height: 20%;
+	width: 100%;
+}
 #pworldmap
 {
   background-decorator: image;
@@ -85,21 +92,21 @@
 
 
   <body id="body">
-
-  <div id="main" style="width:100%; height:100%;">
-
-    <div id="map-frame">
-      <div id="party-cursor">-</div>
-      <p id="pworldmap">
-        <div id='tile0-0' class='tile' style='position: absolute;top: 0px; left: 0px; height: 50px; width: 50px;' data-pos-x='0' data-pos-y='0'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+    
+	  <div id="main" class="  place-beneath">
+	
+	    <div id="map-frame" class="  place-next-to">
+	      <div id="party-cursor">-</div>
+	      <p id="pworldmap">
+	        <div id='tile0-0' class='tile' style='position: absolute;top: 0px; left: 0px; height: 50px; width: 50px;' data-pos-x='0' data-pos-y='0'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
 <div id='tile1-0' class='tile' style='position: absolute;top: 0px; left: 50px; height: 50px; width: 50px;' data-pos-x='1' data-pos-y='0'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
 <div id='tile2-0' class='tile' style='position: absolute;top: 0px; left: 100px; height: 50px; width: 50px;' data-pos-x='2' data-pos-y='0'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
 <div id='tile3-0' class='tile' style='position: absolute;top: 0px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='0'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
-<div id='tile4-0' class='tile' style='position: absolute;top: 0px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='0'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile5-0' class='tile' style='position: absolute;top: 0px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='0'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile6-0' class='tile' style='position: absolute;top: 0px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='0'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile7-0' class='tile' style='position: absolute;top: 0px; left: 350px; height: 50px; width: 50px;' data-pos-x='7' data-pos-y='0'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile8-0' class='tile' style='position: absolute;top: 0px; left: 400px; height: 50px; width: 50px;' data-pos-x='8' data-pos-y='0'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
+<div id='tile4-0' class='tile' style='position: absolute;top: 0px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='0'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile5-0' class='tile' style='position: absolute;top: 0px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='0'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile6-0' class='tile' style='position: absolute;top: 0px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='0'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile7-0' class='tile' style='position: absolute;top: 0px; left: 350px; height: 50px; width: 50px;' data-pos-x='7' data-pos-y='0'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile8-0' class='tile' style='position: absolute;top: 0px; left: 400px; height: 50px; width: 50px;' data-pos-x='8' data-pos-y='0'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
 <div id='tile9-0' class='tile' style='position: absolute;top: 0px; left: 450px; height: 50px; width: 50px;' data-pos-x='9' data-pos-y='0'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile10-0' class='tile' style='position: absolute;top: 0px; left: 500px; height: 50px; width: 50px;' data-pos-x='10' data-pos-y='0'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile11-0' class='tile' style='position: absolute;top: 0px; left: 550px; height: 50px; width: 50px;' data-pos-x='11' data-pos-y='0'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
@@ -129,11 +136,11 @@
 <div id='tile0-1' class='tile' style='position: absolute;top: 50px; left: 0px; height: 50px; width: 50px;' data-pos-x='0' data-pos-y='1'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
 <div id='tile1-1' class='tile' style='position: absolute;top: 50px; left: 50px; height: 50px; width: 50px;' data-pos-x='1' data-pos-y='1'></div>
 <div id='tile2-1' class='tile' style='position: absolute;top: 50px; left: 100px; height: 50px; width: 50px;' data-pos-x='2' data-pos-y='1'></div>
-<div id='tile3-1' class='tile' style='position: absolute;top: 50px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='1'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
-<div id='tile4-1' class='tile' style='position: absolute;top: 50px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='1'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
-<div id='tile5-1' class='tile' style='position: absolute;top: 50px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='1'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile6-1' class='tile' style='position: absolute;top: 50px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='1'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
-<div id='tile7-1' class='tile' style='position: absolute;top: 50px; left: 350px; height: 50px; width: 50px;' data-pos-x='7' data-pos-y='1'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile3-1' class='tile' style='position: absolute;top: 50px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='1'></div>
+<div id='tile4-1' class='tile' style='position: absolute;top: 50px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='1'></div>
+<div id='tile5-1' class='tile' style='position: absolute;top: 50px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='1'></div>
+<div id='tile6-1' class='tile' style='position: absolute;top: 50px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='1'></div>
+<div id='tile7-1' class='tile' style='position: absolute;top: 50px; left: 350px; height: 50px; width: 50px;' data-pos-x='7' data-pos-y='1'></div>
 <div id='tile8-1' class='tile' style='position: absolute;top: 50px; left: 400px; height: 50px; width: 50px;' data-pos-x='8' data-pos-y='1'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
 <div id='tile9-1' class='tile' style='position: absolute;top: 50px; left: 450px; height: 50px; width: 50px;' data-pos-x='9' data-pos-y='1'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile10-1' class='tile' style='position: absolute;top: 50px; left: 500px; height: 50px; width: 50px;' data-pos-x='10' data-pos-y='1'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
@@ -165,9 +172,9 @@
 <div id='tile1-2' class='tile' style='position: absolute;top: 100px; left: 50px; height: 50px; width: 50px;' data-pos-x='1' data-pos-y='2'></div>
 <div id='tile2-2' class='tile' style='position: absolute;top: 100px; left: 100px; height: 50px; width: 50px;' data-pos-x='2' data-pos-y='2'></div>
 <div id='tile3-2' class='tile' style='position: absolute;top: 100px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='2'></div>
-<div id='tile4-2' class='tile' style='position: absolute;top: 100px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='2'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
-<div id='tile5-2' class='tile' style='position: absolute;top: 100px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='2'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
-<div id='tile6-2' class='tile' style='position: absolute;top: 100px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='2'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile4-2' class='tile' style='position: absolute;top: 100px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='2'></div>
+<div id='tile5-2' class='tile' style='position: absolute;top: 100px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='2'></div>
+<div id='tile6-2' class='tile' style='position: absolute;top: 100px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='2'></div>
 <div id='tile7-2' class='tile' style='position: absolute;top: 100px; left: 350px; height: 50px; width: 50px;' data-pos-x='7' data-pos-y='2'></div>
 <div id='tile8-2' class='tile' style='position: absolute;top: 100px; left: 400px; height: 50px; width: 50px;' data-pos-x='8' data-pos-y='2'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
 <div id='tile9-2' class='tile' style='position: absolute;top: 100px; left: 450px; height: 50px; width: 50px;' data-pos-x='9' data-pos-y='2'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
@@ -237,7 +244,7 @@
 <div id='tile3-4' class='tile' style='position: absolute;top: 200px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='4'></div>
 <div id='tile4-4' class='tile' style='position: absolute;top: 200px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='4'></div>
 <div id='tile5-4' class='tile' style='position: absolute;top: 200px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='4'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
-<div id='tile6-4' class='tile' style='position: absolute;top: 200px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='4'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile6-4' class='tile' style='position: absolute;top: 200px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='4'></div>
 <div id='tile7-4' class='tile' style='position: absolute;top: 200px; left: 350px; height: 50px; width: 50px;' data-pos-x='7' data-pos-y='4'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
 <div id='tile8-4' class='tile' style='position: absolute;top: 200px; left: 400px; height: 50px; width: 50px;' data-pos-x='8' data-pos-y='4'></div>
 <div id='tile9-4' class='tile' style='position: absolute;top: 200px; left: 450px; height: 50px; width: 50px;' data-pos-x='9' data-pos-y='4'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
@@ -266,13 +273,13 @@
 <div id='tile32-4' class='tile' style='position: absolute;top: 200px; left: 1600px; height: 50px; width: 50px;' data-pos-x='32' data-pos-y='4'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile33-4' class='tile' style='position: absolute;top: 200px; left: 1650px; height: 50px; width: 50px;' data-pos-x='33' data-pos-y='4'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile34-4' class='tile' style='position: absolute;top: 200px; left: 1700px; height: 50px; width: 50px;' data-pos-x='34' data-pos-y='4'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile0-5' class='tile' style='position: absolute;top: 250px; left: 0px; height: 50px; width: 50px;' data-pos-x='0' data-pos-y='5'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile1-5' class='tile' style='position: absolute;top: 250px; left: 50px; height: 50px; width: 50px;' data-pos-x='1' data-pos-y='5'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile2-5' class='tile' style='position: absolute;top: 250px; left: 100px; height: 50px; width: 50px;' data-pos-x='2' data-pos-y='5'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
-<div id='tile3-5' class='tile' style='position: absolute;top: 250px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='5'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile0-5' class='tile' style='position: absolute;top: 250px; left: 0px; height: 50px; width: 50px;' data-pos-x='0' data-pos-y='5'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile1-5' class='tile' style='position: absolute;top: 250px; left: 50px; height: 50px; width: 50px;' data-pos-x='1' data-pos-y='5'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile2-5' class='tile' style='position: absolute;top: 250px; left: 100px; height: 50px; width: 50px;' data-pos-x='2' data-pos-y='5'></div>
+<div id='tile3-5' class='tile' style='position: absolute;top: 250px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='5'></div>
 <div id='tile4-5' class='tile' style='position: absolute;top: 250px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='5'></div>
 <div id='tile5-5' class='tile' style='position: absolute;top: 250px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='5'></div>
-<div id='tile6-5' class='tile' style='position: absolute;top: 250px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='5'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile6-5' class='tile' style='position: absolute;top: 250px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='5'></div>
 <div id='tile7-5' class='tile' style='position: absolute;top: 250px; left: 350px; height: 50px; width: 50px;' data-pos-x='7' data-pos-y='5'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
 <div id='tile8-5' class='tile' style='position: absolute;top: 250px; left: 400px; height: 50px; width: 50px;' data-pos-x='8' data-pos-y='5'></div>
 <div id='tile9-5' class='tile' style='position: absolute;top: 250px; left: 450px; height: 50px; width: 50px;' data-pos-x='9' data-pos-y='5'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
@@ -301,11 +308,11 @@
 <div id='tile32-5' class='tile' style='position: absolute;top: 250px; left: 1600px; height: 50px; width: 50px;' data-pos-x='32' data-pos-y='5'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile33-5' class='tile' style='position: absolute;top: 250px; left: 1650px; height: 50px; width: 50px;' data-pos-x='33' data-pos-y='5'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile34-5' class='tile' style='position: absolute;top: 250px; left: 1700px; height: 50px; width: 50px;' data-pos-x='34' data-pos-y='5'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile0-6' class='tile' style='position: absolute;top: 300px; left: 0px; height: 50px; width: 50px;' data-pos-x='0' data-pos-y='6'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile1-6' class='tile' style='position: absolute;top: 300px; left: 50px; height: 50px; width: 50px;' data-pos-x='1' data-pos-y='6'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile2-6' class='tile' style='position: absolute;top: 300px; left: 100px; height: 50px; width: 50px;' data-pos-x='2' data-pos-y='6'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile3-6' class='tile' style='position: absolute;top: 300px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='6'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
-<div id='tile4-6' class='tile' style='position: absolute;top: 300px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='6'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile0-6' class='tile' style='position: absolute;top: 300px; left: 0px; height: 50px; width: 50px;' data-pos-x='0' data-pos-y='6'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile1-6' class='tile' style='position: absolute;top: 300px; left: 50px; height: 50px; width: 50px;' data-pos-x='1' data-pos-y='6'></div>
+<div id='tile2-6' class='tile' style='position: absolute;top: 300px; left: 100px; height: 50px; width: 50px;' data-pos-x='2' data-pos-y='6'></div>
+<div id='tile3-6' class='tile' style='position: absolute;top: 300px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='6'></div>
+<div id='tile4-6' class='tile' style='position: absolute;top: 300px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='6'></div>
 <div id='tile5-6' class='tile' style='position: absolute;top: 300px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='6'></div>
 <div id='tile6-6' class='tile' style='position: absolute;top: 300px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='6'></div>
 <div id='tile7-6' class='tile' style='position: absolute;top: 300px; left: 350px; height: 50px; width: 50px;' data-pos-x='7' data-pos-y='6'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
@@ -336,12 +343,12 @@
 <div id='tile32-6' class='tile' style='position: absolute;top: 300px; left: 1600px; height: 50px; width: 50px;' data-pos-x='32' data-pos-y='6'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile33-6' class='tile' style='position: absolute;top: 300px; left: 1650px; height: 50px; width: 50px;' data-pos-x='33' data-pos-y='6'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile34-6' class='tile' style='position: absolute;top: 300px; left: 1700px; height: 50px; width: 50px;' data-pos-x='34' data-pos-y='6'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile0-7' class='tile' style='position: absolute;top: 350px; left: 0px; height: 50px; width: 50px;' data-pos-x='0' data-pos-y='7'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile1-7' class='tile' style='position: absolute;top: 350px; left: 50px; height: 50px; width: 50px;' data-pos-x='1' data-pos-y='7'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile2-7' class='tile' style='position: absolute;top: 350px; left: 100px; height: 50px; width: 50px;' data-pos-x='2' data-pos-y='7'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile3-7' class='tile' style='position: absolute;top: 350px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='7'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile4-7' class='tile' style='position: absolute;top: 350px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='7'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
-<div id='tile5-7' class='tile' style='position: absolute;top: 350px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='7'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile0-7' class='tile' style='position: absolute;top: 350px; left: 0px; height: 50px; width: 50px;' data-pos-x='0' data-pos-y='7'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile1-7' class='tile' style='position: absolute;top: 350px; left: 50px; height: 50px; width: 50px;' data-pos-x='1' data-pos-y='7'></div>
+<div id='tile2-7' class='tile' style='position: absolute;top: 350px; left: 100px; height: 50px; width: 50px;' data-pos-x='2' data-pos-y='7'></div>
+<div id='tile3-7' class='tile' style='position: absolute;top: 350px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='7'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile4-7' class='tile' style='position: absolute;top: 350px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='7'></div>
+<div id='tile5-7' class='tile' style='position: absolute;top: 350px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='7'></div>
 <div id='tile6-7' class='tile' style='position: absolute;top: 350px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='7'></div>
 <div id='tile7-7' class='tile' style='position: absolute;top: 350px; left: 350px; height: 50px; width: 50px;' data-pos-x='7' data-pos-y='7'></div>
 <div id='tile8-7' class='tile' style='position: absolute;top: 350px; left: 400px; height: 50px; width: 50px;' data-pos-x='8' data-pos-y='7'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
@@ -371,13 +378,13 @@
 <div id='tile32-7' class='tile' style='position: absolute;top: 350px; left: 1600px; height: 50px; width: 50px;' data-pos-x='32' data-pos-y='7'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile33-7' class='tile' style='position: absolute;top: 350px; left: 1650px; height: 50px; width: 50px;' data-pos-x='33' data-pos-y='7'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile34-7' class='tile' style='position: absolute;top: 350px; left: 1700px; height: 50px; width: 50px;' data-pos-x='34' data-pos-y='7'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile0-8' class='tile' style='position: absolute;top: 400px; left: 0px; height: 50px; width: 50px;' data-pos-x='0' data-pos-y='8'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile1-8' class='tile' style='position: absolute;top: 400px; left: 50px; height: 50px; width: 50px;' data-pos-x='1' data-pos-y='8'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile2-8' class='tile' style='position: absolute;top: 400px; left: 100px; height: 50px; width: 50px;' data-pos-x='2' data-pos-y='8'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile3-8' class='tile' style='position: absolute;top: 400px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='8'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile4-8' class='tile' style='position: absolute;top: 400px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='8'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile5-8' class='tile' style='position: absolute;top: 400px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='8'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
-<div id='tile6-8' class='tile' style='position: absolute;top: 400px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='8'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile0-8' class='tile' style='position: absolute;top: 400px; left: 0px; height: 50px; width: 50px;' data-pos-x='0' data-pos-y='8'></div>
+<div id='tile1-8' class='tile' style='position: absolute;top: 400px; left: 50px; height: 50px; width: 50px;' data-pos-x='1' data-pos-y='8'></div>
+<div id='tile2-8' class='tile' style='position: absolute;top: 400px; left: 100px; height: 50px; width: 50px;' data-pos-x='2' data-pos-y='8'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile3-8' class='tile' style='position: absolute;top: 400px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='8'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile4-8' class='tile' style='position: absolute;top: 400px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='8'></div>
+<div id='tile5-8' class='tile' style='position: absolute;top: 400px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='8'></div>
+<div id='tile6-8' class='tile' style='position: absolute;top: 400px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='8'></div>
 <div id='tile7-8' class='tile' style='position: absolute;top: 400px; left: 350px; height: 50px; width: 50px;' data-pos-x='7' data-pos-y='8'></div>
 <div id='tile8-8' class='tile' style='position: absolute;top: 400px; left: 400px; height: 50px; width: 50px;' data-pos-x='8' data-pos-y='8'></div>
 <div id='tile9-8' class='tile' style='position: absolute;top: 400px; left: 450px; height: 50px; width: 50px;' data-pos-x='9' data-pos-y='8'></div>
@@ -406,13 +413,13 @@
 <div id='tile32-8' class='tile' style='position: absolute;top: 400px; left: 1600px; height: 50px; width: 50px;' data-pos-x='32' data-pos-y='8'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile33-8' class='tile' style='position: absolute;top: 400px; left: 1650px; height: 50px; width: 50px;' data-pos-x='33' data-pos-y='8'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile34-8' class='tile' style='position: absolute;top: 400px; left: 1700px; height: 50px; width: 50px;' data-pos-x='34' data-pos-y='8'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile0-9' class='tile' style='position: absolute;top: 450px; left: 0px; height: 50px; width: 50px;' data-pos-x='0' data-pos-y='9'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile1-9' class='tile' style='position: absolute;top: 450px; left: 50px; height: 50px; width: 50px;' data-pos-x='1' data-pos-y='9'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile2-9' class='tile' style='position: absolute;top: 450px; left: 100px; height: 50px; width: 50px;' data-pos-x='2' data-pos-y='9'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile3-9' class='tile' style='position: absolute;top: 450px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='9'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile4-9' class='tile' style='position: absolute;top: 450px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='9'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile5-9' class='tile' style='position: absolute;top: 450px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='9'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile6-9' class='tile' style='position: absolute;top: 450px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='9'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile0-9' class='tile' style='position: absolute;top: 450px; left: 0px; height: 50px; width: 50px;' data-pos-x='0' data-pos-y='9'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile1-9' class='tile' style='position: absolute;top: 450px; left: 50px; height: 50px; width: 50px;' data-pos-x='1' data-pos-y='9'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile2-9' class='tile' style='position: absolute;top: 450px; left: 100px; height: 50px; width: 50px;' data-pos-x='2' data-pos-y='9'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile3-9' class='tile' style='position: absolute;top: 450px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='9'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile4-9' class='tile' style='position: absolute;top: 450px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='9'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile5-9' class='tile' style='position: absolute;top: 450px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='9'></div>
+<div id='tile6-9' class='tile' style='position: absolute;top: 450px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='9'></div>
 <div id='tile7-9' class='tile' style='position: absolute;top: 450px; left: 350px; height: 50px; width: 50px;' data-pos-x='7' data-pos-y='9'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
 <div id='tile8-9' class='tile' style='position: absolute;top: 450px; left: 400px; height: 50px; width: 50px;' data-pos-x='8' data-pos-y='9'></div>
 <div id='tile9-9' class='tile' style='position: absolute;top: 450px; left: 450px; height: 50px; width: 50px;' data-pos-x='9' data-pos-y='9'></div>
@@ -445,9 +452,9 @@
 <div id='tile1-10' class='tile' style='position: absolute;top: 500px; left: 50px; height: 50px; width: 50px;' data-pos-x='1' data-pos-y='10'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile2-10' class='tile' style='position: absolute;top: 500px; left: 100px; height: 50px; width: 50px;' data-pos-x='2' data-pos-y='10'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile3-10' class='tile' style='position: absolute;top: 500px; left: 150px; height: 50px; width: 50px;' data-pos-x='3' data-pos-y='10'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile4-10' class='tile' style='position: absolute;top: 500px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='10'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile5-10' class='tile' style='position: absolute;top: 500px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='10'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
-<div id='tile6-10' class='tile' style='position: absolute;top: 500px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='10'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
+<div id='tile4-10' class='tile' style='position: absolute;top: 500px; left: 200px; height: 50px; width: 50px;' data-pos-x='4' data-pos-y='10'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile5-10' class='tile' style='position: absolute;top: 500px; left: 250px; height: 50px; width: 50px;' data-pos-x='5' data-pos-y='10'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
+<div id='tile6-10' class='tile' style='position: absolute;top: 500px; left: 300px; height: 50px; width: 50px;' data-pos-x='6' data-pos-y='10'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
 <div id='tile7-10' class='tile' style='position: absolute;top: 500px; left: 350px; height: 50px; width: 50px;' data-pos-x='7' data-pos-y='10'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
 <div id='tile8-10' class='tile' style='position: absolute;top: 500px; left: 400px; height: 50px; width: 50px;' data-pos-x='8' data-pos-y='10'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
 <div id='tile9-10' class='tile' style='position: absolute;top: 500px; left: 450px; height: 50px; width: 50px;' data-pos-x='9' data-pos-y='10'><div style='background: rgba(0, 0, 0, 125); width: 50px; height: 50;'></div></div>
@@ -618,25 +625,29 @@
 <div id='tile34-14' class='tile' style='position: absolute;top: 700px; left: 1700px; height: 50px; width: 50px;' data-pos-x='34' data-pos-y='14'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 <div id='tile0-15' class='tile' style='position: absolute;top: 750px; left: 0px; height: 50px; width: 50px;' data-pos-x='0' data-pos-y='15'><div style='background: rgba(0, 0, 0, 255); width: 50px; height: 50;'></div></div>
 
-      </p>
-    </div>
-
-    <div id="clock-frame" class="window-background">
-      <span class="console-value" id="clock-year">0000</span> <span class="console-value" id="clock-month">01</span> <span id="clock-day" class="console-value">01</span>
-    </div>
-
-    <div id="city-list" class="window-background">
-      City list
-    </div>
-
-    <div id="main-bar" class="window-background">
-      <button id="button-inventory" i18n="Inventory">Inventory</button>
-      <button id="button-character" i18n="Character">Character</button>
-      <button id="button-pipbuck"   i18n="Pipbuck">Pipbuck</button>
-      <button id="button-menu"      i18n="Menu">Menu</button>
-    </div>
-
-  </div>
+	      </p>
+	    </div>
+		 <div id="map-side" class="  place-next-to">
+		    <div id="clock-frame" class="window-background place-beneath">
+		      <span class="console-value" id="clock-year">0000</span> <span class="console-value" id="clock-month">01</span> <span id="clock-day" class="console-value">01</span>
+		    </div>
+		
+		    <div id="city-list" class="window-background place-beneath">
+		      City list
+		    </div>
+		  </div>
+	  </div>
+	  <div id="rest" class="  place-beneath window-background">
+	    <div id="main-bar" class="   place-beneath">
+	      <button id="button-inventory" class="universal_button" i18n="Inventory">Inventory</button>
+	      <button id="button-character" class="universal_button" i18n="Character">Character</button>
+	      <button id="button-pipbuck"  class="universal_button" i18n="Pipbuck">Pipbuck</button>
+	      <button id="button-menu"     class="universal_button" i18n="Menu">Menu</button>
+	    </div>
+		 <div id="quest-locator" class="console-bg   place-beneath">
+				 Placeholder for quest tracer
+		 </div>
+	  </div>
 
   </body>
 </rml>

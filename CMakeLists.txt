@@ -8,7 +8,7 @@ include_directories(include angelscript)
 
 if(UNIX)
   if(CMAKE_COMPILER_IS_GNUCC)
-    set(CMAKE_CXX_FLAGS "-std=c++0x -Wno-deprecated-declarations")
+    set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -Wno-deprecated-declarations -pedantic")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DAUDIO_BACKEND_SFML")
   endif()
 endif()
@@ -24,7 +24,7 @@ add_executable(game ${sourceFiles})
 if (UNIX)
   target_link_libraries(game -L/usr/lib/panda3d p3framework panda pandafx pandaexpress p3dtoolconfig p3dtool p3direct
                                               p3rocket RocketCore RocketControls
-                                              angelscript sfml-audio)
+                                              angelscript sfml-audio pthread)
 else()
   target_link_libraries(game libp3framework libpanda libpandafx libpandaexpress libp3dtoolconfig libp3dtool libp3direct libp3rocket RocketCore RocketControls angelscript sfml-audio)
 endif()

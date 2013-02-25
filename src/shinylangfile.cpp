@@ -36,11 +36,11 @@ Parser::Parser(const string& filename)
         std::string line  = text.substr(begLine, i - begLine);
         bool        empty = true;
 
-        for (int ii = 0 ; ii < line.size() ; ++ii)
+        for (unsigned int ii = 0 ; ii < line.size() ; ++ii)
         {
           if (line[ii] == '#')
           {
-            for (int iii = ii ; iii < line.size() ; ++iii)
+            for (unsigned int iii = ii ; iii < line.size() ; ++iii)
               line[iii] = ' ';
           }
           if (line[ii] == '\t')
@@ -111,9 +111,9 @@ DataTree* Parser::Run()
     }
     else
     {
-      DataBranch* branch = new DataBranch;
-      int         endKey, begValue;
-      string      key, value;
+      DataBranch*  branch = new DataBranch;
+      unsigned int endKey, begValue;
+      string       key, value;
 
       for (endKey   = 0          ; endKey < str.size() && str[endKey] != ':'     ; ++endKey);
       for (begValue = endKey + 1 ; begValue < str.size() && str[begValue] == ' ' ; ++begValue);

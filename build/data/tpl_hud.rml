@@ -1,0 +1,16 @@
+<template name="tplhud" content="content">
+<head>
+  <link type="text/rcss" href="rkt.rcss"/>
+  <link type="text/rcss" href="main.rcss"/>
+
+
+
+</head>
+<body>
+    <div id="body_mainbar">
+      <div id="content">
+      </div>
+    </div>
+</body>
+</template>
+

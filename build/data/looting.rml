@@ -1,7 +1,7 @@
 <rml>
   <head>
     <title>Iventory</title>
-    <link type="text/template" href="tpl_mainbar.rml" />
+    <link type="text/template" href="tpl_window.rml" />
     <style>
       #body
       {
@@ -10,7 +10,7 @@
         margin: auto;
         margin-top: 10px;
       }
-
+		.universal_button{display: inline-block; float: left; width: 40%; margin-right: 10%;}
       #body-inventory-items
       {
         width:          90%;
@@ -43,14 +43,14 @@
 
       #buttons
       {
-        position:       absolute;
-        bottom:         5px;
-        right:          5px;
+        width: 90%; 
+        padding-left: 10%;
+        height: 15%;
       }
-
+		#inventory-items{width: 90%; height: 85%;}
       .inventory-item-icon
       {}
-
+		
       .inventory-item-draggable
       {
         drag: clone;
@@ -66,8 +66,8 @@
       </p>
     </div>
     <div id="buttons">
-      <button id="button_take_all" i18n="Take all">Take all</button>
-      <button id="button_done"     i18n="Done">Done</button>
+      <button id="button_take_all" i18n="Take all" class="universal_button">Take all</button>
+      <button id="button_done"     i18n="Done" class="universal_button">Done</button>
     </div>
   </p>
   </div></body>

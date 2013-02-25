@@ -27,6 +27,7 @@
 # include "inventory_ui.hpp"
 
 # include "world.h"
+#include <soundmanager.hpp>
 
 class Level
 {
@@ -36,6 +37,7 @@ public:
   
   Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& data, TimeManager& tm);
   
+  void InitSun(void);
   void InitPlayer(void);
 
   // Saving/Loading
@@ -59,6 +61,8 @@ public:
   };
 
   AsyncTask::DoneStatus   do_task(void);
+  void                    SetPersistent(bool set)  { _persistent = set;    }
+  bool                    IsPersistent(void) const { return (_persistent); }
   void                    SetState(State);
   State                   GetState(void) const { return (_state); }
   void                    SetInterrupted(bool);
@@ -91,7 +95,7 @@ public:
   void                   CallbackCancelSelectZone(void);
   const std::string&     GetNextZone(void) const;
   const std::string&     GetExitZone(void) const;
-  void                   SetEntryZone(PlayerParty&, const std::string&);
+  void                   SetEntryZone(Party&, const std::string&);
 
   // Interaction Management
   void                   CallbackActionBarter(ObjectCharacter*);
@@ -143,14 +147,23 @@ public:
 
   MouseState        _mouseState;
 
+  // Misc
+  void              SpawnEnemies(const std::string& type, unsigned short quantity, unsigned short n_spawn);
+  bool              IsWaypointOccupied(unsigned int id) const;
+  ISampleInstance*  PlaySound(const std::string& name);
+
 private:
   typedef std::list<InstanceDynamicObject*> InstanceObjects;
   typedef std::list<ObjectCharacter*>       Characters;
   typedef std::list<LevelExitZone*>         ExitZones;
 
   void              RunDaylight(void);
+  void              RunMetabolism(void);
   void              MouseInit(void);
   void              ToggleCharacterOutline(bool);
+  
+  void              InsertDynamicObject(DynamicObject&);
+  void              InsertCharacter(ObjectCharacter*);
   
   Observatory::ObserverHandler obs;
   Observatory::ObserverHandler obs_player;
@@ -162,8 +175,10 @@ private:
   Timer                _timer;
   TimeManager&         _timeManager;
   State                _state;
+  bool                 _persistent;
 
   World*               _world;
+  SoundManager         _sound_manager;
   InstanceObjects      _objects;
   Characters           _characters;
   Characters::iterator _itCharacter;
@@ -173,8 +188,11 @@ private:
   bool                 _exitingZone;
   std::string          _exitingZoneTo, _exitingZoneName;
 
-  DirectionalLight* _sunLight;
-  NodePath          _sunLightNode;
+  PT(DirectionalLight) _sunLight;
+  NodePath             _sunLightNode;
+  
+  TimeManager::Task*   _task_daylight;
+  TimeManager::Task*   _task_metabolism;
 
   enum UiIterator
   {

@@ -5,9 +5,10 @@
 # include "rocket_extension.hpp"
 # include "datatree.hpp"
 # include "scriptengine.hpp"
+# include "scriptable.hpp"
 # include <cstdarg>
 
-class StatModel
+class StatModel : public Scriptable
 {
 public:
   StatModel(Data statsheet);
@@ -47,6 +48,8 @@ public:
   short          GetSpecial(const std::string& stat)   const;
   short          GetSkill(const std::string& stat)     const;
   
+  std::string    SelectRandomEncounter(void);
+  
   unsigned short GetSpecialPoints(void)                const { return (_statsheet["Variables"]["Special Points"]); }
   unsigned short GetSkillPoints(void)                  const { return (_statsheet["Variables"]["Skill Points"]);   }
   unsigned short GetPerksPoints(void)                  const { return (_statsheet["Variables"]["Perks"]);          }
@@ -77,21 +80,16 @@ public:
   bool           UpdateAllValues(void);  
   
 private:
-  typedef std::pair<asIScriptFunction**, std::string> ScriptFuncPtr;
-  typedef std::list<ScriptFuncPtr>                    ScriptFuncPtrs;
   void           LoadFunctions(void);
-  void           ReloadFunction(asIScriptFunction**);
-  ScriptFuncPtrs _script_func_ptrs;
   
   std::vector<std::string> GetStatKeys(Data stats) const;
 
   Data               _statsheet;
   Data               _statsheet_backup;
-  asIScriptContext*  _scriptContext;
-  asIScriptModule*   _scriptModule;
   asIScriptFunction *_scriptAddSpecialPoint, *_scriptActivateTraits,  *_scriptAddExperience;
   asIScriptFunction *_scriptXpNextLevel,     *_scriptLevelUp,         *_scriptUpdateAllValues;
   asIScriptFunction *_scriptIsReady,         *_scriptAvailableTraits, *_scriptAddPerk;
+  asIScriptFunction *_selectRandomEncounter;
 };
 
 class StatView
@@ -163,6 +161,7 @@ public:
   void TriggerSkillAffinity(const std::string& stat, bool);
 
   void AddKill(const std::string& race);
+  void RunMetabolism(void);
 
   Observatory::Signal<void (short)>          HpChanged;
   Observatory::Signal<void (unsigned short)> LevelUp;

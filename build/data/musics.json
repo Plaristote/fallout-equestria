@@ -3,5 +3,7 @@
                 "menu": "menu.ogg"
               },
   "test": { "test": "test.ogg" },
+  "random-desert-1": { "desert-wind": "desert-wind.ogg" },
+  "special-test": { "desert-wind": "desert-wind.ogg" },
   "worldmap": { "highwayman": "worldmap.ogg" }
 }

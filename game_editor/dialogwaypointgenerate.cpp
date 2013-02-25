@@ -1,6 +1,9 @@
 #include "dialogwaypointgenerate.h"
 #include "ui_dialogwaypointgenerate.h"
 
+#include "functorthread.h"
+#include "qpandaapplication.h"
+
 using namespace std;
 
 DialogWaypointGenerate::DialogWaypointGenerate(QWidget *parent) :
@@ -24,6 +27,9 @@ void DialogWaypointGenerate::SetWorld(World *world)
 
 void DialogWaypointGenerate::Generate()
 {
+  FunctorThread& thread = *FunctorThread::Create([this](void)
+  {
+    float step     = 0;
     float sizex    = ui->size_x->value();
     float sizey    = ui->size_y->value();
     float spacingx = ui->spacing_x->value();
@@ -31,9 +37,9 @@ void DialogWaypointGenerate::Generate()
     float initPosX = ui->pos_x->value();
     float initPosY = ui->pos_y->value();
     float initPosZ = ui->pos_z->value();
-
     vector<vector<Waypoint*> > waypoints;
 
+    to_select.clear();
     waypoints.resize(sizex);
     for (int i = 0 ; i < sizex ; ++i)
       waypoints[i].resize(sizey);
@@ -47,6 +53,8 @@ void DialogWaypointGenerate::Generate()
             float posz = initPosZ;
 
             waypoints[x][y] = world->AddWayPoint(posx, posy, posz);
+            SigUpdateProgressbar("Waypoint Generation: %p%", ++step / (sizex * sizey * 2) * 100);
+            to_select.push_back(waypoints[x][y]);
         }
     }
 
@@ -70,6 +78,13 @@ void DialogWaypointGenerate::Generate()
               waypoints[x][y]->Connect(waypoints[x - 1][y + 1]);
             if (x + 1 < sizex && y + 1 < sizey)
               waypoints[x][y]->Connect(waypoints[x + 1][y + 1]);
+            SigUpdateProgressbar("Waypoint Generation: %p%", ++step / (sizex * sizey * 2) * 100);
         }
     }
+    EndedGeneration();
+    QPandaApplication::SetPandaEnabled(true);
+  });
+  QPandaApplication::SetPandaEnabled(false);
+  StartedGeneration();
+  thread.start();
 }

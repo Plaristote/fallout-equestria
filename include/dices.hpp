@@ -17,7 +17,7 @@ struct Dices
     return ((rand() % max) + 1);
   }
 
-  static bool Test(unsigned successPercentage)
+  static bool Test(int successPercentage)
   {
     return (Throw(100) <= successPercentage);
   }

@@ -1,6 +1,8 @@
 #include "mainmenu.hpp"
 #include "musicmanager.hpp"
-#include <soundmanager.hpp>
+#include "soundmanager.hpp"
+#include "executor.hpp"
+#include <ui_dialog.hpp>
 
 extern PandaFramework framework;
 
@@ -25,7 +27,6 @@ void MouseCursor::Update(void)
   if (_cursor && IsVisible())
   {
     stringstream strTop, strLeft;
-    int          nTop,   nLeft;
     string       top,    left;
     MouseData    pointer = _window->get_graphics_window()->get_pointer(0);
 
@@ -146,6 +147,7 @@ AsyncTask::DoneStatus MainMenu::do_task()
   }
   _mouseCursor.Update();
   SoundManager::GarbageCollectAll();
+  Executor::Run(); // Executor does not have any specific application. It just executes lambdas collected here and there.
   return (quitGamePlz ? AsyncTask::DoneStatus::DS_exit : AsyncTask::DoneStatus::DS_cont);
 }
 
@@ -198,7 +200,6 @@ MainMenu::View::View(WindowFramework* window, Rocket::Core::Context* context) : 
     std::string                      idz[]                        = { "button-continue", "button-new-game", "button-load-game", "button-options", "button-quit" };
     Observatory::Signal<void (Rocket::Core::Event&)>* signalz[]   = { &Continue, &NewGame, &LoadGame, &Options, &Quit };
     RocketListener*                  listenerz[]                  = { &ContinueClicked, &NewGameClicked, &LoadGameClicked, &OptionsClicked, &QuitClicked };
-    Rocket::Core::Element*           buttons[5];
 
     for (int it = 0 ; it < 5 ; ++it)
     {

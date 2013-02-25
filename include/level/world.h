@@ -97,12 +97,18 @@ struct Waypoint
     };
 
     typedef std::list<Arc> Arcs;
+    typedef std::vector<std::pair<Arc, unsigned short> > ArcsWithdrawed;
 
     unsigned int        id;
     unsigned char       floor;
     Arcs                arcs;
+    ArcsWithdrawed      arcs_withdrawed;
     NodePath            nodePath;
     FBoundingBox        mouseBox;
+    
+    void WithdrawArc(Waypoint* other);
+    void UnwithdrawArc(Waypoint* other, ArcObserver* observer);
+    std::pair<Arc, unsigned short>* GetWithdrawable(Waypoint* other);
 
     Waypoint(NodePath root);
     Waypoint(void) {}

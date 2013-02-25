@@ -234,13 +234,17 @@ struct WorldLight
     Type_DynamicObject
   };
 
-  WorldLight(Type type, ParentType ptype, NodePath parent, const std::string& name) : name(name), type(type), parent_type(ptype), parent(parent)
-  { 
-    Initialize();
+  WorldLight(WindowFramework* window, Type type, ParentType ptype, NodePath parent, const std::string& name) : name(name), type(type), parent_type(ptype), parent(parent)
+  {
+    enabled = true;
+    Initialize(window);
   }
-  
+
   WorldLight(NodePath parent) : parent(parent) {}
-  
+
+  void   SetEnabled(bool);
+  void   Destroy(void);
+
   LColor GetColor(void) const
   {
     return (light->get_color());
@@ -251,6 +255,14 @@ struct WorldLight
     LColor color(r, g, b, a);
     
     light->set_color(color);
+  }
+
+  void   SetPosition(LPoint3 position)
+  {
+     nodePath.set_pos(position);
+#ifdef GAME_EDITOR
+     symbol.set_pos(position);
+#endif
   }
 
   bool operator==(const std::string& comp) { return (name == comp); }
@@ -279,10 +291,14 @@ struct WorldLight
   PT(Light)   light;
   Lens*       lens;
   float       zoneSize;
+  bool        enabled;
 
   std::list<NodePath> enlightened;
+#ifdef GAME_EDITOR
+  NodePath    symbol;
+#endif
 private:
-  void Initialize(void);
+  void Initialize(WindowFramework*);
   NodePath    parent;
   MapObject*  parent_i;
 };
@@ -312,6 +328,9 @@ struct World
     
     NodePath         rootLights;
     WorldLights      lights;
+#ifdef GAME_EDITOR
+    NodePath         lightSymbols;
+#endif
     
     ExitZones        exitZones;
     EntryZones       entryZones;
@@ -415,11 +434,18 @@ struct World
     
     Waypoint*      GetWaypointAt(LPoint2f);
 
-    void           UnSerialize(Utils::Packet& packet);
-    void           Serialize(Utils::Packet& packet, std::function<void (float)> progress_callback);
+    typedef std::function<void (const std::string&, float)> ProgressCallback;
 
-    void           CompileWaypoints(void);
-    void           CompileDoors(void);
+    void           UnSerialize(Utils::Packet& packet);
+    void           Serialize(Utils::Packet& packet, ProgressCallback progress_callback);
+
+    void           CompileWaypoints(ProgressCallback);
+    void           CompileDoors(ProgressCallback);
+
+#ifdef GAME_EDITOR
+    bool           do_compile_waypoints;
+    bool           do_compile_doors;
+#endif
 };
 
 #endif // WORLD_H

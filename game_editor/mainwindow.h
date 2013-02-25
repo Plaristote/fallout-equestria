@@ -24,6 +24,7 @@
 #include "tabdialog.h"
 #include "tabl18n.h"
 #include "serializer.hpp"
+#include "dialogsavemap.h"
 
 namespace Ui {
 class MainWindow;
@@ -50,6 +51,8 @@ public:
 
 signals:
     void Closed(void);
+    void SigDisplayError(QString title, QString message);
+    void SigUpdateProgressBar(QString label, float value);
 
 public slots:
     //void WaypointHovered(NodePath);
@@ -61,6 +64,11 @@ private slots:
     void PandaInitialized(void);
     void LoadProject(void);
     void FilterInit(void);
+    void CurrentTabChanged(int);
+    void EnableLevelEditor(void);
+    void DisableLevelEditor(void);
+    void UpdateProgressBar(QString label, float value);
+    void DisplayError(QString title, QString message);
 
     // MAPS
     void LoadMap(const QString&);
@@ -88,7 +96,11 @@ private slots:
     void WaypointSelDelete(void);
     void WaypointHovered(NodePath);
     void WaypointSelect(Waypoint*);
+    void SelectGeneratedWaypoints(void);
     void UpdateSelection(void);
+    void WaypointDiscardSelection(void);
+    void WaypointSelectAll(void);
+    void WaypointSyncTerrain(void);
 
     // ENTRY/EXIT ZONES
     void EntryZoneAdd(void);
@@ -143,6 +155,9 @@ private slots:
     void DynamicObjectSetWaypoint(void);
 
     // LIGHTS
+    void LightVisible(void);
+    void LightSetEnabled(void);
+    void LightSetDisabled(void);
     void LightSelected(void);
     void LightAdd(void);
     void LightDelete(void);
@@ -154,6 +169,7 @@ public:
     void DrawMap(void);
 
 private:
+    QPandaApplication&       _app;
     WindowFramework*         _window;
     Ui::MainWindow*          ui;
     TabScript                tabScript;
@@ -169,6 +185,8 @@ private:
     Waypoint*                waypointHovered;
     float                    waypointSelX, waypointSelY, waypointSelZ;
     DialogWaypointGenerate   waypointGenerate;
+    DialogSaveMap            dialogSaveMap;
+    bool                     save_map_use_thread;
 
     WizardObject             wizardObject;
 

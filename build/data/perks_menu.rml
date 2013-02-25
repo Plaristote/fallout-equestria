@@ -12,45 +12,40 @@
       
       #controls
       {
-        position: absolute;
-        bottom:   0px;
-        right:    0px;
+       
         height:   10%;
       }
 
       #perks-selector
       {
-        position:   absolute;
-        height:     90%;
-        width:      30%;
-        top:        0px;
-        left:       0px;
-        overflow-x: scroll;
+        display: inline-block;
+        height:     80%;
+        width:      40%;
+        overflow-y: scroll;
+        z-index: 80;
       }
 
       #perks-description
       {
-        position:   absolute;
-        height:     90%;
-        width:      70%;
-        top:        0px;
-        right:      0px;
-        overflow:   auto;
+        display: inline-block;
+        height:     80%;
+        width:      55%;
+        overflow:   hidden;
       }
 
     </style>
   </head>
   <body template="pywindow">
 
-    <div id="perks-selector">
+    <div id="perks-selector" class="console-bg">
     </div>
 
-    <div id="perks-description">
+    <div id="perks-description" class="console-bg">
     </div>
 
     <div id="controls">
-      <button class="button_menu" id="select" i18n="Ok">Ok</button>
-      <button class="button_menu" id="cancel" i18n="Cancel">Cancel</button>
+      <button class="francis" id="select" i18n="Ok">Ok</button>
+      <button class="francis" id="cancel" i18n="Cancel">Cancel</button>
     </div>
   </body>
 </rml>

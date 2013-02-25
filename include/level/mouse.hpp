@@ -34,7 +34,7 @@ struct MouseHovering
   NodePath dynObject;
 };
 
-class World;
+struct World;
 
 class Mouse
 {

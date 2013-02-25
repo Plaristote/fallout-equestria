@@ -104,7 +104,7 @@
       }
      </style>
   </head>
-  <body id="body" class="window">
+  <body id="body">
   <div id="window">
   <p>
     <div id="inventory-items">
@@ -120,8 +120,8 @@
       </p>
    </div>
     <div id="buttons">
-      <button id="button_done" i18n="Barter">Barter</button>
-      <button id="button_quit" i18n="Quit">Quit</button>
+      <button id="button_done" i18n="Barter" class="universal_button">Barter</button>
+      <button id="button_quit" i18n="Quit" class="universal_button">Quit</button>
     </div>
   </p>
   </div>

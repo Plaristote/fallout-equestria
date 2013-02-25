@@ -9,6 +9,8 @@ namespace Ui {
 class DialogWaypointGenerate;
 }
 
+typedef QList<Waypoint*> WaypointList;
+
 class DialogWaypointGenerate : public QDialog
 {
     Q_OBJECT
@@ -18,14 +20,21 @@ public:
     ~DialogWaypointGenerate();
 
     void SetWorld(World* world);
+    WaypointList GetToSelect(void) const { return (to_select); }
 
 private slots:
     void Generate(void);
+
+signals:
+    void SigUpdateProgressbar(QString, float);
+    void StartedGeneration(void);
+    void EndedGeneration(void);
 
 private:
     Ui::DialogWaypointGenerate* ui;
 
     World*                      world;
+    WaypointList                to_select;
 };
 
 #endif // DIALOGWAYPOINTGENERATE_H

@@ -32,6 +32,7 @@ namespace Script
   public:
     static asIScriptModule* Require(const std::string& name, const std::string& filepath);
     static void             Release(asIScriptModule* module);
+    static void             OutputFunctionList(asIScriptModule* module);
     
   private:
     struct LoadedModule

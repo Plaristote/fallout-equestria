@@ -219,7 +219,6 @@ void Pipbuck::ReloadApps(void)
   list<string>           apps;
   stringstream           rml;
 
-  apps_data.Output();  
   // Get App List from scripts
   if (_module)
   {
@@ -271,35 +270,15 @@ void Pipbuck::ReloadApps(void)
 PipbuckClockApp::PipbuckClockApp(Data script) : _appid(script.Key()), _time_manager(GameTask::CurrentGameTask->GetTimeManager())
 {
   EventWait.EventReceived.Connect            (*this, &PipbuckClockApp::Wait);
-  EventWaitMore.EventReceived.Connect        (*this, &PipbuckClockApp::WaitMore);
-  EventWaitLess.EventReceived.Connect        (*this, &PipbuckClockApp::WaitLess);
+  EventWaitMore.EventReceived.Connect        ([this](Rocket::Core::Event&) { WaitChange(1);  });
+  EventWaitLess.EventReceived.Connect        ([this](Rocket::Core::Event&) { WaitChange(-1); });
   EventTimeUnitSelected.EventReceived.Connect(*this, &PipbuckClockApp::SelectTimeUnit);
 }
 
 bool PipbuckClockApp::Started(DataEngine& de)
 {
-  ifstream file("data/pipbuck_clock.rml");
-
   _year = _month = _day = _hour = _minute = _second = 0;
-  if (file.is_open())
-  {
-    long           size, begin, end;
-    char*          raw;
-
-    begin       = file.tellg();
-    file.seekg(0, std::ios::end);
-    end         = file.tellg();
-    file.seekg(0, std::ios::beg);
-    size        = end - begin;
-    raw         = new char[size + 1];
-    file.read(raw, size);
-    file.close();
-    _inner_rml = raw;
-    delete[] raw;
-  }
-  else
-    return (false);
-  return (true);
+  return (Filesystem::FileContent("data/pipbuck_clock.rml", _inner_rml));
 }
 
 void PipbuckClockApp::Focused(Rocket::Core::Element* root, DataEngine& de)
@@ -395,16 +374,6 @@ void PipbuckClockApp::WaitChange(int change)
   }
 }
 
-void PipbuckClockApp::WaitMore(Rocket::Core::Event&)
-{
-  WaitChange(1);
-}
-
-void PipbuckClockApp::WaitLess(Rocket::Core::Event&)
-{
-  WaitChange(-1);
-}
-
 void PipbuckClockApp::Wait(Rocket::Core::Event&)
 {
   Rocket::Core::Variant* var_days    = _wait_days->GetAttribute("data-value");
@@ -439,23 +408,26 @@ void PipbuckClockApp::RunAsMainTask(Rocket::Core::Element* root, DataEngine& de)
   if (_second) SetValue(_second, _time_manager.GetSecond());
   if (_minutes_to_spend > 0)
   {
-    if (Level::CurrentLevel != 0 && Level::CurrentLevel->GetState() == Level::Fight)
-    {
-      _span_error->SetInnerRML(i18n::T("You can't wait while fighting").c_str());
-      _minutes_to_spend = 0;
-      return ;
-    }
-    _span_error->SetInnerRML("");
-    if (_minutes_to_spend > 60)
-    {
-      _time_manager.AddElapsedTime(0, 0, 1);
-      _minutes_to_spend -= 60;
-    }
-    else
-    {
-      _time_manager.AddElapsedTime(0, 1);
-      _minutes_to_spend--;
-    }
+     if (Level::CurrentLevel != 0 && Level::CurrentLevel->GetState() == Level::Fight)
+     {
+       _span_error->SetInnerRML(i18n::T("You can't wait while fighting").c_str());
+       _minutes_to_spend = 0;
+       return ;
+     }
+     Level::CurrentLevel->SetState(Level::Interrupted);
+     _span_error->SetInnerRML("");
+     if (_minutes_to_spend > 60)
+     {
+       _time_manager.AddElapsedTime(0, 0, 1);
+       _minutes_to_spend -= 60;
+     }
+     else
+     {
+       _time_manager.AddElapsedTime(0, 1);
+       _minutes_to_spend--;
+     }
+     if (_minutes_to_spend == 0)
+       Level::CurrentLevel->SetState(Level::Normal);
   }
 }
 

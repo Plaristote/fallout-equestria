@@ -23,7 +23,7 @@ GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
 
   string fonts_name[] = { "", "Fallout", "", "", "", "" };
 
-  for (int i=0; i<GET_ARRAY_SIZE(fonts); i++)
+  for (unsigned int i=0; i<GET_ARRAY_SIZE(fonts); i++)
   {
     string path = string(PATH_FONTS) + "/" + fonts[i];
 
@@ -159,6 +159,8 @@ void OptionsManager::Initialize(void)
   if (!_data)
   {
     _data = DataTree::Factory::JSON("conf.json");
+    if (!_data)
+      _data = new DataTree;
     Refresh();
   }
 }
@@ -258,7 +260,7 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
     {
       Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("language-select"));
       
-      for (unsigned int i = 0 ; i < select->GetNumOptions() ; ++i)
+      for (int i = 0 ; i < select->GetNumOptions() ; ++i)
       {
 	Controls::SelectOption* option = select->GetOption(i);
 	
@@ -276,7 +278,7 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
     {
       Controls::ElementFormControlSelect* select = dynamic_cast<Controls::ElementFormControlSelect*>(screen_select);
       
-      for (unsigned int i = 0 ; i < select->GetNumOptions() ; ++i)
+      for (int i = 0 ; i < select->GetNumOptions() ; ++i)
       {
 	Controls::SelectOption* option = select->GetOption(i);
 
@@ -380,10 +382,10 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
   GConsole= this;
 
   if (Script::Engine::Get())
-    _scriptContext = Script::Engine::Get()->CreateContext();
+    _script_context = Script::Engine::Get()->CreateContext();
   else
   {
-    _scriptContext = 0;
+    _script_context = 0;
     cerr << "/!\\ [GameConsole] No Script::Engine" << endl;
   }
 
@@ -399,7 +401,6 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
   {
     doc->Show();
 
-    Rocket::Core::Element* form  = doc->GetElementById("console_form");
 
     if (_input)
     {
@@ -416,8 +417,8 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
 
 GameConsole::~GameConsole()
 {
-  if (_scriptContext)
-    _scriptContext->Release();
+  if (_script_context)
+    _script_context->Release();
   Script::Engine::ScriptError.Disconnect(_observerError);
 }
 
@@ -431,12 +432,12 @@ void GameConsole::Execute(Rocket::Core::Event&)
     _history.push_back(string.CString());
     _histIter= _history.end();
 
-    if (_scriptContext)
+    if (_script_context)
     {
       stringstream stream;
 
       _currentLine = string.CString();
-      int ret = ExecuteString(Script::Engine::Get(), _currentLine.c_str(), 0, _scriptContext);
+      int ret = ExecuteString(Script::Engine::Get(), _currentLine.c_str(), 0, _script_context);
       if (ret == asEXECUTION_ABORTED || ret == asEXECUTION_EXCEPTION)
       {
 	stream << "<span class='console-as-error'>[AngelScript]</span> ";
@@ -505,17 +506,17 @@ void GameConsole::KeyUp(Rocket::Core::Event& event)
 void GameConsole::ListFunctions() {
 	asIScriptEngine* engine = Script::Engine::Get();
 
-	for (int i= 0; i<engine->GetGlobalFunctionCount(); i++)
+	for (unsigned int i= 0; i<engine->GetGlobalFunctionCount(); i++)
 		cout << "GLOBAL: " << engine->GetGlobalFunctionByIndex(i)->GetName() << endl;
-	for (int i= 0; i<engine->GetFuncdefCount(); i++)
+	for (unsigned int i= 0; i<engine->GetFuncdefCount(); i++)
 		cout << "FUNCDEF: " << engine->GetFuncdefByIndex(i)->GetName() << endl;
-	for (int i= 0; i<engine->GetObjectTypeCount(); i++) {
+	for (unsigned int i= 0; i<engine->GetObjectTypeCount(); i++) {
 		asIObjectType* obj = engine->GetObjectTypeByIndex(i);
 		cout << "OBJ: " << obj->GetName() << endl;
-		for (int j= 0; j<obj->GetMethodCount(); j++) 
+		for (unsigned int j= 0; j<obj->GetMethodCount(); j++) 
 			cout << "---->" << obj->GetMethodByIndex(j)->GetName() << endl;
-	};
-};
+	}
+}
 
 //Print out the entire scene graph into the console
 void GameConsole::PrintScenegraph() {
@@ -523,7 +524,7 @@ void GameConsole::PrintScenegraph() {
 	//render.ls();
 	PrintChildren(GameConsole::Get()._window->get_render(),0);
 	cout << endl;
-};
+}
 
 void GameConsole::PrintChildren(const NodePath& n, int lvl) {
 	for (int i= 0; i<lvl; i++)
@@ -547,11 +548,11 @@ void GameConsole::PrintChildren(const NodePath& n, int lvl) {
 		//cout << "{";
 		//n.ls();
 		//cout << "}";
-	};
-};
+	}
+}
 GameConsole& GameConsole::Get() {
 	return *GConsole;
-};
+}
 
 /*
  * GameInventory
@@ -665,11 +666,6 @@ GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : Ui
   {
     doc->Show();
 
-    Rocket::Core::Element* elementWindow;
-    Rocket::Core::Element* element;
-
-    elementWindow = doc->GetElementById("content");
-
     ToggleEventListener(true, "continue", "click", _continueClicked);
     ToggleEventListener(true, "options",  "click", _optionsClicked);
     ToggleEventListener(true, "exit",     "click", _exitClicked);
@@ -706,28 +702,6 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
   if (doc)
   {
     doc->Show();
-
-    Rocket::Core::Element* elementWindow;
-    Rocket::Core::Element* element;
-
-    elementWindow = doc->GetElementById("window");
-
-    for (unsigned int i = 0 ; element = elementWindow->GetChild(i) ; ++i)
-    {
-      cout << "Element[" << i << "] tag: '" << element->GetTagName().CString() << "' id: " << element->GetId().CString() << endl;
-    }
-    
-    if (!elementWindow)
-    {
-      cout << "Window element doesn't exist" << endl;
-      return ;
-    }
-
-    element = doc->GetElementById("first_col");
-
-    if (!element)
-      cout << "first_col doesn't exist" << endl;
-
     ToggleEventListener(true, "menu",      "click", MenuButtonClicked);
     ToggleEventListener(true, "inv",       "click", InventoryButtonClicked);
     ToggleEventListener(true, "pipbuck",   "click", PipbuckButtonClicked);
@@ -813,9 +787,9 @@ void GameMainBar::SetCurrentAP(unsigned short ap, unsigned short max)
     if (apbar)
     {
       for (unsigned short i = 0  ; i < ap ; ++i)
-	rml += "<img src='../textures/ap-active.png' /> ";
+	rml += "<img class='img-ap'   height='20px' src='../textures/ap-active.png' /> ";
       for (unsigned short i = ap ; i < _apMax ; ++i)
-	rml += "<img src='../textures/ap-inactive.png' /> ";
+	rml += "<img class='img-ap' height='20px' src='../textures/ap-inactive.png' /> ";
       apbar->SetInnerRML(rml.c_str());
     }
   }
@@ -830,7 +804,7 @@ void GameMainBar::SetMaxAP(unsigned short ap)
   if (apbar)
   {
     for (unsigned short i = 0 ; i < ap ; ++i)
-      rml += "<img src='../textures/ap-inactive.png' /> ";
+      rml += "<img class='img-ap' src='../textures/ap-inactive.png' /> ";
     apbar->SetInnerRML(rml.c_str());
   }
 }
@@ -898,7 +872,6 @@ void GameMainBar::SetEquipedItemAction(unsigned short it, InventoryObject* item,
       stringstream rml;
       bool         actionExists = (*item)["actions"].Count() > actionIt;
 
-      std::cout << "Action It is " << (int)actionIt << std::endl;
       if (actionExists) rml << "<p class='equiped_action'>" << (*item)["actions"][actionIt].Key() << "</p>";
       rml << "<p class='equiped_image'><img src='../textures/itemIcons/" << (*item)["icon"].Value() << "' /></p>";
       if (actionExists) rml << "<p class='equiped_apcost'>" << (*item)["actions"][actionIt]["ap-cost"].Value() << "AP</p>";

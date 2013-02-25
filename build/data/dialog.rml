@@ -83,7 +83,7 @@ button.dialog-answer:active,
       </p>
 
       <div id="sidebar">
-        <button id="button-open-barter" i18n="Barter">Barter</button>
+        <button id="button-open-barter" i18n="Barter" class="universal_button">Barter</button>
       </div>
 
     </p>
