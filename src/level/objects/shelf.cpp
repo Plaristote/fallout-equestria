@@ -3,7 +3,7 @@
 #include <algorithm>
 
 using namespace std;
-using namespace Observatory;
+using namespace Sync;
 
 void ObjectShelf::LockWaypoints(bool locking)
 {

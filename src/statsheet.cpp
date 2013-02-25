@@ -474,7 +474,7 @@ StatController::StatController(Data statsheet) : _model(statsheet), _view(0)
   _model.SkillChanged.Connect    (*this,   &StatController::SkillChanged);
   _model.StatisticChanged.Connect(*this,   &StatController::StatisticChanged);
   _model.LevelUpped.Connect      (*this,   &StatController::LevelChanged);
-  _model.LevelUpped.Connect      (LevelUp, &Observatory::Signal<void (unsigned short)>::Emit);
+  _model.LevelUpped.Connect      (LevelUp, &Sync::Signal<void (unsigned short)>::Emit);
   _model.MaxHpChanged.Connect    (*this,   &StatController::SetMaxHp);
   _model.PerksChanged.Connect    (*this,   &StatController::PerksChanged);
 }
@@ -908,7 +908,7 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
     CancelButton.EventReceived.Connect(*this, &StatViewRocket::Cancel);
 
     // Perks Dialog
-    _perks_dialog.PerkChoosen.Connect (PerkToggled, &Observatory::Signal<void (const string&)>::Emit);
+    _perks_dialog.PerkChoosen.Connect (PerkToggled, &Sync::Signal<void (const string&)>::Emit);
 
     // Edit Mode
     EventSpecialClicked.EventReceived.Connect(*this, &StatViewRocket::SpecialClicked);

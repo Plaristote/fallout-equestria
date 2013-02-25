@@ -1,7 +1,8 @@
-#ifndef  OBSERVATORY_HPP
-# define OBSERVATORY_HPP
+#ifndef  Sync_HPP
+# define Sync_HPP
 
-# include <panda3d/cmath.h>
+# include "globals.hpp"
+
 # include <list>
 # include <queue>
 # include <algorithm>
@@ -29,7 +30,7 @@
 # define S2P_RECORD_ATTR        P2 p1;
 # define S2P_RECORD_VAL         params.p1
 # define S2P_RECORD_SERI        p1
-# define S2P_RECORD_UNSERI      p1
+# define S2P_RECORD_UNSERI      packet.operator>> <P2>(p1);
 
 # define S3P_TPL                class P1, class P2, class P3
 # define S3P_TFUN               P1 (P2, P3)
@@ -39,7 +40,7 @@
 # define S3P_RECORD_ATTR        P2 p1; P3 p2;
 # define S3P_RECORD_VAL         params.p1, params.p2
 # define S3P_RECORD_SERI        p1 << p2
-# define S3P_RECORD_UNSERI      p1 >> p2
+# define S3P_RECORD_UNSERI      S2P_RECORD_UNSERI packet.operator>> <P3>(p2);
 
 # define S4P_TPL                class P1, class P2, class P3, class P4
 # define S4P_TFUN               P1 (P2, P3, P4)
@@ -49,7 +50,7 @@
 # define S4P_RECORD_ATTR        P2 p1; P3 p2; P4 p3;
 # define S4P_RECORD_VAL         params.p1, params.p2, params.p3
 # define S4P_RECORD_SERI        p1 << p2 << p3
-# define S4P_RECORD_UNSERI      p1 >> p2 >> p3
+# define S4P_RECORD_UNSERI      S3P_RECORD_UNSERI packet.operator>> <P4>(p3);
 
 # define S5P_TPL                class P1, class P2, class P3, class P4, class P5
 # define S5P_TFUN               P1 (P2, P3, P4, P5)
@@ -59,7 +60,7 @@
 # define S5P_RECORD_ATTR        P2 p1; P3 p2; P4 p3; P5 p4;
 # define S5P_RECORD_VAL         params.p1, params.p2, params.p3, params.p4
 # define S5P_RECORD_SERI        p1 << p2 << p3 << p4
-# define S5P_RECORD_UNSERI      p1 >> p2 >> p3 >> p4
+# define S5P_RECORD_UNSERI      S4P_RECORD_UNSERI packet.operator>> <P5>(p4);
 
 # define S6P_TPL                class P1, class P2, class P3, class P4, class P5, class P6
 # define S6P_TFUN               P1 (P2, P3, P4, P5, P6)
@@ -69,7 +70,7 @@
 # define S6P_RECORD_ATTR        P2 p1; P3 p2; P4 p3; P5 p4; P6 p5;
 # define S6P_RECORD_VAL         params.p1, params.p2, params.p3, params.p4, params.p5
 # define S6P_RECORD_SERI        p1 << p2 << p3 << p4 << p5
-# define S6P_RECORD_UNSERI      p1 >> p2 >> p3 >> p4 >> p5
+# define S6P_RECORD_UNSERI      S5P_RECORD_UNSERI packet.operator>> <P6>(p5);
 
 # define S7P_TPL                class P1, class P2, class P3, class P4, class P5, class P6, class P7
 # define S7P_TFUN               P1 (P2, P3, P4, P5, P6, P7)
@@ -79,11 +80,11 @@
 # define S7P_RECORD_ATTR        P2 p1; P3 p2; P4 p3; P5 p4; P6 p5; P7 p6;
 # define S7P_RECORD_VAL         params.p1, params.p2, params.p3, params.p4, params.p5, params.p6
 # define S7P_RECORD_SERI        p1 << p2 << p3 << p4 << p5 << p6
-# define S7P_RECORD_UNSERI      p1 >> p2 >> p3 >> p4 >> p5 >> p6
+# define S7P_RECORD_UNSERI      S6P_RECORD_UNSERI packet.operator>> <P7>(p6);
 
 # define DECL_SIGNAL(TPL, TFUN, PARAMS, VALUES, RECORD_CON, RECORD_ATTR, RECORD_VAL, RECORD_SERI, RECORD_UNSERI) \
   template<TPL>                                                         \
-  class Signal<TFUN> : public ISignal                                   \
+  class Signal<TFUN> : virtual public ISignal                           \
   {                                                                     \
     friend class ObserverHandler;                                       \
                                                                         \
@@ -137,7 +138,7 @@
                                                                         \
       void Unserialize(Utils::Packet& packet)                           \
       {                                                                 \
-        packet >> RECORD_UNSERI;                                        \
+        RECORD_UNSERI;                                        \
       }                                                                 \
                                                                         \
       RECORD_ATTR                                                       \
@@ -145,7 +146,8 @@
                                                                         \
     typedef std::queue<RecordedCall> RecordedCalls;                     \
                                                                         \
-    Signal(bool async = true) : _async(async) {}                        \
+    Signal(bool direct = true) : _direct(direct)                        \
+    { _semaphore.SetDeadlockSafety(true); }                             \
                                                                         \
     ~Signal()                                                           \
     {                                                                   \
@@ -156,20 +158,19 @@
         delete *it;                                                     \
     }                                                                   \
                                                                         \
-    void       SetAsync(bool set)  { _async = set;    }                 \
-    bool       IsAsync(void) const { return (_async); }                 \
+    void       SetDirect(bool set)  { _direct = set;    }               \
+    bool       IsDirect(void) const { return (_direct); }               \
                                                                         \
     void       Emit(PARAMS)                                             \
     {                                                                   \
-      if (_async)                                                       \
+      if (_direct)                                                      \
       {                                                                 \
         _iterator = _observers.begin();                                 \
         while (_iterator != _observers.end())                           \
         {                                                               \
-          typename Observers::iterator trace = _iterator;               \
-                                                                        \
+          _iterator_updated_during_emit = false;                        \
           (**_iterator)(VALUES);                                        \
-          if (trace == _iterator)                                       \
+          if (_iterator_updated_during_emit == false)                   \
             _iterator++;                                                \
         }                                                               \
       }                                                                 \
@@ -208,7 +209,10 @@
           InterfaceObserver* observer = *toDel;                         \
                                                                         \
           if (toDel == _iterator)                                       \
+          {                                                             \
+            _iterator_updated_during_emit = true;                       \
             _iterator = _observers.erase(toDel);                        \
+          }                                                             \
           else                                                          \
             _observers.erase(toDel);                                    \
           delete observer;                                              \
@@ -235,38 +239,38 @@
       return (_observers.size());                                       \
     }                                                                   \
                                                                         \
-    void       PushRecordCall(void* raw)                                \
-    {                                                                   \
-      RecordedCall params;                                              \
-                                                                        \
-      memcpy(&params, raw, sizeof(RecordedCall));                       \
-      _recordedCalls.push(params);                                      \
-    }                                                                   \
-                                                                        \
-    inline RecordedCalls& GetRecordedCalls(void)                        \
-    {                                                                   \
-      return (_recordedCalls);                                          \
-    }                                                                   \
-                                                                        \
     void       ExecuteRecordedCalls(void)                               \
     {                                                                   \
       Semaphore::Lock lock(_semaphore);                                 \
                                                                         \
-      while (_recordedCalls.size())                                     \
+      FuncExecuteRecordedCalls(_recordedCalls);                         \
+      FuncExecuteRecordedCalls(_pushedCalls);                           \
+    }                                                                   \
+                                                                        \
+    void       FuncExecuteRecordedCalls(RecordedCalls& calls)           \
+    {                                                                   \
+      while (calls.size())                                              \
       {                                                                 \
-        RecordedCall& params = _recordedCalls.front();                  \
+        RecordedCall& params = calls.front();                           \
                                                                         \
         _iterator = _observers.begin();                                 \
         while (_iterator != _observers.end())                           \
         {                                                               \
-          typename Observers::iterator trace = _iterator;               \
-                                                                        \
+          _iterator_updated_during_emit = false;                        \
           (**_iterator)(RECORD_VAL);                                    \
-          if (trace == _iterator)                                       \
+          if (_iterator_updated_during_emit == false)                   \
             _iterator++;                                                \
         }                                                               \
-        _recordedCalls.pop();                                           \
+        calls.pop();                                                    \
       }                                                                 \
+    }                                                                   \
+                                                                        \
+    void       BackupRecordedCalls(bool on_off)                         \
+    {                                                                   \
+      if (on_off)                                                       \
+        _backedupCalls = _recordedCalls;                                \
+      else                                                              \
+        _recordedCalls = _backedupCalls;                                \
     }                                                                   \
                                                                         \
   private:                                                              \
@@ -279,13 +283,16 @@
     }                                                                   \
                                                                         \
     typename Observers::iterator _iterator;                             \
+    bool                         _iterator_updated_during_emit;         \
     Observers                    _observers;                            \
     RecordedCalls                _recordedCalls;                        \
-    bool                         _async;                                \
+    RecordedCalls                _backedupCalls;                        \
+    RecordedCalls                _pushedCalls;                          \
+    bool                         _direct;                               \
     Semaphore                    _semaphore;                            \
   };
 
-namespace Observatory
+namespace Sync
 {
   typedef void* ObserverId;
   
@@ -294,19 +301,29 @@ namespace Observatory
   class ISignal
   {
   public:
-    virtual void ExecuteRecordedCalls(void) = 0;
+    virtual void ExecuteRecordedCalls(void)       = 0;
+    //virtual void PushRecordCall(Utils::Packet&)   = 0;
+    //virtual bool FetchRecordCall(Utils::Packet&)  = 0;
+    //virtual int  RecordCallCount(void)            = 0;
+    //virtual int  PushedCallCount(void)            = 0;
+    //virtual void BackupRecordedCalls(bool on_off) = 0;
+    virtual void SetDirect(bool)                  = 0;
   };
-  
-  struct Signals : public std::list<ISignal*>
+
+  class Signals : public std::list<ISignal*>
   {
+  public:
     void ExecuteRecordedCalls(void)
     {
-      for_each(begin(), end(), [](ISignal* signal) { signal->ExecuteRecordedCalls(); });
+      std::for_each(begin(), end(), [](ISignal* signal)
+      {
+        signal->ExecuteRecordedCalls();
+      });
     }
   };
-  
+
   template<class p1 = void>
-  class Signal : public ISignal
+  class Signal : virtual public ISignal
   {
     friend class ObserverHandler;
 
@@ -321,7 +338,7 @@ namespace Observatory
     class FunctionObserver : public InterfaceObserver
     {
       public:
-        typedef std::function<void ()> Function;
+        typedef std::function<void (void)> Function;
 
         FunctionObserver(Function function) : _function(function) {}
 
@@ -359,7 +376,8 @@ namespace Observatory
     };
     typedef std::queue<RecordedCall> RecordedCalls;
 
-    Signal(bool async = true) : _async(async) {}
+    Signal(bool direct = true) : _direct(direct)
+    { _semaphore.SetDeadlockSafety(true); }
 
     ~Signal()
     {
@@ -370,20 +388,19 @@ namespace Observatory
         delete *it;
     }
     
-    void       SetAsync(bool set)  { _async = set;    }
-    bool       IsAsync(void) const { return (_async); }
+    void       SetDirect(bool set)  { _direct = set;    }
+    bool       IsDirect(void) const { return (_direct); }
 
     void       Emit()
     {
-      if (_async)
+      if (_direct)
       {
         _iterator = _observers.begin();
         while (_iterator != _observers.end())
         {
-          typename Observers::iterator trace = _iterator;
-
+          _iterator_updated_during_emit = false;
           (**_iterator)();
-          if (trace == _iterator)
+          if (_iterator_updated_during_emit == false)
             _iterator++;
         }
       }
@@ -418,7 +435,10 @@ namespace Observatory
           InterfaceObserver* observer = *toDel;
 
           if (toDel == _iterator)
+          {
+            _iterator_updated_during_emit = true;
             _iterator = _observers.erase(toDel);
+          }
           else
             _observers.erase(toDel);
           delete observer;
@@ -447,22 +467,66 @@ namespace Observatory
     
     void       ExecuteRecordedCalls(void)
     {
-      while (_recordedCalls.size())
-      {
-        /*RecordedCall& params = */_recordedCalls.front();
+      Semaphore::Lock lock(_semaphore);
 
+      FuncExecuteRecordedCalls(_recordedCalls);
+      FuncExecuteRecordedCalls(_pushedCalls);
+    }
+
+    void       FuncExecuteRecordedCalls(RecordedCalls& calls)
+    {
+      while (calls.size())
+      {
         _iterator = _observers.begin();
         while (_iterator != _observers.end())
         {
-          typename Observers::iterator trace = _iterator;
-
+          _iterator_updated_during_emit = false;
           (**_iterator)();
-          if (trace == _iterator)
+          if (_iterator_updated_during_emit == false)
             _iterator++;
         }
-        _recordedCalls.pop();
+        calls.pop();
       }
-    }    
+    }
+
+    void       PushRecordCall(Utils::Packet& packet)
+    {
+      Semaphore::Lock lock(_semaphore);
+      RecordedCall    params;
+
+      params.Unserialize(packet);
+      _pushedCalls.push(params);
+    }
+    
+    bool       FetchRecordCall(Utils::Packet& packet)
+    {
+      Semaphore::Lock lock(_semaphore);
+      RecordedCall&   params = _recordedCalls.front();
+
+      params.Serialize(packet);
+      _recordedCalls.pop();
+      return (_recordedCalls.size() > 0);
+    }
+    
+    int        RecordCallCount(void)
+    {
+      Semaphore::Lock lock(_semaphore);
+      return (_recordedCalls.size());
+    }
+
+    int        PushedCallCount(void)
+    {
+      Semaphore::Lock lock(_semaphore);
+      return (_pushedCalls.size());
+    }
+
+    void       BackupRecordedCalls(bool on_off)
+    {
+      if (on_off)
+        _backedupCalls = _recordedCalls;
+      else
+        _recordedCalls = _backedupCalls;
+    }
 
   private:
     ObserverId AddObserver(InterfaceObserver* observer)
@@ -474,9 +538,13 @@ namespace Observatory
     }
 
     typename Observers::iterator _iterator;
+    bool                         _iterator_updated_during_emit;
     Observers                    _observers;
     RecordedCalls                _recordedCalls;
-    bool                         _async;
+    RecordedCalls                _backedupCalls;
+    RecordedCalls                _pushedCalls;
+    bool                         _direct;
+    Semaphore                    _semaphore;
   };
  
   //DECL_SIGNAL(S1P_TPL, S1P_TFUN, S1P_PARAMS, S1P_VALUES, S1P_RECORD_CON, S1P_RECORD_ATTR, S1P_RECORD_VAL, S1P_RECORD_SERI, S1P_RECORD_UNSERI) 
@@ -493,13 +561,15 @@ namespace Observatory
     {
       virtual ~IObserverPair() {};
       virtual void Disconnect(void) = 0;
+      virtual bool operator==(const ISignal& comp) const = 0;
     };
 
     template<class C>
     struct ObserverPair : public IObserverPair
     {
       ObserverPair(C& signal, ObserverId id) : signal(signal), id(id) {}
-      void Disconnect(void) { signal.Disconnect(id); }
+      void Disconnect(void)                      { signal.Disconnect(id);     }
+      bool operator==(const ISignal& comp) const { return (&signal == &comp); }
       C&         signal;
       ObserverId id;
     };
@@ -519,6 +589,26 @@ namespace Observatory
         delete observer;
       });
       _observers.clear();
+    }
+
+    void       DisconnectAllFrom(const ISignal& signal)
+    {
+      Observers::iterator it  = _observers.begin();
+      Observers::iterator end = _observers.end();
+
+      while (it != end)
+      {
+        IObserverPair* observer = *it;
+
+        if ((*observer) == signal)
+        {
+          observer->Disconnect();
+          delete observer;
+          it = _observers.erase(it);
+        }
+        else
+          ++it;
+      }
     }
     
     template<class C>
@@ -546,96 +636,6 @@ namespace Observatory
   private:
     Observers _observers;
   };
-
-  
-//   class Socket
-//   {
-//   public:
-//     void Send(void*, unsigned short size);
-//     void Send(const Utils::Packet& packet);
-//   private:
-//   };
-//   
-//   class NetworkObserver
-//   {
-//     typedef std::list<Socket*> Observers;
-//   public:
-//     NetworkObserver(unsigned int id) : _id(id) {}
-//     virtual ~NetworkObserver() {}
-//     virtual void ExecutePendingCalls(void) = 0;
-//     virtual void SendPendingCalls(void)    = 0;
-// 
-//     bool         operator==(unsigned int id) const { return (_id == id); }
-//     unsigned int Id(void)                    const { return (_id); }
-//     void         AddSocket(Socket* socket)         { _observers.push_back(socket); }
-//     void         DelSocket(Socket* socket)         { _observers.remove(socket);    }
-//     
-//   protected:
-//     void         SendToObservers(const Utils::Packet& packet)
-//     {
-//       std::for_each(_observers.begin(), _observers.end(), [packet](Socket* socket)
-//       { socket->Send(packet); });
-//     }
-// 
-//   private:
-//     Observers    _observers;
-//     unsigned int _id;
-//   };
-// 
-//   class NetworkObserverManager
-//   {
-//     typedef std::list<NetworkObserver*> Observers;
-//   public:
-//     
-//   private:
-//     Observers _observers;
-//   };
-//   
-//   template<typename SIG>
-//   class NetworkSignal : public NetworkObserver
-//   {
-//   public:
-//     NetworkSignal(SIG& sig) : _signal(sig) {}
-// 
-//     void ReceivePendingCalls(Utils::Packet& packet)
-//     {
-//       unsigned int to_receive;
-// 
-//       packet >> to_receive;
-//       for (unsigned int i = 0 ; i < to_receive ; ++i)
-//       {
-//         RecordedCall call;
-// 
-//         call.Unserialize(packet);
-//         _signal.PushRecordCall(call);
-//       }
-//       _signal.ExecuteRecordedCalls();
-//     }
-// 
-//     void SendPendingCalls(void)
-//     {
-//       SIG::RecordedCalls& calls = _signal.GetRecordedCalls();
-//       unsigned int        to_send = calls.size();
-// 
-//       if (to_send > 0)
-//       {
-//         Utils::Packet     packet;
-// 
-//         packet << Id() << to_send;
-//         while (calls.size())
-//         {
-//           const SIG::RecordedCall& call = calls.front();
-// 
-//           call.Serialize(packet);
-//           calls.pop();
-//         }
-//         SendToObservers(packet);
-//     }
-// 
-//   private:
-//     SIG& _signal;
-//   };
-
 }
 
 #endif

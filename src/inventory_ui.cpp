@@ -27,10 +27,10 @@ bool InventoryView::operator==(Rocket::Core::Element* element)
   return (element == &_element);
 }
 
-Observatory::Signal<void (InventoryView*, Rocket::Core::Element*)> ObjectDropped;
-Observatory::Signal<void (InventoryObject*)>                       ObjectSelected;
-Observatory::Signal<void (InventoryObject*)>                       ObjectMenuRequested;
-Observatory::Signal<void (InventoryObject*)>                       ObjectFocused;
+Sync::Signal<void (InventoryView*, Rocket::Core::Element*)> ObjectDropped;
+Sync::Signal<void (InventoryObject*)>                       ObjectSelected;
+Sync::Signal<void (InventoryObject*)>                       ObjectMenuRequested;
+Sync::Signal<void (InventoryObject*)>                       ObjectFocused;
 
 void InventoryView::UpdateView(void)
 {
@@ -170,9 +170,9 @@ void InventoryViewController::AddView(Rocket::Core::Element* element, Inventory&
 
   _views.push_back(&view);
   view.ObjectDropped.Connect      (*this,               &InventoryViewController::DragObserver);
-  view.ObjectFocused.Connect      (ObjectFocused,       &Observatory::Signal<void (InventoryObject*)>::Emit);
-  view.ObjectSelected.Connect     (ObjectSelected,      &Observatory::Signal<void (InventoryObject*)>::Emit);
-  view.ObjectMenuRequested.Connect(ObjectMenuRequested, &Observatory::Signal<void (InventoryObject*)>::Emit);
+  view.ObjectFocused.Connect      (ObjectFocused,       &Sync::Signal<void (InventoryObject*)>::Emit);
+  view.ObjectSelected.Connect     (ObjectSelected,      &Sync::Signal<void (InventoryObject*)>::Emit);
+  view.ObjectMenuRequested.Connect(ObjectMenuRequested, &Sync::Signal<void (InventoryObject*)>::Emit);
 }
 
 void InventoryViewController::DragObserver(InventoryView* container, Rocket::Core::Element* element)
@@ -230,7 +230,7 @@ UiUseObjectOn::UiUseObjectOn(WindowFramework* window, Rocket::Core::Context* con
     if (eInventory)
     {
       _viewController.AddView(eInventory, inventory);
-      _viewController.ObjectSelected.Connect(ObjectSelected, &Observatory::Signal<void (InventoryObject*)>::Emit);
+      _viewController.ObjectSelected.Connect(ObjectSelected, &Sync::Signal<void (InventoryObject*)>::Emit);
     }
     _root->Show();
   }

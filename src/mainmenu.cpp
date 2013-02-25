@@ -198,7 +198,7 @@ MainMenu::View::View(WindowFramework* window, Rocket::Core::Context* context) : 
   if (_root)
   {
     std::string                      idz[]                        = { "button-continue", "button-new-game", "button-load-game", "button-options", "button-quit" };
-    Observatory::Signal<void (Rocket::Core::Event&)>* signalz[]   = { &Continue, &NewGame, &LoadGame, &Options, &Quit };
+    Sync::Signal<void (Rocket::Core::Event&)>* signalz[]   = { &Continue, &NewGame, &LoadGame, &Options, &Quit };
     RocketListener*                  listenerz[]                  = { &ContinueClicked, &NewGameClicked, &LoadGameClicked, &OptionsClicked, &QuitClicked };
 
     for (int it = 0 ; it < 5 ; ++it)
@@ -208,7 +208,7 @@ MainMenu::View::View(WindowFramework* window, Rocket::Core::Context* context) : 
       if (element)
       {
 	element->AddEventListener("click", listenerz[it]);
-	listenerz[it]->EventReceived.Connect(*signalz[it], &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
+	listenerz[it]->EventReceived.Connect(*signalz[it], &Sync::Signal<void (Rocket::Core::Event&)>::Emit);
       }
       else
 	cerr << "Missing button " << idz[it] << endl;

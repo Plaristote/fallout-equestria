@@ -11,11 +11,11 @@ class MainMenu : public AsyncTask
   {
     View(WindowFramework* window, Rocket::Core::Context* context);
 
-    Observatory::Signal<void (Rocket::Core::Event&)> Continue;
-    Observatory::Signal<void (Rocket::Core::Event&)> NewGame;
-    Observatory::Signal<void (Rocket::Core::Event&)> Quit;
-    Observatory::Signal<void (Rocket::Core::Event&)> LoadGame;
-    Observatory::Signal<void (Rocket::Core::Event&)> Options;
+    Sync::Signal<void (Rocket::Core::Event&)> Continue;
+    Sync::Signal<void (Rocket::Core::Event&)> NewGame;
+    Sync::Signal<void (Rocket::Core::Event&)> Quit;
+    Sync::Signal<void (Rocket::Core::Event&)> LoadGame;
+    Sync::Signal<void (Rocket::Core::Event&)> Options;
     
   private:
     RocketListener NewGameClicked, QuitClicked, LoadGameClicked, OptionsClicked, ContinueClicked;

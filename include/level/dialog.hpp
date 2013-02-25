@@ -97,8 +97,8 @@ public:
 
   ObjectCharacter* WithCharacter(void) const { return (_character); }
 
-  Observatory::Signal<void ()>                 DialogEnded;
-  Observatory::Signal<void (ObjectCharacter*)> StartBarter;
+  Sync::Signal<void ()>                 DialogEnded;
+  Sync::Signal<void (ObjectCharacter*)> StartBarter;
 
 private:
   void             ExecuteAnswer(Rocket::Core::Event& event);

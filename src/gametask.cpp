@@ -285,7 +285,7 @@ GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(wind
     return (character != 0);
   };
   
-  SyncLoadLevel.SetAsync(false);
+  SyncLoadLevel.SetDirect(false);
   SyncLoadLevel.Connect(*this, &GameTask::DoLoadLevel);
   _signals.push_back(&SyncLoadLevel);
 }
@@ -310,7 +310,7 @@ void                  GameTask::SaveClicked(Rocket::Core::Event&)
     delete _uiSaveGame;
   }
   _uiSaveGame = new UiSave(_window, _gameUi.GetContext(), _savePath);
-  _uiSaveGame->SaveToSlot.SetAsync(false);
+  _uiSaveGame->SaveToSlot.SetDirect(false);
   _uiSaveGame->SaveToSlot.Connect(*this, &GameTask::SaveToSlot);
   _uiSaveGame->EraseSlot.Connect (*this, &GameTask::EraseSlot);
   _uiSaveGame->Show();
@@ -773,6 +773,30 @@ void GameTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::str
   SyncLoadLevel.Emit(params);
 }
 
+void GameTask::SetLevelSpecialEncounter(const string& special_encounter)
+{
+  if (_level)
+  {
+    float x, y;
+
+    _level->SetPersistent(true);
+    _worldMap->GetCurrentPosition(x, y);
+    _worldMap->AddCity(special_encounter, x, y, 10);
+    _worldMap->SetCityVisible(special_encounter);
+  }
+  SyncLoadLevel.Disconnect(obs_level_unpersistent);
+}
+
+void GameTask::SetLevelEncounter(const string& encounter_type, short n_creeps)
+{
+  if (_level)
+  {
+    _level->SetPersistent(false);
+    _level->SpawnEnemies(encounter_type, n_creeps, 1);
+  }
+  SyncLoadLevel.Disconnect(obs_level_unpersistent);
+}
+
 void GameTask::DoCheckRandomEncounter(int x, int y)
 {
   short encounter_chance  = 25;
@@ -815,22 +839,11 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
         }
         callback = [this, special_encounter](void)
         {
-          Observatory::ObserverId obs_id;
+          auto   _this          = this;
+          string encounter_name = special_encounter;
 
           MapOpenLevel(special_encounter);
-          obs_id = SyncLoadLevel.Connect([this, &obs_id, special_encounter](LoadLevelParams)
-          {
-            if (_level)
-            {
-              float x, y;
-
-              _level->SetPersistent(true);
-              _worldMap->GetCurrentPosition(x, y);
-              _worldMap->AddCity(special_encounter, x, y, 10);
-              _worldMap->SetCityVisible(special_encounter);
-            }
-            SyncLoadLevel.Disconnect(obs_id);
-          });
+          obs_level_unpersistent = SyncLoadLevel.Connect([_this, encounter_name](LoadLevelParams) { _this->SetLevelSpecialEncounter(encounter_name); });
         };
         if (dialog)
           dialog->SetMessage(i18n::T("You discovered ") + i18n::T(special_encounter) + ". Do you want to go in ?");
@@ -847,7 +860,6 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
     {
       // Launch a hostile encounter
       short  n_creeps            = 5 + Dices::Throw(20) - (luck * Dices::Throw(2));
-      short  encounter_type_dice = Dices::Throw(100);
       string encounter_type, encounter_map;
       Data   bad_encounters = case_data["type-encounters"];
       Data   map_encounters = case_data["map-encounters"];
@@ -869,18 +881,13 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
 
       callback = [this, encounter_type, encounter_map, n_creeps](void)
       {
-        Observatory::ObserverId obs_id;
+        auto   _this   = this;
+        string type    = encounter_type;
+        string teh_map = encounter_map;
+        short  n       = n_creeps;
 
         MapOpenLevel(encounter_map);
-        obs_id = SyncLoadLevel.Connect([this, &obs_id, encounter_type, n_creeps](LoadLevelParams)
-        {
-          if (_level)
-          {
-            _level->SetPersistent(false);
-            _level->SpawnEnemies(encounter_type, n_creeps, 1);
-          }
-          SyncLoadLevel.Disconnect(obs_id);
-        });
+        obs_level_unpersistent = SyncLoadLevel.Connect([_this, type, n](LoadLevelParams) { _this->SetLevelEncounter(type, n); });
       };
 
       if (dialog)

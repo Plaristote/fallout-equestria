@@ -19,10 +19,10 @@
 
 using namespace std;
 
-Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUse;
-Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseObjectOn;
-Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSkillOn;
-Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
+Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUse;
+Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseObjectOn;
+Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSkillOn;
+Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
 PT(DirectionalLight) workaround_sunlight;
 
@@ -1197,7 +1197,7 @@ struct XpFetcher
   }
 
   ObjectCharacter         *killer, *target;
-  Observatory::ObserverId observerId;
+  Sync::ObserverId observerId;
   bool                    character_died;
 };
 

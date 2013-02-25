@@ -49,9 +49,9 @@ public:
   
   void                      ClosestWaypoint(World*, short currentFloor);
 
-  Observatory::Signal<void> ButtonLeft;
-  Observatory::Signal<void> ButtonMiddle;
-  Observatory::Signal<void> ButtonRight;
+  Sync::Signal<void> ButtonLeft;
+  Sync::Signal<void> ButtonMiddle;
+  Sync::Signal<void> ButtonRight;
 
   static void               CallbackButton1(const Event*, void* ptr)
   {

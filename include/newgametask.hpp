@@ -11,9 +11,9 @@ public:
   UiNewGame(WindowFramework*, Rocket::Core::Context*);
   ~UiNewGame(void);
 
-  Observatory::Signal<void>                      StartFromScratch;
-  Observatory::Signal<void (const std::string&)> SelectProfile;
-  Observatory::Signal<void>                      Cancel;
+  Sync::Signal<void>                      StartFromScratch;
+  Sync::Signal<void (const std::string&)> SelectProfile;
+  Sync::Signal<void>                      Cancel;
 
 private:
   RocketListener PreviousProfile, NextProfile, EventSelectProfile, EventStartFromScratch, EventCancel;
@@ -36,8 +36,8 @@ public:
   NewGameTask(WindowFramework*, Rocket::Core::Context*);
   ~NewGameTask();
 
-  Observatory::Signal<void> StartGame;
-  Observatory::Signal<void> Cancel;
+  Sync::Signal<void> StartGame;
+  Sync::Signal<void> Cancel;
   
 private:
   void                      SelectProfile(const std::string&);

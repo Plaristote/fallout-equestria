@@ -16,9 +16,9 @@ public:
   UiObjectQuantityPicker(WindowFramework* window, Rocket::Core::Context* context, const Inventory& inventory, const InventoryObject* object);
   ~UiObjectQuantityPicker();
 
-  Observatory::Signal<void (unsigned short)> QuantityPicked;
-  Observatory::Signal<void>                  Canceled;  
-  Observatory::ObserverHandler               Observer;
+  Sync::Signal<void (unsigned short)> QuantityPicked;
+  Sync::Signal<void>                  Canceled;  
+  Sync::ObserverHandler               Observer;
 
 private:
   RocketListener          EventAccepted, EventCanceled, EventIncrement, EventDecrement;
@@ -42,10 +42,10 @@ public:
   
   bool operator==(Rocket::Core::Element* element);
 
-  Observatory::Signal<void (InventoryView*, Rocket::Core::Element*)> ObjectDropped;
-  Observatory::Signal<void (InventoryObject*)>                       ObjectSelected;
-  Observatory::Signal<void (InventoryObject*)>                       ObjectMenuRequested;
-  Observatory::Signal<void (InventoryObject*)>                       ObjectFocused;
+  Sync::Signal<void (InventoryView*, Rocket::Core::Element*)> ObjectDropped;
+  Sync::Signal<void (InventoryObject*)>                       ObjectSelected;
+  Sync::Signal<void (InventoryObject*)>                       ObjectMenuRequested;
+  Sync::Signal<void (InventoryObject*)>                       ObjectFocused;
 
   void             UpdateView(void);
   void             Destroy(void);
@@ -62,9 +62,9 @@ private:
 class InventoryViewController
 {
 public:
-  Observatory::Signal<void (InventoryObject*)> ObjectSelected;
-  Observatory::Signal<void (InventoryObject*)> ObjectMenuRequested;
-  Observatory::Signal<void (InventoryObject*)> ObjectFocused;
+  Sync::Signal<void (InventoryObject*)> ObjectSelected;
+  Sync::Signal<void (InventoryObject*)> ObjectMenuRequested;
+  Sync::Signal<void (InventoryObject*)> ObjectFocused;
   
   void AddView(Rocket::Core::Element* element, Inventory& inventory);
   void DragObserver(InventoryView* container, Rocket::Core::Element* element);
@@ -86,8 +86,8 @@ public:
 
   void Destroy(void);
   
-  Observatory::Signal<void ()>                 ActionCanceled;
-  Observatory::Signal<void (InventoryObject*)> ObjectSelected;
+  Sync::Signal<void ()>                 ActionCanceled;
+  Sync::Signal<void (InventoryObject*)> ObjectSelected;
 
 private:
   void RocketCancelClicked(Rocket::Core::Event&) { ActionCanceled.Emit(); }
@@ -104,7 +104,7 @@ public:
   
   bool AllowDrop(InventoryView& from, InventoryView& to);
   
-  Observatory::Signal<void> BarterEnded;
+  Sync::Signal<void> BarterEnded;
 
 private:
   void SwapObjects(InventoryObject* object);
@@ -134,7 +134,7 @@ public:
 
   void Destroy(void);
   
-  Observatory::Signal<void> Done;
+  Sync::Signal<void> Done;
 
 private:
   void SwapObjects(InventoryObject* object);
@@ -156,8 +156,8 @@ public:
   ~UiEquipMode();
 
   void Destroy(void);
-  Observatory::Signal<void (unsigned short, InventoryObject*, EquipedMode)> EquipModeSelected;
-  Observatory::Signal<void> Closed;
+  Sync::Signal<void (unsigned short, InventoryObject*, EquipedMode)> EquipModeSelected;
+  Sync::Signal<void> Closed;
   
   void             DisableMode(EquipedMode);
 
@@ -179,8 +179,8 @@ public:
   UiNextZone(WindowFramework* window, Rocket::Core::Context* context, const std::vector<std::string> zones);
   ~UiNextZone();
   
-  Observatory::Signal<void (const std::string&)> NextZoneSelected;
-  Observatory::Signal<void (void)>               Cancel;
+  Sync::Signal<void (const std::string&)> NextZoneSelected;
+  Sync::Signal<void (void)>               Cancel;
 
 private:
   RocketListener LevelSelected, CancelSelected;

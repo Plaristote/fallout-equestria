@@ -28,7 +28,7 @@ using namespace std;
 /*struct Quest
 {
   Data                                           data;
-  Observatory::Signal<void (const std::string&)> Completed;
+  Sync::Signal<void (const std::string&)> Completed;
 
   void ActionCompleted(const std::string& type, const std::string& target, unsigned short quantity);
   

@@ -6,7 +6,7 @@
 using namespace std;
 
 i18n*                     i18n::_self = 0;
-Observatory::Signal<void> i18n::LanguageChanged;
+Sync::Signal<void> i18n::LanguageChanged;
 
 i18n::i18n(const string& language)
 {

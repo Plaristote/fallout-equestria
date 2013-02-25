@@ -21,10 +21,10 @@ public:
   ~GameMenu();
   void MenuEventContinue(Rocket::Core::Event& event) { Hide(); }
   
-  Observatory::Signal<void (Rocket::Core::Event&)> SaveClicked;
-  Observatory::Signal<void (Rocket::Core::Event&)> LoadClicked;
-  Observatory::Signal<void (Rocket::Core::Event&)> ExitClicked;
-  Observatory::Signal<void (Rocket::Core::Event&)> OptionsClicked;
+  Sync::Signal<void (Rocket::Core::Event&)> SaveClicked;
+  Sync::Signal<void (Rocket::Core::Event&)> LoadClicked;
+  Sync::Signal<void (Rocket::Core::Event&)> ExitClicked;
+  Sync::Signal<void (Rocket::Core::Event&)> OptionsClicked;
 
 private:
   RocketListener         _continueClicked;
@@ -61,10 +61,10 @@ public:
   RocketListener         PersButtonClicked;
   RocketListener         PipbuckButtonClicked;
   
-  Observatory::Signal<void (unsigned short)> UseEquipedItem;
-  Observatory::Signal<void (unsigned short)> EquipedItemNextAction;
-  Observatory::Signal<void>                  CombatPassTurn;
-  Observatory::Signal<void>                  CombatEnd;
+  Sync::Signal<void (unsigned short)> UseEquipedItem;
+  Sync::Signal<void (unsigned short)> EquipedItemNextAction;
+  Sync::Signal<void>                  CombatPassTurn;
+  Sync::Signal<void>                  CombatEnd;
   
 private:
   RocketListener         EquipedItem1Clicked;
@@ -92,10 +92,10 @@ public:
   void                     SetInventory(Inventory&);
   void                     UpdateInventory(void);
 
-  Observatory::Signal<void (unsigned short, InventoryObject*)> EquipItem;
-  Observatory::Signal<void (unsigned short)>                   UnequipItem;
-  Observatory::Signal<void (InventoryObject*)>                 UseObject;
-  Observatory::Signal<void (InventoryObject*)>                 DropObject;
+  Sync::Signal<void (unsigned short, InventoryObject*)> EquipItem;
+  Sync::Signal<void (unsigned short)>                   UnequipItem;
+  Sync::Signal<void (InventoryObject*)>                 UseObject;
+  Sync::Signal<void (InventoryObject*)>                 DropObject;
 
 private:
   void                     UpdateInventoryCapacity(void);
@@ -155,7 +155,7 @@ private:
   Rocket::Core::Element*         _input;
   std::string                    _currentLine;
   asIScriptContext*              _script_context;
-  Observatory::ObserverId        _observerError;
+  Sync::ObserverId        _observerError;
 };
 
 # include "statsheet.hpp"
@@ -173,7 +173,7 @@ public:
   void                   OpenMenu(Rocket::Core::Event&);
   void                   OpenInventory(Rocket::Core::Event&);
   void                   OpenPers(Rocket::Core::Event&);
-  Observatory::Signal<void (Rocket::Core::Event&)> OpenPipbuck;
+  Sync::Signal<void (Rocket::Core::Event&)> OpenPipbuck;
   
   PT(RocketRegion)       GetRocketRegion(void) { return (_rocket); }
 
@@ -207,12 +207,12 @@ public:
   GameInventory&   GetInventory(void) { return (_gameUi.GetInventory()); }
   StatViewRocket&  GetPers(void)      { return (_gameUi.GetPers());      }
 
-  Observatory::Signal<void (bool)> InterfaceOpened;  
+  Sync::Signal<void (bool)> InterfaceOpened;  
 
 private:
   GameUi&                      _gameUi;
   GameMainBar*                 _mainBar;  
-  Observatory::ObserverHandler _obs;
+  Sync::ObserverHandler _obs;
 };
 
 class GameOptions : public UiBase
@@ -234,7 +234,7 @@ private:
 class AlertUi : public UiBase
 {
 public:
-  static Observatory::Signal<void (const std::string)> NewAlert;
+  static Sync::Signal<void (const std::string)> NewAlert;
   
   AlertUi(WindowFramework* window, Rocket::Core::Context* context, const std::string& message);
   ~AlertUi();

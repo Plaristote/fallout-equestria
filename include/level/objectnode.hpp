@@ -68,19 +68,19 @@ struct ObjectType2Code { enum { Type = ObjectTypes::ObjectType::Other }; };
 class InstanceDynamicObject : public WaypointModifier, public AnimatedObject
 {
 public:
-  static Observatory::Signal<void (InstanceDynamicObject*)> ActionUse;
-  static Observatory::Signal<void (InstanceDynamicObject*)> ActionUseObjectOn;
-  static Observatory::Signal<void (InstanceDynamicObject*)> ActionUseSkillOn;
-  static Observatory::Signal<void (InstanceDynamicObject*)> ActionTalkTo;
+  static Sync::Signal<void (InstanceDynamicObject*)> ActionUse;
+  static Sync::Signal<void (InstanceDynamicObject*)> ActionUseObjectOn;
+  static Sync::Signal<void (InstanceDynamicObject*)> ActionUseSkillOn;
+  static Sync::Signal<void (InstanceDynamicObject*)> ActionTalkTo;
 
   struct Interaction
   {
-    Interaction(const std::string& name, InstanceDynamicObject* instance, Observatory::Signal<void (InstanceDynamicObject*)>* signal)
+    Interaction(const std::string& name, InstanceDynamicObject* instance, Sync::Signal<void (InstanceDynamicObject*)>* signal)
     : name(name), instance(instance), signal(signal) {}
 
     std::string                                         name;
     InstanceDynamicObject*                              instance;
-    Observatory::Signal<void (InstanceDynamicObject*)>* signal;
+    Sync::Signal<void (InstanceDynamicObject*)>* signal;
   };
   typedef std::list<Interaction> InteractionList;
   
@@ -125,7 +125,7 @@ public:
   InventoryObject*         pendingActionObject;
   unsigned char            pendingActionObjectActionIt;
   
-  Observatory::Signal<void (InstanceDynamicObject*)> AnimationEnded;
+  Sync::Signal<void (InstanceDynamicObject*)> AnimationEnded;
 
   virtual void             CallbackActionUse(InstanceDynamicObject* object) { ThatDoesNothing(); }
   

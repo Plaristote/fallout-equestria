@@ -17,9 +17,9 @@ public:
   bool CanGoThrough(unsigned char id) { return (true); }
   void GoingThrough(void* character);
   
-  Observatory::Signal<void (void)>                            ExitZone;
-  Observatory::Signal<void (const std::string&)>              GoToNextZone;
-  Observatory::Signal<void (const std::vector<std::string>&)> SelectNextZone;
+  Sync::Signal<void (void)>                            ExitZone;
+  Sync::Signal<void (const std::string&)>              GoToNextZone;
+  Sync::Signal<void (const std::vector<std::string>&)> SelectNextZone;
 
 private:
   std::string              _name;

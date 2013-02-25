@@ -9,7 +9,7 @@ class UiLoad : public UiBase
 public:
   UiLoad(WindowFramework* window, Rocket::Core::Context* context, const std::string& savePath);
   virtual ~UiLoad();
-  Observatory::Signal<void (unsigned char)> LoadSlot, EraseSlot;
+  Sync::Signal<void (unsigned char)> LoadSlot, EraseSlot;
   
   static std::string LoadSlotRml(const std::string& prefix, unsigned short slot);
   
@@ -31,7 +31,7 @@ class UiSave : public UiBase
 public:
   UiSave(WindowFramework* window, Rocket::Core::Context* context, const std::string& savePath);
   virtual ~UiSave();
-  Observatory::Signal<bool (unsigned char)> SaveToSlot, EraseSlot;
+  Sync::Signal<bool (unsigned char)> SaveToSlot, EraseSlot;
 
 private:
   void LoadSlots(const std::string& savepath);

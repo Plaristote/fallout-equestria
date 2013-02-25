@@ -21,9 +21,9 @@ public:
     virtual void Unfocused(DataEngine&)                             = 0;
     virtual void Focused(Rocket::Core::Element*, DataEngine&)       = 0;
 
-    Observatory::Signal<void (App*)> Exit;
-    Observatory::Signal<void>        Unfocus;
-    Observatory::Signal<void (App*)> AskFocus;
+    Sync::Signal<void (App*)> Exit;
+    Sync::Signal<void>        Unfocus;
+    Sync::Signal<void (App*)> AskFocus;
   };
   
   Pipbuck(WindowFramework*, Rocket::Core::Context*, DataEngine&);

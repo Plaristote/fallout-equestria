@@ -6,7 +6,7 @@ using namespace std;
 using namespace Script;
 
 asIScriptEngine*                        Engine::_engine;
-Observatory::Signal<void (std::string)> Engine::ScriptError;
+Sync::Signal<void (std::string)> Engine::ScriptError;
 ModuleManager::Modules                  ModuleManager::_modules;
 
 void Script::Call(asIScriptContext* context, asIScriptFunction* function, const std::string fmt, ...)

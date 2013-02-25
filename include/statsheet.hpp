@@ -72,10 +72,10 @@ public:
   
   bool           IsReady(void);
   
-  Observatory::Signal<void (unsigned short)>            LevelUpped;
-  Observatory::Signal<void (const std::string&, short)> SpecialChanged, SkillChanged, StatisticChanged;
-  Observatory::Signal<void (short)>                     MaxHpChanged;
-  Observatory::Signal<void>                             PerksChanged;
+  Sync::Signal<void (unsigned short)>            LevelUpped;
+  Sync::Signal<void (const std::string&, short)> SpecialChanged, SkillChanged, StatisticChanged;
+  Sync::Signal<void (short)>                     MaxHpChanged;
+  Sync::Signal<void>                             PerksChanged;
 
   bool           UpdateAllValues(void);  
   
@@ -119,13 +119,13 @@ public:
   virtual void SetAvailablePerks(std::list<std::string> perks)                                              = 0;
   virtual void SetSkillAffinity(const std::string& skill, bool)                                             = 0;
 
-  Observatory::Signal<void (const std::string&, const std::string&)> StatUpped, StatDowned; 
-  Observatory::Signal<void (const std::string&, const std::string&)> InformationChanged;
-  Observatory::Signal<void (unsigned char)>                          AgeChanged;
-  Observatory::Signal<void (const std::string&)>                     TraitToggled;
-  Observatory::Signal<void (const std::string&)>                     PerkToggled;
-  Observatory::Signal<void (const std::string&)>                     ToggleSkillAffinity;
-  Observatory::Signal<void>                                          Accepted, Canceled, MakeBackup;
+  Sync::Signal<void (const std::string&, const std::string&)> StatUpped, StatDowned; 
+  Sync::Signal<void (const std::string&, const std::string&)> InformationChanged;
+  Sync::Signal<void (unsigned char)>                          AgeChanged;
+  Sync::Signal<void (const std::string&)>                     TraitToggled;
+  Sync::Signal<void (const std::string&)>                     PerkToggled;
+  Sync::Signal<void (const std::string&)>                     ToggleSkillAffinity;
+  Sync::Signal<void>                                          Accepted, Canceled, MakeBackup;
 
   void         SetNumPerks(unsigned short n_perks)             { _n_perks = n_perks; }
 
@@ -163,10 +163,10 @@ public:
   void AddKill(const std::string& race);
   void RunMetabolism(void);
 
-  Observatory::Signal<void (short)>          HpChanged;
-  Observatory::Signal<void (unsigned short)> LevelUp;
-  Observatory::Signal<void>                  ChangesAccepted;
-  Observatory::Signal<void>                  ChangesCanceled;
+  Sync::Signal<void (short)>          HpChanged;
+  Sync::Signal<void (unsigned short)> LevelUp;
+  Sync::Signal<void>                  ChangesAccepted;
+  Sync::Signal<void>                  ChangesCanceled;
 
 private:
   void      SetMaxHp(short hp);
@@ -190,7 +190,7 @@ private:
 
   StatModel                    _model;
   StatView*                    _view;
-  Observatory::ObserverHandler _viewObservers;
+  Sync::ObserverHandler _viewObservers;
 };
 
 class StatViewRocket : public UiBase, public StatView
@@ -203,8 +203,8 @@ class StatViewRocket : public UiBase, public StatView
     void SetAvailablePerks(std::list<std::string> perks);
     void SetPerkDescription(std::string description);
 
-    Observatory::Signal<void (const std::string&)> PerkSelected;
-    Observatory::Signal<void (const std::string&)> PerkChoosen;
+    Sync::Signal<void (const std::string&)> PerkSelected;
+    Sync::Signal<void (const std::string&)> PerkChoosen;
     
   private:
     void ClearPerksButtons(void);

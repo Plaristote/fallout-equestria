@@ -1,11 +1,10 @@
-#include "globals.hpp"
 #include "level/objectnode.hpp"
 #include <panda3d/nodePathCollection.h>
 #include <panda3d/auto_bind.h>
 #include "level/level.hpp"
 
 using namespace std;
-using namespace Observatory;
+using namespace Sync;
 using namespace ObjectTypes;
 
 void InstanceDynamicObject::ThatDoesNothing() { _level->ConsoleWrite("That does nothing"); }

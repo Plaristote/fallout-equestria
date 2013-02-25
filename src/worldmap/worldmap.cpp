@@ -80,7 +80,7 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, Time
     ToggleEventListener(true, "button-menu",      "click", ButtonMenu);
     ButtonInventory.EventReceived.Connect(_gameUi, &GameUi::OpenInventory);
     ButtonCharacter.EventReceived.Connect(_gameUi, &GameUi::OpenPers);
-    ButtonPipbuck.EventReceived.Connect(_gameUi.OpenPipbuck, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
+    ButtonPipbuck.EventReceived.Connect(_gameUi.OpenPipbuck, &Sync::Signal<void (Rocket::Core::Event&)>::Emit);
     ButtonMenu.EventReceived.Connect(_gameUi, &GameUi::OpenMenu);
     
     _cursor->AddEventListener("click", &PartyCursorClicked);

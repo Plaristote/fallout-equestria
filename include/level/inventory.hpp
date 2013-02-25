@@ -105,7 +105,7 @@ public:
   void             SetCapacity(unsigned short value) { _capacity = value;       }
   bool             CanCarry(InventoryObject*, unsigned short quantity = 1);
   
-  Observatory::Signal<void> ContentChanged;
+  Sync::Signal<void> ContentChanged;
 
 private:
   Content          _content;
