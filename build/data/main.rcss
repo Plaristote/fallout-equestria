@@ -68,18 +68,35 @@ div#title_bar span
 
 div#window
 {
+        width: 100%;
+        height: 100%;
 	width: auto;
 	padding: 10px 15px;
 
-	background-decorator:          tiled-box;
-	background-top-left-image:     invader.tga 0px 0px 133px 140px;
-	background-top-right-image:    invader.tga 136px 0px 146px 140px;
-	background-top-image:          invader.tga stretch 134px 0px 135px 140px;
-	background-bottom-left-image:  invader.tga 0px 140px 11px 151px;
-	background-bottom-right-image: invader.tga 136px 140px 146px 151px;
-	background-bottom-image:       invader.tga clamp-truncate 11px 140px 12px 151px;
-	background-left-image:         invader.tga clamp-truncate 0px 139px 10px 140px;
-	background-center-image:       invader.tga clamp-truncate 11px 139px 12px 140px;
+        background-decorator: tiled-box;
+        background-top-left-image:     invader.tga           0px   0px  30px  30px;
+        background-top-right-image:    invader.tga         202px   0px 231px  30px;
+        background-top-image:          invader.tga stretch  30px   0px 201px  30px;
+        background-bottom-left-image:  invader.tga           0px  91px  30px 119px;
+        background-bottom-right-image: invader.tga         202px  91px 231px 119px;
+        background-bottom-image:       invader.tga stretch  30px  91px 201px 119px;
+        background-left-image:         invader.tga stretch   0px  30px  30px  90px;
+        background-right-image:        invader.tga stretch 202px  30px 231px  90px;
+        background-center-image:       invader.tga repeat-truncate  30px  30px 201px  90px;
+}
+
+.window-background
+{
+        background-decorator: tiled-box;
+        background-top-left-image:     invader.tga           0px   0px  30px  30px;
+        background-top-right-image:    invader.tga         202px   0px 231px  30px;
+        background-top-image:          invader.tga stretch  30px   0px 201px  30px;
+        background-bottom-left-image:  invader.tga           0px  91px  30px 119px;
+        background-bottom-right-image: invader.tga         202px  91px 231px 119px;
+        background-bottom-image:       invader.tga stretch  30px  91px 201px 119px;
+        background-left-image:         invader.tga stretch   0px  30px  30px  90px;
+        background-right-image:        invader.tga stretch 202px  30px 231px  90px;
+        background-center-image:       invader.tga repeat-truncate  30px  30px 201px  90px;
 }
 
 .window-inventory
@@ -98,7 +115,7 @@ div#window
 
 .inventory-item-quantity
 {
-  font-family: JH_FALLOUT;
+  font-family: JH_Fallout;
   font-size:   8px;
   margin-left: -15px;
   top: 0px;
@@ -149,11 +166,26 @@ input.submit
 	margin-left: 0px;
 }
 
+button.simple-button
+{
+  display: inline-block;
+  width:   40px;
+  height:  22px;
+  background-decorator: image;
+  background-image: button.png;
+}
+
+button.simple-button:active
+{
+  background-decorator: image;
+  background-image: button-pressed.png;
+}
+
 button.francis
 {
   display: inline-block;
-  width:  30px;
-  height: 30px;
+  width:   60px;
+  height:  20px;
 
   padding-top: 15px;
   font-size: 10;
@@ -161,7 +193,7 @@ button.francis
   tab-index: auto;
 
   background-decorator: image;
-  background-image: invader.tga 247px 0px 406px 45px;
+  background-image: hud.png 0px 0px 125px 39px;
 }
 
 button.francis:focus
@@ -174,30 +206,64 @@ button.francis:focus
 
 button.francis:hover
 {
-  background-image-t: 45px 90px;
+  background-image: hud.png 0px 40px 125px 79px;
 }
 
 button.francis:active
 {
-  background-image-t: 90px 135px;
+  background-image: hud.png 0px 80px 125px 119px;
+}
+
+button
+{
+  display: inline-block;
+
+  text-align: center;
+  tab-index:  auto;
+
+  height: 47px;
+  width:  247px;
+
+  font-family:  Fallout;
+  font-size:    20px;
+  padding-top:  12px;
+  padding-left: 30px;
+
+  background-decorator: image;
+  //background-image:     hud.png 204px 32px 373px 58px;
+  background-image: revelation-mod/menu_button.png 0px  0px 247px 47px;
+}
+
+/*button:hover
+{
+  background-image:     hud.png 204px 59px 373px 87px;
+}*/
+
+button:active
+{
+  //background-image:     hud.png 204px 88px 373px 115px;
+  background-image: revelation-mod/menu_button.png 0xp 49px 247px 96px;
 }
 
 button.button_menu
 {
-	display: inline-block;
+  display: inline-block;
 
-	width: 159px;
-	height: 37px;
+  width: 185px;
+  height: 28px;
 
-	padding-top: 8px;
-	vertical-align: -18px;
+  vertical-align: -18px;
 
-	font-size: 18;
-	text-align: center;
-	tab-index: auto;
+  padding-left: 60px;
 
-	background-decorator: image;
-	background-image: invader.tga 247px 0px 406px 45px;
+  margin: 5px 5px 5px 5px;
+
+  font-size: 18;
+  text-align: center;
+  tab-index: auto;
+
+  background-decorator: image;
+  background-image: hud.png 0px 121px 185px 148px;
 }
 
 button.button_menu:focus,
@@ -211,12 +277,12 @@ button.button_menu:focus,
 
 button.button_menu:hover,
 {
-	background-image-t: 45px 90px;
+	background-image: hud.png 0px 149px 185px 175px;
 }
 
 button.button_menu:active,
 {
-	background-image-t: 90px 135px;
+	background-image: hud.png 0px 176px 185px 203px;
 }
 
 /*datagrid input.text
@@ -541,3 +607,122 @@ scrollbarhorizontal
 	width: 0px;
 	height: 0px;
 }
+
+.dialog-bg
+{
+  background-decorator:          tiled-box;
+  background-top-left-image:     revelation-mod/dialog_menu.png    0px    0px   40px   40px;
+  background-top-right-image:    revelation-mod/dialog_menu.png 1020px    0px 1092px   40px;
+  background-top-image:          revelation-mod/dialog_menu.png   40px    0px 1020px   40px;
+  background-bottom-left-image:  revelation-mod/dialog_menu.png    0px  250px  220px  416px;
+  background-bottom-right-image: revelation-mod/dialog_menu.png  950px  250px 1092px  416px;
+  background-bottom-image:       revelation-mod/dialog_menu.png  220px  250px  950px  416px;
+  background-left-image:         revelation-mod/dialog_menu.png    0px   40px   40px  250px;
+  background-right-image:        revelation-mod/dialog_menu.png 1020px   40px 1092px  250px;
+  background-center-image:       revelation-mod/dialog_menu.png   40px   40px 1020px  250px;
+}
+
+.console-value
+{
+  background-decorator:          tiled-box;
+  background-top-left-image:     hud.png 126px 0px  136px 10px;
+  background-top-right-image:    hud.png 193px 0px  203px 10px;
+  background-top-image:          hud.png 136px 0px  193px 10px;
+  background-bottom-left-image:  hud.png 126px 50px 136px 61px;
+  background-bottom-right-image: hud.png 193px 50px 203px 61px;
+  background-bottom-image:       hud.png 136px 50px 193px 61px;
+  background-left-image:         hud.png 126px 10px 136px 49px;
+  background-right-image:        hud.png 193px 10px 203px 49px;
+  background-center-image:       hud.png 136px 10px 193px 49px;
+  padding: 0px 5px 5px 5px;
+}
+
+.console-bg
+{
+  background-decorator:          tiled-box;
+  background-top-left-image:     hud.png 126px 0px  136px 10px;
+  background-top-right-image:    hud.png 193px 0px  203px 10px;
+  background-top-image:          hud.png 136px 0px  193px 10px;
+  background-bottom-left-image:  hud.png 126px 50px 136px 61px;
+  background-bottom-right-image: hud.png 193px 50px 203px 61px;
+  background-bottom-image:       hud.png 136px 50px 193px 61px;
+  background-left-image:         hud.png 126px 10px 136px 49px;
+  background-right-image:        hud.png 193px 10px 203px 49px;
+  background-center-image:       hud.png 136px 10px 193px 49px;
+  padding: 1px 3px 3px 3px;
+}
+
+.console-bg scrollbarvertical,
+.console-bg scrollbarvertical:hover
+{
+	margin-top:    10px;
+	margin-bottom: 10px;
+	margin-right:  10px;
+	width:         10px;
+}
+
+.console-bg scrollbarvertical slidertrack,
+{
+	background-decorator:    tiled-vertical;
+	background-top-image:    invader.tga         70px 320px 97px 322px;
+	background-center-image: invader.tga stretch 70px 322px 97px 323px;
+	background-bottom-image: invader.tga         70px 324px 97px 325px;
+}
+
+.console-bg scrollbarvertical sliderbar,
+{
+	margin-left: 0px;
+	width:       10px;
+	min-height:  46px;
+
+	background-decorator:    tiled-vertical;
+	background-top-image:    invader.tga         56px 273px 79px 296px;
+	background-center-image: invader.tga stretch 56px 296px 79px 296px;
+	background-bottom-image: invader.tga         56px 296px 79px 319px;
+}
+
+.console-bg scrollbarvertical sliderbar:hover
+{
+	background-top-image-s: 80px 103px;
+	background-center-image-s: 80px 103px;
+	background-bottom-image-s: 80px 103px;
+}
+
+.console-bg scrollbarvertical sliderbar:active
+{
+	background-top-image-s: 104px 127px;
+	background-center-image-s: 104px 127px;
+	background-bottom-image-s: 104px 127px;
+}
+
+.console-bg scrollbarvertical sliderarrowdec,
+{
+	width: 10px;
+	height: 10px;
+	
+	icon-decorator: image;
+	icon-image: invader.tga 0px 273px 27px 297px;
+}
+
+.console-bg scrollbarvertical sliderarrowinc,
+{
+	width: 10px;
+	height: 10px;
+	
+	icon-decorator: image;
+	icon-image: invader.tga 28px 273px 55px 297px;
+}
+
+.console-bg scrollbarvertical sliderarrowdec:hover,
+.console-bg scrollbarvertical sliderarrowinc:hover
+{
+	icon-image-t: 177px 201px;
+}
+
+.console-bg scrollbarvertical sliderarrowdec:active,
+.console-bg scrollbarvertical sliderarrowinc:active
+{
+	icon-image-t: 202px 226px;
+}
+
+

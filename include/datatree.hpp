@@ -96,10 +96,14 @@ public:
   }
 
   /*! \brief Sets the DataBranch to nil, thus removing it cleanly when Data is destroyed */
-  void Remove(void)     { if (_data) _data->nil = true; }
+  void Remove(void)       { if (_data) _data->nil = true; }
+  void CutBranch(void);
   /*! \brief Checks if the current Data is attached to a DataBranch */
-  bool Nil(void) const { return (!_data || _data->nil);          }
-  Data Parent(void)    { return (_data ? _data->father : _data); }
+  bool Nil(void) const    { return (!_data || _data->nil);          }
+  bool NotNil(void) const { return (!(Nil()));                      }
+  Data Parent(void)       { return (_data ? _data->father : _data); }
+  /*! \brief Move the parameter Data into this Data's children. */
+  void PushBack(Data d);
   /*! \brief For debug purposes, writes the content of the DataTree from the current branch to the standard output */
   void Output(unsigned char indent = 0);
   

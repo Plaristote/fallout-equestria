@@ -46,12 +46,10 @@ void World::DeleteWayPoint(Waypoint* toDel)
   }
 }
 
-LPlane World::GetWaypointPlane(short currentFloor) const
+void   World::GetWaypointLimits(short currentFloor, LPoint3& upperRight, LPoint3& upperLeft, LPoint3& bottomLeft) const
 {
   Waypoints::const_iterator it  = waypoints.begin();
   Waypoints::const_iterator end = waypoints.end();
-  LPlane                    plane;
-  LPoint3                   upperRight(0, 0, 0), upperLeft(0, 0, 0), bottomLeft(0, 0, 0);
 
   for (; it != end ; ++it)
   {
@@ -78,6 +76,13 @@ LPlane World::GetWaypointPlane(short currentFloor) const
   }
   upperRight.set_z(bottomLeft.get_z());
   upperLeft.set_z(bottomLeft.get_z());
+}
+
+LPlane World::GetWaypointPlane(short currentFloor) const
+{
+  LPoint3 upperRight(0, 0, 0), upperLeft(0, 0, 0), bottomLeft(0, 0, 0);
+
+  GetWaypointLimits(currentFloor, upperRight, upperLeft, bottomLeft);
   return (LPlane(upperRight, upperLeft, bottomLeft));
 }
 
@@ -206,6 +211,21 @@ MapObject* World::GetMapObjectFromNodePath(NodePath path)
 }
 
 // DYNAMIC OBJECTS
+DynamicObject* World::InsertDynamicObject(DynamicObject& object)
+{
+  object.waypoint = 0;
+  object.nodePath = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + object.strModel);
+  if (object.strTexture != "")
+  {
+    object.texture    = TexturePool::load_texture(TEXT_ROOT + object.strTexture);
+    if (object.texture)
+      object.nodePath.set_texture(object.texture);
+  }
+  object.nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
+  dynamicObjects.push_back(object);
+  return (&(*dynamicObjects.rbegin()));
+}
+
 DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type type, const string &model, const string &texture)
 {
   DynamicObject object;
@@ -214,20 +234,7 @@ DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type t
   object.interactions = 0;
   object.strModel     = model;
   object.strTexture   = texture;
-  object.nodePath     = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model);
-  if (texture != "")
-  {
-    object.texture    = TexturePool::load_texture(TEXT_ROOT + texture);
-    if (object.texture)
-      object.nodePath.set_texture(object.texture);
-  }
-
-  DynamicObjectChangeFloor(object, 0);
-
-  object.nodePath.set_name(name);
-  object.nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
-  dynamicObjects.push_back(object);
-  return (&(*(--(dynamicObjects.end()))));
+  return (InsertDynamicObject(object));
 }
 
 void World::DeleteDynamicObject(DynamicObject* ptr)
@@ -331,7 +338,19 @@ EntryZone* World::GetEntryZoneByName(const std::string& name)
 // Lights
 void World::AddLight(WorldLight::Type type, const std::string& name)
 {
-  lights.push_back(WorldLight(type, rootLights, name));
+  lights.push_back(WorldLight(type, WorldLight::Type_None, rootLights, name));
+}
+
+void World::AddLight(WorldLight::Type type, const std::string& name, MapObject* parent)
+{
+  AddLight(type, name);
+  lights.rbegin()->ReparentTo(parent);
+}
+
+void World::AddLight(WorldLight::Type type, const std::string& name, DynamicObject* parent)
+{
+  AddLight(type, name);
+  lights.rbegin()->ReparentTo(parent);
 }
 
 void World::DeleteLight(const std::string& name)
@@ -755,15 +774,17 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
     packet >> iType >> interactions;
     type = (Type)iType;
 
-    if (type == Character)
+    if      (type == Character)
       packet >> script >> charsheet >> dialog;
-    if (type == Door || type == Locker)
+    else if (type == Door || type == Locker)
       packet >> iLocked >> key;
+    else if (type == Item)
+      packet >> key;
     locked = iLocked;
 
     packet >> iWaypoint;
     waypoint = world->GetWaypointFromId(iWaypoint);
-
+    
     // Blocked Arcs
     {
         int size;
@@ -804,10 +825,12 @@ void DynamicObject::Serialize(Utils::Packet& packet)
 
     packet << iType << interactions;
 
-    if (type == Character)
+    if      (type == Character)
       packet << script << charsheet << dialog;
-    if (type == Door || type == Locker)
+    else if (type == Door || type == Locker)
       packet << iLocked << key;
+    else if (type == Item)
+      packet << key;
 
     if (waypoint)
       iWaypoint = waypoint->id;
@@ -832,10 +855,99 @@ void DynamicObject::Serialize(Utils::Packet& packet)
 
       packet << size;
       for (; it != end ; ++it)
-    packet << (*it).first << (*it).second;
+        packet << (*it).first << (*it).second;
     }
 }
 
+/*
+ * WorldLights
+ */
+void WorldLight::Initialize(void)
+{
+  switch (type)
+  {
+    case Point:
+    {
+      PT(PointLight) pLight = new PointLight(name);
+
+      light    = pLight;
+      nodePath = parent.attach_new_node(pLight);
+    }
+      break ;
+    case Directional:
+    {
+      PT(DirectionalLight) pLight = new DirectionalLight(name);
+
+      light    = pLight;
+      nodePath = parent.attach_new_node(pLight);
+    }
+      break ;
+    case Ambient:
+    {
+      PT(AmbientLight) pLight = new AmbientLight(name);
+
+      light    = pLight;
+      nodePath = parent.attach_new_node(pLight);
+    }
+      break ;
+    case Spot:
+    {
+      PT(Spotlight) pLight = new Spotlight(name);
+
+      light    = pLight;
+      nodePath = parent.attach_new_node(pLight);
+    }
+      break ;
+  }  
+}
+
+void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
+{
+  float     r, g, b, a;
+  float     pos_x, pos_y, pos_z;
+  float     hpr_x, hpr_y, hpr_z;
+  string    parent_name;
+
+  packet >> name >> zoneSize;
+  packet.operator>> <char>(reinterpret_cast<char&>(type));
+  packet.operator>> <char>(reinterpret_cast<char&>(parent_type));
+  if (parent_type != Type_None)
+    packet >> parent_name;
+  packet >> r >> g >> b >> a;
+  packet >> pos_x >> pos_y >> pos_z;
+  packet >> hpr_x >> hpr_y >> hpr_z;
+  switch (parent_type)
+  {
+    case Type_MapObject:
+      ReparentTo(world->GetMapObjectFromName(parent_name));
+      break ;
+    case Type_DynamicObject:
+      ReparentTo(world->GetDynamicObjectFromName(parent_name));
+      break ;
+    case Type_None:
+      break ;
+  }
+  Initialize();
+  SetColor(r, g, b, a);
+  nodePath.set_pos(LVecBase3(pos_x, pos_y, pos_z));
+  nodePath.set_hpr(LVecBase3(hpr_x, hpr_y, hpr_z));
+}
+
+void WorldLight::Serialize(Utils::Packet& packet)
+{
+  LColor color = light->get_color();
+
+  packet << name << zoneSize << (char)type << (char)parent_type;
+  if (parent_i)
+    packet << parent_i->nodePath.get_name();
+  packet << (float)color.get_x() << (float)color.get_y() << (float)color.get_z() << (float)color.get_w();
+  packet << (float)nodePath.get_x() << (float)nodePath.get_y() << (float)nodePath.get_z();
+  packet << (float)nodePath.get_hpr().get_x() << (float)nodePath.get_hpr().get_y() << (float)nodePath.get_hpr().get_z();
+}
+
+/*
+ * World
+ */
 void           World::UnSerialize(Utils::Packet& packet)
 {
   // Waypoints
@@ -899,6 +1011,20 @@ void           World::UnSerialize(Utils::Packet& packet)
       dynamicObjects.push_back(object);
     }
   }
+  
+  // Lights
+  {
+    int size;
+    
+    packet >> size;
+    for (int it = 0 ; it < size ; ++it)
+    {
+      WorldLight light(window->get_render());
+
+      light.UnSerialize(this, packet);
+      lights.push_back(light);
+    }
+  }
 
   // ExitZones
   {
@@ -919,10 +1045,10 @@ void           World::UnSerialize(Utils::Packet& packet)
 
       for (; begin != end ; ++begin)
       {
-    Waypoint* wp = GetWaypointFromId(*begin);
+        Waypoint* wp = GetWaypointFromId(*begin);
 
-    if (wp)
-      zone.waypoints.push_back(wp);
+       if (wp)
+         zone.waypoints.push_back(wp);
       }
       exitZones.push_back(zone);
     }
@@ -953,12 +1079,17 @@ void           World::UnSerialize(Utils::Packet& packet)
       entryZones.push_back(zone);
     }
   }
+
+  // Post-loading stuff
+  for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light); });
 }
 
-void           World::Serialize(Utils::Packet& packet)
+void           World::Serialize(Utils::Packet& packet, std::function<void (float)> progress_callback)
 {
+  progress_callback(0);
   // Compile Step
   CompileWaypoints();
+  progress_callback(30);
 
   // Waypoints
   {
@@ -982,6 +1113,7 @@ void           World::Serialize(Utils::Packet& packet)
       for (it = waypoints.begin() ; it != end ; ++it)
     (*it).Serialize(packet);
   }
+  progress_callback(35);
 
   // MapObjects
   {
@@ -993,8 +1125,10 @@ void           World::Serialize(Utils::Packet& packet)
 
       for (; it != end ; ++it) { (*it).Serialize(packet); }
   }
+  progress_callback(40);
 
   CompileDoors();
+  progress_callback(70);
 
   // DynamicObjects
   {
@@ -1006,6 +1140,19 @@ void           World::Serialize(Utils::Packet& packet)
 
       for (; it != end ; ++it) { (*it).Serialize(packet); }
   }
+  progress_callback(75);
+  
+  // WorldLights
+  {
+    int size = lights.size();
+    
+    packet << size;
+    WorldLights::iterator it  = lights.begin();
+    WorldLights::iterator end = lights.end();
+    
+    for (; it != end ; ++it) { (*it).Serialize(packet); }
+  }
+  progress_callback(80);
 
   // ExitZones
   {
@@ -1022,12 +1169,13 @@ void           World::Serialize(Utils::Packet& packet)
       std::list<Waypoint*>::iterator wpEnd = zone.waypoints.end();
 
       for (; wpIt != wpEnd ; ++wpIt)
-    waypointsId.push_back((*wpIt)->id);
+        waypointsId.push_back((*wpIt)->id);
       packet << zone.name;
       packet << zone.destinations;
       packet << waypointsId;
     }
   }
+  progress_callback(85);
 
   // EntryZone
   {
@@ -1049,6 +1197,7 @@ void           World::Serialize(Utils::Packet& packet)
         packet << waypointsId;
       }
   }
+  progress_callback(100);
 }
 #include <panda3d/collisionHandlerQueue.h>
 // MAP COMPILING

@@ -1,0 +1,9 @@
+<template name="tplmainbar" content="content">
+<head>
+  <link type="text/rcss" href="rkt.rcss"/>
+  <link type="text/rcss" href="main.rcss"/>
+</head>
+<body class="dialog-bg">
+</body>
+</template>
+

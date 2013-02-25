@@ -39,6 +39,8 @@ public:
   
   void MoveTowardsCoordinates(float x, float y);
   void MoveTowardsPlace(const std::string&);
+  
+  DataEngine& GetDataEngine(void) { return (_dataEngine); }
 
   Observatory::Signal<void (std::string)> GoToPlace;
 
@@ -55,7 +57,7 @@ private:
 
   void                   SaveMapStatus(void) const;
 
-  RocketListener         MapClickedEvent, PartyCursorClicked, CityButtonClicked, ButtonInventory, ButtonCharacter, ButtonMenu;
+  RocketListener         MapClickedEvent, PartyCursorClicked, CityButtonClicked, ButtonInventory, ButtonCharacter, ButtonPipbuck, ButtonMenu;
   DataTree*              _mapTree;
   DataEngine&            _dataEngine;
   TimeManager&           _timeManager;

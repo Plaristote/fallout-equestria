@@ -1,0 +1,21 @@
+{
+  "TestSuccessPerk": {
+    "Requirements": {
+      "Special/STR": {
+        "Comp":  ">=",
+        "Value": 3
+      }
+    }
+  },
+  "TestFailurePerk": {
+    "Requirements": {
+      "Special/STR": {
+        "Comp":  ">",
+        "Value": 3
+      }
+    }
+  },
+  "OtherPerkForFun": {
+  }
+}
+

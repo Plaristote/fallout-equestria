@@ -1,8 +1,9 @@
 {
-  "Name":   "Velvet Remedy",
-  "Age":    16,
-  "Gender": "Mare",
-  "Race":   "Unicorn",
+  "Name":    "Velvet Remedy",
+  "Age":     16,
+  "Gender":  "Mare",
+  "Race":    "Unicorn",
+  "Faction": "Test Town",
   "Special":    {
                   "STR": 3,
                   "PER": 6,
@@ -83,10 +84,11 @@
                 },
 
   "Variables":  {
+                  "Hit Points":     26,
                   "Level":          1,
                   "Experience":     0,
                   "Skill Points":   0,
-                  "Special Points": 10,
+                  "Special Points": 1,
                   "Perks":          0,
                   "Traits":         2
                 },

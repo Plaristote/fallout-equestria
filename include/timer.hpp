@@ -17,9 +17,11 @@ public:
     _lastTime    = _globalClock->get_real_time();
   }
 
-  double          GetElapsedTime(void) { return (_globalClock->get_real_time() - _lastTime); }
-  void            Profile(std::string str) { cout << str+": " << GetElapsedTime() << " sec\n"; Restart(); }
-  void            Restart(void)        { _lastTime = _globalClock->get_real_time();          }
+  double          GetElapsedTime(void) const { return (_globalClock->get_real_time() - _lastTime); }
+  void            Profile(std::string str)   { cout << str+": " << GetElapsedTime() << " sec\n"; Restart(); }
+  void            Restart(void)              { _lastTime = _globalClock->get_real_time();          }
+  void            SetLastTime(double v)      { _lastTime = v; }
+  float           GetLastTime(void) const    { return (_lastTime); }
   
   static void     asConstructor(void* memory) { new(memory) Timer(); }
   static void     asDestructor(void* memory)  {                      }
@@ -66,11 +68,11 @@ public:
     ClearTasks(0);
   }
   
-  static unsigned short GetDaysPerMonth(unsigned short m)
+  static unsigned short GetDaysPerMonth(unsigned short m, unsigned short year = 1)
   {
     if (m == 2)
-      return (29);
-    return (m % 2 != 0 ? 30 : 31);
+      return (year % 4 == 0 ? 29 : 28);
+    return ((m <= 7 ? m % 2 == 0 : m % 2 != 0) ? 30 : 31); 
   }
   
   void            ClearTasks(unsigned char level)

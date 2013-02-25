@@ -1,5 +1,6 @@
 #include "level/inventory.hpp"
 #include "level/level.hpp"
+#include <level/objects/locker.hpp>
 #include <algorithm>
 
 InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
@@ -208,13 +209,15 @@ const std::string InventoryObject::UseAsWeapon(ObjectCharacter* user, ObjectChar
 const std::string InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType)
 {
   ObjectCharacter* charTarget;
-  ObjectDoor*      doorTarget;
+  Lockable*        lockTarget;
   ActionHooks&     hooks = _actionHooks[useType];
 
   if (hooks.UseOnCharacter && (charTarget = target->Get<ObjectCharacter>()) != 0)
     return (ExecuteHook(hooks.UseOnCharacter, user, charTarget, useType));
-  if (hooks.UseOnDoor      && (doorTarget = target->Get<ObjectDoor>())      != 0)
-    return (ExecuteHook(hooks.UseOnDoor, user, doorTarget, useType));
+  if (hooks.UseOnDoor      && (lockTarget = target->Get<ObjectDoor>())      != 0)
+    return (ExecuteHook(hooks.UseOnDoor, user, lockTarget, useType));
+  if (hooks.UseOnDoor      && (lockTarget = target->Get<ObjectLocker>())  != 0)
+    return (ExecuteHook(hooks.UseOnDoor, user, lockTarget, useType));
   if (hooks.UseOnOthers)
     return (ExecuteHook(hooks.UseOnOthers, user, target, useType));
   return ("That does nothing");
@@ -306,6 +309,24 @@ void Inventory::LoadInventory(DynamicObject* object)
   });
 }
 
+void Inventory::LoadInventory(Data items)
+{
+  _content.clear();
+  for_each(items.begin(), items.end(), [this](Data item)
+  {
+    InventoryObject* newObject;
+    unsigned int     quantity;
+
+    quantity = (item["quantity"].Nil() ? 1 : (unsigned int)item["quantity"]);
+    for (unsigned short i = 0 ; i < quantity ; ++i)
+    {
+      newObject = new InventoryObject(item);
+      (*newObject)["quantity"].Remove();
+      AddObject(newObject);
+    }
+  });
+}
+
 void Inventory::SaveInventory(DynamicObject* object)
 {
   Content::iterator it  = _content.begin();
@@ -338,6 +359,37 @@ void Inventory::SaveInventory(DynamicObject* object)
   }
 }
 
+void Inventory::SaveInventory(Data items)
+{
+  Content::iterator it  = _content.begin();
+  Content::iterator end = _content.end();
+  
+  for (; it != end ; ++it)
+  {
+    Content::iterator groupIt  = _content.begin();
+    InventoryObject&  item     = **it;
+    bool              ignore   = true;
+    int               quantity = 0;
+
+    for (; groupIt != end ; ++groupIt)
+    {
+      if (groupIt == it && quantity == 0)
+	ignore = false;
+      if (item.IsGroupableWith(*groupIt))
+	quantity++;
+    }
+    if (quantity == 0) quantity = 1;
+    if (!ignore)
+    {
+      std::string str;
+
+      item["quantity"] = quantity;
+      items[item.Key()].Duplicate(item);
+      item["quantity"].Remove();
+    }
+  }
+}
+
 void Inventory::AddObject(InventoryObject* toAdd)
 {
   Data weight = (*toAdd)["weight"];
@@ -363,6 +415,13 @@ void Inventory::DelObject(InventoryObject* toDel)
   }
 }
 
+bool Inventory::IncludesObject(InventoryObject* obj) const
+{
+  Content::const_iterator it = std::find(_content.begin(), _content.end(), obj);
+  
+  return (it != _content.end());
+}
+
 InventoryObject* Inventory::GetObject(const std::string& name)
 {
   Content::iterator it  = _content.begin();
@@ -376,7 +435,7 @@ InventoryObject* Inventory::GetObject(const std::string& name)
   return (0);
 }
 
-bool Inventory::CanCarry(InventoryObject* object)
+bool Inventory::CanCarry(InventoryObject* object, unsigned short quantity)
 {
-  return (_capacity >= _currentWeight + (unsigned short)((*object)["weight"]));
+  return ((_capacity >= _currentWeight + (unsigned short)((*object)["weight"]) * quantity) || (_capacity == 0));
 }

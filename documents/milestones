@@ -1,4 +1,7 @@
 MILESTONES
+x -> Finished
+~ -> In progress
+# -> Delayed
 
 Milestone I [Started May 2012, Finished October 2012]
 x -> Statistics
@@ -26,39 +29,68 @@ x --> Dialogs
 x --> Inventories
 x --> Saving/Loading
 
-Milestone II
-  -> Statistics
+Milestone II [Started October 2012, Finished November 2012]
+x -> Statistics
 x --> i18n
 x --> Canceling modifications
-  --> Support for:
-  ----> Skill afinities
+x --> Kill count
+x --> Support for:
+x ----> Skill afinities
 x ----> Perks
 
 x -> Worldmap
 x --> World clock moving forward in time while traveling
 x --> Displaying world time
 
-  -> Levels
-  --> Proper camera handling
-  --> Barter
+x -> Levels
+x --> Basic light management
+x --> Daylight/Nightlight management
+x --> Displaying pathfinding data while in combat mode
+x --> Outlining allies and enemies in green or red while in combat mode
+? --> Cutting out walls that are hiding the player's close surroundings
+x --> Proper camera handling
+x --> Barter
+# --> Stairs
 x --> Doors
-  --> Stairs
-  --> Lockers
-  --> Shelfs
+x --> Lockers
+x --> Shelfs
 x --> Saving/Loading of buffs
 
-  -> Worldmap/Level shared buffs
-x -> Shared "world clock" management for Worldmap and Levels
-? -> Music Manager
-x -> i18n/Rocket interfaces dynamic translator
-x -> Option Manager and user interface
+x -> GameTask (Worldmap and Level handler)
+x --> PipBuck
+x ----> File Manager App with text and audio support (Scripted App)
+x ----> Clock App (Displaying time and allowing character to sleep) (C++ App)
+x --> Player stored globally, and inserted into maps instead of loaded from there
+x ----> Saving and loading player globally
+x ----> Inventory access from  the WorldMap
+x ----> Inserting player into loaded maps when needed
+x --> DataEngine
+x ----> Factions and Diplomacy
+x --> Worldmap/Level shared buffs
+x --> Shared "world clock" management for Worldmap and Levels
+
+x -> General
+x --> Music Manager
+x --> Sound Manager
+x --> i18n/Rocket interfaces dynamic translator
+x --> Option Manager and user interface
+x --> Creating New Games
 
 Milestone III
+  -> Statistics
+  --> Reputation
+
   -> Worldmap
   --> Random encounters
   --> Various terrain and movement speed
 
   -> Levels
-  --> Lights
+  --> Stairs
+  --> Shader for casting shadows
 
-  -> Sound Manager
+  -> GameTask
+  --> Quests
+~ --> Party management
+  --> Pipbuck
+  ----> Quest Application
+

@@ -9,3 +9,12 @@ string default_weapon_2()
   return ("buck");
 }
 
+StringList GetAvailableApps(Data data)
+{
+  Write("Toto");
+  StringList apps;
+
+  apps.Add("helloworld");
+  apps.Add("clock");
+  return (apps);
+}

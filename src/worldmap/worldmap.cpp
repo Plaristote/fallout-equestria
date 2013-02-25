@@ -1,4 +1,5 @@
 #include "worldmap/worldmap.hpp"
+#include "musicmanager.hpp"
 
 using namespace std;
 using namespace Rocket;
@@ -11,10 +12,20 @@ WorldMap::~WorldMap()
   
   ToggleEventListener(false, "button-inventory", "click", ButtonInventory);
   ToggleEventListener(false, "button-character", "click", ButtonCharacter);
+  ToggleEventListener(false, "button-pipbuck",   "click", ButtonPipbuck);
   ToggleEventListener(false, "button-menu",      "click", ButtonMenu);
   for_each(_cases.begin(), _cases.end(), [this](Core::Element* tile)
   { tile->RemoveEventListener("click", &MapClickedEvent); });
   _cursor->RemoveEventListener("click", &PartyCursorClicked);
+  
+  for_each(_cities.begin(), _cities.end(), [this](const City& city)
+  {
+    string         name        = "city-" + city.name;
+    Core::Element* city_button = _root->GetElementById(name.c_str());
+    
+    if (city_button)
+      city_button->RemoveEventListener("click", &CityButtonClicked);
+  });
 
   Destroy();
   delete _mapTree;
@@ -61,9 +72,11 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, Time
     //
     ToggleEventListener(true, "button-inventory", "click", ButtonInventory);
     ToggleEventListener(true, "button-character", "click", ButtonCharacter);
+    ToggleEventListener(true, "button-pipbuck",   "click", ButtonPipbuck);
     ToggleEventListener(true, "button-menu",      "click", ButtonMenu);
     ButtonInventory.EventReceived.Connect(_gameUi, &GameUi::OpenInventory);
     ButtonCharacter.EventReceived.Connect(_gameUi, &GameUi::OpenPers);
+    ButtonPipbuck.EventReceived.Connect(_gameUi.OpenPipbuck, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
     ButtonMenu.EventReceived.Connect(_gameUi, &GameUi::OpenMenu);
     
     _cursor->AddEventListener("click", &PartyCursorClicked);
@@ -125,8 +138,8 @@ void WorldMap::AddCityToList(Data cityData)
     stringstream   rml;
 
     rml << "<div class='city-entry'>";
-    rml << "<div class='city-button'><button id='city-" << cityData.Key() << "' data-city='" << cityData.Key() << "'>Go</button></div>";
-    rml << "<div class='city-name'>" << cityData.Key() << "</div>";
+    rml << "<div class='city-button'><button id='city-" << cityData.Key() << "' data-city='" << cityData.Key() << "' class='simple-button city-button-button'> </button>";
+    rml << "<span class='city-name'>" << cityData.Key() << "</span></div>";
     rml << "</div>";
     elem->GetInnerRML(innerRml);
     innerRml = innerRml + Rocket::Core::String(rml.str().c_str());
@@ -169,6 +182,7 @@ void WorldMap::Show(void)
   _current_pos_x = _dataEngine["worldmap"]["pos-x"];
   _current_pos_y = _dataEngine["worldmap"]["pos-y"];
   UpdateClock();
+  MusicManager::Get()->Play("worldmap");
 }
 
 void WorldMap::Run(void)
@@ -364,7 +378,8 @@ void WorldMap::MapTileGenerator(Data map)
   _tsize_x = tsize_x;
   _tsize_y = tsize_y;
 
-  // TODO Find out why this is broken. We can't afford compiling maps in the release version.
+  // TODO Find out why this is broken.
+  // WARNING Don't try to find out why this is broken. It'll drive you crazy. CRAZY.
   //_root = _context->LoadDocument("data/worldmap.rml");
   _root = 0;
   if (!_root)
@@ -376,23 +391,20 @@ void WorldMap::MapTileGenerator(Data map)
     // Generate RCSS and RML for the Tilemap
     //
     loadingScreen.AppendText("Generating Tiles...");
+    
+    rcss << "#pworldmap\n";
+    rcss << "{\n" << "  background-decorator: image;\n";
+    rcss << "  background-image: worldmap.png 0px 0px " << (size_x * tsize_x) << "px " <<  (size_y * tsize_y) << "px" << ";\n";
+    rcss << "  width:  " << (size_x * tsize_x) << "px;\n";
+    rcss << "  height: " << (size_y * tsize_y) << "px;\n";
+    rcss << "}\n\n";
+    
     for_each(tiles.begin(), tiles.end(), [this, &rml, &rcss, &pos_x, &pos_y, size_x, size_y, tsize_x, tsize_y](Data tile)
     {
-      rcss << "#tile" << pos_x << "-" << pos_y << "\n";
-      rcss << "{\n" << "  top: "  << (pos_y * tsize_y) << "px;\n" << "  left: " << (pos_x * tsize_x) << "px;\n";
-      rcss << "  height: " << tsize_y << "px; width: " << tsize_x << "px;\n";
-      rcss << "  background-decorator: image;\n";
-      rcss << "  background-image: worldmap.png " << (pos_x * tsize_x) << "px " << (pos_y * tsize_y) << "px ";
-      rcss << (pos_x * tsize_x + tsize_x) << "px " << (pos_y * tsize_y + tsize_y) << "px;\n";
-      rcss << "}\n\n";
-
       rml  << "<div id='tile" << pos_x << "-" << pos_y << "' class='tile' style='position: absolute;";
       rml  << "top: "  << (pos_y * tsize_y) << "px; ";
       rml  << "left: " << (pos_x * tsize_x) << "px; ";
-      rml  << "height: " << tsize_y << "px; width: " << tsize_x << "px; ";
-      rml  << "background-decorator: image; ";
-      rml  << "background-image: worldmap.png " << (pos_x * tsize_x) << "px " << (pos_y * tsize_y) << "px ";
-      rml  << (pos_x * tsize_x + tsize_x) << "px " << (pos_y * tsize_y + tsize_y) << "px;";
+      rml  << "height: " << tsize_y << "px; width: " << tsize_x << "px;";
       rml  << "' data-pos-x='" << pos_x << "' data-pos-y='" << pos_y << "'>";
       
       if (tile["visibility"].Value() == "0")
@@ -413,7 +425,7 @@ void WorldMap::MapTileGenerator(Data map)
     // Load the worldmap rml template, replace the #{RML} and #{RCSS} bits with generated RML/RCSS,
     // create a temporary RML file with the result.
     //
-    ifstream file("data/worldmap.rml.tpl");
+    ifstream file("data/worldmap.rml.tpl", std::ios::binary);
 
     loadingScreen.AppendText("Compiling Worldmap. This might take a while.");
     if (file.is_open())
@@ -435,13 +447,17 @@ void WorldMap::MapTileGenerator(Data map)
       fileRml = raw;
       delete[] raw;
 
-      size_t firstReplaceIt = fileRml.find("#{RCSS}");      
+      size_t firstReplaceIt = fileRml.find("#{RCSS}");
       fileRml.replace(firstReplaceIt, strlen("#{RCSS}"), rcss.str());
       size_t secReplaceIt   = fileRml.find("#{RML}");
       fileRml.replace(secReplaceIt, strlen("#{RML}"), rml.str());
-      
-      ofstream ofile("data/worldmap.rml");
-      
+
+      size_t win_newline;
+      while ((win_newline = fileRml.find("\r\n")) != fileRml.npos)
+	fileRml.replace(win_newline, 2, "\n");
+
+      ofstream ofile("data/worldmap.rml", std::ios::binary);
+
       if (ofile.is_open())
       {
 	ofile.write(fileRml.c_str(), fileRml.size());

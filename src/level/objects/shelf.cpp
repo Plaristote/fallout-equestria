@@ -7,19 +7,30 @@ using namespace Observatory;
 
 void ObjectShelf::LockWaypoints(bool locking)
 {
-  std::for_each(_object->lockedArcs.begin(), _object->lockedArcs.end(), [this, locking](std::pair<int, int> waypoints)
+  if (_object)
   {
-    Waypoint*        waypoint1 = _level->GetWorld()->GetWaypointFromId(waypoints.first);
-    Waypoint*        waypoint2 = _level->GetWorld()->GetWaypointFromId(waypoints.first);
-
-    if (waypoint1 && waypoint2)
+    std::for_each(_object->lockedArcs.begin(), _object->lockedArcs.end(), [this, locking](std::pair<int, int> waypoints)
     {
-      if (locking)
-	waypoint1->Disconnect(waypoint2);
-      else
-	waypoint1->Connect(waypoint2);
-    }
-  });
+      Waypoint*        waypoint1 = _level->GetWorld()->GetWaypointFromId(waypoints.first);
+      Waypoint*        waypoint2 = _level->GetWorld()->GetWaypointFromId(waypoints.first);
+
+      if (waypoint1 && waypoint2)
+      {
+	if (locking)
+	  waypoint1->Disconnect(waypoint2);
+	else
+	  waypoint1->Connect(waypoint2);
+      }
+    });
+  }
+}
+
+ObjectShelf::ObjectShelf(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
+{
+  _type   = ObjectTypes::Shelf;
+  LockWaypoints(true);
+  _inventory.LoadInventory(object);
+  _inventory.SetCapacity(450);
 }
 
 InstanceDynamicObject::GoToData ObjectShelf::GetGoToData(InstanceDynamicObject* character)

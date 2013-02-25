@@ -17,6 +17,7 @@ void TimeManager::AddElapsedTime(unsigned short s, unsigned short m, unsigned sh
   second += s;
   minute += m;
   hour   += h;
+  day    += d;
   month  += mo;
   year   += y;
   CorrectValues();
@@ -47,6 +48,7 @@ TimeManager::Task* TimeManager::AddTask(unsigned char level, bool loop, unsigned
 
 void TimeManager::DelTask(Task* task)
 {
+  cout << "[" << task << "] Del Task" << endl;
   Tasks::iterator it = std::find(tasks.begin(), tasks.end(), task);
   
   if (it != tasks.end())
@@ -58,32 +60,77 @@ void TimeManager::DelTask(Task* task)
 
 void TimeManager::ExecuteTasks(void)
 {
+  //Timer           profiler;
   Tasks::iterator it  = tasks.begin();
   Tasks::iterator end = tasks.end();
 
+  /*if (it != end)
+  {
+    Task& ftask = **it;
+    cout << "FTime" << endl;
+    cout << year << "/" << month << "/" << day << " ";
+    cout << hour << ":" << minute  << ":" << second << endl;
+    cout << "FTask" << endl;
+    cout << ftask.lastY << "/" << ftask.lastMo << "/" << ftask.lastD << " ";
+    cout << ftask.lastH << ":" << ftask.lastM  << ":" << ftask.lastS << endl << endl;
+  }*/
+  // TODO Write that shit again while not drunk.
   while (it != end)
   {
     Task&          task = **it;
 
-    if (task.lastY <= year && task.lastMo <= month && task.lastD <= day && task.lastM <= minute && task.lastS <= second)
+    bool dostuff = true;
+    if (year < task.lastY)
+      dostuff = false;
+    else
+    {
+      if (year == task.lastY && month < task.lastMo)
+	dostuff = false;
+      else
+      {
+	if (year == task.lastY && month == task.lastMo && hour < task.lastH)
+	  dostuff = false;
+	else
+	{
+	  if (year == task.lastY && month == task.lastMo && hour == task.lastH && minute < task.lastM)
+	    dostuff = false;
+	  else
+	  {
+	    if (year == task.lastY && month == task.lastMo && hour == task.lastH && minute == task.lastM && second < task.lastS)
+	      dostuff = false;
+	  }
+	}
+      }
+    }
+    if (dostuff)
     {
       safeIt = it;
+      cout << "[" << &task << "] Executing Callbacks" << endl;
       task.Interval.Emit();
+      cout << "[" << &task << "] Executed Callbacks" << endl;
       task.IntervalIt.Emit(++task.it);
       if (safeIt != it)
       {
+	cout << "[" << &task << "] Task has been deleted" << endl;
 	it = safeIt;
 	continue ;
       }
       if (!(task.loop))
       {
+	cout << "[" << &task << "] Task isn't looping" << endl;
 	it = tasks.erase(it);
 	continue ;
       }
       task.NextStep();
+      cout << "[" << &task << "] Next step will be at: ";
+      cout << task.lastY << "/" << task.lastMo << "/" << task.lastD << " ";
+      cout << task.lastH << ":" << task.lastM  << ":" << task.lastS << endl;
+      
     }
-    ++it;
+    else
+      ++it;
   }
+  //profiler.Profile("Timer");
 }
 
 void TimeManager::CorrectValues(void)
@@ -105,12 +152,14 @@ void TimeManager::CorrectValues(void)
   }
   if (month > 12)
   {
-    year += (month / 13);
-    month = month % 13;
+    year += (month / 12);
+    month = month % 12;
+    if (month == 0)
+    { month = 1; }
   }
-  while (day > GetDaysPerMonth(month))
+  while (day > GetDaysPerMonth(month, year))
   {
-    day -= GetDaysPerMonth(month);
+    day -= GetDaysPerMonth(month, year);
     month += 1;
     if (month > 12)
     {
@@ -130,7 +179,7 @@ void TimeManager::Task::NextStep(void)
   lastD  += timeD;
   lastM  += timeM;
   lastS  += timeS;
-  
+
   if (lastS > 59)
   {
     lastM += (lastS / 60);

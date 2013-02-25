@@ -23,12 +23,19 @@
     </style>
   </head>
   <body template="pywindow">
+
+    <select id="screen-select">
+    </select>
+    <input type="checkbox" id="fullscreen" /> Fullscreen
+
+    <br />
+
     <select id="language-select">
       <option>English</option>
       <option>French</option>
       <option>Spanish</option>
     </select>
     <br />
-    <button class="button_menu" id="exit" i18n="Exit">Exit</button>
+    <button id="exit" i18n="Exit">Exit</button>
   </body>
 </rml>

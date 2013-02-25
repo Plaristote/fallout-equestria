@@ -54,8 +54,21 @@ void CharacterBuff::Initialize(Level* level, ObjectCharacter* character, Data bu
     WindowFramework* window = level->GetWorld()->window;
 
     _graphicalEffect = window->load_model(window->get_panda_framework()->get_models(), "models/" + dataGraphics["model"].Value());
+    _graphicalEffect.set_name("graphical_effect");
     if (!(dataGraphics["scale"].Nil()))
       _graphicalEffect.set_scale((float)dataGraphics["scale"]);
+    if (dataGraphics["color"].NotNil())
+    {
+      Data color = dataGraphics["color"];
+      
+      if (color["alpha"].NotNil())
+      {
+	_graphicalEffect.set_transparency(TransparencyAttrib::M_alpha);
+	_graphicalEffect.set_color(color["red"], color["green"], color["blue"], color["alpha"]);
+      }
+      else
+        _graphicalEffect.set_color(color["red"], color["green"], color["alpha"]);
+    }
   }
 }
 
@@ -121,6 +134,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   string defEquiped[2];
   
   _goToData.objective = 0;  
+  _inventory          = new Inventory;
   
   NodePath bodyNP = object->nodePath.find("**/+Character");
   _character      = dynamic_cast<Character*>(bodyNP.node());
@@ -199,8 +213,8 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _fovTraverser.add_collider(_fovNp, _fovHandlerQueue);
   
   // Faction
-  _diplomacy.SetFaction(0);
-  _diplomacy.SetEnemyMask(0);
+  _faction        = 0;
+  _self_enemyMask = 0;
 
   // Statistics
   _stats      = 0;
@@ -209,14 +223,15 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   {
     Data stats = GetStatistics();
     
-    _inventory.SetCapacity(stats["Statistics"]["Carry Weight"]);
+    _inventory->SetCapacity(stats["Statistics"]["Carry Weight"]);
     _armorClass = stats["Statistics"]["Armor Class"].Nil() ? 5  : (int)(stats["Statistics"]["Armor Class"]);
     _hitPoints  = stats["Statistics"]["Hit Points"].Nil()  ? 15 : (int)(stats["Statistics"]["Hit Points"]);
     _stats      = new StatController(stats);
+    SetStatistics(_statistics, _stats);
   }
   else
   {
-    _inventory.SetCapacity(275);
+    _inventory->SetCapacity(275);
     _hitPoints  = 15;
     _armorClass = 5;
   }
@@ -269,7 +284,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   }
   
   // Inventory
-  _inventory.LoadInventory(_object);
+  _inventory->LoadInventory(_object);
 
   // Equiped Items
   defEquiped[0] = DEFAULT_WEAPON_1;
@@ -282,7 +297,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
     _equiped[i].default_ = new InventoryObject(items[defEquiped[i]]);
     _equiped[i].equiped  = _equiped[i].default_;
     _equiped[i].equiped->SetEquiped(true);
-    _inventory.AddObject(_equiped[i].equiped);
+    _inventory->AddObject(_equiped[i].equiped);
   }
   
   // Animations (HAIL MICROSOFT)
@@ -317,10 +332,24 @@ void ObjectCharacter::SetHitPoints(short hp)
     CharacterDied.Emit();
 }
 
+void ObjectCharacter::StatHpUpdate(short hp)
+{
+  _hitPoints = hp;
+  HitPointsChanged.Emit(_hitPoints);
+  if (hp <= 0)
+    CharacterDied.Emit();
+}
+
+void ObjectCharacter::NullifyStatistics(void)
+{
+  _stats      = 0;
+  _statistics = 0;
+}
+
 void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* controller)
 {
-  if (_stats)      delete _stats;
-  if (_statistics) delete _statistics;
+  if (_stats      && _stats      != controller) delete _stats;
+  if (_statistics && _statistics != statistics) delete _statistics;
   _statistics = statistics;
   _stats      = controller;
   if (_statistics)
@@ -328,7 +357,16 @@ void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* contro
     Data data_stats(_statistics);
 
     ActionPointChanged.Emit(_actionPoints, data_stats["Statistics"]["Action Points"]);
+    if (data_stats["Variables"]["Hit Points"].Nil())
+      data_stats["Variables"]["Hit Points"] = data_stats["Statistics"]["Hit Points"].Value();
     SetHitPoints(data_stats["Variables"]["Hit Points"]);
+    _obs_handler.Connect(_stats->HpChanged, *this, &ObjectCharacter::StatHpUpdate);
+    cout << "Faction is named " << data_stats["Faction"].Value() << endl;
+    if (data_stats["Faction"].NotNil())
+      SetFaction(data_stats["Faction"].Value());
+    else
+      _faction = 0;
+    GetDynamicObject()->nodePath.set_name(data_stats["Name"].Value());
   }
 }
 
@@ -382,7 +420,7 @@ void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, E
   
   item->SetEquiped(true);
   EquipedItemChanged.Emit(it, item);
-  _inventory.ContentChanged.Emit();
+  _inventory->ContentChanged.Emit();
 }
 
 void ObjectCharacter::UnequipItem(unsigned short it)
@@ -412,14 +450,16 @@ void ObjectCharacter::ItemNextUseType(unsigned short it)
 
 void ObjectCharacter::RestartActionPoints(void)
 {
-  Data stats(_statistics);
-
   _path.clear();
   if (_statistics)
+  {
+    Data stats(_statistics);
+
     _actionPoints = stats["Statistics"]["Action Points"];
+  }
   else
     _actionPoints = 10;
-  ActionPointChanged.Emit(_actionPoints, stats["Statistics"]["Action Points"]);
+  ActionPointChanged.Emit(_actionPoints, _actionPoints);
 }
 
 void ObjectCharacter::Run(float elapsedTime)
@@ -510,6 +550,20 @@ unsigned short      ObjectCharacter::GetPathDistance(InstanceDynamicObject* obje
   ret = GetPathDistance(object->GetOccupiedWaypoint());
   object->ProcessCollisions();
   return (ret);
+}
+
+list<Waypoint>     ObjectCharacter::GetPath(Waypoint* waypoint)
+{
+  list<Waypoint>   path;
+  
+  UnprocessCollisions();
+  _level->FindPath(path, *_waypointOccupied, *waypoint);
+  if (path.size() > 0)
+    path.erase(path.begin());
+  if (path.size() > _actionPoints)
+    path.resize(_actionPoints);
+  ProcessCollisions();
+  return (path);
 }
 
 unsigned short      ObjectCharacter::GetPathDistance(Waypoint* waypoint)
@@ -818,6 +872,7 @@ void                ObjectCharacter::RunDeath()
 
   GetNodePath().set_hpr(0, 0, 90);
   UnprocessCollisions();
+  _hitPoints = 0;
 }
 
 void                ObjectCharacter::CallbackActionUse(InstanceDynamicObject*)
@@ -830,9 +885,30 @@ void                ObjectCharacter::CallbackActionUse(InstanceDynamicObject*)
  */
 # define FOV_TTL 5
 
+Script::StdList<ObjectCharacter*>         ObjectCharacter::GetNearbyEnemies(void) const
+{
+  Script::StdList<ObjectCharacter*> ret;
+  
+  auto it  = _fovEnemies.begin();
+  auto end = _fovEnemies.end();
+  
+  while (it != end)
+  {
+    cout << "[" << it->enemy << "] FovEnemy: " << it->enemy->GetName() << endl;
+    ret.push_back(it->enemy);
+    it++;
+  }
+  return (ret);
+}
+
+Script::StdList<ObjectCharacter*> ObjectCharacter::GetNearbyAllies(void) const
+{
+  return (_fovAllies);
+}
+
 void     ObjectCharacter::CheckFieldOfView(void)
 {
-  if (_hitPoints <= 0)
+  if (_hitPoints <= 0 || _level->GetPlayer() == this)
     return ;
   CollisionTraverser fovTraverser;
   float              fovRadius = 45;
@@ -957,62 +1033,55 @@ void     ObjectCharacter::RequestCharacter(ObjectCharacter* f, ObjectCharacter* 
 /*
  * Diplomacy
  */
+#include "gametask.hpp"
+void     ObjectCharacter::SetFaction(const std::string& name)
+{
+  WorldDiplomacy& diplomacy = GameTask::CurrentGameTask->GetDiplomacy();
+
+  _faction = diplomacy.GetFaction(name);
+  cout << "Faction pointer for " << name << " is " << _faction << endl;
+}
+
+void     ObjectCharacter::SetFaction(unsigned int flag)
+{
+  WorldDiplomacy& diplomacy = GameTask::CurrentGameTask->GetDiplomacy();
+
+  _faction = diplomacy.GetFaction(flag);
+}
+
 void     ObjectCharacter::SetAsEnemy(ObjectCharacter* other, bool enemy)
 {
-  _diplomacy.SetAsEnemy(other->GetDiplomacy(), enemy);
-}
-
-bool     ObjectCharacter::IsEnemy(ObjectCharacter* other) const
-{
-  return (true);
-  return (_diplomacy.IsEnemyWith(other->GetDiplomacy()));
-}
-
-bool     ObjectCharacter::IsAlly(ObjectCharacter* other) const
-{
-  return (_diplomacy.IsAlly(other->GetDiplomacy()));
-}
-
-bool     ObjectCharacter::Diplomacy::IsEnemyWith(Diplomacy& other) const
-{
-  Faction*     otherFaction   = other.GetFaction();
-  unsigned int selfEnemyFlag  = (_faction ? _faction->enemyMask : _enemyMask);
-
-  if (otherFaction)
-    return (selfEnemyFlag & otherFaction->flag);
-  return (false);
-}
-
-bool     ObjectCharacter::Diplomacy::IsAlly(Diplomacy& other) const
-{
-  return (_faction != 0 && other.GetFaction() == _faction);
-}
-
-void     ObjectCharacter::Diplomacy::SetAsEnemy(Diplomacy& other, bool enemy)
-{
-  Faction* otherFaction = other.GetFaction();
-  
-  if (otherFaction)
+  if (_faction && other->GetFaction() != 0)
   {
-    if (_faction)
-    {
-      if (enemy)
-      {
-	_faction->enemyMask     |= otherFaction->flag;
-	otherFaction->enemyMask |= _faction->flag;
-      }
-      else
-      {
-	if (_faction->enemyMask & otherFaction->flag) { _faction->enemyMask -= otherFaction->flag; }
-	if (otherFaction->enemyMask & _faction->flag) { otherFaction->enemyMask -= _faction->flag; }
-      }
-    }
-    else
-    {
-      if (enemy)
-        _enemyMask |= otherFaction->flag;
-      else if (_enemyMask & otherFaction->flag)
-	_enemyMask -= otherFaction->flag;
-    }
+    WorldDiplomacy& diplomacy = GameTask::CurrentGameTask->GetDiplomacy();
+
+    diplomacy.SetAsEnemy(enemy, _faction->flag, other->GetFaction());
+  }
+  else
+  {
+    if (enemy)
+      _self_enemyMask &= other->GetFaction();
+    else if (_self_enemyMask & other->GetFaction());
+      _self_enemyMask -= other->GetFaction();
   }
 }
+
+bool     ObjectCharacter::IsEnemy(const ObjectCharacter* other) const
+{
+  cout << "Calling IsEnemy" << endl;
+  if (other->GetFaction() == 0 && _faction)
+    return (other->IsEnemy(this));
+  if (_faction)
+  {
+    cout << "I haz faction: " << _faction->enemyMask << " (" << _faction->flag << ")" << endl;
+    return (_faction->enemyMask & other->GetFaction());
+  }
+  cout << "I haz no faction" << endl;
+  return (_self_enemyMask & other->GetFaction());
+}
+
+bool     ObjectCharacter::IsAlly(const ObjectCharacter* other) const
+{
+  return (_faction && _faction->flag == other->GetFaction());
+}
+

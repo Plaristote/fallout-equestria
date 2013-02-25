@@ -37,13 +37,13 @@
       }
     </style>
   </head>
-  <body id="body" template="tplmainbar">
-  <p>
-    <div id="inventory-items" class="window-inventory">
+  <body id="body">
+  <div id="window"><p>
+    <div id="inventory-items" class="console-bg">
       <div id="inventory">
       </div>
     </div>
     <button class="button_menu" id="button_cancel" i18n="Cancel">Cancel</button>
   </p>
-  </body>
+  </div></body>
 </rml>

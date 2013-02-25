@@ -13,8 +13,12 @@ void CastShield(Character@ self)
     Data dataEngine = level.GetDataEngine();
     Data buffData   = dataEngine["shielding spell"];
 
-    buffData["graphics"]["model"]    = "sphere.obj";
-    buffData["graphics"]["scale"]    = 3;
+    buffData["graphics"]["model"]          = "sphere.obj";
+    buffData["graphics"]["scale"]          = 5;
+    buffData["graphics"]["color"]["red"]   = 50;
+    buffData["graphics"]["color"]["green"] = 50;
+    buffData["graphics"]["color"]["blue"]  = 200;
+    buffData["graphics"]["color"]["alpha"] = 0.5;
     buffData["duration"] = 30;
 
     buffData["script"]["source"]    = "spell.as";
@@ -28,8 +32,8 @@ void CastShield(Character@ self)
 
 void main(Character@ self, float elaspedTime)
 {
-  //if (myTimer.GetElapsedTime() > 2.5)
-  //  CastShield(self);
+  if (myTimer.GetElapsedTime() > 2.5)
+    CastShield(self);
   /*if (!(self.IsMoving()) && myTimer.GetElapsedTime() > 2.5)
   {
     if (initWaypoint == 0)
@@ -66,36 +70,50 @@ Character@ currentTarget = null;
 
 Character@ SelectTarget(Character@ self)
 {
+  Cout("Fluttershy Select Target");
   CharacterList         enemies  = self.GetNearbyEnemies();
-  CharacterListIterator it       = enemies.Begin();
   int                   nEnemies = enemies.Size();
+  int                   it       = 0;
   Character@            bestMatch;
 
-  while (nEnemies > 0)
+  Cout("Debug #1");
+  while (it < nEnemies)
   {
-    Character@ current = it.Value();
+    Cout("Debug #2");
+    Character@ current = enemies[it];
 
+    Cout("Debug #3");
     if (@bestMatch == null || current.GetHitPoints() < bestMatch.GetHitPoints())
-      @bestMatch = @(it.Value());
-
-    nEnemies--;
+      @bestMatch = @current;
+    Cout("Debug #4");
+ 
     it++;
+    Cout("Debug #5");
   }
-  Write("Selected enemy: " + bestMatch.GetName());
+  if (@bestMatch != null)
+  {
+    Cout("Selected enemy: " + bestMatch.GetName());
+    Write("Selected enemy: " + bestMatch.GetName());
+  }
   return (bestMatch);
 }
 
 void combat(Character@ self)
 {
+  Cout("Fluttershy in Combat mode");
   if (self.IsMoving())
     return ;
 
   if (@currentTarget == null || !(currentTarget.IsAlive()))
     @currentTarget = @SelectTarget(self);
   if (@currentTarget == null)
+  {
+    Cout("Fluttershy passing turn");
     level.NextTurn();
+  }
   else
   {
+    Cout("Fluttershy acting on an enemy");
     if (self.HasLineOfSight(currentTarget.AsObject()))
     {
       int   actionPoints = self.GetActionPoints();

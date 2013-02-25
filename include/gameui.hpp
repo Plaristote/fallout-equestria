@@ -59,6 +59,7 @@ public:
   RocketListener         MenuButtonClicked;
   RocketListener         InventoryButtonClicked;
   RocketListener         PersButtonClicked;
+  RocketListener         PipbuckButtonClicked;
   
   Observatory::Signal<void (unsigned short)> UseEquipedItem;
   Observatory::Signal<void (unsigned short)> EquipedItemNextAction;
@@ -172,6 +173,7 @@ public:
   void                   OpenMenu(Rocket::Core::Event&);
   void                   OpenInventory(Rocket::Core::Event&);
   void                   OpenPers(Rocket::Core::Event&);
+  Observatory::Signal<void (Rocket::Core::Event&)> OpenPipbuck;
   
   PT(RocketRegion)       GetRocketRegion(void) { return (_rocket); }
 
@@ -208,10 +210,9 @@ public:
   Observatory::Signal<void (bool)> InterfaceOpened;  
 
 private:
-  GameUi&          _gameUi;
-  GameMainBar*     _mainBar;
-  
-  Observatory::ObserverId _observers[6];
+  GameUi&                      _gameUi;
+  GameMainBar*                 _mainBar;  
+  Observatory::ObserverHandler _obs;
 };
 
 class GameOptions : public UiBase
@@ -221,11 +222,28 @@ public:
   ~GameOptions(void);
 private:
   RocketListener ExitClicked;
-  RocketListener LanguageSelected;
+  RocketListener LanguageSelected, ScreenSelected, FullscreenToggled;
   
   void SetLanguage(Rocket::Core::Event&);
+  void SetResolution(Rocket::Core::Event&);
+  void ToggleFullscreen(Rocket::Core::Event&);
   
   std::list<Rocket::Core::Element*> _language_options;
+};
+
+class AlertUi : public UiBase
+{
+public:
+  static Observatory::Signal<void (const std::string)> NewAlert;
+  
+  AlertUi(WindowFramework* window, Rocket::Core::Context* context, const std::string& message);
+  ~AlertUi();
+
+  bool Run(void);
+
+private:
+  RocketListener ButtonClicked;
+  bool           _continue;
 };
 
 class GeneralUi

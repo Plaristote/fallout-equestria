@@ -30,7 +30,6 @@ bool scrollSwapAxis[] = {
   true,
 };
 
-
 SceneCamera::SceneCamera(WindowFramework* window, NodePath camera) : _window(window), _graphicWindow(window->get_graphics_window()), _camera(camera)
 {
   _scrollEnabled = true;

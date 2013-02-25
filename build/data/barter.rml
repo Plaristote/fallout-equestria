@@ -1,0 +1,129 @@
+<rml>
+  <head>
+    <title>Barter</title>
+    <link type="text/template" href="tpl_mainbar.rml" />
+    <style>
+      #body
+      {
+        width:  600px;
+        height: 70%;
+        margin: auto;
+        margin-top: 10px;
+      }
+
+      #window
+      {
+        width: 600px; height: 100%;
+      }
+
+      #body-inventory-items
+      {
+        width:          90%;
+        height:         80%;
+        //margin-left:    10px;
+        //margin-right:   10px;
+        margin-top:     10px;
+        margin-bottom:  10px;
+      }
+
+      #self-inventory
+      {
+        position: absolute;
+        //drag:  clone;
+        width: 20%;
+        left:  10%;
+        height: 80%;
+        overflow-y: auto;
+        margin-right: 100px;
+      }
+
+      #stack-player
+      {
+        position: absolute;
+        width: 20%;
+        left: 30%;
+        height: 70%;
+        top: 5%;
+        overflow-y: auto;
+        margin-right: 50px;
+      }
+
+      #stack-other
+      {
+        position: absolute;
+        width: 20%;
+        right: 30%;
+        height: 70%;
+        top: 5%;
+        overflow-y: auto;
+        margin-left: 50px;
+      }
+
+      #value-other
+      {
+        position: absolute;
+        top:      0px;
+        height:   10%;
+        width:    20%;
+        right:    30%;
+      }
+
+      #value-player
+      {
+        position: absolute;
+        top:      0px;
+        height:   10%;
+        width:    20%;
+        left:     30%;
+      }
+
+      #other-inventory
+      {
+        position: absolute;
+        //drag:  clone;
+        width: 20%;
+        right: 10%;
+        height: 80%;
+        overflow-y: auto;
+        margin-left: 100px;
+      }
+
+      #buttons
+      {
+        position:       absolute;
+        bottom:         5px;
+        right:          5px;
+      }
+
+      .inventory-item-icon
+      {}
+
+      .inventory-item-draggable
+      {
+        drag: clone;
+      }
+     </style>
+  </head>
+  <body id="body" class="window">
+  <div id="window">
+  <p>
+    <div id="inventory-items">
+      <p id="self-inventory"  class="console-bg">
+      </p>
+      <span id="value-player">0 caps</span>
+      <span id="value-other">0 caps</span>
+      <p id="stack-player"    class="console-bg">
+      </p>
+      <p id="stack-other"     class="console-bg">
+      </p>
+       <p id="other-inventory" class="console-bg">
+      </p>
+   </div>
+    <div id="buttons">
+      <button id="button_done" i18n="Barter">Barter</button>
+      <button id="button_quit" i18n="Quit">Quit</button>
+    </div>
+  </p>
+  </div>
+  </body>
+</rml>

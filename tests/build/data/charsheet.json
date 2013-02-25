@@ -1,0 +1,97 @@
+{
+  "Name":    "Velvet Remedy",
+  "Age":     16,
+  "Gender":  "Mare",
+  "Race":    "Unicorn",
+  "Faction": "Test Town",
+  "Special":    {
+                  "STR": 3,
+                  "PER": 6,
+                  "END": 3,
+                  "CHA": 9,
+                  "INT": 7,
+                  "AGI": 5,
+                  "LUC": 7
+                },
+  "Statistics": {
+                  "Action Points":        5,
+                  "Armor Class":          5,
+                  "Bonus Damage":         0,
+                  "Carry Weight":         100,
+                  "Critical Chance":      7,
+                  "Damage Resistance":    0,
+                  "Healing Rate":         1,
+                  "Hit Points":           26,
+                  "Melee Damage":         1,
+                  "Perk Rate":            3,
+                  "Poison Resistance":    15,
+                  "Radiation Resistance": 6,
+                  "Skill Rate":           19
+                },
+  "Skills":     {
+                  "Small Guns":    10,
+                  "Big Guns":      10,
+                  "Energy Guns":   10,
+                  "Explosives":    10,
+                  "Unarmed":       10,
+                  "Lockpick":      10,
+                  "Melee Weapons": 10,
+                  "Medicine":      10,
+                  "Repair":        10,
+                  "Science":       10,
+                  "Sneak":         10,
+                  "Spellcasting":  10,
+                  "Steal":         10,
+                  "Barter":        10,
+                  "Outdoorspony":  10,
+                  "Speech":        10,
+                  "Gambling":      10
+                },
+  "Skill Points": {
+                  "Small Guns":    0,
+                  "Big Guns":      0,
+                  "Energy Guns":   0,
+                  "Explosives":    0,
+                  "Unarmed":       0,
+                  "Lockpick":      0,
+                  "Melee Weapons": 0, 
+                  "Medicine":      0,
+                  "Repair":        0,
+                  "Science":       0,
+                  "Sneak":         0,
+                  "Spellcasting":  0, 
+                  "Steal":         0,
+                  "Barter":        0,
+                  "Outdoorspony":  0,
+                  "Speech":        0,
+                  "Gambling":      0
+                },
+
+  "Statistics Modifiers": {
+                  "Action Points":        0,
+                  "Armor Class":          0,
+                  "Bonus Damage":         0,
+                  "Carry Weight":         0,
+                  "Critical Chance":      0,
+                  "Damage Resistance":    0,
+                  "Healing Rate":         0,
+                  "Hit Points":           0,
+                  "Melee Damage":         0,
+                  "Perk Rate":            0,
+                  "Poison Resistance":    0,
+                  "Radiation Resistance": 0,
+                  "Skill Rate":           0
+                },
+
+  "Variables":  {
+                  "Hit Points":     26,
+                  "Level":          1,
+                  "Experience":     0,
+                  "Skill Points":   0,
+                  "Special Points": 10,
+                  "Perks":          1,
+                  "Traits":         2
+                },
+
+  "Traits": { }
+}

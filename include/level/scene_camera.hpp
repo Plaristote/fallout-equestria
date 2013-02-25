@@ -48,6 +48,8 @@ public:
   void            CenterOnObject(InstanceDynamicObject*);
   void            FollowObject(InstanceDynamicObject*);
   
+  NodePath        GetNodePath(void) const { return (_camera); }
+  
 private:
   void            RunScroll(float elapsedTime);
   void            RunFollow(float elapsedTime);

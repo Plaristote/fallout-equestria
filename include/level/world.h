@@ -227,44 +227,19 @@ struct WorldLight
     Spot
   };
 
-  WorldLight(Type type, NodePath parent, const std::string& name) : name(name)
+  enum ParentType
   {
-    switch (type)
-    {
-      case Point:
-      {
-	PT(PointLight) pLight = new PointLight(name);
+    Type_None,
+    Type_MapObject,
+    Type_DynamicObject
+  };
 
-	light    = pLight;
-	nodePath = parent.attach_new_node(pLight);
-      }
-	break ;
-      case Directional:
-      {
-	PT(DirectionalLight) pLight = new DirectionalLight(name);
-
-	light    = pLight;
-	nodePath = parent.attach_new_node(pLight);
-      }
-	break ;
-      case Ambient:
-      {
-	PT(AmbientLight) pLight = new AmbientLight(name);
-
-	light    = pLight;
-	nodePath = parent.attach_new_node(pLight);
-      }
-	break ;
-      case Spot:
-      {
-	PT(Spotlight) pLight = new Spotlight(name);
-
-	light    = pLight;
-	nodePath = parent.attach_new_node(pLight);
-      }
-	break ;
-    }
+  WorldLight(Type type, ParentType ptype, NodePath parent, const std::string& name) : name(name), type(type), parent_type(ptype), parent(parent), parent_i(0)
+  {
+    Initialize();
   }
+  
+  WorldLight(NodePath parent) : parent(parent), parent_i(0) {}
   
   LColor GetColor(void) const
   {
@@ -277,17 +252,39 @@ struct WorldLight
     
     light->set_color(color);
   }
-  
+
   bool operator==(const std::string& comp) { return (name == comp); }
 
+  void UnSerialize(World*, Utils::Packet& packet);
+  void Serialize(Utils::Packet& packet);
+  
+  void ReparentTo(DynamicObject* object)
+  {
+    parent_type = Type_DynamicObject;
+    parent      = object->nodePath;
+    parent_i    = object;
+  }
+  
+  void ReparentTo(MapObject* object)
+  {
+    parent_type = Type_MapObject;
+    parent      = object->nodePath;
+    parent_i    = object;
+  }
+  
   std::string name;
   NodePath    nodePath;
-  Type        types;
+  Type        type;
+  ParentType  parent_type;
   PT(Light)   light;
   Lens*       lens;
   float       zoneSize;
 
   std::list<NodePath> enlightened;
+private:
+  void Initialize(void);
+  NodePath    parent;
+  MapObject*  parent_i;
 };
 
 struct World
@@ -392,6 +389,7 @@ struct World
     void           SetMapObjectsVisible(bool v);
     void           MapObjectChangeFloor(MapObject&, unsigned char floor);
 
+    DynamicObject* InsertDynamicObject(DynamicObject&);
     DynamicObject* AddDynamicObject(const std::string& name, DynamicObject::Type type, const std::string& model, const std::string& texture);
     void           DeleteDynamicObject(DynamicObject*);
     DynamicObject* GetDynamicObjectFromName(const std::string& name);
@@ -409,6 +407,8 @@ struct World
     EntryZone*     GetEntryZoneByName(const std::string&);
     
     void           AddLight(WorldLight::Type, const std::string&);
+    void           AddLight(WorldLight::Type, const std::string&, MapObject* parent);
+    void           AddLight(WorldLight::Type, const std::string&, DynamicObject* parent);
     void           DeleteLight(const std::string&);
     WorldLight*    GetLightByName(const std::string&);
     void           CompileLight(WorldLight*, unsigned char = ColMask::Object | ColMask::DynObject);

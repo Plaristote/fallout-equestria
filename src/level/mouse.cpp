@@ -100,7 +100,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
   
   collisionHandlerQueue->sort_entries();
 
-  _hovering.Reset();
+  _hovering.hasWaypoint = false;
   for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
   {
     CollisionEntry* entry = collisionHandlerQueue->get_entry(i);
@@ -147,7 +147,9 @@ void Mouse::Run(void)
       {
 	case ColMask::DynObject:
 	  if (!(_hovering.hasDynObject))
+	  {
 	    _hovering.SetDynObject(into);
+	  }
 	  break ;
       }
     }

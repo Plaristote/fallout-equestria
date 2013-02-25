@@ -1,0 +1,7 @@
+{
+  "mainmenu": {
+                "menu": "menu.ogg"
+              },
+  "test": { "test": "test.ogg" },
+  "worldmap": { "highwayman": "worldmap.ogg" }
+}

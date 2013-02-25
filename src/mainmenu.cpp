@@ -1,5 +1,6 @@
 #include "mainmenu.hpp"
 #include "musicmanager.hpp"
+#include <soundmanager.hpp>
 
 extern PandaFramework framework;
 
@@ -24,10 +25,12 @@ void MouseCursor::Update(void)
   if (_cursor && IsVisible())
   {
     stringstream strTop, strLeft;
+    int          nTop,   nLeft;
+    string       top,    left;
     MouseData    pointer = _window->get_graphics_window()->get_pointer(0);
 
-    strTop  << (pointer.get_y() + 1);
-    strLeft << (pointer.get_x() + 1);
+    strLeft << ((int)pointer.get_x() + 1);
+    strTop  << ((int)pointer.get_y() + 1);
     _cursor->SetProperty("top",  strTop.str().c_str());
     _cursor->SetProperty("left", strLeft.str().c_str());
     _root->PullToFront();
@@ -36,12 +39,17 @@ void MouseCursor::Update(void)
 
 MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window), _mouseCursor(window, _generalUi.GetRocketRegion()->get_context()), _view(window, _generalUi.GetRocketRegion()->get_context())
 {
-  _uiLoad    = 0;
-  _levelTask = 0;
+  _new_game_task = 0;
+  _uiLoad        = 0;
+  _levelTask     = 0;
   AsyncTaskManager::get_global_ptr()->add(this);
-  
+
+  AlertUi::NewAlert.Connect([this](const string message)
+  { _alerts.push_back(new AlertUi(_window, _generalUi.GetRocketRegion()->get_context(), message)); });
+
   _view.Continue.Connect(*this, &MainMenu::Continue);
   _view.LoadGame.Connect(*this, &MainMenu::OpenUiLoad);
+  _view.NewGame.Connect (*this, &MainMenu::NewGame);
   _view.Quit.Connect    (*this, &MainMenu::QuitGame);
   _view.Options.Connect (_generalUi.GetOptions(), &UiBase::FireShow);
   _view.Show();
@@ -51,12 +59,31 @@ MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window
   _need_garbage_collect = false;
 
   MusicManager::Initialize();
-  MusicManager::Get()->Play("mainmenu", "traderslife");
+  MusicManager::Get()->Play("mainmenu");
 }
 
 MainMenu::~MainMenu()
 {
+  if (_new_game_task) { delete _new_game_task; }
   MusicManager::Finalize();
+}
+
+void MainMenu::NewGame(Rocket::Core::Event&)
+{
+  if (_new_game_task)
+    delete _new_game_task;
+  _new_game_task = new NewGameTask(_window, _generalUi.GetRocketRegion()->get_context());
+  _new_game_task->StartGame.Connect(*this, &MainMenu::StartGame);
+  _new_game_task->Cancel.Connect(*this, &MainMenu::CancelNewGame);
+}
+
+void MainMenu::StartGame(void)
+{
+  createLevelPlz = true;
+}
+
+void MainMenu::CancelNewGame(void)
+{
 }
 
 void MainMenu::Continue(Rocket::Core::Event&)
@@ -70,36 +97,55 @@ void MainMenu::EndGame(void)
   delete _levelTask;
   _levelTask            = 0;
   _need_garbage_collect = true;
+  MusicManager::Get()->Play("mainmenu");
+}
+
+void MainMenu::DisplayAlerts(void)
+{
+  AlertUi* alert = _alerts.front();
+  
+  alert->Show();
+  if (!(alert->Run()))
+  {
+    delete alert;
+    _alerts.erase(_alerts.begin());
+  }  
 }
 
 AsyncTask::DoneStatus MainMenu::do_task()
 {
   MusicManager* mm = MusicManager::Get();
 
-  if (mm) { mm->Run(); }
-  if (createLevelPlz) AsyncCreateLevel();
-  if (_levelTask)
+  if (_alerts.size() > 0)
+    DisplayAlerts();
+  else
   {
-    DoneStatus done = _levelTask->do_task();
-    
-    switch (done)
+    if (mm) { mm->Run(); }
+    if (createLevelPlz) AsyncCreateLevel();
+    if (_levelTask)
     {
-      case AsyncTask::DoneStatus::DS_exit:
-	quitGamePlz = true;
-	break ;
-      case AsyncTask::DoneStatus::DS_done:
-	EndGame();
-	break ;
-      default:
-	break ;
+      DoneStatus done = _levelTask->do_task();
+
+      switch (done)
+      {
+        case AsyncTask::DoneStatus::DS_exit:
+          quitGamePlz = true;
+          break ;
+        case AsyncTask::DoneStatus::DS_done:
+          EndGame();
+          break ;
+        default:
+          break ;
+      }
+    }
+    else if (_need_garbage_collect)
+    {
+      TexturePool::get_global_ptr()->garbage_collect();
+      _need_garbage_collect = false;
     }
   }
-  else if (_need_garbage_collect)
-  {
-    TexturePool::get_global_ptr()->garbage_collect();
-    _need_garbage_collect = false;
-  }
   _mouseCursor.Update();
+  SoundManager::GarbageCollectAll();
   return (quitGamePlz ? AsyncTask::DoneStatus::DS_exit : AsyncTask::DoneStatus::DS_cont);
 }
 
@@ -113,6 +159,11 @@ void MainMenu::AsyncCreateLevel(void)
     _levelTask->LoadLastState();
   slotToLoadPlz  = -1;
   createLevelPlz = false;
+  if (_new_game_task)
+  {
+    delete _new_game_task;
+    _new_game_task = 0;
+  }
 }
 
 void MainMenu::OpenUiLoad(Rocket::Core::Event&)

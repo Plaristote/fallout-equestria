@@ -6,6 +6,7 @@
 # include "inventory.hpp"
 # include "timer.hpp"
 # include "statsheet.hpp"
+# include "diplomacy.hpp"
 # include <panda3d/collisionRay.h>
 # include <panda3d/collisionSegment.h>
 # include <panda3d/collisionSphere.h>
@@ -52,27 +53,6 @@ private:
 class ObjectCharacter : public InstanceDynamicObject
 {
 public:
-  struct Faction
-  {
-    unsigned int flag;
-    unsigned int enemyMask;
-  };
-
-  class Diplomacy
-  {
-  public:
-    void     SetEnemyMask(unsigned int m) { _enemyMask = m;     }
-    void     SetFaction(Faction* faction) { _faction = faction; }
-    Faction* GetFaction(void) const       { return (_faction);  }
-    bool     IsEnemyWith(Diplomacy& other) const;
-    bool     IsAlly(Diplomacy& other)      const;
-    void     SetAsEnemy(Diplomacy& other, bool enemy = true);
-
-  private:
-    Faction*     _faction;
-    unsigned int _enemyMask;
-  };
-  
   struct FovEnemy
   {
     FovEnemy(ObjectCharacter* enemy, unsigned char ttl) : enemy(enemy), ttl(ttl) {}
@@ -87,9 +67,9 @@ public:
   
   void Load(Utils::Packet&);
   void Save(Utils::Packet&);
-  
+
   void SetStatistics(DataTree* stats, StatController* statsController);
-  
+  void NullifyStatistics(void);
 
   Observatory::Signal<void (InstanceDynamicObject*)>         ReachedDestination;
   Observatory::Signal<void (unsigned short, unsigned short)> ActionPointChanged;
@@ -107,6 +87,21 @@ public:
     return (ret);
   }
   
+  void                SetInventory(Inventory* inventory)
+  {
+    if (inventory)
+    {
+      if (_inventory) delete _inventory;
+      _inventory = inventory;
+      if (_statistics)
+      {
+	Data statistics(_statistics);
+
+	inventory->SetCapacity(statistics["Statistics"]["Carry Weight"]);
+      }
+    }
+  }
+  
   void                ProcessCollisions() { if (_hitPoints > 0) InstanceDynamicObject::ProcessCollisions(); }
 
   void                Run(float elapsedTime);
@@ -117,6 +112,7 @@ public:
   void                GoTo(InstanceDynamicObject* object, int max_distance = 0);
   void                GoToRandomWaypoint(void);
   void                TruncatePath(unsigned short max_length);
+  std::list<Waypoint> GetPath(Waypoint* waypoint);
   unsigned short      GetPathDistance(Waypoint* waypoint);
   unsigned short      GetPathDistance(InstanceDynamicObject* object);
   float               GetDistance(InstanceDynamicObject* object);
@@ -124,20 +120,27 @@ public:
   int                 GetNearestWaypoint(InstanceDynamicObject* object);
   int                 GetFarthestWaypoint(InstanceDynamicObject* object);
   bool                HasLineOfSight(InstanceDynamicObject* object);
-  bool                IsMoving(void) const      { return (_path.size());          }
-  bool                IsAlive(void) const       { return (_hitPoints > 0);        }
-  bool                IsInterrupted(void) const { return (AnimationEnded.ObserverCount() > 0); }
-  Inventory&          GetInventory(void)        { return (_inventory);            }
-  Data                GetStatistics(void)       { return (_statistics);           }
-  StatController*     GetStatController(void)   { return (_stats);                }
-  Diplomacy&          GetDiplomacy(void)        { return (_diplomacy);            }
+  bool                IsMoving(void) const       { return (_path.size());          }
+  bool                IsAlive(void) const        { return (_hitPoints > 0);        }
+  bool                IsInterrupted(void) const  { return (AnimationEnded.ObserverCount() > 0); }
+  Inventory&          GetInventory(void)         { return (*_inventory);           }
+  Data                GetStatistics(void)        { return (_statistics ? Data(_statistics) : Data()); }
+  StatController*     GetStatController(void)    { return (_stats);                }
+  const std::string   GetFactionName(void) const { return (_faction ? _faction->name : ""); }
+  unsigned int        GetFaction(void) const     { return (_faction ? _faction->flag : 0);  }
 
   unsigned short      GetActionPoints(void) const        { return (_actionPoints); }
-  void                SetActionPoints(unsigned short ap) { _actionPoints = ap; ActionPointChanged.Emit(_actionPoints, Data(_statistics)["Statistics"]["Action Points"]); }
+  void                SetActionPoints(unsigned short ap)
+  {
+    _actionPoints = ap;
+    if (_statistics)
+      ActionPointChanged.Emit(_actionPoints, Data(_statistics)["Statistics"]["Action Points"]);
+  }
   void                RestartActionPoints(void);
   
   short               GetHitPoints(void) const        { return (_hitPoints); }
   void                SetHitPoints(short hp);
+  void                StatHpUpdate(short);
   
   short               GetArmorClass(void) const        { return (_armorClass); }
   void                SetArmorClass(short ac)          { _armorClass = ac; ArmorClassChanged.Emit(_armorClass); }
@@ -158,12 +161,14 @@ public:
   void                DelBuff(CharacterBuff* buff);
 
   void                CheckFieldOfView(void);
+  void                SetFaction(const std::string&);
+  void                SetFaction(unsigned int flag);
   void                SetAsEnemy(ObjectCharacter*, bool);
-  bool                IsEnemy(ObjectCharacter*) const;
-  bool                IsAlly(ObjectCharacter*)  const;
+  bool                IsEnemy(const ObjectCharacter*) const;
+  bool                IsAlly(const ObjectCharacter*)  const;
   
-  Script::StdList<FovEnemy>         GetNearbyEnemies(void) { return (_fovEnemies); }
-  Script::StdList<ObjectCharacter*> GetNearbyAllies(void)  { return (_fovAllies);  }
+  Script::StdList<ObjectCharacter*> GetNearbyEnemies(void) const;
+  Script::StdList<ObjectCharacter*> GetNearbyAllies(void)  const;
   
   // Script Communication Tools
   void                RequestAttack(ObjectCharacter* attack, ObjectCharacter* from);
@@ -184,16 +189,19 @@ private:
   void                RequestCharacter(ObjectCharacter*, ObjectCharacter*, asIScriptFunction*);
   
   void                CallbackActionUse(InstanceDynamicObject* object);
+  
+  Observatory::ObserverHandler   _obs_handler;
 
-  PT(Character)             _character;
-  std::list<Waypoint>       _path;
-  GoToData                  _goToData;
+  PT(Character)                  _character;
+  std::list<Waypoint>            _path;
+  GoToData                       _goToData;
 
-  DataTree*                 _statistics;
-  StatController*           _stats;
-  Diplomacy                 _diplomacy;
-  unsigned short            _actionPoints;
-  short                     _hitPoints, _armorClass, _tmpArmorClass;
+  DataTree*                      _statistics;
+  StatController*                _stats;
+  const WorldDiplomacy::Faction* _faction;
+  unsigned int                   _self_enemyMask;
+  unsigned short                 _actionPoints;
+  short                          _hitPoints, _armorClass, _tmpArmorClass;
   
 
   // Inventory and Equiped Items
@@ -208,7 +216,7 @@ private:
     NodePath                       jointHorn, jointBattleSaddle, jointMouth;
   };
 
-  Inventory                 _inventory;
+  Inventory*                _inventory;
   ItemEquiped               _equiped[2];
   std::list<CharacterBuff*> _buffs;
 

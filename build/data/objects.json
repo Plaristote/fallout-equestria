@@ -11,7 +11,7 @@
       "ap-cost": 3,
       "combat": 1,
       "range": 10,
-      "danage": 5,
+      "damage": 5,
       "hookWeapon": "HoovesHit"
     }
 

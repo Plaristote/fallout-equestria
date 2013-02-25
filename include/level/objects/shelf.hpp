@@ -7,25 +7,18 @@
 class ObjectShelf : public InstanceDynamicObject
 {
 public:
-  ObjectShelf(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
-  {
-    _type   = ObjectTypes::Shelf;
-    LockWaypoints(true);
-    _inventory.LoadInventory(object);
-  }
-  
+  ObjectShelf(Level* level, DynamicObject* object);
+
   ~ObjectShelf()
   {
     LockWaypoints(false);
   }
 
-  void        ProcessCollisions(void) {}
-  void        LockWaypoints(bool);
-  GoToData    GetGoToData(InstanceDynamicObject*);
-  Inventory&  GetInventory(void)      { return (_inventory); }
-  
-  void        CallbackActionUse(InstanceDynamicObject*);
+  void         LockWaypoints(bool);
+  GoToData     GetGoToData(InstanceDynamicObject*);
+  Inventory&   GetInventory(void)      { return (_inventory); }
 
+  virtual void CallbackActionUse(InstanceDynamicObject*);
 private:
   Inventory   _inventory;
 };

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>698</width>
-    <height>530</height>
+    <width>845</width>
+    <height>669</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,15 +58,21 @@
         </item>
         <item row="4" column="1" rowspan="3" colspan="3">
          <widget class="QToolBox" name="toolBox">
+          <property name="minimumSize">
+           <size>
+            <width>250</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="currentIndex">
-           <number>4</number>
+           <number>5</number>
           </property>
           <widget class="QWidget" name="waypointsPage">
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-201</y>
-             <width>262</width>
+             <y>0</y>
+             <width>289</width>
              <height>375</height>
             </rect>
            </property>
@@ -279,7 +285,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>241</width>
+             <width>165</width>
              <height>92</height>
             </rect>
            </property>
@@ -331,7 +337,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>247</width>
+             <width>165</width>
              <height>215</height>
             </rect>
            </property>
@@ -393,8 +399,8 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-124</y>
-             <width>258</width>
+             <y>0</y>
+             <width>285</width>
              <height>323</height>
             </rect>
            </property>
@@ -601,8 +607,8 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-133</y>
-             <width>258</width>
+             <y>0</y>
+             <width>285</width>
              <height>324</height>
             </rect>
            </property>
@@ -795,6 +801,179 @@
             </item>
            </layout>
           </widget>
+          <widget class="QWidget" name="lights">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>295</width>
+             <height>269</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Lights</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_14">
+            <item row="0" column="0">
+             <widget class="QPushButton" name="lightsAdd">
+              <property name="text">
+               <string>Add</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="lightsSelect"/>
+            </item>
+            <item row="0" column="2">
+             <widget class="QPushButton" name="lightsDel">
+              <property name="text">
+               <string>Del</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0" colspan="3">
+             <widget class="QFrame" name="lightFrame">
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_13">
+               <item row="4" column="0" colspan="3">
+                <widget class="QLabel" name="label_12">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Rotation</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1" colspan="2">
+                <widget class="QDoubleSpinBox" name="lightRadius"/>
+               </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_13">
+                 <property name="text">
+                  <string>Type</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="0">
+                <widget class="QDoubleSpinBox" name="lightRotX"/>
+               </item>
+               <item row="3" column="2">
+                <widget class="QDoubleSpinBox" name="lightPosZ"/>
+               </item>
+               <item row="7" column="1">
+                <widget class="QDoubleSpinBox" name="lightColorG"/>
+               </item>
+               <item row="5" column="1">
+                <widget class="QDoubleSpinBox" name="lightRotY"/>
+               </item>
+               <item row="2" column="0" colspan="3">
+                <widget class="QLabel" name="label_11">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Position</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1" colspan="2">
+                <widget class="QComboBox" name="lightTypesList">
+                 <item>
+                  <property name="text">
+                   <string>Point Light</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Directional Light</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Ambient Light</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Spot Light</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item row="7" column="3">
+                <widget class="QDoubleSpinBox" name="lightColorA"/>
+               </item>
+               <item row="5" column="2">
+                <widget class="QDoubleSpinBox" name="lightRotZ"/>
+               </item>
+               <item row="7" column="2">
+                <widget class="QDoubleSpinBox" name="lightColorB"/>
+               </item>
+               <item row="6" column="0" colspan="3">
+                <widget class="QLabel" name="label_14">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Color (RGBA)</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="0">
+                <widget class="QDoubleSpinBox" name="lightColorR"/>
+               </item>
+               <item row="3" column="1">
+                <widget class="QDoubleSpinBox" name="lightPosY"/>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_15">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Radius</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0">
+                <widget class="QDoubleSpinBox" name="lightPosX"/>
+               </item>
+               <item row="8" column="0" colspan="3">
+                <widget class="QPushButton" name="lightCompile">
+                 <property name="text">
+                  <string>Apply changes</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
         <item row="7" column="0" colspan="4">
@@ -839,6 +1018,19 @@
            </size>
           </property>
           <layout class="QGridLayout" name="gridLayout"/>
+         </widget>
+        </item>
+        <item row="8" column="0" colspan="4">
+         <widget class="QProgressBar" name="progressBar">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="value">
+           <number>100</number>
+          </property>
+          <property name="textVisible">
+           <bool>false</bool>
+          </property>
          </widget>
         </item>
        </layout>
@@ -1040,7 +1232,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>698</width>
+     <width>845</width>
      <height>21</height>
     </rect>
    </property>

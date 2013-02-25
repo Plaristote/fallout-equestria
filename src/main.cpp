@@ -5,7 +5,7 @@
 #include <panda3d/directionalLight.h>
 
 PandaFramework       framework;
-PT(AsyncTaskManager) taskMgr = AsyncTaskManager::get_global_ptr();
+PT(AsyncTaskManager) taskMgr     = AsyncTaskManager::get_global_ptr();
 PT(ClockObject)      globalClock = ClockObject::get_global_clock();
 
 # include "mainmenu.hpp"
@@ -22,6 +22,134 @@ using namespace std;
 
 #include "serializer.hpp"
 #include <i18n.hpp>
+#include <level/objects/shelf.hpp>
+#include <level/objects/locker.hpp>
+
+string humanize(const std::string& str)
+{
+  string ret;
+  
+  for (unsigned short i = 0 ;  i < str.size() ; ++i)
+  {
+    if (i == 0 || str[i - 1] == '_')
+      ret += str[i] - 'a' + 'A';
+    else if (str[i] == '_')
+      ret += ' ';
+    else
+      ret += str[i];
+  }
+  return (ret);
+}
+
+string underscore(const std::string& str)
+{
+  string ret;
+  
+  for (unsigned short i = 0 ;  i < str.size() ; ++i)
+  {
+    if      (str[i] >= 'A' && str[i] <= 'Z')
+      ret += str[i] - 'A' + 'a';
+    else if (str[i] == ' ')
+      ret += '_';
+    else
+      ret += str[i];
+  }
+  return (ret);
+}
+
+asIScriptContext* as_current_context;
+asIScriptModule*  as_current_module;
+
+class RocketAsListener : Rocket::Core::EventListener
+{
+public:
+  RocketAsListener(DataEngine& de, Rocket::Core::Element* elem, const std::string& event, const std::string& func_name) : _element(elem), _event(event), _de(de)
+  {
+    cout << "RocketAsListener::RocketAsListener" << endl;
+    if (_element)
+      _element->AddEventListener(_event.c_str(), this);
+    else
+      cout << "RocketAsListener constructed with null RmlElement" << endl;
+    _callback = "void " + func_name + "(Data, RmlElement@, string)";
+    _context  = as_current_context;
+    _module   = as_current_module;
+  }
+
+  ~RocketAsListener()
+  {
+    if (_element)
+      _element->RemoveEventListener(_event.c_str(), this);
+  }
+
+  void ProcessEvent(Rocket::Core::Event& event)
+  {
+    cout << "RocketAsListener::ProcessEvent" << endl;
+    if (_module && _element)
+    {
+      asIScriptFunction* callback = _module->GetFunctionByDecl(_callback.c_str());
+      
+      if (_context && callback)
+      {
+	_context->Prepare(callback);
+	_context->SetArgObject(0, &_de);
+	_context->SetArgObject(1, event.GetCurrentElement());
+	_context->SetArgObject(2, &_event);
+	_context->Execute();
+      }
+      if (callback) callback->Release();
+    }
+  }
+
+private:
+  DataEngine&            _de;
+  Rocket::Core::Element* _element;
+  std::string            _event;
+  asIScriptContext*      _context;
+  asIScriptModule*       _module;
+  std::string            _callback;
+};
+
+class RocketAsManager
+{
+  struct ListenerPair
+  {
+    ListenerPair(Rocket::Core::Element* f, RocketAsListener* s) : element(f), listener(s) {}
+    Rocket::Core::Element* element;
+    RocketAsListener*      listener;
+    bool operator==(Rocket::Core::Element* comp) { return (element == comp); }
+  };
+  typedef std::list<ListenerPair> ListenerPairs;
+public:
+  static RocketAsManager self;
+  
+  void          AddEventListener(Rocket::Core::Element* e, RocketAsListener* l)
+  {
+    _event_listeners.push_back(ListenerPair(e, l));
+  }
+  
+  void          DelEventListener(Rocket::Core::Element* e)
+  {
+    bool keep_searching;
+
+    do
+    {
+      auto it = std::find(_event_listeners.begin(), _event_listeners.end(), e);
+
+      keep_searching = it != _event_listeners.end();
+      if (keep_searching)
+      {
+	cout << "Deleted an event listener" << endl;
+	delete it->listener;
+	_event_listeners.erase(it);
+      }
+    } while (keep_searching);
+  }
+  
+private:
+  ListenerPairs _event_listeners;
+};
+
+RocketAsManager RocketAsManager::self;
 
 void AngelCout(const std::string& str)
 {
@@ -58,6 +186,18 @@ namespace asUtils
   void UnserializeInt   (Utils::Packet* packet, int& i)                   { (*packet) >> i;     }
   void UnserializeString(Utils::Packet* packet, std::string& str)         { (*packet) >> str;   }
   void UnserializeStrArr(Utils::Packet* packet, std::list<string>& array) { (*packet) >> array; }
+
+  std::string            RocketGetId(Rocket::Core::Element* self)                            { return (self->GetId().CString());          }
+  Rocket::Core::Element* RocketGetElementById(Rocket::Core::Element* self, const string& id) { return (self->GetElementById(id.c_str())); }
+  void                   RocketSetInnerRML(Rocket::Core::Element* self, const string& rml)   { return (self->SetInnerRML(rml.c_str()));   }
+  void                   RocketClearListeners(Rocket::Core::Element* self) { cout << "RocketClearListeners" << endl; RocketAsManager::self.DelEventListener(self); }
+  void                   RocketSetListener(Rocket::Core::Element* self, const string& event, const string& callback)
+  {
+    DataEngine&       data_engine = WorldMap::CurrentWorldMap->GetDataEngine();
+    RocketAsListener* listener    = new RocketAsListener(data_engine, self, event, callback);
+
+    RocketAsManager::self.AddEventListener(self, listener);
+  }
 }
 
 struct asConsoleOutput
@@ -65,6 +205,9 @@ struct asConsoleOutput
   void OutputError(std::string str) { std::cout << "[asConsoleOutput]" << str << std::endl; }
 };
 asConsoleOutput asConsole;
+
+#include "musicmanager.hpp"
+#include <soundmanager.hpp>
 
 static void AngelScriptInitialize(void)
 {
@@ -77,9 +220,39 @@ static void AngelScriptInitialize(void)
   engine->RegisterGlobalFunction("void PrintScenegraph()", asFUNCTION( GameConsole::PrintScenegraph ), asCALL_CDECL);
   engine->RegisterGlobalFunction("void Write(const string &in)", asFUNCTION(GameConsole::WriteOn), asCALL_CDECL);
   engine->RegisterGlobalFunction("void SetLanguage(const string& in)", asFUNCTION(i18n::Load), asCALL_CDECL);
+  engine->RegisterGlobalFunction("int  Random()", asFUNCTION(rand), asCALL_CDECL);
 
-  Script::StdList<string>::Register(engine, "StringList", "string");  
+  Script::StdList<string>::Register(engine, "StringList", "string");
 
+  const char* musicmanagerClass = "Music";
+  engine->RegisterObjectType(musicmanagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(musicmanagerClass, "void Play(string)",         asMETHODPR(MusicManager,Play, (const std::string&), void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(musicmanagerClass, "void Play(string, string)", asMETHODPR(MusicManager,Play, (const std::string&, const std::string&), void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(musicmanagerClass, "void PlayNext()",           asMETHOD(MusicManager,PlayNext),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(musicmanagerClass, "void SetVolume(float)",     asMETHOD(MusicManager,SetVolume), asCALL_THISCALL);
+  engine->RegisterGlobalFunction("Music@ MusicHandle(void)", asFUNCTION(MusicManager::Get), asCALL_CDECL);
+  
+  const char* soundInstanceClass = "Sound";
+  engine->RegisterObjectType(soundInstanceClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(soundInstanceClass, "void  Play()",  asMETHOD(ISampleInstance,Start), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundInstanceClass, "void  Stop()",  asMETHOD(ISampleInstance,Stop),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundInstanceClass, "void  Pause()", asMETHOD(ISampleInstance,Pause), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundInstanceClass, "void  SetVolume(float)", asMETHOD(ISampleInstance,SetVolume), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundInstanceClass, "float GetVolume() const", asMETHOD(ISampleInstance,GetVolume), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundInstanceClass, "bool  IsPlaying()", asMETHOD(ISampleInstance,IsPlaying), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundInstanceClass, "void  AddReference()", asMETHOD(ISampleInstance,AddReference), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundInstanceClass, "void  DelReference()", asMETHOD(ISampleInstance,DelReference), asCALL_THISCALL);
+  
+  const char* soundManagerClass = "SoundManager";
+  engine->RegisterObjectType(soundManagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterGlobalFunction("SoundManager@ NewSoundManager()", asFUNCTION(SoundManager::NewSoundManager), asCALL_CDECL);
+  engine->RegisterObjectMethod(soundManagerClass, "void Release()", asMETHOD(SoundManager,Release), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundManagerClass, "bool   RequireSound(string)",   asMETHOD(SoundManager,Require),        asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundManagerClass, "Sound@ CreateInstance(string)", asMETHOD(SoundManager,CreateInstance), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundManagerClass, "void   DeleteInstance(Sound@)", asMETHOD(SoundManager,DeleteInstance), asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundManagerClass, "void   SetVolume(float)",       asMETHOD(SoundManager,SetVolume),      asCALL_THISCALL);
+  engine->RegisterObjectMethod(soundManagerClass, "float   GetVolume(void) const", asMETHOD(SoundManager,GetVolume),      asCALL_THISCALL);
+  
   const char* packetClass = "Serializer";
   engine->RegisterObjectType(packetClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(packetClass, "void Serialize(int)",               asFUNCTION(asUtils::SerializeInt),      asCALL_CDECL_OBJFIRST);
@@ -100,6 +273,7 @@ static void AngelScriptInitialize(void)
   engine->RegisterObjectType     (dataClass, sizeof(Data), asOBJ_VALUE | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_DESTRUCTOR | asOBJ_APP_CLASS_ASSIGNMENT);
   engine->RegisterObjectBehaviour(dataClass, asBEHAVE_CONSTRUCT, "void f()",   asFUNCTION(asData::Constructor),    asCALL_CDECL_OBJLAST);
   engine->RegisterObjectBehaviour(dataClass, asBEHAVE_DESTRUCT,  "void f()",   asFUNCTION(asData::Destructor),     asCALL_CDECL_OBJLAST);
+  engine->RegisterObjectMethod   (dataClass, "void       Duplicate(Data)",           asMETHOD(Data, Duplicate),          asCALL_THISCALL);
   engine->RegisterObjectMethod   (dataClass, "const Data &opAssign(const Data &in)", asMETHODPR(Data,operator=,  (const Data&), const Data&), asCALL_THISCALL);
   engine->RegisterObjectMethod   (dataClass, "Data opIndex(const string &in)",       asMETHODPR(Data,operator[], (const std::string&), Data), asCALL_THISCALL);
   engine->RegisterObjectMethod   (dataClass, "Data opIndex(int)",                    asMETHODPR(Data,operator[], (unsigned int),       Data), asCALL_THISCALL);
@@ -111,10 +285,19 @@ static void AngelScriptInitialize(void)
   engine->RegisterObjectMethod   (dataClass, "void opEquals(string)",          asFUNCTION(asData::opEqualsString), asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod   (dataClass, "int    Count()",                 asMETHOD(Data,Count),               asCALL_THISCALL);
   engine->RegisterObjectMethod   (dataClass, "bool   Nil()",                   asMETHOD(Data,Nil),                 asCALL_THISCALL);
+  engine->RegisterObjectMethod   (dataClass, "bool   NotNil()",                asMETHOD(Data,NotNil),              asCALL_THISCALL);
   engine->RegisterObjectMethod   (dataClass, "string Key()",                   asMETHOD(Data,Key),                 asCALL_THISCALL);
   engine->RegisterObjectMethod   (dataClass, "string AsString()",              asMETHOD(Data,Value),               asCALL_THISCALL);
   engine->RegisterObjectMethod   (dataClass, "int    AsInt()",                 asFUNCTION(asData::getAsInt),       asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod   (dataClass, "float  AsFloat()",               asFUNCTION(asData::getAsFloat),     asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod   (dataClass, "void   Output()",                asMETHOD(Data,Output),              asCALL_THISCALL);
+
+  const char* statsheetClass = "Special";
+  engine->RegisterObjectType(statsheetClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(statsheetClass, "void SetCurrentHp(int)",         asMETHOD(StatController,SetCurrentHp),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void AddExperience(int)",        asMETHOD(StatController,AddExperience), asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void SetStatistic(string, int)", asMETHOD(StatController,SetStatistic),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "Data GetData()",                 asMETHOD(StatController,GetData),       asCALL_THISCALL);
 
   const char* itemClass      = "Item";
   const char* inventoryClass = "Inventory";
@@ -130,9 +313,11 @@ static void AngelScriptInitialize(void)
   const char* dynObjectClass = "DynamicObject";
   const char* charClass      = "Character";
   const char* doorClass      = "Door";
+  const char* shelfClass     = "Shelf";
   engine->RegisterObjectType(dynObjectClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(charClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(doorClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectType(shelfClass,     0, asOBJ_REF | asOBJ_NOCOUNT);
 
   Script::StdList<ObjectCharacter*>::Register(engine, "CharacterList", "Character@");
   engine->RegisterObjectMethod(charClass, "CharacterList GetNearbyAllies()",  asMETHOD(ObjectCharacter,GetNearbyAllies),  asCALL_THISCALL);
@@ -166,12 +351,19 @@ static void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "void LookAt(Character@)",                  asMETHODPR(ObjectCharacter,LookAt,(InstanceDynamicObject*),void),         asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void LookAt(DynamicObject@)",              asMETHODPR(ObjectCharacter,LookAt,(InstanceDynamicObject*),void),         asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void PushBuff(Data, Character@)",          asMETHOD(ObjectCharacter,PushBuff), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "string GetFactionName()",                  asMETHOD(ObjectCharacter,GetFactionName), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "void   SetFaction(string)",                asMETHODPR(ObjectCharacter,SetFaction,(const string&), void),     asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "void   SetAsEnemy(Character@, bool)",      asMETHOD(ObjectCharacter,SetAsEnemy),     asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "bool   IsEnemy(const Character@) const",   asMETHOD(ObjectCharacter,IsEnemy),        asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "bool   IsAlly(const Character@) const",    asMETHOD(ObjectCharacter,IsAlly),         asCALL_THISCALL);
 
-  engine->RegisterObjectMethod(doorClass, "void Unlock()",       asMETHOD(ObjectDoor,Unlock), asCALL_THISCALL);
-  engine->RegisterObjectMethod(doorClass, "bool IsLocked()",     asMETHOD(ObjectDoor,IsLocked), asCALL_THISCALL);
-  engine->RegisterObjectMethod(doorClass, "bool IsOpen()",       asMETHOD(ObjectDoor,IsOpen), asCALL_THISCALL);
-  engine->RegisterObjectMethod(doorClass, "string GetKeyName()", asMETHOD(ObjectDoor,GetKeyName), asCALL_THISCALL);
-
+  engine->RegisterObjectMethod(doorClass, "void   Unlock()",     asMETHOD(Lockable,Unlock),         asCALL_THISCALL);
+  engine->RegisterObjectMethod(doorClass, "bool   IsLocked()",   asMETHOD(Lockable,IsLocked),       asCALL_THISCALL);
+  engine->RegisterObjectMethod(doorClass, "bool   IsOpen()",     asMETHOD(Lockable,IsOpen),         asCALL_THISCALL);
+  engine->RegisterObjectMethod(doorClass, "string GetKeyName()", asMETHOD(Lockable,GetKeyName),     asCALL_THISCALL);
+  
+  engine->RegisterObjectMethod(shelfClass,  "Inventory@ GetInventory()", asMETHOD(ObjectShelf,GetInventory), asCALL_THISCALL);
+  
   const char* worldClass = "World";
   engine->RegisterObjectType(worldClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(worldClass, "void SetWaypointsVisible(bool) const",      asMETHOD(World,SetWaypointsVisible),      asCALL_THISCALL);
@@ -189,7 +381,7 @@ static void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(levelClass, "Data           GetDataEngine()",                       asMETHOD(Level,GetDataEngine),       asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "const World@   GetWorld() const",                      asMETHOD(Level,GetWorld),            asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Camera@        GetCamera()",                           asMETHOD(Level,GetCamera),           asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "Character@     GetCharacter(string)",                  asMETHOD(Level,GetCharacter),        asCALL_THISCALL);
+  //engine->RegisterObjectMethod(levelClass, "Character@     GetCharacter(string)",                  asMETHODPR(Level,GetCharacter,(ObjectCharacter*),void), asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Character@     GetPlayer()",                           asMETHOD(Level,GetPlayer),           asCALL_THISCALL);  
   engine->RegisterObjectMethod(levelClass, "DynamicObject@ GetObject(string)",                     asMETHOD(Level,GetObject),           asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           ActionUseWeaponOn(Character@, Character@, Item@, int)",     asMETHOD(Level,ActionUseWeaponOn), asCALL_THISCALL);
@@ -204,11 +396,27 @@ static void AngelScriptInitialize(void)
   const char* worldmapClass = "WorldMap";
   engine->RegisterObjectType(worldmapClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(worldmapClass, "void SetCityVisible(string)", asMETHOD(WorldMap,SetCityVisible), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(worldmapClass, "Data GetDataEngine()",        asMETHOD(WorldMap,GetDataEngine),  asCALL_THISCALL);
+
+  const char* gametaskClass = "Game";
+  engine->RegisterObjectType(gametaskClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(gametaskClass, "void PushBuff(Character@, Data)", asMETHODPR(GameTask,PushBuff,(ObjectCharacter*,Data),void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(gametaskClass, "void PushBuff(string,     Data)", asMETHODPR(GameTask,PushBuff,(const string&,Data),   void), asCALL_THISCALL);
 
   engine->RegisterGlobalProperty("Level@    level",    &(Level::CurrentLevel));
   engine->RegisterGlobalProperty("WorldMap@ worldmap", &(WorldMap::CurrentWorldMap));
+  engine->RegisterGlobalProperty("Game@     game",     &(GameTask::CurrentGameTask));
+  
+  const char* rmlDocumentClass = "RmlElement";
+  engine->RegisterObjectType(rmlDocumentClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(rmlDocumentClass, "string      GetId()",                          asFUNCTION(asUtils::RocketGetId),          asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(rmlDocumentClass, "RmlElement@ GetElementById(string)",           asFUNCTION(asUtils::RocketGetElementById), asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(rmlDocumentClass, "void        SetInnerRML(string)",              asFUNCTION(asUtils::RocketSetInnerRML),    asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(rmlDocumentClass, "void        ClearEventListeners()",            asFUNCTION(asUtils::RocketClearListeners), asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(rmlDocumentClass, "void        AddEventListener(string, string)", asFUNCTION(asUtils::RocketSetListener),    asCALL_CDECL_OBJFIRST);
 }
 
+#ifndef UNIT_TESTER
 int main(int argc, char *argv[])
 {
   WindowFramework* window;
@@ -246,3 +454,4 @@ int main(int argc, char *argv[])
   Script::Engine::Finalize();
   return (0);
 }
+#endif

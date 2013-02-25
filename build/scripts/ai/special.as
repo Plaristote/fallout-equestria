@@ -212,3 +212,16 @@ StringList AvailableTraits(Data sheet)
   toRet.Add("Small Frame");
   return (toRet);
 }
+
+int action_barter_value(Item@ item, Data stats_owner, Data stats_buyer)
+{
+  return (5);
+}
+
+int action_barter_deal(Data stats_first, int total_first, Data stats_second, int total_second)
+{
+  // TODO: Make this shit use the stats
+  if (total_second >= total_first)
+    return (0);
+  return (1);
+}

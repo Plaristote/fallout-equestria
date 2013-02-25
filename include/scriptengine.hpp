@@ -72,12 +72,18 @@ namespace Script
 	it = copy.it;
 	return (*this);
       }
-      T    Value(void)                   { return (*it);           }
+      
+      T    Value(void)
+      {
+	return (*it);
+      }
+
       bool Equal(asIterator comp) const  { return (comp.it == it); }
       void Increment(void)               { ++it;                   }
       void Decrement(void)               { --it;                   }
 
       typename std::list<T>::iterator it;
+      StdList<T>*                     self;
     };
 
     struct asRIterator
@@ -91,12 +97,18 @@ namespace Script
 	it = copy.it;
 	return (*this);
       }
-      T    Value(void)                   { return (*it);           }
+      
+      T    Value(void)
+      {
+	return (*it);
+      }
+
       bool Equal(asRIterator comp) const { return (comp.it == it); }
       void Increment(void)               { ++it;                   }
       void Decrement(void)               { --it;                   }
 
       typename std::list<T>::reverse_iterator it;
+      StdList<T>*                             self;
     };
     
     static void Register(asIScriptEngine* engine, const std::string& arrayName, const std::string& typeName)
@@ -125,6 +137,7 @@ namespace Script
       engine->RegisterObjectMethod(type.c_str(), (itType + " End()").c_str(), asMETHOD(StdList<T>,End), asCALL_THISCALL);
       engine->RegisterObjectMethod(type.c_str(), (ritType + " RBegin()").c_str(), asMETHOD(StdList<T>,RBegin), asCALL_THISCALL);
       engine->RegisterObjectMethod(type.c_str(), (ritType + " REnd()").c_str(), asMETHOD(StdList<T>,REnd), asCALL_THISCALL);
+      engine->RegisterObjectMethod(type.c_str(), (typeName + " opIndex(int)").c_str(), asMETHODPR(StdList<T>,operator[],(unsigned int i),T), asCALL_THISCALL);
 
       engine->RegisterObjectMethod(itType.c_str(), ("const " + itType + " &opAssign(const " + itType + " &in)").c_str(), asMETHODPR(StdList<T>::asIterator,operator=, (const StdList<T>::asIterator&), const StdList<T>::asIterator&), asCALL_THISCALL);
       engine->RegisterObjectMethod(itType.c_str(), (typeName + " Value()").c_str(), asMETHOD(StdList<T>::asIterator,Value), asCALL_THISCALL);
@@ -154,28 +167,40 @@ namespace Script
     }
 
     unsigned int Size(void) { return std::list<T>::size(); }
+    
+    T          operator[](unsigned int i)
+    {
+      auto it  = std::list<T>::begin();
+      auto end = std::list<T>::end();
+
+      for (unsigned int cur = 0 ; it != end && cur < i ; ++it, ++cur);
+      return (*it);
+    }
 
     asIterator Begin(void)
     {
       asIterator toRet;
-      
-      toRet.it = std::list<T>::begin();
+
+      toRet.it   = std::list<T>::begin();
+      toRet.self = this;
       return (toRet);
     }
     
     asRIterator RBegin(void)
     {
       asRIterator toRet;
-      
-      toRet.it = std::list<T>::rbegin();
+
+      toRet.it   = std::list<T>::rbegin();
+      toRet.self = this;
       return (toRet);
     }
     
     asIterator End(void)
     {
       asIterator toRet;
-      
-      toRet.it = std::list<T>::end();
+
+      toRet.it   = std::list<T>::end();
+      toRet.self = this;
       return (toRet);
     }
     
@@ -183,7 +208,8 @@ namespace Script
     {
       asRIterator toRet;
 
-      toRet.it = std::list<T>::rend();
+      toRet.it   = std::list<T>::rend();
+      toRet.self = this;
       return (toRet);
     }
 

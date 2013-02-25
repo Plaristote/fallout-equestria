@@ -64,9 +64,14 @@ void        WaypointModifier::WithdrawArc(Waypoint* first, Waypoint* second)
 {
   Waypoint::Arc* arc = first->GetArcTo(second->id);
 
-  first->Disconnect(second);
-  second->Disconnect(first);
-  _withdrawedArcs.push_back(WithdrawedArc(first, second, arc->observer));
+  if (arc)
+  {
+    Waypoint::ArcObserver* observer = arc->observer;
+
+    first->Disconnect(second);
+    second->Disconnect(first);
+    _withdrawedArcs.push_back(WithdrawedArc(first, second, observer));
+  }
 }
 
 void        WaypointModifier::SetOccupiedWaypoint(Waypoint* wp)

@@ -14,15 +14,24 @@ extern PandaFramework framework;
 GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
 {
   //HAIL MICROSOFT!!!
-	string fonts[] = { "JH_FALLOUT.TTF",
-                           "Delicious-Roman.otf",
-                           "Delicious-Italic.otf",
-                           "Delicious-Bold.otf",
-                           "Delicious-BoldItalic.otf" };
+  string fonts[] = { "JH_FALLOUT.TTF", // Fallout Console Font
+                     "fallout.ttf",    // Fallout Regular Font
+                     "Delicious-Roman.otf",
+                     "Delicious-Italic.otf",
+                     "Delicious-Bold.otf",
+                     "Delicious-BoldItalic.otf" };
 
-  //ForEach(fonts, [](string path) { Core::FontDatabase::LoadFontFace(Core::String(PATH_FONTS) + "/" + path.c_str()); });
+  string fonts_name[] = { "", "Fallout", "", "", "", "" };
+
   for (int i=0; i<GET_ARRAY_SIZE(fonts); i++)
-	  Core::FontDatabase::LoadFontFace(Core::String(PATH_FONTS) + "/" + fonts[i].c_str());
+  {
+    string path = string(PATH_FONTS) + "/" + fonts[i];
+
+    if (fonts_name[i] == "")
+      Core::FontDatabase::LoadFontFace(path.c_str());
+    else
+      Core::FontDatabase::LoadFontFace(path.c_str(), fonts_name[i].c_str(), Core::Font::STYLE_NORMAL, Rocket::Core::Font::WEIGHT_NORMAL);
+  }
 
   _rocket = RocketRegion::make("interface", window->get_graphics_output());
   _rocket->set_active(true);
@@ -55,26 +64,19 @@ GeneralUi::~GeneralUi(void)
 LevelUi::LevelUi(WindowFramework* window, GameUi& gameUi) : _gameUi(gameUi)
 {
   _mainBar = new GameMainBar(window, _gameUi.GetRocketRegion()->get_context());
-  
-  _observers[0] = _mainBar->MenuButtonClicked.EventReceived.Connect     (_gameUi, &GameUi::OpenMenu);
-  _observers[1] = _mainBar->InventoryButtonClicked.EventReceived.Connect(_gameUi, &GameUi::OpenInventory);
-  _observers[2] = _mainBar->PersButtonClicked.EventReceived.Connect     (_gameUi, &GameUi::OpenPers);
 
-  _observers[3] = _gameUi.GetInventory().VisibilityToggled.Connect(InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
-  _observers[4] = _gameUi.GetMenu().VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);  
-  _observers[5] = _gameUi.GetPers().VisibilityToggled.Connect     (InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  _obs.Connect(_mainBar->MenuButtonClicked.EventReceived,      _gameUi,             &GameUi::OpenMenu);
+  _obs.Connect(_mainBar->InventoryButtonClicked.EventReceived, _gameUi,             &GameUi::OpenInventory);
+  _obs.Connect(_mainBar->PersButtonClicked.EventReceived,      _gameUi,             &GameUi::OpenPers);
+  _obs.Connect(_mainBar->PipbuckButtonClicked.EventReceived,   _gameUi.OpenPipbuck, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
+  _obs.Connect(_gameUi.GetInventory().VisibilityToggled, InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  _obs.Connect(_gameUi.GetMenu().VisibilityToggled,      InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  _obs.Connect(_gameUi.GetPers().VisibilityToggled,      InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
 }
 
 LevelUi::~LevelUi(void)
 {
-  _gameUi.GetInventory().VisibilityToggled.Disconnect(_observers[0]);
-  _gameUi.GetMenu().VisibilityToggled.Disconnect     (_observers[1]);
-  _gameUi.GetPers().VisibilityToggled.Disconnect     (_observers[2]);
-  
-  _gameUi.GetInventory().VisibilityToggled.Disconnect(_observers[3]);
-  _gameUi.GetMenu().VisibilityToggled.Disconnect     (_observers[4]);
-  _gameUi.GetPers().VisibilityToggled.Disconnect     (_observers[5]);
-
+  _obs.DisconnectAll();
   delete _mainBar;
 }
 
@@ -183,10 +185,30 @@ void OptionsManager::Refresh(void)
   
   if (_data)
   {
+    // Language
     Data language = data["language"];
 
-    if (!(language.Nil()))
+    if (language.NotNil())
       i18n::Load(language.Value());
+    
+    // Screen
+    Data             screen        = data["screen"];
+
+    if (screen.NotNil())
+    {
+      bool             hide_cursor   = screen["debug-cursor"] == 1;
+      unsigned int     screen_width  = screen["x"];
+      unsigned int     screen_height = screen["y"];
+      bool             fullscreen    = screen["fullscreen"] == 1;
+      WindowProperties props         = framework.get_window(0)->get_graphics_window()->get_properties();
+
+      props.set_cursor_hidden(hide_cursor);
+      props.set_fullscreen(fullscreen);
+      props.set_size(screen_width, screen_height);
+      framework.get_window(0)->get_graphics_window()->request_properties(props);
+    }
+
+    // Saving changes
     DataTree::Writers::JSON(_data, "conf.json");
   }
 }
@@ -196,17 +218,43 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
   _root = context->LoadDocument("data/options.rml");
   if (_root)
   {
+    Core::Element* fullscreen_box   = _root->GetElementById("fullscreen");
+    Core::Element* screen_select    = _root->GetElementById("screen-select");
     Core::Element* language_select  = _root->GetElementById("language-select");
     vector<string> languages        = i18n::LanguagesAvailable();
     Data           current_language = OptionsManager::Get()["language"];
-    stringstream   rml;
 
-    for_each(languages.begin(), languages.end(), [&rml](string language)
     {
-      rml << "<option id='language-" << language << "' value='" << language << "'";
-      rml << ">" << language << "</option>\n";
-    });
-    language_select->SetInnerRML(rml.str().c_str());
+      stringstream        rml;
+      GraphicsPipe*       pipe   = framework.get_default_pipe();
+      DisplayInformation* di     = pipe->get_display_information();
+      int                 di_tot = di->get_total_display_modes();
+      
+      for (int i = 0 ; i < di_tot ; ++i)
+      {
+	rml << "<option value='" << i << "'>";
+	rml << di->get_display_mode_width(i) << 'x' << di->get_display_mode_height(i) << ' ';
+	if (di->get_display_mode_fullscreen_only(i))
+	  rml << " (Fullscreen)";
+	rml << "</option>";
+      }
+      screen_select->SetInnerRML(rml.str().c_str());
+    }
+
+    if (OptionsManager::Get()["screen"]["fullscreen"] == 1)
+      fullscreen_box->SetAttribute("checked", "on");
+
+    {
+      stringstream rml;
+
+      for_each(languages.begin(), languages.end(), [&rml](string language)
+      {
+	rml << "<option id='language-" << language << "' value='" << language << "'";
+	rml << ">" << language << "</option>\n";
+      });
+      language_select->SetInnerRML(rml.str().c_str());
+    }
+
     {
       Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("language-select"));
       
@@ -224,20 +272,84 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
 	}
       }
     }
-
     
+    {
+      Controls::ElementFormControlSelect* select = dynamic_cast<Controls::ElementFormControlSelect*>(screen_select);
+      
+      for (unsigned int i = 0 ; i < select->GetNumOptions() ; ++i)
+      {
+	Controls::SelectOption* option = select->GetOption(i);
+
+	if (option)
+	{
+	  if (current_language.Value() == option->GetValue().CString())
+	  {
+	    select->SetSelection(i);
+	    break ;
+	  }
+	}
+      }
+    }
+
+    ToggleEventListener(true, "fullscreen",      "click",  FullscreenToggled);
+    ToggleEventListener(true, "screen-select",   "change", ScreenSelected);
     ToggleEventListener(true, "language-select", "change", LanguageSelected);
-    ToggleEventListener(true, "exit", "click", ExitClicked);
-    ExitClicked.EventReceived.Connect(*this, &UiBase::FireHide);
-    LanguageSelected.EventReceived.Connect(*this, &GameOptions::SetLanguage);
+    ToggleEventListener(true, "exit",            "click",  ExitClicked);
+    ExitClicked.EventReceived.Connect      (*this, &UiBase::FireHide);
+    FullscreenToggled.EventReceived.Connect(*this, &GameOptions::ToggleFullscreen);
+    ScreenSelected.EventReceived.Connect   (*this, &GameOptions::SetResolution);
+    LanguageSelected.EventReceived.Connect (*this, &GameOptions::SetLanguage);
     Translate();
   }
 }
 
 GameOptions::~GameOptions()
 {
+  ToggleEventListener(false, "fullscreen",      "click",  FullscreenToggled);
+  ToggleEventListener(false, "screen-select",   "change", ScreenSelected);  
   ToggleEventListener(false, "language-select", "change", LanguageSelected);
-  ToggleEventListener(false, "exit", "click", ExitClicked);
+  ToggleEventListener(false, "exit",            "click",  ExitClicked);
+}
+
+void GameOptions::ToggleFullscreen(Rocket::Core::Event& event)
+{
+  Core::Element* checkbox = event.GetCurrentElement();
+  
+  if (checkbox)
+  {
+    Core::Variant* var  = checkbox->GetAttribute("checked");
+    Data           opts = OptionsManager::Get();
+    
+    opts["screen"]["fullscreen"] = (var ? 1 : 0);
+    OptionsManager::Refresh();
+  }
+}
+
+void GameOptions::SetResolution(Rocket::Core::Event&)
+{
+  Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("screen-select"));
+  int                                 it_select = select->GetSelection();
+  Controls::SelectOption*             option    = select->GetOption(it_select);
+
+  if (option)
+  {
+    stringstream        str_it;
+    int                 it;
+    Core::String        str    = option->GetValue();
+    GraphicsPipe*       pipe   = framework.get_default_pipe();
+    DisplayInformation* di     = pipe->get_display_information();
+    
+    str_it << str.CString();
+    str_it >> it;
+    if (it < di->get_total_display_modes())
+    {
+      Data opts = OptionsManager::Get();
+      
+      opts["screen"]["x"] = di->get_display_mode_width(it);
+      opts["screen"]["y"] = di->get_display_mode_height(it);
+      OptionsManager::Refresh();
+    }
+  }
 }
 
 void GameOptions::SetLanguage(Core::Event& event)
@@ -496,7 +608,6 @@ GameInventory::~GameInventory()
 
 void GameInventory::SetInventory(Inventory& inventory)
 {
-  
   Core::Element* itemListContainer = _root->GetElementById("body-inventory-items");
 
   if (itemListContainer)
@@ -619,6 +730,7 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
 
     ToggleEventListener(true, "menu",      "click", MenuButtonClicked);
     ToggleEventListener(true, "inv",       "click", InventoryButtonClicked);
+    ToggleEventListener(true, "pipbuck",   "click", PipbuckButtonClicked);
     ToggleEventListener(true, "charsheet", "click", PersButtonClicked);
     ToggleEventListener(true, "equiped_1", "click", EquipedItem1Clicked);
     ToggleEventListener(true, "equiped_2", "click", EquipedItem2Clicked);
@@ -637,11 +749,12 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
 
 GameMainBar::~GameMainBar()
 {
-  ToggleEventListener(false, "menu",      "click", MenuButtonClicked);
-  ToggleEventListener(false, "inv",       "click", InventoryButtonClicked);
-  ToggleEventListener(false, "charsheet", "click", PersButtonClicked);
-  ToggleEventListener(false, "equiped_1", "click", EquipedItem1Clicked);
-  ToggleEventListener(false, "equiped_2", "click", EquipedItem2Clicked);
+  ToggleEventListener(false, "menu",       "click", MenuButtonClicked);
+  ToggleEventListener(false, "inv",        "click", InventoryButtonClicked);
+  ToggleEventListener(false, "pipbuck",    "click", PipbuckButtonClicked);
+  ToggleEventListener(false, "charsheet",  "click", PersButtonClicked);
+  ToggleEventListener(false, "equiped_1",  "click", EquipedItem1Clicked);
+  ToggleEventListener(false, "equiped_2",  "click", EquipedItem2Clicked);
   ToggleEventListener(false, "pass_turn",  "click", PassTurnClicked);
   ToggleEventListener(false, "stop_fight", "click", CombatEndClicked);  
 }
@@ -795,32 +908,33 @@ void GameMainBar::SetEquipedItemAction(unsigned short it, InventoryObject* item,
 }
 
 /*
- * UiBase
+ * AlertUi
  */
-void UiBase::RecursiveTranslate(Core::Element* root)
+Observatory::Signal<void (const string)> AlertUi::NewAlert;
+
+AlertUi::AlertUi(WindowFramework* window, Core::Context* context, const string& message) : UiBase(window, context)
 {
-  unsigned short it;
-  Core::Element* child;
-
-  if (!root)
-    return ;
-  for (it = 0 ; (child = root->GetChild(it)) ; ++it)
+  _continue = true;
+  _root     = context->LoadDocument("data/alert.rml");
+  if (_root)
   {
-    Core::Variant* attr = child->GetAttribute("i18n");
+    Core::Element* elem_message = _root->GetElementById("message");
 
-    if (attr)
-    {
-      string key = attr->Get<Core::String>().CString();
-
-      child->SetInnerRML(i18n::T(key).c_str());
-    }
-    else
-      RecursiveTranslate(child);
+    elem_message->SetInnerRML(message.c_str());
+    ToggleEventListener(true, "button-ok", "click", ButtonClicked);
+    ButtonClicked.EventReceived.Connect([this](Core::Event&) { _continue = false; });
   }
 }
 
-void UiBase::Translate(void)
+AlertUi::~AlertUi()
+{
+}
+
+bool AlertUi::Run(void)
 {
   if (_root)
-    RecursiveTranslate(_root);
+  {
+    _root->PullToFront();
+  }
+  return (_continue);
 }

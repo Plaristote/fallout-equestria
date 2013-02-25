@@ -19,6 +19,16 @@ body
   margin-top: 5px;
   font-family: JH_Fallout;
   font-size:   8px;
+
+  //background-decorator:          tiled-box;
+  //background-top-left-image:     hud.png         72px 0px  78px 6px;
+  //background-top-right-image:    hud.png         83px 0px  89px 6px;
+  //background-bottom-left-image:  hud.png         72px 29px 78px 35px;
+  //background-bottom-right-image: hud.png         83px 29px 89px 35px;
+  //background-top-image:          hud.png stretch 78px 0px  89px 6px;
+  //background-bottom-image:       hud.png stretch 78px 29px 89px 35px;
+  //background-center-image:       hud.png stretch 78px 6px  89px 29px;
+
 }
 
 #console
@@ -109,7 +119,7 @@ body
   <body id="body" template="tplmainbar">
    <p>
       <div id="console-container">
-        <p id="console">
+        <p id="console" class="console-bg">
         </p>
       </div>
 

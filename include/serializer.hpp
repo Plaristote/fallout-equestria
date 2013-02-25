@@ -8,7 +8,7 @@
 # include <iostream>
 # include <fstream>
 
-# ifdef _WIN32 || _WIN64
+# ifdef _WIN32
 #  include <cstdint>
 typedef std::int32_t my_int32;
 # else
@@ -92,7 +92,7 @@ private:
   {
     if ((canIHaz(sizeof(T), 1)))
       tmp = *(reinterpret_cast<T*>(reading));
-    reading = reinterpret_cast<void*>((int)reading + sizeof(T));
+    reading = reinterpret_cast<void*>((long)reading + sizeof(T));
   }
 
   // Association Type/TypeCode

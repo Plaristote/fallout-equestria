@@ -7,6 +7,8 @@
 # include <panda3d/texturePool.h>
 # include <panda3d/directionalLight.h>
 
+# include "playerparty.hpp"
+
 # include "timer.hpp"
 # include "datatree.hpp"
 # include "scene_camera.hpp"
@@ -33,12 +35,19 @@ public:
   static Level* CurrentLevel;
   
   Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& data, TimeManager& tm);
+  
+  void InitPlayer(void);
 
   // Saving/Loading
-  void SetDataEngine(DataEngine* de) { _dataEngine = de; }
+  void SetDataEngine(DataEngine* de)   { _dataEngine = de; }
+  void SetPlayerInventory(Inventory*);
   void SaveUpdateWorld(void);
   void Save(Utils::Packet&);
   void Load(Utils::Packet&);
+  
+  void InsertParty(PlayerParty& party);
+  void FetchParty(PlayerParty& party);
+  void StripParty(PlayerParty& party);
 
   ~Level();
 
@@ -54,12 +63,15 @@ public:
   State                   GetState(void) const { return (_state); }
   void                    SetInterrupted(bool);
   void                    TaskCeiling(float elapsedTime);
+  void                    DisplayCombatPath(void);
+  void                    DestroyCombatPath(void);
   
   // World Interactions
   bool                   FindPath(std::list<Waypoint>&, Waypoint&, Waypoint&);
   World*                 GetWorld(void)       { return (_world); }
   SceneCamera&           GetCamera(void)      { return (_camera); }
   ObjectCharacter*       GetCharacter(const std::string& name);
+  ObjectCharacter*       GetCharacter(const DynamicObject*);
   ObjectCharacter*       GetPlayer(void);
   void                   UnprocessAllCollisions(void);
   void                   ProcessAllCollisions(void);
@@ -79,9 +91,10 @@ public:
   void                   CallbackCancelSelectZone(void);
   const std::string&     GetNextZone(void) const;
   const std::string&     GetExitZone(void) const;
-  void                   SetEntryZone(const std::string&);
+  void                   SetEntryZone(PlayerParty&, const std::string&);
 
   // Interaction Management
+  void                   CallbackActionBarter(ObjectCharacter*);
   void                   CallbackActionUse(InstanceDynamicObject* object);
   void                   CallbackActionTalkTo(InstanceDynamicObject* object);
   void                   CallbackActionUseObjectOn(InstanceDynamicObject* object);
@@ -137,8 +150,10 @@ private:
 
   void              RunDaylight(void);
   void              MouseInit(void);
+  void              ToggleCharacterOutline(bool);
   
   Observatory::ObserverHandler obs;
+  Observatory::ObserverHandler obs_player;
 
   WindowFramework*     _window;
   GraphicsWindow*      _graphicWindow;
@@ -152,6 +167,7 @@ private:
   InstanceObjects      _objects;
   Characters           _characters;
   Characters::iterator _itCharacter;
+  NodePath             _player_halo;
   
   ExitZones            _exitZones;
   bool                 _exitingZone;
@@ -168,6 +184,7 @@ private:
     UiItLoot,
     UiItEquipMode,
     UiItNextZone,
+    UiItBarter,
     UiTotalIt
   };
   
@@ -184,7 +201,7 @@ private:
     _camera.SetEnabledScroll(true);
     SetInterrupted(false);
   }
-  
+
   LevelUi           _levelUi;
   UiBase*           _currentUis[UiTotalIt];
   DialogController* _currentRunningDialog;
@@ -195,7 +212,15 @@ private:
   DataEngine*       _dataEngine;
   DataTree*         _items;
 
-  
+  /*
+   * Combat Path Shower
+   */
+  std::list<Waypoint> _combat_path;
+  NodePath            _last_combat_path;
+
+  /*
+   * Floor Management
+   */
   class HidingFloor
   {
     NodePath floor;
@@ -212,9 +237,9 @@ private:
     void  SetFadingIn(bool set);
     void  Run(float elapsedTime);
   };
-  
+
   std::list<HidingFloor> _hidingFloors;
-  
+
   unsigned char     _currentFloor;
   Waypoint*         _floor_lastWp;
   

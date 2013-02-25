@@ -1,4 +1,7 @@
 {
+  "You can't wait while fighting": "Impossible d'attendre en combat",
+  "It's locked":        "C'est verouille",
+
   "Continue":           "Continuer",
   "New Game":           "Nouveau jeu",
   "Save":               "Sauvegarder",
@@ -31,7 +34,7 @@
   "Action Points":      "Points d'action",
   "Armor Class":        "Classe d'armure",
   "Bonus Damage":       "Bonus de dommage",
-  "Carry Weigth":       "Poids transportable",
+  "Carry Weight":       "Poids transportable",
   "Critical Chance":    "Chance de critiques",
   "Damage Resistance":  "Resistance aux dommages",
   "Healing Rate":       "Vitesse de guerison",
@@ -39,6 +42,7 @@
   "Melee Damage":       "Dommage de melee",
   "Perk Rate":          "Perk Rate",
   "Poison Resistance":  "Resistance aux poisons",
+  "Radiation Resistance": "Resistance aux radiations",
   "Skill Rate":         "Skill Rate",
   
   "Small Guns":         "Armes legeres",

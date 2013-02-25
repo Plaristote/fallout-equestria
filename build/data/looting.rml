@@ -5,7 +5,7 @@
     <style>
       #body
       {
-        width:  520px;
+        width:  550px;
         height: 70%;
         margin: auto;
         margin-top: 10px;
@@ -57,18 +57,18 @@
       }
      </style>
   </head>
-  <body id="body" template="tplmainbar">
+  <body id="body"><div id="window">
   <p>
     <div id="inventory-items">
-      <p id="self-inventory"  class="window-inventory">
+      <p id="self-inventory"  class="console-bg">
       </p>
-      <p id="other-inventory" class="window-inventory">
+      <p id="other-inventory" class="console-bg">
       </p>
     </div>
     <div id="buttons">
-      <button class="button_menu" id="button_take_all" i18n="Take all">Take all</button>
-      <button class="button_menu" id="button_done"     i18n="Done">Done</button>
+      <button id="button_take_all" i18n="Take all">Take all</button>
+      <button id="button_done"     i18n="Done">Done</button>
     </div>
   </p>
-  </body>
+  </div></body>
 </rml>

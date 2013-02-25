@@ -27,14 +27,30 @@ private:
   std::vector<std::string> _destinations;
 };
 
-class ObjectDoor : public InstanceDynamicObject, public Waypoint::ArcObserver
+class Lockable
 {
 public:
-  ObjectDoor(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
+  Lockable(DynamicObject* o) : __object(o) {}
+  Lockable(void) {}
+
+  string         GetKeyName(void) const { return (__object->key);              }
+  bool           IsLocked(void)   const { return (__object->locked);           }
+  bool           IsOpen(void)     const { return (!_closed);                  }
+  void           Unlock(void)           { __object->locked = !__object->locked; }
+
+protected:
+  bool           _closed;
+private:
+  DynamicObject* __object;
+};
+
+class ObjectDoor : public InstanceDynamicObject, public Lockable, public Waypoint::ArcObserver
+{
+public:
+  ObjectDoor(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object), Lockable(object)
   {
     _type   = ObjectTypes::Door;
     _closed = true;
-    _locked = object->locked;
     ObserveWaypoints(true);
   }
   
@@ -44,22 +60,17 @@ public:
   }
 
   string   GetKeyName() const { return (_object->key); }
-  void     Unlock(void)   { _locked = !_locked; }
-  bool     IsLocked(void) { return (_locked);   }
-  bool     IsOpen(void)   { return (!_closed);  }
   
   void     CallbackActionUse(InstanceDynamicObject* object);
-  GoToData GetGoToData(InstanceDynamicObject* character);  
+  GoToData GetGoToData(InstanceDynamicObject* character);
   void     ObserveWaypoints(bool doObserver);
   
   void     ProcessCollisions(void) {}
 
   bool     CanGoThrough(unsigned char id);
   void     GoingThrough(void*);
-
 private:
-  bool _closed;
-  bool _locked;
+  void     PendingActionOpen(InstanceDynamicObject*);
 };
 
 template<> struct ObjectType2Code<ObjectDoor>      { enum { Type = ObjectTypes::ObjectType::Door      }; };

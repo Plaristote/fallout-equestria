@@ -43,7 +43,9 @@ bool DataTree::Save(const string& path)
 }
 
 Data::Data(DataTree* d) : _data(d)
-{}
+{
+  d->pointers++;
+}
 
 Data::Data(const std::string& key, DataBranch* father)
 {
@@ -60,9 +62,27 @@ Data::~Data()
 {
   if (_data)
   {
-    _data->pointers--;
+    if (_data->pointers > 0)
+      _data->pointers--;
     if ((_data->nil || !_data->father) && _data->root == false && _data->pointers == 0)
-      delete _data;
+      ;//delete _data;
+  }
+}
+
+void Data::PushBack(Data d)
+{
+  if (_data)
+  {
+    DataBranch* parent = _data;
+
+    _data->children.push_back(d._data);
+    d._data->father = _data;
+    d._data->nil    = false;
+    while (parent)
+    {
+      parent->nil   = false;
+      parent = parent->father;
+    }
   }
 }
 
@@ -128,7 +148,7 @@ void        Data::Duplicate(Data var)
   for (; it != end ; ++it)
   {
     Data        children = *it;
-    DataBranch* tmp      = new DataBranch();
+    DataBranch* tmp      = new DataBranch;
     
     tmp->father = _data;
     _data->children.push_back(tmp);
@@ -140,7 +160,8 @@ const Data& Data::operator=(const Data& var)
 {
   if (var.Nil() && !Nil())
   {
-    _data->pointers--;
+    if (_data->pointers > 0)
+      _data->pointers--;
     _data = 0;
   }
   else if (Nil())
@@ -156,11 +177,28 @@ const Data& Data::operator=(const Data& var)
   return (*this);
 }
 
+void Data::CutBranch(void)
+{
+  DataBranch::Children::iterator it  = _data->children.begin();
+  DataBranch::Children::iterator end = _data->children.end();
+  
+  while (it != end)
+  {
+    (*it)->nil    = true;
+    (*it)->father = 0;
+    if ((*it)->pointers == 0)
+      delete (*it);
+    it = _data->children.erase(it);
+  }
+  Remove();
+}
+
 DataBranch::~DataBranch()
 {
   Children::iterator it;
   Children::iterator end;
 
+  //std::cout << "Deleting databranch" << endl;
   if (father)
   {
     it  = father->children.begin();
@@ -179,13 +217,10 @@ DataBranch::~DataBranch()
   {
     DataBranch* child = *children.begin();
 
-    if (child->nil == false)
+    child->father = 0;
+    if (child->pointers == 0)
       delete child;
-    else
-    {
-      children.erase(children.begin());
-      child->father = 0;
-    }
+    children.erase(children.begin());
   }
 }
 

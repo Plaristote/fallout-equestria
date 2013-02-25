@@ -14,6 +14,14 @@
 
 # include <panda3d/cmath.h>
 # include <algorithm>
+# include <string>
 # define ForEach(stlContainer, functor) (std::for_each((stlContainer).begin(), (stlContainer).end(), (functor)))
+
+/*
+ * String Utils
+ */
+std::string humanize(const std::string&);
+std::string underscore(const std::string&);
+
 
 #endif // GLOBALS_HPP

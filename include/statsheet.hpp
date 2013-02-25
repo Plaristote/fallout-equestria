@@ -1,9 +1,11 @@
 #ifndef  STATSHEET_HPP
 # define STATSHEET_HPP
 
+# include "globals.hpp"
 # include "rocket_extension.hpp"
 # include "datatree.hpp"
 # include "scriptengine.hpp"
+# include <cstdarg>
 
 class StatModel
 {
@@ -13,7 +15,10 @@ public:
   
   void           Backup(void);
   void           RestoreBackup(void);
-  
+
+  int            Action(const std::string& action, const std::string& fmt, ...);
+  Data           GetAll(void) { return (_statsheet); }
+
   void           SetName(const std::string& name)  { _statsheet["Name"]   = name;           }
   std::string    GetName(void) const               { return (_statsheet["Name"].Value());   }
   void           SetRace(const std::string& race)  { _statsheet["Race"]   = race;           }
@@ -23,9 +28,15 @@ public:
   void           SetGender(const std::string& g)   { _statsheet["Gender"] = (g == "male" ? "Stallion" : "Mare"); }
   std::string    GetGender(void) const             { return (_statsheet["Gender"].Value()); }
 
+  void           AddKill(const std::string&);
+  unsigned int   GetKills(const std::string& race) const { return (_statsheet["Kills"][race]); }
+
   bool           AddPerk(const std::string& perk);
   void           ToggleTrait(const std::string& trait);
-  bool           HasTrait(const std::string& trait)    const { return (_statsheet["Traits"][trait] == 1); }
+  void           ToggleSkillAffinity(const std::string& skill);
+  bool           HasTrait(const std::string& trait)         const { return (_statsheet["Traits"][trait]     == 1); }
+  bool           HasSkillAffinity(const std::string& skill) const { return (_statsheet["Affinities"][skill] == 1); }
+  Data           GetSkillAffinities(void)                         { return (_statsheet["Affinities"]);             }
 
   void           SetStatistic(const std::string& stat, short value);
   void           SetSpecial(const std::string& stat, short value);
@@ -63,14 +74,14 @@ public:
   Observatory::Signal<void (short)>                     MaxHpChanged;
   Observatory::Signal<void>                             PerksChanged;
 
+  bool           UpdateAllValues(void);  
+  
 private:
   typedef std::pair<asIScriptFunction**, std::string> ScriptFuncPtr;
   typedef std::list<ScriptFuncPtr>                    ScriptFuncPtrs;
   void           LoadFunctions(void);
   void           ReloadFunction(asIScriptFunction**);
   ScriptFuncPtrs _script_func_ptrs;
-  
-  bool           UpdateAllValues(void);
   
   std::vector<std::string> GetStatKeys(Data stats) const;
 
@@ -108,12 +119,14 @@ public:
   virtual void SetTraitActive(const std::string&, bool)                                                     = 0;
   virtual void SetPerks(std::list<std::string>)                                                             = 0;
   virtual void SetAvailablePerks(std::list<std::string> perks)                                              = 0;
+  virtual void SetSkillAffinity(const std::string& skill, bool)                                             = 0;
 
   Observatory::Signal<void (const std::string&, const std::string&)> StatUpped, StatDowned; 
   Observatory::Signal<void (const std::string&, const std::string&)> InformationChanged;
   Observatory::Signal<void (unsigned char)>                          AgeChanged;
   Observatory::Signal<void (const std::string&)>                     TraitToggled;
   Observatory::Signal<void (const std::string&)>                     PerkToggled;
+  Observatory::Signal<void (const std::string&)>                     ToggleSkillAffinity;
   Observatory::Signal<void>                                          Accepted, Canceled, MakeBackup;
 
   void         SetNumPerks(unsigned short n_perks)             { _n_perks = n_perks; }
@@ -128,6 +141,10 @@ class StatController
 public:
   StatController(Data statsheet);
   
+  StatModel&       Model(void)         { return (_model);          }
+  const StatModel& Model(void) const   { return (_model);          }
+  Data             GetData(void)       { return (_model.GetAll()); }
+
   void SetView(StatView*);
 
   void UpSpecial(const std::string& stat);
@@ -142,8 +159,15 @@ public:
 
   void AddExperience(unsigned short experience);
   void SetCurrentHp(short hp);
-  
+
+  void TriggerSkillAffinity(const std::string& stat, bool);
+
+  void AddKill(const std::string& race);
+
+  Observatory::Signal<void (short)>          HpChanged;
   Observatory::Signal<void (unsigned short)> LevelUp;
+  Observatory::Signal<void>                  ChangesAccepted;
+  Observatory::Signal<void>                  ChangesCanceled;
 
 private:
   void      SetMaxHp(short hp);
@@ -152,6 +176,7 @@ private:
   void      StatisticChanged(const std::string&, short);
   void      PerksChanged(void);
   void      TraitToggled(const std::string&);
+  void      SkillAffinityToggled(const std::string&);
   void      LevelChanged(unsigned short);
   void      InformationChanged(const std::string&, const std::string&);
   void      AgeChanged(unsigned char);
@@ -200,6 +225,7 @@ class StatViewRocket : public UiBase, public StatView
 
 public:
   StatViewRocket(WindowFramework* window, Rocket::Core::Context* context);
+  ~StatViewRocket();
   
   void SetEditMode(EditMode);
   
@@ -216,6 +242,7 @@ public:
   void SetExperience(unsigned short, unsigned short, unsigned short);
   void SetTraits(std::list<std::string>);
   void SetTraitActive(const std::string&, bool);
+  void SetSkillAffinity(const std::string& skill, bool);
   void SetPerks(std::list<std::string>);
   void SetAvailablePerks(std::list<std::string>);
 
@@ -248,6 +275,8 @@ private:
   Rocket::Core::Element* _specialSelected;
   Rocket::Core::Element* _skillSelected;
   Rocket::Core::Element* _traitSelected;
+  
+  std::list<Rocket::Core::Element*> _traits;
 };
 
 #endif

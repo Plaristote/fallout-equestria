@@ -1,7 +1,7 @@
 <rml>
 	<head>
 		<title>Main Menu</title>
-		<link type="text/template" href="tpl_mainbar.rml" />
+		<link type="text/template" href="tpl_dialog.rml" />
 		<style>
 	        body
 		{
@@ -12,17 +12,24 @@
 
                 #npcLine
                 {
-                  width: 100%;
+                  width: 80%;
                   height: 20%;
                   overflow-x: scroll;
                 }
 
                 #answers
                 {
-                  width:  100%;
+                  width:  80%;
                   height: 80%;
                   overflow-x: auto;
                 }
+
+#sidebar
+{
+  position: absolute;
+  width:    20%;
+  right:    0px;
+}
 
 button.dialog-answer
 {
@@ -37,7 +44,10 @@ button.dialog-answer
         text-align: left;
         tab-index: auto;
 
-        background-color: #000000;
+        background-decorator: none;
+        background-color: transparent;
+
+        font-family: JH_Fallout;
 }
 
 button.dialog-answer:focus,
@@ -51,6 +61,9 @@ button.dialog-answer:focus,
 
 button.dialog-answer:hover,
 {
+  shadow-font-effect: shadow;
+  shadow-offset: 1px 1px;
+  shadow-color: yellow;
 }
 
 button.dialog-answer:active,
@@ -68,6 +81,10 @@ button.dialog-answer:active,
 
       <p id="answers">
       </p>
+
+      <div id="sidebar">
+        <button id="button-open-barter" i18n="Barter">Barter</button>
+      </div>
 
     </p>
   </body>

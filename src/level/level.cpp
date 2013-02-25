@@ -4,18 +4,25 @@
 
 #include "level/objects/door.hpp"
 #include "level/objects/shelf.hpp"
+#include <level/objects/locker.hpp>
 #include <i18n.hpp>
 
 #define AP_COST_USE             2
 #define WORLDTIME_TURN          10
 #define WORLDTIME_DAYLIGHT_STEP 3
 
+// REQUIREMENT FOR THE WALL-EATING BALL OF WRATH
+#include <panda3d/stencilAttrib.h>
+#include <panda3d/colorBlendAttrib.h>
+#include <panda3d/depthTestAttrib.h>
+// END
+
 using namespace std;
 
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUse;
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseObjectOn;
 Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSkillOn;
-Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;  
+Observatory::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
 Level* Level::CurrentLevel = 0;
 
@@ -27,6 +34,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   loadingScreen->FadeIn();
   CurrentLevel = this;
   _state       = Normal;
+  _mouseState  = MouseAction;
 
   obs.Connect(_levelUi.InterfaceOpened, *this, &Level::SetInterrupted);
 
@@ -45,16 +53,25 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 
   _graphicWindow = _window->get_graphics_window();
 
-  _sunLight = new DirectionalLight("sun_light");
+  // TODO Implement map daylight/nodaylight system
+  if (true)
+  {
+    _sunLight = new DirectionalLight("sun_light");
 
-  _sunLight->set_color(LVecBase4f(0.8, 0.8, 0.8, 1));
-  //_sunLight->set_shadow_caster(true, 12, 12);
-  _sunLight->get_lens()->set_near_far(1.f, 2.f);
-  _sunLight->get_lens()->set_film_size(512);
+    _sunLight->set_shadow_caster(true, 2048, 2048);
+    _sunLight->get_lens()->set_near_far(1.f, 50.f);
+    _sunLight->get_lens()->set_film_size(5096);
 
-  _sunLightNode = window->get_render().attach_new_node(_sunLight);
-  _sunLightNode.set_hpr(-30, -80, 0);
-  window->get_render().set_light(_sunLightNode);
+    _sunLightNode = window->get_render().attach_new_node(_sunLight);
+    _sunLightNode.set_pos(0, -10.f, 0);
+    _sunLightNode.set_hpr(-30, -80, 0);
+    window->get_render().set_light(_sunLightNode);
+    
+    TimeManager::Task* daylightTask = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
+    daylightTask->Interval.Connect(*this, &Level::RunDaylight);
+    RunDaylight();
+  }
+
   window->get_render().set_shader_input("light", _sunLightNode);
 
   MouseInit();
@@ -104,13 +121,16 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 	  ObjectCharacter* character = new ObjectCharacter(this, &object);
 
 	  _characters.push_back(character);
+	  cout << "Added an instance: " << character << endl;
         }
 	break ;
       case DynamicObject::Door:
 	instance = new ObjectDoor(this, &object);
+	cout << "LOADING A DOOR" << endl;
 	break ;
       case DynamicObject::Shelf:
 	instance = new ObjectShelf(this, &object);
+	cout << "LOADING A SHELF" << endl;
 	break ;
       case DynamicObject::Item:
       {
@@ -124,8 +144,14 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 	break ;
       }
       case DynamicObject::Locker:
+	cout << "INSTANTIATING A LOCKER" << endl;
+	instance = new ObjectLocker(this, &object);
+	cout << "LOADING A LOCKER" << endl;
 	break ;
+      default:
+	cout << "[FATAL ERROR:] Unimplemented object type " << object.type << endl;
     }
+    cout << "Added an instance => " << instance << endl;
     if (instance != 0)
       _objects.push_back(instance);
   });
@@ -134,65 +160,35 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   _world->SetWaypointsVisible(false);
 
   loadingScreen->AppendText("Loading interface");
-  if (!(GetPlayer()->GetStatistics().Nil()))
-  {
-    Data stats(GetPlayer()->GetStatistics());
-    
-    if (!(stats["Statistics"]["Action Points"].Nil()))
-      _levelUi.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
-  }
-  GetPlayer()->HitPointsChanged.Connect        (_levelUi.GetMainBar(), &GameMainBar::SetCurrentHp);
-  GetPlayer()->ActionPointChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
-  GetPlayer()->EquipedItemActionChanged.Connect(_levelUi.GetMainBar(), &GameMainBar::SetEquipedItemAction);
-  GetPlayer()->EquipedItemChanged.Connect      (_levelUi.GetMainBar(), &GameMainBar::SetEquipedItem);
-  GetPlayer()->EquipedItemChanged.Emit(0, GetPlayer()->GetEquipedItem(0));
-  GetPlayer()->EquipedItemChanged.Emit(1, GetPlayer()->GetEquipedItem(1));
-  _levelUi.GetMainBar().EquipedItemNextAction.Connect(*GetPlayer(), &ObjectCharacter::ItemNextUseType);
-  _levelUi.GetMainBar().UseEquipedItem.Connect       (*this, &Level::CallbackActionTargetUse);
-  _levelUi.GetMainBar().CombatEnd.Connect            (*this, &Level::StopFight);
-  _levelUi.GetMainBar().CombatPassTurn.Connect       (*this, &Level::NextTurn);
-  _levelUi.GetInventory().SetInventory(GetPlayer()->GetInventory());
-  obs.Connect(_levelUi.GetInventory().EquipItem,   *this,        &Level::PlayerEquipObject);
-  obs.Connect(_levelUi.GetInventory().UnequipItem, *GetPlayer(), &ObjectCharacter::UnequipItem);
-  obs.Connect(_levelUi.GetInventory().DropObject,  *this,        &Level::PlayerDropObject);
-  obs.Connect(_levelUi.GetInventory().UseObject,   *this,        &Level::PlayerUseObject);
-  
-  _levelUi.GetMainBar().SetEquipedItem(0, GetPlayer()->GetEquipedItem(0));
-  _levelUi.GetMainBar().SetEquipedItem(1, GetPlayer()->GetEquipedItem(1));
-
   obs.Connect(InstanceDynamicObject::ActionUse,         *this, &Level::CallbackActionUse);
   obs.Connect(InstanceDynamicObject::ActionTalkTo,      *this, &Level::CallbackActionTalkTo);
   obs.Connect(InstanceDynamicObject::ActionUseObjectOn, *this, &Level::CallbackActionUseObjectOn);
 
-  TimeManager::Task* daylightTask = _timeManager.AddTask(TASK_LVL_CITY, true, 3);
-  daylightTask->Interval.Connect(*this, &Level::RunDaylight);
-
   unsigned int taskIt = 0;
-  std::for_each(_characters.begin(), _characters.end(), [this, &taskIt](ObjectCharacter* character)
+  for_each(_characters.begin(), _characters.end(), [this, &taskIt](ObjectCharacter* character)
   {
-    if (character != GetPlayer())
-    {
-      TimeManager::Task* task = _timeManager.AddTask(TASK_LVL_CITY, true, 3);
+    TimeManager::Task* task = _timeManager.AddTask(TASK_LVL_CITY, true, 3);
 
-      task->lastS += (taskIt % 3);
-      ++taskIt;
-      task->Interval.Connect(*character, &ObjectCharacter::CheckFieldOfView);
-    }
+    task->lastS += (taskIt % 3);
+    ++taskIt;
+    task->Interval.Connect(*character, &ObjectCharacter::CheckFieldOfView);
   });
   
   _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
   _camera.FollowObject(GetPlayer());
   
-//   _world->AddLight(WorldLight::Point, "toto");
-//   WorldLight* light = _world->GetLightByName("toto");
-//   
-//   light->zoneSize = 20;
-//   light->SetColor(255, 50, 50, 125);
-//   light->nodePath.reparent_to(GetPlayer()->GetNodePath());
-//   _world->CompileLight(light);
-// 
+   _world->AddLight(WorldLight::Directional, "toto");
+   WorldLight* light    = _world->GetLightByName("toto");
+   PT(DirectionalLight) slight = reinterpret_cast<DirectionalLight*>(&(*light->light));
+
+   /*light->zoneSize = 1000;
+   light->SetColor(255, 50, 50, 125);
+   //slight->set_shadow_caster(true, 12, 12);
+   //window->get_render().set_shader_input("light2", light->nodePath);
+   light->nodePath.reparent_to(GetPlayer()->GetNodePath());
+   _world->CompileLight(light);*/
+ 
 //   PointLight* plight = dynamic_cast<PointLight*>(light->nodePath.node());
-//   plight->set_shadow_caster(true, 12, 12);
 //   plight->get_lens()->set_near_far(1.f, 2.f);
 //   plight->get_lens()->set_film_size(512);
   
@@ -203,10 +199,182 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   delete loadingScreen;
 }
 
+void Level::InitPlayer(void)
+{
+  if (!(GetPlayer()->GetStatistics().Nil()))
+  {
+    Data stats(GetPlayer()->GetStatistics());
+    
+    if (!(stats["Statistics"]["Action Points"].Nil()))
+      _levelUi.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
+  }
+  obs_player.Connect(GetPlayer()->HitPointsChanged,         _levelUi.GetMainBar(), &GameMainBar::SetCurrentHp);
+  obs_player.Connect(GetPlayer()->ActionPointChanged,       _levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
+  obs_player.Connect(GetPlayer()->EquipedItemActionChanged, _levelUi.GetMainBar(), &GameMainBar::SetEquipedItemAction);
+  obs_player.Connect(GetPlayer()->EquipedItemChanged,       _levelUi.GetMainBar(), &GameMainBar::SetEquipedItem);
+  _levelUi.GetMainBar().EquipedItemNextAction.Connect(*GetPlayer(), &ObjectCharacter::ItemNextUseType);
+  _levelUi.GetMainBar().UseEquipedItem.Connect       (*this, &Level::CallbackActionTargetUse);
+  _levelUi.GetMainBar().CombatEnd.Connect            (*this, &Level::StopFight);
+  _levelUi.GetMainBar().CombatPassTurn.Connect       (*this, &Level::NextTurn);
+  obs.Connect(_levelUi.GetInventory().EquipItem,   *this,        &Level::PlayerEquipObject);
+  obs.Connect(_levelUi.GetInventory().UnequipItem, *GetPlayer(), &ObjectCharacter::UnequipItem);
+  obs.Connect(_levelUi.GetInventory().DropObject,  *this,        &Level::PlayerDropObject);
+  obs.Connect(_levelUi.GetInventory().UseObject,   *this,        &Level::PlayerUseObject);
+  
+  _levelUi.GetMainBar().SetEquipedItem(0, GetPlayer()->GetEquipedItem(0));
+  _levelUi.GetMainBar().SetEquipedItem(1, GetPlayer()->GetEquipedItem(1));
+  
+  //
+  // The wall-eating ball of wrath
+  //
+  PandaNode*         node;
+  CPT(RenderAttrib) atr1 = StencilAttrib::make(1, StencilAttrib::SCF_not_equal, StencilAttrib::SO_keep, StencilAttrib::SO_keep,    StencilAttrib::SO_keep,    1, 1, 0);
+  CPT(RenderAttrib) atr2 = StencilAttrib::make(1, StencilAttrib::SCF_always,    StencilAttrib::SO_zero, StencilAttrib::SO_replace, StencilAttrib::SO_replace, 1, 0, 1);
+
+  _player_halo = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
+  _player_halo.set_scale(5);
+  _player_halo.set_bin("background", 0);
+  _player_halo.set_depth_write(0);
+  _player_halo.reparent_to(_window->get_render());
+  node        = _player_halo.node();
+  node->set_attrib(atr2);
+  node->set_attrib(ColorBlendAttrib::make(ColorBlendAttrib::M_add));
+  for_each(_world->floors.begin(), _world->floors.end(), [node, atr1](NodePath floor)
+  {
+    NodePath map_objects = floor.get_child(0);
+    
+    for (unsigned short i = 0 ; i < map_objects.get_num_children() ; ++i)
+    {
+      NodePath child = map_objects.get_child(i);
+
+      cout << "MapObjects(" << i << ")->name = " << child.get_name().substr(0, 6) << endl;
+      if (child.node() != node && child.get_name().substr(0, 6) != "Ground")
+        child.set_attrib(atr1);
+    }
+  });  
+  
+  //_world->CompileLight(_world->GetLightByName("toto"));
+}
+
+void Level::InsertParty(PlayerParty& party)
+{
+  cout << "[Level] Insert Party" << endl;
+  PlayerParty::DynamicObjects::reverse_iterator it, end;
+
+  // Inserting progressively the last of PlayerParty's character at the beginning of the characters list
+  // Player being the first of PlayerParty's list, it will also be the first of Level's character list.
+  it  = party.GetObjects().rbegin();
+  end = party.GetObjects().rend();
+  for (; it != end ; ++it)
+  {
+    DynamicObject*   object    = _world->InsertDynamicObject(**it);
+    ObjectCharacter* character = new ObjectCharacter(this, object);
+
+    _characters.insert(_characters.begin(), character);
+    // Replace the Party DynamicObject pointer to the new one
+    delete *it;
+    *it = object;
+  }
+  party.SetHasLocalObjects(false);
+}
+
+void Level::FetchParty(PlayerParty& party)
+{
+  cout << "[Level] Fetch Party" << endl;
+  PlayerParty::DynamicObjects::iterator it  = party.GetObjects().begin();
+  PlayerParty::DynamicObjects::iterator end = party.GetObjects().end();
+
+  cout << "Debug: Fetch Party" << endl;
+  for (; it != end ; ++it)
+  {
+    Characters::iterator cit    = _characters.begin();
+    Characters::iterator cend   = _characters.end();
+
+    cout << "Fetching character: " << (*it)->nodePath.get_name() << endl;
+    (*it)->nodePath.set_name(GetPlayer()->GetName());
+    cout << "Fetching character: " << (*it)->nodePath.get_name() << endl;
+    while (cit != cend)
+    {
+      ObjectCharacter* character = *cit;
+
+      cout << "--> Comparing with " << (*cit)->GetDynamicObject()->nodePath.get_name() << endl;
+      if (character->GetDynamicObject()->nodePath.get_name() == (*it)->nodePath.get_name())
+      {
+        cout << "--> SUCCESS" << endl;
+        *it = character->GetDynamicObject();
+        break ;
+      }
+      ++cit;
+    }
+    cout << "My primary function is failure..." << endl;
+  }
+  //*it = GetPlayer()->GetDynamicObject();
+  party.SetHasLocalObjects(false);
+}
+
+// Takes the party's characters out of the map.
+// Backups their DynamicObject in PlayerParty because World is going to remove them anyway.
+void Level::StripParty(PlayerParty& party)
+{
+  PlayerParty::DynamicObjects::iterator it  = party.GetObjects().begin();
+  PlayerParty::DynamicObjects::iterator end = party.GetObjects().end();
+  
+  obs_player.DisconnectAll(); // Character is gonna get deleted: we must disconnect him.
+  cout << "Debug: Strip Party" << endl;
+  for (; it != end ; ++it)
+  {
+    DynamicObject*       backup = new DynamicObject;
+    Characters::iterator cit    = _characters.begin();
+    Characters::iterator cend   = _characters.end();
+
+    *backup = **it;
+    cout << "Stripping character: " << (*it)->nodePath.get_name() << endl;
+    while (cit != cend)
+    {
+      ObjectCharacter* character = *cit;
+
+      cout << "--> Comparing with: " << (*cit)->GetDynamicObject()->nodePath.get_name() << endl;
+      if (character->GetDynamicObject() == *it)
+      {
+        cout << "--> SUCCESS" << endl;
+        character->UnprocessCollisions();
+        character->NullifyStatistics();
+	delete character;
+	_characters.erase(cit);
+	_world->DeleteDynamicObject(*it);
+	break ;
+      }
+      ++cit;
+    }
+    cout << "My primary function is failure..." << endl;
+    *it = backup;
+  }
+  party.SetHasLocalObjects(true);
+}
+
+void Level::SetPlayerInventory(Inventory* inventory)
+{
+  ObjectCharacter* player = GetPlayer();
+
+  if (!inventory)
+  {
+    cout << "Using map's inventory" << endl;
+    inventory = &(player->GetInventory());
+  }
+  else
+  {  player->SetInventory(inventory);       }
+  _levelUi.GetInventory().SetInventory(*inventory);
+  player->EquipedItemChanged.Emit(0, player->GetEquipedItem(0));
+  player->EquipedItemChanged.Emit(1, player->GetEquipedItem(1));  
+}
+
 Level::~Level()
 {
+  _player_halo.remove_node();
+  
   _timeManager.ClearTasks(TASK_LVL_CITY);
   obs.DisconnectAll();
+  obs_player.DisconnectAll();
   ForEach(_objects,   [](InstanceDynamicObject* obj) { delete obj;  });
   ForEach(_exitZones, [](LevelExitZone* zone)        { delete zone; });
   CurrentLevel = 0;
@@ -252,12 +420,25 @@ InstanceDynamicObject* Level::GetObject(const string& name)
 
 ObjectCharacter* Level::GetCharacter(const string& name)
 {
+  Characters::const_iterator it  = _characters.begin();
+  Characters::const_iterator end = _characters.end();
+
+  for (; it != end ; ++it)
+  {
+    if ((*(*it)) == name)
+      return (*it);
+  }
+  return (0);
+}
+
+ObjectCharacter* Level::GetCharacter(const DynamicObject* object)
+{
   Characters::iterator it  = _characters.begin();
   Characters::iterator end = _characters.end();
 
   for (; it != end ; ++it)
   {
-    if ((*(*it)) == name)
+    if ((*(*it)).GetDynamicObject() == object)
       return (*it);
   }
   return (0);
@@ -273,6 +454,11 @@ void Level::SetState(State state)
   _state = state;
   if (state == Normal)
     _itCharacter = _characters.end();
+  if (state != Fight)
+  {
+    DestroyCombatPath();
+    ToggleCharacterOutline(false);
+  }
 }
 
 void Level::SetInterrupted(bool set)
@@ -297,6 +483,16 @@ void Level::SetInterrupted(bool set)
 void Level::StartFight(ObjectCharacter* starter)
 {
   _itCharacter = std::find(_characters.begin(), _characters.end(), starter);
+  if (_itCharacter == _characters.end())
+  { 
+    cout << "[FATAL ERROR][Level::StartFight] Unable to find starting character" << endl;
+    if (_characters.size() < 1)
+    {
+      cout << "[FATAL ERROR][Level::StartFight] Can't find a single character" << endl;
+      return ;
+    }
+    _itCharacter = _characters.begin();
+  }
   _levelUi.GetMainBar().SetEnabledAP(true);
   (*_itCharacter)->RestartActionPoints();
   SetState(Fight);
@@ -311,7 +507,7 @@ void Level::StopFight(void)
     
     for (; it != end ; ++it)
     {
-      list<ObjectCharacter::FovEnemy> listEnemies = (*it)->GetNearbyEnemies();
+      list<ObjectCharacter*> listEnemies = (*it)->GetNearbyEnemies();
 
       if (listEnemies.size() > 0 && (*it)->IsAlive())
       {
@@ -328,59 +524,79 @@ void Level::NextTurn(void)
 {
   if (_state != Fight)
     return ;
-  std::cout << "Next Turn" << std::endl;
-  (*_itCharacter)->PlayAnimation("idle");
+  if (_itCharacter != _characters.end())
+  {
+    cout << "Playing animation idle" << endl;
+    (*_itCharacter)->PlayAnimation("idle");
+  }
   if ((++_itCharacter) == _characters.end())
   {
     _itCharacter = _characters.begin();
     _timeManager.AddElapsedTime(WORLDTIME_TURN);
   }
-  (*_itCharacter)->RestartActionPoints();
+  if (_itCharacter != _characters.end())
+    (*_itCharacter)->RestartActionPoints();
+  else
+    cout << "[FATAL ERROR][Level::NextTurn] Character Iterator points to nothing (n_characters = " << _characters.size() << ")" << endl;
 }
 
 void Level::RunDaylight(void)
 {
-  static Timer         lightTimer;
-  static unsigned char dayStep    = 1;
-  static unsigned int  stepLength = 60;
+  //cout << "Run Day Light" << endl;
+  
+  LVecBase4f color_steps[6] = {
+    LVecBase4f(0.2, 0.2, 0.5, 1), // 00h00
+    LVecBase4f(0.2, 0.2, 0.3, 1), // 04h00
+    LVecBase4f(0.7, 0.7, 0.5, 1), // 08h00
+    LVecBase4f(1.0, 1.0, 1.0, 1), // 12h00
+    LVecBase4f(1.0, 0.8, 0.8, 1), // 16h00
+    LVecBase4f(0.4, 0.4, 0.6, 1)  // 20h00
+  };
 
-  LVecBase4f           colorSteps[3];
-
-  colorSteps[0] = LVecBase4f(0.2, 0.2, 0.2, 1);
-  colorSteps[1] = LVecBase4f(1.0, 1.0, 1.0, 1);
-  colorSteps[2] = LVecBase4f(0.6, 0.3, 0.3, 1);
-
-  if (lightTimer.GetElapsedTime() < stepLength)
-  {
-    LVecBase4f toSet = _sunLight->get_color();
-    LVecBase4f dif   = colorSteps[(dayStep == 2 ? 0 : dayStep + 1)] - colorSteps[dayStep];
-
-    toSet += ((dif * WORLDTIME_DAYLIGHT_STEP) / stepLength);
-    _sunLight->set_color(toSet);
-  }
-  else
-  {
-    cout << "Daylight Next step" << endl;
-    dayStep++;
-    if (dayStep >= 3)
-      dayStep = 0;
-    _sunLight->set_color(colorSteps[dayStep]);
-    lightTimer.Restart();
-  }
+  int it = _timeManager.GetHour() / 4;
+  
+  LVecBase4f to_set(0, 0, 0, 0);
+  LVecBase4f dif = (it == 5 ? color_steps[0] : color_steps[it + 1]) - color_steps[it];
+  
+  // dif / 5 * (it % 4) -> dif / 100 * (20 * (it % 4)) is this more clear ? I hope it is.
+  to_set += color_steps[it] + (dif / 5 * (it % 4));
+  _sunLight->set_color(to_set);
 }
+
+extern void* mypointer;
 
 AsyncTask::DoneStatus Level::do_task(void)
 { 
   float elapsedTime = _timer.GetElapsedTime();
+  
+  // TEST Mouse Cursor automatic change while hovering interfaces
+  if (_levelUi.GetContext()->GetHoverElement() == _levelUi.GetContext()->GetRootElement())
+    SetMouseState(_mouseState);
+  else
+    _mouse.SetMouseState('i');
+  // TEST END
 
-  _mouse.Run();
-  _camera.Run(elapsedTime);
+  // TEST Transparent Ball of Wrath
+  if (!(_player_halo.is_empty()))
+  {
+    _player_halo.set_pos(GetPlayer()->GetDynamicObject()->nodePath.get_pos());
+    _player_halo.set_hpr(GetPlayer()->GetDynamicObject()->nodePath.get_hpr());
+  }
+  // TEST End
+  
+  //RunDaylight(); // Quick workaround for the daylight task not working
+  _camera.Run(elapsedTime);  
   _timeManager.ExecuteTasks();
-
+  
   switch (_state)
   {
     case Fight:
-      ForEach(_objects,    [elapsedTime]      (InstanceDynamicObject* object) { object->Run(elapsedTime); });
+      ForEach(_objects,    [elapsedTime]      (InstanceDynamicObject* object)
+      {
+	object->Run(elapsedTime);
+	object->UnprocessCollisions();
+	object->ProcessCollisions();
+      });
       for_each(_characters.begin(), _characters.end(), [this, elapsedTime](ObjectCharacter* character)
       {
 	if (character == (*_itCharacter))
@@ -388,10 +604,18 @@ AsyncTask::DoneStatus Level::do_task(void)
         character->UnprocessCollisions();
         character->ProcessCollisions();
       });
+      _mouse.ClosestWaypoint(_world, _currentFloor);
+      if (_mouse.Hovering().hasWaypoint && _mouse.Hovering().waypoint != _last_combat_path && _mouseState == MouseAction)
+        DisplayCombatPath();
       break ;
     case Normal:
       _timeManager.AddElapsedSeconds(elapsedTime);
-      ForEach(_objects,    [elapsedTime](InstanceDynamicObject* object) { object->Run(elapsedTime); });
+      ForEach(_objects,    [elapsedTime](InstanceDynamicObject* object)
+      {
+	object->Run(elapsedTime);
+	object->UnprocessCollisions();
+	object->ProcessCollisions();
+      });
       ForEach(_characters, [elapsedTime](ObjectCharacter* character)
       {
         character->Run(elapsedTime);
@@ -404,9 +628,33 @@ AsyncTask::DoneStatus Level::do_task(void)
   }
   
   CheckCurrentFloor(elapsedTime);  
-  
+  _mouse.Run();
   _timer.Restart();
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);
+}
+
+void Level::DestroyCombatPath(void)
+{
+  for_each(_combat_path.begin(), _combat_path.end(), [](Waypoint& wp) { wp.nodePath.detach_node(); });
+}
+
+void Level::DisplayCombatPath(void)
+{
+  _last_combat_path = _mouse.Hovering().waypoint;
+  DestroyCombatPath();
+  _combat_path = GetPlayer()->GetPath(_world->GetWaypointFromNodePath(_mouse.Hovering().waypoint));
+  for_each(_combat_path.begin(), _combat_path.end(), [this](Waypoint& wp)
+  {
+    NodePath sphere = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
+
+    sphere.set_pos(wp.nodePath.get_pos());
+    sphere.reparent_to(_window->get_render());
+    wp.nodePath = sphere;
+    wp.nodePath.set_transparency(TransparencyAttrib::M_alpha);
+    wp.nodePath.set_color(0.5, 0.5, 0.5, 0.5);
+    wp.nodePath.set_light_off();
+    wp.nodePath.set_attrib(DepthTestAttrib::make(DepthTestAttrib::M_always));
+  });
 }
 
 void Level::TaskCeiling(float elapsedTime)
@@ -478,7 +726,12 @@ void Level::MouseInit(void)
 
 void Level::SetMouseState(MouseState state)
 {
-  _mouseState = state;
+  if (state != _mouseState)
+  {
+    DestroyCombatPath();
+    _mouseState = state;
+    ToggleCharacterOutline(_state == Level::State::Fight && _mouseState == MouseTarget && *_itCharacter == GetPlayer());
+  }
   switch (state)
   {
     case MouseAction:
@@ -515,11 +768,8 @@ void Level::MouseLeftClicked(void)
 	{
 	  toGo = _world->GetWaypointFromNodePath(hovering.waypoint);
 
-	  if (toGo)
-	  {
-	    if (_characters.size() > 0)
-	      GetPlayer()->GoTo(toGo);
-	  }
+	  if (toGo && _characters.size() > 0)
+	    GetPlayer()->GoTo(toGo);
 	}
       }
       break ;
@@ -594,11 +844,30 @@ void Level::CallbackActionUse(InstanceDynamicObject* object)
   ActionUse(GetPlayer(), object);
 }
 
+void Level::CallbackActionBarter(ObjectCharacter* character)
+{
+  cout << "CallbackActionBarter" << endl;
+  UiBarter* ui_barter;
+
+  CloseRunningUi<UiItBarter>();
+  if (_currentUis[UiItBarter])
+    delete _currentUis[UiItBarter];
+  ui_barter = new UiBarter(_window, _levelUi.GetContext(), GetPlayer(), character);
+  ui_barter->BarterEnded.Connect(*this, &Level::CloseRunningUi<UiItBarter>);
+  ui_barter->Show();
+  _currentUis[UiItBarter] = ui_barter;
+  _camera.SetEnabledScroll(false);
+  SetInterrupted(true);
+}
+
 void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 {
   CloseRunningUi<UiItInteractMenu>();
-  //if (GetState() == Fight)
-  //  return ;
+  if (GetState() == Fight)
+  {
+    ConsoleWrite(i18n::T("Can't talk during fight."));
+    return ;
+  }
   if ((GetPlayer()->HasLineOfSight(object)) && GetPlayer()->GetPathDistance(object) <= 3)
   {
     string dialog = object->GetDialog();
@@ -613,10 +882,13 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
     if (talkTo)
       talkTo->LookAt(GetPlayer());
     
-    _currentRunningDialog = new DialogController(_window, _levelUi.GetContext(), dialog, i18n::GetDialogs());
+    _currentRunningDialog = new DialogController(_window, _levelUi.GetContext(), talkTo, i18n::GetDialogs());
     _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningUi<UiItRunningDialog>);
+    _currentRunningDialog->DialogEnded.Connect(_levelUi.GetMainBar(), &UiBase::Show);
+    _currentRunningDialog->StartBarter.Connect(*this, &Level::CallbackActionBarter);
     _mouseActionBlocked = true;
     _camera.SetEnabledScroll(false);
+    _levelUi.GetMainBar().Hide();
     SetInterrupted(true);
     _currentUis[UiItRunningDialog] = _currentRunningDialog;
   }
@@ -824,15 +1096,18 @@ struct XpFetcher
   void Execute(void)
   {
     Data            stats      = target->GetStatistics();
+    Data            xp_reward;
     StatController* controller = killer->GetStatController();
 
+    if (stats.NotNil())
+      xp_reward = stats["Variable"]["XpReward"];
     if (controller)
     {
-      if (stats.Nil())
+      if (xp_reward.Nil())
         controller->AddExperience(1001);
       else
-        controller->AddExperience(stats["Variable"]["XpReward"]);
-    }    
+        controller->AddExperience(xp_reward);
+    }
   }
 
   ObjectCharacter         *killer, *target;
@@ -877,11 +1152,24 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
     XpFetcher xpFetcher(user, target);
     string    output;
     
+    user->SetAsEnemy(target, true);
     output = (item->UseAsWeapon(user, target, user->pendingActionObjectActionIt));
     MouseRightClicked();
     ConsoleWrite(output);
     if (xpFetcher.character_died)
+    {
       xpFetcher.Execute();
+      if (user->GetStatController() && target->GetStatController())
+      {
+        string race  = target->GetStatistics()["Race"].Value();
+        Data   kills = user->GetStatistics()["Kills"];
+
+        if (kills[race].Nil())
+          kills[race] = 0;
+        else
+          kills[race] = (unsigned int)kills[race] + 1;
+      }
+    }
   }
 }
 
@@ -956,12 +1244,18 @@ void Level::ActionDropObject(ObjectCharacter* user, InventoryObject* object)
   }
   if (!(UseActionPoints(AP_COST_USE)))
     return ;
-  user->GetInventory().DelObject(object);
   waypoint = user->GetOccupiedWaypoint();
-  item     = new ObjectItem(this, object->CreateDynamicObject(_world), object);
-  item->SetOccupiedWaypoint(waypoint);
-  item->GetDynamicObject()->nodePath.set_pos(waypoint->nodePath.get_pos());
-  _objects.push_back(item);
+  if (waypoint)
+  {
+    user->GetInventory().DelObject(object);
+    item     = new ObjectItem(this, object->CreateDynamicObject(_world), object);
+    item->SetOccupiedWaypoint(waypoint);
+    _world->DynamicObjectSetWaypoint(*(item->GetDynamicObject()), *waypoint);
+    item->GetDynamicObject()->nodePath.set_pos(waypoint->nodePath.get_pos());
+    _objects.push_back(item);
+  }
+  else
+    cerr << "User has no waypoint, thus the object can't be dropped" << endl;
 }
 
 bool Level::UseActionPoints(unsigned short ap)
@@ -1038,31 +1332,66 @@ const string& Level::GetExitZone(void) const
   return (_exitingZoneName);
 }
 
-void Level::SetEntryZone(const std::string& name)
+void Level::SetEntryZone(PlayerParty& player_party, const std::string& name)
 {
   EntryZone* zone               = _world->GetEntryZoneByName(name);
 
   if (!zone && _world->entryZones.size() > 0)
     zone = &(_world->entryZones.front());
+  else if (!zone)
+  {
+    cout << "[Map Error] This map has no entry zones. Generating a fake entry zone." << endl;  
+    _world->AddEntryZone("FakeEntryZone");
+    zone = _world->GetEntryZoneByName("FakeEntryZone");
+    for (unsigned int i = 1 ; i < 10 ; ++i)
+    {
+      Waypoint* wp = _world->GetWaypointFromId(i);
+
+      if (wp)
+        zone->waypoints.push_back(wp);
+      else
+	break ;
+    }
+  }
   if (zone)
   {
-    list<Waypoint*>::iterator it  = zone->waypoints.begin();
-    list<Waypoint*>::iterator end = zone->waypoints.end();
-
-    for (; it != end ; ++it)
+    cout << "[Level][SetEntryZone] Inserting characters into entry zone '" << zone->name << "'" << endl;
+    auto party_it  = player_party.GetObjects().begin();
+    auto party_end = player_party.GetObjects().end();
+    
+    for (; party_it != party_end ; ++party_it)
     {
-      // TODO if something
+      cout << "[Level][SetEntryZone] Trying to insert character " << (*party_it)->nodePath.get_name() << endl;
+      list<Waypoint*>::iterator it  = zone->waypoints.begin();
+      list<Waypoint*>::iterator end = zone->waypoints.end();
+
+      for (; it != end ; ++it)
       {
-        GetPlayer()->SetOccupiedWaypoint(*it);
-	GetPlayer()->GetNodePath().set_pos((*it)->nodePath.get_pos());
-	GetPlayer()->TruncatePath(0);
-        break ;
+	// TODO if something
+	{
+	  ObjectCharacter* character = GetCharacter(*party_it);
+
+	  if (character)
+	  {
+	    cout << "Some character entry zone haz been set" << endl;
+	    (*party_it)->waypoint = *it;
+	    (*party_it)->floor    = -1;
+	    (*party_it)->nodePath.set_alpha_scale(1.f);
+	    (*party_it)->nodePath.show();
+	    character->SetOccupiedWaypoint(*it);
+	    _world->DynamicObjectChangeFloor(*character->GetDynamicObject(), (*it)->floor);
+	    character->GetNodePath().set_pos((*it)->nodePath.get_pos());
+	    character->TruncatePath(0);
+	  }
+	  break ;
+	}
       }
     }
   }
-  else
-    cout << "[Map Error] This map has no entry zones" << endl;
   _exitingZone = false;
+  _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
+  _camera.FollowObject(GetPlayer());
+  _floor_lastWp = 0;
 }
 
 /*
@@ -1191,7 +1520,12 @@ void Level::CheckCurrentFloor(float elapsedTime)
     Waypoint*      wp;
 
     wp = player->GetDynamicObject()->waypoint;
-    if (!_floor_lastWp || (wp != _floor_lastWp))//(wp && wp->floor != _floor_lastWp->floor))
+    if (!wp)
+    {
+      cout << "[Level] Player doesn't have an occupied waypoint. Something went wrong somewhere" << endl;
+      return ;
+    }
+    if (!_floor_lastWp || (wp != _floor_lastWp))
     {
       SetCurrentFloor(wp->floor);
       _floor_lastWp = wp;
@@ -1208,4 +1542,44 @@ void Level::CheckCurrentFloor(float elapsedTime)
     else
       ++cur;
   }
+}
+
+void Level::ToggleCharacterOutline(bool toggle)
+{
+  for_each(_characters.begin(), _characters.end(), [this, toggle](ObjectCharacter* character)
+  {
+    NodePath original = character->GetDynamicObject()->nodePath;
+    NodePath outline;
+
+    if (character == GetPlayer()) return ;
+    if (toggle)
+    {
+      if (!(character->IsAlive())) return ;
+      outline = original.copy_to(original);
+      outline.set_name("outline");
+      outline.set_texture_off();
+      outline.set_light_off();
+      outline.set_attrib(RenderModeAttrib::make(RenderModeAttrib::M_wireframe));
+      outline.set_attrib(DepthTestAttrib::make(DepthTestAttrib::M_always));
+      outline.set_transparency(TransparencyAttrib::M_alpha);
+      if (character->IsAlly(GetPlayer()))
+      { outline.set_color(0, 255, 0, 0.5); }
+      else
+      { outline.set_color(255, 0, 0, 0.5); }
+      outline.reparent_to(original);
+      outline.set_pos(0, 0, 0);
+      outline.set_hpr(0, 0, 0);
+      
+      NodePathCollection effects = outline.find_all_matches("graphical_effect");
+      
+      for(unsigned short i = 0 ; i < effects.get_num_paths() ; ++i)
+	effects.get_path(i).detach_node();
+    }
+    else
+    {
+      outline = original.find("outline");
+      if (!(outline.is_empty()))
+      { outline.detach_node(); }
+    }
+  });
 }

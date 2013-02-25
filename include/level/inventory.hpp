@@ -88,9 +88,12 @@ public:
   
   void             LoadInventory(DynamicObject*);
   void             SaveInventory(DynamicObject*);
+  void             LoadInventory(Data);
+  void             SaveInventory(Data);
 
   void             AddObject(InventoryObject*);
   void             DelObject(InventoryObject*);
+  bool             IncludesObject(InventoryObject*) const;
   const Content&   GetContent(void) const { return (_content); }
   Content&         GetContent(void)       { return (_content); }
   InventoryObject* GetObject(const std::string& name);
@@ -98,7 +101,7 @@ public:
   unsigned short   GetCurrentWeight(void) const      { return (_currentWeight); }
   unsigned short   GetCapacity(void)      const      { return (_capacity);      }
   void             SetCapacity(unsigned short value) { _capacity = value;       }
-  bool             CanCarry(InventoryObject*);
+  bool             CanCarry(InventoryObject*, unsigned short quantity = 1);
   
   Observatory::Signal<void> ContentChanged;
 

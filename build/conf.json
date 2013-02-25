@@ -1,4 +1,12 @@
 {
-"language": "French"
+"language": "French",
+"savepath": "saves/",
+"screen": {
+  "fullscreen": 0,
+  "x": 800,
+  "y": 600,
+  "debug-cursor": 0
+}
+
 
 }
