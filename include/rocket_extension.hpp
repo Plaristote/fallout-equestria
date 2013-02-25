@@ -17,7 +17,7 @@ struct RocketListener : public Rocket::Core::EventListener
 {
   void ProcessEvent(Rocket::Core::Event& event) { EventReceived.Emit(event); }
 
-  Observatory::Signal<void (Rocket::Core::Event&)> EventReceived;
+  Sync::Signal<void (Rocket::Core::Event&)> EventReceived;
 };
 
 class GameUi;
@@ -53,8 +53,8 @@ public:
 
   virtual void Destroy(void) { if (_root) { _root->Hide(); } }
 
-  Observatory::Signal<void (bool)> VisibilityToggled;
-  Observatory::Signal<void>        VisibilityToggledOn, VisibilityToggledOff;
+  Sync::Signal<void (bool)> VisibilityToggled;
+  Sync::Signal<void>        VisibilityToggledOn, VisibilityToggledOff;
   
   static void SetPropertyOnAll(Rocket::Core::Element* elem, const std::string& property, const std::string& value)
   {
@@ -80,7 +80,7 @@ protected:
 private:
   void RecursiveTranslate(Rocket::Core::Element*);
   
-  Observatory::ObserverId        _languageObs;
+  Sync::ObserverId        _languageObs;
   Listeners                      _listeners;
 };
 

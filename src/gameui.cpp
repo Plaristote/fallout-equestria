@@ -68,10 +68,10 @@ LevelUi::LevelUi(WindowFramework* window, GameUi& gameUi) : _gameUi(gameUi)
   _obs.Connect(_mainBar->MenuButtonClicked.EventReceived,      _gameUi,             &GameUi::OpenMenu);
   _obs.Connect(_mainBar->InventoryButtonClicked.EventReceived, _gameUi,             &GameUi::OpenInventory);
   _obs.Connect(_mainBar->PersButtonClicked.EventReceived,      _gameUi,             &GameUi::OpenPers);
-  _obs.Connect(_mainBar->PipbuckButtonClicked.EventReceived,   _gameUi.OpenPipbuck, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
-  _obs.Connect(_gameUi.GetInventory().VisibilityToggled, InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
-  _obs.Connect(_gameUi.GetMenu().VisibilityToggled,      InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
-  _obs.Connect(_gameUi.GetPers().VisibilityToggled,      InterfaceOpened, &Observatory::Signal<void (bool)>::Emit);
+  _obs.Connect(_mainBar->PipbuckButtonClicked.EventReceived,   _gameUi.OpenPipbuck, &Sync::Signal<void (Rocket::Core::Event&)>::Emit);
+  _obs.Connect(_gameUi.GetInventory().VisibilityToggled, InterfaceOpened, &Sync::Signal<void (bool)>::Emit);
+  _obs.Connect(_gameUi.GetMenu().VisibilityToggled,      InterfaceOpened, &Sync::Signal<void (bool)>::Emit);
+  _obs.Connect(_gameUi.GetPers().VisibilityToggled,      InterfaceOpened, &Sync::Signal<void (bool)>::Emit);
 }
 
 LevelUi::~LevelUi(void)
@@ -673,10 +673,10 @@ GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : Ui
     ToggleEventListener(true, "load",     "click", _loadClicked);
 
     _continueClicked.EventReceived.Connect(*this, &GameMenu::MenuEventContinue);
-    _exitClicked.EventReceived.Connect(ExitClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
-    _saveClicked.EventReceived.Connect(SaveClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
-    _loadClicked.EventReceived.Connect(LoadClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
-    _optionsClicked.EventReceived.Connect(OptionsClicked, &Observatory::Signal<void (Rocket::Core::Event&)>::Emit);
+    _exitClicked.EventReceived.Connect(ExitClicked, &Sync::Signal<void (Rocket::Core::Event&)>::Emit);
+    _saveClicked.EventReceived.Connect(SaveClicked, &Sync::Signal<void (Rocket::Core::Event&)>::Emit);
+    _loadClicked.EventReceived.Connect(LoadClicked, &Sync::Signal<void (Rocket::Core::Event&)>::Emit);
+    _optionsClicked.EventReceived.Connect(OptionsClicked, &Sync::Signal<void (Rocket::Core::Event&)>::Emit);
 
     Translate();
   }
@@ -883,7 +883,7 @@ void GameMainBar::SetEquipedItemAction(unsigned short it, InventoryObject* item,
 /*
  * AlertUi
  */
-Observatory::Signal<void (const string)> AlertUi::NewAlert;
+Sync::Signal<void (const string)> AlertUi::NewAlert;
 
 AlertUi::AlertUi(WindowFramework* window, Core::Context* context, const string& message) : UiBase(window, context)
 {

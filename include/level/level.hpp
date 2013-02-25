@@ -123,7 +123,7 @@ public:
 
   void                   PlayerEquipObject(unsigned short it, InventoryObject* object);
 
-  Observatory::Signal<void (Inventory&)> SignalShelfOpened;
+  Sync::Signal<void (Inventory&)> SignalShelfOpened;
 
   // Fight Management
   void                   StartFight(ObjectCharacter* starter);
@@ -165,8 +165,8 @@ private:
   void              InsertDynamicObject(DynamicObject&);
   void              InsertCharacter(ObjectCharacter*);
   
-  Observatory::ObserverHandler obs;
-  Observatory::ObserverHandler obs_player;
+  Sync::ObserverHandler obs;
+  Sync::ObserverHandler obs_player;
 
   WindowFramework*     _window;
   GraphicsWindow*      _graphicWindow;

@@ -15,7 +15,7 @@ NewGameTask::NewGameTask(WindowFramework* window, Core::Context* rocket) : _ui_n
   _ui_new_game.StartFromScratch.Connect(*this,        &NewGameTask::StartFromScratch);
   _ui_new_game.SelectProfile.Connect   (*this,        &NewGameTask::SelectProfile);
   _ui_new_game.Cancel.Connect          (_ui_new_game, &UiBase::Hide);
-  _ui_new_game.Cancel.Connect          (Cancel,       &Observatory::Signal<void>::Emit);
+  _ui_new_game.Cancel.Connect          (Cancel,       &Sync::Signal<void>::Emit);
   _ui_new_game.Show();
   StartGame.Connect(*this, &NewGameTask::Done);
 }
@@ -36,9 +36,9 @@ void NewGameTask::SelectProfile(const std::string& profile)
     _stat_view       = new StatViewRocket(_window, _rocket);
     _stat_view->SetEditMode(StatView::Create);
     _stat_controller->SetView(_stat_view);
-    _stat_controller->ChangesCanceled.Connect(Cancel,    &Observatory::Signal<void>::Emit);
+    _stat_controller->ChangesCanceled.Connect(Cancel,    &Sync::Signal<void>::Emit);
     //_stat_controller->ChangesAccepted.Connect(*this,     &NewGameTask::Done);
-    _stat_controller->ChangesAccepted.Connect(StartGame, &Observatory::Signal<void>::Emit);
+    _stat_controller->ChangesAccepted.Connect(StartGame, &Sync::Signal<void>::Emit);
     _stat_view->Show();
     _ui_new_game.Hide();
   }

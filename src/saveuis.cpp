@@ -131,7 +131,7 @@ void UiLoad::LoadSlots(const string& savePath)
 	std::string str("slot-");
 	bool        compare = true;
 
-	for (int i = 0 ; i < str.length() ; ++i)
+	for (unsigned int i = 0 ; i < str.length() ; ++i)
 	{
 	  if (str[i] != entry.d_name[i])
 	  {
@@ -275,7 +275,7 @@ void UiSave::LoadSlots(const string& savePath)
 
     dir.OpenDir(savePath);
     std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [this, &nSlots](const Dirent& entry)
-    { if (entry.d_type == DT_DIR && entry.d_name != "." && entry.d_name != "..") nSlots++; });
+    { if (entry.d_type == DT_DIR && entry.d_name != std::string(".") && entry.d_name != std::string("..")) nSlots++; });
 
     std::stringstream rml;
     

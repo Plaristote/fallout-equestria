@@ -47,8 +47,8 @@ public:
   Data        GetCaseData(int x, int y) const;
   void        GetCurrentPosition(float& x, float& y) const { x = _current_pos_x; y = _current_pos_y; }
 
-  Observatory::Signal<void (std::string)> GoToPlace;
-  Observatory::Signal<void (int, int)>    RequestRandomEncounterCheck;
+  Sync::Signal<void (std::string)> GoToPlace;
+  Sync::Signal<void (int, int)>    RequestRandomEncounterCheck;
 
 private:
   void                   MapTileGenerator(Data map);

@@ -2,7 +2,7 @@
 # define I18N_HPP
 
 # include "datatree.hpp"
-#include "observatory.hpp"
+# include "observatory.hpp"
 # include <vector>
 
 class i18n
@@ -21,7 +21,7 @@ public:
   static Data                      GetDialogs(void);
   static Data                      GetStatistics(void);
   
-  static Observatory::Signal<void> LanguageChanged;
+  static Sync::Signal<void> LanguageChanged;
 
 private:
   DataTree*                        _dialogs;

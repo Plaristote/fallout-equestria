@@ -32,7 +32,7 @@ public:
   /**
    * @brief ... Triggered when a not looping animation ends.
    **/
-  Observatory::Signal<void> AnimationEnd;
+  Sync::Signal<void> AnimationEnd;
 
   bool                      pendingAnimationDone;
 

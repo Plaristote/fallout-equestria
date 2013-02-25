@@ -71,10 +71,10 @@ public:
   void SetStatistics(DataTree* stats, StatController* statsController);
   void NullifyStatistics(void);
 
-  Observatory::Signal<void (InstanceDynamicObject*)>         ReachedDestination;
-  Observatory::Signal<void (unsigned short, unsigned short)> ActionPointChanged;
-  Observatory::Signal<void (short)>                          HitPointsChanged;
-  Observatory::Signal<void>                                  CharacterDied;
+  Sync::Signal<void (InstanceDynamicObject*)>         ReachedDestination;
+  Sync::Signal<void (unsigned short, unsigned short)> ActionPointChanged;
+  Sync::Signal<void (short)>                          HitPointsChanged;
+  Sync::Signal<void>                                  CharacterDied;
 
   virtual GoToData   GetGoToData(InstanceDynamicObject* character)
   {
@@ -147,7 +147,7 @@ public:
   void                SetArmorClass(short ac)          { _armorClass = ac; ArmorClassChanged.Emit(_armorClass); }
   void                RestartArmorClass(void)          { _armorClass -= _tmpArmorClass; _tmpArmorClass = 0;     }
   void                SetBonusAC(short ac)             { _armorClass += ac; _tmpArmorClass += ac;               }
-  Observatory::Signal<void (short)>          ArmorClassChanged;
+  Sync::Signal<void (short)>          ArmorClassChanged;
 
   void                PlayEquipedItemAnimation(unsigned short it, const std::string& name);
   void                SetEquipedItem(unsigned short it, InventoryObject* object, EquipedMode mode = EquipedMouth);
@@ -155,8 +155,8 @@ public:
   unsigned char       GetequipedAction(unsigned short it) const { return (_equiped[it].actionIt); }
   void                UnequipItem(unsigned short it);
   void                ItemNextUseType(unsigned short it);
-  Observatory::Signal<void (unsigned short, InventoryObject*)>                EquipedItemChanged;
-  Observatory::Signal<void (unsigned short, InventoryObject*, unsigned char)> EquipedItemActionChanged;
+  Sync::Signal<void (unsigned short, InventoryObject*)>                EquipedItemChanged;
+  Sync::Signal<void (unsigned short, InventoryObject*, unsigned char)> EquipedItemActionChanged;
 
   void                PushBuff(Data, ObjectCharacter* caster);
   void                DelBuff(CharacterBuff* buff);
@@ -191,7 +191,7 @@ private:
   
   void                CallbackActionUse(InstanceDynamicObject* object);
   
-  Observatory::ObserverHandler   _obs_handler;
+  Sync::ObserverHandler   _obs_handler;
 
   PT(Character)                  _character;
   std::list<Waypoint>            _path;

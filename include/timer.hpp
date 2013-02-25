@@ -46,8 +46,8 @@ public:
 
     void NextStep(void);
 
-    Observatory::Signal<void>                  Interval;
-    Observatory::Signal<void (unsigned short)> IntervalIt;
+    Sync::Signal<void>                  Interval;
+    Sync::Signal<void (unsigned short)> IntervalIt;
     
     void Serialize(Utils::Packet&);
     void Unserialize(Utils::Packet&);

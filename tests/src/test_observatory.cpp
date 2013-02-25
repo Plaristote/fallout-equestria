@@ -1,11 +1,11 @@
 #include "test.hpp"
-#include "observatory.hpp"
+#include "Sync.hpp"
 
-void TestsObservatory(UnitTest& tester)
+void TestsSync(UnitTest& tester)
 {
-  tester.AddTest("Observatory", "Add Callback", []() -> string
+  tester.AddTest("Sync", "Add Callback", []() -> string
   {
-    Observatory::Signal<void> mysignal;
+    Sync::Signal<void> mysignal;
     bool                      called = false;
 
     mysignal.Connect([&called]() { called = true; });
@@ -15,11 +15,11 @@ void TestsObservatory(UnitTest& tester)
     return ("");
   });
 
-  tester.AddTest("Observatory", "Remove callback", []() -> string
+  tester.AddTest("Sync", "Remove callback", []() -> string
   {
-    Observatory::Signal<void> mysignal;
+    Sync::Signal<void> mysignal;
     bool                      called = false;
-    Observatory::ObserverId   id;
+    Sync::ObserverId   id;
 
     id = mysignal.Connect([&called]() { called = true; });
     mysignal.Disconnect(id);
@@ -29,10 +29,10 @@ void TestsObservatory(UnitTest& tester)
     return ("");
   });
 
-  tester.AddTest("Observatory", "Self-removing callback", []() -> string
+  tester.AddTest("Sync", "Self-removing callback", []() -> string
   {
-    Observatory::Signal<void> mysignal;
-    Observatory::ObserverId   id;
+    Sync::Signal<void> mysignal;
+    Sync::ObserverId   id;
     unsigned char             called = 0;
 
     id = mysignal.Connect([&id, &mysignal, &called]() { called++; mysignal.Disconnect(id); });
@@ -43,10 +43,10 @@ void TestsObservatory(UnitTest& tester)
     return ("");
   });
 
-  tester.AddTest("Observatory", "Observer Handler", []() -> string
+  tester.AddTest("Sync", "Observer Handler", []() -> string
   {
-    Observatory::Signal<void>    mysignal;
-    Observatory::ObserverHandler handler;
+    Sync::Signal<void>    mysignal;
+    Sync::ObserverHandler handler;
     bool                         called = false;
 
     handler.Connect(mysignal, [&called]() { called = true; });
@@ -61,9 +61,9 @@ void TestsObservatory(UnitTest& tester)
     return ("");
   });
 
-  tester.AddTest("Observatory", "Synchronous callback", []() -> string
+  tester.AddTest("Sync", "Synchronous callback", []() -> string
   {
-    Observatory::Signal<void> mysignal;
+    Sync::Signal<void> mysignal;
     bool                      called = false;
 
     mysignal.SetAsync(false);

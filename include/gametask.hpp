@@ -23,7 +23,7 @@ public:
   void               Refresh(void);
   void               Save(Utils::Packet&);
 
-  Observatory::Signal<void (Buff*)> Over;
+  Sync::Signal<void (Buff*)> Over;
 
 private:
   void               InitScripts(void);
@@ -84,6 +84,10 @@ public:
   void                  LoadLastState(void);
   void                  Exit(Rocket::Core::Event&) { _continue = false; }
 
+  // Special Encounter Callbacks
+  void                  SetLevelSpecialEncounter(const std::string&);
+  void                  SetLevelEncounter(const std::string& type, short n_creeps);
+
   // BUFF MANAGEMENT
   void                  PushBuff(ObjectCharacter* character, Data buff);
   void                  PushBuff(const std::string& name,    Data buff);
@@ -112,7 +116,7 @@ private:
   
   void                  EraseSlot(unsigned char slot);
 
-  Observatory::Signals  _signals;
+  Sync::Signals  _signals;
   bool                  _continue;
   WindowFramework*      _window;
   GameUi                _gameUi;
@@ -136,7 +140,8 @@ private:
   UiSave*               _uiSaveGame;
   UiLoad*               _uiLoadGame;
   
-  Observatory::Signal<void (LoadLevelParams)> SyncLoadLevel;
+  Sync::Signal<void (LoadLevelParams)> SyncLoadLevel;
+  Sync::ObserverId                     obs_level_unpersistent;
 };
 
 #endif

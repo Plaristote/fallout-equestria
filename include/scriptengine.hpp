@@ -19,7 +19,7 @@ namespace Script
     static void             Finalize(void);
     static asIScriptModule* LoadModule(const std::string& name, const std::string& filepath);
 
-    static Observatory::Signal<void (const std::string)> ScriptError;
+    static Sync::Signal<void (const std::string)> ScriptError;
 
   private:
     static void             MessageCallback(const asSMessageInfo* msg, void* param);

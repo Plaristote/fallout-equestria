@@ -23,7 +23,7 @@ private:
   Listeners                    _listeners;
   RocketListener               _buttonListener;
   RocketListener               _buttonHover, _buttonClick;
-  Observatory::ObserverHandler _obs;
+  Sync::ObserverHandler _obs;
   bool                         _done;
 };
 
