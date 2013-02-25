@@ -129,7 +129,6 @@
     struct RecordedCall                                                 \
     {                                                                   \
       RecordedCall(PARAMS) : RECORD_CON {}                              \
-      RecordedCall(void) {}                                             \
                                                                         \
       void Serialize(Utils::Packet& packet)                             \
       {                                                                 \
@@ -144,7 +143,7 @@
       RECORD_ATTR                                                       \
     };                                                                  \
                                                                         \
-    typedef std::queue<RecordedCall> RecordedCalls;                     \
+    typedef std::queue<RecordedCall*> RecordedCalls;                    \
                                                                         \
     Signal(bool direct = true) : _direct(direct)                        \
     { _semaphore.SetDeadlockSafety(true); }                             \
@@ -178,7 +177,7 @@
       {                                                                 \
         Semaphore::Lock lock(_semaphore);                               \
                                                                         \
-        _recordedCalls.push(RecordedCall(VALUES));                      \
+        _recordedCalls.push(new RecordedCall(VALUES));                  \
       }                                                                 \
     }                                                                   \
                                                                         \
@@ -251,7 +250,7 @@
     {                                                                   \
       while (calls.size())                                              \
       {                                                                 \
-        RecordedCall& params = calls.front();                           \
+        RecordedCall& params = *(calls.front());                        \
                                                                         \
         _iterator = _observers.begin();                                 \
         while (_iterator != _observers.end())                           \
@@ -261,16 +260,9 @@
           if (_iterator_updated_during_emit == false)                   \
             _iterator++;                                                \
         }                                                               \
+		delete &params;                                                 \
         calls.pop();                                                    \
       }                                                                 \
-    }                                                                   \
-                                                                        \
-    void       BackupRecordedCalls(bool on_off)                         \
-    {                                                                   \
-      if (on_off)                                                       \
-        _backedupCalls = _recordedCalls;                                \
-      else                                                              \
-        _recordedCalls = _backedupCalls;                                \
     }                                                                   \
                                                                         \
   private:                                                              \

@@ -1,0 +1,13 @@
+Here are the modifications you need to do on the Panda3D and libRocket libraries to make the project compile fine.
+
+Rocket:
++ Variant.inl
+--> Comment the SCRIPTINTERFACE case from the GetInto template.
++ All files
+--> Change the name of the Factory class to something unused (we usually change it to RFactory)
+
+Panda3D
++ socket_portable.h
+--> Fix the namespace issue in DO_BIND by adding two semicolons before bind
++ time_base.h
+--> Add a name to the unnamed enum that defines USEC. We usually name it FUCKYOUMSVC
