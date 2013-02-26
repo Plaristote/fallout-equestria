@@ -181,6 +181,7 @@ struct DynamicObject : public MapObject
     Type      type;
 
     // All
+    std::string          name;
     std::string          script;
 
     // Door / Locker

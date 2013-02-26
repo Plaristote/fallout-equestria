@@ -43,6 +43,7 @@ public:
     void closeEvent(QCloseEvent*);
 
     void LoadAllMaps(void);
+    void LoadAllStatsheets(void);
 
     bool CloseAllScript(void);
 
@@ -69,6 +70,10 @@ private slots:
     void DisableLevelEditor(void);
     void UpdateProgressBar(QString label, float value);
     void DisplayError(QString title, QString message);
+
+    // CHARSHEETS
+    void AddCharsheet(void);
+    void DeleteCharsheet(void);
 
     // MAPS
     void LoadMap(const QString&);

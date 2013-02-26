@@ -4,6 +4,7 @@
 #include <QGraphicsEllipseItem>
 #include <QInputDialog>
 #include <iostream>
+#include "selectableresource.h"
 
 using namespace std;
 
@@ -371,7 +372,8 @@ void WorldmapEditor::MapClicked(int x, int y)
 
 void WorldmapEditor::CaseAddMap()
 {
-  QString     map_name = QInputDialog::getText(this, "Add encounter map", "Map name");
+  SelectableResource::MapsResource().SelectResource([this](QString map_name)
+  {
   std::string value    = map_name.toStdString();
 
   if (map_name != "")
@@ -394,6 +396,7 @@ void WorldmapEditor::CaseAddMap()
     }
     ui->encounterMapList->addItem(map_name);
   }
+  });
 }
 
 void WorldmapEditor::CaseDelMap()
@@ -494,9 +497,7 @@ void WorldmapEditor::UpdateCaseData()
 
 void WorldmapEditor::AddCity(void)
 {
-  QString     map_name = QInputDialog::getText(this, "Add city", "Map name");
-
-  if (map_name != "")
+  SelectableResource::MapsResource().SelectResource([this](QString map_name)
   {
     std::string name = map_name.toStdString();
     Data        cities(file_cities);
@@ -508,8 +509,9 @@ void WorldmapEditor::AddCity(void)
       cities[name]["pos_y"]  = 0;
       ui->cityList->addItem(map_name);
       ui->cityList->setCurrentRow(ui->cityList->count() - 1);
+      AddCityHalo(map_name);
     }
-  }
+  });
 }
 
 void WorldmapEditor::DelCity(void)

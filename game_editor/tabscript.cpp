@@ -1,6 +1,7 @@
 #include "tabscript.h"
 #include "ui_mainwindow.h"
 #include <QTextStream>
+#include "selectableresource.h"
 
 #define N_SCRIPT_CAT 5
 extern QString strScriptCategories[N_SCRIPT_CAT];
@@ -56,6 +57,8 @@ void TabScript::LoadAllScript(void)
 
             item->setText(0, name);
             files.insert(filepath, 0);
+            if (strScriptCategories[i] == "Artificial Intelligence")
+              SelectableResource::AIs().AddResource(name);
         }
     }
 }
@@ -85,6 +88,8 @@ void TabScript::RemoveScript()
 
                         if (name == currentEditor->GetFilename())
                         {
+                            if (strScriptCategories[i] == "Artificial Intelligence")
+                              SelectableResource::AIs().AddResource(item->text(0));
                             scriptCategories[i].removeChild(item);
                             break ;
                         }
@@ -121,6 +126,8 @@ void TabScript::NewScript(void)
         files.insert(filepath, 0);
         LoadScript(filepath);
         dialogNewScript.Clear();
+        if (strScriptCategories[type] == "Artificial Intelligence")
+          SelectableResource::AIs().AddResource(name);
     }
 }
 

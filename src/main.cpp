@@ -525,8 +525,41 @@ static void AngelScriptInitialize(void)
 }
 
 #ifndef UNIT_TESTER
+int compile_statsheet(std::string name)
+{
+  DataTree* statsheet = DataTree::Factory::JSON("data/charsheets/" + name + ".json");
+
+  if (statsheet)
+  {
+    Data               data(statsheet);
+    asIScriptEngine*   engine  = Script::Engine::Get();
+    asIScriptContext*  context = engine->CreateContext();
+    asIScriptModule*   module  = Script::ModuleManager::Require("special", "scripts/ai/special.as");
+    asIScriptFunction* update_all;
+
+    update_all = module->GetFunctionByDecl("void UpdateAllValues(Data)");
+    if (!update_all)
+      return (-2);
+    context->Prepare(update_all);
+    context->SetArgObject(0, &data);
+    context->Execute();
+    DataTree::Writers::JSON(data, "data/charsheets/" + name + ".json");
+    return (0);
+  }
+  return (-1);
+}
+
 int main(int argc, char *argv[])
 {
+  Dices::Initialize();
+  Script::Engine::Initialize();
+  AngelScriptInitialize();
+
+  // If used as statsheet compiler
+  if (argc == 3 && std::string(argv[1]) == "--compile-statsheet")
+    return (compile_statsheet(argv[2]));
+  // Otherwise run the game
+
   WindowFramework* window;
   ConfigPage*      config = load_prc_file("config.prc");
 
@@ -547,9 +580,6 @@ int main(int argc, char *argv[])
     window->get_graphics_window()->request_properties(props);
   }
 
-  Dices::Initialize();
-  Script::Engine::Initialize();
-  AngelScriptInitialize();
   OptionsManager::Initialize();
   {
     MainMenu       mainMenu(window);

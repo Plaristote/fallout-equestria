@@ -23,6 +23,7 @@ public:
     ~DialogObject();
 
     void SetCurrentObject(DynamicObject* object);
+    void SetWorld(World* world) { this->world = world; }
 
 public slots:
     void SetObjectList(QStringList);
@@ -36,10 +37,16 @@ private slots:
     void ItemAdd(void);
     void ItemSave(void);
 
+    void SelectCharsheet(void);
+    void SelectScript(void);
+    void SelectModel(void);
+    void SelectTexture(void);
+
 private:
     Ui::DialogObject*   ui;
     DynamicObject*      object;
     DialogInventoryItem dialogItem;
+    World*              world;
 
     QVector<DataTree*>  itemsData;
 };

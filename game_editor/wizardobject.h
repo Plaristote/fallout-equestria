@@ -21,9 +21,14 @@ public:
     const QString GetTexture(void) const;
     int           GetPosX(void) const;
     int           GetPosY(void) const;
+    int           GetPosZ(void) const;
     const QString GetType(void) const;
     float         GetScale(void) const;
-    
+
+private slots:
+    void SelectTexture(void);
+    void SelectModel(void);
+
 private:
     Ui::WizardObject *ui;
 };

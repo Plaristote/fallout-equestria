@@ -42,7 +42,10 @@ SOURCES += main.cpp\
     dialoginventoryitem.cpp \
     worldmapeditor.cpp \
     functorthread.cpp \
-    dialogsavemap.cpp
+    dialogsavemap.cpp \
+    selectableresource.cpp \
+    charsheeteditor.cpp \
+    formkeyvalue.cpp
 
 HEADERS  += mainwindow.h \
     qpandawidget.h \
@@ -69,7 +72,10 @@ HEADERS  += mainwindow.h \
     dialoginventoryitem.h \
     worldmapeditor.h \
     functorthread.h \
-    dialogsavemap.h
+    dialogsavemap.h \
+    selectableresource.h \
+    charsheeteditor.h \
+    formkeyvalue.h
 
 FORMS    += mainwindow.ui \
     dialognewscript.ui \
@@ -83,4 +89,7 @@ FORMS    += mainwindow.ui \
     itemeditor.ui \
     dialoginventoryitem.ui \
     worldmapeditor.ui \
-    dialogsavemap.ui
+    dialogsavemap.ui \
+    selectableresource.ui \
+    charsheeteditor.ui \
+    formkeyvalue.ui

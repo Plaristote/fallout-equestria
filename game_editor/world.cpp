@@ -221,6 +221,9 @@ MapObject* World::GetMapObjectFromNodePath(NodePath path)
 // DYNAMIC OBJECTS
 DynamicObject* World::InsertDynamicObject(DynamicObject& object)
 {
+  if (!(object.nodePath.is_empty()))
+    object.nodePath.remove_node();
+  object.nodePath.set_name(object.name);
   object.waypoint = 0;
   object.nodePath = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + object.strModel);
   if (object.strTexture != "")
@@ -238,6 +241,7 @@ DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type t
 {
   DynamicObject object;
 
+  object.name         = name;
   object.type         = type;
   object.interactions = 0;
   object.strModel     = model;

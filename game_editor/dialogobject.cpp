@@ -1,5 +1,8 @@
 #include "dialogobject.h"
 #include "ui_dialogobject.h"
+#include "selectableresource.h"
+#include <QFileDialog>
+#include <QMessageBox>
 
 extern QString objectTypes[];
 
@@ -21,6 +24,12 @@ DialogObject::DialogObject(QWidget *parent) :
     connect(ui->itemList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(ItemAdd()));
     connect(ui->inventory, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(OpenItemDialog()));
     connect(&dialogItem, SIGNAL(accepted()), this, SLOT(ItemSave()));
+
+    connect(ui->toolSelectCharsheet, SIGNAL(clicked()), this, SLOT(SelectCharsheet()));
+    connect(ui->toolSelectScript,    SIGNAL(clicked()), this, SLOT(SelectScript()));
+
+    connect(ui->modelPick,   SIGNAL(clicked()), this, SLOT(SelectModel()));
+    connect(ui->texturePick, SIGNAL(clicked()), this, SLOT(SelectTexture()));
 }
 
 DialogObject::~DialogObject()
@@ -107,10 +116,10 @@ void DialogObject::SetCurrentObject(DynamicObject* object)
 void DialogObject::UpdateType(QString str)
 {
     // 0 -> NPC | 1 -> Shelf | 2 -> Locker | 3 -> Door
-    ui->script->setEnabled      (str == objectTypes[0]);
-    ui->statistsics->setEnabled (str == objectTypes[0]);
-    ui->tabInventory->setEnabled(str == objectTypes[0] || str == objectTypes[1] || str == objectTypes[2]);
-    ui->tabDoor->setEnabled     (str == objectTypes[2] || str == objectTypes[3]);
+    ui->toolSelectCharsheet->setEnabled(str == objectTypes[0]);
+    ui->toolSelectScript->setEnabled   (str == objectTypes[0]);
+    ui->tabInventory->setEnabled       (str == objectTypes[0] || str == objectTypes[1] || str == objectTypes[2]);
+    ui->tabDoor->setEnabled            (str == objectTypes[2] || str == objectTypes[3]);
 }
 
 void DialogObject::Apply()
@@ -130,6 +139,36 @@ void DialogObject::Apply()
         object->type = DynamicObject::Door;
         break ;
     }
+
+    if (object->strModel != ui->model->text().toStdString())
+    {
+        std::string name         = object->nodePath.get_name();
+        std::string model_path   = ui->model->text().toStdString();
+        LPoint3   pos   = object->nodePath.get_pos();
+        LVecBase3 hpr   = object->nodePath.get_hpr();
+        LVecBase3 scale = object->nodePath.get_scale();
+
+        object->nodePath.remove_node();
+        object->nodePath = world->window->load_model(world->window->get_panda_framework()->get_models(), MODEL_ROOT + model_path);
+        object->nodePath.set_name(name);
+        object->nodePath.set_pos(pos);
+        object->nodePath.set_hpr(hpr);
+        object->nodePath.set_scale(scale);
+        object->nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
+        object->nodePath.reparent_to(world->rootDynamicObjects);
+        world->DynamicObjectSetWaypoint(*object, *object->waypoint);
+    }
+    if (object->strTexture != ui->texture->text().toStdString())
+    {
+        std::string texture_path = ui->texture->text().toStdString();
+
+        if (texture_path != "")
+        {
+          object->texture = TexturePool::load_texture(TEXT_ROOT + texture_path);
+          object->nodePath.set_texture(object->texture);
+        }
+    }
+
     object->dialog     = ui->dialog->text().toStdString();
     object->script     = ui->script->text().toStdString();
     object->strModel   = ui->model->text().toStdString();
@@ -195,4 +234,66 @@ void DialogObject::ItemSave()
     Data             data((itemsData[it]));
 
     item->setText(1, data["quantity"].Value().c_str());
+}
+
+void DialogObject::SelectCharsheet()
+{
+  SelectableResource::Charsheets().SelectResource([this](QString name)
+  {
+    ui->statistsics->setText(name);
+  });
+}
+
+void DialogObject::SelectScript()
+{
+  SelectableResource::AIs().SelectResource([this](QString name)
+  {
+    ui->script->setText(name);
+  });
+}
+
+void DialogObject::SelectModel(void)
+{
+    QString filter    = "Panda3D Models (*.egg *.bam *.egg.pz *.bam.pz *.obj)";
+    QString base_path = QDir::currentPath() + "/models/";
+    QString path      = QFileDialog::getOpenFileName(this, "Select a model", base_path, filter);
+    QFileInfo info(path);
+    QString   relative_path;
+
+    if (!(info.exists()))
+      return ;
+    if (!(path.startsWith(base_path))) // Needs to be moved
+    {
+      if (!(QFile::copy(path, base_path + info.fileName())))
+      {
+        QMessageBox::warning(this, "Error", "Couldn't copy file to the project directory.");
+        return ;
+      }
+      path = base_path + info.fileName();
+    }
+    relative_path = path.remove(0, base_path.length());
+    ui->model->setText(relative_path);
+}
+
+void DialogObject::SelectTexture(void)
+{
+    QString   filter    = "Images (*.png *.jpg *.bmp)";
+    QString   base_path = QDir::currentPath() + "/textures/";
+    QString   path = QFileDialog::getOpenFileName(this, "Select a texture", base_path, filter);
+    QFileInfo info(path);
+    QString   relative_path;
+
+    if (!(info.exists()))
+      return ;
+    if (!(path.startsWith(base_path))) // Needs to be moved
+    {
+      if (!(QFile::copy(path, base_path + info.fileName())))
+      {
+        QMessageBox::warning(this, "Error", "Couldn't copy file to the project directory.");
+        return ;
+      }
+      path = base_path + info.fileName();
+    }
+    relative_path = path.remove(0, base_path.length());
+    ui->texture->setText(relative_path);
 }

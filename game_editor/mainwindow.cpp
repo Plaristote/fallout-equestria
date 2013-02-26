@@ -7,6 +7,7 @@
 #include "mouse.h"
 #include <QElapsedTimer>
 #include "functorthread.h"
+#include "selectableresource.h"
 
 extern PandaFramework framework;
 
@@ -70,6 +71,10 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     objectFile    = 0;
     ui->setupUi(this);
 
+    ui->charsheetAdd->setIcon(iconAdd);
+    ui->charsheetDel->setIcon(iconDelete);
+    ui->charsheetSave->setIcon(iconSave);
+
     ui->waypointAdd->setIcon(iconAdd);
     ui->waypointRemove->setIcon(iconDelete);
     ui->waypointConnect->setIcon(iconConnect);
@@ -83,9 +88,10 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     ui->tabWidget->setTabIcon(0, iconLevel);
     ui->tabWidget->setTabIcon(1, iconWorldmap);
     ui->tabWidget->setTabIcon(2, iconScript);
-    ui->tabWidget->setTabIcon(3, iconItems);
-    ui->tabWidget->setTabIcon(4, iconDialogs);
-    ui->tabWidget->setTabIcon(5, iconLanguage);
+    ui->tabWidget->setTabIcon(3, iconScript);
+    ui->tabWidget->setTabIcon(4, iconItems);
+    ui->tabWidget->setTabIcon(5, iconDialogs);
+    ui->tabWidget->setTabIcon(6, iconLanguage);
     ui->scriptNew->setIcon(iconAdd);
     ui->dialogNew->setIcon(iconAdd);
     ui->mapNew->setIcon(iconAdd);
@@ -170,6 +176,11 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(&this->waypointGenerate, SIGNAL(EndedGeneration()),                    ui->progressBar, SLOT(hide()),                                Qt::QueuedConnection);
     connect(&this->waypointGenerate, SIGNAL(EndedGeneration()),                    this,            SLOT(SelectGeneratedWaypoints()),            Qt::QueuedConnection);
 
+    connect(ui->charsheetList, SIGNAL(currentTextChanged(QString)), ui->charsheetEditor, SLOT(Load(QString)));
+    connect(ui->charsheetAdd,  SIGNAL(clicked()),                   this,                SLOT(AddCharsheet()));
+    connect(ui->charsheetDel,  SIGNAL(clicked()),                   this,                SLOT(DeleteCharsheet()));
+    connect(ui->charsheetSave, SIGNAL(clicked()),                   ui->charsheetEditor, SLOT(Save()));
+
     ui->scriptList->header()->hide();
 }
 
@@ -181,6 +192,36 @@ MainWindow::~MainWindow()
 void MainWindow::CurrentTabChanged(int ntab)
 {
     _app.SetPandaEnabled(ntab == 0); // The first tab is the only one using Panda3D
+}
+
+void MainWindow::AddCharsheet()
+{
+  QString name = QInputDialog::getText(this, "New statistic sheet", "Name");
+
+  if (name != "")
+  {
+    ui->charsheetEditor->New(name);
+    ui->charsheetList->addItem(name);
+    ui->charsheetDel->setEnabled(true);
+  }
+}
+
+void MainWindow::DeleteCharsheet()
+{
+  QListWidgetItem* item = ui->charsheetList->currentItem();
+
+  if (item)
+  {
+    int ret = QMessageBox::warning(this, "Deleting a stat sheet", "Are you sure you want to delete " + item->text() + " ?", QMessageBox::Yes, QMessageBox::No);
+
+    if (ret == QMessageBox::No)
+      return ;
+    ui->charsheetEditor->Delete();
+    ui->charsheetList->removeItemWidget(item);
+    delete item;
+  }
+  if (ui->charsheetList->count() == 0)
+    ui->charsheetDel->setEnabled(false);
 }
 
 void MainWindow::CreateMap(void)
@@ -195,6 +236,7 @@ void MainWindow::CreateMap(void)
     SaveMap();
     save_map_use_thread = true;
     ui->listMap->addItem(name);
+    SelectableResource::MapsResource().AddResource(name);
     LoadMap(name);
 }
 
@@ -249,25 +291,48 @@ void MainWindow::LoadProject()
         ui->itemEditor->LoadAllItems();
         ui->worldmapEditor->Load();
         LoadAllMaps();
+        LoadAllStatsheets();
     }
     else
         splashScreen.open();
 }
 
-void MainWindow::LoadAllMaps()
+void MainWindow::LoadAllStatsheets()
 {
-    QDir        dir("maps/");
+    QDir        dir("data/charsheets");
     QStringList fileList = dir.entryList();
-    QRegExp     regexp("\.blob$");
+    QRegExp     regexp("\.json$");
 
     foreach (QString string, fileList)
     {
-        if (!(string.contains(regexp)))
-          continue ;
+      if ((string.contains(regexp)))
+      {
         QString name = string.replace(regexp, "");
 
-        ui->listMap->addItem(name);
+        ui->charsheetList->addItem(name);
+        SelectableResource::Charsheets().AddResource(name);
+      }
     }
+    if (ui->charsheetList->count() == 0)
+      ui->charsheetDel->setEnabled(false);
+}
+
+void MainWindow::LoadAllMaps()
+{
+  QDir        dir("maps/");
+  QStringList fileList = dir.entryList();
+  QRegExp     regexp("\.blob$");
+
+  foreach (QString string, fileList)
+  {
+    if (string.contains(regexp))
+    {
+      QString name = string.replace(regexp, "");
+
+      ui->listMap->addItem(name);
+      SelectableResource::MapsResource().AddResource(name);
+    }
+  }
 }
 
 void MainWindow::FilterInit()
@@ -501,8 +566,14 @@ void MainWindow::DynamicObjectAdd()
     QString name = wizardObject.GetName();
     QString mod  = wizardObject.GetModel();
     QString tex  = wizardObject.GetTexture();
+    float   posx = wizardObject.GetPosX();
+    float   posy = wizardObject.GetPosY();
+    float   posz = wizardObject.GetPosZ();
+    float   scale = wizardObject.GetScale();
 
     dynamicObjectHovered = world->AddDynamicObject(name.toStdString(), DynamicObject::Character, mod.toStdString(), tex.toStdString());
+    dynamicObjectHovered->nodePath.set_pos(posx, posy, posz);
+    dynamicObjectHovered->nodePath.set_scale(scale);
     DynamicObjectSelect();
 }
 
@@ -692,9 +763,10 @@ void MainWindow::MapObjectAdd()
     QString text  = wizardObject.GetTexture();
     float   posx  = wizardObject.GetPosX();
     float   posy  = wizardObject.GetPosY();
+    float   posz  = wizardObject.GetPosZ();
     float   scale = wizardObject.GetScale();
 
-    mapobjectHovered = world->AddMapObject(name.toStdString(), model.toStdString(), text.toStdString(), posx, posy, 0);
+    mapobjectHovered = world->AddMapObject(name.toStdString(), model.toStdString(), text.toStdString(), posx, posy, posz);
     mapobjectHovered->nodePath.set_scale(scale);
     mapobjectHovered->nodePath.show();
     MapObjectSelect();
@@ -1234,6 +1306,7 @@ void MainWindow::LoadMap(const QString& path)
         }
 
         waypointGenerate.SetWorld(world);
+        dialogObject.SetWorld(world);
     }
 }
 

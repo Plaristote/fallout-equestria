@@ -8,6 +8,7 @@
 #include <QSettings>
 
 #include "qpandaapplication.h"
+#include "selectableresource.h"
 
 int main(int argc, char *argv[])
 {
