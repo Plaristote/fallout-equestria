@@ -5,6 +5,8 @@
 #include <QInputDialog>
 #include <iostream>
 #include "selectableresource.h"
+#include <QTableWidget>
+#include <QTableWidgetItem>
 
 using namespace std;
 
@@ -12,7 +14,12 @@ WorldmapEditor::WorldmapEditor(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::WorldmapEditor)
 {
+    data_encounters         = 0;
+    data_special_encounters = 0;
+
     ui->setupUi(this);
+
+    ui->frameEncounter->setEnabled(false);
 
     ui->graphicsView->setScene(&scene);
 
@@ -43,8 +50,249 @@ WorldmapEditor::WorldmapEditor(QWidget *parent) :
 
     connect(ui->buttonSave, SIGNAL(clicked()), this, SLOT(Save()));
 
-    lock_cities = false;
-    lock_mspeed = false;
+    lock_cities   = false;
+    lock_mspeed   = false;
+    lock_critters = false;
+
+    connect(ui->encounterAdd,    SIGNAL(clicked()), this, SLOT(EncounterAdd()));
+    connect(ui->encounterDelete, SIGNAL(clicked()), this, SLOT(EncounterDel()));
+    connect(ui->encounterList,   SIGNAL(currentRowChanged(int)), this, SLOT(EncounterSelect()));
+
+    connect(ui->critterAdd,    SIGNAL(clicked()), this, SLOT(EncounterAddCharacter()));
+    connect(ui->critterDelete, SIGNAL(clicked()), this, SLOT(EncounterDelCharacter()));
+    connect(ui->critterList,   SIGNAL(cellDoubleClicked(int,int)), this, SLOT(EncounterEditCharacter(int,int)));
+    connect(ui->critterList,   SIGNAL(cellChanged(int,int)), this, SLOT(EncounterRefresh()));
+
+    connect(ui->specialEncounterAdd, SIGNAL(clicked()), this, SLOT(SpecialEncounterAdd()));
+    connect(ui->specialEncounterDelete, SIGNAL(clicked()), this, SLOT(SpecialEncounterDelete()));
+}
+
+void WorldmapEditor::SpecialEncounterLoad(void)
+{
+  QString   path        = QDir::currentPath() + "/data/newgame/dataengine.json";
+  DataTree* data_engine = DataTree::Factory::JSON(path.toStdString());
+
+  if (data_special_encounters)
+    delete data_special_encounters;
+  data_special_encounters = new DataTree;
+  if (data_engine)
+  {
+    Data data(data_engine);
+    Data encounters(data_special_encounters);
+
+    encounters.Duplicate(data["special-encounters"]);
+    std::for_each(encounters.begin(), encounters.end(), [this](Data data_item)
+    {
+      QString name = QString::fromStdString(data_item.Value());
+
+      ui->specialEncountersList->addItem(name);
+      data_item.Output();
+      //SelectableResource::SpecialEncounters().AddResource(name);
+    });
+  }
+}
+
+void WorldmapEditor::SpecialEncounterSave(void)
+{
+  QString   path        = QDir::currentPath() + "/data/newgame/dataengine.json";
+  DataTree* data_engine = DataTree::Factory::JSON(path.toStdString());
+
+  if (data_engine)
+  {
+    Data data(data_engine);
+    Data encounters(data_special_encounters);
+
+    data["special-encounters"].Remove();
+    data["special-encounters"].Duplicate(encounters);
+    DataTree::Writers::JSON(data, path.toStdString());
+  }
+}
+
+void WorldmapEditor::SpecialEncounterAdd(void)
+{
+  SelectableResource::MapsResource().SelectResource([this](QString map_name)
+  {
+    Data encounters(data_special_encounters);
+
+    ui->specialEncountersList->addItem(map_name);
+    encounters["to_add"] = map_name.toStdString();
+    encounters["to_add"].SetKey("");
+  });
+}
+
+void WorldmapEditor::SpecialEncounterDelete(void)
+{
+  QListWidgetItem* item = ui->specialEncountersList->currentItem();
+
+  if (item)
+  {
+    Data encounters(data_special_encounters);
+
+    encounters[ui->specialEncountersList->currentRow()].Remove();
+    encounters.Output();
+    ui->specialEncountersList->removeItemWidget(item);
+    delete item;
+  }
+}
+
+void WorldmapEditor::EncountersLoad(void)
+{
+  QString   path        = QDir::currentPath() + "/data/newgame/dataengine.json";
+  DataTree* data_engine = DataTree::Factory::JSON(path.toStdString());
+
+  if (data_encounters)
+    delete data_encounters;
+  data_encounters = new DataTree;
+  if (data_engine)
+  {
+    Data data(data_engine);
+    Data encounters(data_encounters);
+
+    encounters.Duplicate(data["random-encounters"]);
+    std::for_each(encounters.begin(), encounters.end(), [this](Data data_item)
+    {
+      QString name = QString::fromStdString(data_item.Key());
+
+      ui->encounterList->addItem(name);
+      SelectableResource::Encounters().AddResource(name);
+    });
+  }
+}
+
+void WorldmapEditor::EncounterAdd(void)
+{
+  QString name = QInputDialog::getText(this, "New encounter", "Name");
+
+  if (name != "")
+  {
+    Data encounters(data_encounters);
+
+    encounters[name.toStdString()] = "";
+    ui->encounterList->addItem(name);
+    SelectableResource::Encounters().AddResource(name);
+  }
+}
+
+void WorldmapEditor::EncounterDel(void)
+{
+  QListWidgetItem* item = ui->encounterList->currentItem();
+
+  if (item)
+  {
+    Data        encounters(data_encounters);
+    std::string name = item->text().toStdString();
+
+    encounters[name].Remove();
+    SelectableResource::Encounters().DelResource(item->text());
+    ui->encounterList->removeItemWidget(item);
+    delete item;
+  }
+}
+
+void WorldmapEditor::EncounterSelect(void)
+{
+  QListWidgetItem* item = ui->encounterList->currentItem();
+
+  ui->frameEncounter->setEnabled(item != 0);
+  if (item)
+  {
+    Data        encounters(data_encounters);
+    std::string name      = item->text().toStdString();
+    Data        encounter = encounters[name];
+
+    lock_critters = true;
+    while (ui->critterList->rowCount())
+      ui->critterList->removeRow(0);
+    std::for_each(encounter.begin(), encounter.end(), [this](Data data_critter)
+    {
+      std::string character = data_critter.Key();
+      std::string quantity  = data_critter.Value();
+      int         row       = ui->critterList->rowCount();
+
+      QTableWidgetItem* item_character = new QTableWidgetItem(QString::fromStdString(character));
+      QTableWidgetItem* item_quantity  = new QTableWidgetItem(QString::fromStdString(quantity));
+
+      ui->critterList->insertRow(row);
+      ui->critterList->setItem(row, 0, item_character);
+      ui->critterList->setItem(row, 1, item_quantity);
+    });
+    lock_critters = false;
+  }
+}
+
+void WorldmapEditor::EncounterRefresh(void)
+{
+  QListWidgetItem* item = ui->encounterList->currentItem();
+  Data             encounters(data_encounters);
+  Data             encounter;
+
+  if (!item || lock_critters) return;
+  encounter = encounters[item->text().toStdString()];
+  for (int i = 0 ; i < ui->critterList->rowCount() ; ++i)
+  {
+    std::cout << "iterator: " << i << std::endl;
+    std::cout << "columns:  " << ui->critterList->columnCount() << std::endl;
+    std::cout << "rows:     " << ui->critterList->rowCount() << std::endl;
+    QTableWidgetItem* item_character = ui->critterList->item(i, 0);
+    QTableWidgetItem* item_quantity  = ui->critterList->item(i, 1);
+
+    std::cout << item_character << ',' << item_quantity << std::endl;
+    if (item_character && item_quantity)
+    {
+      std::string       character      = item_character->text().toStdString();
+      std::string       quantity       = item_quantity->text().toStdString();
+
+      encounter[character] = quantity;
+    }
+  }
+}
+
+void WorldmapEditor::EncountersSave(void)
+{
+  QString   path        = QDir::currentPath() + "/data/newgame/dataengine.json";
+  DataTree* data_engine = DataTree::Factory::JSON(path.toStdString());
+
+  if (data_engine)
+  {
+    Data data(data_engine);
+    Data encounters(data_encounters);
+
+    data["random-encounters"].Remove();
+    data["random-encounters"].Duplicate(encounters);
+    DataTree::Writers::JSON(data, path.toStdString());
+  }
+}
+
+void WorldmapEditor::EncounterAddCharacter()
+{
+  int               row = ui->critterList->rowCount();
+
+  ui->critterList->insertRow(row);
+}
+
+void WorldmapEditor::EncounterDelCharacter()
+{
+    int row = ui->critterList->currentRow();
+
+    ui->critterList->removeRow(row);
+}
+
+void WorldmapEditor::EncounterEditCharacter(int x, int y)
+{
+  if (y == 0)
+  {
+    QTableWidgetItem* item_character;
+
+    cout << x << "," << y << endl;
+    item_character = ui->critterList->item(x, y);
+    if (item_character)
+    {
+      SelectableResource::Charsheets().SelectResource([item_character](QString name)
+      {
+        item_character->setText(name);
+      });
+    }
+  }
 }
 
 WorldmapEditor::~WorldmapEditor()
@@ -126,6 +374,9 @@ void WorldmapEditor::Load(void)
       ui->tileSizeY->setValue(data["tile_size_y"]);
       lock_cities = false;
   }
+
+  EncountersLoad();
+  SpecialEncounterLoad();
 }
 
 void WorldmapEditor::Save(void)
@@ -136,6 +387,8 @@ void WorldmapEditor::Save(void)
 
   DataTree::Writers::JSON(Data(file_cities), path_cities);
   DataTree::Writers::JSON(Data(file_map),    path_map);
+  EncountersSave();
+  SpecialEncounterSave();
 }
 
 void WorldmapEditor::ClickedCity(QString name)
@@ -429,29 +682,31 @@ void WorldmapEditor::CaseDelMap()
 
 void WorldmapEditor::CaseAddEncounter()
 {
-  QString     map_name = QInputDialog::getText(this, "Add encounter type", "Encounter name");
-  std::string value    = map_name.toStdString();
-
-  if (map_name != "")
+  SelectableResource::Encounters().SelectResource([this](QString map_name)
   {
-    foreach(MapTile* tile, tile_selection)
-    {
-      Data           case_data = GetTileData(tile->pos_x, tile->pos_y);
-      unsigned short i;
+    std::string value    = map_name.toStdString();
 
-      for (i = 0 ; i < case_data.Count() ; ++i)
+    if (map_name != "")
+    {
+      foreach(MapTile* tile, tile_selection)
       {
-        if (case_data["type-encounters"][i].Value() == value)
-          break ;
-      }
-      if (i == case_data.Count())
-      {
+        Data           case_data = GetTileData(tile->pos_x, tile->pos_y);
+        unsigned short i;
+
+        for (i = 0 ; i < case_data.Count() ; ++i)
+        {
+          if (case_data["type-encounters"][i].Value() == value)
+            break ;
+        }
+        if (i == case_data.Count())
+        {
           case_data["type-encounters"][value] = value;
           case_data["type-encounters"][value].SetKey("");
+        }
       }
+      ui->encounterTypes->addItem(map_name);
     }
-    ui->encounterTypes->addItem(map_name);
-  }
+  });
 }
 
 void WorldmapEditor::CaseDelEncounter()

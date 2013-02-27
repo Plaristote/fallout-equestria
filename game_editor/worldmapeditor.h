@@ -99,6 +99,21 @@ public slots:
     void CaseDelEncounter(void);
     void UpdateCaseData(void);
 
+    void EncounterAddCharacter(void);
+    void EncounterDelCharacter(void);
+    void EncounterEditCharacter(int, int);
+    void EncounterAdd(void);
+    void EncounterDel(void);
+    void EncounterSelect(void);
+    void EncountersLoad(void);
+    void EncountersSave(void);
+    void EncounterRefresh(void);
+
+    void SpecialEncounterAdd(void);
+    void SpecialEncounterDelete(void);
+    void SpecialEncounterLoad(void);
+    void SpecialEncounterSave(void);
+
 private:
     typedef QPair<QString, City*> CityHalo;
     typedef QList<CityHalo>       CityHalos;
@@ -117,11 +132,13 @@ private:
     QGraphicsPixmapItem pixmap_worldmap;
     DataTree*           file_map;
     DataTree*           file_cities;
+    DataTree*           data_encounters;
+    DataTree*           data_special_encounters;
 
     CityHalos           city_halos;
     Tiles               tile_selection;
 
-    bool                lock_cities, lock_mspeed;
+    bool                lock_cities, lock_mspeed, lock_critters;
 };
 
 #endif // WORLDMAPEDITOR_H

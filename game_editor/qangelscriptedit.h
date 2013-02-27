@@ -21,7 +21,7 @@ public:
                  << "\\buint\\8\\b" << "\\buint\\16\\b" << "\\buint\\b" << "\\buint64\\b" << "\\bint32\\b" << "\\buint32\\b"
                  << "\\bfloat\\b" << "\\bdouble\\b" << "\\bstring\\b" << "\\bbool\\b" << "\\bvoid\\b";
         // ENGINE TYPES
-        patterns << "\\bData\\b" << "\\bMapPosition\\b";
+        patterns << "\\bData\\b" << "\\bWorld\\b" << "\\bCharacter\\b" << "\\bDynamicObject\\b" << "\\bSound\\b" << "\\bWorldMap\\b" << "\\bGame\\b" << "\\bRmlElement\\b" << "\\bCamera\\b" << "\\bInventory\\b" << "\\bItem\\b" << "\\bCharacterList\\b" << "\\bDoor\\b" << "\\bShelf\\b" << "\\bSpecial\\b";
 
         PushRules(patterns, format);
         patterns.clear();
@@ -34,7 +34,7 @@ public:
 
         format.setForeground(Qt::darkGreen);
         format.setFontWeight(QFont::Cursive);
-        patterns << "\".*\"";
+        patterns << "\"[^\"]*\"";
         PushRules(patterns, format);
         patterns.clear();
 

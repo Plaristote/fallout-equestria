@@ -77,8 +77,9 @@ x --> Option Manager and user interface
 x --> Creating New Games
 
 Milestone III [Started December 2012]
-  -> Game Editor
-~ --> Worldmap Editor
+x -> Game Editor
+x --> Worldmap Editor
+x --> Character sheet Editor
 x --> Graphical representation of lights
 x --> Selection tools for waypoints
 x --> Automatic leveling of waypoints

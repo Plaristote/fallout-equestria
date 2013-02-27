@@ -97,7 +97,6 @@ void CharsheetEditor::Load(QString name)
       widget->FromData(stats[i]);
       widget->show();
       statistics_widgets << widget;
-      cout << "Fuck yeah stats" << endl;
     }
     for (unsigned short i = 0 ; i < skills.Count() ; ++i)
     {
@@ -107,10 +106,7 @@ void CharsheetEditor::Load(QString name)
       widget->FromData(skills[i]);
       widget->show();
       skills_widgets << widget;
-      cout << "Fuck yeah skills" << endl;
     }
-    cout << "What the Fuck yeah" << endl;
-
     this->setEnabled(true);
   }
 }

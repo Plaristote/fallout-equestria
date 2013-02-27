@@ -38,6 +38,13 @@ public:
       return (*ptr);
     }
 
+    static SelectableResource& Encounters(void)
+    {
+      static SelectableResource* ptr = new SelectableResource;
+
+      return (*ptr);
+    }
+
 private slots:
     void SearchList(void);
     void SelectedItem(void);
