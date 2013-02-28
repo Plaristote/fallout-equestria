@@ -1,4 +1,5 @@
 #include "level/world.h"
+#include <timer.hpp>
 #include <panda3d/collisionHandlerQueue.h>
 
 using namespace std;
@@ -125,6 +126,9 @@ Waypoint* World::GetWaypointFromNodePath(NodePath path)
 
 Waypoint* World::GetWaypointFromId(unsigned int id)
 {
+  /*if (waypoints.size() < id)
+    return (&waypoints[id]);
+  return (0);*/
   Waypoints::iterator it  = find(waypoints.begin(), waypoints.end(), id);
 
   if (it != waypoints.end())
@@ -722,10 +726,13 @@ float my_sqrt(const float x)
 
 void World::DynamicObjectSetWaypoint(DynamicObject& object, Waypoint& waypoint)
 {
-  if (floors.size() > waypoint.floor)
-    object.nodePath.set_alpha_scale(floors[waypoint.floor].get_color_scale().get_w());
   object.waypoint = &waypoint;
-  DynamicObjectChangeFloor(object, waypoint.floor);
+  if (object.waypoint->floor != waypoint.floor)
+  {
+    if (floors.size() > waypoint.floor)
+      object.nodePath.set_alpha_scale(floors[waypoint.floor].get_color_scale().get_w());
+    DynamicObjectChangeFloor(object, waypoint.floor);
+  }
 }
 
 // SERIALIZATION

@@ -295,7 +295,7 @@ private:
 
 struct World
 {
-    typedef std::list<Waypoint>      Waypoints;
+    typedef std::vector<Waypoint>    Waypoints;
     typedef std::list<MapObject>     MapObjects;
     typedef std::list<DynamicObject> DynamicObjects;
     typedef std::list<WorldLight>    WorldLights;

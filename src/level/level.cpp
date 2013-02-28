@@ -1490,7 +1490,6 @@ void Level::SetEntryZone(Party& player_party, const std::string& name)
 
       for (; it != end ; ++it)
       {
-	// TODO if something. Maybe this ? ->
         if (!(IsWaypointOccupied((*it)->id)))
 	{
 	  ObjectCharacter* character = GetCharacter(*party_it);

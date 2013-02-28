@@ -457,6 +457,7 @@ void ObjectCharacter::RestartActionPoints(void)
 void ObjectCharacter::Run(float elapsedTime)
 {
   PStatCollector collector_ai("Level:Characters:AI");
+  Timer profile;
   
   if (!(IsInterrupted()))
   {
@@ -496,6 +497,7 @@ void ObjectCharacter::Run(float elapsedTime)
       RunMovement(elapsedTime);
   }
   InstanceDynamicObject::Run(elapsedTime);
+  profile.Profile("Level:Characters:AI");
 }
 
 int                 ObjectCharacter::GetBestWaypoint(InstanceDynamicObject* object, bool farthest)
@@ -703,19 +705,26 @@ void                ObjectCharacter::StopRunAnimation(InstanceDynamicObject*)
 
 void                ObjectCharacter::RunMovementNext(float elapsedTime)
 {
-  Waypoint* wp = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
+  Timer profile;
+  
+  Waypoint* wp = &(_level->GetWorld()->waypoints[_path.begin()->id]);
+  
+  //Waypoint* wp = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
 
-  if (wp != _waypointOccupied)
+  Timer profile2;
+  if (wp != _waypointOccupied && _level->GetState() == Level::Fight)
     SetActionPoints(_actionPoints - 1);
   _waypointOccupied = wp;
-  _level->GetWorld()->DynamicObjectSetWaypoint(*(GetDynamicObject()), *wp);
+  //_object->waypoint = wp;
+  //_level->GetWorld()->DynamicObjectSetWaypoint(*(GetDynamicObject()), *wp);
+  profile2.Profile("Level:Character:Movement:Next:SetWaypoint");
+  profile2.Restart();
 
   // Has reached object objective, if there is one ?
   if (_goToData.objective)
   {
     if (_path.size() <= (unsigned int)_goToData.max_distance && HasLineOfSight(_goToData.objective))
     {
-//      cout << "Reached destination" << endl;
       _path.clear();
       ReachedDestination.Emit(this);
       ReachedDestination.DisconnectAll();
@@ -724,6 +733,8 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
   }
 
   _path.erase(_path.begin());  
+  profile2.Profile("Level:Character:Movement:Next:SetNextMovement");
+  profile2.Restart();
 
   if (_path.size() > 0)
   {
@@ -745,11 +756,8 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
     else
       pathAvailable = false;
     ProcessCollisions();
-    // End check if the next waypoint is still accessible
 
-    if (pathAvailable)
-      RunMovement(elapsedTime);
-    else
+    if (!pathAvailable)
     {
       if (_goToData.objective)
 	GoTo(_goToData.objective);
@@ -760,7 +768,7 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
       }
       if (_path.size() == 0)
       {
-	_level->ConsoleWrite("Path is obstructed");
+	//_level->ConsoleWrite("Path is obstructed");
 	ReachedDestination.DisconnectAll();
       }
     }
@@ -770,12 +778,14 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
     ReachedDestination.Emit(this);
     ReachedDestination.DisconnectAll();
   }
+  profile.Profile("Level:Characters:Movement:Next");
 }
 
 LPoint3 NodePathSize(NodePath);
 
 void                ObjectCharacter::RunMovement(float elapsedTime)
 {
+  Timer             profile;
   PStatCollector    collector("Level:Characters:Movement"); collector.start();
   Waypoint&         next = *(_path.begin());
   // TODO: Speed walking / running / combat
@@ -836,6 +846,7 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
     _object->nodePath.set_pos(dest);
   }
   collector.stop();
+  profile.Profile("Level:Characters:Movement");
 }
 
 void                ObjectCharacter::LookAt(LVecBase3 pos)
