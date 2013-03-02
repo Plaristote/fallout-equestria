@@ -25,6 +25,7 @@ Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSkil
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
 PT(DirectionalLight) workaround_sunlight;
+PT(AmbientLight)     workaround_sunambient;
 
 class Circle
 {
@@ -214,9 +215,16 @@ void Level::InsertDynamicObject(DynamicObject& object)
 void Level::InitSun(void)
 {
   if (workaround_sunlight.is_null())
-    workaround_sunlight = new DirectionalLight("sun_light");
+    workaround_sunlight   = new DirectionalLight("sun_light");
+  if (workaround_sunambient.is_null())
+    workaround_sunambient = new AmbientLight("sun_light_ambient");
   _sunLight = workaround_sunlight;
   //_sunLight = new DirectionalLight("sun_light");
+  
+  _sunLightAmbient = workaround_sunambient;
+  //_sunLightAmbient = new AmbientLight("sun_light_ambient");
+  _sunLightAmbientNode = _window->get_render().attach_new_node(_sunLightAmbient);
+  _window->get_render().set_light(_sunLightAmbientNode, 5);
 
   unsigned int shadow_caster_buffer = 128;
   unsigned int film_size            = 128;
@@ -236,7 +244,7 @@ void Level::InitSun(void)
   _sunLightNode = _window->get_render().attach_new_node(_sunLight);
   _sunLightNode.set_pos(50.f, 50, 50.f);
   _sunLightNode.set_hpr(127, -31,  0);
-  _window->get_render().set_light(_sunLightNode);
+  _window->get_render().set_light(_sunLightNode, 6);
   _window->get_render().set_two_sided(false);
 
   _task_daylight   = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
@@ -419,6 +427,7 @@ void Level::SetPlayerInventory(Inventory* inventory)
 
 Level::~Level()
 {
+  _sunLightAmbientNode.remove_node();
   _sunLightNode.remove_node();
   _player_halo.remove_node();
   _window->get_render().clear_light();
@@ -599,7 +608,7 @@ void Level::RunMetabolism(void)
 {
   for_each(_characters.begin(), _characters.end(), [this](ObjectCharacter* character)
   {
-    if (character != GetPlayer())
+    if (character != GetPlayer() && character->GetHitPoints() > 0)
     {
       StatController* controller = character->GetStatController();
 
@@ -636,6 +645,8 @@ void Level::RunDaylight(void)
   // dif / 5 * (it % 4) -> dif / 100 * (20 * (it % 4)) is this more clear ? I hope it is.
   to_set += color_steps[it] + (dif / total_seconds * elapsed_seconds);
   _sunLight->set_color(to_set);
+  to_set.set_w(0.1);
+  _sunLightAmbient->set_color(to_set / 3);
   //cout << "Sunlight color [" << _timeManager.GetHour() << "]->[" << it << "]: " << to_set.get_x() << "," << to_set.get_y() << "," << to_set.get_z() << endl;
 
   // Angle va de 0/180 de 8h/20h à 20h/8h

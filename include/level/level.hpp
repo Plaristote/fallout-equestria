@@ -190,6 +190,8 @@ private:
 
   PT(DirectionalLight) _sunLight;
   NodePath             _sunLightNode;
+  PT(AmbientLight)     _sunLightAmbient;
+  NodePath             _sunLightAmbientNode;
   
   TimeManager::Task*   _task_daylight;
   TimeManager::Task*   _task_metabolism;

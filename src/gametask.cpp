@@ -1,5 +1,6 @@
 #include "gametask.hpp"
 #include "musicmanager.hpp"
+#include "quest_manager.hpp"
 #include <options.hpp>
 #include <dices.hpp>
 #include <ui_dialog.hpp>
@@ -174,7 +175,7 @@ void BuffManager::Save(Utils::Packet& packet, function<bool (const string&)> cal
 
 void GameTask::LoadLevelBuffs(Utils::Packet& packet)
 {
-  _buff_manager.Load(packet, [this](const string&name) -> StatController*
+  _buff_manager.Load(packet, [this](const string& name) -> StatController*
   {
     ObjectCharacter* character = _level->GetCharacter(name);
 
@@ -261,6 +262,7 @@ GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(wind
   _playerParty     = 0;
   _playerStats     = 0;
   _playerInventory = 0;
+  _quest_manager   = 0;
   _uiSaveGame      = 0;
   _uiLoadGame      = 0;
   _gameUi.GetMenu().SaveClicked.Connect(*this, &GameTask::SaveClicked);
@@ -292,13 +294,14 @@ GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : _gameUi(wind
 
 GameTask::~GameTask()
 {
-  if (_playerParty) { delete _playerParty; }
-  if (_playerStats) { delete _playerStats; }
-  if (_charSheet)   { delete _charSheet;   }
-  if (_uiSaveGame)  { _uiSaveGame->Destroy(); delete _uiSaveGame; }
-  if (_uiLoadGame)  { _uiLoadGame->Destroy(); delete _uiLoadGame; }
-  if (_worldMap)    { _worldMap->Destroy();   delete _worldMap;   }
-  if (_level)       { delete _level;       }
+  if (_playerParty)   { delete _playerParty;   }
+  if (_playerStats)   { delete _playerStats;   }
+  if (_charSheet)     { delete _charSheet;     }
+  if (_uiSaveGame)    { _uiSaveGame->Destroy(); delete _uiSaveGame; }
+  if (_uiLoadGame)    { _uiLoadGame->Destroy(); delete _uiLoadGame; }
+  if (_worldMap)      { _worldMap->Destroy();   delete _worldMap;   }
+  if (_quest_manager) { delete _quest_manager; }
+  if (_level)         { delete _level;         }
   CurrentGameTask = 0;
 }
 
@@ -453,10 +456,11 @@ bool GameTask::LoadGame(const std::string& savepath)
 {
   Data currentLevel, time;
 
-  if (_worldMap)    delete _worldMap;
-  if (_playerParty) delete _playerParty;
-  if (_playerStats) delete _playerStats;
-  if (_charSheet)   delete _charSheet;
+  if (_worldMap)      delete _worldMap;
+  if (_playerParty)   delete _playerParty;
+  if (_playerStats)   delete _playerStats;
+  if (_charSheet)     delete _charSheet;
+  if (_quest_manager) delete _quest_manager;
   if (_playerInventory)
   {
     delete _playerInventory;
@@ -473,6 +477,7 @@ bool GameTask::LoadGame(const std::string& savepath)
   if (!_charSheet)  return (false);
   _playerParty     = new PlayerParty(savepath);
   _playerStats     = new StatController(_charSheet);
+  _quest_manager   = new QuestManager(_dataEngine, _playerStats);
   _playerStats->SetView(&(_gameUi.GetPers()));
   if (_dataEngine["player"]["inventory"].NotNil())
   {
@@ -520,6 +525,7 @@ void GameTask::ExitLevel(const std::string& savepath)
     if (!(SaveGame(savepath)))
       AlertUi::NewAlert.Emit(i18n::T("Fatal Error") + ": " + i18n::T("Cannot save level"));
   }
+  _quest_manager->Finalize();
   delete _level;
   _level = 0;
   _worldMap->SetInterrupted(false);
@@ -751,6 +757,8 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     SetPlayerInventory();
     _level->SetEntryZone(*_playerParty, params.entry_zone);
     SetLevel(_level);
+    
+    _quest_manager->Initialize(_level);
 
     // TODO remove this when we're done with deploying creeps
     //_level->SpawnEnemies("critters", 10, 1);

@@ -191,7 +191,7 @@ private:
   
   void                CallbackActionUse(InstanceDynamicObject* object);
   
-  Sync::ObserverHandler   _obs_handler;
+  Sync::ObserverHandler          _obs_handler;
 
   PT(Character)                  _character;
   std::list<Waypoint>            _path;

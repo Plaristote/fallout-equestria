@@ -9,6 +9,8 @@
 # include "statsheet.hpp"
 # include "pipbuck.hpp"
 
+class QuestManager;
+
 class Buff
 {
 public:
@@ -129,6 +131,7 @@ private:
   PlayerParty*          _playerParty;
   StatController*       _playerStats;
   Inventory*            _playerInventory;
+  QuestManager*         _quest_manager;
   
   WorldMap*             _worldMap;
   

@@ -117,6 +117,7 @@ AsyncTask::DoneStatus MainMenu::do_task()
 {
   MusicManager* mm = MusicManager::Get();
 
+  _mouseCursor.Show();
   if (_alerts.size() > 0)
     DisplayAlerts();
   else
