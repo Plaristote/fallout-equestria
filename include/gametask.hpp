@@ -99,9 +99,12 @@ public:
   void                  LoadPartyBuffs(Utils::Packet&);
   std::function<bool (const std::string&)> _is_level_buff;
 
-  // TIME MANAGEMENT
-  TimeManager&          GetTimeManager(void) { return (_timeManager); }
-  WorldDiplomacy&       GetDiplomacy(void)   { return (_dataEngine.GetDiplomacy()); }
+  // Getters
+  TimeManager&          GetTimeManager(void)  { return (_timeManager); }
+  WorldDiplomacy&       GetDiplomacy(void)    { return (_dataEngine.GetDiplomacy()); }
+  QuestManager&         GetQuestManager(void) { return (*_quest_manager); }
+  
+  ISampleInstance*      PlaySound(const std::string&);
 
 private:
   void                  FinishLoad(void);
@@ -121,6 +124,7 @@ private:
   Sync::Signals  _signals;
   bool                  _continue;
   WindowFramework*      _window;
+  SoundManager          _sound_manager;
   GameUi                _gameUi;
   DataEngine            _dataEngine;
   TimeManager           _timeManager;

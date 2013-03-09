@@ -1,6 +1,7 @@
 #include "statsheet.hpp"
 #include <i18n.hpp>
 #include <gameui.hpp>
+#include <gametask.hpp>
 
 using namespace std;
 
@@ -540,6 +541,7 @@ void StatController::LevelChanged(unsigned short lvl)
 
   if (_view)
   {
+    GameTask::CurrentGameTask->PlaySound("pipbuck/levelup");
     _view->SetIdValue("level", lvl);
     _view->SetIdValue("next-level", _model.GetXpNextLevel());
     if (((skill_points = _model.GetSkillPoints()) > 0) || (_model.GetPerksPoints() > 0))

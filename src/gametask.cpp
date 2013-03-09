@@ -914,3 +914,15 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
       callback();
   }
 }
+
+ISampleInstance* GameTask::PlaySound(const std::string& name)
+{
+  if (_sound_manager.Require(name))
+  {
+    ISampleInstance* instance = _sound_manager.CreateInstance(name);
+
+    instance->Start();
+    return (instance);
+  }
+  return (0);
+}

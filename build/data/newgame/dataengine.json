@@ -34,20 +34,22 @@
 ,
 "Factions": {
   "Player Party": {
-    "Enemies": {
-    }
-  },
-  "Test Town": {
-    "Enemies": {
-    }
+    "Enemies": ""
   }
-},
+,
+  "Test Town": {
+    "Enemies": ""
+  }
+
+}
+,
 "Pipbuck": {
   "Apps": {
     "clock": {
       "type": 1,
       "icon": "clock.png"
-    },
+    }
+,
     "helloworld": {
       "type": 0,
       "icon": "helloworld.png",
@@ -60,12 +62,15 @@
         "run_background": "daemon",
         "run_focused": "main"
       }
+
     }
-  },
+
+  }
+,
   "Files": {
     "firstfile": {
-      "type":    "text",
-      "header":  "First text file ever for the pipbuck",
+      "type": "text",
+      "header": "First text file ever for the pipbuck",
       "content": "Chapter One: Sustinex<br /><br />
 
 
@@ -135,13 +140,28 @@ Newly refreshed and woken up, not to mention fearing for my skin, I ran to my ba
 
 
 ?No... no... no... n-is that a thong? No... no... YES!?"
-    },
-    "secondfile": {
-      "type":    "audio",
-      "header":  "First audio file ever for the pipbuck",
-      "src":     "audiofile"
     }
+,
+    "secondfile": {
+      "type": "audio",
+      "header": "First audio file ever for the pipbuck",
+      "src": "audiofile"
+    }
+
   }
+
 }
+,
+"random-encounters": {
+  "timberwolves": {
+    "timberwolf": 10
+  }
+
+}
+,
+"special-encounters": [
+"random-desert-1", "special-test"
+]
+
 
 }

@@ -26,16 +26,16 @@
 }
 ,
 "worldmap": {
-  "pos-x": 311.805,
-  "pos-y": 448.635
+  "pos-x": 161,
+  "pos-y": 265
 }
 ,
 "time": {
-  "seconds": 0,
-  "minutes": 35,
-  "hours": 0,
-  "days": 26,
-  "month": 4,
+  "seconds": 41,
+  "minutes": 47,
+  "hours": 10,
+  "days": 29,
+  "month": 5,
   "year": 2473
 }
 ,
@@ -178,7 +178,7 @@ Newly refreshed and woken up, not to mention fearing for my skin, I ran to my ba
     "charsheet": "timberwolf",
     "script": "timberwolf",
     "model": "lpip.egg",
-    "texture": "lpip.png",
+    "texture": "lpip.png"
   }
 
 }
@@ -221,7 +221,8 @@ Newly refreshed and woken up, not to mention fearing for my skin, I ran to my ba
 ,
       "mode-mouth": 1,
       "mode-magic": 1,
-      "quantity": 1
+      "quantity": 1,
+      "Name": "hooves"
     }
 ,
     "buck": {
@@ -254,12 +255,13 @@ Newly refreshed and woken up, not to mention fearing for my skin, I ran to my ba
         "use": 1
       }
 ,
-      "quantity": 1
+      "quantity": 1,
+      "Name": "buck"
     }
 
   }
 
 }
-
+,
 
 }

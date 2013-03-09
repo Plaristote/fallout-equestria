@@ -56,11 +56,13 @@ public:
 
   void   Initialize(Level* level)
   {
+    _level = level;
     for_each(_quests.begin(), _quests.end(), [level](Quest* quest) { quest->Initialize(level); });
   }
   
   void   Finalize(void)
   {
+    _level = 0;
     for_each(_quests.begin(), _quests.end(), [](Quest* quest)      { quest->Finalize(); });
   }
 
@@ -70,6 +72,7 @@ private:
   DataEngine&     _data_engine;
   Quests          _quests;
   StatController* _stats_controller;
+  Level*          _level;
 };
 
 #endif

@@ -20,6 +20,7 @@ Semaphore::Semaphore(unsigned int initial_count, unsigned int max_count)
   sem_init(&_handle, 0, initial_count);
   _max_count       = max_count;
   _deadlock_safety = false;
+  _thread_lock     = false;
 }
 
 Semaphore::~Semaphore(void)

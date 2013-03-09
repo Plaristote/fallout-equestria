@@ -1,6 +1,7 @@
 #include "quest_manager.hpp"
 #include "level/level.hpp"
 #include "statsheet.hpp"
+#include <gametask.hpp>
 #include <algorithm>
 
 using namespace std;
@@ -12,6 +13,7 @@ QuestManager::QuestManager(DataEngine& de, StatController* player_controller) : 
 {
   Data quests = de["Quests"];
   
+  _level = 0;
   for_each(quests.begin(), quests.end(), [this](Data data_quest)
   {
     Quest* quest = new Quest;
@@ -30,6 +32,9 @@ void QuestManager::AddQuest(Data data)
   quest->data = _data_engine["Quests"][data.Key()];
   quest->QuestCompleted.Connect(*this, &QuestManager::QuestCompleted);
   _quests.push_back(quest);
+  GameTask::CurrentGameTask->PlaySound("pipbuck/newquest");
+  if (_level)
+    quest->Initialize(_level);
 }
 
 void QuestManager::QuestCompleted(Quest* quest)

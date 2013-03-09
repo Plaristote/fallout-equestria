@@ -11,6 +11,8 @@ public:
   void SetCursorTexture(const std::string& texture) { if (_cursor) _cursor->SetAttribute("src", texture.c_str()); }
   void Update(void);
   
+  void PullToFront(void) { _root->PullToFront(); }
+  
   static MouseCursor*    Get(void) { return (_static); }
 
 private:

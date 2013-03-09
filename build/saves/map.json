@@ -6,31 +6,31 @@
 "tiles": [
 {
     "visibility": 1,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 1,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 1,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 1,
-    "movement-speed": 0.5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 1,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 1,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 1,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 1
@@ -118,31 +118,31 @@
   }
 , {
     "visibility": 1,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 5
+    "movement-speed": 0.9
   }
 , {
     "visibility": 2,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 2
@@ -230,31 +230,31 @@
   }
 , {
     "visibility": 1,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 5
+    "movement-speed": 0.9
   }
 , {
     "visibility": 2,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1.2
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1.2
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 2
@@ -342,31 +342,31 @@
   }
 , {
     "visibility": 1,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 1,
-    "movement-speed": 5
+    "movement-speed": 0.9
   }
 , {
     "visibility": 2,
-    "movement-speed": 5,
+    "movement-speed": 0.9
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1.2
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1.2
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 2
@@ -453,7 +453,8 @@
     "visibility": 0
   }
 , {
-    "visibility": 0
+    "visibility": 0,
+    "movement-speed": 0.7
   }
 , {
     "visibility": 1
@@ -463,19 +464,19 @@
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5,
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 1,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 1
@@ -576,11 +577,16 @@
 "random-desert-1"    
 ]
 ,
+    "type-encounters": [
+"timberwolves"    
+]
+,
   }
 , {
     "visibility": 2,
-    "map-encounters": [
-"random-desert-1"    
+    "map-encounters": "",
+    "type-encounters": [
+"timberwolves"    
 ]
 
   }
@@ -589,12 +595,20 @@
     "map-encounters": [
 "random-desert-1"    
 ]
+,
+    "type-encounters": [
+"timberwolves"    
+]
 
   }
 , {
     "visibility": 2,
     "map-encounters": [
 "random-desert-1"    
+]
+,
+    "type-encounters": [
+"timberwolves"    
 ]
 
   }
@@ -697,18 +711,19 @@
 "random-desert-1"    
 ]
 ,
+    "type-encounters": [
+"timberwolves"    
+]
+
   }
 , {
-    "visibility": 2,
+    "visibility": 1,
     "map-encounters": [
 "random-desert-1"    
 ]
 ,
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1"    
+    "type-encounters": [
+"timberwolves"    
 ]
 
   }
@@ -716,6 +731,21 @@
     "visibility": 2,
     "map-encounters": [
 "random-desert-1"    
+]
+,
+    "type-encounters": [
+"timberwolves"    
+]
+
+  }
+, {
+    "visibility": 2,
+    "map-encounters": [
+"random-desert-1"    
+]
+,
+    "type-encounters": [
+"timberwolves"    
 ]
 
   }
@@ -817,6 +847,32 @@
     "map-encounters": [
 "random-desert-1"    
 ]
+,
+    "type-encounters": [
+"timberwolves"    
+]
+
+  }
+, {
+    "visibility": 1,
+    "map-encounters": [
+"random-desert-1"    
+]
+,
+    "type-encounters": [
+"timberwolves"    
+]
+
+  }
+, {
+    "visibility": 1,
+    "map-encounters": [
+"random-desert-1"    
+]
+,
+    "type-encounters": [
+"timberwolves"    
+]
 
   }
 , {
@@ -825,18 +881,8 @@
 "random-desert-1"    
 ]
 ,
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1"    
+    "type-encounters": [
+"timberwolves"    
 ]
 
   }
@@ -938,28 +984,44 @@
     "map-encounters": [
 "random-desert-1"    
 ]
+,
+    "type-encounters": [
+"timberwolves"    
+]
 
   }
 , {
-    "visibility": 2,
+    "visibility": 0,
     "map-encounters": [
 "random-desert-1"    
 ]
 ,
+    "type-encounters": [
+"timberwolves"    
+]
+
   }
 , {
-    "visibility": 2,
+    "visibility": 1,
     "map-encounters": [
 "random-desert-1"    
 ]
 ,
+    "type-encounters": [
+"timberwolves"    
+]
+
   }
 , {
-    "visibility": 2,
+    "visibility": 1,
     "map-encounters": [
 "random-desert-1"    
 ]
 ,
+    "type-encounters": [
+"timberwolves"    
+]
+
   }
 , {
     "visibility": 2
@@ -1055,16 +1117,16 @@
     "visibility": 1
   }
 , {
-    "visibility": 1
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
   }
 , {
     "visibility": 1
-  }
-, {
-    "visibility": 2,
-  }
-, {
-    "visibility": 2,
   }
 , {
     "visibility": 1
@@ -1163,13 +1225,13 @@
     "visibility": 0
   }
 , {
-    "visibility": 1
+    "visibility": 0
   }
 , {
-    "visibility": 1
+    "visibility": 0
   }
 , {
-    "visibility": 1
+    "visibility": 0
   }
 , {
     "visibility": 1

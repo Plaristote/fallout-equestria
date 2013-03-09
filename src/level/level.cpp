@@ -242,7 +242,7 @@ void Level::InitSun(void)
   _sunLight->get_lens()->set_film_size(film_size);
 
   _sunLightNode = _window->get_render().attach_new_node(_sunLight);
-  _sunLightNode.set_pos(50.f, 50, 50.f);
+  _sunLightNode.set_pos(150.f, 50, 50.f);
   _sunLightNode.set_hpr(127, -31,  0);
   _window->get_render().set_light(_sunLightNode, 6);
   _window->get_render().set_two_sided(false);

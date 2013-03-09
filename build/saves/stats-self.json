@@ -1,53 +1,53 @@
 {
-"Name": "Pipsqueak",
+"Name": "Velvet Remedy",
 "Age": 16,
-"Gender": "Male",
+"Gender": "Mare",
 "Race": "Unicorn",
-"Faction": "Player",
+"Faction": "Test Town",
 "Special": {
-  "STR": 10,
+  "STR": 6,
   "PER": 6,
-  "END": 6,
-  "CHA": 6,
+  "END": 3,
+  "CHA": 9,
   "INT": 7,
-  "AGI": 6,
-  "LUC": 6
+  "AGI": 5,
+  "LUC": 7
 }
 ,
 "Statistics": {
-  "Action Points": 6,
-  "Armor Class": 6,
+  "Action Points": 10,
+  "Armor Class": 5,
   "Bonus Damage": 0,
-  "Carry Weight": 275,
-  "Critical Chance": 6,
-  "Damage Resistance": 0,
-  "Healing Rate": 2,
-  "Hit Points": 37,
-  "Melee Damage": 5,
-  "Perk Rate": 4,
-  "Poison Resistance": 30,
-  "Radiation Resistance": 10,
-  "Skill Rate": 18
+  "Carry Weight": 175,
+  "Critical Chance": 7,
+  "Damage Resistance": 5,
+  "Healing Rate": 1,
+  "Hit Points": 27,
+  "Melee Damage": 1,
+  "Perk Rate": 3,
+  "Poison Resistance": 15,
+  "Radiation Resistance": 4,
+  "Skill Rate": 19
 }
 ,
 "Skills": {
-  "Small Guns": 41,
-  "Big Guns": 16,
-  "Energy Guns": 16,
-  "Explosives": 80,
-  "Unarmed": 120,
-  "Lockpick": 80,
-  "Melee Weapons": 135,
-  "Medicine": 90,
+  "Small Guns": 40,
+  "Big Guns": 15,
+  "Energy Guns": 15,
+  "Explosives": 75,
+  "Unarmed": 95,
+  "Lockpick": 75,
+  "Melee Weapons": 110,
+  "Medicine": 80,
   "Repair": 27,
   "Science": 39,
-  "Sneak": 31,
-  "Spellcasting": 45,
-  "Steal": 6,
-  "Barter": 40,
-  "Outdoorspony": 70,
-  "Speech": 37,
-  "Gambling": 38
+  "Sneak": 30,
+  "Spellcasting": 46,
+  "Steal": 5,
+  "Barter": 38,
+  "Outdoorspony": 55,
+  "Speech": 43,
+  "Gambling": 41
 }
 ,
 "Skill Points": {
@@ -71,38 +71,36 @@
 }
 ,
 "Statistics Modifiers": {
-  "Action Points": 0,
+  "Action Points": "-2",
   "Armor Class": 0,
   "Bonus Damage": 0,
   "Carry Weight": 0,
   "Critical Chance": 0,
-  "Damage Resistance": 0,
+  "Damage Resistance": 5,
   "Healing Rate": 0,
-  "Hit Points": 1,
+  "Hit Points": 3,
   "Melee Damage": 0,
-  "Perk Rate": 1,
+  "Perk Rate": 0,
   "Poison Resistance": 0,
   "Radiation Resistance": 0,
-  "Skill Rate": "-1"
+  "Skill Rate": 0
 }
 ,
 "Variables": {
-  "Level": 3,
-  "Experience": 1001,
-  "Skill Points": 0,
+  "Hit Points": 21,
+  "Level": 4,
+  "Experience": 12750,
+  "Skill Points": 57,
   "Special Points": 0,
-  "Perks": 1,
-  "Traits": 0,
-  "Hit Points": 2292
+  "Perks": 3,
+  "Traits": 0
 }
 ,
 "Traits": {
-  "Skilled": 1,
-  "Gifted": 1
+  "Bloody Mess": 1,
+  "Bruiser": 1
 }
 ,
-"Kills": {
-  "Brain cells": 1024,
-  "Spliffs": 2048
-}
+"Affinities": "",
+
 }

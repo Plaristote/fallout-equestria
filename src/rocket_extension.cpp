@@ -1,4 +1,5 @@
 #include "rocket_extension.hpp"
+#include "mousecursor.hpp"
 
 using namespace std;
 using namespace Rocket;
@@ -82,4 +83,37 @@ void UiBase::Translate(void)
 {
   if (_root)
     RecursiveTranslate(_root);
+}
+
+void UiBase::Show(void)
+{
+  if (_root)
+  {
+    _root->Show();
+    VisibilityToggled.Emit(true);
+    VisibilityToggledOn.Emit();
+    if (MouseCursor::Get() != 0 && MouseCursor::Get() != this)
+      MouseCursor::Get()->Show();
+  }
+}
+
+void UiBase::Hide(void)
+{
+  if (_root)
+  {
+    _root->Hide();
+    _root->PushToBack();
+    VisibilityToggled.Emit(false);
+    VisibilityToggledOff.Emit();
+  }
+}
+bool UiBase::IsVisible(void) const
+{
+  return (_root && _root->IsVisible());
+}
+
+void UiBase::SetModal(bool modal)
+{
+  if (_root)
+    _root->Show(modal ? Rocket::Core::ElementDocument::MODAL : Rocket::Core::ElementDocument::NONE);
 }

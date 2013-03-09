@@ -1,53 +1,53 @@
 {
-"Name": "Velvet Remedy",
-"Age": 16,
-"Gender": "Mare",
-"Race": "Unicorn",
-"Faction": "Test Town",
+"Name": "Timberwolf",
+"Age": 8,
+"Gender": "Male",
+"Race": "Timberwolf",
+"Faction": "Timberwolves",
 "Special": {
-  "STR": 3,
-  "PER": 6,
-  "END": 3,
-  "CHA": 9,
-  "INT": 7,
-  "AGI": 5,
-  "LUC": 7
+  "STR": 6,
+  "PER": 8,
+  "END": 5,
+  "CHA": 1,
+  "INT": 5,
+  "AGI": 9,
+  "LUC": 5
 }
 ,
 "Statistics": {
-  "Action Points": 5,
-  "Armor Class": 5,
+  "Action Points": 9,
+  "Armor Class": 9,
   "Bonus Damage": 0,
-  "Carry Weight": 100,
-  "Critical Chance": 7,
+  "Carry Weight": 175,
+  "Critical Chance": 5,
   "Damage Resistance": 0,
   "Healing Rate": 1,
-  "Hit Points": 26,
+  "Hit Points": 31,
   "Melee Damage": 1,
   "Perk Rate": 3,
-  "Poison Resistance": 15,
-  "Radiation Resistance": 6,
-  "Skill Rate": 19
+  "Poison Resistance": 25,
+  "Radiation Resistance": 8,
+  "Skill Rate": 15
 }
 ,
 "Skills": {
-  "Small Guns": 10,
-  "Big Guns": 10,
-  "Energy Guns": 10,
-  "Explosives": 10,
-  "Unarmed": 10,
-  "Lockpick": 10,
-  "Melee Weapons": 10,
-  "Medicine": 10,
-  "Repair": 10,
-  "Science": 10,
-  "Sneak": 10,
-  "Spellcasting": 10,
-  "Steal": 10,
-  "Barter": 10,
-  "Outdoorspony": 10,
-  "Speech": 10,
-  "Gambling": 10
+  "Small Guns": 54,
+  "Big Guns": 19,
+  "Energy Guns": 19,
+  "Explosives": 105,
+  "Unarmed": 115,
+  "Lockpick": 105,
+  "Melee Weapons": 130,
+  "Medicine": 80,
+  "Repair": 25,
+  "Science": 35,
+  "Sneak": 34,
+  "Spellcasting": 40,
+  "Steal": 9,
+  "Barter": 22,
+  "Outdoorspony": 55,
+  "Speech": 27,
+  "Gambling": 35
 }
 ,
 "Skill Points": {
@@ -87,13 +87,13 @@
 }
 ,
 "Variables": {
-  "Hit Points": 26,
+  "Hit Points": 31,
   "Level": 1,
   "Experience": 0,
   "Skill Points": 0,
-  "Special Points": 1,
+  "Special Points": 0,
   "Perks": 0,
-  "Traits": 2
+  "Traits": 0
 }
 ,
 "Traits": ""

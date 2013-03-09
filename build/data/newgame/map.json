@@ -6,31 +6,31 @@
 "tiles": [
 {
     "visibility": 1,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 1,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 1,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 1,
-    "movement-speed": 0.5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 1,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 1,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 1,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 1
@@ -118,31 +118,31 @@
   }
 , {
     "visibility": 1,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 5
+    "movement-speed": 0.9
   }
 , {
     "visibility": 2,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 2
@@ -230,31 +230,31 @@
   }
 , {
     "visibility": 1,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 5
+    "movement-speed": 0.9
   }
 , {
     "visibility": 2,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1.2
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1.2
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 2
@@ -342,31 +342,31 @@
   }
 , {
     "visibility": 1,
-    "movement-speed": 5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 1,
-    "movement-speed": 5
+    "movement-speed": 0.9
   }
 , {
     "visibility": 2,
-    "movement-speed": 5
+    "movement-speed": 0.9
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1.2
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1.2
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 2
@@ -453,7 +453,8 @@
     "visibility": 0
   }
 , {
-    "visibility": 0
+    "visibility": 0,
+    "movement-speed": 0.7
   }
 , {
     "visibility": 1
@@ -463,19 +464,19 @@
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 0.7
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 1,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 2,
-    "movement-speed": 0.5
+    "movement-speed": 1
   }
 , {
     "visibility": 1

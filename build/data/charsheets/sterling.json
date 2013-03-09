@@ -1,53 +1,57 @@
 {
-"Name": "Timberwolf",
-"Age": 8,
-"Gender": "Male",
-"Race": "Timberwolf",
-"Faction": "Timberwolves",
 "Special": {
-  "STR": 6,
-  "PER": 8,
+  "STR": 5,
+  "PER": 6,
   "END": 5,
-  "CHA": 1,
+  "CHA": 8,
   "INT": 5,
-  "AGI": 9,
+  "AGI": 6,
   "LUC": 5
 }
 ,
+"Variables": {
+  "Hit Points": 30,
+  "Level": 5
+}
+,
+"Name": "Sterling",
+"Age": 21,
+"Race": "Earth Pony",
+"Faction": "Pawnee",
 "Statistics": {
-  "Action Points": 9,
-  "Armor Class": 9,
+  "Action Points": 6,
+  "Armor Class": 6,
   "Bonus Damage": 0,
-  "Carry Weight": 175,
+  "Carry Weight": 150,
   "Critical Chance": 5,
   "Damage Resistance": 0,
   "Healing Rate": 1,
-  "Hit Points": 31,
+  "Hit Points": 30,
   "Melee Damage": 1,
   "Perk Rate": 3,
-  "Poison Resistance": 15,
-  "Radiation Resistance": 6,
-  "Skill Rate": 19
+  "Poison Resistance": 25,
+  "Radiation Resistance": 8,
+  "Skill Rate": 15
 }
 ,
 "Skills": {
-  "Small Guns": 0,
-  "Big Guns": 0,
-  "Energy Guns": 0,
-  "Explosives": 0,
-  "Unarmed": 100,
-  "Lockpick": 0,
-  "Melee Weapons": 10,
-  "Medicine": 10,
-  "Repair": 0,
-  "Science": 0,
-  "Sneak": 100,
-  "Spellcasting": 50,
-  "Steal": 10,
-  "Barter": 0,
-  "Outdoorspony": 100,
-  "Speech": 50,
-  "Gambling": 80
+  "Small Guns": 41,
+  "Big Guns": 16,
+  "Energy Guns": 16,
+  "Explosives": 80,
+  "Unarmed": 95,
+  "Lockpick": 80,
+  "Melee Weapons": 110,
+  "Medicine": 70,
+  "Repair": 25,
+  "Science": 35,
+  "Sneak": 31,
+  "Spellcasting": 40,
+  "Steal": 6,
+  "Barter": 86,
+  "Outdoorspony": 55,
+  "Speech": 61,
+  "Gambling": 35
 }
 ,
 "Skill Points": {
@@ -85,17 +89,6 @@
   "Radiation Resistance": 0,
   "Skill Rate": 0
 }
-,
-"Variables": {
-  "Hit Points": 31,
-  "Level": 1,
-  "Experience": 0,
-  "Skill Points": 0,
-  "Special Points": 0,
-  "Perks": 0,
-  "Traits": 0
-}
-,
-"Traits": ""
+
 
 }
