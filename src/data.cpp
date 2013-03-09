@@ -65,7 +65,7 @@ Data::~Data()
     if (_data->pointers > 0)
       _data->pointers--;
     if ((_data->nil || !_data->father) && _data->root == false && _data->pointers == 0)
-      ;//delete _data;
+      delete _data;
   }
 }
 
@@ -133,6 +133,7 @@ const Data Data::operator[](const std::string& key) const
 
 void        Data::Duplicate(Data var)
 {
+  std::cout << "Duplicate begin " << var.Key() << std::endl;
   Data::my_iterator it  = var.begin();
   Data::my_iterator end = var.end();
 
@@ -149,11 +150,12 @@ void        Data::Duplicate(Data var)
   {
     Data        children = *it;
     DataBranch* tmp      = new DataBranch;
-    
+
     tmp->father = _data;
     _data->children.push_back(tmp);
     Data(tmp).Duplicate(children);
   }
+  std::cout << "Duplicate end" << std::endl;
 }
 
 const Data& Data::operator=(const Data& var)

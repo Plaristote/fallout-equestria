@@ -94,11 +94,23 @@ void MainMenu::Continue(Rocket::Core::Event&)
 
 void MainMenu::EndGame(void)
 {
-  _view.Show();
-  delete _levelTask;
-  _levelTask            = 0;
-  _need_garbage_collect = true;
-  MusicManager::Get()->Play("mainmenu");
+  // TODO find out why the dialog doesn't go away
+  /*UiDialog* dialog      = new UiDialog(_window, _generalUi.GetRocketRegion()->get_context());
+
+  dialog->SetMessage(i18n::T("If you quit without saving, you'll lose your recent progresses.") + "<br/>" + i18n::T("Are you sure ?"));
+  dialog->AddChoice(i18n::T("No"),  [this, dialog](Rocket::Core::Event&) { dialog->SetModal(false); dialog->Hide(); });
+  dialog->AddChoice(i18n::T("Yes"), [this, dialog](Rocket::Core::Event&)
+  {*/
+    _view.Show();
+    delete _levelTask;
+    _levelTask            = 0;
+    _need_garbage_collect = true;
+    MusicManager::Get()->Play("mainmenu");
+    /*dialog->SetModal(false);
+    dialog->Hide();
+  });
+  dialog->Show();
+  dialog->SetModal(true);*/
 }
 
 void MainMenu::DisplayAlerts(void)

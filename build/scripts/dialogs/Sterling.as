@@ -16,3 +16,22 @@ string HookInit()
   }
   return ("WelcomeBack");
 }
+
+string TryTakeQuest()
+{
+  Data          data_engine   = level.GetDataEngine();
+  QuestManager@ quest_manager = game.GetQuestManager();
+  Data          quest         = data_engine["my_quests"]["Sterling's Quest"];
+
+  quest_manager.AddQuest(quest);
+  return ("kthxbye");
+}
+
+string StartFight()
+{
+  Character@ sterling = level.GetCharacter("Sterling");
+  Character@ player   = level.GetPlayer();
+
+  player.SetAsEnemy(sterling, true);
+  return ("");
+}

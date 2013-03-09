@@ -1,0 +1,111 @@
+{
+"kthxbye": {
+  "npcLine": 10029,
+  "10030": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+,
+  "10031": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+
+}
+,
+"Howdy": {
+  "npcLine": 10032,
+  "10034": {
+    "HookAvailable": "",
+    "HookExecute": "MakeDeal",
+    "DefaultAnswer": ""
+  }
+,
+  "10035": {
+    "HookAvailable": "",
+    "HookExecute": "TryTakeQuest",
+    "DefaultAnswer": ""
+  }
+,
+  "10036": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+,
+  "10037": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "gtfo"
+  }
+
+}
+,
+"WelcomeBack": {
+  "npcLine": 10033,
+  "10034": {
+    "HookAvailable": "",
+    "HookExecute": "MakeDeal",
+    "DefaultAnswer": ""
+  }
+,
+  "10036": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+
+}
+,
+"gtfo": {
+  "npcLine": 10038,
+  "10039": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+,
+  "10040": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "angry_fight"
+  }
+
+}
+,
+"angry_fight": {
+  "npcLine": 10041,
+  "10042": {
+    "HookAvailable": "",
+    "HookExecute": "StartFight",
+    "DefaultAnswer": ""
+  }
+,
+  "10043": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+
+}
+,
+"SuccessfulBusiness": {
+  "npcLine": 10044,
+  "10045": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+,
+  "10046": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "gtfo"
+  }
+
+}
+
+
+}
