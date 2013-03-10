@@ -601,7 +601,10 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
   _goToData.objective = 0;
   UnprocessCollisions();
   if (_path.size() > 0)
+  {
+    cout << "SETTING START FROM FOR SOME REASON" << endl;
     start_from = _level->GetWorld()->GetWaypointFromId(_path.front().id);
+  }
   _path.clear();
   if (start_from && waypoint)
   {
@@ -743,6 +746,8 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
     UnprocessCollisions();
     Waypoint::Arc* arc = _waypointOccupied->GetArcTo(_path.begin()->id);
 
+    if (!arc)
+      cout << "NO ARC TOWARDS THIS PLACE" << endl;
     if (arc)
     {
       if (arc->observer)
@@ -763,6 +768,7 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
 	GoTo(_goToData.objective);
       else
       {
+        cout << "PATH IS NOT AVAILABLE" << endl;
 	Waypoint* dest = _level->GetWorld()->GetWaypointFromId((*(--(_path.end()))).id);
 	GoTo(dest);
       }
@@ -1094,6 +1100,7 @@ void     ObjectCharacter::SetFaction(unsigned int flag)
 
 void     ObjectCharacter::SetAsEnemy(const ObjectCharacter* other, bool enemy)
 {
+  cout << "SetAsEnemy" << endl;
   if (_faction && other->GetFaction() != 0)
   {
     WorldDiplomacy& diplomacy = GameTask::CurrentGameTask->GetDiplomacy();
@@ -1102,24 +1109,26 @@ void     ObjectCharacter::SetAsEnemy(const ObjectCharacter* other, bool enemy)
   }
   else
   {
+    cout << "Using self enemy mask: " << other->GetFactionName() << ':' << other->GetFaction() << endl;
     if (enemy)
-      _self_enemyMask &= other->GetFaction();
+      _self_enemyMask |= other->GetFaction();
     else if (_self_enemyMask & other->GetFaction())
       _self_enemyMask -= other->GetFaction();
+    cout << "Self enemy mask: " << _self_enemyMask << endl;
   }
 }
 
 bool     ObjectCharacter::IsEnemy(const ObjectCharacter* other) const
 {
-  //cout << "Calling IsEnemy" << endl;
+  cout << "Calling IsEnemy " << other->GetFactionName() << endl;
   if (other->GetFaction() == 0 && _faction)
     return (other->IsEnemy(this));
   if (_faction)
   {
-    //cout << "I haz faction: " << _faction->enemyMask << " (" << _faction->flag << ")" << endl;
+    cout << "I haz faction: " << _faction->enemyMask << " (" << _faction->flag << ")" << endl;
     return (_faction->enemyMask & other->GetFaction());
   }
-  //cout << "I haz no faction" << endl;
+  cout << "I haz no faction " << _self_enemyMask << '&' << other->GetFaction() << endl;
   return (_self_enemyMask & other->GetFaction());
 }
 

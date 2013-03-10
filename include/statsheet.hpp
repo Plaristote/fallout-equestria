@@ -112,7 +112,7 @@ public:
   virtual void SetCategoryFields(const std::string& category, const std::vector<std::string>& keys)         = 0;  
   virtual void SetIdValue(const std::string& id, const std::string& value)                                  = 0;
   virtual void SetIdValue(const std::string& id, short value)                                               = 0;
-  virtual void SetExperience(unsigned short xp, unsigned short lvl, unsigned short next_level)              = 0;
+  virtual void SetExperience(unsigned int xp, unsigned short lvl, unsigned int next_level)                  = 0;
   virtual void SetTraits(std::list<std::string>)                                                            = 0;
   virtual void SetTraitActive(const std::string&, bool)                                                     = 0;
   virtual void SetPerks(std::list<std::string>)                                                             = 0;
@@ -155,7 +155,7 @@ public:
   void DownSkill(const std::string& stat);
   void SetSkill(const std::string& stat, short value);
 
-  void AddExperience(unsigned short experience);
+  void AddExperience(unsigned int experience);
   void SetCurrentHp(short hp);
 
   void TriggerSkillAffinity(const std::string& stat, bool);
@@ -238,7 +238,7 @@ public:
   void SetIdValue(const std::string& id, const std::string& value);
   void SetIdValue(const std::string& id, short value);
   void SetCategoryFields(const std::string& category, const std::vector<std::string>& keys);
-  void SetExperience(unsigned short, unsigned short, unsigned short);
+  void SetExperience(unsigned int, unsigned short, unsigned int);
   void SetTraits(std::list<std::string>);
   void SetTraitActive(const std::string&, bool);
   void SetSkillAffinity(const std::string& skill, bool);

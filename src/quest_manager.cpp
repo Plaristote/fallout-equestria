@@ -97,13 +97,17 @@ void Quest::WatcherCharacterInventory(Data condition, Level* level)
   std::string      character_name = condition["target"];
   ObjectCharacter* character      = level->GetCharacter(character_name);
 
+  cout << "WatchedCharacterInventory" << endl;
+  condition.Output();
   if (character)
   {
+    cout << "Setting up observer on character " << character->GetName() << endl;
     _observers.Connect(character->GetInventory().ContentChanged, [this, condition, character](void)
     {
       std::string    object_type = condition["object_type"].Value();
       unsigned short quantity    = condition["object_quantity"];
 
+      cout << "Checking if quest objective has been completed" << endl;
       if (character->GetInventory().ContainsHowMany(object_type) >= quantity)
       {
         (Data)(condition["completed"]) = 1;

@@ -245,7 +245,7 @@ void           StatModel::ToggleTrait(const string& trait)
 
 void           StatModel::SetExperience(unsigned short e)
 {
-  unsigned short currentXp = _statsheet["Variables"]["Experience"];
+  unsigned int   currentXp = _statsheet["Variables"]["Experience"];
   unsigned short nextLevel = 0;
 
   _statsheet["Variables"]["Experience"] = e;
@@ -576,9 +576,10 @@ void StatController::AddKill(const string& race)
     _view->SetFieldValue("Kills", race, _model.GetKills(race));
 }
 
-void StatController::AddExperience(unsigned short exp)
+void StatController::AddExperience(unsigned int exp)
 {
-  _model.SetExperience(_model.GetExperience() + exp);
+  exp += _model.GetExperience();
+  _model.SetExperience(exp);
   if (_view)
     _view->SetIdValue("current-xp", exp);
 }
@@ -1256,7 +1257,7 @@ void StatViewRocket::SetIdValue(const std::string& id, const std::string& value)
     element->SetInnerRML(value.c_str());
 }
 
-void StatViewRocket::SetExperience(unsigned short xp, unsigned short lvl, unsigned short next_level)
+void StatViewRocket::SetExperience(unsigned int xp, unsigned short lvl, unsigned int next_level)
 {
   if (_root)
   {

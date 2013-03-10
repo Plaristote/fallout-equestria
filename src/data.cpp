@@ -133,7 +133,6 @@ const Data Data::operator[](const std::string& key) const
 
 void        Data::Duplicate(Data var)
 {
-  std::cout << "Duplicate begin " << var.Key() << std::endl;
   Data::my_iterator it  = var.begin();
   Data::my_iterator end = var.end();
 
@@ -155,7 +154,6 @@ void        Data::Duplicate(Data var)
     _data->children.push_back(tmp);
     Data(tmp).Duplicate(children);
   }
-  std::cout << "Duplicate end" << std::endl;
 }
 
 const Data& Data::operator=(const Data& var)

@@ -131,13 +131,15 @@ Waypoint* World::GetWaypointFromNodePath(NodePath path)
 
 Waypoint* World::GetWaypointFromId(unsigned int id)
 {
-  /*if (waypoints.size() < id)
-    return (&waypoints[id]);
-  return (0);*/
-  Waypoints::iterator it  = find(waypoints.begin(), waypoints.end(), id);
-
-  if (it != waypoints.end())
-    return ((&(*it)));
+  if (waypoints.size() > id && id > 0)
+  {
+    Waypoint& wp = waypoints[id - 1];
+    
+    if (wp.id != id)
+      cout << "/!\\ RETARD ALERT ! Wrong waypoint (" << wp.id << ", looking for " << id << ')' << endl;
+    return (&waypoints[id - 1]);
+  }
+  cout  << "Wp size -> " << waypoints.size() << ", looking for " << id << endl;
   return (0);
 }
 

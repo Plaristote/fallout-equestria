@@ -123,6 +123,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   {
     LevelExitZone* exitZone = new LevelExitZone(this, zone.destinations);
     
+    cout << "Registering ExitZone '" << zone.name << '\'' << endl;
     exitZone->SetName(zone.name);
     ForEach(zone.waypoints, [exitZone](Waypoint* wp)
     {
@@ -238,7 +239,7 @@ void Level::InitSun(void)
   }
 
   _sunLight->set_shadow_caster(true, shadow_caster_buffer, shadow_caster_buffer);
-  _sunLight->get_lens()->set_near_far(10.f, 200.f);
+  _sunLight->get_lens()->set_near_far(10.f, 1200.f);
   _sunLight->get_lens()->set_film_size(film_size);
 
   _sunLightNode = _window->get_render().attach_new_node(_sunLight);

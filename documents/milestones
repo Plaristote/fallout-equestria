@@ -104,10 +104,10 @@ x --> Scatter inserted parties in the spawning zones
   -> GameTask
 x --> Temporaries levels
 x --> Healing Rate Task
-  --> Quests
+~ --> Quests
 ~ --> Party management
-  --> Pipbuck
-  ----> Quest Application
+~ --> Pipbuck
+~ ----> Quest Application
 
 Milestone IV
   -> GameTask

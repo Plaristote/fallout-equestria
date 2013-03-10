@@ -18,7 +18,7 @@ public:
   }
 
   double          GetElapsedTime(void) const { return (_globalClock->get_real_time() - _lastTime); }
-  void            Profile(std::string str)   { cout << str+": " << GetElapsedTime() << " sec\n"; Restart(); }
+  void            Profile(std::string str);
   void            Restart(void)              { _lastTime = _globalClock->get_real_time();          }
   void            SetLastTime(double v)      { _lastTime = v; }
   float           GetLastTime(void) const    { return (_lastTime); }

@@ -116,6 +116,8 @@ struct Waypoint
     bool                 operator==(const Waypoint& other) const;
     bool                 operator==(const Waypoint* other) const;
     bool                 operator==(unsigned int id)       const { return (this->id == id); }
+    bool                 operator<(const Waypoint& other)  const { return (id < other.id); }
+    bool                 operator>(const Waypoint& other)  const { return (id > other.id); }
     Arcs::iterator       ConnectUnsafe(Waypoint* other);
     Arcs::iterator       Connect(Waypoint* other);
     Arcs::iterator       Disconnect(Waypoint* other);

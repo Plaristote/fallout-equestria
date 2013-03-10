@@ -32,6 +32,7 @@ string StartFight()
   Character@ sterling = level.GetCharacter("Sterling");
   Character@ player   = level.GetPlayer();
 
-  player.SetAsEnemy(sterling, true);
+  sterling.SetAsEnemy(player, true);
+  //player.SetAsEnemy(sterling, true);
   return ("");
 }

@@ -4,6 +4,7 @@
 
 void LevelExitZone::GoingThrough(void* character)
 {
+  cout << "LevelExitZone::GoingThrough" << endl;
   if (character == _level->GetPlayer())
   {
     if (_destinations.size() == 0)

@@ -10,6 +10,7 @@ public:
   {
     ForEach(destinations, [this](std::string dest) { _destinations.push_back(dest); });
   }
+  virtual ~LevelExitZone(void) {}
   
   void               SetName(const std::string& name) { _name = name;   }
   const std::string& GetName(void) const              { return (_name); }
