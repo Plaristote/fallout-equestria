@@ -11,10 +11,10 @@ string default_weapon_2()
 
 StringList GetAvailableApps(Data data)
 {
-  Write("Toto");
   StringList apps;
 
   apps.Add("helloworld");
   apps.Add("clock");
+  apps.Add("quest manager");
   return (apps);
 }

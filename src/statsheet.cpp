@@ -979,6 +979,7 @@ void StatViewRocket::UpdateName(Core::Event& event)
 
 void StatViewRocket::UpdateGender(Core::Event& event)
 {
+  Core::Element* gender_edit   = _root->GetElementById("char-gender-edit");
   Core::Element* gender_male   = _root->GetElementById("char-gender-option-male");
   Core::Element* gender_female = _root->GetElementById("char-gender-option-female");
   
@@ -995,7 +996,8 @@ void StatViewRocket::UpdateGender(Core::Event& event)
     if ((!var_male && var_female) || is_female == "true") result = "female";
     InformationChanged.Emit("gender", result);
   }
-  event.GetCurrentElement()->GetParentNode()->SetProperty("display", "none");
+  if (gender_edit)
+    gender_edit->SetProperty("display", "none");
 }
 
 void        StatViewRocket::StatUpdate(Core::Event& event, string& ret_type, string& ret_stat)
