@@ -72,15 +72,20 @@ void Pipbuck::StartApp(Rocket::Core::Event& event)
     // If the app isn't already running, create an instance of it
     if (app_data.NotNil() && to_start)
     {
-      switch ((int)app_data["type"])
+      unsigned int app_type = app_data["type"];
+
+      switch (app_type)
       {
-	default:
-	case 0:
-	  app = new PipbuckAppScript(app_data);
-	  break ;
 	case 1:
 	  app = new PipbuckClockApp(app_data);
 	  break ;
+        case 2:
+          app = new PipbuckQuestApp(app_data);
+          break ;
+        default:
+        case 0:
+          app = new PipbuckAppScript(app_data);
+          break ;
       }
     }
     
@@ -262,6 +267,35 @@ void Pipbuck::ReloadApps(void)
     id << "app_button_" << i;
     ToggleEventListener(true, id.str(), "click", EventStartApp);
   }
+}
+
+/*
+ * 2.5 PipbuckQuestApp, for quest follow-up
+ */
+PipbuckQuestApp::PipbuckQuestApp(Data script) : _appid(script.Key()), _data_engine(0)
+{
+}
+
+bool PipbuckQuestApp::Started(DataEngine& de)
+{
+  _data_engine = &de;
+  return (Filesystem::FileContent("data/pipbuck_quest.rml", _inner_rml));
+}
+
+void PipbuckQuestApp::Exited(DataEngine& de)
+{
+}
+
+void PipbuckQuestApp::Unfocused(DataEngine& de)
+{
+}
+
+void PipbuckQuestApp::Focused(Rocket::Core::Element* root, DataEngine& de)
+{
+}
+
+void PipbuckQuestApp::RunAsMainTask(Rocket::Core::Element*, DataEngine& de)
+{
 }
 
 /*
@@ -496,7 +530,7 @@ void PipbuckAppScript::RunAsBackgroundTask(DataEngine& de)
   const string       function_name = "int " + _data["hooks"]["run_background"].Value() + "(Data)";
   asIScriptFunction* function      = _module->GetFunctionByDecl(function_name.c_str());
   int                ret_value     = 0;
-  
+
   if (function)
   {
     as_current_context = _context;

@@ -89,13 +89,13 @@ void Quest::InitializeCondition(Data condition, Level* level)
 }
 
 /*
-  * Watcher Initialization
-  */
+ * Watcher Initialization
+ */
 void Quest::WatcherCharacterInventory(Data condition, Level* level)
 {
   std::string      character_name = condition["target"];
   ObjectCharacter* character      = level->GetCharacter(character_name);
-  
+
   if (character)
   {
     _observers.Connect(character->GetInventory().ContentChanged, [this, condition, character](void)

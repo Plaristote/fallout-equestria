@@ -126,6 +126,40 @@ string underscore(const std::string& str)
 void AngelScriptInitialize(void);
 int  compile_statsheet(std::string);
 
+
+#include <panda3d/geoMipTerrain.h>
+void Earthscultor2Bam(Data heightmap, const std::string& out)
+{
+  NodePath terrain;
+  
+  GeoMipTerrain* mip_terrain = new GeoMipTerrain("Terrain");
+
+  mip_terrain->set_heightfield(heightmap["heightmap"].Value());
+  mip_terrain->set_block_size(heightmap["block_size"]);
+  mip_terrain->set_factor(heightmap["factor"]);
+  mip_terrain->set_min_level(heightmap["min_level"]);
+  
+  mip_terrain->get_root().set_sz(heightmap["max_height"]);
+  
+  mip_terrain->generate();
+  mip_terrain->get_root().write_bam_file(out);
+  
+  delete mip_terrain;
+}
+
+int compile_heightmap(const std::string& sourcefile, const std::string& out)
+{
+  DataTree* datatree = DataTree::Factory::JSON(sourcefile);
+
+  if (datatree)
+  {
+    Earthscultor2Bam(datatree, out);
+    delete datatree;
+    return (0);
+  }
+  return (-1);
+}
+
 #ifndef UNIT_TESTER
 int main(int argc, char *argv[])
 {
@@ -133,9 +167,11 @@ int main(int argc, char *argv[])
   Script::Engine::Initialize();
   AngelScriptInitialize();
 
-  // If used as statsheet compiler
+  // If used as compiler of some sort
   if (argc == 3 && std::string(argv[1]) == "--compile-statsheet")
     return (compile_statsheet(argv[2]));
+  if (argc == 4 && std::string(argv[1]) == "--compile-heightmap")
+    return (compile_heightmap(argv[2], argv[3]));
   // Otherwise run the game
 
   WindowFramework* window;
@@ -172,3 +208,4 @@ int main(int argc, char *argv[])
   return (0);
 }
 #endif
+

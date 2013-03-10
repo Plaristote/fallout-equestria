@@ -58,6 +58,8 @@ MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window
   createLevelPlz        = false;
   quitGamePlz           = false;
   _need_garbage_collect = false;
+  
+  _window->set_background_type(WindowFramework::BT_black);
 
   MusicManager::Initialize();
   MusicManager::Get()->Play("mainmenu");

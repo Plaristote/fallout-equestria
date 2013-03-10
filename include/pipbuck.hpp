@@ -118,4 +118,25 @@ private:
   unsigned int          _minutes_to_spend;
 };
 
+class PipbuckQuestApp : public Pipbuck::App
+{
+public:
+  PipbuckQuestApp(Data script);
+  ~PipbuckQuestApp() {}
+
+  const std::string GetAppId(void) const { return (_appid); }
+  
+  void RunAsMainTask(Rocket::Core::Element*, DataEngine&);
+  void RunAsBackgroundTask(DataEngine&) {}
+
+  bool Started(DataEngine&);
+  void Exited(DataEngine&);
+  void Unfocused(DataEngine&);
+  void Focused(Rocket::Core::Element*, DataEngine&);
+private:
+  const std::string _appid;
+  std::string       _inner_rml;
+  DataEngine*       _data_engine;
+};
+
 #endif
