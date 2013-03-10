@@ -1,0 +1,8 @@
+<button id="back_button" class="button" style="float: right; width: 150px; margin-top: 10px; margin-right: 10px;" i18n="previous">Back</button>
+<div id="quest_title" style="float: left;">Quest name</div>
+
+<div id="quest_description">
+</div>
+
+<div id="objectives_container">
+</div>

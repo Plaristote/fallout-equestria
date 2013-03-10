@@ -134,9 +134,30 @@ public:
   void Unfocused(DataEngine&);
   void Focused(Rocket::Core::Element*, DataEngine&);
 private:
+  enum Interfaces
+  {
+    QuestList,
+    QuestView
+  };
+
+  void LoadQuestList(Rocket::Core::Element*);
+  void LoadQuestView(Rocket::Core::Element*);
+  
+  RocketListener EventQuestHovered, EventQuestClicked, EventBackClicked;
+  
+  void               ListQuestHovered(Rocket::Core::Event&);
+  void               ListQuestClicked(Rocket::Core::Event&);
+
   const std::string _appid;
-  std::string       _inner_rml;
+  std::string       _rml_index, _rml_view;
   DataEngine*       _data_engine;
+  Interfaces        _current_view;
+  std::string       _current_quest;
+  
+  Rocket::Core::Element* _last_hovered;
+  Rocket::Core::Element* _root;
+  
+  Sync::ObserverHandler  _observer;
 };
 
 #endif

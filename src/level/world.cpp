@@ -7,6 +7,8 @@ using namespace std;
 unsigned char         gPathfindingUnitType = 0;
 void*                 gPathfindingData     = 0;
 
+NodePath World::model_sphere;
+
 World::World(WindowFramework* window)
 {
   this->window       = window;
@@ -14,6 +16,8 @@ World::World(WindowFramework* window)
   rootMapObjects     = window->get_render().attach_new_node("mapobjects");
   rootDynamicObjects = window->get_render().attach_new_node("dynamicobjects");
   rootLights         = window->get_render().attach_new_node("lights");
+  
+  model_sphere = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
 }
 
 World::~World()
@@ -25,10 +29,11 @@ World::~World()
 
 Waypoint* World::AddWayPoint(float x, float y, float z)
 {
-  NodePath nodePath = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
+  NodePath nodePath = rootWaypoints.attach_new_node("waypoint");
   Waypoint  waypoint(nodePath);
   Waypoint* ptr;
 
+  model_sphere.instance_to(nodePath);
   waypoint.nodePath.set_pos(x, y, z);
   waypoints.push_back(waypoint);
   nodePath.reparent_to(rootWaypoints);
@@ -1034,9 +1039,10 @@ void           World::UnSerialize(Utils::Packet& packet)
     packet >> size;
     for (int it = 0 ; it < size ; ++it)
     {
-      NodePath sphere = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
+      NodePath sphere = rootWaypoints.attach_new_node("waypoint");
       Waypoint waypoint(sphere);
 
+      model_sphere.instance_to(sphere);
       waypoint.Unserialize(packet);
       sphere.reparent_to(rootWaypoints);
       waypoints.push_back(waypoint);

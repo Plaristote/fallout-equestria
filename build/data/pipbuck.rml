@@ -47,7 +47,40 @@
     background-color: rgb(10%, 100%, 0%);
     color: black;
   }
-		</style>
+
+  //
+  // Pipbuck Quest Rml
+  //
+  .quest-list-item
+  {
+    display: block;
+    width:   100px;
+    padding: 20px 20px 20px 20px;
+    margin:  20px 20px 20px 20px;
+  }
+
+  .quest-name
+  {
+    float: left;
+    font-size: 65%;
+    width: 20%;
+  }
+
+  .quest-desc
+  {
+    float: left;
+    font-size: 60%;
+    width: 60%;
+  }
+
+  .quest-prog
+  {
+    float: left;
+    font-size: 60%;
+    width: 20%;
+  }
+
+</style>
 	</head>
   <body id="body" template="tplmainbar">
     <button id="button-quit" i18n="Quit" class="universal_button">Quit</button>

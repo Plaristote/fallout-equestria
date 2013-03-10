@@ -126,6 +126,12 @@ DialogController::DialogController(WindowFramework* window, Rocket::Core::Contex
     DialogEnded.Emit();
 }
 
+DialogController::~DialogController()
+{
+  _context->Release();
+  cout << "Destroyed Dialog Controller" << endl;
+}
+
 void DialogController::OpenBarter(Core::Event& event)
 {
   cout << "OpenBarter executed" << endl;

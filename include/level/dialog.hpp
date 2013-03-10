@@ -73,7 +73,7 @@ public:
   void Destroy(void);
 protected:
   DialogView(WindowFramework* window, Rocket::Core::Context* context);
-  ~DialogView();
+  virtual ~DialogView();
 
   void UpdateView(const std::string& npcLine, const DialogAnswers& answers);
   void CleanView(const DialogAnswers& answers);
@@ -90,10 +90,7 @@ class DialogController : public DialogView
 {
 public:
   DialogController(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* character, Data i18n);
-  ~DialogController()
-  {
-    _context->Release();
-  }
+  ~DialogController();
 
   ObjectCharacter* WithCharacter(void) const { return (_character); }
 

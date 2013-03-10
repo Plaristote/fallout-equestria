@@ -35,6 +35,7 @@ void QuestManager::AddQuest(Data data)
   GameTask::CurrentGameTask->PlaySound("pipbuck/newquest");
   if (_level)
     quest->Initialize(_level);
+  QuestsUpdated.Emit();
 }
 
 void QuestManager::QuestCompleted(Quest* quest)

@@ -65,6 +65,9 @@ public:
     _level = 0;
     for_each(_quests.begin(), _quests.end(), [](Quest* quest)      { quest->Finalize(); });
   }
+  
+  Sync::Signal<void>          QuestsUpdated;
+  Sync::Signal<void (Quest*)> QuestUpdated;
 
 private:
   void   QuestCompleted(Quest*);

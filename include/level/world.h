@@ -426,6 +426,8 @@ struct World
 
     void           CompileWaypoints(void);
     void           CompileDoors(void);
+    
+    static NodePath model_sphere;
 };
 
 #endif // WORLD_H

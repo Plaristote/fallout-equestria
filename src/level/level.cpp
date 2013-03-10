@@ -987,14 +987,19 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
     _mouseActionBlocked = true;
     _camera.SetEnabledScroll(false);
     _levelUi.GetMainBar().Hide();
-    SetInterrupted(true);
     _currentUis[UiItRunningDialog] = _currentRunningDialog;
+    SetInterrupted(true);
   }
   else
   {
     GetPlayer()->GoTo(object, 3);
-    GetPlayer()->ReachedDestination.Connect(*this, &Level::PendingActionTalkTo);
-    GetPlayer()->pendingActionOn = object;
+    if (GetPlayer()->GetPathSize() > 1)
+    {
+      GetPlayer()->ReachedDestination.Connect(*this, &Level::PendingActionTalkTo);
+      GetPlayer()->pendingActionOn = object;
+    }
+    else
+      ConsoleWrite(i18n::T("No line of sight"));
   }
 }
 
@@ -1062,7 +1067,9 @@ void Level::SelectedUseObjectOn(InventoryObject* object)
 
 void Level::PendingActionTalkTo(InstanceDynamicObject* object)
 {
+  cout << "PendingActionTalkTo Start" << endl;
   CallbackActionTalkTo(object->pendingActionOn);
+  cout << "PendingActionTalkTo Done" << endl;
 }
 
 void Level::PendingActionUseObjectOn(InstanceDynamicObject* object)

@@ -17,7 +17,8 @@ UiBase::~UiBase()
     {
       Rocket::Core::Element* elem = _root->GetElementById(listener.elem.c_str());
       
-      elem->RemoveEventListener(listener.event.c_str(), &(listener.instance));
+      if (elem)
+        elem->RemoveEventListener(listener.event.c_str(), &(listener.instance));
     });
     _root->Close();
     _root->RemoveReference();

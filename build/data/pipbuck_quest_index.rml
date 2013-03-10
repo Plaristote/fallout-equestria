@@ -1,0 +1,9 @@
+<div id="quest_title" i18n="pipbuck-quest-title">Quest List</div>
+
+<div id="quest_containers">
+  <datagrid id="quest-key">
+    <col>Nom de la quete</col>
+    <col>Description de la quete</col>
+    <col>Has been completed</col>
+  </datagrid>
+</div>

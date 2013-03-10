@@ -1,5 +1,6 @@
 #include "pipbuck.hpp"
 #include <gametask.hpp>
+#include <quest_manager.hpp>
 
 using namespace std;
 
@@ -274,12 +275,21 @@ void Pipbuck::ReloadApps(void)
  */
 PipbuckQuestApp::PipbuckQuestApp(Data script) : _appid(script.Key()), _data_engine(0)
 {
+  EventQuestHovered.EventReceived.Connect(*this, &PipbuckQuestApp::ListQuestHovered);
+  EventQuestClicked.EventReceived.Connect(*this, &PipbuckQuestApp::ListQuestClicked);
+  EventBackClicked.EventReceived.Connect([this](Rocket::Core::Event&)
+  {
+    LoadQuestList(_root);
+  });
 }
 
 bool PipbuckQuestApp::Started(DataEngine& de)
 {
-  _data_engine = &de;
-  return (Filesystem::FileContent("data/pipbuck_quest.rml", _inner_rml));
+  _root         = 0;
+  _data_engine  = &de;
+  _current_view = QuestList;
+  return (Filesystem::FileContent("data/pipbuck_quest_index.rml", _rml_index) &&
+          Filesystem::FileContent("data/pipbuck_quest_view.rml",  _rml_view));
 }
 
 void PipbuckQuestApp::Exited(DataEngine& de)
@@ -288,14 +298,135 @@ void PipbuckQuestApp::Exited(DataEngine& de)
 
 void PipbuckQuestApp::Unfocused(DataEngine& de)
 {
+  _observer.DisconnectAll();
 }
 
-void PipbuckQuestApp::Focused(Rocket::Core::Element* root, DataEngine& de)
+void PipbuckQuestApp::Focused(Rocket::Core::Element* root, DataEngine&)
+{
+  QuestManager& qm = GameTask::CurrentGameTask->GetQuestManager();
+  
+  _observer.Connect(qm.QuestsUpdated, [this](void)
+  {
+    if (_current_view == QuestList)
+      LoadQuestList(_root);
+  });
+
+  _root         = 0;
+  _last_hovered = 0;
+  switch (_current_view)
+  {
+    case QuestList:
+      LoadQuestList(root);
+      break ;
+    case QuestView:
+      LoadQuestView(root);
+      break ;
+  }
+}
+
+void PipbuckQuestApp::RunAsMainTask(Rocket::Core::Element*, DataEngine&)
 {
 }
 
-void PipbuckQuestApp::RunAsMainTask(Rocket::Core::Element*, DataEngine& de)
+void PipbuckQuestApp::LoadQuestList(Rocket::Core::Element* root)
 {
+  //QuestManager&          quest_manager = GameTask::CurrentGameTask->GetQuestManager();
+  Rocket::Core::Element* quest_list;
+  
+  _root = root;
+  root->SetInnerRML(_rml_index.c_str());
+  quest_list = root->GetElementById("quest_containers");
+  if (quest_list)
+  {
+    std::stringstream rml;
+    Data              quests = (*_data_engine)["Quests"];
+
+    _current_view = QuestList;
+    std::for_each(quests.begin(), quests.end(), [&rml](Data quest)
+    {
+      rml << "<div class='quest-list-item' id=\"" << underscore(quest.Key()) << "\" data-quest=\"" << quest.Key().c_str() << "\">";
+      rml << "  <div class='quest-name'>" << i18n::T(quest.Key()) << "</div>";
+      rml << "  <div class='quest-desc'>" << i18n::T(quest["description"].Value()) << "</div>";
+      rml << "  <div class='quest-prog'>" << "In progress" << "</div>";
+      rml << "</div>";
+    });
+    quest_list->SetInnerRML(rml.str().c_str());
+    
+    std::for_each(quests.begin(), quests.end(), [this, quest_list](Data quest)
+    {
+      Rocket::Core::Element* button = quest_list->GetElementById(underscore(quest.Key()).c_str());
+      
+      std::cout << "Looking for button " << underscore(quest.Key()) << std::endl;
+      if (button)
+      {
+        button->AddEventListener("mouseover", &EventQuestHovered);
+        button->AddEventListener("click",     &EventQuestClicked);
+      }
+    });
+  }
+}
+
+void PipbuckQuestApp::ListQuestHovered(Rocket::Core::Event& event)
+{
+  Rocket::Core::Element* element = event.GetCurrentElement();
+  
+  if (element)
+  {
+    Rocket::Core::Element* child;
+    Rocket::Core::String   color_on("yellow");
+    Rocket::Core::String   color_off("white");
+
+    if (_last_hovered != 0)
+    {
+      for (unsigned short i = 0 ; (child = _last_hovered->GetChild(i)) != 0 ; ++i)
+        child->SetProperty("color", color_off);
+    }
+    for (unsigned short i = 0 ; (child = element->GetChild(i)) != 0 ; ++i)
+    {
+      std::cout << "Setting color to yellow for " << child->GetClassNames().CString() << std::endl;
+      child->SetProperty("color", color_on);
+    }
+    _last_hovered = element;
+  }
+}
+
+void PipbuckQuestApp::ListQuestClicked(Rocket::Core::Event& event)
+{
+  Rocket::Core::Element* element = event.GetCurrentElement();
+  
+  if (element)
+  {
+    Rocket::Core::Variant* variant = element->GetAttribute("data-quest");
+    
+    if (variant)
+    {
+      _current_quest = variant->Get<Rocket::Core::String>().CString();
+      LoadQuestView(_root);
+    }
+  }
+}
+
+void PipbuckQuestApp::LoadQuestView(Rocket::Core::Element* root)
+{
+  Data quest = (*_data_engine)["Quests"][_current_quest];
+  
+  if (quest.NotNil())
+  {
+    _last_hovered = 0;
+    _current_view = QuestView;
+    root->SetInnerRML(_rml_view.c_str());
+    
+    Rocket::Core::Element* elem_title = root->GetElementById("quest_title");
+    Rocket::Core::Element* elem_desc  = root->GetElementById("quest_description"); 
+    Rocket::Core::Element* elem_objs  = root->GetElementById("objectives_container");
+    Rocket::Core::Element* back_button= root->GetElementById("back_button");
+
+    if (elem_title)
+      elem_title->SetInnerRML(i18n::T(quest.Key()).c_str());
+    if (elem_desc)
+      elem_desc->SetInnerRML(i18n::T(quest["description"].Value()).c_str());
+    back_button->AddEventListener("click", &EventBackClicked);
+  }
 }
 
 /*
