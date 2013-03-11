@@ -59,6 +59,8 @@ public:
   {
     ObserveWaypoints(false);
   }
+  
+  void     ProcessCollisions(void);
 
   string   GetKeyName() const { return (_object->key); }
   
@@ -66,12 +68,12 @@ public:
   GoToData GetGoToData(InstanceDynamicObject* character);
   void     ObserveWaypoints(bool doObserver);
   
-  void     ProcessCollisions(void) {}
-
   bool     CanGoThrough(unsigned char id);
   void     GoingThrough(void*);
 private:
   void     PendingActionOpen(InstanceDynamicObject*);
+  
+  std::list<std::pair<int, int> > _workaround_wp_disconnected;
 };
 
 template<> struct ObjectType2Code<ObjectDoor>      { enum { Type = ObjectTypes::ObjectType::Door      }; };

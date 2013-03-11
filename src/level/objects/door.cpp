@@ -16,6 +16,11 @@ void LevelExitZone::GoingThrough(void* character)
   }
 }
 
+void ObjectDoor::ProcessCollisions(void)
+{
+  cout << "Door Process Collisions" << endl;
+}
+
 void ObjectDoor::ObserveWaypoints(bool doObserver)
 {
   _waypointDisconnected = _object->lockedArcs;

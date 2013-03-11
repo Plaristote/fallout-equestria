@@ -6,8 +6,8 @@ void         WaypointModifier::ProcessCollisions(void)
 {
   PStatCollector collector("Level:Waypoints:ProcessCollisions");
 
-  if (_collision_processed == 0)
-  {
+  /*if (_collision_processed == 0)
+  {*/
     collector.start();
     if (_waypointOccupied != 0)
       WithdrawAllArcs(_waypointOccupied);
@@ -16,8 +16,9 @@ void         WaypointModifier::ProcessCollisions(void)
       WithdrawArc(waypoints.first, waypoints.second);
     });
     collector.stop();
-  }
+  /*}
   _collision_processed++;
+  cout << this << " col proc count '" << _collision_processed << "' (" << (this == _level->GetPlayer()) << endl;*/
 }
 
 void         WaypointModifier::UnprocessCollisions(void)
@@ -25,8 +26,8 @@ void         WaypointModifier::UnprocessCollisions(void)
   PStatCollector collector("Level:Waypoints:UnprocessCollisions");
   Timer timer;
 
-  if (_collision_processed)
-  {
+  /*if (_collision_processed)
+  {*/
     collector.start();
     std::for_each(_withdrawedArcs.begin(), _withdrawedArcs.end(), [this](WithdrawedArc& arcs)
     {
@@ -37,8 +38,8 @@ void         WaypointModifier::UnprocessCollisions(void)
     });
     _withdrawedArcs.clear();
     collector.stop();
-  }
-  _collision_processed--;
+  /*}
+  _collision_processed--;*/
 }
 
 void        WaypointModifier::WithdrawAllArcs(unsigned int id)

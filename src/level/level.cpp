@@ -666,12 +666,10 @@ AsyncTask::DoneStatus Level::do_task(void)
 { 
   float elapsedTime = _timer.GetElapsedTime();
 
-  // TEST Mouse Cursor automatic change while hovering interfaces
   if (_levelUi.GetContext()->GetHoverElement() == _levelUi.GetContext()->GetRootElement())
     SetMouseState(_mouseState);
   else
     _mouse.SetMouseState('i');
-  // TEST END
 
   // TEST Transparent Ball of Wrath
   if (!(_player_halo.is_empty()))
@@ -681,39 +679,33 @@ AsyncTask::DoneStatus Level::do_task(void)
   }
   // TEST End
   
-  //RunDaylight(); // Quick workaround for the daylight task not working
   _camera.Run(elapsedTime);  
-  //_timeManager.ExecuteTasks();
 
-  ProcessAllCollisions();  
+  std::function<void (InstanceDynamicObject*)> run_object = [elapsedTime](InstanceDynamicObject* obj)
+  {
+    obj->Run(elapsedTime);
+    obj->UnprocessCollisions();
+    obj->ProcessCollisions();
+  };
+  
   switch (_state)
   {
     case Fight:
-      ForEach(_objects,    [elapsedTime]      (InstanceDynamicObject* object)
-      {
-	object->Run(elapsedTime);
-      });
+      ForEach(_objects, run_object);
       if (_itCharacter != _characters.end())
-        (*_itCharacter)->Run(elapsedTime);
+        run_object(*_itCharacter);
       _mouse.ClosestWaypoint(_world, _currentFloor);
       if (_mouse.Hovering().hasWaypoint && _mouse.Hovering().waypoint != _last_combat_path && _mouseState == MouseAction)
         DisplayCombatPath();
       break ;
     case Normal:
       _timeManager.AddElapsedSeconds(elapsedTime);
-      ForEach(_objects,    [elapsedTime](InstanceDynamicObject* object)
-      {
-	object->Run(elapsedTime);
-      });
-      ForEach(_characters, [elapsedTime](ObjectCharacter* character)
-      {
-        character->Run(elapsedTime);
-      });
+      ForEach(_objects,    run_object);
+      ForEach(_characters, run_object);
       break ;
     case Interrupted:
       break ;
   }
-  UnprocessAllCollisions();
   
   CheckCurrentFloor(elapsedTime);  
   _mouse.Run();

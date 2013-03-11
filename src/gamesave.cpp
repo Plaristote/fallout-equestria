@@ -202,10 +202,11 @@ void CharacterBuff::Load(Level* level, ObjectCharacter* character, Utils::Packet
 void CharacterBuff::Save(Utils::Packet& packet)
 {
   string json;
-  Data   safeDataCopy;
+  /*Data   safeDataCopy;
 
   safeDataCopy.Duplicate(_buff);
-  DataTree::Writers::StringJSON(safeDataCopy, json);
+  DataTree::Writers::StringJSON(safeDataCopy, json);*/
+  DataTree::Writers::StringJSON(_buff, json);
   packet << _task->lastS << _task->lastM << _task->lastH << _task->lastD << _task->lastMo << _task->lastY;
   packet << _task->timeS << _task->timeM << _task->timeH << _task->timeD << _task->timeMo << _task->timeY;
   packet << json;
