@@ -102,60 +102,63 @@ void Mouse::SetMouseState(char i)
 
 void Mouse::ClosestWaypoint(World* world, short currentFloor)
 {
-  PStatCollector collector("Level:Mouse:FindWaypoint"); collector.start();
-  NodePath                  collision_context;
-  PT(CollisionPlane)        pickerPlane;
-  PT(CollisionRay)          pickerRay;
-  PT(CollisionNode)         planeNode;
-  PT(CollisionNode)         pickerNode;
-  NodePath                  planePath;
-  NodePath                  pickerPath;
-  CollisionTraverser        collisionTraverser;
-  PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
-  LPlane                    plane                 = world->GetWaypointPlane(currentFloor);
-  LPoint2f                  cursorPos             = _mouseWatcher->get_mouse();
-
-  collision_context = _window->get_render().attach_new_node("MouseCollisionContext");
-
-  pickerNode        = new CollisionNode("mouseRay2");
-  pickerPath        = _camera.attach_new_node(pickerNode);
-  pickerRay         = new CollisionRay();
-  pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
-  pickerNode->add_solid(pickerRay);
-
-  planeNode         = new CollisionNode("pickerPlane");
-  planePath         = collision_context.attach_new_node(planeNode);
-  pickerPlane       = new CollisionPlane(plane);
-  planeNode->add_solid(pickerPlane);
-
-  collisionTraverser.add_collider(pickerPath, collisionHandlerQueue);
-  collisionTraverser.traverse(collision_context);
-
-  collisionHandlerQueue->sort_entries();
-
-  _hovering.hasWaypoint = false;
-  for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
+  if (_mouseWatcher->has_mouse())
   {
-    CollisionEntry* entry = collisionHandlerQueue->get_entry(i);
-    NodePath        np    = entry->get_into_node_path();
-    LPoint3         pos   = entry->get_surface_point(np);
+    PStatCollector collector("Level:Mouse:FindWaypoint"); collector.start();
+    NodePath                  collision_context;
+    PT(CollisionPlane)        pickerPlane;
+    PT(CollisionRay)          pickerRay;
+    PT(CollisionNode)         planeNode;
+    PT(CollisionNode)         pickerNode;
+    NodePath                  planePath;
+    NodePath                  pickerPath;
+    CollisionTraverser        collisionTraverser;
+    PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
+    LPlane                    plane                 = world->GetWaypointPlane(currentFloor);
+    LPoint2f                  cursorPos             = _mouseWatcher->get_mouse();
 
-    if (!(planePath.is_ancestor_of(np.node())) && planePath != np)
-      continue ;
-    pos.set_x(pos.get_x() + np.get_x());
-    pos.set_y(pos.get_y() + np.get_y());
-    pos.set_z(pos.get_z() + np.get_z());
-    NodePath tmp = world->GetWaypointClosest(pos)->nodePath;
+    collision_context = _window->get_render().attach_new_node("MouseCollisionContext");
 
-    _hovering.SetWaypoint(tmp);
-    break ;
+    pickerNode        = new CollisionNode("mouseRay2");
+    pickerPath        = _camera.attach_new_node(pickerNode);
+    pickerRay         = new CollisionRay();
+    pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
+    pickerNode->add_solid(pickerRay);
+
+    planeNode         = new CollisionNode("pickerPlane");
+    planePath         = collision_context.attach_new_node(planeNode);
+    pickerPlane       = new CollisionPlane(plane);
+    planeNode->add_solid(pickerPlane);
+
+    collisionTraverser.add_collider(pickerPath, collisionHandlerQueue);
+    collisionTraverser.traverse(collision_context);
+
+    collisionHandlerQueue->sort_entries();
+
+    _hovering.hasWaypoint = false;
+    for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
+    {
+      CollisionEntry* entry = collisionHandlerQueue->get_entry(i);
+      NodePath        np    = entry->get_into_node_path();
+      LPoint3         pos   = entry->get_surface_point(np);
+
+      if (!(planePath.is_ancestor_of(np.node())) && planePath != np)
+        continue ;
+      pos.set_x(pos.get_x() + np.get_x());
+      pos.set_y(pos.get_y() + np.get_y());
+      pos.set_z(pos.get_z() + np.get_z());
+      NodePath tmp = world->GetWaypointClosest(pos)->nodePath;
+
+      _hovering.SetWaypoint(tmp);
+      break ;
+    }
+
+    //pickerPath.detach_node(); // TODO find out why hasDynObject stops working after this...
+                                //      this leak has to go away
+    planePath.detach_node();
+    collision_context.detach_node();
+    collector.stop();
   }
-
-  //pickerPath.detach_node(); // TODO find out why hasDynObject stops working after this...
-			      //      this leak has to go away
-  planePath.detach_node();
-  collision_context.detach_node();
-  collector.stop();
 }
 
 void Mouse::Run(void)

@@ -67,9 +67,6 @@ select selectbox{height: 100px; overflow: auto;}
 		
 		      <tab id="tab-options-video" class="tab-tab">VIDEO</tab>
 		      <panel id="" class="something_button">
-		      	<select id="screen-select" class="char-place-beneath">
-   				</select>
-    				<div class="char-place-beneath"><input type="checkbox" id="fullscreen" /> Fullscreen</div>
                         <select id="graphics-quality" class="char-place-beneath">
                           <option value="1">Incredibly low quality</option>
                           <option value="2">Very low quality</option>
@@ -78,6 +75,9 @@ select selectbox{height: 100px; overflow: auto;}
                           <option value="5">Good quality</option>
                           <option value="6">Quality with capital Q</option>
                         </select>
+		      	<select id="screen-select" class="char-place-beneath">
+   				</select>
+    				<div class="char-place-beneath"><input type="checkbox" id="fullscreen" /> Fullscreen</div>
 		      </panel>
 		
 		      <tab id="tab-options-sound" class="tab-tab">SOUND</tab>

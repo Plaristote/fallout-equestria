@@ -198,7 +198,7 @@ void OptionsManager::Refresh(void)
 
     if (screen.NotNil())
     {
-      bool             hide_cursor   = screen["debug-cursor"] == 1;
+      bool             hide_cursor   = data["debug"]["cursor"] == 0;
       unsigned int     screen_width  = screen["x"];
       unsigned int     screen_height = screen["y"];
       bool             fullscreen    = screen["fullscreen"] == 1;
@@ -293,12 +293,14 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
       }
     }
 
-    ToggleEventListener(true, "fullscreen",      "click",  FullscreenToggled);
-    ToggleEventListener(true, "screen-select",   "change", ScreenSelected);
-    ToggleEventListener(true, "language-select", "change", LanguageSelected);
+    ToggleEventListener(true, "fullscreen",       "click",  FullscreenToggled);
+    ToggleEventListener(true, "screen-select",    "change", ScreenSelected);
+    ToggleEventListener(true, "language-select",  "change", LanguageSelected);
+    ToggleEventListener(true, "graphics-quality", "change", QualitySelected);
     ToggleEventListener(true, "exit",            "click",  ExitClicked);
     ExitClicked.EventReceived.Connect      (*this, &UiBase::FireHide);
     FullscreenToggled.EventReceived.Connect(*this, &GameOptions::ToggleFullscreen);
+    QualitySelected.EventReceived.Connect  (*this, &GameOptions::SetQuality);
     ScreenSelected.EventReceived.Connect   (*this, &GameOptions::SetResolution);
     LanguageSelected.EventReceived.Connect (*this, &GameOptions::SetLanguage);
     Translate();
@@ -310,6 +312,7 @@ GameOptions::~GameOptions()
   ToggleEventListener(false, "fullscreen",      "click",  FullscreenToggled);
   ToggleEventListener(false, "screen-select",   "change", ScreenSelected);  
   ToggleEventListener(false, "language-select", "change", LanguageSelected);
+  ToggleEventListener(false, "graphics-quality", "change", QualitySelected);
   ToggleEventListener(false, "exit",            "click",  ExitClicked);
 }
 
@@ -323,6 +326,22 @@ void GameOptions::ToggleFullscreen(Rocket::Core::Event& event)
     Data           opts = OptionsManager::Get();
     
     opts["screen"]["fullscreen"] = (var ? 1 : 0);
+    OptionsManager::Refresh();
+  }
+}
+
+void GameOptions::SetQuality(Rocket::Core::Event&)
+{
+  Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("graphics-quality"));
+  int                                 it_select = select->GetSelection();
+  Controls::SelectOption*             option    = select->GetOption(it_select);
+  
+  if (option)
+  {
+    Data        opts = OptionsManager::Get();
+    std::string str  = option->GetValue().CString();
+
+    opts["graphics-quality"] = str;
     OptionsManager::Refresh();
   }
 }

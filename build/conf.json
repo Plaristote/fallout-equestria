@@ -1,14 +1,18 @@
 {
-"language": "French",
+"language": "English",
 "savepath": "saves/",
 "screen": {
   "fullscreen": 0,
   "x": 800,
-  "y": 600,
-  "debug-cursor": 0
+  "y": 600
 }
 ,
 "combat-speed": 30,
-"graphics-quality": 6
+"graphics-quality": 1,
+"debug": {
+  "cursor": 0,
+  "pathfinding": 0
+}
+
 
 }

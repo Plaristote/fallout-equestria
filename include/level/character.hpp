@@ -190,6 +190,7 @@ private:
   void                RequestCharacter(ObjectCharacter*, ObjectCharacter*, asIScriptFunction*);
   
   void                CallbackActionUse(InstanceDynamicObject* object);
+  void                DebugPathfinding(void);
   
   Sync::ObserverHandler          _obs_handler;
 

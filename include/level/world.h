@@ -82,15 +82,19 @@ struct Waypoint
     struct Arc
     {
         Arc(NodePath from, Waypoint* to);
+        Arc(const Arc&);
 	~Arc();
 
         bool operator==(Waypoint* other) { return (to == other); }
         void UpdateDirection(void);
         void Destroy(void);
+        
+        void SetVisible(bool);
 
         PT(CollisionSegment) csegment;
         PT(CollisionNode)    node;
         NodePath             nodePath;
+        NodePath             from;
         Waypoint*            to;
 
         ArcObserver*         observer;
@@ -127,6 +131,8 @@ struct Waypoint
     void                 UpdateArcDirection(Waypoint*);
     void                 SetSelected(bool);
     bool                 IsSelected(void) const { return (selected); }
+    
+    void                 SetArcsVisible(bool);
 
     // Pathfinding features
     float                GoalDistanceEstimate(const Waypoint& goal) const { return (GetDistanceEstimate(goal)); }

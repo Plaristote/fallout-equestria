@@ -5,42 +5,40 @@ using namespace std;
 void         WaypointModifier::ProcessCollisions(void)
 {
   PStatCollector collector("Level:Waypoints:ProcessCollisions");
-  
-  collector.start();
-  if (_waypointOccupied != 0)
-    WithdrawAllArcs(_waypointOccupied);
-  for_each(_waypointDisconnected.begin(), _waypointDisconnected.end(), [this](std::pair<int, int> waypoints)
+
+  if (_collision_processed == 0)
   {
-    WithdrawArc(waypoints.first, waypoints.second);
-  });
-  collector.stop();
+    collector.start();
+    if (_waypointOccupied != 0)
+      WithdrawAllArcs(_waypointOccupied);
+    for_each(_waypointDisconnected.begin(), _waypointDisconnected.end(), [this](std::pair<int, int> waypoints)
+    {
+      WithdrawArc(waypoints.first, waypoints.second);
+    });
+    collector.stop();
+  }
+  _collision_processed++;
 }
 
 void         WaypointModifier::UnprocessCollisions(void)
 {
   PStatCollector collector("Level:Waypoints:UnprocessCollisions");
-  //static float average = 0;
   Timer timer;
 
-  collector.start();
-  std::for_each(_withdrawedArcs.begin(), _withdrawedArcs.end(), [this](WithdrawedArc& arcs)
+  if (_collision_processed)
   {
-    Waypoint::Arcs::iterator it;
+    collector.start();
+    std::for_each(_withdrawedArcs.begin(), _withdrawedArcs.end(), [this](WithdrawedArc& arcs)
+    {
+      Waypoint::Arcs::iterator it;
 
-    arcs.first->UnwithdrawArc(arcs.second, arcs.observer);
-    arcs.second->UnwithdrawArc(arcs.first, arcs.observer);
-//     it = arcs.first->ConnectUnsafe(arcs.second);
-//     it->observer = arcs.observer;
-//     it = arcs.second->ConnectUnsafe(arcs.first);
-//     it->observer = arcs.observer;
-  });
-  _withdrawedArcs.clear();
-
-  /*if (average == 0)
-    average = timer.GetElapsedTime();
-  else
-    average = (average + timer.GetElapsedTime()) / 2;*/
-  collector.stop();
+      arcs.first->UnwithdrawArc(arcs.second, arcs.observer);
+      arcs.second->UnwithdrawArc(arcs.first, arcs.observer);
+    });
+    _withdrawedArcs.clear();
+    collector.stop();
+  }
+  _collision_processed--;
 }
 
 void        WaypointModifier::WithdrawAllArcs(unsigned int id)
@@ -62,7 +60,6 @@ void        WaypointModifier::WithdrawAllArcs(Waypoint* waypoint)
     _withdrawedArcs.push_back(WaypointModifier::WithdrawedArc(waypoint, withdrawable.first.to, withdrawable.first.observer));
     waypoint->WithdrawArc(withdrawable.first.to);
   });
-  //waypoint->DisconnectAll();
 }
 
 void        WaypointModifier::WithdrawArc(unsigned int id1, unsigned int id2)
@@ -89,14 +86,6 @@ void        WaypointModifier::WithdrawArc(Waypoint* first, Waypoint* second)
   first->WithdrawArc(second);
   second->WithdrawArc(first);
   _withdrawedArcs.push_back(WithdrawedArc(first, second, observer));
-//   if (arc)
-//   {
-//     Waypoint::ArcObserver* observer = arc->observer;
-// 
-//     first->Disconnect(second);
-//     second->Disconnect(first);
-//     _withdrawedArcs.push_back(WithdrawedArc(first, second, observer));
-//   }
 }
 
 void        WaypointModifier::SetOccupiedWaypoint(Waypoint* wp)

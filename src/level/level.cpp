@@ -684,23 +684,17 @@ AsyncTask::DoneStatus Level::do_task(void)
   //RunDaylight(); // Quick workaround for the daylight task not working
   _camera.Run(elapsedTime);  
   //_timeManager.ExecuteTasks();
-  
+
+  ProcessAllCollisions();  
   switch (_state)
   {
     case Fight:
       ForEach(_objects,    [elapsedTime]      (InstanceDynamicObject* object)
       {
 	object->Run(elapsedTime);
-	object->UnprocessCollisions();
-	object->ProcessCollisions();
       });
-      for_each(_characters.begin(), _characters.end(), [this, elapsedTime](ObjectCharacter* character)
-      {
-	if (character == (*_itCharacter))
-	  character->Run(elapsedTime);
-        character->UnprocessCollisions();
-        character->ProcessCollisions();
-      });
+      if (_itCharacter != _characters.end())
+        (*_itCharacter)->Run(elapsedTime);
       _mouse.ClosestWaypoint(_world, _currentFloor);
       if (_mouse.Hovering().hasWaypoint && _mouse.Hovering().waypoint != _last_combat_path && _mouseState == MouseAction)
         DisplayCombatPath();
@@ -710,19 +704,16 @@ AsyncTask::DoneStatus Level::do_task(void)
       ForEach(_objects,    [elapsedTime](InstanceDynamicObject* object)
       {
 	object->Run(elapsedTime);
-	object->UnprocessCollisions();
-	object->ProcessCollisions();
       });
       ForEach(_characters, [elapsedTime](ObjectCharacter* character)
       {
         character->Run(elapsedTime);
-        character->UnprocessCollisions();
-        character->ProcessCollisions();
       });
       break ;
     case Interrupted:
       break ;
   }
+  UnprocessAllCollisions();
   
   CheckCurrentFloor(elapsedTime);  
   _mouse.Run();
@@ -744,10 +735,12 @@ void Level::DisplayCombatPath(void)
   _combat_path = GetPlayer()->GetPath(_world->GetWaypointFromNodePath(_mouse.Hovering().waypoint));
   for_each(_combat_path.begin(), _combat_path.end(), [this](Waypoint& wp)
   {
-    NodePath sphere = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
+    NodePath sphere = _window->get_render().attach_new_node("combat_path_node");
+    //NodePath sphere = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
 
-    sphere.set_pos(wp.nodePath.get_pos());
-    sphere.reparent_to(_window->get_render());
+    //sphere.set_pos(wp.nodePath.get_pos());
+    //sphere.reparent_to(_window->get_render());
+    wp.nodePath.copy_to(sphere);
     wp.nodePath = sphere;
     wp.nodePath.set_transparency(TransparencyAttrib::M_alpha);
     wp.nodePath.set_color(0.5, 0.5, 0.5, 0.5);

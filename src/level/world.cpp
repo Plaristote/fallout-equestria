@@ -8,6 +8,7 @@ unsigned char         gPathfindingUnitType = 0;
 void*                 gPathfindingData     = 0;
 
 NodePath World::model_sphere;
+NodePath debug_pathfinding;
 
 World::World(WindowFramework* window)
 {
@@ -18,6 +19,7 @@ World::World(WindowFramework* window)
   rootLights         = window->get_render().attach_new_node("lights");
   
   model_sphere = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
+  debug_pathfinding = window->get_render().attach_new_node("debug_pathfinding");
 }
 
 World::~World()
@@ -25,6 +27,7 @@ World::~World()
   ForEach(waypoints,      [](Waypoint& wp)      { wp.nodePath.remove_node(); });
   ForEach(objects,        [](MapObject& mo)     { mo.nodePath.remove_node(); });
   ForEach(dynamicObjects, [](DynamicObject& dy) { dy.nodePath.remove_node(); });
+  debug_pathfinding.remove_node();
 }
 
 Waypoint* World::AddWayPoint(float x, float y, float z)
@@ -620,7 +623,7 @@ void Waypoint::SetMouseBox(void)
 //#define WAYPOINT_DEBUG
 
 // WAYPOINTS ARCS
-Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
+Waypoint::Arc::Arc(NodePath from, Waypoint* to) : from(from), to(to)
 {
   observer = 0;
 #ifdef WAYPOINT_DEBUG
@@ -637,11 +640,31 @@ Waypoint::Arc::Arc(NodePath from, Waypoint* to) : to(to)
 #endif
 }
 
+Waypoint::Arc::Arc(const Waypoint::Arc& arc) : from(arc.from), to(arc.to)
+{
+  csegment = arc.csegment;
+  observer = arc.observer;
+#ifdef WAYPOINT_DEBUG
+  node     = arc.node;
+  nodePath.reparent_to(arc.from);
+#endif
+}
+
 Waypoint::Arc::~Arc()
 {
 #ifdef WAYPOINT_DEBUG
-  node->remove_solid(0);
-  nodePath.remove_node();
+  //node->remove_solid(0);
+  nodePath.detach_node();
+#endif
+}
+
+void Waypoint::Arc::SetVisible(bool set)
+{
+#ifdef WAYPOINT_DEBUG
+  if (set)
+    nodePath.show();
+  else
+    nodePath.hide();
 #endif
 }
 
@@ -660,8 +683,16 @@ void Waypoint::Arc::UpdateDirection(void)
 void Waypoint::Arc::Destroy(void)
 {
 #ifdef WAYPOINT_DEBUG
-  nodePath.remove_node();
+  nodePath.detach_node();
 #endif
+}
+
+void Waypoint::SetArcsVisible(bool set)
+{
+  for_each(arcs.begin(), arcs.end(), [set](Waypoint::Arc& arc)
+  {
+    arc.SetVisible(set);
+  });
 }
 
 void Waypoint::WithdrawArc(Waypoint* other)
@@ -672,7 +703,7 @@ void Waypoint::WithdrawArc(Waypoint* other)
   {
     const Arc& arc = (*it).first;
 
-    if (arc.to == other)
+    if (arc.to->id == other->id)
     {
       if (GetArcTo(arc.to->id))
         Disconnect(arc.to);
@@ -714,7 +745,7 @@ std::pair<Waypoint::Arc, unsigned short>* Waypoint::GetWithdrawable(Waypoint* ot
   {
     const Arc& arc = (*it).first;
 
-    if (arc.to == other)
+    if (arc.to->id == other->id)
       return (&(*it));
   }
   return (0);

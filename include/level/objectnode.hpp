@@ -24,7 +24,10 @@ static inline double round(double val)
 class Level;
 
 struct WaypointModifier
-{  
+{
+  WaypointModifier() : _collision_processed(0)
+  {}
+  
   virtual void ProcessCollisions(void);
   void         UnprocessCollisions(void);
   bool         HasOccupiedWaypoint(void)      const { return (_waypointOccupied != 0); }
@@ -38,6 +41,7 @@ protected:
   void         WithdrawArc(unsigned int id1, unsigned int id2);
   void         WithdrawArc(Waypoint* first, Waypoint* second);
 
+  unsigned short                  _collision_processed;
   Level*                          _level;
   Waypoint*                       _waypointOccupied;
   std::list<std::pair<int, int> > _waypointDisconnected;

@@ -551,10 +551,8 @@ float               ObjectCharacter::GetDistance(InstanceDynamicObject* object)
 unsigned short      ObjectCharacter::GetPathDistance(InstanceDynamicObject* object)
 {
   unsigned short ret;
-  
-  object->UnprocessCollisions();
+
   ret = GetPathDistance(object->GetOccupiedWaypoint());
-  object->ProcessCollisions();
   return (ret);
 }
 
@@ -591,6 +589,23 @@ void                ObjectCharacter::GoTo(unsigned int id)
   if (wp) GoTo(wp);
 }
 
+void                ObjectCharacter::DebugPathfinding(void)
+{
+  NodePath debug_root = _window->get_render().find("debug_pathfinding");
+  NodePath debug      = debug_root.find(GetName());
+
+  if (debug.is_empty())
+    debug = debug_root.attach_new_node(GetName());
+  for (unsigned short i = 0 ; i < debug.get_num_children() ; ++i)
+    debug.get_child(i).remove_node();
+  for_each(_path.begin(), _path.end(), [this, debug](Waypoint& wp)
+  {
+    NodePath np = debug.attach_new_node("debug_pathfinding_node");
+
+    wp.nodePath.copy_to(np);
+  });
+}
+
 void                ObjectCharacter::GoTo(Waypoint* waypoint)
 {
   PStatCollector collector("Level:Characters:Pathfinding");
@@ -600,11 +615,11 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
   ReachedDestination.DisconnectAll();
   _goToData.objective = 0;
   UnprocessCollisions();
-  if (_path.size() > 0)
+  /*if (_path.size() > 0)
   {
     cout << "SETTING START FROM FOR SOME REASON" << endl;
     start_from = _level->GetWorld()->GetWaypointFromId(_path.front().id);
-  }
+  }*/
   _path.clear();
   if (start_from && waypoint)
   {
@@ -615,7 +630,11 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
       cout << "No path" << endl;
     }
     else
+    {
+      if (OptionsManager::Get()["debug"]["pathfinding"] == 1)
+        DebugPathfinding();
       StartRunAnimation();
+    }
   }
   else
     cout << "Character doesn't have a waypointOccupied" << endl;
@@ -634,28 +653,15 @@ void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max
   _goToData              = object->GetGoToData(this);
   _goToData.max_distance = max_distance;
 
-  UnprocessCollisions();
   object->UnprocessCollisions();
-
-  _path.clear();
-  if (_waypointOccupied && _goToData.nearest)
-  {
-    if (!(_level->FindPath(_path, *_waypointOccupied, *_goToData.nearest)))
-    {
-      if (_level->GetPlayer() == this)
-        _level->ConsoleWrite("Can't reach.");
-    }
-    else
-      StartRunAnimation();
-    while (_goToData.min_distance && _path.size() > 1)
-    {
-      _path.erase(--(_path.end()));
-      _goToData.min_distance--;
-    }
-  }
-
-  ProcessCollisions();
+  GoTo(_goToData.nearest);
   object->ProcessCollisions();
+
+  while (_goToData.min_distance && _path.size() > 1)
+  {
+    _path.erase(--(_path.end()));
+    _goToData.min_distance--;
+  }
 }
 
 void                ObjectCharacter::GoToRandomWaypoint(void)
@@ -710,9 +716,9 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
 {
   Timer profile;
   
-  Waypoint* wp = &(_level->GetWorld()->waypoints[_path.begin()->id]);
+  //Waypoint* wp = &(_level->GetWorld()->waypoints[_path.begin()->id]);
   
-  //Waypoint* wp = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
+  Waypoint* wp = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
 
   Timer profile2;
   if (wp != _waypointOccupied && _level->GetState() == Level::Fight)
@@ -739,6 +745,8 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
   profile2.Profile("Level:Character:Movement:Next:SetNextMovement");
   profile2.Restart();
 
+  while (_path.size() > 0 && _path.front().id == _waypointOccupied->id)
+    _path.erase(_path.begin());
   if (_path.size() > 0)
   {
     bool pathAvailable = true;
@@ -746,8 +754,6 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
     UnprocessCollisions();
     Waypoint::Arc* arc = _waypointOccupied->GetArcTo(_path.begin()->id);
 
-    if (!arc)
-      cout << "NO ARC TOWARDS THIS PLACE" << endl;
     if (arc)
     {
       if (arc->observer)
@@ -764,19 +770,16 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
 
     if (!pathAvailable)
     {
+      //cout << "Path is not available" << endl;
       if (_goToData.objective)
 	GoTo(_goToData.objective);
       else
       {
-        cout << "PATH IS NOT AVAILABLE" << endl;
 	Waypoint* dest = _level->GetWorld()->GetWaypointFromId((*(--(_path.end()))).id);
 	GoTo(dest);
       }
       if (_path.size() == 0)
-      {
-	//_level->ConsoleWrite("Path is obstructed");
 	ReachedDestination.DisconnectAll();
-      }
     }
   }
   else
