@@ -115,6 +115,85 @@ private:
   SoundInstances       _sounds_playing;
 };
 
+# ifdef AUDIO_BACKEND_PANDA3D
+#  include <panda3d/audioManager.h>
+#  define AUDIO_SAMPLE_TYPE p3_Sample
+
+class p3_SampleInstance : public ISampleInstance
+{
+public:
+  p3_SampleInstance(PT(AudioSound) sound) : sound(sound)
+  {
+  }
+
+  void Start(void)
+  {
+    sound->play();
+  }
+  
+  void Stop(void)
+  {
+    sound->stop();
+  }
+  
+  void Pause(void)
+  {
+    sound->stop();
+  }
+  
+  void SetVolume(float volume)
+  {
+    sound->set_volume(volume);
+  }
+  
+  float GetVolume(void) const
+  {
+    return (sound->get_volume());
+  }
+  
+  bool IsPlaying(void) const
+  {
+    return (sound->status() == AudioSound::PLAYING);
+  }  
+  
+private:
+  PT(AudioSound) sound;
+};
+
+class p3_Sample : public ISample
+{
+public:
+  p3_Sample(SoundManager* sm) : ISample(sm)
+  {
+    if (audio_manager.is_null())
+    {
+      audio_manager = AudioManager::create_AudioManager();
+      audio_manager->set_active(true);
+      audio_manager->set_volume(1.0);
+    }
+  }
+
+  ISampleInstance* NewInstance(void)
+  {
+    PT(AudioSound) sound = audio_manager->get_sound(filepath);
+    
+    return (new p3_SampleInstance(sound));
+  }
+
+  bool             LoadFromFile(const std::string& filename)
+  {
+    ISample::LoadFromFile(filename);
+    filepath = filename;
+    return (true);
+  }  
+
+private:
+  static PT(AudioManager) audio_manager;
+  std::string             filepath;
+};
+
+# endif
+
 # ifdef AUDIO_BACKEND_SFML
 #  include <SFML/Audio.hpp>
 #  define AUDIO_SAMPLE_TYPE sf_Sample

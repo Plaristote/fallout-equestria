@@ -7,6 +7,10 @@ SoundManager::SoundManagers SoundManager::_sound_managers;
 SoundManager::Sounds        SoundManager::_sounds;
 DataTree*                   SoundManager::_data_audio = 0;
 
+#ifdef AUDIO_BACKEND_PANDA3D
+PT(AudioManager) p3_Sample::audio_manager;
+#endif
+
 SoundManager::SoundManager()
 {
   _volume = 10.f;
