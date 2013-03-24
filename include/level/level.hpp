@@ -152,6 +152,7 @@ public:
   bool              IsWaypointOccupied(unsigned int id) const;
   ISampleInstance*  PlaySound(const std::string& name);
 
+  Sync::ObserverHandler obs;
 private:
   typedef std::list<InstanceDynamicObject*> InstanceObjects;
   typedef std::list<ObjectCharacter*>       Characters;
@@ -165,7 +166,6 @@ private:
   void              InsertDynamicObject(DynamicObject&);
   void              InsertCharacter(ObjectCharacter*);
   
-  Sync::ObserverHandler obs;
   Sync::ObserverHandler obs_player;
 
   WindowFramework*     _window;

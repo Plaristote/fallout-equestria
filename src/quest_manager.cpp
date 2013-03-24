@@ -55,6 +55,17 @@ void QuestManager::QuestCompleted(Quest* quest)
 void Quest::Initialize(Level* level)
 {
   Data objectives = data["objectives"];
+  Data script     = data["script"];
+
+  if (script.NotNil())
+  {
+    string path = script.Value();
+
+    _script_func_ptrs = {
+      ScriptFuncPtr(&_update_hook, "void update(Data quest)")
+    };
+    LoadScript(path, "scripts/quests/" + path + ".as");
+  }
   
   for_each(objectives.begin(), objectives.end(), [this, level](Data objective)
   {
@@ -67,6 +78,14 @@ void Quest::Initialize(Level* level)
       _this->InitializeCondition(condition, _level);
     });
   });
+}
+
+void Quest::CompleteCondition(const string& objective, const string& condition_name)
+{
+  Data condition = data[objective]["objectives"][condition_name];
+
+  (Data)(condition["completed"]) = 1;
+  CheckIfCompleted();
 }
 
 void Quest::InitializeCondition(Data condition, Level* level)
@@ -149,6 +168,14 @@ bool Quest::CheckIfCompleted(void)
   bool success    = true;
   Data objectives = data["objectives"];
 
+  ReloadFunction(&_update_hook);
+  if (_update_hook)
+  {
+    _script_context->Prepare(_update_hook);
+    _script_context->SetArgObject(0, &data);
+    _script_context->Execute();
+  }
+  
   for_each(objectives.begin(), objectives.end(), [this, &success](Data objective)
   {
     Data   conditions        = objective["conditions"];

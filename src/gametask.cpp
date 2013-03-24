@@ -757,7 +757,12 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     SetPlayerInventory();
     _level->SetEntryZone(*_playerParty, params.entry_zone);
     SetLevel(_level);
-    
+
+    _level->obs.Connect(_pipbuck.VisibilityToggled, [this](bool visible)
+    {
+      _level->GetCamera().SetEnabledScroll(!visible);
+    });
+
     _quest_manager->Initialize(_level);
 
     // TODO remove this when we're done with deploying creeps

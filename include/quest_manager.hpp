@@ -4,16 +4,19 @@
 # include "datatree.hpp"
 # include "observatory.hpp"
 # include "dataengine.hpp"
+# include "scriptable.hpp"
 
 class Level;
 class StatController;
 
-class Quest
+class Quest : private Scriptable
 {
 public:
   Data                             data;
   Sync::Signal<void (Data)>        ObjectiveCompleted;
   Sync::Signal<void (Quest*)>      QuestCompleted;
+  
+  bool operator==(const std::string& key) const { return (data.Key() == key); }
 
   void Initialize(Level* level);
 
@@ -21,6 +24,10 @@ public:
   {
     _observers.DisconnectAll();
   }
+  
+  Data GetData(void) { return (data); }
+  
+  void CompleteCondition(const std::string& objective, const std::string& condition);
 
 private:
   typedef void (Quest::*WatcherInitializerMethod)(Data, Level*);
@@ -39,6 +46,8 @@ private:
   void WatcherTime(Data condition, Level* level);
 
   Sync::ObserverHandler _observers;
+  
+  asIScriptFunction* _update_hook;
 };
 
 class QuestManager
@@ -50,6 +59,19 @@ public:
   ~QuestManager()
   {
     for_each(_quests.begin(), _quests.end(), [](Quest* quest) { delete quest; });
+  }
+  
+  Quest* operator[](const std::string& key)
+  {
+    Quests::const_iterator it;
+    Quests::const_iterator end;
+    
+    for (it = _quests.begin(), end = _quests.end() ; it != end ; ++it)
+    {
+      if (**it == key)
+        return (*it);
+    }
+    return (0);
   }
 
   void   AddQuest(Data);

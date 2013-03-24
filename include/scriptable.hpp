@@ -1,6 +1,8 @@
 #ifndef  SCRIPTABLE_HPP
 # define SCRIPTABLE_HPP
 
+# include <angelscript.h>
+
 class Scriptable
 {
 public:

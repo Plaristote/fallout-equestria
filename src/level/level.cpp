@@ -520,6 +520,7 @@ void Level::SetState(State state)
     DestroyCombatPath();
     ToggleCharacterOutline(false);
   }
+  _camera.SetEnabledScroll(state != Interrupted);
 }
 
 void Level::SetInterrupted(bool set)

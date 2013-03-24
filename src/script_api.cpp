@@ -361,9 +361,15 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(worldmapClass, "void SetCityVisible(string)", asMETHOD(WorldMap,SetCityVisible), asCALL_THISCALL);
   engine->RegisterObjectMethod(worldmapClass, "Data GetDataEngine()",        asMETHOD(WorldMap,GetDataEngine),  asCALL_THISCALL);
   
+  const char* questClass = "Quest";
+  engine->RegisterObjectType(questClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(questClass, "void CompleteCondition(const string&, const string&)", asMETHOD(Quest,CompleteCondition), asCALL_THISCALL);
+  engine->RegisterObjectMethod(questClass, "Data GetData()", asMETHOD(Quest,GetData), asCALL_THISCALL);
+  
   const char* questmanagerClass = "QuestManager";
   engine->RegisterObjectType(questmanagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(questmanagerClass, "void AddQuest(Data)", asMETHOD(QuestManager,AddQuest), asCALL_THISCALL);
+  engine->RegisterObjectMethod(questmanagerClass, "Quest@ opIndex(const string &in)", asMETHODPR(QuestManager,operator[], (const std::string&), Quest*), asCALL_THISCALL);
 
   const char* gametaskClass = "Game";
   engine->RegisterObjectType(gametaskClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
