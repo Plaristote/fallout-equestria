@@ -43,15 +43,15 @@
       <item>
        <widget class="QToolBox" name="toolBox">
         <property name="currentIndex">
-         <number>2</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="pageMap">
          <property name="geometry">
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>127</width>
-           <height>186</height>
+           <width>305</width>
+           <height>194</height>
           </rect>
          </property>
          <attribute name="label">
@@ -129,7 +129,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>176</width>
+           <width>288</width>
            <height>260</height>
           </rect>
          </property>
@@ -227,7 +227,7 @@
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>-26</y>
+           <y>0</y>
            <width>288</width>
            <height>388</height>
           </rect>
@@ -366,6 +366,102 @@
              </item>
             </layout>
            </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>288</width>
+           <height>234</height>
+          </rect>
+         </property>
+         <attribute name="label">
+          <string>Encounters</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_6">
+          <item row="0" column="0">
+           <widget class="QPushButton" name="encounterAdd">
+            <property name="text">
+             <string>Add</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QListWidget" name="encounterList"/>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="encounterDelete">
+            <property name="text">
+             <string>Delete</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QFrame" name="frameEncounter">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_7">
+             <item row="2" column="0">
+              <widget class="QPushButton" name="critterAdd">
+               <property name="text">
+                <string>Add Critter</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QPushButton" name="critterDelete">
+               <property name="text">
+                <string>Remove Critter</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0" colspan="2">
+              <widget class="QTableWidget" name="critterList">
+               <column>
+                <property name="text">
+                 <string>Character Sheet</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Quantity</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page_2">
+         <attribute name="label">
+          <string>Special Encounters</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="0" column="0">
+           <widget class="QPushButton" name="specialEncounterAdd">
+            <property name="text">
+             <string>Add</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="specialEncounterDelete">
+            <property name="text">
+             <string>Delete</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QListWidget" name="specialEncountersList"/>
           </item>
          </layout>
         </widget>
