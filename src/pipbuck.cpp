@@ -355,8 +355,7 @@ void PipbuckQuestApp::LoadQuestList(Rocket::Core::Element* root)
     std::for_each(quests.begin(), quests.end(), [this, quest_list](Data quest)
     {
       Rocket::Core::Element* button = quest_list->GetElementById(underscore(quest.Key()).c_str());
-      
-      std::cout << "Looking for button " << underscore(quest.Key()) << std::endl;
+
       if (button)
       {
         button->AddEventListener("mouseover", &EventQuestHovered);
@@ -383,7 +382,6 @@ void PipbuckQuestApp::ListQuestHovered(Rocket::Core::Event& event)
     }
     for (unsigned short i = 0 ; (child = element->GetChild(i)) != 0 ; ++i)
     {
-      std::cout << "Setting color to yellow for " << child->GetClassNames().CString() << std::endl;
       child->SetProperty("color", color_on);
     }
     _last_hovered = element;
@@ -415,17 +413,45 @@ void PipbuckQuestApp::LoadQuestView(Rocket::Core::Element* root)
     _last_hovered = 0;
     _current_view = QuestView;
     root->SetInnerRML(_rml_view.c_str());
-    
-    Rocket::Core::Element* elem_title = root->GetElementById("quest_title");
-    Rocket::Core::Element* elem_desc  = root->GetElementById("quest_description"); 
-    Rocket::Core::Element* elem_objs  = root->GetElementById("objectives_container");
-    Rocket::Core::Element* back_button= root->GetElementById("back_button");
+    {
+      std::stringstream      html;
+      Data                   objectives = quest["objectives"];
+      Rocket::Core::Element* elem_title = root->GetElementById("quest_title");
+      Rocket::Core::Element* elem_desc  = root->GetElementById("quest_description"); 
+      Rocket::Core::Element* elem_objs  = root->GetElementById("objectives_container");
+      Rocket::Core::Element* back_button= root->GetElementById("back_button");
 
-    if (elem_title)
-      elem_title->SetInnerRML(i18n::T(quest.Key()).c_str());
-    if (elem_desc)
-      elem_desc->SetInnerRML(i18n::T(quest["description"].Value()).c_str());
-    back_button->AddEventListener("click", &EventBackClicked);
+      if (elem_title)
+        elem_title->SetInnerRML(i18n::T(quest.Key()).c_str());
+      if (elem_desc)
+        elem_desc->SetInnerRML(i18n::T(quest["description"].Value()).c_str());
+      back_button->AddEventListener("click", &EventBackClicked);
+      
+      for_each(objectives.begin(), objectives.end(), [&html](Data objective)
+      {
+        Data conditions = objective["conditions"];
+        bool completed  = true;
+        auto it         = conditions.begin();
+        auto end        = conditions.end();
+
+        conditions.Output();
+        
+        for (; it != end ; ++it)
+        {
+          if ((int)((*it)["completed"]) != 1)
+          {
+            completed   = false;
+            break ;
+          }
+        }
+        html << "<div class='objective'>";
+        html << "<div style='float:left; font-size: 75%; width: 25%;'>" << objective.Key() << "</div>";
+        html << "<div style='float:left; font-size: 75%; width: 75%; color:" << (completed ? "green" : "#FFE84C") << ";'>";
+        html << objective["description"].Value() << "</div>";
+        html << "</div>";
+      });
+      elem_objs->SetInnerRML(html.str().c_str());
+    }
   }
 }
 

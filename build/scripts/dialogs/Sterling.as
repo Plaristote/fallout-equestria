@@ -1,6 +1,17 @@
 
 string MakeDeal()
 {
+  QuestManager@ quest_manager = game.GetQuestManager();
+  Quest@        quest         = quest_manager["Dummy quest"];
+  
+  if (@quest != null)
+  {
+    Cout("Completing condition of quest");
+    quest.CompleteCondition("Find the key", "Script");
+    Cout("Condition completed");
+  }
+  else
+    Cout("Couldn't fetch quest 'Dummy quest'");
   return ("SuccessfulBusiness");
 }
 

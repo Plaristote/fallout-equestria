@@ -363,7 +363,7 @@ void AngelScriptInitialize(void)
   
   const char* questClass = "Quest";
   engine->RegisterObjectType(questClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(questClass, "void CompleteCondition(const string&, const string&)", asMETHOD(Quest,CompleteCondition), asCALL_THISCALL);
+  engine->RegisterObjectMethod(questClass, "void CompleteCondition(string, string)", asMETHOD(Quest,CompleteCondition), asCALL_THISCALL);
   engine->RegisterObjectMethod(questClass, "Data GetData()", asMETHOD(Quest,GetData), asCALL_THISCALL);
   
   const char* questmanagerClass = "QuestManager";

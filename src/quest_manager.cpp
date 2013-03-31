@@ -82,7 +82,7 @@ void Quest::Initialize(Level* level)
 
 void Quest::CompleteCondition(const string& objective, const string& condition_name)
 {
-  Data condition = data[objective]["objectives"][condition_name];
+  Data condition = data["objectives"][objective]["conditions"][condition_name];
 
   (Data)(condition["completed"]) = 1;
   CheckIfCompleted();
