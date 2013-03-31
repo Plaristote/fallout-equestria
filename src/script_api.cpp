@@ -169,6 +169,9 @@ struct asConsoleOutput
 
 asConsoleOutput asConsole;
 
+#define OBJ_REF_REGISTER_METHOD(klass,retval,method,params) \
+  engine->RegisterObjectMethod(#klass, std::string(std::string(#retval) + ' ' + std::string(#method) + std::string(#params)).c_str(), asMETHOD(klass,method), asCALL_THISCALL)
+
 void AngelScriptInitialize(void)
 {
   asIScriptEngine* engine = Script::Engine::Get();
@@ -360,12 +363,14 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectType(worldmapClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(worldmapClass, "void SetCityVisible(string)", asMETHOD(WorldMap,SetCityVisible), asCALL_THISCALL);
   engine->RegisterObjectMethod(worldmapClass, "Data GetDataEngine()",        asMETHOD(WorldMap,GetDataEngine),  asCALL_THISCALL);
-  
+
   const char* questClass = "Quest";
   engine->RegisterObjectType(questClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(questClass, "void CompleteCondition(string, string)", asMETHOD(Quest,CompleteCondition), asCALL_THISCALL);
-  engine->RegisterObjectMethod(questClass, "Data GetData()", asMETHOD(Quest,GetData), asCALL_THISCALL);
-  
+  OBJ_REF_REGISTER_METHOD(Quest, void, CompleteCondition,    (string, string));
+  OBJ_REF_REGISTER_METHOD(Quest, bool, IsConditionCompleted, ());
+  OBJ_REF_REGISTER_METHOD(Quest, bool, IsOver,               ());
+  OBJ_REF_REGISTER_METHOD(Quest, Data, GetData,              ());
+
   const char* questmanagerClass = "QuestManager";
   engine->RegisterObjectType(questmanagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(questmanagerClass, "void AddQuest(Data)", asMETHOD(QuestManager,AddQuest), asCALL_THISCALL);

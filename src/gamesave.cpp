@@ -72,11 +72,14 @@ void Level::Save(Utils::Packet& packet)
   cout << ">>>> Objects: " << _world->dynamicObjects.size() << endl;
   cout << ">>>> Saving " << _characters.size() << " characters" << endl;
   for_each(_characters.begin(), _characters.end(), [&packet](ObjectCharacter* character)    { character->Save(packet); });
+  std::cout << "Done saving characters" << std::endl;
 
   if (GameTask::CurrentGameTask)
     GameTask::CurrentGameTask->SaveLevelBuffs(packet);
+  std::cout << "Done saving level buffs" << std::endl;
 
   _task_metabolism->Serialize(packet);
+  cout << "End Level::Save" << endl;
 }
 
 /*

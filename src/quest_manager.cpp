@@ -46,6 +46,7 @@ void QuestManager::QuestCompleted(Quest* quest)
   {
     data["complete"] = 1;
     _stats_controller->AddExperience(data["reward"]);
+    GameTask::CurrentGameTask->PlaySound("pipbuck/questdone");
   }
 }
 
@@ -88,6 +89,18 @@ void Quest::CompleteCondition(const string& objective, const string& condition_n
   CheckIfCompleted();
 }
 
+bool Quest::IsConditionCompleted(const string& objective, const string& condition_name)
+{
+  Data condition = data["objectives"][objective]["conditions"][condition_name];
+
+  return ((Data)(condition["completed"]) == 1);
+}
+
+bool Quest::IsOver(void)
+{
+  return ((int)data["completed"] == 1);
+}
+
 void Quest::InitializeCondition(Data condition, Level* level)
 {
   std::string        type           = condition.Key();
@@ -116,17 +129,14 @@ void Quest::WatcherCharacterInventory(Data condition, Level* level)
   std::string      character_name = condition["target"];
   ObjectCharacter* character      = level->GetCharacter(character_name);
 
-  cout << "WatchedCharacterInventory" << endl;
   condition.Output();
   if (character)
   {
-    cout << "Setting up observer on character " << character->GetName() << endl;
     _observers.Connect(character->GetInventory().ContentChanged, [this, condition, character](void)
     {
       std::string    object_type = condition["object_type"].Value();
       unsigned short quantity    = condition["object_quantity"];
 
-      cout << "Checking if quest objective has been completed" << endl;
       if (character->GetInventory().ContainsHowMany(object_type) >= quantity)
       {
         (Data)(condition["completed"]) = 1;
@@ -190,6 +200,9 @@ bool Quest::CheckIfCompleted(void)
       ObjectiveCompleted.Emit(objective);
   });
   if (success)
+  {
+    data["completed"] = 1;
     QuestCompleted.Emit(this);
+  }
   return (success);
 }

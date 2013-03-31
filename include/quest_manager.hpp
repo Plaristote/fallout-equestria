@@ -28,6 +28,8 @@ public:
   Data GetData(void) { return (data); }
   
   void CompleteCondition(const std::string& objective, const std::string& condition);
+  bool IsConditionCompleted(const std::string& objective, const std::string& condition);
+  bool IsOver(void);
 
 private:
   typedef void (Quest::*WatcherInitializerMethod)(Data, Level*);

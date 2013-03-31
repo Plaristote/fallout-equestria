@@ -55,10 +55,8 @@ Buff::Buff(Utils::Packet& packet, TimeManager& tm, function<StatController* (con
 void Buff::Save(Utils::Packet& packet)
 {
   string json;
-  Data   safeDataCopy;
 
-  safeDataCopy.Duplicate(_buff);
-  DataTree::Writers::StringJSON(safeDataCopy, json);
+  DataTree::Writers::StringJSON(_buff, json);
   packet << _target_name << json;
   packet << _task->lastS << _task->lastM << _task->lastH << _task->lastD << _task->lastMo << _task->lastY;
   packet << _task->timeS << _task->timeM << _task->timeH << _task->timeD << _task->timeMo << _task->timeY;
@@ -153,6 +151,7 @@ void BuffManager::Save(Utils::Packet& packet, function<bool (const string&)> cal
 
     if (callback(buff->GetTargetName()))
       n_buff++;
+    ++it;
   }
   packet << n_buff;
 
@@ -729,9 +728,9 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     try
     {
       level = new Level(_window, _gameUi, packet, _timeManager);
+      SetLevel(level);
       if (params.isSaveFile)
 	level->Load(packet);
-      SetLevel(level);
       file.close();
     }
     catch (const char* error)

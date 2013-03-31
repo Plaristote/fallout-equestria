@@ -347,7 +347,12 @@ void PipbuckQuestApp::LoadQuestList(Rocket::Core::Element* root)
       rml << "<div class='quest-list-item' id=\"" << underscore(quest.Key()) << "\" data-quest=\"" << quest.Key().c_str() << "\">";
       rml << "  <div class='quest-name'>" << i18n::T(quest.Key()) << "</div>";
       rml << "  <div class='quest-desc'>" << i18n::T(quest["description"].Value()) << "</div>";
-      rml << "  <div class='quest-prog'>" << "In progress" << "</div>";
+
+      Quest* quest_object = GameTask::CurrentGameTask->GetQuestManager()[quest.Key()];
+      bool   completed;
+      
+      completed = (quest_object && quest_object->IsOver());
+      rml << "  <div class='quest-prog'>" << (completed ? "Done" : "In progress") << "</div>";
       rml << "</div>";
     });
     quest_list->SetInnerRML(rml.str().c_str());
