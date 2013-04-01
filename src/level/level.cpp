@@ -586,10 +586,10 @@ void Level::StopFight(void)
 
 void Level::NextTurn(void)
 {
+  if (_state != Fight || _currentCharacter != _itCharacter)
+    return ;
   if (*_itCharacter == GetPlayer())
     StopFight();
-  if (_state != Fight)
-    return ;
   if (_itCharacter != _characters.end())
   {
     cout << "Playing animation idle" << endl;
@@ -693,6 +693,7 @@ AsyncTask::DoneStatus Level::do_task(void)
   {
     case Fight:
       ForEach(_objects, run_object);
+      _currentCharacter = _itCharacter; // Keep a character from askin NextTurn several times
       if (_itCharacter != _characters.end())
         run_object(*_itCharacter);
       _mouse.ClosestWaypoint(_world, _currentFloor);

@@ -1,5 +1,5 @@
 #include "test.hpp"
-#include "Sync.hpp"
+#include "observatory.hpp"
 
 void TestsSync(UnitTest& tester)
 {
@@ -66,7 +66,7 @@ void TestsSync(UnitTest& tester)
     Sync::Signal<void> mysignal;
     bool                      called = false;
 
-    mysignal.SetAsync(false);
+    mysignal.SetDirect(false);
     mysignal.Connect([&called]() { called = true; });
     mysignal.Emit();
     if (called)

@@ -141,6 +141,7 @@ struct Waypoint
     float                GetCost(Waypoint&) { return (1.f); }
 
     // Loading
+    void                 LoadArcs(void);
     void                 Unserialize(Utils::Packet& packet);
     void                 UnserializeLoadArcs(World*);
     void                 Serialize(Utils::Packet& packet);

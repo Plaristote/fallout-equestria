@@ -11,6 +11,7 @@ void TestsStatistics(UnitTest&);
 void TestsTimeManager(UnitTest&);
 void TestsSync(UnitTest&);
 void TestsData(UnitTest&);
+void TestsPathfinding(UnitTest&);
 
 list<function<void (UnitTest&)> > TestInitializers;
 
@@ -26,6 +27,7 @@ int main(void)
   TestInitializers.push_back(&TestsSync);
   TestInitializers.push_back(&TestsTimeManager);
   TestInitializers.push_back(&TestsStatistics);
+  TestInitializers.push_back(&TestsPathfinding);
 
   for_each(TestInitializers.begin(), TestInitializers.end(), [&tester](function<void (UnitTest& tester)> callback) { callback(tester); });
 

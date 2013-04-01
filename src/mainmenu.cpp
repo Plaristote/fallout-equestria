@@ -159,7 +159,8 @@ AsyncTask::DoneStatus MainMenu::do_task()
       _need_garbage_collect = false;
     }
   }
-  _mouseCursor.Update();
+  if (!quitGamePlz)
+    _mouseCursor.Update();
   SoundManager::GarbageCollectAll();
   Executor::Run(); // Executor does not have any specific application. It just executes lambdas collected here and there.
   return (quitGamePlz ? AsyncTask::DoneStatus::DS_exit : AsyncTask::DoneStatus::DS_cont);

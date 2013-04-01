@@ -717,7 +717,6 @@ void Waypoint::UnwithdrawArc(Waypoint* other, ArcObserver* observer)
 {
   ArcsWithdrawed::iterator it, end;
 
-  //cout << "Unwithdraw arc" << endl;
   for (it = arcs_withdrawed.begin(), end = arcs_withdrawed.end() ; it != end ; ++it)
   {
     const Arc& arc = (*it).first;
@@ -728,9 +727,16 @@ void Waypoint::UnwithdrawArc(Waypoint* other, ArcObserver* observer)
         (*it).second--;
       if ((*it).second == 0)
       {
-        std::list<Waypoint::Arc>::iterator it = Connect(arc.to);
+        std::pair<Waypoint::Arc, unsigned short>* withdrawable = arc.to->GetWithdrawable(this);
+
+        if (!withdrawable)
+          break ;
+        if (withdrawable && withdrawable->second == 0)
+        {
+          std::list<Waypoint::Arc>::iterator it = Connect(arc.to);
         
-        it->observer = observer;
+          it->observer = observer;
+        }
       }
       break ;
     }
@@ -786,6 +792,14 @@ void Waypoint::Unserialize(Utils::Packet &packet)
   nodePath.set_pos(posx, posy, posz);
 }
 
+void Waypoint::LoadArcs(void)
+{
+  std::for_each(arcs.begin(), arcs.end(), [this](Arc& arc)
+  {
+    arcs_withdrawed.push_back(std::pair<Arc, unsigned short>(arc, 0));
+  });
+}
+
 void Waypoint::UnserializeLoadArcs(World* world)
 {
   vector<int>::iterator it  = tmpArcs.begin();
@@ -798,10 +812,7 @@ void Waypoint::UnserializeLoadArcs(World* world)
     if (waypoint)
       Connect(waypoint);
   }
-  std::for_each(arcs.begin(), arcs.end(), [this](Arc& arc)
-  {
-    arcs_withdrawed.push_back(std::pair<Arc, unsigned short>(arc, 0));
-  });
+  LoadArcs();
   tmpArcs.clear();
 }
 

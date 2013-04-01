@@ -182,6 +182,7 @@ private:
   InstanceObjects      _objects;
   Characters           _characters;
   Characters::iterator _itCharacter;
+  Characters::iterator _currentCharacter;
   NodePath             _player_halo;
   
   ExitZones            _exitZones;

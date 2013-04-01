@@ -478,19 +478,24 @@ void ObjectCharacter::Run(float elapsedTime)
     }
     else if (state == Level::Fight)
     {
-//       if (this != _level->GetPlayer())
-//         cout << "Movement count: " << _path.size() << endl;
       ReloadFunction(&_scriptFight);
       if (_hitPoints <= 0 || _actionPoints == 0)
 	_level->NextTurn();
-      else if (!(IsMoving()) && _scriptFight) // replace with something more appropriate
+      else if (!(IsMoving()) && _scriptFight) // TODO replace with something more appropriate
       {
+        unsigned int ap_before = _actionPoints;
+
         collector_ai.start();
         ReloadFunction(&_scriptFight);
 	_script_context->Prepare(_scriptFight);
 	_script_context->SetArgObject(0, this);
 	_script_context->Execute();
         collector_ai.stop();
+        if (ap_before == _actionPoints) // If stalled, skip turn
+        {
+          cout << "Character " << GetName() << " is stalling" << endl;
+          _level->NextTurn();
+        }
       }
     }
     if (_path.size() > 0)
@@ -615,11 +620,11 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
   ReachedDestination.DisconnectAll();
   _goToData.objective = 0;
   UnprocessCollisions();
-  /*if (_path.size() > 0)
+  if (_path.size() > 0)
   {
-    cout << "SETTING START FROM FOR SOME REASON" << endl;
+    //cout << "SETTING START FROM FOR SOME REASON" << endl;
     start_from = _level->GetWorld()->GetWaypointFromId(_path.front().id);
-  }*/
+  }
   _path.clear();
   if (start_from && waypoint)
   {

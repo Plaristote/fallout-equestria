@@ -34,7 +34,7 @@ void         WaypointModifier::UnprocessCollisions(void)
       Waypoint::Arcs::iterator it;
 
       arcs.first->UnwithdrawArc(arcs.second, arcs.observer);
-      arcs.second->UnwithdrawArc(arcs.first, arcs.observer);
+      //arcs.second->UnwithdrawArc(arcs.first, arcs.observer);
     });
     _withdrawedArcs.clear();
     collector.stop();
@@ -85,7 +85,7 @@ void        WaypointModifier::WithdrawArc(Waypoint* first, Waypoint* second)
       observer = withdrawable->first.observer;
   }
   first->WithdrawArc(second);
-  second->WithdrawArc(first);
+  //second->WithdrawArc(first);
   _withdrawedArcs.push_back(WithdrawedArc(first, second, observer));
 }
 
