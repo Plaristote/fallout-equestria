@@ -8,7 +8,6 @@ extern PandaFramework framework;
 
 void SetOpacityOnAll(Rocket::Core::Element* element, float alpha)
 {
-  std::stringstream             stream;    
   const Rocket::Core::Property* property = element->GetProperty("color");
   std::string                   string   = property->ToString().CString();
 
@@ -146,11 +145,7 @@ void UiLoad::LoadSlots(const string& savePath)
 
     std::stringstream rml;
     for (int it = 0 ; it < nSlots ; ++it)
-    {
-      string str;
-      
       rml << UiLoad::LoadSlotRml("load", it);
-    }
     slotContainer->SetInnerRML(rml.str().c_str());
     
     for (int it = 0 ; it < nSlots ; ++it)

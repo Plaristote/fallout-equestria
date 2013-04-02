@@ -44,7 +44,7 @@ struct RecursiveChecker
     if (first == second)
     {
       checkers.pop();
-      if (checkers.size())
+      if (!(checkers.empty()))
         return (checkers.front().Execute(checkers));
       return (true);
     }

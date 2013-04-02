@@ -537,10 +537,10 @@ void StatController::TraitToggled(const string& trait)
 
 void StatController::LevelChanged(unsigned short lvl)
 {
-  unsigned short skill_points;
-
   if (_view)
   {
+    unsigned short skill_points;
+
     GameTask::CurrentGameTask->PlaySound("pipbuck/levelup");
     _view->SetIdValue("level", lvl);
     _view->SetIdValue("next-level", _model.GetXpNextLevel());
@@ -657,7 +657,7 @@ void StatController::MakeBackup(void)
 
 void StatController::SetView(StatView* view)
 {
-  list<string>   perks,    traits;
+  list<string>   traits;
   vector<string> specials, skills, statistics;
 
   if (_view)
@@ -819,7 +819,7 @@ static list<string> split(const std::string& str, char c = ' ')
 
 Data DataGetFromPathRec(Data data, list<string> array)
 {
-  if (array.size() != 0)
+  if (!(array.empty()))
   {
     string key = (*array.begin());
     

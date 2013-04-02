@@ -103,7 +103,6 @@ bool Quest::IsOver(void)
 
 void Quest::InitializeCondition(Data condition, Level* level)
 {
-  std::string        type           = condition.Key();
   WatcherInitializer initializers[] = {
     { "InventoryContains", &Quest::WatcherCharacterInventory },
     { "CharacterKilled",   &Quest::WatcherCharacterKill      },

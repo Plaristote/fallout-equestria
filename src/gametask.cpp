@@ -716,7 +716,6 @@ void   GameTask::SetPlayerInventory(void)
 
 void GameTask::DoLoadLevel(LoadLevelParams params)
 {
-  Level*   level = 0;
   ifstream file;
   string   name  = params.path;
   
@@ -727,6 +726,8 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
 
     try
     {
+      Level*   level = 0;
+
       level = new Level(_window, _gameUi, packet, _timeManager);
       SetLevel(level);
       if (params.isSaveFile)
@@ -736,7 +737,6 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     catch (const char* error)
     {
       std::cerr << "?? Failed to load file !! (" << error << ")" << std::endl;
-      level = 0;
     }
   }
   else
@@ -895,7 +895,6 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
       {
         auto   _this   = this;
         string type    = encounter_type;
-        string teh_map = encounter_map;
         short  n       = n_creeps;
 
         MapOpenLevel(encounter_map);

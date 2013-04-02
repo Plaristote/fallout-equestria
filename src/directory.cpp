@@ -68,11 +68,12 @@ bool Directory::RemoveDir(const string& str)
 bool Directory::OpenDir(const string& str)
 {
   DIR*      dir;
-  Dirent*   ent;
 
   dir = opendir(str.c_str());
   if (dir != NULL)
   {
+    Dirent* ent;
+
     _dirEntries.clear();
     _dirName    = str;
     /* print all the files and directories within directory */

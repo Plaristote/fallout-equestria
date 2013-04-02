@@ -84,7 +84,6 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   _items = DataTree::Factory::JSON("data/objects.json");
 
   _floor_lastWp = 0;
-  ceilingCurrentTransparency = 1.f;
 
   for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
     _currentUis[i] = 0;
@@ -571,7 +570,7 @@ void Level::StopFight(void)
     {
       list<ObjectCharacter*> listEnemies = (*it)->GetNearbyEnemies();
 
-      if (listEnemies.size() > 0 && (*it)->IsAlive())
+      if (!(listEnemies.empty()) && (*it)->IsAlive())
       {
 	ConsoleWrite("You can't leave combat mode if enemies are nearby");
 	return ;
@@ -743,10 +742,6 @@ void Level::DisplayCombatPath(void)
   });
 }
 
-void Level::TaskCeiling(float elapsedTime)
-{
-}
-
 /*
  * Nodes Management
  */
@@ -847,12 +842,10 @@ void Level::MouseLeftClicked(void)
 	return ;
       else
       {
-	Waypoint* toGo;
-
 	_mouse.ClosestWaypoint(_world, _currentFloor);
 	if (hovering.hasWaypoint)
 	{
-	  toGo = _world->GetWaypointFromNodePath(hovering.waypoint);
+	  Waypoint* toGo = _world->GetWaypointFromNodePath(hovering.waypoint);
 
 	  if (toGo && _characters.size() > 0)
 	    GetPlayer()->GoTo(toGo);
@@ -956,8 +949,6 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
   }
   if ((GetPlayer()->HasLineOfSight(object)) && GetPlayer()->GetPathDistance(object) <= 3)
   {
-    string dialog = object->GetDialog();
-
     if (_currentUis[UiItRunningDialog])
       delete _currentUis[UiItRunningDialog];
 
@@ -1326,7 +1317,6 @@ void Level::PlayerUseObject(InventoryObject* object)
 
 void Level::ActionDropObject(ObjectCharacter* user, InventoryObject* object)
 {
-  ObjectItem* item;
   Waypoint*   waypoint;
 
   if (!user || !object)
@@ -1339,6 +1329,8 @@ void Level::ActionDropObject(ObjectCharacter* user, InventoryObject* object)
   waypoint = user->GetOccupiedWaypoint();
   if (waypoint)
   {
+    ObjectItem* item;
+
     user->GetInventory().DelObject(object);
     item     = new ObjectItem(this, object->CreateDynamicObject(_world), object);
     item->SetOccupiedWaypoint(waypoint);

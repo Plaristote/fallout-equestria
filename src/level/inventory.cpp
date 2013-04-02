@@ -144,7 +144,6 @@ InventoryObject::EquipedModel::EquipedModel(WindowFramework* window, InventoryOb
 {
   Data        anims   = object["animations"];
   std::string texture = object["texture"].Value();
-  Texture*    texfile;
 
   _modelName   = object["model"].Value();
   for (unsigned short i = 0 ; i < _modelName.size() ; ++i)
@@ -168,7 +167,8 @@ InventoryObject::EquipedModel::EquipedModel(WindowFramework* window, InventoryOb
   np = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + object["model"].Value());
   if (texture != "")
   {
-    texfile    = TexturePool::load_texture(TEXT_ROOT + texture);
+    Texture*    texfile = TexturePool::load_texture(TEXT_ROOT + texture);
+
     if (texfile)
       np.set_texture(texfile);
   }
@@ -314,13 +314,12 @@ void Inventory::LoadInventory(Data items)
   _content.clear();
   for_each(items.begin(), items.end(), [this](Data item)
   {
-    InventoryObject* newObject;
     unsigned int     quantity;
 
     quantity = (item["quantity"].Nil() ? 1 : (unsigned int)item["quantity"]);
     for (unsigned short i = 0 ; i < quantity ; ++i)
     {
-      newObject = new InventoryObject(item);
+      InventoryObject* newObject = new InventoryObject(item);
       (*newObject)["quantity"].Remove();
       AddObject(newObject);
     }
@@ -381,8 +380,6 @@ void Inventory::SaveInventory(Data items)
     if (quantity == 0) quantity = 1;
     if (!ignore)
     {
-      std::string str;
-
       item["quantity"] = quantity;
       items[item.Key()].Duplicate(item);
       item["quantity"].Remove();

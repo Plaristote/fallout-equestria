@@ -27,11 +27,10 @@
 # include "inventory_ui.hpp"
 
 # include "world.h"
-#include <soundmanager.hpp>
+# include "soundmanager.hpp"
 
 class Level
 {
-  float ceilingCurrentTransparency;
 public:
   static Level* CurrentLevel;
   
@@ -66,7 +65,6 @@ public:
   void                    SetState(State);
   State                   GetState(void) const { return (_state); }
   void                    SetInterrupted(bool);
-  void                    TaskCeiling(float elapsedTime);
   void                    DisplayCombatPath(void);
   void                    DestroyCombatPath(void);
   

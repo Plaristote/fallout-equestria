@@ -247,7 +247,7 @@ void Pipbuck::ReloadApps(void)
     cout << "pipbuck.as: isn't loaded" << endl;
   unsigned int iterator = 0;
   rml << "<div id='app_list'>";
-  if (apps.size() == 0)
+  if (apps.empty())
     rml << i18n::T("You don't have any application right now");
   for_each(apps.begin(), apps.end(), [&rml, &iterator, apps_data](const string& app)
   {

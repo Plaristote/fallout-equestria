@@ -84,12 +84,10 @@ void MusicManager::PlayNext(void)
   Data           category = _data[_current_category];
   unsigned short max      = category.Count();
   unsigned short selected;
-  string         filename;
 
   if (category.Nil()) return ;
   selected = rand() % max;
   cout << "Random select it = " << selected << " (max being " << max << ")" << endl;
-  filename = category[selected].Value();
   Play(_current_category, category[selected].Key());
 }
 
@@ -101,8 +99,8 @@ void MusicManager::Run(void)
   if (_current_music)
   {
     float elapsed_time  = _timer.GetElapsedTime();
-    bool  not_playing   = true;
-    bool  volume_change = false;
+    bool  not_playing;
+    bool  volume_change;
 
 #ifdef AUDIO_BACKEND_PANDA3D
     not_playing   = _current_music->status()     != AudioSound::PLAYING;
