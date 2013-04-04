@@ -1,6 +1,7 @@
 #include "level/world.h"
 #include <timer.hpp>
 #include <panda3d/collisionHandlerQueue.h>
+//#include <../game_editor/world.h>
 
 using namespace std;
 
@@ -20,6 +21,8 @@ World::World(WindowFramework* window)
   
   model_sphere = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
   debug_pathfinding = window->get_render().attach_new_node("debug_pathfinding");
+  
+  rootWaypoints.set_collide_mask(ColMask::Waypoint);
 }
 
 World::~World()

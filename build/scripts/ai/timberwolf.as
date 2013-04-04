@@ -43,7 +43,6 @@ Character@ SelectTarget(Character@ self)
 
     if (@bestMatch == null || current.GetHitPoints() < bestMatch.GetHitPoints())
       @bestMatch = @current;
- 
     it++;
   }
   return (bestMatch);
@@ -55,6 +54,18 @@ void MyOutput(string str)
   Write(str);
 }
 
+void GoToTarget(Character@ self, DynamicObject@ target, int min_dist = 1)
+{
+  self.GoTo(target, min_dist);
+
+  string str;
+
+  str = "Path to target -> " + self.GetPathSize();
+  MyOutput(str);
+  if (self.GetPathSize() == 1)
+    level.NextTurn();
+}
+
 void combat(Character@ self)
 {
   if (self.IsMoving())
@@ -63,11 +74,16 @@ void combat(Character@ self)
   if (@currentTarget == null || !(currentTarget.IsAlive()))
     @currentTarget = @SelectTarget(self);
   if (@currentTarget == null)
+  {
+    Cout("No target");
     level.NextTurn();
+  }
   else
   {
+    Cout("Target aquired");
     if (self.HasLineOfSight(currentTarget.AsObject()))
     {
+        Cout("Line of sight");
       int   actionPoints = self.GetActionPoints();
       int   actionPointsCost;
       Item@ equiped1 = self.GetEquipedItem(0);
@@ -126,30 +142,9 @@ void combat(Character@ self)
           level.NextTurn();
       }
       else
-      {
-        if (currentTarget.GetPathDistance(self.AsObject()) <= 1)
-          level.NextTurn();
-        else
-        {
-          self.GoTo(currentTarget.AsObject(), 1);
-          self.TruncatePath(1);
-          /*if (self.GetPathSize() != 1)
-            level.NextTurn();*/
-        }
-      }
+        GoToTarget(self, currentTarget.AsObject());
     }
     else
-    {
-      //Cout("Timberwolf GoTo Player");
-      self.GoTo(currentTarget.AsObject(), 1);
-      self.TruncatePath(1);
-      if (self.GetPathSize() != 1)
-      {
-        //Cout("Timberwolf didn't find any path");
-        level.NextTurn();
-      }
-      else
-        Cout("Timberwolf found a path");
-    }
+      GoToTarget(self, currentTarget.AsObject());
   }
 }

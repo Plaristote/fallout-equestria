@@ -10,6 +10,19 @@
 
 using namespace std;
 
+void SetCollideMaskOnSingleNodepath(NodePath np, unsigned short collide_mask)
+{
+  NodePathCollection col = np.get_children();
+
+  np.set_collide_mask(CollideMask(collide_mask));
+  for (int n = 0 ; n < col.size() ; ++n)
+  {
+    NodePath cnp = col.get_path(n);
+
+    cnp.set_collide_mask(CollideMask(0));
+  }
+}
+
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
 {
   Data   items = _level->GetItems();  
@@ -56,9 +69,8 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 
   _type         = ObjectTypes::Character;
   _actionPoints = 0;
-  
-  //_object->nodePath.set_collide_mask(CollideMask(ColMask::DynObject | ColMask::FovTarget), CollideMask::all_on(), _object->nodePath.get_class_type());
-  _object->nodePath.set_collide_mask(CollideMask(ColMask::DynObject | ColMask::FovTarget), 0);
+
+  SetCollideMaskOnSingleNodepath(_object->nodePath, ColMask::DynObject | ColMask::FovTarget);
 
   // Line of sight tools
   _losNode      = new CollisionNode("losRay");
@@ -383,7 +395,7 @@ void ObjectCharacter::Run(float elapsedTime)
       RunMovement(elapsedTime);
   }
   InstanceDynamicObject::Run(elapsedTime);
-  profile.Profile("Level:Characters:AI");
+  //profile.Profile("Level:Characters:AI");
 }
 
 int                 ObjectCharacter::GetBestWaypoint(InstanceDynamicObject* object, bool farthest)
@@ -611,9 +623,7 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
   // do not swap waypoints: instead, find another path.
   if (_waypointOccupied->id != wp->id && _level->IsWaypointOccupied(wp->id))
   {
-    cout << "Avoiding a collision" << endl;
-    Waypoint* dest = _level->GetWorld()->GetWaypointFromId((*(--(_path.end()))).id);
-    GoTo(dest);
+    GoTo(_level->GetWorld()->GetWaypointFromId((*(--(_path.end()))).id));
     return ;
   }
   _waypointOccupied = wp;
@@ -740,7 +750,7 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
     _object->nodePath.set_pos(dest);
   }
   collector.stop();
-  profile.Profile("Level:Characters:Movement");
+  //profile.Profile("Level:Characters:Movement");
 }
 
 void                ObjectCharacter::LookAt(LVecBase3 pos)
@@ -765,9 +775,10 @@ void                ObjectCharacter::LookAt(InstanceDynamicObject* object)
 bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* object)
 {
   PStatCollector collector("Level:Characters:LineOfSight");
-  
+
   if (object == this)
     return (true);
+  Timer profiler;
   collector.start();
   NodePath root  = _object->nodePath;
   NodePath other = object->GetNodePath();
@@ -795,6 +806,7 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
     break ;
   }
   collector.stop();
+  profiler.Profile("HasLineOfSight");
   return (ret);
 }
 
@@ -845,6 +857,8 @@ void     ObjectCharacter::CheckFieldOfView(void)
 {
   if (_hitPoints <= 0 || _level->GetPlayer() == this)
     return ;
+  Timer profile;
+  cout << "Checking Field of View for " << this << endl;
   PStatCollector     collector("Level:Characters:FieldOfView");
   CollisionTraverser fovTraverser;
   float              fovRadius = 45;
@@ -857,6 +871,7 @@ void     ObjectCharacter::CheckFieldOfView(void)
     while (it != _fovEnemies.end())
     {
       it->ttl--;
+      cout << "TTL left is '" << (int)it->ttl << '\'' << endl;
       if (it->ttl == 0)
 	it = _fovEnemies.erase(it);
       else
@@ -877,14 +892,22 @@ void     ObjectCharacter::CheckFieldOfView(void)
   //if (!(IsEnemy(_level->GetPlayer())) && _level->GetState() != Level::Fight)
   //  return ;
   
+  //tmpfix:
+  //InstanceDynamicObject* last_obj = 0;
+  
   for (unsigned short i = 0 ; i < _fovHandlerQueue->get_num_entries() ; ++i)
   {
+    //cout << "loop fovhandlerqueue " << i << endl;
     CollisionEntry*        entry  = _fovHandlerQueue->get_entry(i);
     NodePath               node   = entry->get_into_node_path();
     InstanceDynamicObject* object = _level->FindObjectFromNode(node);
 
+    //if (object == last_obj)
+    //  continue ;
+    //last_obj = object;
     if (object && object != this)
     {
+      //cout << object->GetName() << endl;
       ObjectCharacter* character = object->Get<ObjectCharacter>();
 
       if (character)
@@ -908,6 +931,7 @@ void     ObjectCharacter::CheckFieldOfView(void)
   if (_fovEnemies.size() > 0 && _level->GetState() != Level::Fight)
     _level->StartFight(this);
   collector.stop();
+  profile.Profile("/!\\ CheckFieldOfView");
 }
 
 /*
@@ -1008,15 +1032,10 @@ void     ObjectCharacter::SetAsEnemy(const ObjectCharacter* other, bool enemy)
 
 bool     ObjectCharacter::IsEnemy(const ObjectCharacter* other) const
 {
-  cout << "Calling IsEnemy " << other->GetFactionName() << endl;
   if (other->GetFaction() == 0 && _faction)
     return (other->IsEnemy(this));
   if (_faction)
-  {
-    cout << "I haz faction: " << _faction->enemyMask << " (" << _faction->flag << ")" << endl;
     return (_faction->enemyMask & other->GetFaction());
-  }
-  cout << "I haz no faction " << _self_enemyMask << '&' << other->GetFaction() << endl;
   return (_self_enemyMask & other->GetFaction());
 }
 
