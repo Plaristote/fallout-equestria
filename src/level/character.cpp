@@ -607,8 +607,11 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
   if (wp != _waypointOccupied && _level->GetState() == Level::Fight)
     SetActionPoints(_actionPoints - 1);
   
-  if (_level->IsWaypointOccupied(wp->id))
+  // If the next waypoint is already occupied by someone else,
+  // do not swap waypoints: instead, find another path.
+  if (_waypointOccupied->id != wp->id && _level->IsWaypointOccupied(wp->id))
   {
+    cout << "Avoiding a collision" << endl;
     Waypoint* dest = _level->GetWorld()->GetWaypointFromId((*(--(_path.end()))).id);
     GoTo(dest);
     return ;
