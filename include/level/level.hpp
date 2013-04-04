@@ -155,6 +155,8 @@ private:
   typedef std::list<InstanceDynamicObject*> InstanceObjects;
   typedef std::list<ObjectCharacter*>       Characters;
   typedef std::list<LevelExitZone*>         ExitZones;
+  
+  void              SetupCamera(void);
 
   void              RunDaylight(void);
   void              RunMetabolism(void);

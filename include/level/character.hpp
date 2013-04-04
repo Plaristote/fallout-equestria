@@ -233,6 +233,7 @@ private:
   PT(CollisionSphere)       _fovTargetSphere;
   PT(CollisionNode)         _fovTargetNode;
   NodePath                  _fovTargetNp;
+  bool                      _fovNeedsUpdate;
   
   PT(CollisionSphere)       _fovSphere;
   PT(CollisionNode)         _fovNode;

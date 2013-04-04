@@ -87,6 +87,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _losTraverser.add_collider(_losPath, _losHandlerQueue);  
 
   // Fov tools
+  _fovNeedsUpdate   = true;
   _fovTargetNode    = new CollisionNode("fovTargetSphere");
   _fovTargetNode->set_from_collide_mask(CollideMask(0));
   _fovTargetNode->set_into_collide_mask(CollideMask(ColMask::FovTarget));
@@ -352,6 +353,7 @@ void ObjectCharacter::Run(float elapsedTime)
   PStatCollector collector_ai("Level:Characters:AI");
   Timer profile;
   
+  _fovNeedsUpdate = true;
   if (!(IsInterrupted()))
   {
     Level::State state = _level->GetState();
@@ -855,7 +857,7 @@ Script::StdList<ObjectCharacter*> ObjectCharacter::GetNearbyAllies(void) const
 
 void     ObjectCharacter::CheckFieldOfView(void)
 {
-  if (_hitPoints <= 0 || _level->GetPlayer() == this)
+  if (_hitPoints <= 0 || !_fovNeedsUpdate || _level->GetPlayer() == this)
     return ;
   Timer profile;
   cout << "Checking Field of View for " << this << endl;
@@ -864,6 +866,7 @@ void     ObjectCharacter::CheckFieldOfView(void)
   float              fovRadius = 45;
   
   collector.start();
+  _fovNeedsUpdate = false;
   // Prepare all the FOV data
   {
     list<FovEnemy>::iterator it = _fovEnemies.begin();

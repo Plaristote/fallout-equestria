@@ -333,6 +333,7 @@ void Level::InsertParty(PlayerParty& party)
     *it = object;
   }
   party.SetHasLocalObjects(false);
+  SetupCamera();
 }
 
 void Level::FetchParty(PlayerParty& party)
@@ -603,6 +604,33 @@ void Level::NextTurn(void)
     (*_itCharacter)->RestartActionPoints();
   else
     cout << "[FATAL ERROR][Level::NextTurn] Character Iterator points to nothing (n_characters = " << _characters.size() << ")" << endl;
+  SetupCamera();
+}
+
+void Level::SetupCamera(void)
+{
+  if (_state == Fight)
+  {
+    if  (*_itCharacter != GetPlayer())
+    {
+      if (OptionsManager::Get()["camera"]["fight"]["focus-enemies"].Value() == "1")
+        _camera.FollowObject(*_itCharacter);
+      else
+        _camera.StopFollowingNodePath();
+    }
+    else
+    {
+      if (OptionsManager::Get()["camera"]["fight"]["focus-self"].Value() == "1")
+        _camera.FollowObject(*_itCharacter);
+      else
+        _camera.StopFollowingNodePath();
+    }
+  }
+  else
+  {
+    if (OptionsManager::Get()["camera"]["focus-self"].Value() == "1")
+      _camera.FollowObject(GetPlayer());
+  }
 }
 
 void Level::RunMetabolism(void)
