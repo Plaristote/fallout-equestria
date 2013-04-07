@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<!--[if IE 8]> 				 <html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+
+<head>
+	<meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>Twilidoc - Fallout Equestria</title>
+
+  <link rel="stylesheet" href="css/normalize.css" />
+  <link rel="stylesheet" href="css/foundation.css" />
+  <link rel="stylesheet" href="css/sh_ide-kdev.min.css" />
+  <script src="js/vendor/custom.modernizr.js"></script>
+  <script src="js/jquery.min.js"></script>
+
+  <script src="js/sh_main.js"></script>
+  <script src="js/sh_cpp.min.js"></script>
+
+  <script src="js/json2.js" type="text/javascript"></script>
+  <script src="js/raphael.js" type="text/javascript"></script>
+  <script src="js/joint.js" type="text/javascript"></script>
+  <script src="js/joint.arrows.js" type="text/javascript"></script>
+  <script src="js/joint.dia.js" type="text/javascript"></script>
+  <script src="js/joint.dia.uml.js" type="text/javascript"></script>
+
+  <script src="js/project.js"></script>
+  
+  <style>
+    html
+    {
+      background: url(img/cloudy-twilight.png);
+      -webkit-background-size: cover;
+      -moz-background-size: cover;
+      -o-background-size: cover;
+      background-size: cover;
+    }
+  
+    .match-bundle
+    {
+      -moz-column-count:3; /* Firefox */
+      -webkit-column-count:3; /* Safari and Chrome */
+      column-count:3;
+    }
+  </style>
+  
+</head>
+<body>
+
+	<div class="row">
+		<div class="large-12 columns">
+                        <span style="right:0px; position: absolute;">
+                          <h4 style="right:0px; position: absolute; color:rgba(0, 0, 0, 0.5); text-shadow: 2px 2px white;">Twilidoc</h4>
+                          <img src="img/twilight-icon-1.png" />
+                        </span>
+                        
+  <ul class="button-group" style="float: right; padding-top: 20px; padding-right: 125px;">
+    <li><a href="index.html"   class="button secondary">Index</a></li>
+    <li><a href="classes.html" class="button secondary">Classes</a></li>
+    <li><a href="#" class="button secondary">Files</a></li>
+  </ul>
+                        
+                        
+			<h2>Fallout Equestria</h2>
+			
+			
+			
+  <div class="row collapse">
+    <div class="small-3 large-2 columns">
+      <span class="prefix">Search</span>
+    </div>
+    <div class="small-9 large-10 columns">
+      <input type="text" id="sexy-search" placeholder="Search for classes, methods, attributes...">
+    </div>
+  </div>
+			<hr />
+		</div>
+	</div>
+
+<div class="row">
+  <div class="large-12 columns">
+
+  <!-- Grid Example -->
+  <div class="row" id="search-results" style="display:none;">
+  </div>
+
+  
+    <h3>ObjectCharacter::FovEnemy</h3>
+
+  <script type="text/javascript">
+    var uml        = Joint.dia.uml;
+    var uml_height = 0;
+
+    function get_project_type(name)
+    {
+      for (var i = 0 ; i < project.types.length ; i++)
+      {
+        var type = project.types[i];
+
+        if (type.name == name)
+          return (type);
+      }
+      return (null);
+    }
+
+    function generate_uml(type, visibility, start_pos)
+    {
+      var color      = 'yellow';
+      var methods    = [];
+      var attributes = [];
+      var object;
+      var position   = typeof start_pos == 'undefined' ? { x: 0, y: 0 } : start_pos;
+      var width      = 100;
+      var height     = 50;
+
+      if      (visibility == 'protected') { color = 'lightblue'; }
+      else if (visibility == 'private')   { color = 'blue';      }
+
+      for (var i = 0 ; i < type.methods.length ; i++)
+      {
+        var method = type.methods[i];
+        var str;
+
+        str = method.name + '(' + method.params + ')';
+        methods.push(str);
+        // Adjust size of the rect to the content
+        if (str.length * 5 > width)
+          width = 10 + str.length * 5;
+        height += 13;
+      }
+
+      for (var i = 0 ; i < type.attributes.length ; i++)
+      {
+        var attribute = type.attributes[i];
+        var str;
+
+        str = attribute.name;
+        attributes.push(str);
+        if (str.length * 5 > width)
+          width = 10 + str.length * 5;
+        height += 13;
+      }
+
+      object = uml.Class.create({
+        label: type.name,
+        shadow: true,
+        attrs: { fill: color },
+        labelAttrs: { 'font-weight': 'bold' },
+        methods: methods,
+        attributes: attributes,
+        rect: { x: position.x, y: position.y, width: width, height: height },
+        interactive: false
+      });
+
+      if (position.y + height + 10 > uml_height)
+        uml_height = position.y + height + 10;
+
+      position.x += width + 50;
+      var tmp  = position.x;
+      var tmp2 = position.y;
+      for (var i = 0 ; i < type.ancestors.length ; i++)
+      {
+        var ancestor      = type.ancestors[i];
+        var ancestor_type = get_project_type(ancestor.name);
+        var ancestor_pos  = position;
+
+        if (ancestor_type != null)
+        {
+          var tmp2 = position.y;
+          inherits_object   = generate_uml(ancestor_type, ancestor.visibility, ancestor_pos);
+          position.y = tmp2;
+          object.joint(inherits_object, uml.generalizationArrow);
+          console.log(inherits_object);
+          position.x  = tmp;
+          position.y += inherits_object.getBBox().height + 10;
+        }
+      }
+      return (object);
+    }
+
+    $(document).ready(function()
+    {
+      console.log(project);
+
+      var joint = Joint.paper("uml", 1, 1);
+
+      klass = get_project_type("ObjectCharacter::FovEnemy");
+      if (klass != null)
+        generate_uml(klass, 'public');
+      else
+        alert("Fatal error: couldn't find type 'ObjectCharacter::FovEnemy'");
+
+      joint.setSize(900, uml_height);
+    });
+  </script>
+
+  <div id="uml">
+  </div>
+  
+  <div class="row">
+  <style>.button {margin: 0 0 0 0;}</style>
+    <table width="100%">
+      <thead>
+        <tr><td colspan="4"><h5>Methods</h5></td></tr>
+        <tr>
+          <th>Type</th>
+          <th>Name</th>
+          <th>Parameters</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+      </tbody>
+      <thead>
+        <tr><td colspan="4"><h5>Attributes</h5></td></tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            <td>
+              <span style="float:left;">
+                
+                  <img src="img/icon-default.png" alt='Regular method' />
+                
+              </span>            
+
+              <ul class="button-group" style="float:right;">
+              
+                <li><a href="#" class="tiny button">ptr</a></li>
+              
+              
+              
+              
+
+              
+              
+                <li><a href="./class_ObjectCharacter.html" class="tiny success button">ObjectCharacter</a></li>
+              
+              </ul>
+            </td>
+            <td colspan="2">enemy</td>
+            <td>
+              <ul class="button-group">
+                <li><a href="#" class="small button">Details</a></li>
+              </ul>
+            </td>
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+
+
+  </div>
+</div>
+
+  <script>
+  document.write('<script src=' +
+  ('__proto__' in {} ? 'js/vendor/zepto' : 'js/vendor/jquery') +
+  '.js><\/script>')
+  </script>
+  
+  <script src="js/foundation.min.js"></script>
+  <!--
+  
+  <script src="js/foundation/foundation.js"></script>
+  
+  <script src="js/foundation/foundation.dropdown.js"></script>
+  
+  <script src="js/foundation/foundation.placeholder.js"></script>
+  
+  <script src="js/foundation/foundation.forms.js"></script>
+  
+  <script src="js/foundation/foundation.alerts.js"></script>
+  
+  <script src="js/foundation/foundation.magellan.js"></script>
+  
+  <script src="js/foundation/foundation.reveal.js"></script>
+  
+  <script src="js/foundation/foundation.tooltips.js"></script>
+  
+  <script src="js/foundation/foundation.clearing.js"></script>
+  
+  <script src="js/foundation/foundation.cookie.js"></script>
+  
+  <script src="js/foundation/foundation.joyride.js"></script>
+  
+  <script src="js/foundation/foundation.orbit.js"></script>
+  
+  <script src="js/foundation/foundation.section.js"></script>
+  
+  <script src="js/foundation/foundation.topbar.js"></script>
+  
+  -->
+  
+  <script>
+    $(document).foundation();
+  </script>
+  
+</body>
+</html>
