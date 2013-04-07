@@ -71,6 +71,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _actionPoints = 0;
 
   SetCollideMaskOnSingleNodepath(_object->nodePath, ColMask::DynObject | ColMask::FovTarget);
+  _object->nodePath.set_collide_mask(ColMask::DynObject);
 
   // Line of sight tools
   _losNode      = new CollisionNode("losRay");

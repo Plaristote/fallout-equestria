@@ -103,7 +103,8 @@ public:
   TimeManager&          GetTimeManager(void)  { return (_timeManager); }
   WorldDiplomacy&       GetDiplomacy(void)    { return (_dataEngine.GetDiplomacy()); }
   QuestManager&         GetQuestManager(void) { return (*_quest_manager); }
-  
+  Party*                GetPlayerParty(void)  { return (_playerParty); }
+
   ISampleInstance*      PlaySound(const std::string&);
 
 private:

@@ -375,12 +375,18 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectType(questmanagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(questmanagerClass, "void AddQuest(Data)", asMETHOD(QuestManager,AddQuest), asCALL_THISCALL);
   engine->RegisterObjectMethod(questmanagerClass, "Quest@ opIndex(const string &in)", asMETHODPR(QuestManager,operator[], (const std::string&), Quest*), asCALL_THISCALL);
+  
+  const char* partyClass = "Party";
+  engine->RegisterObjectType(partyClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  OBJ_REF_REGISTER_METHOD(Party, void, Join,  (Character@));
+  OBJ_REF_REGISTER_METHOD(Party, void, Leave, (Character@));
 
   const char* gametaskClass = "Game";
   engine->RegisterObjectType(gametaskClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(gametaskClass, "void PushBuff(Character@, Data)", asMETHODPR(GameTask,PushBuff,(ObjectCharacter*,Data),void), asCALL_THISCALL);
   engine->RegisterObjectMethod(gametaskClass, "void PushBuff(string,     Data)", asMETHODPR(GameTask,PushBuff,(const string&,Data),   void), asCALL_THISCALL);
   engine->RegisterObjectMethod(gametaskClass, "QuestManager@ GetQuestManager()", asMETHOD(GameTask,GetQuestManager), asCALL_THISCALL);
+  engine->RegisterObjectMethod(gametaskClass, "Party@ GetPlayerParty()", asMETHOD(GameTask,GetPlayerParty), asCALL_THISCALL);
 
   engine->RegisterGlobalProperty("Level@    level",    &(Level::CurrentLevel));
   engine->RegisterGlobalProperty("WorldMap@ worldmap", &(WorldMap::CurrentWorldMap));
