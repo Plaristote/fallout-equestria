@@ -3,42 +3,433 @@ GameTask:
   overview: 'The task class that handles the proper execution of an in-progress game.'
 
   methods:
-    - name: 'MapOpenLevel'
-    - name: 'SetLevel'
-    - name: 'do_task'
-      desc: 'Implementation of AsyncTask from Panda3D'
-    - name: 'SaveGame'
-      desc: 'Saves the current state of the game in the path passed as parameter'
-    - name: 'LoadGame'
-      desc: 'Loads a game from the path passed as parameter'
+    - name:  'MapOpenLevel'
+    - name:  'SetLevel'
+    - name:  'do_task'
+      short: 'Implementation of AsyncTask from Panda3D'
+    - name:  'SaveGame'
+      short: 'Saves the current state of the game in the path passed as parameter'
+    - name:  'LoadGame'
+      short: 'Loads a game from the path passed as parameter'
 
   attributes:
-    - name: 'CurrentGameTask'
-      desc: 'Static accessor to the current running GameTask, if one exists. Among other things, it is what the "game" global variable points to in the scripting context'
-    - name: '_signals'
-      desc: 'Handle for registered observers'
-    - name: '_continue'
-      desc: 'The game will stop at its next iteration if this variable is set to false'
-    - name: '_window'
-      desc: "Panda3D's WindowFramework instance"
-    - name: 'SoundManager'
-    - name: 'GameUi'
-    - name: 'DataEngine'
-    - name: 'TimeManager'
-    - name: 'BuffManager'
-    - name: 'Pipbuck'
-    - name: '_charSheet'
-      desc: 'Pointer to the statistic sheet configuration file from the current player.'
-    - name: '_playerParty'
-    - name: '_playerStats'
-    - name: '_playerInventory'
-    - name: '_quest_manager'
-    - name: '_worldMap'
-    - name: '_levelName'
-    - name: '_level'
-    - name: '_savePath'
-      desc: 'Stores the savepath value from [[OptionsManager]].'
-    - name: '_uiSaveGame'
-    - name: '_uiLoadGame'
-    - name: 'obs_level_unpersistent'
-      desc: 'Used in special encounters to handle the observers spawning creeps after the unpersistent level has been loaded.'
+    - name:  'CurrentGameTask'
+      short: 'Static accessor to the current running GameTask. Null if none exists'
+      desc:  'Among other things, it is what the "game" global variable points to in the scripting context.'
+    - name:  '_signals'
+      short: 'Handle for registered observers'
+    - name:  '_continue'
+      short: 'The game will stop at its next iteration if this variable is set to false'
+    - name:  '_window'
+      short: "Panda3D's WindowFramework instance"
+    - name:  'SoundManager'
+    - name:  'GameUi'
+    - name:  'DataEngine'
+    - name:  'TimeManager'
+    - name:  'BuffManager'
+    - name:  'Pipbuck'
+    - name:  '_charSheet'
+      short: 'Pointer to the statistic sheet configuration file from the current player.'
+    - name:  '_playerParty'
+    - name:  '_playerStats'
+    - name:  '_playerInventory'
+    - name:  '_quest_manager'
+    - name:  '_worldMap'
+    - name:  '_levelName'
+    - name:  '_level'
+    - name:  '_savePath'
+      short: 'Stores the savepath value from [[OptionsManager]].'
+    - name:  '_uiSaveGame'
+    - name:  '_uiLoadGame'
+    - name:  'obs_level_unpersistent'
+      short: 'Used in special encounters to handle the observers spawning creeps after the unpersistent level has been loaded.'
+
+TimeManager:
+  overview: |
+    Keeps track of game-relative time. It also provide an API to periodically or spontaneously execute tasks inside the
+    worldmap and/or level contexts.
+    
+WorldDiplomacy:
+  overview: |
+    Extension of the DataEngine providing logical tools to handle faction data. It is used to determine wether two characters
+    are enemies or allies based on their factions. It can also be used to add new factions during the game.
+    
+QuestManager:
+  overview: |
+    This class is the backend for quest managing. It can be used to add or access quests during the game. At level starts,
+    this class is responsible for watching game events: it must find out whenever an objective is fulfilled, and execute
+    the corresponding script hooks.
+
+Quest:
+  overview: |
+    Instance of a Quest that the character is following or has already finished.
+
+Party:
+  overview: |
+    Basically a set of [DynamicObjects] that can be joined or left during the execution of a [Level]. The specialization
+    [PlayerParty] is used in [GameTask] to allow the retrieval / insertion of the player's party when a level is loaded or
+    closed. [Party] is also used in [Level] when spawning characters into a [Zone]
+    
+ISampleInstance:
+  overview: |
+    Interface for a sound sample. It is used as a mean to keep a sample alive as long as needed: if the reference counter is
+    null when the sound stops playing, it will be garbage collected. Reference counter can be modified using AddReference and
+    DelReference.
+    
+SoundManager:
+  overview: |
+    Handles requests and garbage collecting for sound files (returned as [ISampleInstance]).
+    
+GameUi:
+  overview: |
+    Container for global UIs relevant to a GameTask instance (console, menu, inventory and character stats).
+
+DataEngine:
+  overview: |
+    Class handle for all the data generated by the game. It is used by scripts to store data and by the core parts to
+    load data relevant to the current instance of the game.
+    
+BuffManager:
+  overview: |
+    Handle the loading, saving and correct execution of buffs applied to characters during the execution of [Level] or
+    [WorldMap].
+
+Pipbuck:
+  overview: |
+    Main controller for the pipbuck. It handles the execution and contexts of [Pipbuck::App]s.
+
+'Pipbuck::App':
+  overview: |
+    Interface representing a running application from the [Pipbuck].
+    
+PipbuckAppScript:
+  overview: |
+    Controls a [Pipbcuk::App] running from a script file.
+
+DataTree:
+  overview: |
+    Representation as a tree of a loaded configuration file (mainly JSON).
+    
+PlayerParty:
+  overview: |
+    Specialization of [Party] for the player's party
+
+StatController:
+  overview: |
+    Controller of the MVC pattern used in CMAP (Cutie Mark Acquisition Program)
+    
+Inventory:
+  overview: |
+    Controller for a character's inventory
+    
+WorldMap:
+  overview: |
+    One of the three main parts of the game engine's core, it handles everything that happens when the player is
+    exploring the world map.
+    
+Level:
+  overview: |
+    One of the three main parts of the game engine's core, it handles everything that happens when the player is
+    inside a level.
+    
+UiSave:
+  overview: |
+    Interface for saving the game.
+    
+UiLoad:
+  overview: |
+    Interface for loading the game.
+    
+Data:
+  overview: |
+    Handle for a [DataBranch]. It allow safe polymorphic access to, and dynamic creation of sub-branches. It also
+    provide different tools to ease the management of a data tree.
+    
+  methods:
+    - name:  'Key'
+      short: 'Returns the key of the current element as a string'
+    - name:  'Value'
+      short: 'Returns the value of the current element as a string'
+    - name:  'SetKey'
+      short: 'Changes the key of the current element'
+    - name:  'Duplicate'
+      short: 'Duplicates all elements of the branch passed as a paremter into the current element'
+    - short: |
+        A templated cast operator allowing polymorphic access of the current element's value. It supports every type supported by [std::stringstream]
+    - name:  'Remove'
+      short: 'If the current element already exists, it will be removed from the tree after this [Data] is destroyed'
+    - name:  'Nil'
+      short: |
+        Returns true if the current branch doesn't exist
+    - name:  'NotNil'
+      short: 'Returns true if the current branch exists'
+    - name:  'Parent'
+      short: 'Returns the parent branch as a [Data] instance. If the current element has no parent, the Nil method of the returned [Data] will return true'
+
+DataBranch:
+  overview: |
+    Leaf or root of a data tree. It should always be handled using the [Data] object as a wrapper.
+    
+  attributes:
+    - name:  'key'
+      short: 'name of the node'
+    - name:  'value'
+      short: 'value of the branch, stored as a string. It can be converted to other types by using [Data].'
+    - name:  'children'
+      short: 'list of children nodes'
+    - name:  'father'
+      short: 'points to the parent node if there is one, null otherwise.'
+    - name:  'nil'
+      short: 'is true if the current branch is temporary. If set to true, the Data wrappers will destroy it after all the instances of Data wrapping it are destoryed'
+    - name:  'root'
+      short: 'must be true if the branch is the root of the tree'
+    - name:  'pointers'
+      short: 'reference counter used by the [Data] wrapper.'
+      
+'DataTree::Factory':
+  overview: |
+    Set of methods for generating DataTree.
+    
+'DataTree::Writers':
+  overview: |
+    Set of methods to serialize DataTrees.
+    
+Dices:
+  overview: |
+    Abstraction for random operations.
+
+Filesystem:
+  overview: |
+    Abstraction for file management.
+    
+Directory:
+  overview: |
+    Abstraction for directory management.
+    
+  attributes:
+    - name:  '_dirEntries'
+      short: 'List of entries for the current opened directory'
+    - name:  '_dirName'
+      short: 'Name of the currently opened directory'
+      
+Executor:
+  overview: |
+    Singleton for executing lambdas asynchronously
+    
+Buff:
+  overview: |
+    This class controls the effects of buffs that are placed on a character.
+    
+BuffManager:
+  overview: |
+    Class responsible for loading, saving, and schedule [Buff]s.
+
+GameMenu:
+  overview: |
+    UI for the in-game main menu.
+    
+GameMainBar:
+  overview: |
+    UI for the HUD used while the player is inside a [Level].
+
+GameInventory:
+  overview: |
+    UI for the player's inventory.
+    
+GameConsole:
+  overview: |
+    UI and controls for the console.
+
+LoadingScreen:
+  overview: |
+    UI for the loading screen.
+    
+LevelUi:
+  overview: |
+    Container for all the [Level] specific parts of the interface.
+    
+GeneralUi:
+  overview: |
+    Container for the parts of the interface that are present from beginning to exiting of the game.
+
+GameOptions:
+  overview: |
+    UI giving access of the [OptionManager] values to the player.
+    
+OptionsManager:
+  overview: |
+    Handles the access and persistence of game options. Synchronizes with [GameOptions].
+    
+AlertUi:
+  overview: |
+    Creates alerts to warn the user of game engine, scripting or configuration malfunctions.
+    
+i18n:
+  overview: |
+    Intertionalization
+    
+UiObjectQuantityPicker:
+  overview: |
+    UI for picking quantities when moving objects from an inventory to another.
+    
+InventoryView:
+  overview: |
+    View for the Inventory MVC UI.
+    
+InventoryViewController:
+  overview: |
+    Controller for the Inventory MVC UI.
+    
+UiUseObjectOn:
+  overview: |
+    UI used when the player ask to use an object on a [DynamicObject].
+    
+UiBarter:
+  overview: |
+    UI used when characters are bartering.
+    
+UiLoot:
+  overview: |
+    UI used when the player is looting other inventories (bodies, lockers, etc).
+    
+UiEquipMode:
+  overview: |
+    UI for picking the way a character will yield an object.
+    
+UiNextZone:
+  overview: |
+    UI used to pick the next zone when leaving a level. Used only when several choices are availables.
+    
+CharacterBuff:
+  overview: |
+    Instance of a buff placed on an [ObjectCharacter].
+    
+ObjectCharacter:
+  overview: |
+    Controls the logical and displaying parts of a character or NPC.
+    
+'ObjectCharacter::FovEnemy':
+  overview: |
+    Represents a character detected by another character
+    
+  attributes:
+    - name:  'ttl'
+      short: 'Time to live, determine how much field of view checks will be executed before the character loses track of this target'
+
+'ObjectCharacter::ItemEquiped':
+  overview: |
+    Controller for an item that is equiped by a character.
+    
+'WorldDiplomacy::Faction':
+  overview: |
+    Represents a game faction for the diplomacy system.
+    
+Timer:
+  overview: |
+    Abstraction for realtime management.
+    
+'TimeManager::Task':
+  overview: |
+    A task that will be spontaneously or regularly executed by the [TimeManager].
+    
+UiDialog:
+  overview: |
+    UI for prompting the player to pick a decision from a list.
+    
+'UiDialog::Button':
+  overview: |
+    Button representing a choice for the [UiDialog] object.
+    
+'WorldMap::City':
+  overview: |
+    Represents a city in the [WorldMap] object.
+    
+Scriptable:
+  overview: |
+    Component for class that must load and execute functions from scripts.
+    
+UiBase:
+  overview: |
+    Component for a class that implements a Rocket interface.
+
+WaypointModifier:
+  overview: |
+    Component for an object that will affect the pathfinding.
+    
+InstanceDynamicObject:
+  overview: |
+    Instance of a [DynamicObject] created by the [Level].
+    
+LevelExitZone:
+  overview: |
+    Represent an exiting zone: a set of waypoints that cause the player to go to another
+    zone or to pick another zone when he walks over them.
+    
+Waypoint:
+  overview: |
+    A waypoint, used as nodes for the positioning and pathfinding system.
+    
+'Waypoint::ArcObserver':
+  overview: |
+    An interface that allows to the implementation to be warned when a character is passing
+    through it and/or to forbid them to pass.
+    
+'Waypoint::Arc':
+  overview: |
+    A connection between two [Waypoint]s.
+    
+MapObject:
+  overview: |
+    An object from a level represented by a model.
+    
+DynamicObject:
+  overview: |
+    A MapObject that also packs configuration for scripting, dialogs, interactions and inventory.
+    
+Zone:
+  overview: |
+    A set of waypoints.
+    
+World:
+  overview: |
+    Stores all persistent data about a level.
+    
+MainMenu:
+  overview: |
+    Top-level task of the whole game. Handles the main menu and the proper execution of the sub tasks.
+    
+'MainMenu::View':
+  overview: |
+    UI for the MainMenu.
+    
+MusicManager:
+  overview: |
+    Handle the playlists and provide an interface for playing music during the game.
+    
+UiNewGame:
+  overview: |
+    UI for starting a new game.
+    
+NewGameTask:
+  overview: |
+    Task executed when the player is starting a new game.
+
+Signal:
+  overview: |
+    Template for the Observer design pattern. Allows the implementation of signal/slot behaviors.
+    
+ObserverHandler:
+  overview: |
+    Handles a set of observers connected to signals. Automatically disconnect all the observers when the instance of ObserverHandler is destroyed.
+    
+StdList:
+  overview: |
+    Script interface for std::list.
+    
+Serializable:
+  overview: |
+    Interface for declaring objects that can be passed through the [Packet] serializer.
+    
+Packet:
+  overview: |
+    Object for packing in / packing out objects in a serializable fashion.

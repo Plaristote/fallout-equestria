@@ -73,13 +73,20 @@
           </ul>
         </div><!--/.nav-collapse -->
         
-	<div style="float:right;">
+
+        <div style="float:right;">
 	  <div id='visibility-filter' class='btn-group' data-toggle='buttons-checkbox'>
 	    <button type='button' class='btn btn-primary visibility-public'>Public</button>
 	    <button type='button' class='btn btn-primary visibility-protected'>Protected</button>
 	    <button type='button' class='btn btn-primary visibility-private'>Private</button>
 	  </div>      
 	</div>
+        <div style="float:right;">
+	  <div id='folding-filter' class='btn-group'>
+	    <button type='button' class='btn' id='fold-all'><i class='icon-chevron-up'></i> Fold</button>
+	    <button type='button' class='btn' id='unfold-all'><i class='icon-chevron-down'></i> Unfold</button>
+	  </div>
+        </div>
         
       </div>
     </div>
@@ -89,7 +96,7 @@
     <div class="row-fluid">
         
       <!-- left menu starts -->
-      <div id="main-menu" class="span2 main-menu-span" style="position: fixed;">
+      <div id="main-menu" class="span2 main-menu-span" style="position: fixed; top: 75px;">
         <div class="well nav-collapse sidebar-nav">
           <ul class="nav nav-tabs nav-stacked main-menu">
             <li class="nav-header hidden-tablet" style="text-align:center;">Fallout Equestria</li>
@@ -103,7 +110,7 @@
       </div><!--/span-->
       <!-- left menu ends -->
 
-      <div class='after-menu' style="padding-left: 185px; margin-right: -185px;">
+      <div class='after-menu' style="padding-left: 185px; margin-right: -185px; padding-top: 50px;">
       
       <noscript>
         <div class="alert alert-block span10">

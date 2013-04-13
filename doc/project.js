@@ -1,6 +1,6 @@
 var project = {
   name: "Fallout: Equestria RPG",
-  desc: {"homepage":"<h5>Overview</h5>\nI'm far too stoned to elaborate.\n"},
+  desc: {"homepage":"<p>\n  <h5>Overview</h5>\n  I'm far too stoned to elaborate.\n</p>\n<p>\n  <h5>Getting started</h5>\n  The main loop is probably the best place to get started if you need to study the game's architecture.<br />\n  The classes handling the main loop are respectively:<br />\n  <ul>\n    <li>[MainMenu]</li>\n    <li>[NewGameTask] <i>Task executed when the user is in the New Game context</i></li>\n    <li>[GameTask]    <i>Task executed when the user is playing the game</i>\n      <ul>\n        <li>[WorldMap] <i>Task executed when the user is exploring the worldmap</i></li>\n        <li>[Level]    <i>Task executed when the user is in a loaded map</i></li>\n      </ul>\n    </li>\n  </ul>\n</p>\n"},
   types: [
     
       {
@@ -8,10 +8,11 @@ var project = {
         file:       "include/serializer.hpp",
         decl:       "struct",
         namespaces: ["Serializable"],
+        doc:        {"overview":"Interface for declaring objects that can be passed through the [Packet] serializer.\n","detail":null},
         methods: [
           {
               name:        "Serialize",
-              params:      "Packet&",
+              params:      ["(Packet&)"],
               attrs:       68,
               desc:        "",
               return_type: "void",
@@ -19,7 +20,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Unserialize",
-              params:      "Packet&",
+              params:      ["(Packet&)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -39,10 +40,11 @@ var project = {
         file:       "include/serializer.hpp",
         decl:       "class",
         namespaces: ["Packet"],
+        doc:        {"overview":"Object for packing in / packing out objects in a serializable fashion.","detail":null},
         methods: [
           {
               name:        "raw",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "char",
@@ -50,7 +52,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "size",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "size_t",
@@ -58,7 +60,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PrintContent",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -66,7 +68,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PrintRawContent",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -74,7 +76,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Unserialize",
-              params:      "T& v",
+              params:      ["(T& v)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -82,7 +84,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SerializeArray",
-              params:      "T& tehList",
+              params:      ["(T& tehList)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -90,7 +92,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "canIHaz",
-              params:      "size_t sizeType,int howMany",
+              params:      ["(size_t sizeType","int howMany)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -98,7 +100,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "checkType",
-              params:      "int assumedType",
+              params:      ["(int assumedType)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -106,7 +108,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "realloc",
-              params:      "int newsize",
+              params:      ["(int newsize)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -114,7 +116,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "updateHeader",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -122,7 +124,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "read",
-              params:      "T& tmp",
+              params:      ["(T& tmp)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -240,10 +242,11 @@ var project = {
         file:       "include/serializer.hpp",
         decl:       "struct",
         namespaces: ["Packet","Packet::SelectUnserializer"],
+        
         methods: [
           {
               name:        "Func",
-              params:      "Utils::Packet& packet,T& v",
+              params:      ["(Utils::Packet& packet","T& v)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -263,6 +266,7 @@ var project = {
         file:       "include/serializer.hpp",
         decl:       "struct",
         namespaces: ["Packet","Packet::TypeToCode"],
+        
         methods: [
           
         ],
@@ -278,10 +282,11 @@ var project = {
         file:       "include/level/world.h",
         decl:       "struct",
         namespaces: ["FBoundingBox"],
+        
         methods: [
           {
               name:        "Intersects",
-              params:      "float x,float y",
+              params:      ["(float x","float y)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -329,10 +334,11 @@ var project = {
         file:       "include/level/world.h",
         decl:       "struct",
         namespaces: ["Waypoint"],
+        doc:        {"overview":"A waypoint, used as nodes for the positioning and pathfinding system.\n","detail":null},
         methods: [
           {
               name:        "WithdrawArc",
-              params:      "Waypoint* other",
+              params:      ["(Waypoint* other)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -340,7 +346,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UnwithdrawArc",
-              params:      "Waypoint* other,ArcObserver* observer",
+              params:      ["(Waypoint* other","ArcObserver* observer)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -348,7 +354,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetWithdrawable",
-              params:      "Waypoint* other",
+              params:      ["(Waypoint* other)"],
               attrs:       0,
               desc:        "",
               return_type: "",
@@ -356,7 +362,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ConnectUnsafe",
-              params:      "Waypoint* other",
+              params:      ["(Waypoint* other)"],
               attrs:       0,
               desc:        "",
               return_type: "Arcs::iterator",
@@ -364,7 +370,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Connect",
-              params:      "Waypoint* other",
+              params:      ["(Waypoint* other)"],
               attrs:       0,
               desc:        "",
               return_type: "Arcs::iterator",
@@ -372,7 +378,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Disconnect",
-              params:      "Waypoint* other",
+              params:      ["(Waypoint* other)"],
               attrs:       0,
               desc:        "",
               return_type: "Arcs::iterator",
@@ -380,7 +386,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DisconnectAll",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -388,7 +394,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetArcTo",
-              params:      "unsigned int id",
+              params:      ["(unsigned int id)"],
               attrs:       0,
               desc:        "",
               return_type: "Waypoint::Arc",
@@ -396,7 +402,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PositionChanged",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -404,7 +410,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UpdateArcDirection",
-              params:      "Waypoint*",
+              params:      ["(Waypoint*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -412,7 +418,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetSelected",
-              params:      "bool",
+              params:      ["(bool)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -420,7 +426,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsSelected",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -428,7 +434,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetArcsVisible",
-              params:      "bool",
+              params:      ["(bool)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -436,7 +442,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GoalDistanceEstimate",
-              params:      "const Waypoint& goal",
+              params:      ["(const Waypoint& goal)"],
               attrs:       4,
               desc:        "",
               return_type: "float",
@@ -444,7 +450,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetDistanceEstimate",
-              params:      "const Waypoint& other",
+              params:      ["(const Waypoint& other)"],
               attrs:       4,
               desc:        "",
               return_type: "float",
@@ -452,7 +458,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetCost",
-              params:      "Waypoint&",
+              params:      ["(Waypoint&)"],
               attrs:       0,
               desc:        "",
               return_type: "float",
@@ -460,7 +466,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LoadArcs",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -468,7 +474,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Unserialize",
-              params:      "Utils::Packet& packet",
+              params:      ["(Utils::Packet& packet)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -476,7 +482,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UnserializeLoadArcs",
-              params:      "World*",
+              params:      ["(World*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -484,7 +490,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Serialize",
-              params:      "Utils::Packet& packet",
+              params:      ["(Utils::Packet& packet)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -492,7 +498,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetMouseBox",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -567,10 +573,11 @@ var project = {
         file:       "include/level/world.h",
         decl:       "struct",
         namespaces: ["Waypoint","Waypoint::ArcObserver"],
+        doc:        {"overview":"An interface that allows to the implementation to be warned when a character is passing\nthrough it and/or to forbid them to pass.\n","detail":null},
         methods: [
           {
               name:        "CanGoThrough",
-              params:      "unsigned char type",
+              params:      ["(unsigned char type)"],
               attrs:       64,
               desc:        "",
               return_type: "bool",
@@ -578,7 +585,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GoingThrough",
-              params:      "void*",
+              params:      ["(void*)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -598,10 +605,11 @@ var project = {
         file:       "include/level/world.h",
         decl:       "struct",
         namespaces: ["Waypoint","Waypoint::Arc"],
+        doc:        {"overview":"A connection between two [Waypoint]s.\n","detail":null},
         methods: [
           {
               name:        "UpdateDirection",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -609,7 +617,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Destroy",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -617,7 +625,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetVisible",
-              params:      "bool",
+              params:      ["(bool)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -669,10 +677,11 @@ var project = {
         file:       "include/level/world.h",
         decl:       "struct",
         namespaces: ["MapObject"],
+        doc:        {"overview":"An object from a level represented by a model.\n","detail":null},
         methods: [
           {
               name:        "UnSerialize",
-              params:      "WindowFramework* window,Utils::Packet& packet",
+              params:      ["(WindowFramework* window","Utils::Packet& packet)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -680,7 +689,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Serialize",
-              params:      "Utils::Packet& packet",
+              params:      ["(Utils::Packet& packet)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -728,10 +737,11 @@ var project = {
         file:       "include/level/world.h",
         decl:       "struct",
         namespaces: ["DynamicObject","","MapObject"],
+        doc:        {"overview":"A MapObject that also packs configuration for scripting, dialogs, interactions and inventory.\n","detail":null},
         methods: [
           {
               name:        "UnSerialize",
-              params:      "World*,Utils::Packet& packet",
+              params:      ["(World*","Utils::Packet& packet)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -739,7 +749,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Serialize",
-              params:      "Utils::Packet& packet",
+              params:      ["(Utils::Packet& packet)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -821,6 +831,7 @@ var project = {
         file:       "include/level/world.h",
         decl:       "struct",
         namespaces: ["Zone"],
+        doc:        {"overview":"A set of waypoints.\n","detail":null},
         methods: [
           
         ],
@@ -843,6 +854,7 @@ var project = {
         file:       "include/level/world.h",
         decl:       "struct",
         namespaces: ["ExitZone","","Zone"],
+        
         methods: [
           
         ],
@@ -862,10 +874,11 @@ var project = {
         file:       "include/level/world.h",
         decl:       "struct",
         namespaces: ["WorldLight"],
+        
         methods: [
           {
               name:        "GetColor",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "LColor",
@@ -873,7 +886,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetColor",
-              params:      "float r,float g,float b,float a",
+              params:      ["(float r","float g","float b","float a)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -881,7 +894,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "color",
-              params:      "r,g,b,a",
+              params:      ["(r","g","b","a)"],
               attrs:       0,
               desc:        "",
               return_type: "LColor",
@@ -889,7 +902,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UnSerialize",
-              params:      "World*,Utils::Packet& packet",
+              params:      ["(World*","Utils::Packet& packet)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -897,7 +910,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Serialize",
-              params:      "Utils::Packet& packet",
+              params:      ["(Utils::Packet& packet)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -905,7 +918,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ReparentTo",
-              params:      "DynamicObject* object",
+              params:      ["(DynamicObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -913,7 +926,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ReparentTo",
-              params:      "MapObject* object",
+              params:      ["(MapObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -921,7 +934,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Initialize",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -999,10 +1012,11 @@ var project = {
         file:       "include/level/world.h",
         decl:       "struct",
         namespaces: ["World"],
+        doc:        {"overview":"Stores all persistent data about a level.\n","detail":null},
         methods: [
           {
               name:        "FloorResize",
-              params:      "int",
+              params:      ["(int)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1010,7 +1024,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddWayPoint",
-              params:      "float x,float y,float z",
+              params:      ["(float x","float y","float z)"],
               attrs:       0,
               desc:        "",
               return_type: "Waypoint",
@@ -1018,7 +1032,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DeleteWayPoint",
-              params:      "Waypoint*",
+              params:      ["(Waypoint*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1026,7 +1040,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetWaypointFromNodePath",
-              params:      "NodePath path",
+              params:      ["(NodePath path)"],
               attrs:       0,
               desc:        "",
               return_type: "Waypoint",
@@ -1034,7 +1048,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetWaypointFromId",
-              params:      "unsigned int id",
+              params:      ["(unsigned int id)"],
               attrs:       0,
               desc:        "",
               return_type: "Waypoint",
@@ -1042,7 +1056,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetWaypointClosest",
-              params:      "LPoint3",
+              params:      ["(LPoint3)"],
               attrs:       0,
               desc:        "",
               return_type: "Waypoint",
@@ -1050,7 +1064,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetWaypointsVisible",
-              params:      "bool v",
+              params:      ["(bool v)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1058,7 +1072,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetWaypointLimits",
-              params:      "short currentFloor,LPoint3& upperRight,LPoint3& upperLeft,LPoint3& bottomLeft",
+              params:      ["(short currentFloor","LPoint3& upperRight","LPoint3& upperLeft","LPoint3& bottomLeft)"],
               attrs:       4,
               desc:        "",
               return_type: "void",
@@ -1066,7 +1080,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetWaypointPlane",
-              params:      "short currentFloor",
+              params:      ["(short currentFloor)"],
               attrs:       4,
               desc:        "",
               return_type: "LPlane",
@@ -1074,7 +1088,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DeleteObject",
-              params:      "MapObject* ptr,std::list<OBJTYPE>& list",
+              params:      ["(MapObject* ptr","std::list<OBJTYPE>& list)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1082,7 +1096,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetObjectFromName",
-              params:      "const std::string& name,std::list<OBJTYPE>& list",
+              params:      ["(const std::string& name","std::list<OBJTYPE>& list)"],
               attrs:       0,
               desc:        "",
               return_type: "OBJTYPE",
@@ -1090,7 +1104,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetObjectFromNodePath",
-              params:      "NodePath path,std::list<OBJTYPE>& list",
+              params:      ["(NodePath path","std::list<OBJTYPE>& list)"],
               attrs:       0,
               desc:        "",
               return_type: "OBJTYPE",
@@ -1098,7 +1112,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ObjectChangeFloor",
-              params:      "MapObject&,unsigned char floor,unsigned short type",
+              params:      ["(MapObject&","unsigned char floor","unsigned short type)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1106,7 +1120,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddMapObject",
-              params:      "const std::string& name,const std::string& model,const std::string& texture,float x,float y,float z",
+              params:      ["(const std::string& name","const std::string& model","const std::string& texture","float x","float y","float z)"],
               attrs:       0,
               desc:        "",
               return_type: "MapObject",
@@ -1114,7 +1128,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DeleteMapObject",
-              params:      "MapObject*",
+              params:      ["(MapObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1122,7 +1136,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetMapObjectFromName",
-              params:      "const std::string& name",
+              params:      ["(const std::string& name)"],
               attrs:       0,
               desc:        "",
               return_type: "MapObject",
@@ -1130,7 +1144,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetMapObjectFromNodePath",
-              params:      "NodePath path",
+              params:      ["(NodePath path)"],
               attrs:       0,
               desc:        "",
               return_type: "MapObject",
@@ -1138,7 +1152,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetMapObjectsVisible",
-              params:      "bool v",
+              params:      ["(bool v)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1146,7 +1160,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "MapObjectChangeFloor",
-              params:      "MapObject&,unsigned char floor",
+              params:      ["(MapObject&","unsigned char floor)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1154,7 +1168,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "InsertDynamicObject",
-              params:      "DynamicObject&",
+              params:      ["(DynamicObject&)"],
               attrs:       0,
               desc:        "",
               return_type: "DynamicObject",
@@ -1162,7 +1176,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddDynamicObject",
-              params:      "const std::string& name,DynamicObject::Type type,const std::string& model,const std::string& texture",
+              params:      ["(const std::string& name","DynamicObject::Type type","const std::string& model","const std::string& texture)"],
               attrs:       0,
               desc:        "",
               return_type: "DynamicObject",
@@ -1170,7 +1184,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DeleteDynamicObject",
-              params:      "DynamicObject*",
+              params:      ["(DynamicObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1178,7 +1192,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetDynamicObjectFromName",
-              params:      "const std::string& name",
+              params:      ["(const std::string& name)"],
               attrs:       0,
               desc:        "",
               return_type: "DynamicObject",
@@ -1186,7 +1200,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetDynamicObjectFromNodePath",
-              params:      "NodePath path",
+              params:      ["(NodePath path)"],
               attrs:       0,
               desc:        "",
               return_type: "DynamicObject",
@@ -1194,7 +1208,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetDynamicObjectsVisible",
-              params:      "bool v",
+              params:      ["(bool v)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1202,7 +1216,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DynamicObjectSetWaypoint",
-              params:      "DynamicObject&,Waypoint&",
+              params:      ["(DynamicObject&","Waypoint&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1210,7 +1224,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DynamicObjectChangeFloor",
-              params:      "DynamicObject&,unsigned char floor",
+              params:      ["(DynamicObject&","unsigned char floor)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1218,7 +1232,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddExitZone",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1226,7 +1240,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DeleteExitZone",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1234,7 +1248,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetExitZoneByName",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "ExitZone",
@@ -1242,7 +1256,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddEntryZone",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1250,7 +1264,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DeleteEntryZone",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1258,7 +1272,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetEntryZoneByName",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "EntryZone",
@@ -1266,7 +1280,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddLight",
-              params:      "WorldLight::Type,const std::string&",
+              params:      ["(WorldLight::Type","const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1274,7 +1288,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddLight",
-              params:      "WorldLight::Type,const std::string&,MapObject* parent",
+              params:      ["(WorldLight::Type","const std::string&","MapObject* parent)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1282,7 +1296,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddLight",
-              params:      "WorldLight::Type,const std::string&,DynamicObject* parent",
+              params:      ["(WorldLight::Type","const std::string&","DynamicObject* parent)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1290,7 +1304,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DeleteLight",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1298,7 +1312,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetLightByName",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "WorldLight",
@@ -1306,7 +1320,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CompileLight",
-              params:      "WorldLight*,unsigned char = ColMask::Object | ColMask::DynObject",
+              params:      ["(WorldLight*","unsigned char = ColMask::Object | ColMask::DynObject)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1314,7 +1328,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetWaypointAt",
-              params:      "LPoint2f",
+              params:      ["(LPoint2f)"],
               attrs:       0,
               desc:        "",
               return_type: "Waypoint",
@@ -1322,7 +1336,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UnSerialize",
-              params:      "Utils::Packet& packet",
+              params:      ["(Utils::Packet& packet)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1330,7 +1344,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Serialize",
-              params:      "Utils::Packet& packet",
+              params:      ["(Utils::Packet& packet)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1338,7 +1352,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CompileWaypoints",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1346,7 +1360,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CompileDoors",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1471,10 +1485,11 @@ var project = {
         file:       "include/playerparty.hpp",
         decl:       "class",
         namespaces: ["Party"],
+        doc:        {"overview":"Basically a set of [DynamicObjects] that can be joined or left during the execution of a [Level]. The specialization\n[PlayerParty] is used in [GameTask] to allow the retrieval / insertion of the player's party when a level is loaded or\nclosed. [Party] is also used in [Level] when spawning characters into a [Zone]\n","detail":null},
         methods: [
           {
               name:        "Join",
-              params:      "DynamicObject*",
+              params:      ["(DynamicObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1482,7 +1497,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Leave",
-              params:      "DynamicObject*",
+              params:      ["(DynamicObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1490,7 +1505,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ConstGetObjects",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "Party::DynamicObjects",
@@ -1498,7 +1513,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetObjects",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Party::DynamicObjects",
@@ -1527,10 +1542,11 @@ var project = {
         file:       "include/playerparty.hpp",
         decl:       "class",
         namespaces: ["PlayerParty","","Party"],
+        doc:        {"overview":"Specialization of [Party] for the player's party\n","detail":null},
         methods: [
           {
               name:        "Create",
-              params:      "const std::string& savepath,const std::string& name,const std::string& model,const std::string& texture",
+              params:      ["(const std::string& savepath","const std::string& name","const std::string& model","const std::string& texture)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -1538,7 +1554,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Save",
-              params:      "const std::string& savepath",
+              params:      ["(const std::string& savepath)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -1546,7 +1562,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetHasLocalObjects",
-              params:      "bool val",
+              params:      ["(bool val)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1554,7 +1570,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Serialize",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       4,
               desc:        "",
               return_type: "void",
@@ -1562,7 +1578,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "UnSerialize",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1593,10 +1609,11 @@ var project = {
         file:       "include/semaphore.hpp",
         decl:       "class",
         namespaces: ["Semaphore"],
+        
         methods: [
           {
               name:        "TryWait",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -1604,7 +1621,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "Wait",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -1612,7 +1629,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "Post",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -1620,7 +1637,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SetDeadlockSafety",
-              params:      "bool to_set",
+              params:      ["(bool to_set)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1628,7 +1645,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SelfLock",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       36,
               desc:        "",
               return_type: "bool",
@@ -1636,7 +1653,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GetCurrentThreadId",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "Semaphore::ThreadId",
@@ -1695,6 +1712,7 @@ var project = {
         file:       "include/semaphore.hpp",
         decl:       "class",
         namespaces: ["Semaphore","Semaphore::Lock"],
+        
         methods: [
           
         ],
@@ -1719,10 +1737,11 @@ var project = {
         file:       "include/observatory.hpp",
         decl:       "class",
         namespaces: ["ISignal"],
+        
         methods: [
           {
               name:        "ExecuteRecordedCalls",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -1730,7 +1749,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetDirect",
-              params:      "bool",
+              params:      ["(bool)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -1750,10 +1769,11 @@ var project = {
         file:       "include/observatory.hpp",
         decl:       "class",
         namespaces: ["Signals",""],
+        
         methods: [
           {
               name:        "ExecuteRecordedCalls",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1777,10 +1797,11 @@ var project = {
         file:       "include/observatory.hpp",
         decl:       "class",
         namespaces: ["Signal",""],
+        doc:        {"overview":"Template for the Observer design pattern. Allows the implementation of signal/slot behaviors.\n","detail":null},
         methods: [
           {
               name:        "SetDirect",
-              params:      "bool set",
+              params:      ["(bool set)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1788,7 +1809,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsDirect",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -1796,7 +1817,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Emit",
-              params:      "",
+              params:      ["()"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1804,7 +1825,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Connect",
-              params:      "ObserverClass& observerInstance,typename Observer<ObserverClass>::Method method",
+              params:      ["(ObserverClass& observerInstance","typename Observer<ObserverClass>::Method method)"],
               attrs:       0,
               desc:        "",
               return_type: "ObserverId",
@@ -1812,7 +1833,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Connect",
-              params:      "typename FunctionObserver::Function function",
+              params:      ["(typename FunctionObserver::Function function)"],
               attrs:       0,
               desc:        "",
               return_type: "ObserverId",
@@ -1820,7 +1841,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Disconnect",
-              params:      "ObserverId id",
+              params:      ["(ObserverId id)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1828,7 +1849,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DisconnectAll",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1836,7 +1857,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ObserverCount",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       36,
               desc:        "",
               return_type: "int",
@@ -1844,7 +1865,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ExecuteRecordedCalls",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1852,7 +1873,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "lock",
-              params:      "_semaphore",
+              params:      ["(_semaphore)"],
               attrs:       0,
               desc:        "",
               return_type: "Semaphore::Lock",
@@ -1860,7 +1881,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FuncExecuteRecordedCalls",
-              params:      "RecordedCalls& calls",
+              params:      ["(RecordedCalls& calls)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1868,7 +1889,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PushRecordCall",
-              params:      "Utils::Packet& packet",
+              params:      ["(Utils::Packet& packet)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1876,7 +1897,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "lock",
-              params:      "_semaphore",
+              params:      ["(_semaphore)"],
               attrs:       0,
               desc:        "",
               return_type: "Semaphore::Lock",
@@ -1884,7 +1905,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FetchRecordCall",
-              params:      "Utils::Packet& packet",
+              params:      ["(Utils::Packet& packet)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -1892,7 +1913,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "lock",
-              params:      "_semaphore",
+              params:      ["(_semaphore)"],
               attrs:       0,
               desc:        "",
               return_type: "Semaphore::Lock",
@@ -1900,7 +1921,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RecordCallCount",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "int",
@@ -1908,7 +1929,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "lock",
-              params:      "_semaphore",
+              params:      ["(_semaphore)"],
               attrs:       0,
               desc:        "",
               return_type: "Semaphore::Lock",
@@ -1916,7 +1937,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PushedCallCount",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "int",
@@ -1924,7 +1945,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "lock",
-              params:      "_semaphore",
+              params:      ["(_semaphore)"],
               attrs:       0,
               desc:        "",
               return_type: "Semaphore::Lock",
@@ -1932,7 +1953,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "BackupRecordedCalls",
-              params:      "bool on_off",
+              params:      ["(bool on_off)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1940,7 +1961,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddObserver",
-              params:      "InterfaceObserver* observer",
+              params:      ["(InterfaceObserver* observer)"],
               attrs:       0,
               desc:        "",
               return_type: "ObserverId",
@@ -2030,10 +2051,11 @@ var project = {
         file:       "include/observatory.hpp",
         decl:       "struct",
         namespaces: ["Signal","Signal::InterfaceObserver"],
+        
         methods: [
           {
               name:        "operator",
-              params:      "",
+              params:      ["()"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -2062,10 +2084,11 @@ var project = {
         file:       "include/observatory.hpp",
         decl:       "class",
         namespaces: ["Signal","Signal::FunctionObserver","","Signal","Signal::InterfaceObserver"],
+        
         methods: [
           {
               name:        "operator",
-              params:      "",
+              params:      ["()"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2098,10 +2121,11 @@ var project = {
         file:       "include/observatory.hpp",
         decl:       "class",
         namespaces: ["Signal","Signal::Observer","","Signal","Signal::InterfaceObserver"],
+        
         methods: [
           {
               name:        "operator",
-              params:      "",
+              params:      ["()"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2139,10 +2163,11 @@ var project = {
         file:       "include/observatory.hpp",
         decl:       "struct",
         namespaces: ["Signal","Signal::RecordedCall"],
+        
         methods: [
           {
               name:        "Serialize",
-              params:      "Utils::Packet& packet",
+              params:      ["(Utils::Packet& packet)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2150,7 +2175,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Unserialize",
-              params:      "Utils::Packet& packet",
+              params:      ["(Utils::Packet& packet)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2177,10 +2202,11 @@ var project = {
         file:       "include/observatory.hpp",
         decl:       "class",
         namespaces: ["ObserverHandler"],
+        doc:        {"overview":"Handles a set of observers connected to signals. Automatically disconnect all the observers when the instance of ObserverHandler is destroyed.\n","detail":null},
         methods: [
           {
               name:        "DisconnectAll",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2188,7 +2214,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DisconnectAllFrom",
-              params:      "const ISignal& signal",
+              params:      ["(const ISignal& signal)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2196,7 +2222,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Add",
-              params:      "C& signal,ObserverId id",
+              params:      ["(C& signal","ObserverId id)"],
               attrs:       32,
               desc:        "",
               return_type: "void",
@@ -2204,7 +2230,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Connect",
-              params:      "C& signal,ObserverClass& observerInstance,typename C::template Observer<ObserverClass>::Method method",
+              params:      ["(C& signal","ObserverClass& observerInstance","typename C::template Observer<ObserverClass>::Method method)"],
               attrs:       32,
               desc:        "",
               return_type: "void",
@@ -2212,7 +2238,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Connect",
-              params:      "C& signal,typename C::FunctionObserver::Function function",
+              params:      ["(C& signal","typename C::FunctionObserver::Function function)"],
               attrs:       32,
               desc:        "",
               return_type: "void",
@@ -2241,10 +2267,11 @@ var project = {
         file:       "include/observatory.hpp",
         decl:       "struct",
         namespaces: ["ObserverHandler","ObserverHandler::IObserverPair"],
+        
         methods: [
           {
               name:        "Disconnect",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -2264,10 +2291,11 @@ var project = {
         file:       "include/observatory.hpp",
         decl:       "struct",
         namespaces: ["ObserverHandler","ObserverHandler::ObserverPair","","ObserverHandler","ObserverHandler::IObserverPair"],
+        
         methods: [
           {
               name:        "Disconnect",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2307,10 +2335,11 @@ var project = {
         file:       "include/timer.hpp",
         decl:       "class",
         namespaces: ["Timer"],
+        doc:        {"overview":"Abstraction for realtime management.\n","detail":null},
         methods: [
           {
               name:        "GetElapsedTime",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "double",
@@ -2318,7 +2347,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Profile",
-              params:      "std::string str",
+              params:      ["(std::string str)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2326,7 +2355,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Restart",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2334,7 +2363,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetLastTime",
-              params:      "double v",
+              params:      ["(double v)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2342,7 +2371,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetLastTime",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "float",
@@ -2350,7 +2379,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "asConstructor",
-              params:      "void* memory",
+              params:      ["(void* memory)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -2358,7 +2387,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "asDestructor",
-              params:      "void* memory",
+              params:      ["(void* memory)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -2385,10 +2414,11 @@ var project = {
         file:       "include/timer.hpp",
         decl:       "class",
         namespaces: ["TimeManager"],
+        doc:        {"overview":"Keeps track of game-relative time. It also provide an API to periodically or spontaneously execute tasks inside the\nworldmap and/or level contexts.\n","detail":null},
         methods: [
           {
               name:        "GetDaysPerMonth",
-              params:      "unsigned short m,unsigned short year = 1",
+              params:      ["(unsigned short m","unsigned short year = 1)"],
               attrs:       16,
               desc:        "",
               return_type: "short",
@@ -2396,7 +2426,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ClearTasks",
-              params:      "unsigned char level",
+              params:      ["(unsigned char level)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2404,7 +2434,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SetTime",
-              params:      "unsigned short s,unsigned short m,unsigned short h,unsigned short d,unsigned short mo,unsigned short y",
+              params:      ["(unsigned short s","unsigned short m","unsigned short h","unsigned short d","unsigned short mo","unsigned short y)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2412,7 +2442,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GetYear",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -2420,7 +2450,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GetMonth",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -2428,7 +2458,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GetDay",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -2436,7 +2466,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GetHour",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -2444,7 +2474,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GetMinute",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -2452,7 +2482,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GetSecond",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -2460,7 +2490,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "AddElapsedSeconds",
-              params:      "float s",
+              params:      ["(float s)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2468,7 +2498,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "AddElapsedTime",
-              params:      "unsigned short s,unsigned short m = 0,unsigned short h = 0,unsigned short d = 0,unsigned short mo = 0,unsigned short y = 0",
+              params:      ["(unsigned short s","unsigned short m = 0","unsigned short h = 0","unsigned short d = 0","unsigned short mo = 0","unsigned short y = 0)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2476,7 +2506,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "AddTask",
-              params:      "unsigned char level,bool loop,unsigned short s,unsigned short m = 0,unsigned short h = 0,unsigned short d = 0,unsigned short mo = 0,unsigned short y = 0",
+              params:      ["(unsigned char level","bool loop","unsigned short s","unsigned short m = 0","unsigned short h = 0","unsigned short d = 0","unsigned short mo = 0","unsigned short y = 0)"],
               attrs:       0,
               desc:        "",
               return_type: "TimeManager::Task",
@@ -2484,7 +2514,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "DelTask",
-              params:      "Task* task",
+              params:      ["(Task* task)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2492,7 +2522,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ExecuteTasks",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2500,7 +2530,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CorrectValues",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2585,10 +2615,11 @@ var project = {
         file:       "include/timer.hpp",
         decl:       "struct",
         namespaces: ["TimeManager","TimeManager::Task"],
+        doc:        {"overview":"A task that will be spontaneously or regularly executed by the [TimeManager].\n","detail":null},
         methods: [
           {
               name:        "NextStep",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2596,7 +2627,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Serialize",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2604,7 +2635,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Unserialize",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2729,6 +2760,7 @@ var project = {
         file:       "include/datatree.hpp",
         decl:       "struct",
         namespaces: ["DataBranch"],
+        doc:        {"overview":"Leaf or root of a data tree. It should always be handled using the [Data] object as a wrapper.\n","detail":null},
         methods: [
           
         ],
@@ -2739,14 +2771,16 @@ var project = {
             type:       "std::string",
             
             attrs:      0,
-            visibility: "public"
+            visibility: "public",
+            doc:         {"name":"key","short":"name of the node"}
           },
           {
             name:       "value",
             type:       "std::string",
             
             attrs:      0,
-            visibility: "public"
+            visibility: "public",
+            doc:         {"name":"value","short":"value of the branch, stored as a string. It can be converted to other types by using [Data]."}
           },
           {
             name:       "children",
@@ -2755,7 +2789,8 @@ var project = {
             obj_type:   "DataBranch::Children",
             
             attrs:      0,
-            visibility: "public"
+            visibility: "public",
+            doc:         {"name":"children","short":"list of children nodes"}
           },
           {
             name:       "father",
@@ -2764,28 +2799,32 @@ var project = {
             obj_type:   "DataBranch",
             
             attrs:      1,
-            visibility: "public"
+            visibility: "public",
+            doc:         {"name":"father","short":"points to the parent node if there is one, null otherwise."}
           },
           {
             name:       "nil",
             type:       "bool",
             
             attrs:      0,
-            visibility: "public"
+            visibility: "public",
+            doc:         {"name":"nil","short":"is true if the current branch is temporary. If set to true, the Data wrappers will destroy it after all the instances of Data wrapping it are destoryed"}
           },
           {
             name:       "root",
             type:       "bool         ",
             
             attrs:      0,
-            visibility: "public"
+            visibility: "public",
+            doc:         {"name":"root","short":"must be true if the branch is the root of the tree"}
           },
           {
             name:       "pointers",
             type:       "int",
             
             attrs:      8,
-            visibility: "public"
+            visibility: "public",
+            doc:         {"name":"pointers","short":"reference counter used by the [Data] wrapper."}
           }
         ],
         ancestors: [
@@ -2797,10 +2836,11 @@ var project = {
         file:       "include/datatree.hpp",
         decl:       "class",
         namespaces: ["Data"],
+        doc:        {"overview":"Handle for a [DataBranch]. It allow safe polymorphic access to, and dynamic creation of sub-branches. It also\nprovide different tools to ease the management of a data tree.\n","detail":null},
         methods: [
           {
               name:        "Key",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -2808,7 +2848,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Value",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -2816,7 +2856,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetKey",
-              params:      "const std::string& newKey",
+              params:      ["(const std::string& newKey)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2824,7 +2864,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Duplicate",
-              params:      "Data var",
+              params:      ["(Data var)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2832,7 +2872,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "T",
-              params:      "",
+              params:      ["()"],
               attrs:       4,
               desc:        "",
               return_type: "operator",
@@ -2840,7 +2880,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Remove",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2848,7 +2888,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CutBranch",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2856,7 +2896,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Nil",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -2864,7 +2904,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "NotNil",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -2872,7 +2912,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Parent",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Data",
@@ -2880,7 +2920,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PushBack",
-              params:      "Data d",
+              params:      ["(Data d)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2888,7 +2928,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Output",
-              params:      "unsigned char indent = 0",
+              params:      ["(unsigned char indent = 0)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -2896,7 +2936,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Count",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "int",
@@ -2904,7 +2944,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "begin",
-              params:      "",
+              params:      ["()"],
               attrs:       0,
               desc:        "",
               return_type: "Data::my_iterator",
@@ -2912,7 +2952,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "const_begin",
-              params:      "",
+              params:      ["()"],
               attrs:       4,
               desc:        "",
               return_type: "Data::const_my_iterator",
@@ -2920,7 +2960,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "end",
-              params:      "",
+              params:      ["()"],
               attrs:       0,
               desc:        "",
               return_type: "Data::my_iterator",
@@ -2928,7 +2968,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "const_end",
-              params:      "",
+              params:      ["()"],
               attrs:       4,
               desc:        "",
               return_type: "Data::const_my_iterator",
@@ -2971,6 +3011,7 @@ var project = {
         file:       "include/datatree.hpp",
         decl:       "class",
         namespaces: ["Data","Data::my_iterator",""],
+        
         methods: [
           
         ],
@@ -2997,6 +3038,7 @@ var project = {
         file:       "include/datatree.hpp",
         decl:       "class",
         namespaces: ["Data","Data::const_my_iterator",""],
+        
         methods: [
           
         ],
@@ -3023,10 +3065,11 @@ var project = {
         file:       "include/datatree.hpp",
         decl:       "class",
         namespaces: ["DataTree","","DataBranch"],
+        doc:        {"overview":"Representation as a tree of a loaded configuration file (mainly JSON).\n","detail":null},
         methods: [
           {
               name:        "tmp",
-              params:      "this",
+              params:      ["(this)"],
               attrs:       0,
               desc:        "",
               return_type: "Data",
@@ -3034,7 +3077,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Save",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -3042,7 +3085,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Save",
-              params:      "const std::string& path",
+              params:      ["(const std::string& path)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -3050,7 +3093,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetSourceFile",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "std::string",
@@ -3081,10 +3124,11 @@ var project = {
         file:       "include/datatree.hpp",
         decl:       "struct",
         namespaces: ["DataTree","DataTree::Factory"],
+        doc:        {"overview":"Set of methods for generating DataTree.\n","detail":null},
         methods: [
           {
               name:        "Yaml",
-              params:      "const std::string& filename",
+              params:      ["(const std::string& filename)"],
               attrs:       16,
               desc:        "",
               return_type: "DataTree",
@@ -3092,7 +3136,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ShinyLang",
-              params:      "const std::string& filename",
+              params:      ["(const std::string& filename)"],
               attrs:       16,
               desc:        "",
               return_type: "DataTree",
@@ -3100,7 +3144,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "JSON",
-              params:      "const std::string& filename",
+              params:      ["(const std::string& filename)"],
               attrs:       16,
               desc:        "",
               return_type: "DataTree",
@@ -3108,7 +3152,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "StringJSON",
-              params:      "const std::string& str",
+              params:      ["(const std::string& str)"],
               attrs:       16,
               desc:        "",
               return_type: "DataTree",
@@ -3128,10 +3172,11 @@ var project = {
         file:       "include/datatree.hpp",
         decl:       "struct",
         namespaces: ["DataTree","DataTree::Writers"],
+        doc:        {"overview":"Set of methods to serialize DataTrees.\n","detail":null},
         methods: [
           {
               name:        "JSON",
-              params:      "Data,const std::string& filename",
+              params:      ["(Data","const std::string& filename)"],
               attrs:       16,
               desc:        "",
               return_type: "bool",
@@ -3139,7 +3184,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "StringJSON",
-              params:      "Data,std::string& str",
+              params:      ["(Data","std::string& str)"],
               attrs:       16,
               desc:        "",
               return_type: "bool",
@@ -3159,10 +3204,11 @@ var project = {
         file:       "include/dataengine.hpp",
         decl:       "class",
         namespaces: ["DataEngine","","Data"],
+        doc:        {"overview":"Class handle for all the data generated by the game. It is used by scripts to store data and by the core parts to\nload data relevant to the current instance of the game.\n","detail":null},
         methods: [
           {
               name:        "Load",
-              params:      "const std::string& filepath",
+              params:      ["(const std::string& filepath)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3170,7 +3216,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Save",
-              params:      "const std::string& filepath",
+              params:      ["(const std::string& filepath)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3178,7 +3224,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetDiplomacy",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "WorldDiplomacy",
@@ -3220,10 +3266,11 @@ var project = {
         file:       "include/animatedobject.hpp",
         decl:       "class",
         namespaces: ["AnimatedObject"],
+        doc:        {"overview":"This is a component for managing an animated model.<br />\nIt can load animations file, play them on a model, and warn a set of\nobservers whenever the animation is finished.<br />\nThe inheriting classes must regularly call the protected [TaskAnimation]\nmethod, which will emit the AnimationEnd signal whenever it is relevant.\n","detail":null},
         methods: [
           {
               name:        "GetNodePath",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       68,
               desc:        "",
               return_type: "NodePath",
@@ -3231,7 +3278,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ResetAnimation",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -3239,7 +3286,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PlayAnimation",
-              params:      "const std::string& name,bool loop = false",
+              params:      ["(const std::string& name","bool loop = false)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3247,7 +3294,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LoadAnimation",
-              params:      "const std::string& name",
+              params:      ["(const std::string& name)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3255,7 +3302,7 @@ var project = {
               visibility:  "protected"
             },{
               name:        "TaskAnimation",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3263,7 +3310,7 @@ var project = {
               visibility:  "protected"
             },{
               name:        "PlayIdleAnimation",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3341,10 +3388,11 @@ var project = {
         file:       "include/level/objectnode.hpp",
         decl:       "struct",
         namespaces: ["WaypointModifier"],
+        doc:        {"overview":"Component for an object that will affect the pathfinding.\n","detail":null},
         methods: [
           {
               name:        "ProcessCollisions",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -3352,7 +3400,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UnprocessCollisions",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3360,7 +3408,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "HasOccupiedWaypoint",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -3368,7 +3416,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetOccupiedWaypointAsInt",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "int",
@@ -3376,7 +3424,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetOccupiedWaypoint",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "Waypoint",
@@ -3384,7 +3432,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetOccupiedWaypoint",
-              params:      "Waypoint* wp",
+              params:      ["(Waypoint* wp)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3392,7 +3440,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "WithdrawAllArcs",
-              params:      "unsigned int id",
+              params:      ["(unsigned int id)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3400,7 +3448,7 @@ var project = {
               visibility:  "protected"
             },{
               name:        "WithdrawAllArcs",
-              params:      "Waypoint* waypoint",
+              params:      ["(Waypoint* waypoint)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3408,7 +3456,7 @@ var project = {
               visibility:  "protected"
             },{
               name:        "WithdrawArc",
-              params:      "unsigned int id1,unsigned int id2",
+              params:      ["(unsigned int id1","unsigned int id2)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3416,7 +3464,7 @@ var project = {
               visibility:  "protected"
             },{
               name:        "WithdrawArc",
-              params:      "Waypoint* first,Waypoint* second",
+              params:      ["(Waypoint* first","Waypoint* second)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3470,6 +3518,7 @@ var project = {
         file:       "include/level/objectnode.hpp",
         decl:       "struct",
         namespaces: ["WaypointModifier","WaypointModifier::WithdrawedArc"],
+        
         methods: [
           
         ],
@@ -3510,6 +3559,7 @@ var project = {
         file:       "include/level/objectnode.hpp",
         decl:       "struct",
         namespaces: ["ObjectType2Code"],
+        
         methods: [
           
         ],
@@ -3525,10 +3575,11 @@ var project = {
         file:       "include/level/objectnode.hpp",
         decl:       "class",
         namespaces: ["InstanceDynamicObject","","WaypointModifier","","AnimatedObject"],
+        doc:        {"overview":"Instance of a [DynamicObject] created by the [Level].\n","detail":null},
         methods: [
           {
               name:        "Load",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -3536,7 +3587,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Save",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -3544,7 +3595,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Run",
-              params:      "float elapsedTime",
+              params:      ["(float elapsedTime)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -3552,7 +3603,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetName",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -3560,7 +3611,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetNodePath",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "NodePath",
@@ -3568,7 +3619,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetInteractions",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "InstanceDynamicObject::InteractionList",
@@ -3576,7 +3627,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetDialog",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -3584,7 +3635,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetDynamicObject",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "DynamicObject",
@@ -3592,7 +3643,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetGoToData",
-              params:      "InstanceDynamicObject* character",
+              params:      ["(InstanceDynamicObject* character)"],
               attrs:       64,
               desc:        "",
               return_type: "InstanceDynamicObject::GoToData",
@@ -3600,7 +3651,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Get",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "C",
@@ -3608,7 +3659,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackActionUse",
-              params:      "InstanceDynamicObject* object",
+              params:      ["(InstanceDynamicObject* object)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -3616,7 +3667,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ResetAnimation",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3624,7 +3675,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ResetInteractions",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3632,7 +3683,7 @@ var project = {
               visibility:  "protected"
             },{
               name:        "ThatDoesNothing",
-              params:      "",
+              params:      ["()"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3640,7 +3691,7 @@ var project = {
               visibility:  "protected"
             },{
               name:        "CallbackAnimationEnded",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3725,6 +3776,7 @@ var project = {
         file:       "include/level/objectnode.hpp",
         decl:       "struct",
         namespaces: ["InstanceDynamicObject","InstanceDynamicObject::Interaction"],
+        
         methods: [
           
         ],
@@ -3763,6 +3815,7 @@ var project = {
         file:       "include/level/objectnode.hpp",
         decl:       "struct",
         namespaces: ["InstanceDynamicObject","InstanceDynamicObject::GoToData"],
+        
         methods: [
           
         ],
@@ -3810,10 +3863,11 @@ var project = {
         file:       "include/level/objects/door.hpp",
         decl:       "class",
         namespaces: ["LevelExitZone","","Waypoint","Waypoint::ArcObserver"],
+        doc:        {"overview":"Represent an exiting zone: a set of waypoints that cause the player to go to another\nzone or to pick another zone when he walks over them.\n","detail":null},
         methods: [
           {
               name:        "SetName",
-              params:      "const std::string& name",
+              params:      ["(const std::string& name)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3821,7 +3875,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetName",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -3829,7 +3883,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CanGoThrough",
-              params:      "unsigned char id",
+              params:      ["(unsigned char id)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -3837,7 +3891,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GoingThrough",
-              params:      "void* character",
+              params:      ["(void* character)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3877,10 +3931,11 @@ var project = {
         file:       "include/level/objects/door.hpp",
         decl:       "class",
         namespaces: ["Lockable"],
+        
         methods: [
           {
               name:        "GetKeyName",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "string",
@@ -3888,7 +3943,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsLocked",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -3896,7 +3951,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsOpen",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -3904,7 +3959,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Unlock",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3940,10 +3995,11 @@ var project = {
         file:       "include/level/objects/door.hpp",
         decl:       "class",
         namespaces: ["ObjectDoor","","InstanceDynamicObject","","WaypointModifier","","AnimatedObject","","Lockable","","Waypoint","Waypoint::ArcObserver"],
+        
         methods: [
           {
               name:        "ProcessCollisions",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3951,7 +4007,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetKeyName",
-              params:      "",
+              params:      ["()"],
               attrs:       4,
               desc:        "",
               return_type: "string",
@@ -3959,7 +4015,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackActionUse",
-              params:      "InstanceDynamicObject* object",
+              params:      ["(InstanceDynamicObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3967,7 +4023,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetGoToData",
-              params:      "InstanceDynamicObject* character",
+              params:      ["(InstanceDynamicObject* character)"],
               attrs:       0,
               desc:        "",
               return_type: "InstanceDynamicObject::GoToData",
@@ -3975,7 +4031,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ObserveWaypoints",
-              params:      "bool doObserver",
+              params:      ["(bool doObserver)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3983,7 +4039,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CanGoThrough",
-              params:      "unsigned char id",
+              params:      ["(unsigned char id)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -3991,7 +4047,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GoingThrough",
-              params:      "void*",
+              params:      ["(void*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -3999,7 +4055,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PendingActionOpen",
-              params:      "InstanceDynamicObject*",
+              params:      ["(InstanceDynamicObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4031,10 +4087,11 @@ var project = {
         file:       "include/scriptengine.hpp",
         decl:       "class",
         namespaces: ["Engine"],
+        
         methods: [
           {
               name:        "Get",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "asIScriptEngine",
@@ -4042,7 +4099,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Initialize",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4050,7 +4107,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Finalize",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4058,7 +4115,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LoadModule",
-              params:      "const std::string& name,const std::string& filepath",
+              params:      ["(const std::string& name","const std::string& filepath)"],
               attrs:       16,
               desc:        "",
               return_type: "asIScriptModule",
@@ -4066,7 +4123,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "MessageCallback",
-              params:      "const asSMessageInfo* msg,void* param",
+              params:      ["(const asSMessageInfo* msg","void* param)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4093,10 +4150,11 @@ var project = {
         file:       "include/scriptengine.hpp",
         decl:       "class",
         namespaces: ["ModuleManager"],
+        
         methods: [
           {
               name:        "Require",
-              params:      "const std::string& name,const std::string& filepath",
+              params:      ["(const std::string& name","const std::string& filepath)"],
               attrs:       16,
               desc:        "",
               return_type: "asIScriptModule",
@@ -4104,7 +4162,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Release",
-              params:      "asIScriptModule* module",
+              params:      ["(asIScriptModule* module)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4112,7 +4170,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "OutputFunctionList",
-              params:      "asIScriptModule* module",
+              params:      ["(asIScriptModule* module)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4141,6 +4199,7 @@ var project = {
         file:       "include/scriptengine.hpp",
         decl:       "struct",
         namespaces: ["ModuleManager","ModuleManager::LoadedModule"],
+        
         methods: [
           
         ],
@@ -4177,10 +4236,11 @@ var project = {
         file:       "include/scriptengine.hpp",
         decl:       "class",
         namespaces: ["StdList",""],
+        doc:        {"overview":"Script interface for std::list.\n","detail":null},
         methods: [
           {
               name:        "Add",
-              params:      "T t",
+              params:      ["(T t)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4188,7 +4248,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Register",
-              params:      "asIScriptEngine* engine,const std::string& arrayName,const std::string& typeName",
+              params:      ["(asIScriptEngine* engine","const std::string& arrayName","const std::string& typeName)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4196,7 +4256,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Constructor",
-              params:      "void* memory",
+              params:      ["(void* memory)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4204,7 +4264,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Destructor ",
-              params:      "void* memory",
+              params:      ["(void* memory)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4212,7 +4272,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Size",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "int",
@@ -4220,7 +4280,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Begin",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "StdList::asIterator",
@@ -4228,7 +4288,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RBegin",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "StdList::asRIterator",
@@ -4236,7 +4296,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "End",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "StdList::asIterator",
@@ -4244,7 +4304,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "REnd",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "StdList::asRIterator",
@@ -4268,10 +4328,11 @@ var project = {
         file:       "include/scriptengine.hpp",
         decl:       "struct",
         namespaces: ["StdList","StdList::asIterator"],
+        
         methods: [
           {
               name:        "Constructor",
-              params:      "void* memory",
+              params:      ["(void* memory)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4279,7 +4340,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Destructor ",
-              params:      "void* memory",
+              params:      ["(void* memory)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4287,7 +4348,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Assign",
-              params:      "asIterator it",
+              params:      ["(asIterator it)"],
               attrs:       16,
               desc:        "",
               return_type: "T",
@@ -4295,7 +4356,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Value",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "T",
@@ -4303,7 +4364,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Equal",
-              params:      "asIterator comp",
+              params:      ["(asIterator comp)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -4311,7 +4372,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Increment",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4319,7 +4380,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Decrement",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4353,10 +4414,11 @@ var project = {
         file:       "include/scriptengine.hpp",
         decl:       "struct",
         namespaces: ["StdList","StdList::asRIterator"],
+        
         methods: [
           {
               name:        "Constructor",
-              params:      "void* memory",
+              params:      ["(void* memory)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4364,7 +4426,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Destructor ",
-              params:      "void* memory",
+              params:      ["(void* memory)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4372,7 +4434,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Assign",
-              params:      "asRIterator it",
+              params:      ["(asRIterator it)"],
               attrs:       16,
               desc:        "",
               return_type: "T",
@@ -4380,7 +4442,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Value",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "T",
@@ -4388,7 +4450,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Equal",
-              params:      "asRIterator comp",
+              params:      ["(asRIterator comp)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -4396,7 +4458,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Increment",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4404,7 +4466,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Decrement",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4438,10 +4500,11 @@ var project = {
         file:       "include/i18n.hpp",
         decl:       "class",
         namespaces: ["i18n"],
+        doc:        {"overview":"Intertionalization\n","detail":null},
         methods: [
           {
               name:        "Load",
-              params:      "const std::string& language",
+              params:      ["(const std::string& language)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4449,7 +4512,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Unload",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4457,7 +4520,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "T",
-              params:      "const std::string& key",
+              params:      ["(const std::string& key)"],
               attrs:       16,
               desc:        "",
               return_type: "std::string",
@@ -4465,7 +4528,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetDialogs",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "Data",
@@ -4473,7 +4536,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetStatistics",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "Data",
@@ -4520,10 +4583,11 @@ var project = {
         file:       "include/rocket_extension.hpp",
         decl:       "struct",
         namespaces: ["MyRocket"],
+        
         methods: [
           {
               name:        "SetVisibility",
-              params:      "Rocket::Core::Context* context,bool visibility",
+              params:      ["(Rocket::Core::Context* context","bool visibility)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4543,10 +4607,11 @@ var project = {
         file:       "include/rocket_extension.hpp",
         decl:       "struct",
         namespaces: ["RocketListener",""],
+        
         methods: [
           {
               name:        "ProcessEvent",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4570,10 +4635,11 @@ var project = {
         file:       "include/rocket_extension.hpp",
         decl:       "class",
         namespaces: ["UiBase"],
+        doc:        {"overview":"Component for a class that implements a Rocket interface.\n","detail":null},
         methods: [
           {
               name:        "FireShow",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4581,7 +4647,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FireHide",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4589,7 +4655,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Show",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -4597,7 +4663,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Hide",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -4605,7 +4671,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsVisible",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -4613,7 +4679,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetModal",
-              params:      "bool modal",
+              params:      ["(bool modal)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4621,7 +4687,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Destroy",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -4629,7 +4695,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetPropertyOnAll",
-              params:      "Rocket::Core::Element* elem,const std::string& property,const std::string& value",
+              params:      ["(Rocket::Core::Element* elem","const std::string& property","const std::string& value)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -4637,7 +4703,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FadeOut",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4645,7 +4711,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FadeIn",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4653,7 +4719,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ToggleEventListener",
-              params:      "bool toggle_on,const std::string& id,const std::string& event,RocketListener& listener",
+              params:      ["(bool toggle_on","const std::string& id","const std::string& event","RocketListener& listener)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4661,7 +4727,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Translate",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4669,7 +4735,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RecursiveTranslate",
-              params:      "Rocket::Core::Element*",
+              params:      ["(Rocket::Core::Element*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4726,6 +4792,7 @@ var project = {
         file:       "include/rocket_extension.hpp",
         decl:       "struct",
         namespaces: ["UiBase","UiBase::Listener"],
+        
         methods: [
           
         ],
@@ -4764,10 +4831,11 @@ var project = {
         file:       "include/gameui.hpp",
         decl:       "class",
         namespaces: ["GameMenu","","UiBase"],
+        doc:        {"overview":"UI for the in-game main menu.\n","detail":null},
         methods: [
           {
               name:        "MenuEventContinue",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4836,10 +4904,11 @@ var project = {
         file:       "include/gameui.hpp",
         decl:       "class",
         namespaces: ["GameMainBar","","UiBase"],
+        doc:        {"overview":"UI for the HUD used while the player is inside a [Level].\n","detail":null},
         methods: [
           {
               name:        "AppendToConsole",
-              params:      "const std::string& str",
+              params:      ["(const std::string& str)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4847,7 +4916,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetCurrentAP",
-              params:      "unsigned short ap,unsigned short maxap",
+              params:      ["(unsigned short ap","unsigned short maxap)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4855,7 +4924,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetMaxAP",
-              params:      "unsigned short ap",
+              params:      ["(unsigned short ap)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4863,7 +4932,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetEnabledAP",
-              params:      "bool",
+              params:      ["(bool)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4871,7 +4940,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetCurrentHp",
-              params:      "short hp",
+              params:      ["(short hp)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4879,7 +4948,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetCurrentAc",
-              params:      "short ac",
+              params:      ["(short ac)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4887,7 +4956,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetEquipedItem",
-              params:      "unsigned short it,InventoryObject* item",
+              params:      ["(unsigned short it","InventoryObject* item)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4895,7 +4964,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetEquipedItemAction",
-              params:      "unsigned short it,InventoryObject* item,unsigned char actionIt",
+              params:      ["(unsigned short it","InventoryObject* item","unsigned char actionIt)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4903,7 +4972,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackEquipedItem1Clicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4911,7 +4980,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackEquipedItem2Clicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4919,7 +4988,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackPassTurnClicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -4927,7 +4996,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackCombatEndClicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5037,10 +5106,11 @@ var project = {
         file:       "include/level/inventory.hpp",
         decl:       "class",
         namespaces: ["InventoryObject","","Data"],
+        
         methods: [
           {
               name:        "UseAsWeapon",
-              params:      "ObjectCharacter* user,ObjectCharacter* target,unsigned char useType",
+              params:      ["(ObjectCharacter* user","ObjectCharacter* target","unsigned char useType)"],
               attrs:       0,
               desc:        "",
               return_type: "std::string",
@@ -5048,7 +5118,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UseOn",
-              params:      "ObjectCharacter* user,InstanceDynamicObject* target,unsigned char useType",
+              params:      ["(ObjectCharacter* user","InstanceDynamicObject* target","unsigned char useType)"],
               attrs:       0,
               desc:        "",
               return_type: "std::string",
@@ -5056,7 +5126,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Use",
-              params:      "ObjectCharacter* user,unsigned char useType",
+              params:      ["(ObjectCharacter* user","unsigned char useType)"],
               attrs:       0,
               desc:        "",
               return_type: "std::string",
@@ -5064,7 +5134,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetName",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -5072,7 +5142,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetIcon",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -5080,7 +5150,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CreateDynamicObject",
-              params:      "World* world",
+              params:      ["(World* world)"],
               attrs:       4,
               desc:        "",
               return_type: "DynamicObject",
@@ -5088,7 +5158,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CreateEquipedModel",
-              params:      "World* world",
+              params:      ["(World* world)"],
               attrs:       0,
               desc:        "",
               return_type: "InventoryObject::EquipedModel",
@@ -5096,7 +5166,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CanWeild",
-              params:      "ObjectCharacter*,EquipedMode",
+              params:      ["(ObjectCharacter*","EquipedMode)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -5104,7 +5174,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetEquiped",
-              params:      "bool set",
+              params:      ["(bool set)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5112,7 +5182,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsEquiped",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -5120,7 +5190,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsGroupableWith",
-              params:      "const InventoryObject*",
+              params:      ["(const InventoryObject*)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -5128,7 +5198,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ExecuteHook",
-              params:      "asIScriptFunction* hook,ObjectCharacter* user,C* target,unsigned char actionIt",
+              params:      ["(asIScriptFunction* hook","ObjectCharacter* user","C* target","unsigned char actionIt)"],
               attrs:       0,
               desc:        "",
               return_type: "std::string",
@@ -5240,10 +5310,11 @@ var project = {
         file:       "include/level/inventory.hpp",
         decl:       "struct",
         namespaces: ["InventoryObject","InventoryObject::EquipedModel","","AnimatedObject"],
+        
         methods: [
           {
               name:        "GetNodePath",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "NodePath",
@@ -5251,7 +5322,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ResetAnimation",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5291,6 +5362,7 @@ var project = {
         file:       "include/level/inventory.hpp",
         decl:       "struct",
         namespaces: ["InventoryObject","InventoryObject::ActionHooks"],
+        
         methods: [
           
         ],
@@ -5341,10 +5413,11 @@ var project = {
         file:       "include/level/inventory.hpp",
         decl:       "class",
         namespaces: ["Inventory"],
+        doc:        {"overview":"Controller for a character's inventory\n","detail":null},
         methods: [
           {
               name:        "LoadInventory",
-              params:      "DynamicObject*",
+              params:      ["(DynamicObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5352,7 +5425,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SaveInventory",
-              params:      "DynamicObject*",
+              params:      ["(DynamicObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5360,7 +5433,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LoadInventory",
-              params:      "Data",
+              params:      ["(Data)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5368,7 +5441,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SaveInventory",
-              params:      "Data",
+              params:      ["(Data)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5376,7 +5449,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddObject",
-              params:      "InventoryObject*",
+              params:      ["(InventoryObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5384,7 +5457,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DelObject",
-              params:      "InventoryObject*",
+              params:      ["(InventoryObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5392,7 +5465,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IncludesObject",
-              params:      "InventoryObject*",
+              params:      ["(InventoryObject*)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -5400,7 +5473,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetContent",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "Inventory::Content",
@@ -5408,7 +5481,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetContent",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Inventory::Content",
@@ -5416,7 +5489,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetObject",
-              params:      "const std::string& name",
+              params:      ["(const std::string& name)"],
               attrs:       0,
               desc:        "",
               return_type: "InventoryObject",
@@ -5424,7 +5497,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ContainsHowMany",
-              params:      "const std::string& name",
+              params:      ["(const std::string& name)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -5432,7 +5505,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetCurrentWeight",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -5440,7 +5513,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetCapacity",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -5448,7 +5521,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetCapacity",
-              params:      "unsigned short value",
+              params:      ["(unsigned short value)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5456,7 +5529,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CanCarry",
-              params:      "InventoryObject*,unsigned short quantity = 1",
+              params:      ["(InventoryObject*","unsigned short quantity = 1)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -5499,10 +5572,11 @@ var project = {
         file:       "include/scriptable.hpp",
         decl:       "class",
         namespaces: ["Scriptable"],
+        doc:        {"overview":"Component for class that must load and execute functions from scripts.\n","detail":null},
         methods: [
           {
               name:        "LoadScript",
-              params:      "std::string module_name,std::string filepath",
+              params:      ["(std::string module_name","std::string filepath)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5510,7 +5584,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ReloadFunction",
-              params:      "asIScriptFunction** pointer",
+              params:      ["(asIScriptFunction** pointer)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5553,10 +5627,11 @@ var project = {
         file:       "include/statsheet.hpp",
         decl:       "class",
         namespaces: ["StatModel","","Scriptable"],
+        
         methods: [
           {
               name:        "Backup",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5564,7 +5639,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RestoreBackup",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5572,7 +5647,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Action",
-              params:      "const std::string& action,const std::string& fmt,...",
+              params:      ["(const std::string& action","const std::string& fmt","...)"],
               attrs:       0,
               desc:        "",
               return_type: "int",
@@ -5580,7 +5655,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetAll",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Data",
@@ -5588,7 +5663,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetName",
-              params:      "const std::string& name",
+              params:      ["(const std::string& name)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5596,7 +5671,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetName",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -5604,7 +5679,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetRace",
-              params:      "const std::string& race",
+              params:      ["(const std::string& race)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5612,7 +5687,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetRace",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -5620,7 +5695,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetAge",
-              params:      "unsigned short age",
+              params:      ["(unsigned short age)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5628,7 +5703,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetAge",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -5636,7 +5711,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetGender",
-              params:      "const std::string& g",
+              params:      ["(const std::string& g)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5644,7 +5719,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetGender",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -5652,7 +5727,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddKill",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5660,7 +5735,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetKills",
-              params:      "const std::string& race",
+              params:      ["(const std::string& race)"],
               attrs:       4,
               desc:        "",
               return_type: "int",
@@ -5668,7 +5743,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddPerk",
-              params:      "const std::string& perk",
+              params:      ["(const std::string& perk)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -5676,7 +5751,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ToggleTrait",
-              params:      "const std::string& trait",
+              params:      ["(const std::string& trait)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5684,7 +5759,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ToggleSkillAffinity",
-              params:      "const std::string& skill",
+              params:      ["(const std::string& skill)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5692,7 +5767,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "HasTrait",
-              params:      "const std::string& trait",
+              params:      ["(const std::string& trait)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -5700,7 +5775,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "HasSkillAffinity",
-              params:      "const std::string& skill",
+              params:      ["(const std::string& skill)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -5708,7 +5783,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetSkillAffinities",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Data",
@@ -5716,7 +5791,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetStatistic",
-              params:      "const std::string& stat,short value",
+              params:      ["(const std::string& stat","short value)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5724,7 +5799,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetSpecial",
-              params:      "const std::string& stat,short value",
+              params:      ["(const std::string& stat","short value)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5732,7 +5807,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetSkill",
-              params:      "const std::string& stat,short value",
+              params:      ["(const std::string& stat","short value)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5740,7 +5815,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetLevel",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -5748,7 +5823,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetStatistic",
-              params:      "const std::string& stat",
+              params:      ["(const std::string& stat)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -5756,7 +5831,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetSpecial",
-              params:      "const std::string& stat",
+              params:      ["(const std::string& stat)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -5764,7 +5839,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetSkill",
-              params:      "const std::string& stat",
+              params:      ["(const std::string& stat)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -5772,7 +5847,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SelectRandomEncounter",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "std::string",
@@ -5780,7 +5855,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetSpecialPoints",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -5788,7 +5863,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetSkillPoints",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -5796,7 +5871,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetPerksPoints",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -5804,7 +5879,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetXpNextLevel",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "short",
@@ -5812,7 +5887,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetExperience",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -5820,7 +5895,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetExperience",
-              params:      "unsigned short e",
+              params:      ["(unsigned short e)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5828,7 +5903,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LevelUp",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5836,7 +5911,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetCurrentHp",
-              params:      "short hp",
+              params:      ["(short hp)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5844,7 +5919,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetCurrentHp",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -5852,7 +5927,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetMaxHp",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -5860,7 +5935,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsReady",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -5868,7 +5943,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UpdateAllValues",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -5876,7 +5951,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LoadFunctions",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5988,10 +6063,11 @@ var project = {
         file:       "include/statsheet.hpp",
         decl:       "class",
         namespaces: ["StatView"],
+        
         methods: [
           {
               name:        "SetEditMode",
-              params:      "EditMode",
+              params:      ["(EditMode)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -5999,7 +6075,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetEditMode",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "EditMode",
@@ -6007,7 +6083,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Hide",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6015,7 +6091,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Show",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6023,7 +6099,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetInformation",
-              params:      "const std::string& name,const std::string& value",
+              params:      ["(const std::string& name","const std::string& value)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6031,7 +6107,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetInformation",
-              params:      "const std::string& name,short value",
+              params:      ["(const std::string& name","short value)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6039,7 +6115,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetFieldValue",
-              params:      "const std::string& category,const std::string& key,const std::string& value",
+              params:      ["(const std::string& category","const std::string& key","const std::string& value)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6047,7 +6123,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetFieldValue",
-              params:      "const std::string& category,const std::string& key,short value",
+              params:      ["(const std::string& category","const std::string& key","short value)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6055,7 +6131,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetCategoryFields",
-              params:      "const std::string& category,const std::vector<std::string>& keys",
+              params:      ["(const std::string& category","const std::vector<std::string>& keys)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6063,7 +6139,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetIdValue",
-              params:      "const std::string& id,const std::string& value",
+              params:      ["(const std::string& id","const std::string& value)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6071,7 +6147,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetIdValue",
-              params:      "const std::string& id,short value",
+              params:      ["(const std::string& id","short value)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6079,7 +6155,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetExperience",
-              params:      "unsigned int xp,unsigned short lvl,unsigned int next_level",
+              params:      ["(unsigned int xp","unsigned short lvl","unsigned int next_level)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6087,7 +6163,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetTraits",
-              params:      "std::list<std::string>",
+              params:      ["(std::list<std::string>)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6095,7 +6171,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetTraitActive",
-              params:      "const std::string&,bool",
+              params:      ["(const std::string&","bool)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6103,7 +6179,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetPerks",
-              params:      "std::list<std::string>",
+              params:      ["(std::list<std::string>)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6111,7 +6187,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetAvailablePerks",
-              params:      "std::list<std::string> perks",
+              params:      ["(std::list<std::string> perks)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6119,7 +6195,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetSkillAffinity",
-              params:      "const std::string& skill,bool",
+              params:      ["(const std::string& skill","bool)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -6127,7 +6203,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetNumPerks",
-              params:      "unsigned short n_perks",
+              params:      ["(unsigned short n_perks)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6161,10 +6237,11 @@ var project = {
         file:       "include/statsheet.hpp",
         decl:       "class",
         namespaces: ["StatController"],
+        doc:        {"overview":"Controller of the MVC pattern used in CMAP (Cutie Mark Acquisition Program)\n","detail":null},
         methods: [
           {
               name:        "Model",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "StatModel",
@@ -6172,7 +6249,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Model",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "StatModel",
@@ -6180,7 +6257,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetData",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Data",
@@ -6188,7 +6265,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetView",
-              params:      "StatView*",
+              params:      ["(StatView*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6196,7 +6273,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UpSpecial",
-              params:      "const std::string& stat",
+              params:      ["(const std::string& stat)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6204,7 +6281,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DownSpecial",
-              params:      "const std::string& stat",
+              params:      ["(const std::string& stat)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6212,7 +6289,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetSpecial",
-              params:      "const std::string& stat,short value",
+              params:      ["(const std::string& stat","short value)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6220,7 +6297,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetStatistic",
-              params:      "const std::string& stat,short value",
+              params:      ["(const std::string& stat","short value)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6228,7 +6305,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UpSkill",
-              params:      "const std::string& stat",
+              params:      ["(const std::string& stat)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6236,7 +6313,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DownSkill",
-              params:      "const std::string& stat",
+              params:      ["(const std::string& stat)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6244,7 +6321,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetSkill",
-              params:      "const std::string& stat,short value",
+              params:      ["(const std::string& stat","short value)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6252,7 +6329,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddExperience",
-              params:      "unsigned int experience",
+              params:      ["(unsigned int experience)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6260,7 +6337,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetCurrentHp",
-              params:      "short hp",
+              params:      ["(short hp)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6268,7 +6345,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "TriggerSkillAffinity",
-              params:      "const std::string& stat,bool",
+              params:      ["(const std::string& stat","bool)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6276,7 +6353,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddKill",
-              params:      "const std::string& race",
+              params:      ["(const std::string& race)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6284,7 +6361,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RunMetabolism",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6292,7 +6369,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetMaxHp",
-              params:      "short hp",
+              params:      ["(short hp)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6300,7 +6377,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SpecialChanged",
-              params:      "const std::string&,short",
+              params:      ["(const std::string&","short)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6308,7 +6385,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SkillChanged",
-              params:      "const std::string&,short",
+              params:      ["(const std::string&","short)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6316,7 +6393,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "StatisticChanged",
-              params:      "const std::string&,short",
+              params:      ["(const std::string&","short)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6324,7 +6401,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "PerksChanged",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6332,7 +6409,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "TraitToggled",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6340,7 +6417,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SkillAffinityToggled",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6348,7 +6425,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "LevelChanged",
-              params:      "unsigned short",
+              params:      ["(unsigned short)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6356,7 +6433,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "InformationChanged",
-              params:      "const std::string&,const std::string&",
+              params:      ["(const std::string&","const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6364,7 +6441,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "AgeChanged",
-              params:      "unsigned char",
+              params:      ["(unsigned char)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6372,7 +6449,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "PerkAdded",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6380,7 +6457,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ViewStatUpped",
-              params:      "const std::string&,const std::string&",
+              params:      ["(const std::string&","const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6388,7 +6465,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ViewStatDowned",
-              params:      "const std::string&,const std::string&",
+              params:      ["(const std::string&","const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6396,7 +6473,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "AcceptChanges",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6404,7 +6481,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CancelChanges",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6412,7 +6489,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "MakeBackup",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6457,10 +6534,11 @@ var project = {
         file:       "include/statsheet.hpp",
         decl:       "class",
         namespaces: ["StatViewRocket","","UiBase","","StatView"],
+        
         methods: [
           {
               name:        "SetEditMode",
-              params:      "EditMode",
+              params:      ["(EditMode)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6468,7 +6546,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Hide",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6476,7 +6554,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Show",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6484,7 +6562,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetInformation",
-              params:      "const std::string& name,const std::string& value",
+              params:      ["(const std::string& name","const std::string& value)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6492,7 +6570,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetInformation",
-              params:      "const std::string& name,short value",
+              params:      ["(const std::string& name","short value)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6500,7 +6578,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetFieldValue",
-              params:      "const std::string& category,const std::string& key,const std::string& value",
+              params:      ["(const std::string& category","const std::string& key","const std::string& value)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6508,7 +6586,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetFieldValue",
-              params:      "const std::string& category,const std::string& key,short value",
+              params:      ["(const std::string& category","const std::string& key","short value)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6516,7 +6594,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetIdValue",
-              params:      "const std::string& id,const std::string& value",
+              params:      ["(const std::string& id","const std::string& value)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6524,7 +6602,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetIdValue",
-              params:      "const std::string& id,short value",
+              params:      ["(const std::string& id","short value)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6532,7 +6610,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetCategoryFields",
-              params:      "const std::string& category,const std::vector<std::string>& keys",
+              params:      ["(const std::string& category","const std::vector<std::string>& keys)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6540,7 +6618,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetExperience",
-              params:      "unsigned int,unsigned short,unsigned int",
+              params:      ["(unsigned int","unsigned short","unsigned int)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6548,7 +6626,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetTraits",
-              params:      "std::list<std::string>",
+              params:      ["(std::list<std::string>)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6556,7 +6634,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetTraitActive",
-              params:      "const std::string&,bool",
+              params:      ["(const std::string&","bool)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6564,7 +6642,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetSkillAffinity",
-              params:      "const std::string& skill,bool",
+              params:      ["(const std::string& skill","bool)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6572,7 +6650,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetPerks",
-              params:      "std::list<std::string>",
+              params:      ["(std::list<std::string>)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6580,7 +6658,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetAvailablePerks",
-              params:      "std::list<std::string>",
+              params:      ["(std::list<std::string>)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6588,7 +6666,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Cancel",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6596,7 +6674,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "Accept",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6604,7 +6682,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "UpdateName",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6612,7 +6690,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "UpdateGender",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6620,7 +6698,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "UpdateAge",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6628,7 +6706,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "TraitClicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6636,7 +6714,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SpecialClicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6644,7 +6722,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SkillClicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6652,7 +6730,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GeneralClicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6660,7 +6738,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "StatMore",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6668,7 +6746,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "StatLess",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6676,7 +6754,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "StatUpdate",
-              params:      "Rocket::Core::Event& event,std::string& type,std::string& stat",
+              params:      ["(Rocket::Core::Event& event","std::string& type","std::string& stat)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6861,10 +6939,11 @@ var project = {
         file:       "include/statsheet.hpp",
         decl:       "struct",
         namespaces: ["StatViewRocket","StatViewRocket::PerksDialog","","UiBase"],
+        
         methods: [
           {
               name:        "SetAvailablePerks",
-              params:      "std::list<std::string> perks",
+              params:      ["(std::list<std::string> perks)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6872,7 +6951,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetPerkDescription",
-              params:      "std::string description",
+              params:      ["(std::string description)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6880,7 +6959,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ClearPerksButtons",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6888,7 +6967,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SetSelectedPerk",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6896,7 +6975,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackChoosePerk",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6904,7 +6983,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackCancel",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6912,7 +6991,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackDblClickPerk",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6979,10 +7058,11 @@ var project = {
         file:       "include/level/character.hpp",
         decl:       "class",
         namespaces: ["CharacterBuff"],
+        doc:        {"overview":"Instance of a buff placed on an [ObjectCharacter].\n","detail":null},
         methods: [
           {
               name:        "GetName",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -6990,7 +7070,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Begin",
-              params:      "ObjectCharacter* from,TimeManager::Task* task = 0",
+              params:      ["(ObjectCharacter* from","TimeManager::Task* task = 0)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6998,7 +7078,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "End",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7006,7 +7086,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Load",
-              params:      "Level*,ObjectCharacter*,Utils::Packet&",
+              params:      ["(Level*","ObjectCharacter*","Utils::Packet&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7014,7 +7094,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Save",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7022,7 +7102,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Initialize",
-              params:      "Level*,ObjectCharacter*,Data buff",
+              params:      ["(Level*","ObjectCharacter*","Data buff)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7127,10 +7207,11 @@ var project = {
         file:       "include/level/character.hpp",
         decl:       "class",
         namespaces: ["ObjectCharacter","","InstanceDynamicObject","","WaypointModifier","","AnimatedObject","","Scriptable"],
+        doc:        {"overview":"Controls the logical and displaying parts of a character or NPC.\n","detail":null},
         methods: [
           {
               name:        "Load",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7138,7 +7219,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Save",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7146,7 +7227,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetStatistics",
-              params:      "DataTree* stats,StatController* statsController",
+              params:      ["(DataTree* stats","StatController* statsController)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7154,7 +7235,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "NullifyStatistics",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7162,7 +7243,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetGoToData",
-              params:      "InstanceDynamicObject* character",
+              params:      ["(InstanceDynamicObject* character)"],
               attrs:       64,
               desc:        "",
               return_type: "InstanceDynamicObject::GoToData",
@@ -7170,7 +7251,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetInventory",
-              params:      "Inventory* inventory",
+              params:      ["(Inventory* inventory)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7178,7 +7259,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "statistics",
-              params:      "_statistics",
+              params:      ["(_statistics)"],
               attrs:       0,
               desc:        "",
               return_type: "Data",
@@ -7186,7 +7267,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ProcessCollisions",
-              params:      "",
+              params:      ["()"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7194,7 +7275,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Run",
-              params:      "float elapsedTime",
+              params:      ["(float elapsedTime)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7202,7 +7283,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LookAt",
-              params:      "LVecBase3",
+              params:      ["(LVecBase3)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7210,7 +7291,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LookAt",
-              params:      "InstanceDynamicObject*",
+              params:      ["(InstanceDynamicObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7218,7 +7299,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GoTo",
-              params:      "unsigned int id",
+              params:      ["(unsigned int id)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7226,7 +7307,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GoTo",
-              params:      "Waypoint* waypoint",
+              params:      ["(Waypoint* waypoint)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7234,7 +7315,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GoTo",
-              params:      "InstanceDynamicObject* object,int max_distance = 0",
+              params:      ["(InstanceDynamicObject* object","int max_distance = 0)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7242,7 +7323,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GoToRandomWaypoint",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7250,7 +7331,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "TruncatePath",
-              params:      "unsigned short max_length",
+              params:      ["(unsigned short max_length)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7258,7 +7339,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetPathDistance",
-              params:      "Waypoint* waypoint",
+              params:      ["(Waypoint* waypoint)"],
               attrs:       0,
               desc:        "",
               return_type: "short",
@@ -7266,7 +7347,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetPathDistance",
-              params:      "InstanceDynamicObject* object",
+              params:      ["(InstanceDynamicObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "short",
@@ -7274,7 +7355,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetDistance",
-              params:      "InstanceDynamicObject* object",
+              params:      ["(InstanceDynamicObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "float",
@@ -7282,7 +7363,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetBestWaypoint",
-              params:      "InstanceDynamicObject* object,bool farthest",
+              params:      ["(InstanceDynamicObject* object","bool farthest)"],
               attrs:       0,
               desc:        "",
               return_type: "int",
@@ -7290,7 +7371,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetNearestWaypoint",
-              params:      "InstanceDynamicObject* object",
+              params:      ["(InstanceDynamicObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "int",
@@ -7298,7 +7379,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetFarthestWaypoint",
-              params:      "InstanceDynamicObject* object",
+              params:      ["(InstanceDynamicObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "int",
@@ -7306,7 +7387,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetPathSize",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "int",
@@ -7314,7 +7395,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "HasLineOfSight",
-              params:      "InstanceDynamicObject* object",
+              params:      ["(InstanceDynamicObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -7322,7 +7403,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsMoving",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -7330,7 +7411,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsAlive",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -7338,7 +7419,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsInterrupted",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -7346,7 +7427,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetInventory",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Inventory",
@@ -7354,7 +7435,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetStatistics",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Data",
@@ -7362,7 +7443,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetStatController",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "StatController",
@@ -7370,7 +7451,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetFactionName",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -7378,7 +7459,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetFaction",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "int",
@@ -7386,7 +7467,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetActionPoints",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -7394,7 +7475,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetActionPoints",
-              params:      "unsigned short ap",
+              params:      ["(unsigned short ap)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7402,7 +7483,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RestartActionPoints",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7410,7 +7491,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetHitPoints",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -7418,7 +7499,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetHitPoints",
-              params:      "short hp",
+              params:      ["(short hp)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7426,7 +7507,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "StatHpUpdate",
-              params:      "short",
+              params:      ["(short)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7434,7 +7515,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetArmorClass",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -7442,7 +7523,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetArmorClass",
-              params:      "short ac",
+              params:      ["(short ac)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7450,7 +7531,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RestartArmorClass",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7458,7 +7539,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetBonusAC",
-              params:      "short ac",
+              params:      ["(short ac)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7466,7 +7547,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PlayEquipedItemAnimation",
-              params:      "unsigned short it,const std::string& name",
+              params:      ["(unsigned short it","const std::string& name)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7474,7 +7555,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetEquipedItem",
-              params:      "unsigned short it,InventoryObject* object,EquipedMode mode = EquipedMouth",
+              params:      ["(unsigned short it","InventoryObject* object","EquipedMode mode = EquipedMouth)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7482,7 +7563,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetEquipedItem",
-              params:      "unsigned short it",
+              params:      ["(unsigned short it)"],
               attrs:       0,
               desc:        "",
               return_type: "InventoryObject",
@@ -7490,7 +7571,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetequipedAction",
-              params:      "unsigned short it",
+              params:      ["(unsigned short it)"],
               attrs:       4,
               desc:        "",
               return_type: "char",
@@ -7498,7 +7579,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UnequipItem",
-              params:      "unsigned short it",
+              params:      ["(unsigned short it)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7506,7 +7587,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ItemNextUseType",
-              params:      "unsigned short it",
+              params:      ["(unsigned short it)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7514,7 +7595,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PushBuff",
-              params:      "Data,ObjectCharacter* caster",
+              params:      ["(Data","ObjectCharacter* caster)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7522,7 +7603,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DelBuff",
-              params:      "CharacterBuff* buff",
+              params:      ["(CharacterBuff* buff)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7530,7 +7611,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CheckFieldOfView",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7538,7 +7619,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetFaction",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7546,7 +7627,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetFaction",
-              params:      "unsigned int flag",
+              params:      ["(unsigned int flag)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7554,7 +7635,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetAsEnemy",
-              params:      "const ObjectCharacter*,bool",
+              params:      ["(const ObjectCharacter*","bool)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7562,7 +7643,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsEnemy",
-              params:      "const ObjectCharacter*",
+              params:      ["(const ObjectCharacter*)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -7570,7 +7651,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsAlly",
-              params:      "const ObjectCharacter*",
+              params:      ["(const ObjectCharacter*)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -7578,7 +7659,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RequestAttack",
-              params:      "ObjectCharacter* attack,ObjectCharacter* from",
+              params:      ["(ObjectCharacter* attack","ObjectCharacter* from)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7586,7 +7667,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RequestHeal",
-              params:      "ObjectCharacter* heal,ObjectCharacter* from",
+              params:      ["(ObjectCharacter* heal","ObjectCharacter* from)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7594,7 +7675,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RequestFollow",
-              params:      "ObjectCharacter* follow,ObjectCharacter* from",
+              params:      ["(ObjectCharacter* follow","ObjectCharacter* from)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7602,7 +7683,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RequestStopFollowing",
-              params:      "ObjectCharacter* follow,ObjectCharacter* from",
+              params:      ["(ObjectCharacter* follow","ObjectCharacter* from)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7610,7 +7691,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AskMorale",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "int",
@@ -7618,7 +7699,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SendMessage",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7626,7 +7707,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RunMovement",
-              params:      "float elapsedTime",
+              params:      ["(float elapsedTime)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7634,7 +7715,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "RunMovementNext",
-              params:      "float elaspedTime",
+              params:      ["(float elaspedTime)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7642,7 +7723,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "RunDeath",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7650,7 +7731,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "StartRunAnimation",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7658,7 +7739,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "StopRunAnimation",
-              params:      "InstanceDynamicObject*",
+              params:      ["(InstanceDynamicObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7666,7 +7747,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "RequestCharacter",
-              params:      "ObjectCharacter*,ObjectCharacter*,asIScriptFunction*",
+              params:      ["(ObjectCharacter*","ObjectCharacter*","asIScriptFunction*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7674,7 +7755,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackActionUse",
-              params:      "InstanceDynamicObject* object",
+              params:      ["(InstanceDynamicObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7682,7 +7763,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "DebugPathfinding",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -7895,6 +7976,7 @@ var project = {
         file:       "include/level/character.hpp",
         decl:       "struct",
         namespaces: ["ObjectCharacter","ObjectCharacter::FovEnemy"],
+        doc:        {"overview":"Represents a character detected by another character\n","detail":null},
         methods: [
           
         ],
@@ -7907,7 +7989,8 @@ var project = {
             obj_type:   "ObjectCharacter",
             
             attrs:      1,
-            visibility: "public"
+            visibility: "public",
+            doc:         {"name":"ttl","short":"Time to live, determine how much field of view checks will be executed before the character loses track of this target"}
           },
           {
             name:       "ttl",
@@ -7926,6 +8009,7 @@ var project = {
         file:       "include/level/character.hpp",
         decl:       "struct",
         namespaces: ["ObjectCharacter","ObjectCharacter::ItemEquiped"],
+        doc:        {"overview":"Controller for an item that is equiped by a character.\n","detail":null},
         methods: [
           
         ],
@@ -8003,10 +8087,11 @@ var project = {
         file:       "include/inventory_ui.hpp",
         decl:       "class",
         namespaces: ["UiObjectQuantityPicker","","UiBase"],
+        doc:        {"overview":"UI for picking quantities when moving objects from an inventory to another.\n","detail":null},
         methods: [
           {
               name:        "Accepted",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8014,7 +8099,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "Increment",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8022,7 +8107,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GetQuantity",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -8030,7 +8115,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SetQuantity",
-              params:      "unsigned short",
+              params:      ["(unsigned short)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8118,10 +8203,11 @@ var project = {
         file:       "include/inventory_ui.hpp",
         decl:       "class",
         namespaces: ["InventoryView",""],
+        doc:        {"overview":"View for the Inventory MVC UI.\n","detail":null},
         methods: [
           {
               name:        "UpdateView",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8129,7 +8215,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Destroy",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8137,7 +8223,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetObjectFromId",
-              params:      "const std::string& id",
+              params:      ["(const std::string& id)"],
               attrs:       0,
               desc:        "",
               return_type: "InventoryObject",
@@ -8145,7 +8231,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ProcessEvent",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8153,7 +8239,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetInventory",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Inventory",
@@ -8193,10 +8279,11 @@ var project = {
         file:       "include/inventory_ui.hpp",
         decl:       "class",
         namespaces: ["InventoryViewController"],
+        doc:        {"overview":"Controller for the Inventory MVC UI.\n","detail":null},
         methods: [
           {
               name:        "AddView",
-              params:      "Rocket::Core::Element* element,Inventory& inventory",
+              params:      ["(Rocket::Core::Element* element","Inventory& inventory)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8204,7 +8291,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DragObserver",
-              params:      "InventoryView* container,Rocket::Core::Element* element",
+              params:      ["(InventoryView* container","Rocket::Core::Element* element)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8212,7 +8299,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Destroy",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8220,7 +8307,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Update",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8228,7 +8315,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AllowDrop",
-              params:      "InventoryView& from,InventoryView& to",
+              params:      ["(InventoryView& from","InventoryView& to)"],
               attrs:       64,
               desc:        "",
               return_type: "bool",
@@ -8248,10 +8335,11 @@ var project = {
         file:       "include/inventory_ui.hpp",
         decl:       "class",
         namespaces: ["UiUseObjectOn","","UiBase"],
+        doc:        {"overview":"UI used when the player ask to use an object on a [DynamicObject].\n","detail":null},
         methods: [
           {
               name:        "Destroy",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8259,7 +8347,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RocketCancelClicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8301,10 +8389,11 @@ var project = {
         file:       "include/inventory_ui.hpp",
         decl:       "class",
         namespaces: ["UiBarter","","UiBase","","InventoryViewController"],
+        doc:        {"overview":"UI used when characters are bartering.\n","detail":null},
         methods: [
           {
               name:        "AllowDrop",
-              params:      "InventoryView& from,InventoryView& to",
+              params:      ["(InventoryView& from","InventoryView& to)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -8312,7 +8401,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SwapObjects",
-              params:      "InventoryObject* object",
+              params:      ["(InventoryObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8320,7 +8409,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "MakeDeal",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8328,7 +8417,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "BarterEnd",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8336,7 +8425,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "UpdateInterface",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8344,7 +8433,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "UpdateInterfaceSide",
-              params:      "Rocket::Core::Element* e,Inventory::Content&,StatController*,StatController*",
+              params:      ["(Rocket::Core::Element* e","Inventory::Content&","StatController*","StatController*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8352,7 +8441,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GetStackValue",
-              params:      "Inventory::Content&,StatController*,StatController*",
+              params:      ["(Inventory::Content&","StatController*","StatController*)"],
               attrs:       0,
               desc:        "",
               return_type: "int",
@@ -8360,7 +8449,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "DropInventory",
-              params:      "Inventory& from,Inventory& to",
+              params:      ["(Inventory& from","Inventory& to)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8368,7 +8457,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SwapFunctor",
-              params:      "InventoryObject* object,Inventory& from,Inventory& to",
+              params:      ["(InventoryObject* object","Inventory& from","Inventory& to)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -8471,10 +8560,11 @@ var project = {
         file:       "include/inventory_ui.hpp",
         decl:       "class",
         namespaces: ["UiLoot","","UiBase"],
+        doc:        {"overview":"UI used when the player is looting other inventories (bodies, lockers, etc).\n","detail":null},
         methods: [
           {
               name:        "Destroy",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8482,7 +8572,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SwapObjects",
-              params:      "InventoryObject* object",
+              params:      ["(InventoryObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8490,7 +8580,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "RocketDoneClicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8498,7 +8588,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "RocketTakeAllClicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8574,10 +8664,11 @@ var project = {
         file:       "include/inventory_ui.hpp",
         decl:       "class",
         namespaces: ["UiEquipMode","","UiBase"],
+        doc:        {"overview":"UI for picking the way a character will yield an object.\n","detail":null},
         methods: [
           {
               name:        "Destroy",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8585,7 +8676,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DisableMode",
-              params:      "EquipedMode",
+              params:      ["(EquipedMode)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8593,7 +8684,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackButton",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8601,7 +8692,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackCancel",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8675,10 +8766,11 @@ var project = {
         file:       "include/inventory_ui.hpp",
         decl:       "class",
         namespaces: ["UiNextZone","","UiBase"],
+        doc:        {"overview":"UI used to pick the next zone when leaving a level. Used only when several choices are availables.\n","detail":null},
         methods: [
           {
               name:        "CallbackLevelSelected",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8686,7 +8778,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackCancel",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8726,10 +8818,11 @@ var project = {
         file:       "include/gameui.hpp",
         decl:       "class",
         namespaces: ["GameInventory","","UiBase"],
+        doc:        {"overview":"UI for the player's inventory.\n","detail":null},
         methods: [
           {
               name:        "SetInventory",
-              params:      "Inventory&",
+              params:      ["(Inventory&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8737,7 +8830,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UpdateInventory",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8745,7 +8838,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UpdateInventoryCapacity",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8753,7 +8846,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SetSelectedObject",
-              params:      "InventoryObject*",
+              params:      ["(InventoryObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8761,7 +8854,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackButtonUse",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8769,7 +8862,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackButtonDrop",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8777,7 +8870,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackButtonEquip1",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8785,7 +8878,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackButtonEquip2",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8793,7 +8886,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackButtonUnequip1",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8801,7 +8894,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CallbackButtonUnequip2",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8904,10 +8997,11 @@ var project = {
         file:       "include/gameui.hpp",
         decl:       "class",
         namespaces: ["GameConsole","","UiBase"],
+        doc:        {"overview":"UI and controls for the console.\n","detail":null},
         methods: [
           {
               name:        "Show",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8915,7 +9009,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Hide",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8923,7 +9017,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Get",
-              params:      "",
+              params:      ["()"],
               attrs:       16,
               desc:        "",
               return_type: "GameConsole",
@@ -8931,7 +9025,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "WriteOn",
-              params:      "const std::string& string",
+              params:      ["(const std::string& string)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -8939,7 +9033,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ListFunctions",
-              params:      "",
+              params:      ["()"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -8947,7 +9041,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PrintScenegraph",
-              params:      "",
+              params:      ["()"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -8955,7 +9049,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PrintChildren",
-              params:      "const NodePath& n,int lvl",
+              params:      ["(const NodePath& n","int lvl)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -8963,7 +9057,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Toggle",
-              params:      "const Event*,void* data",
+              params:      ["(const Event*","void* data)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -8971,7 +9065,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "KeyUp",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8979,7 +9073,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "Execute",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -8987,7 +9081,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "Output",
-              params:      "const std::string str",
+              params:      ["(const std::string str)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9087,10 +9181,11 @@ var project = {
         file:       "include/gameui.hpp",
         decl:       "class",
         namespaces: ["GameUi"],
+        doc:        {"overview":"Container for global UIs relevant to a GameTask instance (console, menu, inventory and character stats).\n","detail":null},
         methods: [
           {
               name:        "window, PT",
-              params:      "RocketRegion",
+              params:      ["(RocketRegion)"],
               attrs:       0,
               desc:        "",
               return_type: "WindowFramework",
@@ -9098,7 +9193,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetContext",
-              params:      "",
+              params:      ["()"],
               attrs:       0,
               desc:        "",
               return_type: "Rocket::Core::Context",
@@ -9106,7 +9201,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetMenu",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "GameMenu",
@@ -9114,7 +9209,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetInventory",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "GameInventory",
@@ -9122,7 +9217,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetPers",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "StatViewRocket",
@@ -9130,7 +9225,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "OpenMenu",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9138,7 +9233,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "OpenInventory",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9146,7 +9241,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "OpenPers",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9202,10 +9297,11 @@ var project = {
         file:       "include/gameui.hpp",
         decl:       "class",
         namespaces: ["LoadingScreen","","UiBase"],
+        doc:        {"overview":"UI for the loading screen.\n","detail":null},
         methods: [
           {
               name:        "AppendText",
-              params:      "const std::string& str",
+              params:      ["(const std::string& str)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9229,10 +9325,11 @@ var project = {
         file:       "include/gameui.hpp",
         decl:       "class",
         namespaces: ["LevelUi"],
+        doc:        {"overview":"Container for all the [Level] specific parts of the interface.\n","detail":null},
         methods: [
           {
               name:        "GetContext",
-              params:      "",
+              params:      ["()"],
               attrs:       0,
               desc:        "",
               return_type: "Rocket::Core::Context",
@@ -9240,7 +9337,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetMainBar",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "GameMainBar",
@@ -9248,7 +9345,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetMenu",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "GameMenu",
@@ -9256,7 +9353,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetInventory",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "GameInventory",
@@ -9264,7 +9361,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetPers",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "StatViewRocket",
@@ -9309,10 +9406,11 @@ var project = {
         file:       "include/gameui.hpp",
         decl:       "class",
         namespaces: ["GameOptions","","UiBase"],
+        doc:        {"overview":"UI giving access of the [OptionManager] values to the player.\n","detail":null},
         methods: [
           {
               name:        "SetLanguage",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9320,7 +9418,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SetResolution",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9328,7 +9426,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SetQuality",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9336,7 +9434,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ToggleFullscreen",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9403,10 +9501,11 @@ var project = {
         file:       "include/gameui.hpp",
         decl:       "class",
         namespaces: ["AlertUi","","UiBase"],
+        doc:        {"overview":"Creates alerts to warn the user of game engine, scripting or configuration malfunctions.\n","detail":null},
         methods: [
           {
               name:        "Run",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -9446,10 +9545,11 @@ var project = {
         file:       "include/gameui.hpp",
         decl:       "class",
         namespaces: ["GeneralUi"],
+        doc:        {"overview":"Container for the parts of the interface that are present from beginning to exiting of the game.\n","detail":null},
         methods: [
           {
               name:        "GetOptions",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "GameOptions",
@@ -9494,10 +9594,11 @@ var project = {
         file:       "include/musicmanager.hpp",
         decl:       "class",
         namespaces: ["MusicManager"],
+        doc:        {"overview":"Handle the playlists and provide an interface for playing music during the game.\n","detail":null},
         methods: [
           {
               name:        "Initialize",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -9505,7 +9606,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Finalize",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -9513,7 +9614,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Get",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "MusicManager",
@@ -9521,7 +9622,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Play",
-              params:      "const std::string& category",
+              params:      ["(const std::string& category)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9529,7 +9630,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Play",
-              params:      "const std::string& category,const std::string& name",
+              params:      ["(const std::string& category","const std::string& name)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9537,7 +9638,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PlayNext",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9545,7 +9646,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Run",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9553,7 +9654,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetVolume",
-              params:      "float volume",
+              params:      ["(float volume)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9561,7 +9662,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FadeOut",
-              params:      "float elapsed_time",
+              params:      ["(float elapsed_time)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9569,7 +9670,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "FadeVolume",
-              params:      "float elapsed_time",
+              params:      ["(float elapsed_time)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9667,10 +9768,11 @@ var project = {
         file:       "include/soundmanager.hpp",
         decl:       "struct",
         namespaces: ["ISampleInstance"],
+        doc:        {"overview":"Interface for a sound sample. It is used as a mean to keep a sample alive as long as needed: if the reference counter is\nnull when the sound stops playing, it will be garbage collected. Reference counter can be modified using AddReference and\nDelReference.\n","detail":null},
         methods: [
           {
               name:        "Start",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -9678,7 +9780,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Stop",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -9686,7 +9788,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Pause",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -9694,7 +9796,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetVolume",
-              params:      "float",
+              params:      ["(float)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -9702,7 +9804,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetVolume",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       68,
               desc:        "",
               return_type: "float",
@@ -9710,7 +9812,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsPlaying",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       68,
               desc:        "",
               return_type: "bool",
@@ -9718,7 +9820,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddReference",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9726,7 +9828,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DelReference",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9734,7 +9836,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetReferenceCount",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "short",
@@ -9761,10 +9863,11 @@ var project = {
         file:       "include/soundmanager.hpp",
         decl:       "struct",
         namespaces: ["ISample"],
+        
         methods: [
           {
               name:        "NewInstance",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       64,
               desc:        "",
               return_type: "ISampleInstance",
@@ -9772,7 +9875,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LoadFromFile",
-              params:      "const std::string& filename",
+              params:      ["(const std::string& filename)"],
               attrs:       64,
               desc:        "",
               return_type: "bool",
@@ -9780,7 +9883,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetFilename",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -9807,10 +9910,11 @@ var project = {
         file:       "include/soundmanager.hpp",
         decl:       "class",
         namespaces: ["SoundManager"],
+        doc:        {"overview":"Handles requests and garbage collecting for sound files (returned as [ISampleInstance]).\n","detail":null},
         methods: [
           {
               name:        "NewSoundManager",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "SoundManager",
@@ -9818,7 +9922,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Release",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9826,7 +9930,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CreateInstance",
-              params:      "const std::string& key",
+              params:      ["(const std::string& key)"],
               attrs:       0,
               desc:        "",
               return_type: "ISampleInstance",
@@ -9834,7 +9938,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DeleteInstance",
-              params:      "ISampleInstance*",
+              params:      ["(ISampleInstance*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9842,7 +9946,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GarbageCollect",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9850,7 +9954,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GarbageCollectAll",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -9858,7 +9962,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetVolume",
-              params:      "float",
+              params:      ["(float)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9866,7 +9970,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetVolume",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "float",
@@ -9874,7 +9978,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Require",
-              params:      "const std::string& key",
+              params:      ["(const std::string& key)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -9882,7 +9986,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RequireSound",
-              params:      "const std::string& key",
+              params:      ["(const std::string& key)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -9890,7 +9994,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "data_audio",
-              params:      "_data_audio",
+              params:      ["(_data_audio)"],
               attrs:       0,
               desc:        "",
               return_type: "Data",
@@ -9962,6 +10066,7 @@ var project = {
         file:       "include/soundmanager.hpp",
         decl:       "struct",
         namespaces: ["SoundManager","SoundManager::Sound"],
+        
         methods: [
           
         ],
@@ -10000,10 +10105,11 @@ var project = {
         file:       "include/soundmanager.hpp",
         decl:       "class",
         namespaces: ["sf_SampleInstance","","ISampleInstance"],
+        
         methods: [
           {
               name:        "Start",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10011,7 +10117,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Stop",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10019,7 +10125,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Pause",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10027,7 +10133,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetVolume",
-              params:      "float volume",
+              params:      ["(float volume)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10035,7 +10141,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetVolume",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "float",
@@ -10043,7 +10149,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsPlaying",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -10074,10 +10180,11 @@ var project = {
         file:       "include/soundmanager.hpp",
         decl:       "class",
         namespaces: ["sf_Sample","","ISample"],
+        
         methods: [
           {
               name:        "NewInstance",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "ISampleInstance",
@@ -10085,7 +10192,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LoadFromFile",
-              params:      "const std::string& filename",
+              params:      ["(const std::string& filename)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -10116,10 +10223,11 @@ var project = {
         file:       "include/level/level.hpp",
         decl:       "class",
         namespaces: ["Level"],
+        doc:        {"overview":"One of the three main parts of the game engine's core, it handles everything that happens when the player is\ninside a level.\n","detail":null},
         methods: [
           {
               name:        "InitSun",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10127,7 +10235,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "InitPlayer",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10135,7 +10243,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetDataEngine",
-              params:      "DataEngine* de",
+              params:      ["(DataEngine* de)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10143,7 +10251,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetPlayerInventory",
-              params:      "Inventory*",
+              params:      ["(Inventory*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10151,7 +10259,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SaveUpdateWorld",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10159,7 +10267,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Save",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10167,7 +10275,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Load",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10175,7 +10283,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "InsertParty",
-              params:      "PlayerParty& party",
+              params:      ["(PlayerParty& party)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10183,7 +10291,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FetchParty",
-              params:      "PlayerParty& party",
+              params:      ["(PlayerParty& party)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10191,7 +10299,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "StripParty",
-              params:      "PlayerParty& party",
+              params:      ["(PlayerParty& party)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10199,7 +10307,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "do_task",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "AsyncTask::DoneStatus",
@@ -10207,7 +10315,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetPersistent",
-              params:      "bool set",
+              params:      ["(bool set)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10215,7 +10323,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsPersistent",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -10223,7 +10331,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetState",
-              params:      "State",
+              params:      ["(State)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10231,7 +10339,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetState",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "State",
@@ -10239,7 +10347,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetInterrupted",
-              params:      "bool",
+              params:      ["(bool)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10247,7 +10355,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DisplayCombatPath",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10255,7 +10363,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "DestroyCombatPath",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10263,7 +10371,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FindPath",
-              params:      "std::list<Waypoint>&,Waypoint&,Waypoint&",
+              params:      ["(std::list<Waypoint>&","Waypoint&","Waypoint&)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -10271,7 +10379,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetWorld",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "World",
@@ -10279,7 +10387,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetCamera",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "SceneCamera",
@@ -10287,7 +10395,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetCharacter",
-              params:      "const std::string& name",
+              params:      ["(const std::string& name)"],
               attrs:       0,
               desc:        "",
               return_type: "ObjectCharacter",
@@ -10295,7 +10403,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetCharacter",
-              params:      "const DynamicObject*",
+              params:      ["(const DynamicObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "ObjectCharacter",
@@ -10303,7 +10411,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetPlayer",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "ObjectCharacter",
@@ -10311,7 +10419,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UnprocessAllCollisions",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10319,7 +10427,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ProcessAllCollisions",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10327,7 +10435,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FindObjectFromNode",
-              params:      "NodePath node",
+              params:      ["(NodePath node)"],
               attrs:       0,
               desc:        "",
               return_type: "InstanceDynamicObject",
@@ -10335,7 +10443,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetObject",
-              params:      "const std::string& name",
+              params:      ["(const std::string& name)"],
               attrs:       0,
               desc:        "",
               return_type: "InstanceDynamicObject",
@@ -10343,7 +10451,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetTimeManager",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "TimeManager",
@@ -10351,7 +10459,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetDataEngine",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Data",
@@ -10359,7 +10467,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetItems",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Data",
@@ -10367,7 +10475,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ConsoleWrite",
-              params:      "const std::string& str",
+              params:      ["(const std::string& str)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10375,7 +10483,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RemoveObject",
-              params:      "InstanceDynamicObject* object",
+              params:      ["(InstanceDynamicObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10383,7 +10491,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackExitZone",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10391,7 +10499,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackGoToZone",
-              params:      "const std::string& name",
+              params:      ["(const std::string& name)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10399,7 +10507,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackSelectNextZone",
-              params:      "const std::vector<std::string>& zones",
+              params:      ["(const std::vector<std::string>& zones)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10407,7 +10515,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackCancelSelectZone",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10415,7 +10523,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetNextZone",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -10423,7 +10531,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetExitZone",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -10431,7 +10539,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetEntryZone",
-              params:      "Party&,const std::string&",
+              params:      ["(Party&","const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10439,7 +10547,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackActionBarter",
-              params:      "ObjectCharacter*",
+              params:      ["(ObjectCharacter*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10447,7 +10555,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackActionUse",
-              params:      "InstanceDynamicObject* object",
+              params:      ["(InstanceDynamicObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10455,7 +10563,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackActionTalkTo",
-              params:      "InstanceDynamicObject* object",
+              params:      ["(InstanceDynamicObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10463,7 +10571,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackActionUseObjectOn",
-              params:      "InstanceDynamicObject* object",
+              params:      ["(InstanceDynamicObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10471,7 +10579,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackActionTargetUse",
-              params:      "unsigned short it",
+              params:      ["(unsigned short it)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10479,7 +10587,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SelectedUseObjectOn",
-              params:      "InventoryObject* object",
+              params:      ["(InventoryObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10487,7 +10595,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ActionUse",
-              params:      "ObjectCharacter* user,InstanceDynamicObject* target",
+              params:      ["(ObjectCharacter* user","InstanceDynamicObject* target)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10495,7 +10603,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ActionUseObject",
-              params:      "ObjectCharacter* user,InventoryObject* object,unsigned char actionIt",
+              params:      ["(ObjectCharacter* user","InventoryObject* object","unsigned char actionIt)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10503,7 +10611,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ActionUseObjectOn",
-              params:      "ObjectCharacter* user,InstanceDynamicObject* target,InventoryObject* object,unsigned char actionIt",
+              params:      ["(ObjectCharacter* user","InstanceDynamicObject* target","InventoryObject* object","unsigned char actionIt)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10511,7 +10619,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ActionDropObject",
-              params:      "ObjectCharacter* user,InventoryObject* object",
+              params:      ["(ObjectCharacter* user","InventoryObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10519,7 +10627,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ActionUseWeaponOn",
-              params:      "ObjectCharacter* user,ObjectCharacter* target,InventoryObject* object,unsigned char actionIt",
+              params:      ["(ObjectCharacter* user","ObjectCharacter* target","InventoryObject* object","unsigned char actionIt)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10527,7 +10635,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PendingActionTalkTo",
-              params:      "InstanceDynamicObject* fromObject",
+              params:      ["(InstanceDynamicObject* fromObject)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10535,7 +10643,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PendingActionUse",
-              params:      "InstanceDynamicObject* fromObject",
+              params:      ["(InstanceDynamicObject* fromObject)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10543,7 +10651,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PendingActionUseObjectOn",
-              params:      "InstanceDynamicObject* fromObject",
+              params:      ["(InstanceDynamicObject* fromObject)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10551,7 +10659,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PendingActionUseWeaponOn",
-              params:      "InstanceDynamicObject* fromObject",
+              params:      ["(InstanceDynamicObject* fromObject)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10559,7 +10667,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PlayerDropObject",
-              params:      "InventoryObject*",
+              params:      ["(InventoryObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10567,7 +10675,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PlayerUseObject",
-              params:      "InventoryObject*",
+              params:      ["(InventoryObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10575,7 +10683,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PlayerLoot",
-              params:      "Inventory*",
+              params:      ["(Inventory*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10583,7 +10691,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PlayerEquipObject",
-              params:      "unsigned short it,InventoryObject* object",
+              params:      ["(unsigned short it","InventoryObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10591,7 +10699,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "StartFight",
-              params:      "ObjectCharacter* starter",
+              params:      ["(ObjectCharacter* starter)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10599,7 +10707,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "StopFight",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10607,7 +10715,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "NextTurn",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10615,7 +10723,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UseActionPoints",
-              params:      "unsigned short ap",
+              params:      ["(unsigned short ap)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -10623,7 +10731,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetMouseState",
-              params:      "MouseState",
+              params:      ["(MouseState)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10631,7 +10739,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "MouseLeftClicked",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10639,7 +10747,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "MouseRightClicked",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10647,7 +10755,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "StartCombat",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10655,7 +10763,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SpawnEnemies",
-              params:      "const std::string& type,unsigned short quantity,unsigned short n_spawn",
+              params:      ["(const std::string& type","unsigned short quantity","unsigned short n_spawn)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10663,7 +10771,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsWaypointOccupied",
-              params:      "unsigned int id",
+              params:      ["(unsigned int id)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -10671,7 +10779,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PlaySound",
-              params:      "const std::string& name",
+              params:      ["(const std::string& name)"],
               attrs:       0,
               desc:        "",
               return_type: "ISampleInstance",
@@ -10679,7 +10787,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetupCamera",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10687,7 +10795,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "RunDaylight",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10695,7 +10803,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "RunMetabolism",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10703,7 +10811,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "MouseInit",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10711,7 +10819,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ToggleCharacterOutline",
-              params:      "bool",
+              params:      ["(bool)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10719,7 +10827,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "InsertDynamicObject",
-              params:      "DynamicObject&",
+              params:      ["(DynamicObject&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10727,7 +10835,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "InsertCharacter",
-              params:      "ObjectCharacter*",
+              params:      ["(ObjectCharacter*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10735,7 +10843,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CloseRunningUi",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10743,7 +10851,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "IsInsideBuilding",
-              params:      "unsigned char& floor",
+              params:      ["(unsigned char& floor)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -10751,7 +10859,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CheckCurrentFloor",
-              params:      "float elapsedTime",
+              params:      ["(float elapsedTime)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10759,7 +10867,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetCurrentFloor",
-              params:      "unsigned char floor",
+              params:      ["(unsigned char floor)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -10767,7 +10875,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FloorFade",
-              params:      "bool in,NodePath floor",
+              params:      ["(bool in","NodePath floor)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11084,10 +11192,11 @@ var project = {
         file:       "include/level/level.hpp",
         decl:       "class",
         namespaces: ["Level","Level::HidingFloor"],
+        
         methods: [
           {
               name:        "Done",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -11095,7 +11204,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Alpha",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "float",
@@ -11103,7 +11212,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ForceAlpha",
-              params:      "float _alpha",
+              params:      ["(float _alpha)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11111,7 +11220,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetNodePath",
-              params:      "NodePath np",
+              params:      ["(NodePath np)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11119,7 +11228,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetFadingIn",
-              params:      "bool set",
+              params:      ["(bool set)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11127,7 +11236,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Run",
-              params:      "float elapsedTime",
+              params:      ["(float elapsedTime)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11175,10 +11284,11 @@ var project = {
         file:       "include/level/mouse.hpp",
         decl:       "struct",
         namespaces: ["MouseHovering"],
+        
         methods: [
           {
               name:        "Reset",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11186,7 +11296,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetWaypoint",
-              params:      "NodePath np",
+              params:      ["(NodePath np)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11194,7 +11304,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetDynObject",
-              params:      "NodePath np",
+              params:      ["(NodePath np)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11242,10 +11352,11 @@ var project = {
         file:       "include/level/mouse.hpp",
         decl:       "class",
         namespaces: ["Mouse"],
+        
         methods: [
           {
               name:        "Run",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11253,7 +11364,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Hovering",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "MouseHovering",
@@ -11261,7 +11372,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetMouseState",
-              params:      "char",
+              params:      ["(char)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11269,7 +11380,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ClosestWaypoint",
-              params:      "World*,short currentFloor",
+              params:      ["(World*","short currentFloor)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11277,7 +11388,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackButton1",
-              params:      "const Event*,void* ptr",
+              params:      ["(const Event*","void* ptr)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -11285,7 +11396,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackButton2",
-              params:      "const Event*,void* ptr",
+              params:      ["(const Event*","void* ptr)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -11293,7 +11404,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackButton3",
-              params:      "const Event*,void* ptr",
+              params:      ["(const Event*","void* ptr)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -11357,6 +11468,7 @@ var project = {
         file:       "include/level/dialog.hpp",
         decl:       "struct",
         namespaces: ["DialogAnswers"],
+        
         methods: [
           
         ],
@@ -11381,10 +11493,11 @@ var project = {
         file:       "include/level/dialog.hpp",
         decl:       "class",
         namespaces: ["DialogModel"],
+        
         methods: [
           {
               name:        "SetCurrentNpcLine",
-              params:      "const std::string& id",
+              params:      ["(const std::string& id)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11392,7 +11505,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetHookAvailable",
-              params:      "const std::string& answerId",
+              params:      ["(const std::string& answerId)"],
               attrs:       0,
               desc:        "",
               return_type: "std::string",
@@ -11400,7 +11513,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetExecuteMethod",
-              params:      "const std::string& answerId",
+              params:      ["(const std::string& answerId)"],
               attrs:       0,
               desc:        "",
               return_type: "std::string",
@@ -11408,7 +11521,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetDefaultNextLine",
-              params:      "const std::string& answerId",
+              params:      ["(const std::string& answerId)"],
               attrs:       0,
               desc:        "",
               return_type: "std::string",
@@ -11416,7 +11529,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetNpcLine",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "std::string",
@@ -11424,7 +11537,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetDialogAnswers",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "DialogAnswers",
@@ -11478,10 +11591,11 @@ var project = {
         file:       "include/level/dialog.hpp",
         decl:       "class",
         namespaces: ["DialogView","","UiBase"],
+        
         methods: [
           {
               name:        "Destroy",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11489,7 +11603,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "UpdateView",
-              params:      "const std::string& npcLine,const DialogAnswers& answers",
+              params:      ["(const std::string& npcLine","const DialogAnswers& answers)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11497,7 +11611,7 @@ var project = {
               visibility:  "protected"
             },{
               name:        "CleanView",
-              params:      "const DialogAnswers& answers",
+              params:      ["(const DialogAnswers& answers)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11553,10 +11667,11 @@ var project = {
         file:       "include/level/dialog.hpp",
         decl:       "class",
         namespaces: ["DialogController","","DialogView","","UiBase"],
+        
         methods: [
           {
               name:        "WithCharacter",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "ObjectCharacter",
@@ -11564,7 +11679,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ExecuteAnswer",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11572,7 +11687,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SetCurrentNode",
-              params:      "const std::string& nodeName",
+              params:      ["(const std::string& nodeName)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11580,7 +11695,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "OpenBarter",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11636,10 +11751,11 @@ var project = {
         file:       "include/level/objects/shelf.hpp",
         decl:       "class",
         namespaces: ["ObjectShelf","","InstanceDynamicObject","","WaypointModifier","","AnimatedObject"],
+        
         methods: [
           {
               name:        "LockWaypoints",
-              params:      "bool",
+              params:      ["(bool)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11647,7 +11763,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetGoToData",
-              params:      "InstanceDynamicObject*",
+              params:      ["(InstanceDynamicObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "InstanceDynamicObject::GoToData",
@@ -11655,7 +11771,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetInventory",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Inventory",
@@ -11663,7 +11779,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackActionUse",
-              params:      "InstanceDynamicObject*",
+              params:      ["(InstanceDynamicObject*)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -11696,10 +11812,11 @@ var project = {
         file:       "include/level/objects/locker.hpp",
         decl:       "class",
         namespaces: ["ObjectLocker","","ObjectShelf","","InstanceDynamicObject","","WaypointModifier","","AnimatedObject","","Lockable"],
+        
         methods: [
           {
               name:        "CallbackActionUse",
-              params:      "InstanceDynamicObject*",
+              params:      ["(InstanceDynamicObject*)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -11707,7 +11824,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetKeyName",
-              params:      "",
+              params:      ["()"],
               attrs:       4,
               desc:        "",
               return_type: "string",
@@ -11715,7 +11832,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PendingActionOpen",
-              params:      "InstanceDynamicObject*",
+              params:      ["(InstanceDynamicObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11743,6 +11860,7 @@ var project = {
         file:       "include/level/objects/stair.hpp",
         decl:       "class",
         namespaces: ["ObjectStair","","InstanceDynamicObject","","WaypointModifier","","AnimatedObject","","Waypoint","Waypoint::ArcObserver"],
+        
         methods: [
           
         ],
@@ -11766,10 +11884,11 @@ var project = {
         file:       "include/level/objects/dropped_object.hpp",
         decl:       "class",
         namespaces: ["ObjectItem","","InstanceDynamicObject","","WaypointModifier","","AnimatedObject"],
+        
         methods: [
           {
               name:        "CallbackActionUse",
-              params:      "InstanceDynamicObject* object",
+              params:      ["(InstanceDynamicObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11777,7 +11896,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ProcessCollisions",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11810,10 +11929,11 @@ var project = {
         file:       "include/level/scene_camera.hpp",
         decl:       "class",
         namespaces: ["SceneCamera"],
+        
         methods: [
           {
               name:        "Run",
-              params:      "float elapsedTime",
+              params:      ["(float elapsedTime)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11821,7 +11941,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetEnabledScroll",
-              params:      "bool set",
+              params:      ["(bool set)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11829,7 +11949,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SwapCameraView",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11837,7 +11957,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetLimits",
-              params:      "unsigned int minX,unsigned int minY,unsigned int maxX,unsigned maxY",
+              params:      ["(unsigned int minX","unsigned int minY","unsigned int maxX","unsigned maxY)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11845,7 +11965,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SlideToHeight",
-              params:      "float",
+              params:      ["(float)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11853,7 +11973,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CenterCameraInstant",
-              params:      "LPoint3f",
+              params:      ["(LPoint3f)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11861,7 +11981,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CenterCameraOn",
-              params:      "NodePath np",
+              params:      ["(NodePath np)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11869,7 +11989,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FollowNodePath",
-              params:      "NodePath np",
+              params:      ["(NodePath np)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11877,7 +11997,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "StopFollowingNodePath",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11885,7 +12005,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CenterOnObject",
-              params:      "InstanceDynamicObject*",
+              params:      ["(InstanceDynamicObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11893,7 +12013,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FollowObject",
-              params:      "InstanceDynamicObject*",
+              params:      ["(InstanceDynamicObject*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11901,7 +12021,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetNodePath",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "NodePath",
@@ -11909,7 +12029,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RunScroll",
-              params:      "float elapsedTime",
+              params:      ["(float elapsedTime)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11917,7 +12037,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "RunFollow",
-              params:      "float elapsedTime",
+              params:      ["(float elapsedTime)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11925,7 +12045,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "RunSlideHeight",
-              params:      "float elapsedTime",
+              params:      ["(float elapsedTime)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12078,10 +12198,11 @@ var project = {
         file:       "include/level/interact_menu.hpp",
         decl:       "class",
         namespaces: ["InteractMenu","","UiBase"],
+        
         methods: [
           {
               name:        "ButtonClicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12089,7 +12210,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ButtonHovered",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12097,7 +12218,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "MouseButton",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12105,7 +12226,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ExecuteForButtonId",
-              params:      "Rocket::Core::Event& event,std::function<bool (Rocket::Core::Event&,const std::string&,InstanceDynamicObject::Interaction*",
+              params:      ["(Rocket::Core::Event& event","std::function<bool (Rocket::Core::Event&","const std::string&","InstanceDynamicObject::Interaction*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12186,10 +12307,11 @@ var project = {
         file:       "include/level/diplomacy.hpp",
         decl:       "class",
         namespaces: ["WorldDiplomacy"],
+        doc:        {"overview":"Extension of the DataEngine providing logical tools to handle faction data. It is used to determine wether two characters\nare enemies or allies based on their factions. It can also be used to add new factions during the game.\n","detail":null},
         methods: [
           {
               name:        "AddFaction",
-              params:      "const std::string& name",
+              params:      ["(const std::string& name)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12197,7 +12319,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetFaction",
-              params:      "const std::string& name",
+              params:      ["(const std::string& name)"],
               attrs:       0,
               desc:        "",
               return_type: "WorldDiplomacy::Faction",
@@ -12205,7 +12327,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetFaction",
-              params:      "unsigned int flag",
+              params:      ["(unsigned int flag)"],
               attrs:       0,
               desc:        "",
               return_type: "WorldDiplomacy::Faction",
@@ -12213,7 +12335,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetAsEnemy",
-              params:      "bool set,const std::string& name1,const std::string& name2",
+              params:      ["(bool set","const std::string& name1","const std::string& name2)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12221,7 +12343,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetAsEnemy",
-              params:      "bool set,unsigned int flag1,unsigned int flag2",
+              params:      ["(bool set","unsigned int flag1","unsigned int flag2)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12229,7 +12351,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Initialize",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12237,7 +12359,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetAsEnemy",
-              params:      "bool set,Faction& first,Faction& second",
+              params:      ["(bool set","Faction& first","Faction& second)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12282,6 +12404,7 @@ var project = {
         file:       "include/level/diplomacy.hpp",
         decl:       "struct",
         namespaces: ["WorldDiplomacy","WorldDiplomacy::Faction"],
+        doc:        {"overview":"Represents a game faction for the diplomacy system.\n","detail":null},
         methods: [
           
         ],
@@ -12318,10 +12441,11 @@ var project = {
         file:       "include/shinylang.hpp",
         decl:       "class",
         namespaces: ["Parser"],
+        
         methods: [
           {
               name:        "Run",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "DataTree",
@@ -12329,7 +12453,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Run",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "DataTree",
@@ -12337,7 +12461,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ParseValue",
-              params:      "DataBranch*",
+              params:      ["(DataBranch*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12345,7 +12469,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ParseString",
-              params:      "DataBranch*",
+              params:      ["(DataBranch*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12353,7 +12477,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ParseOther",
-              params:      "DataBranch*",
+              params:      ["(DataBranch*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12361,7 +12485,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ParseObject",
-              params:      "DataBranch*",
+              params:      ["(DataBranch*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12369,7 +12493,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ParseArray",
-              params:      "DataBranch*",
+              params:      ["(DataBranch*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12424,10 +12548,11 @@ var project = {
         file:       "include/worldmap/worldmap.hpp",
         decl:       "class",
         namespaces: ["WorldMap","","UiBase"],
+        doc:        {"overview":"One of the three main parts of the game engine's core, it handles everything that happens when the player is\nexploring the world map.\n","detail":null},
         methods: [
           {
               name:        "Show",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12435,7 +12560,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetCityVisible",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12443,7 +12568,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddCity",
-              params:      "const std::string&,float pos_x,float pos_y,float radius",
+              params:      ["(const std::string&","float pos_x","float pos_y","float radius)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12451,7 +12576,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "HasCity",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -12459,7 +12584,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "MapClicked",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12467,7 +12592,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PartyClicked",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12475,7 +12600,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CityClicked",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12483,7 +12608,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Run",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12491,7 +12616,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetInterrupted",
-              params:      "bool set",
+              params:      ["(bool set)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12499,7 +12624,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Save",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12507,7 +12632,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "MoveTowardsCoordinates",
-              params:      "float x,float y",
+              params:      ["(float x","float y)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12515,7 +12640,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "MoveTowardsPlace",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12523,7 +12648,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetDataEngine",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "DataEngine",
@@ -12531,7 +12656,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetCaseData",
-              params:      "int x,int y",
+              params:      ["(int x","int y)"],
               attrs:       4,
               desc:        "",
               return_type: "Data",
@@ -12539,7 +12664,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetCurrentPosition",
-              params:      "float& x,float& y",
+              params:      ["(float& x","float& y)"],
               attrs:       4,
               desc:        "",
               return_type: "void",
@@ -12547,7 +12672,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "MapTileGenerator",
-              params:      "Data map",
+              params:      ["(Data map)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12555,7 +12680,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "UpdatePartyCursor",
-              params:      "float elapsedTime",
+              params:      ["(float elapsedTime)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12563,7 +12688,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "UpdateClock",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12571,7 +12696,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "IsPartyInCity",
-              params:      "std::string& ret",
+              params:      ["(std::string& ret)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -12579,7 +12704,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GetCaseAt",
-              params:      "int x,int y",
+              params:      ["(int x","int y)"],
               attrs:       4,
               desc:        "",
               return_type: "Rocket::Core::Element",
@@ -12587,7 +12712,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GetCurrentCase",
-              params:      "int&,int&",
+              params:      ["(int&","int&)"],
               attrs:       4,
               desc:        "",
               return_type: "void",
@@ -12595,7 +12720,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SetCaseVisibility",
-              params:      "int x,int y,char visibility",
+              params:      ["(int x","int y","char visibility)"],
               attrs:       4,
               desc:        "",
               return_type: "void",
@@ -12603,7 +12728,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "AddCityToList",
-              params:      "Data",
+              params:      ["(Data)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12611,7 +12736,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SaveMapStatus",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "void",
@@ -12619,7 +12744,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "CheckRandomEncounter",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -12846,6 +12971,7 @@ var project = {
         file:       "include/worldmap/worldmap.hpp",
         decl:       "struct",
         namespaces: ["WorldMap","WorldMap::City"],
+        doc:        {"overview":"Represents a city in the [WorldMap] object.\n","detail":null},
         methods: [
           
         ],
@@ -12889,10 +13015,11 @@ var project = {
         file:       "include/directory.hpp",
         decl:       "class",
         namespaces: ["Filesystem"],
+        doc:        {"overview":"Abstraction for file management.\n","detail":null},
         methods: [
           {
               name:        "FileContent",
-              params:      "const std::string& filepath,std::string& out",
+              params:      ["(const std::string& filepath","std::string& out)"],
               attrs:       16,
               desc:        "",
               return_type: "bool",
@@ -12900,7 +13027,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FileCopy",
-              params:      "const std::string& from,const std::string& dest",
+              params:      ["(const std::string& from","const std::string& dest)"],
               attrs:       16,
               desc:        "",
               return_type: "bool",
@@ -12920,10 +13047,11 @@ var project = {
         file:       "include/directory.hpp",
         decl:       "class",
         namespaces: ["Directory"],
+        doc:        {"overview":"Abstraction for directory management.\n","detail":null},
         methods: [
           {
               name:        "MakeDir",
-              params:      "const std::string& str",
+              params:      ["(const std::string& str)"],
               attrs:       16,
               desc:        "",
               return_type: "bool",
@@ -12931,7 +13059,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RemoveDir",
-              params:      "const std::string& str",
+              params:      ["(const std::string& str)"],
               attrs:       16,
               desc:        "",
               return_type: "bool",
@@ -12939,7 +13067,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "OpenDir",
-              params:      "const std::string& str",
+              params:      ["(const std::string& str)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -12947,7 +13075,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Path",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -12955,7 +13083,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetEntries",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Directory::Entries",
@@ -12963,7 +13091,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetEntries",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "Directory::Entries",
@@ -12980,14 +13108,16 @@ var project = {
             obj_type:   "Directory::Entries",
             
             attrs:      0,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_dirEntries","short":"List of entries for the current opened directory"}
           },
           {
             name:       "_dirName",
             type:       "std::string",
             
             attrs:      0,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_dirName","short":"Name of the currently opened directory"}
           }
         ],
         ancestors: [
@@ -12999,10 +13129,11 @@ var project = {
         file:       "include/saveuis.hpp",
         decl:       "class",
         namespaces: ["UiLoad","","UiBase"],
+        doc:        {"overview":"Interface for loading the game.\n","detail":null},
         methods: [
           {
               name:        "LoadSlotRml",
-              params:      "const std::string& prefix,unsigned short slot",
+              params:      ["(const std::string& prefix","unsigned short slot)"],
               attrs:       16,
               desc:        "",
               return_type: "std::string",
@@ -13010,7 +13141,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LoadSlots",
-              params:      "const std::string& savepath",
+              params:      ["(const std::string& savepath)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13018,7 +13149,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "LoadGame",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13026,7 +13157,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ClickSlot",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13034,7 +13165,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "Cancel",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13042,7 +13173,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "Erase",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13114,10 +13245,11 @@ var project = {
         file:       "include/saveuis.hpp",
         decl:       "class",
         namespaces: ["UiSave","","UiBase"],
+        doc:        {"overview":"Interface for saving the game.\n","detail":null},
         methods: [
           {
               name:        "LoadSlots",
-              params:      "const std::string& savepath",
+              params:      ["(const std::string& savepath)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13125,7 +13257,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SaveGame",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13133,7 +13265,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ClickSlot",
-              params:      "Rocket::Core::Event& event",
+              params:      ["(Rocket::Core::Event& event)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13141,7 +13273,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "Cancel",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13149,7 +13281,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "Erase",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13221,10 +13353,11 @@ var project = {
         file:       "include/pipbuck.hpp",
         decl:       "class",
         namespaces: ["Pipbuck","","UiBase"],
+        doc:        {"overview":"Main controller for the pipbuck. It handles the execution and contexts of [Pipbuck::App]s.\n","detail":null},
         methods: [
           {
               name:        "Restart",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13232,7 +13365,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Run",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13240,7 +13373,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ReloadApps",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13248,7 +13381,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "StartApp",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13256,7 +13389,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "QuitApp",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13264,7 +13397,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GoHome",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13272,7 +13405,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "DoQuitApp",
-              params:      "App*",
+              params:      ["(App*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13280,7 +13413,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "AppAskedFocus",
-              params:      "App*",
+              params:      ["(App*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13288,7 +13421,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "AppAskedUnfocus",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13296,7 +13429,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "AppAskedExit",
-              params:      "App*",
+              params:      ["(App*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13420,10 +13553,11 @@ var project = {
         file:       "include/pipbuck.hpp",
         decl:       "struct",
         namespaces: ["Pipbuck","Pipbuck::App"],
+        doc:        {"overview":"Interface representing a running application from the [Pipbuck].\n","detail":null},
         methods: [
           {
               name:        "GetAppId",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       68,
               desc:        "",
               return_type: "std::string",
@@ -13431,7 +13565,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RunAsMainTask",
-              params:      "Rocket::Core::Element*,DataEngine&",
+              params:      ["(Rocket::Core::Element*","DataEngine&)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -13439,7 +13573,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RunAsBackgroundTask",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -13447,7 +13581,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Started",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       64,
               desc:        "",
               return_type: "bool",
@@ -13455,7 +13589,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Exited",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -13463,7 +13597,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Unfocused",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -13471,7 +13605,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Focused",
-              params:      "Rocket::Core::Element*,DataEngine&",
+              params:      ["(Rocket::Core::Element*","DataEngine&)"],
               attrs:       64,
               desc:        "",
               return_type: "void",
@@ -13491,10 +13625,11 @@ var project = {
         file:       "include/pipbuck.hpp",
         decl:       "class",
         namespaces: ["PipbuckAppScript","","Pipbuck","Pipbuck::App"],
+        doc:        {"overview":"Controls a [Pipbcuk::App] running from a script file.\n","detail":null},
         methods: [
           {
               name:        "GetAppId",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -13502,7 +13637,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RunAsMainTask",
-              params:      "Rocket::Core::Element*,DataEngine&",
+              params:      ["(Rocket::Core::Element*","DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13510,7 +13645,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RunAsBackgroundTask",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13518,7 +13653,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Started",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -13526,7 +13661,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Exited",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13534,7 +13669,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Unfocused",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13542,7 +13677,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Focused",
-              params:      "Rocket::Core::Element*,DataEngine&",
+              params:      ["(Rocket::Core::Element*","DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13589,10 +13724,11 @@ var project = {
         file:       "include/pipbuck.hpp",
         decl:       "class",
         namespaces: ["PipbuckClockApp","","Pipbuck","Pipbuck::App"],
+        
         methods: [
           {
               name:        "GetAppId",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -13600,7 +13736,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RunAsMainTask",
-              params:      "Rocket::Core::Element*,DataEngine&",
+              params:      ["(Rocket::Core::Element*","DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13608,7 +13744,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RunAsBackgroundTask",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13616,7 +13752,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Started",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -13624,7 +13760,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Exited",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13632,7 +13768,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Unfocused",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13640,7 +13776,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Focused",
-              params:      "Rocket::Core::Element*,DataEngine&",
+              params:      ["(Rocket::Core::Element*","DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13648,7 +13784,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "WaitChange",
-              params:      "int chance",
+              params:      ["(int chance)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13656,7 +13792,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "Wait",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13664,7 +13800,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SelectTimeUnit",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13672,7 +13808,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SetValue",
-              params:      "Rocket::Core::Element* element,unsigned short value",
+              params:      ["(Rocket::Core::Element* element","unsigned short value)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13858,10 +13994,11 @@ var project = {
         file:       "include/pipbuck.hpp",
         decl:       "class",
         namespaces: ["PipbuckQuestApp","","Pipbuck","Pipbuck::App"],
+        
         methods: [
           {
               name:        "GetAppId",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -13869,7 +14006,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RunAsMainTask",
-              params:      "Rocket::Core::Element*,DataEngine&",
+              params:      ["(Rocket::Core::Element*","DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13877,7 +14014,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "RunAsBackgroundTask",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13885,7 +14022,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Started",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -13893,7 +14030,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Exited",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13901,7 +14038,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Unfocused",
-              params:      "DataEngine&",
+              params:      ["(DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13909,7 +14046,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Focused",
-              params:      "Rocket::Core::Element*,DataEngine&",
+              params:      ["(Rocket::Core::Element*","DataEngine&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13917,7 +14054,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LoadQuestList",
-              params:      "Rocket::Core::Element*",
+              params:      ["(Rocket::Core::Element*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13925,7 +14062,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "LoadQuestView",
-              params:      "Rocket::Core::Element*",
+              params:      ["(Rocket::Core::Element*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13933,7 +14070,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ListQuestHovered",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -13941,7 +14078,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ListQuestClicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14055,10 +14192,11 @@ var project = {
         file:       "include/gametask.hpp",
         decl:       "class",
         namespaces: ["Buff"],
+        doc:        {"overview":"This class controls the effects of buffs that are placed on a character.\n","detail":null},
         methods: [
           {
               name:        "GetTargetName",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "std::string",
@@ -14066,7 +14204,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetStatistics",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "StatController",
@@ -14074,7 +14212,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetStatistics",
-              params:      "StatController* v",
+              params:      ["(StatController* v)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14082,7 +14220,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Refresh",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14090,7 +14228,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Save",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14098,7 +14236,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "InitScripts",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14189,10 +14327,11 @@ var project = {
         file:       "include/gametask.hpp",
         decl:       "struct",
         namespaces: ["BuffManager"],
+        doc:        {"overview":"Class responsible for loading, saving, and schedule [Buff]s.\n","detail":null},
         methods: [
           {
               name:        "Save",
-              params:      "Utils::Packet&,std::function<bool            (const std::string&",
+              params:      ["(Utils::Packet&","std::function<bool            (const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14200,7 +14339,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Load",
-              params:      "Utils::Packet&,std::function<StatController* (const std::string&",
+              params:      ["(Utils::Packet&","std::function<StatController* (const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14208,7 +14347,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CollectGarbage",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14216,7 +14355,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Cleanup",
-              params:      "Buff*",
+              params:      ["(Buff*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14263,10 +14402,11 @@ var project = {
         file:       "include/gametask.hpp",
         decl:       "class",
         namespaces: ["GameTask"],
+        doc:        {"overview":"The task class that handles the proper execution of an in-progress game.","detail":null},
         methods: [
           {
               name:        "MapOpenLevel",
-              params:      "std::string name",
+              params:      ["(std::string name)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14274,7 +14414,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetLevel",
-              params:      "Level* level",
+              params:      ["(Level* level)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14282,7 +14422,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "do_task",
-              params:      "",
+              params:      ["()"],
               attrs:       0,
               desc:        "",
               return_type: "AsyncTask::DoneStatus",
@@ -14290,7 +14430,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SaveGame",
-              params:      "const std::string& savepath",
+              params:      ["(const std::string& savepath)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -14298,7 +14438,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LoadGame",
-              params:      "const std::string& savepath",
+              params:      ["(const std::string& savepath)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -14306,7 +14446,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "OpenLevel",
-              params:      "const std::string& savepath,const std::string& level,const std::string& entry_zone = ##",
+              params:      ["(const std::string& savepath","const std::string& level","const std::string& entry_zone = \"\")"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14314,7 +14454,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "ExitLevel",
-              params:      "const std::string& savepath",
+              params:      ["(const std::string& savepath)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14322,7 +14462,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CopySave",
-              params:      "const std::string& savepath,const std::string& slotPath",
+              params:      ["(const std::string& savepath","const std::string& slotPath)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -14330,7 +14470,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SaveToSlot",
-              params:      "unsigned char slot",
+              params:      ["(unsigned char slot)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14338,7 +14478,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LoadSlot",
-              params:      "unsigned char slot",
+              params:      ["(unsigned char slot)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14346,7 +14486,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LoadLastState",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14354,7 +14494,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Exit",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14362,7 +14502,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetLevelSpecialEncounter",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14370,7 +14510,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetLevelEncounter",
-              params:      "const std::string& type,short n_creeps",
+              params:      ["(const std::string& type","short n_creeps)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14378,7 +14518,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PushBuff",
-              params:      "ObjectCharacter* character,Data buff",
+              params:      ["(ObjectCharacter* character","Data buff)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14386,7 +14526,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PushBuff",
-              params:      "const std::string& name,Data buff",
+              params:      ["(const std::string& name","Data buff)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14394,7 +14534,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SaveLevelBuffs",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14402,7 +14542,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SavePartyBuffs",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14410,7 +14550,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LoadLevelBuffs",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14418,7 +14558,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "LoadPartyBuffs",
-              params:      "Utils::Packet&",
+              params:      ["(Utils::Packet&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14426,7 +14566,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetTimeManager",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "TimeManager",
@@ -14434,7 +14574,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetDiplomacy",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "WorldDiplomacy",
@@ -14442,7 +14582,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetQuestManager",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "QuestManager",
@@ -14450,7 +14590,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetPlayerParty",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Party",
@@ -14458,7 +14598,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PlaySound",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "ISampleInstance",
@@ -14466,7 +14606,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FinishLoad",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14474,7 +14614,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "LoadClicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14482,7 +14622,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SaveClicked",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14490,7 +14630,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SaveLevel",
-              params:      "Level* level,const std::string& name",
+              params:      ["(Level* level","const std::string& name)"],
               attrs:       16,
               desc:        "",
               return_type: "bool",
@@ -14498,7 +14638,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "LoadLevel",
-              params:      "WindowFramework* window,GameUi& gameUi,const std::string& path,const std::string& name,const std::string& entry_zone = ##,bool isSaveFile = false",
+              params:      ["(WindowFramework* window","GameUi& gameUi","const std::string& path","const std::string& name","const std::string& entry_zone = \"\"","bool isSaveFile = false)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14506,7 +14646,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "DoLoadLevel",
-              params:      "LoadLevelParams",
+              params:      ["(LoadLevelParams)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14514,7 +14654,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GameOver",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14522,7 +14662,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "DoCheckRandomEncounter",
-              params:      "int x,int y",
+              params:      ["(int x","int y)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14530,7 +14670,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "SetPlayerInventory",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14538,7 +14678,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "EraseSlot",
-              params:      "unsigned char slot",
+              params:      ["(unsigned char slot)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14556,7 +14696,7 @@ var project = {
             
             attrs:      17,
             visibility: "public",
-            doc:         {"name":"CurrentGameTask","desc":"Static accessor to the current running GameTask, if one exists. Among other things, it is what the \"game\" global variable points to in the scripting context"}
+            doc:         {"name":"CurrentGameTask","short":"Static accessor to the current running GameTask. Null if none exists","desc":"Among other things, it is what the \"game\" global variable points to in the scripting context."}
           },
           {
             name:       "_signals",
@@ -14564,7 +14704,7 @@ var project = {
             
             attrs:      0,
             visibility: "private",
-            doc:         {"name":"_signals","desc":"Handle for registered observers"}
+            doc:         {"name":"_signals","short":"Handle for registered observers"}
           },
           {
             name:       "_continue",
@@ -14572,7 +14712,7 @@ var project = {
             
             attrs:      0,
             visibility: "private",
-            doc:         {"name":"_continue","desc":"The game will stop at its next iteration if this variable is set to false"}
+            doc:         {"name":"_continue","short":"The game will stop at its next iteration if this variable is set to false"}
           },
           {
             name:       "_window",
@@ -14580,7 +14720,7 @@ var project = {
             
             attrs:      1,
             visibility: "private",
-            doc:         {"name":"_window","desc":"Panda3D's WindowFramework instance"}
+            doc:         {"name":"_window","short":"Panda3D's WindowFramework instance"}
           },
           {
             name:       "_sound_manager",
@@ -14650,7 +14790,7 @@ var project = {
             
             attrs:      1,
             visibility: "private",
-            doc:         {"name":"_charSheet","desc":"Pointer to the statistic sheet configuration file from the current player."}
+            doc:         {"name":"_charSheet","short":"Pointer to the statistic sheet configuration file from the current player."}
           },
           {
             name:       "_playerParty",
@@ -14726,7 +14866,7 @@ var project = {
             
             attrs:      0,
             visibility: "private",
-            doc:         {"name":"_savePath","desc":"Stores the savepath value from [[OptionsManager]]."}
+            doc:         {"name":"_savePath","short":"Stores the savepath value from [[OptionsManager]]."}
           },
           {
             name:       "_uiSaveGame",
@@ -14754,7 +14894,7 @@ var project = {
             
             attrs:      0,
             visibility: "private",
-            doc:         {"name":"obs_level_unpersistent","desc":"Used in special encounters to handle the observers spawning creeps after the unpersistent level has been loaded."}
+            doc:         {"name":"obs_level_unpersistent","short":"Used in special encounters to handle the observers spawning creeps after the unpersistent level has been loaded."}
           }
         ],
         ancestors: [
@@ -14766,6 +14906,7 @@ var project = {
         file:       "include/gametask.hpp",
         decl:       "struct",
         namespaces: ["GameTask","GameTask::LoadLevelParams"],
+        
         methods: [
           
         ],
@@ -14809,10 +14950,11 @@ var project = {
         file:       "include/mousecursor.hpp",
         decl:       "class",
         namespaces: ["MouseCursor","","UiBase"],
+        
         methods: [
           {
               name:        "SetCursorTexture",
-              params:      "const std::string& texture",
+              params:      ["(const std::string& texture)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14820,7 +14962,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Update",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14828,7 +14970,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PullToFront",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14836,7 +14978,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Get",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "MouseCursor",
@@ -14876,10 +15018,11 @@ var project = {
         file:       "include/options.hpp",
         decl:       "class",
         namespaces: ["OptionsManager"],
+        doc:        {"overview":"Handles the access and persistence of game options. Synchronizes with [GameOptions].\n","detail":null},
         methods: [
           {
               name:        "Initialize",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -14887,7 +15030,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Finalize",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -14895,7 +15038,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Get",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "Data",
@@ -14903,7 +15046,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Refresh",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -14932,10 +15075,11 @@ var project = {
         file:       "include/newgametask.hpp",
         decl:       "class",
         namespaces: ["UiNewGame","","UiBase"],
+        doc:        {"overview":"UI for starting a new game.\n","detail":null},
         methods: [
           {
               name:        "SelectedProfile",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14943,7 +15087,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ClickedStartFromScratch",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14951,7 +15095,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GoToPreviousProfile",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14959,7 +15103,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GoToNextProfile",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14967,7 +15111,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GoToProfile",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -14975,7 +15119,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "GoCancel",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15058,10 +15202,11 @@ var project = {
         file:       "include/newgametask.hpp",
         decl:       "class",
         namespaces: ["NewGameTask"],
+        doc:        {"overview":"Task executed when the player is starting a new game.\n","detail":null},
         methods: [
           {
               name:        "SelectProfile",
-              params:      "const std::string&",
+              params:      ["(const std::string&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15069,7 +15214,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "StartFromScratch",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15077,7 +15222,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "Done",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15147,10 +15292,11 @@ var project = {
         file:       "include/mainmenu.hpp",
         decl:       "class",
         namespaces: ["MainMenu",""],
+        doc:        {"overview":"Top-level task of the whole game. Handles the main menu and the proper execution of the sub tasks.\n","detail":null},
         methods: [
           {
               name:        "Continue",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15158,7 +15304,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "EndGame",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15166,7 +15312,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "NewGame",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15174,7 +15320,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "StartGame",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15182,7 +15328,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CancelNewGame",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15190,7 +15336,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "do_task",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "DoneStatus",
@@ -15198,7 +15344,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AsyncCreateLevel",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15206,7 +15352,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "QuitGame",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15214,7 +15360,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "OpenUiLoad",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15222,7 +15368,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "LoadSlot",
-              params:      "unsigned char slot",
+              params:      ["(unsigned char slot)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15230,7 +15376,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "DisplayAlerts",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15352,6 +15498,7 @@ var project = {
         file:       "include/mainmenu.hpp",
         decl:       "struct",
         namespaces: ["MainMenu","MainMenu::View","","UiBase"],
+        doc:        {"overview":"UI for the MainMenu.\n","detail":null},
         methods: [
           
         ],
@@ -15414,10 +15561,11 @@ var project = {
         file:       "include/astar.hpp",
         decl:       "class",
         namespaces: ["AstarPathfinding"],
+        
         methods: [
           {
               name:        "CancelSearch",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15425,7 +15573,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetStartAndGoalStates",
-              params:      "UserState &Start,UserState &Goal",
+              params:      ["( UserState &Start","UserState &Goal )"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15433,7 +15581,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SearchSuccedded",
-              params:      "Node* node",
+              params:      ["(Node* node)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15441,7 +15589,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SearchStep",
-              params:      "",
+              params:      ["()"],
               attrs:       0,
               desc:        "",
               return_type: "State",
@@ -15449,7 +15597,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FreeSolutionNodes",
-              params:      "",
+              params:      ["()"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15457,7 +15605,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetStepCount",
-              params:      "",
+              params:      ["()"],
               attrs:       0,
               desc:        "",
               return_type: "int",
@@ -15465,7 +15613,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "FreeAllNodes",
-              params:      "",
+              params:      ["()"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15473,7 +15621,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "FreeUnusedNodes",
-              params:      "bool onlyUnused = true",
+              params:      ["(bool onlyUnused = true)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15481,7 +15629,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "PedirNode",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       32,
               desc:        "",
               return_type: "AstarPathfinding::Node",
@@ -15489,7 +15637,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "ReleaseNode",
-              params:      "Node* node",
+              params:      ["(Node* node)"],
               attrs:       32,
               desc:        "",
               return_type: "void",
@@ -15580,6 +15728,7 @@ var project = {
         file:       "include/astar.hpp",
         decl:       "struct",
         namespaces: ["AstarPathfinding","AstarPathfinding::Node"],
+        
         methods: [
           
         ],
@@ -15641,10 +15790,11 @@ var project = {
         file:       "include/astar.hpp",
         decl:       "struct",
         namespaces: ["AstarPathfinding","AstarPathfinding::FunctorCompareNode"],
+        
         methods: [
           {
               name:        "operator",
-              params:      "",
+              params:      ["()"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -15664,10 +15814,11 @@ var project = {
         file:       "include/quest_manager.hpp",
         decl:       "class",
         namespaces: ["Quest","","Scriptable"],
+        doc:        {"overview":"Instance of a Quest that the character is following or has already finished.\n","detail":null},
         methods: [
           {
               name:        "Initialize",
-              params:      "Level* level",
+              params:      ["(Level* level)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15675,7 +15826,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Finalize",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15683,7 +15834,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "GetData",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "Data",
@@ -15691,7 +15842,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CompleteCondition",
-              params:      "const std::string& objective,const std::string& condition",
+              params:      ["(const std::string& objective","const std::string& condition)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15699,7 +15850,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsConditionCompleted",
-              params:      "const std::string& objective,const std::string& condition",
+              params:      ["(const std::string& objective","const std::string& condition)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -15707,7 +15858,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "IsOver",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -15715,7 +15866,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CheckIfCompleted",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "bool",
@@ -15723,7 +15874,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "InitializeCondition",
-              params:      "Data condition,Level* level",
+              params:      ["(Data condition","Level* level)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15731,7 +15882,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "WatcherCharacterInventory",
-              params:      "Data condition,Level* level",
+              params:      ["(Data condition","Level* level)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15739,7 +15890,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "WatcherCharacterKill",
-              params:      "Data condition,Level* level",
+              params:      ["(Data condition","Level* level)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15747,7 +15898,7 @@ var project = {
               visibility:  "private"
             },{
               name:        "WatcherTime",
-              params:      "Data condition,Level* level",
+              params:      ["(Data condition","Level* level)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15794,6 +15945,7 @@ var project = {
         file:       "include/quest_manager.hpp",
         decl:       "struct",
         namespaces: ["Quest","Quest::WatcherInitializer"],
+        
         methods: [
           
         ],
@@ -15823,10 +15975,11 @@ var project = {
         file:       "include/quest_manager.hpp",
         decl:       "class",
         namespaces: ["QuestManager"],
+        doc:        {"overview":"This class is the backend for quest managing. It can be used to add or access quests during the game. At level starts,\nthis class is responsible for watching game events: it must find out whenever an objective is fulfilled, and execute\nthe corresponding script hooks.\n","detail":null},
         methods: [
           {
               name:        "AddQuest",
-              params:      "Data",
+              params:      ["(Data)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15834,7 +15987,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Initialize",
-              params:      "Level* level",
+              params:      ["(Level* level)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15842,7 +15995,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Finalize",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15850,7 +16003,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "QuestCompleted",
-              params:      "Quest*",
+              params:      ["(Quest*)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -15920,10 +16073,11 @@ var project = {
         file:       "include/dices.hpp",
         decl:       "struct",
         namespaces: ["Dices"],
+        doc:        {"overview":"Abstraction for random operations.\n","detail":null},
         methods: [
           {
               name:        "Initialize",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -15931,7 +16085,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Throw",
-              params:      "unsigned int max",
+              params:      ["(unsigned int max)"],
               attrs:       16,
               desc:        "",
               return_type: "int",
@@ -15939,7 +16093,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Test",
-              params:      "int successPercentage",
+              params:      ["(int successPercentage)"],
               attrs:       16,
               desc:        "",
               return_type: "bool",
@@ -15959,10 +16113,11 @@ var project = {
         file:       "include/executor.hpp",
         decl:       "class",
         namespaces: ["Executor"],
+        doc:        {"overview":"Singleton for executing lambdas asynchronously\n","detail":null},
         methods: [
           {
               name:        "ExecuteLater",
-              params:      "std::function<void (void",
+              params:      ["(std::function<void (void)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -15970,7 +16125,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "Run",
-              params:      "void",
+              params:      ["(void)"],
               attrs:       16,
               desc:        "",
               return_type: "void",
@@ -15999,6 +16154,7 @@ var project = {
         file:       "include/json.hpp",
         decl:       "class",
         namespaces: ["Parser"],
+        
         methods: [
           
         ],
@@ -16014,10 +16170,11 @@ var project = {
         file:       "include/ui_dialog.hpp",
         decl:       "class",
         namespaces: ["UiDialog","","UiBase"],
+        doc:        {"overview":"UI for prompting the player to pick a decision from a list.\n","detail":null},
         methods: [
           {
               name:        "SetMessage",
-              params:      "const std::string& message",
+              params:      ["(const std::string& message)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -16025,7 +16182,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "AddChoice",
-              params:      "const std::string& name,std::function<void (Rocket::Core::Event&",
+              params:      ["(const std::string& name","std::function<void (Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -16033,7 +16190,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "PickedChoice",
-              params:      "Rocket::Core::Event&",
+              params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -16073,6 +16230,7 @@ var project = {
         file:       "include/ui_dialog.hpp",
         decl:       "struct",
         namespaces: ["UiDialog","UiDialog::Button"],
+        doc:        {"overview":"Button representing a choice for the [UiDialog] object.\n","detail":null},
         methods: [
           
         ],

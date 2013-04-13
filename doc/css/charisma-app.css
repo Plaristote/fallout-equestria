@@ -379,6 +379,7 @@ margin-bottom:0;
 .main-menu-span{
 	width:6.2% !important;
 	margin-right:4%;
+	position: fixed;
 }
 }
 
@@ -386,11 +387,12 @@ margin-bottom:0;
 margin-left:10px;
 }
 .navbar-inner{
-border-radius:0 0 10px 10px;
--webkit-border-radius:0 0 10px 10px;
--moz-border-radius:0 0 10px 10px;
 padding-top:5px; 
-padding-bottom:5px; 
+padding-bottom:5px;
+margin-bottom: 45px;
+width: 98%;
+position: fixed;
+z-index: 100;
 }
 div.dataTables_length select {
 width: 50px;
