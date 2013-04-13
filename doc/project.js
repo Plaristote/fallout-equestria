@@ -3278,28 +3278,32 @@ var project = {
             type:       "bool",
             
             attrs:      0,
-            visibility: "public"
+            visibility: "public",
+            doc:         {"name":"pendingAnimationDone","short":"","desc":""}
           },
           {
             name:       "_window",
             type:       "WindowFramework",
             
             attrs:      1,
-            visibility: "protected"
+            visibility: "protected",
+            doc:         {"name":"_window","short":"","desc":""}
           },
           {
             name:       "_modelName",
             type:       "std::string",
             
             attrs:      0,
-            visibility: "protected"
+            visibility: "protected",
+            doc:         {"name":"_modelName","short":"The name of the model, used to find the corresponding animations files","desc":"The value must be the name of the model file with no extension or path given."}
           },
           {
             name:       "_anims",
             type:       "AnimControlCollection",
             
             attrs:      0,
-            visibility: "protected"
+            visibility: "protected",
+            doc:         {"name":"_anims","short":""}
           },
           {
             name:       "_mapAnims",
@@ -3308,28 +3312,24 @@ var project = {
             obj_type:   "AnimatedObject::MapAnims",
             
             attrs:      0,
-            visibility: "protected"
+            visibility: "protected",
+            doc:         {"name":"_mapAnims","short":"key/value map of Panda3D animation controllers"}
           },
           {
             name:       "_anim",
             type:       "AnimControl",
             
             attrs:      1,
-            visibility: "protected"
+            visibility: "protected",
+            doc:         {"name":"anim","short":"pointer to the currently played animation"}
           },
           {
             name:       "_animLoop",
             type:       "bool",
             
             attrs:      0,
-            visibility: "protected"
-          },
-          {
-            name:       "_idleSemaphore",
-            type:       "bool",
-            
-            attrs:      0,
-            visibility: "protected"
+            visibility: "protected",
+            doc:         {"name":"_animLoop","short":"Set to true if the currently played animation must be looping"}
           }
         ],
         ancestors: [
@@ -14556,7 +14556,7 @@ var project = {
             
             attrs:      17,
             visibility: "public",
-            doc:         {"name":"_signals","desc":"Handle for registered observers"}
+            doc:         {"name":"CurrentGameTask","desc":"Static accessor to the current running GameTask, if one exists. Among other things, it is what the \"game\" global variable points to in the scripting context"}
           },
           {
             name:       "_signals",
@@ -14564,7 +14564,7 @@ var project = {
             
             attrs:      0,
             visibility: "private",
-            doc:         {"name":"_window","desc":"Panda3D's WindowFramework instance"}
+            doc:         {"name":"_signals","desc":"Handle for registered observers"}
           },
           {
             name:       "_continue",
@@ -14572,7 +14572,7 @@ var project = {
             
             attrs:      0,
             visibility: "private",
-            doc:         {"name":"SoundManager"}
+            doc:         {"name":"_continue","desc":"The game will stop at its next iteration if this variable is set to false"}
           },
           {
             name:       "_window",
@@ -14580,7 +14580,7 @@ var project = {
             
             attrs:      1,
             visibility: "private",
-            doc:         {"name":"GameUi"}
+            doc:         {"name":"_window","desc":"Panda3D's WindowFramework instance"}
           },
           {
             name:       "_sound_manager",
@@ -14590,7 +14590,7 @@ var project = {
             
             attrs:      0,
             visibility: "private",
-            doc:         {"name":"DataEngine"}
+            doc:         {"name":"SoundManager"}
           },
           {
             name:       "_gameUi",
@@ -14600,7 +14600,7 @@ var project = {
             
             attrs:      0,
             visibility: "private",
-            doc:         {"name":"TimeManager"}
+            doc:         {"name":"GameUi"}
           },
           {
             name:       "_dataEngine",
@@ -14610,7 +14610,7 @@ var project = {
             
             attrs:      0,
             visibility: "private",
-            doc:         {"name":"BuffManager"}
+            doc:         {"name":"DataEngine"}
           },
           {
             name:       "_timeManager",
@@ -14620,7 +14620,7 @@ var project = {
             
             attrs:      0,
             visibility: "private",
-            doc:         {"name":"Pipbuck"}
+            doc:         {"name":"TimeManager"}
           },
           {
             name:       "_buff_manager",
@@ -14630,7 +14630,7 @@ var project = {
             
             attrs:      0,
             visibility: "private",
-            doc:         {"name":"_charSheet","desc":"Pointer to the statistic sheet configuration file from the current player"}
+            doc:         {"name":"BuffManager"}
           },
           {
             name:       "_pipbuck",
@@ -14640,7 +14640,7 @@ var project = {
             
             attrs:      0,
             visibility: "private",
-            doc:         {"name":"_playerParty"}
+            doc:         {"name":"Pipbuck"}
           },
           {
             name:       "_charSheet",
@@ -14650,7 +14650,7 @@ var project = {
             
             attrs:      1,
             visibility: "private",
-            doc:         {"name":"_playerStats"}
+            doc:         {"name":"_charSheet","desc":"Pointer to the statistic sheet configuration file from the current player."}
           },
           {
             name:       "_playerParty",
@@ -14660,7 +14660,7 @@ var project = {
             
             attrs:      1,
             visibility: "private",
-            doc:         {"name":"_playerInventory"}
+            doc:         {"name":"_playerParty"}
           },
           {
             name:       "_playerStats",
@@ -14670,7 +14670,7 @@ var project = {
             
             attrs:      1,
             visibility: "private",
-            doc:         {"name":"_quest_manager"}
+            doc:         {"name":"_playerStats"}
           },
           {
             name:       "_playerInventory",
@@ -14679,7 +14679,8 @@ var project = {
             obj_type:   "Inventory",
             
             attrs:      1,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_playerInventory"}
           },
           {
             name:       "_quest_manager",
@@ -14688,7 +14689,8 @@ var project = {
             obj_type:   "QuestManager",
             
             attrs:      1,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_quest_manager"}
           },
           {
             name:       "_worldMap",
@@ -14697,14 +14699,16 @@ var project = {
             obj_type:   "WorldMap",
             
             attrs:      1,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_worldMap"}
           },
           {
             name:       "_levelName",
             type:       "std::string",
             
             attrs:      0,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_levelName"}
           },
           {
             name:       "_level",
@@ -14713,14 +14717,16 @@ var project = {
             obj_type:   "Level",
             
             attrs:      1,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_level"}
           },
           {
             name:       "_savePath",
             type:       "std::string",
             
             attrs:      0,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_savePath","desc":"Stores the savepath value from [[OptionsManager]]."}
           },
           {
             name:       "_uiSaveGame",
@@ -14729,7 +14735,8 @@ var project = {
             obj_type:   "UiSave",
             
             attrs:      1,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_uiSaveGame"}
           },
           {
             name:       "_uiLoadGame",
@@ -14738,14 +14745,16 @@ var project = {
             obj_type:   "UiLoad",
             
             attrs:      1,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_uiLoadGame"}
           },
           {
             name:       "obs_level_unpersistent",
             type:       "Sync::ObserverId",
             
             attrs:      0,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"obs_level_unpersistent","desc":"Used in special encounters to handle the observers spawning creeps after the unpersistent level has been loaded."}
           }
         ],
         ancestors: [

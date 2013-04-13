@@ -1,0 +1,33 @@
+
+AnimatedObject:
+  overview: |
+    This is a component for managing an animated model.<br />
+    It can load animations file, play them on a model, and warn a set of
+    observers whenever the animation is finished.<br />
+    The inheriting classes must regularly call the protected [TaskAnimation]
+    method, which will emit the AnimationEnd signal whenever it is relevant.
+
+  methods:
+    - name:  'GetNodePath'
+      short: 'Inheriting classes must implement a getter for the model'
+    - name:  'ResetAnimation'
+      short: 'This hook will be called whenever an animation finishes'
+
+  attributes:
+    - name:  'pendingAnimationDone'
+      short: ''
+      desc:  ''
+    - name:  '_window'
+      short: ''
+      desc:  ''
+    - name:  '_modelName'
+      short: 'The name of the model, used to find the corresponding animations files'
+      desc:  'The value must be the name of the model file with no extension or path given.'
+    - name:  '_anims'
+      short: ''
+    - name:  '_mapAnims'
+      short: 'key/value map of Panda3D animation controllers'
+    - name:  'anim'
+      short: 'pointer to the currently played animation'
+    - name:  '_animLoop'
+      short: 'Set to true if the currently played animation must be looping'
