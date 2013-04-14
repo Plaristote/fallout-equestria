@@ -5,13 +5,16 @@
 # include "serializer.hpp"
 
 struct DynamicObject;
+class  InstanceDynamicObject;
 
 class Party
 {
 public:
   typedef std::list<DynamicObject*> DynamicObjects;
   
+  void                  Join(InstanceDynamicObject* i);
   void                  Join(DynamicObject*);
+  void                  Leave(InstanceDynamicObject* i);  
   void                  Leave(DynamicObject*);
 
   const DynamicObjects& ConstGetObjects(void) const { return (_objects); }

@@ -1,8 +1,19 @@
 #include "playerparty.hpp"
 #include "level/world.h"
 #include <fstream>
+#include <level/objectnode.hpp>
 
 using namespace std;
+
+void Party::Join(InstanceDynamicObject* object)
+{
+  Join(object->GetDynamicObject());
+}
+
+void Party::Leave(InstanceDynamicObject* object)
+{
+  Leave(object->GetDynamicObject());
+}
 
 void Party::Join(DynamicObject* object)
 {
