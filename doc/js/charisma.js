@@ -492,7 +492,7 @@ function docReady(){
 	}
 
 	//pie chart
-	var data = [
+	/*var data = [
 	{ label: "Internet Explorer",  data: 12},
 	{ label: "Mobile",  data: 27},
 	{ label: "Safari",  data: 85},
@@ -527,7 +527,7 @@ function docReady(){
 			$("#hover").html('<span style="font-weight: bold; color: '+obj.series.color+'">'+obj.series.label+' ('+percent+'%)</span>');
 		}
 		$("#piechart").bind("plothover", pieHover);
-	}
+	}*/
 	
 	//donut chart
 	if($("#donutchart").length)
