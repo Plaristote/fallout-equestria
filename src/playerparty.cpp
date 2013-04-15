@@ -18,14 +18,21 @@ void Party::Leave(InstanceDynamicObject* object)
 void Party::Join(DynamicObject* object)
 {
   if (object)
+  {
     _objects.push_back(object);
+    Updated.Emit();
+  }
 }
 
 void Party::Leave(DynamicObject* object)
 {
   DynamicObjects::iterator it = find(_objects.begin(), _objects.end(), object);
 
-  _objects.erase(it);
+  if (it != _objects.end())
+  {
+    _objects.erase(it);
+    Updated.Emit();
+  }
 }
 
 PlayerParty::PlayerParty(const string& savepath)
@@ -128,4 +135,15 @@ void PlayerParty::Create(const string& savepath, const string& name, const strin
   party._local_objects = false;
   party._objects.push_back(&player);
   party.Save(savepath);
+}
+
+Party::Statsheets Party::GetStatsheets(void) const
+{
+  Statsheets statsheets;
+  
+  for_each(_objects.begin(), _objects.end(), [&statsheets](DynamicObject* object)
+  {
+    statsheets.emplace(object->nodePath.get_name(), object->charsheet);
+  });
+  return (statsheets);
 }

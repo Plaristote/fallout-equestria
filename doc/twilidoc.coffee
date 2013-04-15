@@ -5,52 +5,20 @@ ATTR_UNSIGNED = 8
 ATTR_STATIC   = 16
 ATTR_INLINE   = 32
 ATTR_VIRTUAL  = 64
-ATTR_TYPEDEF  = 128
-
-class Project
-  GetTypedef: (name) ->
-    for typedef in project.typedefs
-      if typedef.name == name
-        return typedef
-    null
 
 class View
-  AfterFilter: () ->
-    @RefreshVisibility()
-
   Display: () ->
-    $("#page-content").fadeOut =>
-      $("#page-content").empty()
-      $("#page-content").append @elem
-      $("#page-content").fadeIn => @AfterFilter()
-      window.current_view = @
-      
-  RefreshVisibility: () ->
-    public_elems      = @elem.find '.visibility-public'
-    console.log public_elems
-    protected_elems   = @elem.find '.visibility-protected'
-    private_elems     = @elem.find '.visibility-private'
-    if window.vision_handle.DisplayPublic()
-      public_elems.show()
-    else
-      public_elems.hide()
-    if window.vision_handle.DisplayProtected()
-      protected_elems.show()
-    else
-      protected_elems.hide()
-    if window.vision_handle.DisplayPrivate()
-      private_elems.show()
-    else
-      private_elems.hide()
+    $("#page-content").empty()
+    $("#page-content").append @elem
+    window.current_view = @
 
 class Widget
-  Begin: (title, icon, controls) ->
+  Begin: (title, icon) ->
     "<div class='row-fluid sortable'>
         <div class='box span12'>
           <div class='box-header well' data-original-title>
             <h2>" + (if icon? then "<i class='" + icon + "'></i>" else '') + " #{title}</h2>
             <div class='box-icon'>
-            " + (if controls? then controls else '') + "
             </div>
           </div>
           <div class='box-content'>"
@@ -59,7 +27,7 @@ class Widget
     "</div></div></div>"
 
 class Attribute
-  TypeBox: (name, attrs, classname, is_typedef) ->
+  TypeBox: (name, attrs, classname) ->
     html  = ''
     html += "<p class='btn-group'>"
     html +=   "<button class='btn btn-mini btn-info'>ptr</button>" if (attrs & ATTR_PTR)
@@ -67,87 +35,11 @@ class Attribute
     html +=   "<button class='btn btn-mini'>const</button>"        if (attrs & ATTR_CONST)
     html +=   "<button class='btn btn-mini'>unsigned</button>"     if (attrs & ATTR_UNSIGNED)
     if classname?
-      type      = get_project_type classname
-      klass     = if is_typedef == true then 'btn-warning' else 'btn-success'
-      html     += "<button class='btn btn-mini #{klass}'"
-      html     += " onclick='location.hash=\"#show-class-#{classname}\"'" unless (is_typedef and type == null)
-      # Popover
-      desc      = if type == null then 'Undocumented type' else type.doc
-      #classname = (classname.replace /</g, '&lt;').replace />/g, '&gt;'
-      classname = (classname.replace /</g, '«').replace />/g, '»'
-      html     += "data-rel='popover' data-content='#{desc}' title='#{classname}'"
-      # End popover
-      html += ">#{name}</button>"
+      html += "<button class='btn btn-mini btn-success' onclick='location.hash=\"#show-class-#{classname}\"'>#{name}</button>"
     else
       html += "<button class='btn btn-mini btn-inverse'>#{name}</button>"
     html += "</p>"
     html
-    
-##
-## Single Element View
-##
-class Member extends View
-  constructor: (classname, type, element) ->
-    icon = ''
-    icon = 'icon-cog'      if type == 'method'
-    icon = 'icon-asterisk' if type == 'attribute'
-    html = Widget::Begin "#{classname}::#{element.name}", icon
-    if type == 'method'
-      html += @RenderMethod element
-    else if type == 'attribute'
-      html += @RenderAttribute element
-    else
-      alert "Unimplemented type #{type} for Member View"
-      throw "Unimplemented type #{type} for Member View"
-    html += Widget::End()
-    @elem = $(html)
-
-  AfterFilter: () ->
-    super
-    (@elem.find '[data-rel="popover"]').popover { trigger: 'hover' }
-  
-  RenderMethod: (method) ->
-    html  = ''
-    obj_type = get_project_type method.return_type
-    html += "<div class='span12' style='margin-top: 10px;'><div>"
-    html += "<div class='method-descriptor'>"
-    html += "<span class='span2'>"
-    if obj_type?
-      html += Attribute::TypeBox method.return_type, method.return_attrs, obj_type.name
-    else
-      html += Attribute::TypeBox method.return_type, method.return_attrs
-    html += "</span>"
-    html += "<span class='span2'><h4>" + method.name + "</h4></span>"
-    html += "</div>"
-    html += "</div>"
-    html += "</div>"
-    html
-
-  RenderAttribute: (attribute) ->
-    html  = ''
-    obj_type = get_project_type attribute.obj_type if attribute.obj_type?
-    html += "<div class='span12' style='margin-top: 10px;'><div>"
-    html += "<div class='attribute-descriptor'>"
-    html += "<span class='span2'>"
-    if attribute.obj_type? and not obj_type?
-      typedef = Project::GetTypedef attribute.obj_type
-      html += Attribute::TypeBox attribute.type, attribute.attrs, typedef.to, true
-    else if obj_type?
-      html += Attribute::TypeBox attribute.type, attribute.attrs, obj_type.name
-    else
-      html += Attribute::TypeBox attribute.type, attribute.attrs
-    html += "</span>"
-    html += "<span class='span10'>"
-    html += "<h4>" + attribute.name + "</h4>"
-    if attribute.doc?
-      html += '<dl>'
-      html += "<dt>Overview</dt><dd>#{attribute.doc.desc}</dd>" if attribute.doc.desc?
-      html += '</dl>'
-    html += "</span>"
-    html += "</div>"
-    html += "</div></div>"
-    html
-    
 ##
 ## Class Widget
 ##
@@ -170,25 +62,45 @@ class Class extends View
       html += Widget::Begin "Methods", "icon-cog"
       html += "<div class='span12'></div>"
       for method in @type.methods
-        html += "<div class='visibility-#{method.visibility}'>"
-        html += Member::RenderMethod method
-        html += "</div>" # Visibility
+        obj_type = get_project_type method.return_type
+        html += "<div class='span12' style='margin-top: 10px;'><div>"
+        html += "<div class='method-descriptor'>"
+        html += "<span class='span2'>"
+        if obj_type?
+          html += Attribute::TypeBox method.return_type, method.return_attrs, obj_type.name
+        else
+          html += Attribute::TypeBox method.return_type, method.return_attrs
+        html += "</span>"
+        html += "<span class='span2'><h4>" + method.name + "</h4></span>"
+        html += "</div>"
+        html += "</div>"
+        html += "</div>"
       html += Widget::End()
 
     if @type.attributes.length > 0
       html += Widget::Begin "Attributes", "icon-asterisk"
       html += "<div class='span12'></div>"
       for attribute in @type.attributes
-        html += "<div class='visibility-#{attribute.visibility}'>"
-        html += Member::RenderAttribute attribute
-        html += "</div>" # visibility
+        obj_type = get_project_type attribute.obj_type if attribute.obj_type?
+        html += "<div class='span12' style='margin-top: 10px;'><div>"
+        html += "<div class='attribute-descriptor'>"
+        html += "<span class='span2'>"
+        if obj_type?
+          html += Attribute::TypeBox attribute.type, attribute.attrs, obj_type.name
+        else
+          html += Attribute::TypeBox attribute.type, attribute.attrs
+        html += "</span>"
+        html += "<span class='span2'>"
+        html += "<h4>" + attribute.name + "</h4>"
+        html += "</span>"
+        html += "</div>"
+        html += "</div></div>"
         obj_type = null
       html += Widget::End()
     @elem = $(html)
     
-  AfterFilter: () ->
+  Display: () ->
     super
-    (@elem.find '[data-rel="popover"]').popover { trigger: 'hover' }
     window.uml.generate_hierarchy 'uml', @type.name
 
 ##
@@ -210,7 +122,7 @@ class ClassList extends View
     i     = 0
     for type in project.types
       html += "<tr class='#{i % 2 == 0 ? 'even' : 'odd'}'>"
-      html +=   "<td>#{type.file}</td>"
+      html +=   "<td></td>"
       html +=   "<td>#{type.name}</td>"
       html +=   "<td></td>"
       html +=   "<td>"
@@ -222,22 +134,11 @@ class ClassList extends View
     html += "</tbody>"
     html += "</table>"
     html += Widget::End()
-    @elem  = $(html)
-    @table = @elem.find 'table'
-
-  AfterFilter: () ->
-    @table.dataTable().fnDestroy()
-    @table.dataTable({
+    @elem = $(html)
+    (@elem.find 'table').dataTable({
       "sDom": "<'row-fluid'<'span6'l><'span6'f>r>t<'row-fluid'<'span12'i><'span12 center'p>>",
       "sPaginationType": "bootstrap",
       "oLanguage": { "sLengthMenu": "_MENU_ records per page" } })
-
-class Homepage extends View
-  constructor: () ->
-    html  = Widget::Begin "#{project.name}"
-    html += project.desc.homepage
-    html += Widget::End()
-    @elem = $(html)
 
 ##
 ## Menu
@@ -259,7 +160,7 @@ class MenuEntry
     html    += '</a></li>'
     @elem    = $(html)
     @menu.results.append @elem
-    #elem.click => @Clicked()
+    @elem.click => @Clicked()
 
 class Menu
   constructor: () ->
@@ -309,7 +210,6 @@ class Breadcrumb
   constructor: () ->
     console.log 'Breadcrumb'
     @dom = $('#breadcrumb')
-    @loading_handle = $("#loading-indicator")
 
   Clear: () ->
     @dom.empty()
@@ -330,54 +230,6 @@ class Breadcrumb
     
   PrefabClass: (class_name) ->
     @PrefabClasses().Add('Class').Add(class_name, "#show-class-#{class_name}")
-    
-  SetLoading: (set) ->
-    if set
-      @loading_handle.fadeIn()
-    else
-      @loading_handle.fadeOut()
-
-class VisibilityHandle
-  PUBLIC    = 1
-  PROTECTED = 2
-  PRIVATE   = 4
-
-  constructor: (default_val) ->
-    @base             = $('#visibility-filter')
-    @flag             = 0
-    @toggle_public    = @base.find '.visibility-public'
-    @toggle_protected = @base.find '.visibility-protected'
-    @toggle_private   = @base.find '.visibility-private'
-    @toggle_public.click    => @DisplayPublic    !(@DisplayPublic())
-    @toggle_protected.click => @DisplayProtected !(@DisplayProtected())
-    @toggle_private.click   => @DisplayPrivate   !(@DisplayPrivate())
-    @toggle_public.click    => @Refresh()
-    @toggle_protected.click => @Refresh()
-    @toggle_private.click   => @Refresh()
-    @toggle_public.click()    if (default_val & PUBLIC)    != 0
-    @toggle_protected.click() if (default_val & PROTECTED) != 0
-    @toggle_private.click()   if (default_val & PRIVATE)   != 0
-
-  DisplayPublic:    (param) ->
-    @FlagGetSet PUBLIC,    param
-
-  DisplayProtected: (param) ->
-    @FlagGetSet PROTECTED, param
-
-  DisplayPrivate:   (param) ->
-    @FlagGetSet PRIVATE,   param
-    
-  FlagGetSet: (value, param) ->
-    if param?
-      if param == true and (@flag & value) == 0
-        @flag += value
-      else if param == false and (@flag & value) != 0
-        @flag -= value
-    @flag & value
-    
-  Refresh: () ->
-    if window.current_view?
-      window.current_view.RefreshVisibility()
 
 class AnchorHandle
   constructor: () ->
@@ -399,9 +251,7 @@ class AnchorHandle
     for route in @routes
       if @anchor.match route.exp
         console.log 'Found matching route'
-        window.breadcrumb.SetLoading true
         route.callback @anchor
-        window.breadcrumb.SetLoading false
         return
     alert 'Not Found'
 
@@ -410,21 +260,14 @@ $(document).ready ->
   window.menu          = new Menu()
   window.breadcrumb    = new Breadcrumb()
   window.anchor_handle = new AnchorHandle()
-  window.vision_handle = new VisibilityHandle(1)
 
   window.anchor_handle.AddRoute /^$/, ->
-    console.log 'Nothing'
-    
-  window.anchor_handle.AddRoute /#project/, ->
-    unless window.homepage?
-      window.homepage = new Homepage()
-    window.homepage.Display()
-    window.breadcrumb.Clear().Add('Project')
+    console.log 'Index'
 
   window.anchor_handle.AddRoute /#class-index/, ->
     console.log 'anchor handler executed'
-    unless window.class_list?
-      window.class_list = new ClassList()
+    #unless window.class_list?
+    window.class_list = new ClassList()
     window.class_list.Display()
     window.breadcrumb.PrefabClasses()
 
@@ -439,35 +282,18 @@ $(document).ready ->
     klass   = matches[1]
     method  = matches[2]
     if window.current_view? and window.current_view.view_type == 'class' and window.current_view.type.name == klass
-      alert 'Opening a method in an already opened class is not implement yet :('
+      alert 'We\'re already in the good class !'
     else
       window.breadcrumb.PrefabClass(matches[1]).Add('Methods').Add(matches[2], "#show-class-#{matches[1]}-method-#{matches[2]}")
-      obj_type = get_project_type klass
-      obj_meth = null
-      for item in obj_type.methods
-        if item.name == method
-          obj_meth = item
-          break
-      view     = new Member klass, 'method', obj_meth
-      view.Display()
 
   window.anchor_handle.AddRoute /#show-class-[^-]+-attribute-[^-]+$/, ->
     matches = /#show-class-([^-]+)-attribute-([^-]+)$/.exec window.anchor_handle.anchor
     klass   = matches[1]
     attr    = matches[2]
     if window.current_view? and window.current_view.view_type == 'class' and window.current_view.type.name == klass
-      alert 'Opening an attribute in an already opened class is not implement yet :('
+      alert 'We\'re already in the good class !'
     else
       window.breadcrumb.PrefabClass(matches[1]).Add('Attributes').Add(matches[2], "#show-class-#{matches[1]}-attribute-#{matches[2]}")
-      obj_type = get_project_type klass
-      obj_attr = null
-      for item in obj_type.attributes
-        if item.name == attr
-          obj_attr = item
-          break
-      view     = new Member klass, 'attribute', obj_attr
-      view.Display()
 
-  window.anchor_handle.anchor = '#project'
   window.anchor_handle.Execute()
   console.log '[Twilidoc] Finished initializing'

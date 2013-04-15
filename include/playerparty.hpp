@@ -3,6 +3,8 @@
 
 # include "globals.hpp"
 # include "serializer.hpp"
+# include "observatory.hpp"
+# include <map>
 
 struct DynamicObject;
 class  InstanceDynamicObject;
@@ -10,8 +12,9 @@ class  InstanceDynamicObject;
 class Party
 {
 public:
-  typedef std::list<DynamicObject*> DynamicObjects;
-  
+  typedef std::list<DynamicObject*>          DynamicObjects;
+  typedef std::map<std::string, std::string> Statsheets;
+
   void                  Join(InstanceDynamicObject* i);
   void                  Join(DynamicObject*);
   void                  Leave(InstanceDynamicObject* i);  
@@ -19,7 +22,10 @@ public:
 
   const DynamicObjects& ConstGetObjects(void) const { return (_objects); }
   DynamicObjects&       GetObjects(void)            { return (_objects); }
-
+  Statsheets            GetStatsheets(void)   const;
+  
+  Sync::Signal<void>    Updated;
+  
 protected:
   DynamicObjects _objects;
 };
@@ -34,7 +40,7 @@ public:
   static void           Create(const std::string& savepath, const std::string& name, const std::string& model, const std::string& texture);
   bool                  Save(const std::string& savepath) const;
   void                  SetHasLocalObjects(bool val) { _local_objects = val; }
-
+  
 private:
   PlayerParty() {};
   

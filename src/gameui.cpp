@@ -207,6 +207,7 @@ void OptionsManager::Refresh(void)
       props.set_cursor_hidden(hide_cursor);
       props.set_fullscreen(fullscreen);
       props.set_size(screen_width, screen_height);
+      props.set_icon_filename("data/icon.ico");
       framework.get_window(0)->get_graphics_window()->request_properties(props);
     }
 
@@ -297,7 +298,7 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
     ToggleEventListener(true, "screen-select",    "change", ScreenSelected);
     ToggleEventListener(true, "language-select",  "change", LanguageSelected);
     ToggleEventListener(true, "graphics-quality", "change", QualitySelected);
-    ToggleEventListener(true, "exit",            "click",  ExitClicked);
+    ToggleEventListener(true, "exit",             "click",  ExitClicked);
     ExitClicked.EventReceived.Connect      (*this, &UiBase::FireHide);
     FullscreenToggled.EventReceived.Connect(*this, &GameOptions::ToggleFullscreen);
     QualitySelected.EventReceived.Connect  (*this, &GameOptions::SetQuality);

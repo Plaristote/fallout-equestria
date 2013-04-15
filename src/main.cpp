@@ -163,48 +163,50 @@ int compile_heightmap(const std::string& sourcefile, const std::string& out)
 #ifndef UNIT_TESTER
 int main(int argc, char *argv[])
 {
-  Dices::Initialize();
-  Script::Engine::Initialize();
-  AngelScriptInitialize();
+  Dices::Initialize();          // Randomness initialization
+  Script::Engine::Initialize(); // Script Engine initialization (obviously)
+  AngelScriptInitialize();      // Registering script API (see script_api.cpp)
 
+  // With some options, game binary can also be used to compile statsheet or heightmaps.
   // If used as compiler of some sort
   if (argc == 3 && std::string(argv[1]) == "--compile-statsheet")
     return (compile_statsheet(argv[2]));
   if (argc == 4 && std::string(argv[1]) == "--compile-heightmap")
     return (compile_heightmap(argv[2], argv[3]));
   // Otherwise run the game
-
-  WindowFramework* window;
-  ConfigPage*      config = load_prc_file("config.prc");
-
-  if (!(PStatClient::connect("localhost", 5185)))
-    cout << "Can't connect to PStat client" << endl;
-  framework.open_framework(argc, argv);
-  framework.set_window_title("Fallout Equestria");
-  window = framework.open_window();
-  window->enable_keyboard();
-  window->get_render().set_shader_auto();
-
-  // Set Windows Properties
   {
-    WindowProperties props = window->get_graphics_window()->get_properties();
+    WindowFramework* window;
+    ConfigPage*      config = load_prc_file("config.prc");
 
-    props.set_cursor_hidden(true);
-    props.set_icon_filename("data/icon.ico");
-    window->get_graphics_window()->request_properties(props);
+    if (!(PStatClient::connect("localhost", 5185))) // Initialize client for profiling collector
+      cout << "Can't connect to PStat client" << endl;
+    framework.open_framework(argc, argv);
+    framework.set_window_title("Fallout Equestria");
+    window = framework.open_window();
+    window->enable_keyboard();
+    window->get_render().set_shader_auto();
+
+    // Set Windows Properties
+    {
+      WindowProperties props = window->get_graphics_window()->get_properties();
+
+      props.set_cursor_hidden(true);
+      props.set_icon_filename("data/icon.ico");
+      window->get_graphics_window()->request_properties(props);
+    }
+
+    OptionsManager::Initialize(); // Loads and handle conf.json file
+    {
+      MainMenu       mainMenu(window); // MainMenu will take over as a Panda3D async_task.
+
+      framework.main_loop();
+      framework.close_framework();
+
+      unload_prc_file(config);
+    }
+    OptionsManager::Finalize();
+    Script::Engine::Finalize();
   }
-
-  OptionsManager::Initialize();
-  {
-    MainMenu       mainMenu(window);
-
-    framework.main_loop();
-    framework.close_framework();
-
-    unload_prc_file(config);
-  }
-  OptionsManager::Finalize();
-  Script::Engine::Finalize();
   return (0);
 }
 #endif

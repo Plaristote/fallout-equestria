@@ -87,6 +87,7 @@ x --> Execute heavy tasks in threads, show progress with progress bar
 
   -> Statistics
   --> Reputation
+~ --> Interface to check statistics of a party
 
 x -> Worldmap
 x --> Display circles showing the visitable areas
@@ -105,10 +106,21 @@ x --> Scatter inserted parties in the spawning zones
 x --> Temporaries levels
 x --> Healing Rate Task
 x --> Quests
-~ --> Party management
+x --> Party management
 x --> Pipbuck
 x ----> Quest Application
+  --> Exit zones leading to the same level must only re-deploy the party
 
 Milestone IV
+  -> WorldMap
+  --> Asynchronous loading
+
+  -> Level
+  --> Asynchronous loading
+~ --> Factorize Actions code. Every part of the process (temporizing, animating, executing) must be contiguous.
+  --> Main script for levels
+  ----> Exposing waypoint observers to scripts
+
   -> GameTask
   --> Compression for save slots
+  --> Interactive interfaces for loading screens
