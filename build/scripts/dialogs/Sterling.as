@@ -22,6 +22,12 @@ string HookInit()
 
   if (have_talked.Nil())
   {
+    data_engine["variables"]["Sterling"]["allied"] = 1;
+
+    Character@ self  = level.GetCharacter("Sterling");
+    Party@     party = game.GetPlayerParty();
+    
+    party.Join(self);
     have_talked = 1;
     return ("Howdy");
   }

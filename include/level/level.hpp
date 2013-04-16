@@ -109,11 +109,6 @@ public:
   void                   ActionDropObject(ObjectCharacter* user, InventoryObject* object);
   void                   ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* object, unsigned char actionIt);
 
-  void                   PendingActionTalkTo(InstanceDynamicObject* fromObject);
-  void                   PendingActionUse(InstanceDynamicObject* fromObject);
-  void                   PendingActionUseObjectOn(InstanceDynamicObject* fromObject);
-  void                   PendingActionUseWeaponOn(InstanceDynamicObject* fromObject);
-
   // Interace Interactions
   void                   PlayerDropObject(InventoryObject*);
   void                   PlayerUseObject(InventoryObject*);

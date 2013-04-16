@@ -1,0 +1,67 @@
+name: "Fallout: Equestria RPG"
+description: |
+  <p>
+    <h5>Overview</h5>
+    This is the Game Engine used for the development of Fallout: Equestria RPG.<br />
+    It aims at providing any feature that might be needed for easy development of classical RPGs like Black Isle Studio used to do them,
+    while using 3D graphics.<br />
+    The Game Engine also comes with a Game Editor which is not documented here (this is the technical documentaiton of the Game Engine, aimed at
+    developers only).
+  </p>
+  <p>
+    <h5>Getting started</h5>
+    <p>
+      The main loop is probably the best place to get started if you need to study the game's architecture.<br />
+      The classes handling the main loop are respectively:<br />
+      <ul>
+        <li>[MainMenu]</li>
+        <li>[NewGameTask] <i>Task executed when the user is in the New Game context</i></li>
+        <li>[GameTask]    <i>Task executed when the user is playing the game</i>
+          <ul>
+            <li>[WorldMap] <i>Task executed when the user is exploring the worldmap</i></li>
+            <li>[Level]    <i>Task executed when the user is in a loaded map</i></li>
+          </ul>
+        </li>
+      </ul>
+    </p>
+  </p>
+  <p>
+    <h5>Methodology</h5>
+    <h6>Event driven development</h6>
+    <p>
+      The Game Engine core is event-driven: that is to say, as a developer, instead of handling things through a main
+      loop, you would rather use callbacks.<br />
+      With such a huge code-base, it allows us to avoid fragmentation of code, making it much easier to read.<br />
+      The templated object Sync::Signal which you will very often see is handling these behaviors. Here's a use sample:
+      <pre class='sh_cpp'>
+  int main(void)
+  {
+    Sync::Signal<void (int)> SignalObject; // Declaring a signal. Observers will take an int as parameter.
+
+    // Connecting the following lambda to the signal. Connect can also take function pointers or method pointers.
+    SignalObject.Connect([](int param)
+    {
+      std::cout << "SignalObject was emitted with parameter " << param << std::endl;
+    });
+    SignalObject.Emit(42); // Executes all the observers
+    return (0);
+  }</pre>
+    </p>
+    <h6>Formatting convention</h6>
+    <p>
+      Developers are free of using their own convention for their own code.<br />
+      However, methods and signals names MUST use upper camel case (ThisIsCamelCase).<br />
+      <br />
+      Though you might use any convention you're comfortable with, here's a list of what you SHOULD use to keep the formating coherent:<br />
+      <ul>
+        <li>2-spaces wide soft-tabs are preffered.</li>
+        <li>Line return before and after braces</li>
+        <li>One-liners do not use braces</li>
+        <li>Private attributes names are prefixed with an underscore</li>
+        <li>Attributes name either use either lower camel case or snake case (thisIsLowerCamelCase, this_is_snake_case)</li>
+      </ul>
+    </p>
+  </p>
+
+includes:
+  - "include"

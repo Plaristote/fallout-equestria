@@ -6,8 +6,13 @@ int   initWaypoint = 0;
 
 bool shieldCasted = false;
 
-void main(Character@ self, float elaspedTime)
+void main(Character@ self, float elapsedTime)
 {
+  Data       data_engine = level.GetDataEngine();
+  Character@ player      = level.GetPlayer();
+
+  if (data_engine["variables"]["Sterling"]["allied"].AsInt() == 1)
+    ai_template_follow_char(self, player, elapsedTime);
 }
 
 Character@ currentTarget = null;
@@ -22,7 +27,10 @@ bool       Fleeing(Character@ self)
     int waypoint = self.GetFarthestWaypoint(other.AsObject());
 
     if (waypoint != self.GetCurrentWaypoint())
-      self.GoTo(waypoint);
+    {
+      if (self.GetPathSize() == 0)
+        self.GoTo(waypoint);
+    }
   }
   return (false);
 }
@@ -132,9 +140,13 @@ void combat(Character@ self)
       else
       {
         if (currentTarget.GetPathDistance(self.AsObject()) <= 1)
+        {
+          Cout("Path distance <= 1");
           level.NextTurn();
+        }
         else
         {
+          Cout("Civilian going to player");
           self.GoTo(level.GetPlayer().AsObject(), 1);
           self.TruncatePath(1);
         }
@@ -142,6 +154,7 @@ void combat(Character@ self)
     }
     else
     {
+      Cout("Civilian going to player");
       self.GoTo(level.GetPlayer().AsObject(), 1);
       self.TruncatePath(1);
     }
