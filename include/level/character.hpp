@@ -204,7 +204,11 @@ private:
   unsigned int                   _self_enemyMask;
   unsigned short                 _actionPoints;
   short                          _hitPoints, _armorClass, _tmpArmorClass;
-  
+
+  public:
+    InventoryObject*             active_object;
+    unsigned short               active_object_it;
+  private:
 
   // Inventory and Equiped Items
   struct ItemEquiped

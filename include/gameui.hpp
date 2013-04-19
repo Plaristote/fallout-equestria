@@ -186,13 +186,21 @@ private:
 };
 
 #include <queue>
-class LoadingScreen : public UiBase
+#include "Boots/functorthread.hpp"
+class LoadingScreen : public UiBase, public Sync::Semaphore
 {
   typedef std::queue<std::string> StringQueue;
 public:
   LoadingScreen(WindowFramework*, Rocket::Core::Context* rocket);
+  ~LoadingScreen();
   
   void             AppendText(const std::string& str);
+
+private:
+  void             Refresh(void);
+
+  Sync::FunctorThread<void>* thread;
+  bool                       done;
 };
 
 class LevelUi

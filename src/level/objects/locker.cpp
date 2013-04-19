@@ -27,15 +27,11 @@ void ObjectLocker::CallbackActionUse(InstanceDynamicObject* object)
   else
   {
     AnimationEnded.DisconnectAll();
-    AnimationEnded.Connect(*this, &ObjectLocker::PendingActionOpen);
-    pendingActionOn = object;
+    AnimationEnded.Connect([this, object](InstanceDynamicObject*)
+    {
+      AnimationEnded.DisconnectAll();
+      ObjectShelf::CallbackActionUse(object);
+    });
     PlayAnimation("open");
   }
-}
-
-void ObjectLocker::PendingActionOpen(InstanceDynamicObject*)
-{
-  AnimationEnded.DisconnectAll();
-  cout << "Count event listeners " << AnimationEnded.ObserverCount() << endl;
-  ObjectShelf::CallbackActionUse(pendingActionOn);
 }

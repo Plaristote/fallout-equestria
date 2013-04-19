@@ -23,6 +23,9 @@ public:
   Sync::Signal<void (const std::vector<std::string>&)> SelectNextZone;
 
 private:
+  void GoingThroughLocal(void* character);
+  void GoingThroughExit(void* character);
+  
   std::string              _name;
   Level*                   _level;
   std::vector<std::string> _destinations;
@@ -70,8 +73,6 @@ public:
   
   bool     CanGoThrough(unsigned char id);
   void     GoingThrough(void*);
-private:
-  void     PendingActionOpen(InstanceDynamicObject*);
   
   std::list<std::pair<int, int> > _workaround_wp_disconnected;
 };

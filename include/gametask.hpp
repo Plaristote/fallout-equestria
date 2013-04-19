@@ -84,7 +84,7 @@ public:
   void                  SaveToSlot(unsigned char slot);
   void                  LoadSlot(unsigned char slot);
   void                  LoadLastState(void);
-  void                  Exit(Rocket::Core::Event&) { _continue = false; }
+  void                  Exit(Rocket::Core::Event&);
 
   // Special Encounter Callbacks
   void                  SetLevelSpecialEncounter(const std::string&);

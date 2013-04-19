@@ -39,6 +39,53 @@ void Level::SpawnEnemies(const std::string& type, unsigned short quantity, unsig
   SetEntryZone(spawn_party, entry_zone.str());
 }
 
+void Level::SetEntryZone(ObjectCharacter* character, const std::string& name)
+{
+  EntryZone* zone = _world->GetEntryZoneByName(name);
+  
+  if (zone)
+  {
+    list<Waypoint*>::iterator it  = zone->waypoints.begin();
+    list<Waypoint*>::iterator end = zone->waypoints.end();
+
+    for (; it != end ; ++it)
+    {
+      if (MoveCharacterTo(character, *it))
+        break ;
+    }
+    if (character == GetPlayer())
+      _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
+  }
+}
+
+bool Level::MoveCharacterTo(ObjectCharacter* character, unsigned int wp_id)
+{
+  Waypoint* wp = _world->GetWaypointFromId(wp_id);
+
+  if (wp)
+    return (MoveCharacterTo(character, wp));
+  return (0);
+}
+
+bool Level::MoveCharacterTo(ObjectCharacter* character, Waypoint* wp)
+{
+  if (!(IsWaypointOccupied(wp->id)))
+  {
+    DynamicObject& object = *(character->GetDynamicObject());
+
+    _world->DynamicObjectSetWaypoint(object, *wp);
+    object.floor = -1;
+    object.nodePath.set_alpha_scale(1.f);
+    object.nodePath.show();
+    character->SetOccupiedWaypoint(wp);
+    _world->DynamicObjectChangeFloor(object, wp->floor);
+    character->GetNodePath().set_pos(wp->nodePath.get_pos());
+    character->TruncatePath(0);
+    return (true);
+  }
+  return (false);
+}
+
 void Level::SetEntryZone(Party& player_party, const std::string& name)
 {
   EntryZone* zone               = _world->GetEntryZoneByName(name);
@@ -69,34 +116,18 @@ void Level::SetEntryZone(Party& player_party, const std::string& name)
     for (; party_it != party_end ; ++party_it)
     {
       cout << "[Level][SetEntryZone] Trying to insert character " << (*party_it)->nodePath.get_name() << endl;
-      list<Waypoint*>::iterator it  = zone->waypoints.begin();
-      list<Waypoint*>::iterator end = zone->waypoints.end();
+      list<Waypoint*>::iterator it        = zone->waypoints.begin();
+      list<Waypoint*>::iterator end       = zone->waypoints.end();
+      ObjectCharacter*          character = GetCharacter(*party_it);
 
       for (; it != end ; ++it)
       {
-        if (!(IsWaypointOccupied((*it)->id)))
-        {
-          ObjectCharacter* character = GetCharacter(*party_it);
-
-          if (character)
-          {
-            cout << "[Level][SetEntryZone][" << character->GetName() << " is now on waypoint " << (*it)->id << endl;
-            (*party_it)->waypoint = *it;
-            (*party_it)->floor    = -1;
-            (*party_it)->nodePath.set_alpha_scale(1.f);
-            (*party_it)->nodePath.show();
-            character->SetOccupiedWaypoint(*it);
-            _world->DynamicObjectChangeFloor(*character->GetDynamicObject(), (*it)->floor);
-            character->GetNodePath().set_pos((*it)->nodePath.get_pos());
-            character->TruncatePath(0);
-          }
+        if (MoveCharacterTo(character, *it))
           break ;
-        }
       }
     }
   }
   _exitingZone = false;
   _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
-  //_camera.FollowObject(GetPlayer());
   _floor_lastWp = 0;
 }

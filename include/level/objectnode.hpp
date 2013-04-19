@@ -125,10 +125,6 @@ public:
     return (0);
   }
 
-  InstanceDynamicObject*   pendingActionOn;
-  InventoryObject*         pendingActionObject;
-  unsigned char            pendingActionObjectActionIt;
-  
   Sync::Signal<void (InstanceDynamicObject*)> AnimationEnded;
 
   virtual void             CallbackActionUse(InstanceDynamicObject* object) { ThatDoesNothing(); }

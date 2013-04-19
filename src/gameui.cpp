@@ -135,6 +135,25 @@ LoadingScreen::LoadingScreen(WindowFramework* window, Core::Context* context) : 
   if (_root)
     Translate();
   Show();
+  /*thread = Sync::FunctorThread<void>::Create([this](void)
+  {
+    do
+    {
+      Refresh();
+    } while (done);
+  });
+  thread->Launch();*/
+  done = false;
+}
+
+LoadingScreen::~LoadingScreen()
+{
+  /*if (thread)
+  {
+    done = true;
+    //thread->Join();
+    thread = 0;
+  }*/
 }
 
 void LoadingScreen::AppendText(const std::string& str)
@@ -142,10 +161,19 @@ void LoadingScreen::AppendText(const std::string& str)
   Core::Element* input = _root->GetElementById("content");
   Core::String   content;
 
+  Wait();
   input->GetInnerRML(content);
   content = Core::String(str.c_str()) + "<br />" + content;
   input->SetInnerRML(content);
+  Post();
+  Refresh();
+}
+
+void LoadingScreen::Refresh(void)
+{
+  Wait();
   framework.get_graphics_engine()->render_frame();
+  Post();
 }
 
 /*

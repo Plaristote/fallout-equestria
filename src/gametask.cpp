@@ -345,6 +345,22 @@ void                  GameTask::GameOver(void)
   _continue = false;
 }
 
+void                  GameTask::Exit(Rocket::Core::Event&)
+{
+  UiDialog* dialog      = new UiDialog(_window, _gameUi.GetContext());
+
+  dialog->SetMessage(i18n::T("If you quit without saving, you'll lose your recent progresses.") + "<br/>" + i18n::T("Are you sure ?"));
+  dialog->AddChoice(i18n::T("No"),  [this, dialog](Rocket::Core::Event&) { dialog->SetModal(false); dialog->Hide(); });
+  dialog->AddChoice(i18n::T("Yes"), [this, dialog](Rocket::Core::Event&)
+  {
+    _continue = false;
+    dialog->SetModal(false);
+    dialog->Hide();
+  });
+  dialog->Show();
+  dialog->SetModal(true);
+}
+
 AsyncTask::DoneStatus GameTask::do_task()
 {
   if (!_continue)
@@ -729,6 +745,7 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
       Level*   level = 0;
 
       level = new Level(_window, _gameUi, packet, _timeManager);
+      level->SetName(params.name);
       SetLevel(level);
       if (params.isSaveFile)
 	level->Load(packet);

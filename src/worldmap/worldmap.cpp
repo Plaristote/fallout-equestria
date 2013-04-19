@@ -547,7 +547,9 @@ void WorldMap::MapTileGenerator(Data map)
       // While adding every case Element to the Case array.
       //
       loadingScreen.AppendText("Loading compiled worldmap");
+      loadingScreen.Wait();
       _root = _context->LoadDocument("data/worldmap.rml");
+      loadingScreen.Post();
     }
   }
 
@@ -555,7 +557,7 @@ void WorldMap::MapTileGenerator(Data map)
   {
     stringstream           streamSizeX, streamSizeY;
     Rocket::Core::Element* mapElem = _root->GetElementById("pworldmap");
-    
+
     streamSizeX << (_size_x * _tsize_x);
     streamSizeY << (_size_y * _tsize_y);
     mapElem->SetProperty("width",  streamSizeX.str().c_str());

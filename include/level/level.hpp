@@ -94,6 +94,9 @@ public:
   const std::string&     GetNextZone(void) const;
   const std::string&     GetExitZone(void) const;
   void                   SetEntryZone(Party&, const std::string&);
+  void                   SetEntryZone(ObjectCharacter*, const std::string&);
+  bool                   MoveCharacterTo(ObjectCharacter*, Waypoint* wp);
+  bool                   MoveCharacterTo(ObjectCharacter*, unsigned int wp_id);
 
   // Interaction Management
   void                   CallbackActionBarter(ObjectCharacter*);
@@ -101,7 +104,6 @@ public:
   void                   CallbackActionTalkTo(InstanceDynamicObject* object);
   void                   CallbackActionUseObjectOn(InstanceDynamicObject* object);
   void                   CallbackActionTargetUse(unsigned short it);
-  void                   SelectedUseObjectOn(InventoryObject* object);
 
   void                   ActionUse(ObjectCharacter* user, InstanceDynamicObject* target);
   void                   ActionUseObject(ObjectCharacter* user, InventoryObject* object, unsigned char actionIt);
@@ -132,18 +134,20 @@ public:
     MouseTarget
   };
 
-  void              SetMouseState(MouseState);
-  void              MouseLeftClicked(void);
-  void              MouseRightClicked(void);
+  void               SetMouseState(MouseState);
+  void               MouseLeftClicked(void);
+  void               MouseRightClicked(void);
 
-  void              StartCombat(void);
+  void               StartCombat(void);
 
-  MouseState        _mouseState;
+  MouseState         _mouseState;
 
   // Misc
-  void              SpawnEnemies(const std::string& type, unsigned short quantity, unsigned short n_spawn);
-  bool              IsWaypointOccupied(unsigned int id) const;
-  ISampleInstance*  PlaySound(const std::string& name);
+  void               SetName(const std::string& name) { _level_name = name;   }
+  const std::string& GetName(void) const              { return (_level_name); }
+  void               SpawnEnemies(const std::string& type, unsigned short quantity, unsigned short n_spawn);
+  bool               IsWaypointOccupied(unsigned int id) const;
+  ISampleInstance*   PlaySound(const std::string& name);
 
   Sync::ObserverHandler obs;
 private:
@@ -163,6 +167,7 @@ private:
   
   Sync::ObserverHandler obs_player;
 
+  std::string          _level_name;
   WindowFramework*     _window;
   GraphicsWindow*      _graphicWindow;
   Mouse                _mouse;

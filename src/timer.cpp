@@ -1,4 +1,5 @@
 #include "timer.hpp"
+#define PROFILING
 
 using namespace std;
 

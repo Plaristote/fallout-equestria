@@ -132,7 +132,6 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 	arc.observer = ez;
       });
     });
-    
     exitZone->ExitZone.Connect      (*this, &Level::CallbackExitZone);
     exitZone->GoToNextZone.Connect  (*this, &Level::CallbackGoToZone);
     exitZone->SelectNextZone.Connect(*this, &Level::CallbackSelectNextZone);
@@ -364,7 +363,6 @@ void Level::FetchParty(PlayerParty& party)
       }
       ++cit;
     }
-    cout << "My primary function is failure..." << endl;
   }
   //*it = GetPlayer()->GetDynamicObject();
   party.SetHasLocalObjects(false);
@@ -888,8 +886,8 @@ void Level::MouseLeftClicked(void)
 	if (dynObject)
 	{
 	  ObjectCharacter*     player    = GetPlayer();
-	  InventoryObject*     item      = player->pendingActionObject;
-	  unsigned char        actionIt  = player->pendingActionObjectActionIt;
+	  InventoryObject*     item      = player->active_object;
+	  unsigned char        actionIt  = player->active_object_it;
 
 	  if ((*item)["actions"][actionIt]["combat"] == "1")
 	  {
@@ -1056,9 +1054,7 @@ void Level::CallbackGoToZone(const string& nextZone)
 
 void Level::CallbackSelectNextZone(const vector<string>& nextZoneChoices)
 {
-  if (_currentUis[UiItNextZone] && _currentUis[UiItNextZone]->IsVisible())
-    return ;
-  else
+  if (!((_currentUis[UiItNextZone] && _currentUis[UiItNextZone]->IsVisible())))
   {
     UiNextZone* uiNextZone = new UiNextZone(_window, _levelUi.GetContext(), nextZoneChoices);
 

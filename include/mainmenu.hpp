@@ -3,7 +3,7 @@
 
 # include "gametask.hpp"
 # include "mousecursor.hpp"
-#include "newgametask.hpp"
+# include "newgametask.hpp"
 
 class MainMenu : public AsyncTask
 {

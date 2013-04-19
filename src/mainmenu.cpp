@@ -96,23 +96,11 @@ void MainMenu::Continue(Rocket::Core::Event&)
 
 void MainMenu::EndGame(void)
 {
-  // TODO find out why the dialog doesn't go away
-  /*UiDialog* dialog      = new UiDialog(_window, _generalUi.GetRocketRegion()->get_context());
-
-  dialog->SetMessage(i18n::T("If you quit without saving, you'll lose your recent progresses.") + "<br/>" + i18n::T("Are you sure ?"));
-  dialog->AddChoice(i18n::T("No"),  [this, dialog](Rocket::Core::Event&) { dialog->SetModal(false); dialog->Hide(); });
-  dialog->AddChoice(i18n::T("Yes"), [this, dialog](Rocket::Core::Event&)
-  {*/
-    _view.Show();
-    delete _levelTask;
-    _levelTask            = 0;
-    _need_garbage_collect = true;
-    MusicManager::Get()->Play("mainmenu");
-    /*dialog->SetModal(false);
-    dialog->Hide();
-  });
-  dialog->Show();
-  dialog->SetModal(true);*/
+  _view.Show();
+  delete _levelTask;
+  _levelTask            = 0;
+  _need_garbage_collect = true;
+  MusicManager::Get()->Play("mainmenu");
 }
 
 void MainMenu::DisplayAlerts(void)
@@ -175,12 +163,12 @@ void MainMenu::AsyncCreateLevel(void)
   else
     _levelTask->LoadLastState();
   slotToLoadPlz  = -1;
-  createLevelPlz = false;
   if (_new_game_task)
   {
     delete _new_game_task;
     _new_game_task = 0;
   }
+  createLevelPlz = false;
 }
 
 void MainMenu::OpenUiLoad(Rocket::Core::Event&)

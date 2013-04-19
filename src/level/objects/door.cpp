@@ -5,6 +5,26 @@
 void LevelExitZone::GoingThrough(void* character)
 {
   cout << "LevelExitZone::GoingThrough" << endl;
+  cout << "LocalExit? ";
+  cout << _name.substr(0, 9) << endl;
+  if (_name.substr(0, 9) == "LocalExit")
+    GoingThroughLocal(character);
+  else
+    GoingThroughExit(character);
+}
+
+void LevelExitZone::GoingThroughLocal(void* ptr)
+{
+  if (_destinations.size() > 0)
+  {
+    ObjectCharacter* character = reinterpret_cast<ObjectCharacter*>(ptr);
+
+    _level->SetEntryZone(character, _destinations.front());
+  }
+}
+
+void LevelExitZone::GoingThroughExit(void* character)
+{
   if (character == _level->GetPlayer())
   {
     if (_destinations.size() == 0)
@@ -110,19 +130,12 @@ void ObjectDoor::CallbackActionUse(InstanceDynamicObject* object)
   if (!IsLocked())
   {
     AnimationEnded.DisconnectAll();
-    AnimationEnded.Connect(*this, &ObjectDoor::PendingActionOpen);
-    pendingActionOn = object;
+    AnimationEnded.Connect([this](InstanceDynamicObject*) { _closed = !_closed; });
     PlayAnimation(_closed ? "open" : "close");
   }
   else
     _level->ConsoleWrite(i18n::T("It's locked"));
 }
-
-void ObjectDoor::PendingActionOpen(InstanceDynamicObject*)
-{
-  _closed = !_closed;
-}
-
 
 
 

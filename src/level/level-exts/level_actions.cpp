@@ -79,11 +79,13 @@ void Level::CallbackActionUseObjectOn(InstanceDynamicObject* target)
   std::cout << "CallbackActionUseObjectOn" << std::endl;
   _currentUseObjectOn = new UiUseObjectOn(_window, _levelUi.GetContext(), GetPlayer()->GetInventory());
   _currentUseObjectOn->ActionCanceled.Connect(*this, &Level::CloseRunningUi<UiItUseObjectOn>);
-  _currentUseObjectOn->ObjectSelected.Connect(*this, &Level::SelectedUseObjectOn);
+  _currentUseObjectOn->ObjectSelected.Connect([this, target](InventoryObject* object)
+  {
+    ActionUseObjectOn(GetPlayer(), target, object, 0);
+  });
   _mouseActionBlocked = true;
   _camera.SetEnabledScroll(false);
   SetInterrupted(true);
-  GetPlayer()->pendingActionOn = target;
   _currentUis[UiItUseObjectOn] = _currentUseObjectOn;
 }
 
@@ -100,18 +102,11 @@ void Level::CallbackActionTargetUse(unsigned short it)
     {
       if ((*object)["actions"][actionIt]["combat"].Value() == "1" && _state != Fight)
         StartFight(player);
-      player->pendingActionObject         = object;
-      player->pendingActionObjectActionIt = actionIt;
       SetMouseState(MouseTarget);
     }
     else
       ActionUseObject(player, object, actionIt);
   }
-}
-
-void Level::SelectedUseObjectOn(InventoryObject* object)
-{
-  ActionUseObjectOn(GetPlayer(), GetPlayer()->pendingActionOn, object, 0); // Action is default action: zero
 }
 
 void Level::ActionUse(ObjectCharacter* user, InstanceDynamicObject* target)
@@ -245,7 +240,7 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
     string    output;
     
     user->SetAsEnemy(target, true);
-    output = (item->UseAsWeapon(user, target, user->pendingActionObjectActionIt));
+    output = (item->UseAsWeapon(user, target, actionIt));
     MouseRightClicked();
     ConsoleWrite(output);
     if (xpFetcher.character_died)
@@ -279,9 +274,6 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
   {
     unsigned int equipedIt            = 0;
       
-    user->pendingActionObject         = item;
-    user->pendingActionOn             = target;
-    user->pendingActionObjectActionIt = actionIt;
     user->AnimationEnded.DisconnectAll();
     user->AnimationEnded.Connect(logic_step);
     if (user->GetEquipedItem(0))
