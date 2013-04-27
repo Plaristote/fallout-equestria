@@ -1,6 +1,6 @@
 $(document).ready ->
-  uml        = Joint.dia.uml;
-  uml_height = 0;
+  uml        = Joint.dia.uml
+  uml_height = 0
 
   visibility_string2uml = (obj) ->
     switch obj.visibility
@@ -26,34 +26,35 @@ $(document).ready ->
     height     = 50
 
     if      visibility == 'protected'
-      color = 'lightblue'
+      color = 'lightgreen'
     else if visibility == 'private'
-      color = 'blue'
+      color = 'lightblue'
     for method in type.methods
       str  = visibility_string2uml method
       str += ' ' + method.name + '(' + method.params + ') -> ' + method.return_type
       methods.push str
       # Adjust size of the rect to the content
       if str.length * 5 > width
-        width = 10 + str.length * 5;
-      height += 13;
+        width = 10 + str.length * 5
+      height += 13
     for attribute in type.attributes
       str = visibility_string2uml attribute
       str += ' ' + attribute.name + ' -> ' + attribute.type
       attributes.push str
       if (str.length * 5 > width)
         width = 10 + str.length * 5
-      height += 13;
+      height += 13
     object = uml.Class.create {
-        label: type.name,
-        shadow: true,
-        attrs: { fill: color },
-        labelAttrs: { 'font-weight': 'bold' },
-        methods: methods,
-        attributes: attributes,
-        rect: { x: position.x, y: position.y, width: width, height: height },
+        label:       type.name,
+        shadow:      true,
+        attrs:       { fill: color },
+        labelAttrs:  { 'font-weight': 'bold' },
+        methods:     methods,
+        attributes:  attributes,
+        rect:        { x: position.x, y: position.y, width: width, height: height },
         interactive: false
       }
+    object.draggable false
 
     if (position.y + height + 10 > uml_height)
       uml_height = position.y + height + 10

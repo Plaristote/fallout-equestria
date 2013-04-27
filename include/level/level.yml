@@ -1,0 +1,135 @@
+WaypointModifier:
+  overview: |
+    Component for an object that will affect the pathfinding.
+
+InstanceDynamicObject:
+  overview: |
+    Instance of a [DynamicObject] created by the [Level].
+
+  methods:
+    - name:   'Load'
+    - name:   'Save'
+    - name:   'Run'
+      shorts: 'Procedure ran when the object is active. Except in some cases for [ObjectCharacter]s, the procedure is run once every frame'
+    - name:   'operator=='
+      shorts: "Compares the [NodePath] passed as parameter with the [DynamicObject]'s [NodePath]."
+    - name:   'operator=='
+    - name:   'GetName'
+    - name:   'GetNodePath'
+    - name:   'GetInteractions'
+    - name:   'GetDialog'
+    - name:   'GetDynamicObject'
+    - name:   'GetGoToData'
+    - name:   'Get'
+      shorts: 'Template method to cast the current object to the correct mapobject type it personifies'
+      desc: |
+        Use the 'type' attribute to determine the actual type of the object. If the expected type
+        matches, then a pointer of the correct class is returned. Otherwise, returns a null pointer.
+    - name: 'CallbackActionUse'
+    - name:  'ResetAnimation'
+      short: "Interrupts all animation running on the object's [NodePath]"
+      
+  attributes:
+    - name:  '_type'
+      short: "Allows mapping of the actual instance's type"
+      desc:  'The value is based on the [ObjectTypes::ObjectType] enum, and is used in the Get method to ensure that a null pointer is returned if the intented cast is impossible'
+    - name: '_object'
+      short: 'Pointer to the [DynamicObject] that this object represent in the [Level]'
+    - name: '_interactions'
+      short: 'List of interactions available for this object, as specified in the [DynamicObject]'
+    - name: '_idle_size'
+      short: "Stores the three dimensional size of the [DynamicObjecŧ]'s model while it is playing the idle animation"
+      
+ObjectCharacter:
+  overview: |
+    Controls the logical and displaying parts of a character or NPC.
+    
+  methods:
+    - name: 'Load'
+    - name: 'Save'
+    - name:  'SetStatistics'
+      short: |
+        Sets the pointer to the statistic datatree and controllers to those passed as parameter. If these
+        values are already set, destroys the previous instances first.
+    - name:  'NullifyStatistics'
+      short: 'Sets the pointers to the statistic datatree and controller to null. Does not destroy them.'
+    - name:  'GetGoToData'
+    - name:  'SetInventory'
+    - name:  'statistics'
+    - name:  'ProcessCollisions'
+      short: |
+        Overload of the [WaypointModifier]'s ProcessCollisions. Ensure that the character does not block
+        pathes when he's dead.
+    - name:  'Run'
+      short: |
+        Procedure run once every frame if the level is running, never if it is interrupted, and in combat run
+        only when it is the character's instance turn to play.
+    - name:  'LookAt'
+    - name:  'LookAt'
+    - name:  'GoTo'
+    - name:  'GoTo'
+    - name:  'GoTo'
+    - name:  'GoToRandomWaypoint'
+      short: "Sets up the character to go one waypoint away in a random direction"
+    - name:  'TruncatePath'
+      short: "If the path the [ObjectCharacter] is following is longer than the given value, it is reduced to the given value"
+    - name:  'GetPathDistance'
+      short: "Get the shortest path from the current [ObjectCharacter] to the [Waypoint]'s."
+    - name:  'GetPathDistance'
+      short: "Get the shortest path from the current [ObjectCharacter] to the [InstanceDyanamicObject]'s position"
+    - name:  'GetDistance'
+      short: 'Returns the physical distance between the [InstanceDynamicObject] and the current [ObjectCharacter]'
+    - name:  'GetBestWaypoint'
+    - name:  'GetNearestWaypoint'
+    - name:  'GetFarthestWaypoint'
+    - name:  'GetPathSize'
+      short: "Returns the length of the path currently being followed by a moving [ObjectCharacter]."
+    - name:  'HasLineOfSight'
+      short: "Returns true if the [ObjectCharacter] can see the target passed as parameter."
+    - name:  'IsMoving'
+      short: "Returns true if the [ObjectCharacter] is currently moving."
+    - name:  'IsAlive'
+      short: "Returns true if the [ObjectCharacter] is alive (hit points > 0)."
+    - name: 'IsInterrupted'
+    - name: 'GetInventory'
+    - name: 'GetStatistics'
+    - name: 'GetStatControler'
+    - name: 'GetFactionName'
+    - name: 'GetFaction'
+    - name: 'GetActionPoints'
+    - name: 'SetActionPoints'
+    - name: 'RestartActionPoints'
+    - name: 'GetHitPoints'
+    - name: 'SetHitPoints'
+    - name: 'StatHpUpdate'
+    - name: 'GetArmorClass'
+    - name: 'SetArmorClass'
+    - name: 'RestartArmorClass'
+    - name: 'SetBonusAC'
+    - name: 'PlayEquipedItemAnimation'
+    - name: 'SetEquipedItem'
+    - name: 'GetEquipedItem'
+    - name: 'GetEquipedAction'
+    - name: 'UnequipItem'
+    - name: 'ItemNextUseType'
+    - name: 'PushBuff'
+    - name: 'DelBuff'
+    - name: 'CheckFieldOfView'
+    - name: 'SetFaction'
+    - name: 'SetFaction'
+    - name: 'SetAsEnemy'
+    - name: 'IsEnemy'
+    - name: 'IsAlly'
+    
+'ObjectCharacter::FovEnemy':
+  overview: |
+    Represents a character detected by another character
+    
+  attributes:
+    - name:  'ttl'
+      short: 'Time to live, determine how much field of view checks will be executed before the character loses track of this target'
+
+'ObjectCharacter::ItemEquiped':
+  overview: |
+    Controller for an item that is equiped by a character.
+    

@@ -54,16 +54,6 @@ WorldDiplomacy:
     Extension of the DataEngine providing logical tools to handle faction data. It is used to determine wether two characters
     are enemies or allies based on their factions. It can also be used to add new factions during the game.
     
-QuestManager:
-  overview: |
-    This class is the backend for quest managing. It can be used to add or access quests during the game. At level starts,
-    this class is responsible for watching game events: it must find out whenever an objective is fulfilled, and execute
-    the corresponding script hooks.
-
-Quest:
-  overview: |
-    Instance of a Quest that the character is following or has already finished.
-
 Party:
   overview: |
     Basically a set of [DynamicObjects] that can be joined or left during the execution of a [Level]. The specialization
@@ -304,22 +294,6 @@ CharacterBuff:
   overview: |
     Instance of a buff placed on an [ObjectCharacter].
     
-ObjectCharacter:
-  overview: |
-    Controls the logical and displaying parts of a character or NPC.
-    
-'ObjectCharacter::FovEnemy':
-  overview: |
-    Represents a character detected by another character
-    
-  attributes:
-    - name:  'ttl'
-      short: 'Time to live, determine how much field of view checks will be executed before the character loses track of this target'
-
-'ObjectCharacter::ItemEquiped':
-  overview: |
-    Controller for an item that is equiped by a character.
-    
 'WorldDiplomacy::Faction':
   overview: |
     Represents a game faction for the diplomacy system.
@@ -352,14 +326,6 @@ UiBase:
   overview: |
     Component for a class that implements a Rocket interface.
 
-WaypointModifier:
-  overview: |
-    Component for an object that will affect the pathfinding.
-    
-InstanceDynamicObject:
-  overview: |
-    Instance of a [DynamicObject] created by the [Level].
-    
 LevelExitZone:
   overview: |
     Represent an exiting zone: a set of waypoints that cause the player to go to another

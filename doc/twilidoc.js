@@ -152,7 +152,7 @@
         if (!(is_typedef && type === null)) {
           html += " data-route='#show-class-" + classname + "'";
         }
-        desc = type === null || !(type.doc != null) ? 'Undocumented type' : type.doc.overview;
+        desc = type === null || !(type.doc != null) ? 'Undocumented type' : type.doc.overview.replace("'", "&#39;");
         classname = (classname.replace(/</g, '«')).replace(/>/g, '»');
         html += "data-rel='popover' data-content='" + desc + "' title='" + classname + "'";
         html += ">" + name + "</button>";

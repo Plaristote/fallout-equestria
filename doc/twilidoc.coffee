@@ -84,7 +84,7 @@ class Attribute
       html     += "<button class='btn btn-mini #{klass}'"
       html     += " data-route='#show-class-#{classname}'" unless (is_typedef and type == null)
       # Popover
-      desc      = if type == null or !(type.doc?) then 'Undocumented type' else type.doc.overview
+      desc      = if type == null or !(type.doc?) then 'Undocumented type' else type.doc.overview.replace "'", "&#39;"
       #classname = (classname.replace /</g, '&lt;').replace />/g, '&gt;'
       classname = (classname.replace /</g, '«').replace />/g, '»'
       html     += "data-rel='popover' data-content='#{desc}' title='#{classname}'"

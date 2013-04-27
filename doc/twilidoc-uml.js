@@ -42,9 +42,9 @@
       width = 100;
       height = 50;
       if (visibility === 'protected') {
-        color = 'lightblue';
+        color = 'lightgreen';
       } else if (visibility === 'private') {
-        color = 'blue';
+        color = 'lightblue';
       }
       _ref = type.methods;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -87,6 +87,7 @@
         },
         interactive: false
       });
+      object.draggable(false);
       if (position.y + height + 10 > uml_height) {
         uml_height = position.y + height + 10;
       }

@@ -1,0 +1,68 @@
+ 
+QuestManager:
+  overview: |
+    This class is the backend for quest managing. It can be used to add or access quests during the game. At level starts,
+    this class is responsible for watching game events: it must find out whenever an objective is fulfilled, and execute
+    the corresponding script hooks.
+    
+  methods:
+    - name:  'operator[]'
+      short: 'Fetches a quest by name. Returns zero if none are found'
+    - name:  'AddQuest'
+      short: 'Creates a [Quest] object and adds it to the _quests list'
+      desc: |
+        See the [Quest] object for description of the [Data] structure that must be
+        passed as parameter.
+    - name:  'Initialize'
+      short: 'Setup the quest events observers when a [Level] is created.'
+    - name:  'Finalize'
+      short: 'Cleans up the quest events observers when a [Level] is destroyed.'
+    - name:  'QuestCompleted'
+      short: 'Completes a quest and trigger the corresponding events.'
+      desc: |
+        Sets the quest's 'complete' variable to 1.<br />
+        Adds experience to the player corresponding to the amount indicated by the quest's 'reward' variable<br />
+        Plays the 'questdone' sound.
+
+  attributes:
+    - name:  '_data_engine'
+    - name:  '_quests'
+      short: 'List of on-going and finished quests'
+    - name:  '_stats_controller'
+      short: "The player's [StatController]"
+    - name:  '_level'
+    
+Quest:
+  overview: |
+    Instance of a Quest that the character is following or has already finished.
+    
+  methods:
+    - name:  'operator=='
+      short: "Compares the [std::string] parameter to the quest's name"
+    - name:  'Initialize'
+    - name:  'Finalize'
+    - name:  'GetData'
+    - name:  'CompleteCondition'
+      short: "Forces a condition status to 'complete'"
+    - name:  'IsConditionCompleted'
+      short: "Returns true if a condition's status is set to 'complete'"
+    - name:  'IsOver'
+      short: 'Returns true if all the conditions are completed'
+    - name:  'CheckIfCompleted'
+      short: 'Returns true if the corresponding condition is completed'
+    - name: 'InitializeCondition'
+      short: 'Sets up the level observers for a condition'
+    - name: 'WatcherCharacterInventory'
+      short: 'Sets up an inventory observer'
+    - name: 'WatcherCharacterKill'
+      short: 'Sets up a character obvserver'
+    - name: 'WatcherTime'
+      short: 'Sets up a game-time observer'
+
+  attributes:
+    - name:  'data'
+      short: 'Reference to the [Data] passed as constructor parameter.'
+    - name:  'observers'
+      short: 'Handle for the quest event observers set up when a [Level] is created.'
+    - name:  '_update_hook'
+      short: 'If a script has been specified for the quest, points to the corresponding AngelScript function'
