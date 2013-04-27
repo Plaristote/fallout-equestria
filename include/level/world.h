@@ -318,6 +318,7 @@ struct World
 
     NodePath         rootWaypoints;
     Waypoints        waypoints;
+    NodePath         waypoint_maps;
 
     NodePath         rootMapObjects;
     MapObjects       objects;
@@ -340,7 +341,7 @@ struct World
     void      DeleteWayPoint(Waypoint*);
     Waypoint* GetWaypointFromNodePath(NodePath path);
     Waypoint* GetWaypointFromId(unsigned int id);
-    Waypoint* GetWaypointClosest(LPoint3);
+    Waypoint* GetWaypointClosest(LPoint3, unsigned char floor);
     void      SetWaypointsVisible(bool v)
     { if (v) { rootWaypoints.show();  } else { rootWaypoints.hide();  } }
     void           GetWaypointLimits(short currentFloor, LPoint3& upperRight, LPoint3& upperLeft, LPoint3& bottomLeft) const;

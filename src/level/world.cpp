@@ -1,7 +1,6 @@
 #include "level/world.h"
 #include <timer.hpp>
 #include <panda3d/collisionHandlerQueue.h>
-//#include <../game_editor/world.h>
 
 using namespace std;
 
@@ -18,7 +17,8 @@ World::World(WindowFramework* window)
   rootMapObjects     = window->get_render().attach_new_node("mapobjects");
   rootDynamicObjects = window->get_render().attach_new_node("dynamicobjects");
   rootLights         = window->get_render().attach_new_node("lights");
-  
+  waypoint_maps      = window->get_render().attach_new_node("waypoint_maps");
+
   model_sphere = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
   debug_pathfinding = window->get_render().attach_new_node("debug_pathfinding");
   
@@ -99,7 +99,7 @@ LPlane World::GetWaypointPlane(short currentFloor) const
   return (LPlane(upperRight, upperLeft, bottomLeft));
 }
 
-Waypoint* World::GetWaypointClosest(LPoint3 pos_1)
+Waypoint* World::GetWaypointClosest(LPoint3 pos_1, unsigned char floor)
 {
   Waypoints::iterator it        = waypoints.begin();
   Waypoints::iterator end       = waypoints.end();
@@ -108,6 +108,7 @@ Waypoint* World::GetWaypointClosest(LPoint3 pos_1)
 
   for (; it != end ; ++it)
   {
+    if ((*it).floor != floor) continue ;
     LPoint3 pos_2  = (*it).nodePath.get_pos();
     float   dist_x = pos_1.get_x() - pos_2.get_x();
     float   dist_y = pos_1.get_y() - pos_2.get_y();
@@ -187,7 +188,6 @@ MapObject* World::AddMapObject(const string &name, const string &model, const st
 
   MapObjectChangeFloor(object, 0);
 
-  //object.nodePath.reparent_to(rootMapObjects);
   object.nodePath.set_collide_mask(CollideMask(ColMask::Object));
   objects.push_back(object);
   return (&(*(--(objects.end()))));
@@ -1102,6 +1102,20 @@ void           World::UnSerialize(Utils::Packet& packet)
       (*it).UnserializeLoadArcs(this);
       (*it).SetMouseBox();
     }
+
+    // Creating waypoint maps
+    /*{
+      bool moar_floors;
+      int  i = 0;
+
+      do
+      {
+        WaypointMap wp_map(window);
+
+        moar_floors = wp_map.Initialize(waypoints, i++);
+        wp_map.GetNodePath().reparent_to(waypoint_maps);
+      } while (moar_floors);
+    }*/
   }
 
   // MapObjects

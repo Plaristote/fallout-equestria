@@ -6,10 +6,7 @@
 class LevelExitZone : public Waypoint::ArcObserver
 {
 public:
-  LevelExitZone(Level* level, std::list<std::string> destinations) : _level(level)
-  {
-    ForEach(destinations, [this](std::string dest) { _destinations.push_back(dest); });
-  }
+  LevelExitZone(Level* level, std::list<std::string> destinations);
   virtual ~LevelExitZone(void) {}
   
   void               SetName(const std::string& name) { _name = name;   }

@@ -69,69 +69,29 @@ void Mouse::SetMouseState(char i)
     MouseCursor::Get()->SetCursorTexture(texture);
 }
 
-/*void Mouse::ClosestWaypoint(World* world, short currentFloor)
-{
-  LPoint2f                  cursorPos             = _mouseWatcher->get_mouse();
-  PT(CollisionTube)         pickerTube;
-  PT(CollisionNode)         pickerNode;
-  NodePath                  pickerPath;
-  CollisionTraverser        collisionTraverser;
-  PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
-  LPoint3f                  cursorPoint(cursorPos.get_x(), cursorPos.get_y(), 0);
-
-  pickerNode = new CollisionNode("mouseRayTube");
-  pickerPath = _camera.attach_new_node(pickerNode);
-  pickerTube = new CollisionTube(_camera.get_pos(), cursorPoint, 4.9f);
-  pickerNode->add_solid(pickerTube);
-  pickerNode->set_from_collide_mask(CollideMask(ColMask::Waypoint));
-
-  collisionTraverser.add_collider(pickerPath, collisionHandlerQueue);
-  collisionTraverser.traverse(world->rootWaypoints);
-  collisionHandlerQueue->sort_entries();
-  _hovering.hasWaypoint = false;
-  for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
-  {
-    CollisionEntry* entry = collisionHandlerQueue->get_entry(i);
-    NodePath        np    = entry->get_into_node_path();
-
-    _hovering.SetWaypoint(np);
-    break ;
-  }  
-  pickerPath.show();
-}*/
-
 void Mouse::ClosestWaypoint(World* world, short currentFloor)
 {
   if (_mouseWatcher->has_mouse())
   {
     PStatCollector collector("Level:Mouse:FindWaypoint"); collector.start();
-    NodePath                  collision_context;
-    PT(CollisionPlane)        pickerPlane;
     PT(CollisionRay)          pickerRay;
-    PT(CollisionNode)         planeNode;
     PT(CollisionNode)         pickerNode;
-    NodePath                  planePath;
     NodePath                  pickerPath;
     CollisionTraverser        collisionTraverser;
     PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
     LPlane                    plane                 = world->GetWaypointPlane(currentFloor);
     LPoint2f                  cursorPos             = _mouseWatcher->get_mouse();
 
-    collision_context = _window->get_render().attach_new_node("MouseCollisionContext");
-
     pickerNode        = new CollisionNode("mouseRay2");
     pickerPath        = _camera.attach_new_node(pickerNode);
     pickerRay         = new CollisionRay();
+    pickerNode->set_from_collide_mask(CollideMask(ColMask::Object));
+    pickerNode->set_into_collide_mask(0);
     pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
     pickerNode->add_solid(pickerRay);
 
-    planeNode         = new CollisionNode("pickerPlane");
-    planePath         = collision_context.attach_new_node(planeNode);
-    pickerPlane       = new CollisionPlane(plane);
-    planeNode->add_solid(pickerPlane);
-
     collisionTraverser.add_collider(pickerPath, collisionHandlerQueue);
-    collisionTraverser.traverse(collision_context);
+    collisionTraverser.traverse(_window->get_render());
 
     collisionHandlerQueue->sort_entries();
 
@@ -142,12 +102,10 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
       NodePath        np    = entry->get_into_node_path();
       LPoint3         pos   = entry->get_surface_point(np);
 
-      if (!(planePath.is_ancestor_of(np.node())) && planePath != np)
-        continue ;
       pos.set_x(pos.get_x() + np.get_x());
       pos.set_y(pos.get_y() + np.get_y());
       pos.set_z(pos.get_z() + np.get_z());
-      NodePath tmp = world->GetWaypointClosest(pos)->nodePath;
+      NodePath tmp = world->GetWaypointClosest(pos, currentFloor)->nodePath;
 
       _hovering.SetWaypoint(tmp);
       break ;
@@ -155,8 +113,6 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
 
     //pickerPath.detach_node(); // TODO find out why hasDynObject stops working after this...
                                 //      this leak has to go away
-    planePath.detach_node();
-    collision_context.detach_node();
     collector.stop();
   }
 }

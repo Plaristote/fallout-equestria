@@ -2,40 +2,6 @@
 #include "level/character.hpp"
 #include "level/level.hpp"
 
-void LevelExitZone::GoingThrough(void* character)
-{
-  cout << "LevelExitZone::GoingThrough" << endl;
-  cout << "LocalExit? ";
-  cout << _name.substr(0, 9) << endl;
-  if (_name.substr(0, 9) == "LocalExit")
-    GoingThroughLocal(character);
-  else
-    GoingThroughExit(character);
-}
-
-void LevelExitZone::GoingThroughLocal(void* ptr)
-{
-  if (_destinations.size() > 0)
-  {
-    ObjectCharacter* character = reinterpret_cast<ObjectCharacter*>(ptr);
-
-    _level->SetEntryZone(character, _destinations.front());
-  }
-}
-
-void LevelExitZone::GoingThroughExit(void* character)
-{
-  if (character == _level->GetPlayer())
-  {
-    if (_destinations.size() == 0)
-      ExitZone.Emit();
-    else if (_destinations.size() == 1)
-      GoToNextZone.Emit(_destinations.front());
-    else
-      SelectNextZone.Emit(_destinations);
-  }
-}
-
 void ObjectDoor::ProcessCollisions(void)
 {
   cout << "Door Process Collisions" << endl;
