@@ -9,19 +9,19 @@ public:
   LevelExitZone(Level* level, std::list<std::string> destinations);
   virtual ~LevelExitZone(void) {}
   
-  void               SetName(const std::string& name) { _name = name;   }
-  const std::string& GetName(void) const              { return (_name); }
+  void                     SetName(const std::string& name) { _name = name;   }
+  const std::string&       GetName(void) const              { return (_name); }
   
-  bool CanGoThrough(unsigned char id) { return (true); }
-  void GoingThrough(void* character);
+  bool                     CanGoThrough(unsigned char id) { return (true); }
+  void                     GoingThrough(void* character);
   
   Sync::Signal<void (void)>                            ExitZone;
   Sync::Signal<void (const std::string&)>              GoToNextZone;
   Sync::Signal<void (const std::vector<std::string>&)> SelectNextZone;
 
 private:
-  void GoingThroughLocal(void* character);
-  void GoingThroughExit(void* character);
+  void                     GoingThroughLocal(void* character);
+  void                     GoingThroughExit(void* character);
   
   std::string              _name;
   Level*                   _level;

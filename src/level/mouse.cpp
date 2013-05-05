@@ -4,6 +4,7 @@
 #include <mousecursor.hpp>
 #include <panda3d/cardMaker.h>
 #include <panda3d/collisionPlane.h>
+#include <boost/concept_check.hpp>
 
 using namespace std;
 
@@ -79,9 +80,19 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
     NodePath                  pickerPath;
     CollisionTraverser        collisionTraverser;
     PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
-    LPlane                    plane                 = world->GetWaypointPlane(currentFloor);
     LPoint2f                  cursorPos             = _mouseWatcher->get_mouse();
+    static bool               updated               = false;
+    static LPoint2f           last_update;
 
+    std::cout << "Difference -> " << ABS(cursorPos.get_x() - last_update.get_x()) << std::endl;
+    if (ABS(cursorPos.get_x() - last_update.get_x()) > 0.05 || ABS(cursorPos.get_y() - last_update.get_y()) > 0.05)
+      updated         = false;
+//    if (cursorPos != _lastMousePos)
+  //    updated         = false;
+    if (!(cursorPos == _lastMousePos && updated == false))
+      return ;
+    last_update       = cursorPos;
+    updated           = true;
     pickerNode        = new CollisionNode("mouseRay2");
     pickerPath        = _camera.attach_new_node(pickerNode);
     pickerRay         = new CollisionRay();
@@ -98,16 +109,18 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
     _hovering.hasWaypoint = false;
     for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
     {
-      CollisionEntry* entry = collisionHandlerQueue->get_entry(i);
-      NodePath        np    = entry->get_into_node_path();
-      LPoint3         pos   = entry->get_surface_point(np);
+      CollisionEntry* entry      = collisionHandlerQueue->get_entry(i);
+      NodePath        np         = entry->get_into_node_path();
+      MapObject*      map_object = world->GetMapObjectFromNodePath(np);
+      LPoint3         pos;
 
-      pos.set_x(pos.get_x() + np.get_x());
-      pos.set_y(pos.get_y() + np.get_y());
-      pos.set_z(pos.get_z() + np.get_z());
-      NodePath tmp = world->GetWaypointClosest(pos, currentFloor)->nodePath;
-
-      _hovering.SetWaypoint(tmp);
+      if (!map_object)
+        continue ;
+      pos = entry->get_surface_point(world->floors[map_object->floor]);
+      _hovering.waypoint_ptr = world->waypoint_graph.GetClosest(pos);
+      //_hovering.waypoint_ptr = world->GetWaypointClosest(pos, map_object->floor);
+      if (_hovering.waypoint_ptr)
+        _hovering.SetWaypoint(_hovering.waypoint_ptr->nodePath);
       break ;
     }
 
@@ -132,7 +145,8 @@ void Mouse::Run(void)
       _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
       _collisionTraverser.traverse(_window->get_render());
       _collisionHandlerQueue->sort_entries();
-      _hovering.Reset();
+      //_hovering.Reset();
+      _hovering.hasDynObject = false;
       for (int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; ++i)
       {
         CollisionEntry* entry = _collisionHandlerQueue->get_entry(i);

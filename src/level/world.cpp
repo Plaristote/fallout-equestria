@@ -327,6 +327,20 @@ ExitZone* World::GetExitZoneByName(const std::string& name)
   return (0);
 }
 
+bool      World::IsInExitZone(unsigned int id) const
+{
+  auto it = exitZones.begin(), end = exitZones.end();
+  
+  for (; it != end ; ++it)
+  {
+    const ExitZone& exit_zone = *it;
+    
+    if (exit_zone.Contains(id))
+      return (true);
+  }
+  return (false);
+}
+
 // ENTRY ZONES
 void World::AddEntryZone(const std::string& name)
 {

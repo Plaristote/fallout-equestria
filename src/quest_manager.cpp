@@ -58,6 +58,8 @@ void Quest::Initialize(Level* level)
   Data objectives = data["objectives"];
   Data script     = data["script"];
 
+  _updating = false;
+  
   if (script.NotNil())
   {
     string path = script.Value();
@@ -177,12 +179,15 @@ bool Quest::CheckIfCompleted(void)
   bool success    = true;
   Data objectives = data["objectives"];
 
+  if (_updating) return (false);
   ReloadFunction(&_update_hook);
   if (_update_hook)
   {
+    _updating = true;
     _script_context->Prepare(_update_hook);
     _script_context->SetArgObject(0, &data);
     _script_context->Execute();
+    _updating = false;
   }
   
   for_each(objectives.begin(), objectives.end(), [this, &success](Data objective)

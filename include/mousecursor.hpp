@@ -8,7 +8,10 @@ class MouseCursor : public UiBase
 public:
   MouseCursor(WindowFramework* window, Rocket::Core::Context* context);
   ~MouseCursor() { _static = 0; }
+
   void SetCursorTexture(const std::string& texture) { if (_cursor) _cursor->SetAttribute("src", texture.c_str()); }
+  void SetHint(const std::string& rml);
+  
   void Update(void);
   
   void PullToFront(void) { _root->PullToFront(); }
@@ -17,6 +20,8 @@ public:
 
 private:
   Rocket::Core::Element* _cursor;
+  Rocket::Core::Element* _hint;
+  std::string            _current_hint;
   static MouseCursor*    _static;
 };
 

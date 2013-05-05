@@ -49,6 +49,7 @@ private:
 
   Sync::ObserverHandler _observers;
   
+  bool               _updating;
   asIScriptFunction* _update_hook;
 };
 

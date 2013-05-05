@@ -22,6 +22,8 @@
 # include <algorithm>
 # include "serializer.hpp"
 
+# include "divide_and_conquer.hpp"
+
 # ifndef TRUE_SQRT
 #  define SQRT my_sqrt
 # else
@@ -139,6 +141,8 @@ struct Waypoint
     float                GetDistanceEstimate(const Waypoint& other) const;
     std::list<Waypoint*> GetSuccessors(Waypoint* parent);
     float                GetCost(Waypoint&) { return (1.f); }
+    // Divide and conquer
+    LPoint3f             GetPosition(void) const { return (nodePath.get_pos()); }
 
     // Loading
     void                 LoadArcs(void);
@@ -220,6 +224,20 @@ struct DynamicObject : public MapObject
 struct Zone
 {
   bool operator==(const std::string& comp) { return (name == comp); }
+
+  bool Contains(unsigned int id) const
+  {
+    auto      it = waypoints.begin(), end = waypoints.end();
+
+    for (; it != end ; ++it)
+    {
+      if ((*it)->id == id)
+        return (true);
+    }
+    return (false);
+  }
+
+  bool Contains(Waypoint* wp) const { return (Contains(wp->id)); }
 
   std::string          name;
   std::list<Waypoint*> waypoints;
@@ -417,6 +435,7 @@ struct World
     void           AddExitZone(const std::string&);
     void           DeleteExitZone(const std::string&);
     ExitZone*      GetExitZoneByName(const std::string&);
+    bool           IsInExitZone(unsigned int id) const;
     
     void           AddEntryZone(const std::string&);
     void           DeleteEntryZone(const std::string&);
@@ -438,6 +457,8 @@ struct World
     void           CompileDoors(void);
     
     static NodePath model_sphere;
+    
+    DivideAndConquer::Graph<Waypoint, LPoint3f> waypoint_graph;
 };
 
 #endif // WORLD_H

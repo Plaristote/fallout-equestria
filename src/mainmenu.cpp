@@ -13,27 +13,56 @@ MouseCursor::MouseCursor(WindowFramework* window, Rocket::Core::Context* context
   _root   = context->CreateDocument();
   if (_root)
   {
-    _root->SetInnerRML("<img id='mouse-cursor' src='textures/cursor-interaction.png' />");
+    _root->SetInnerRML("<img id='mouse-cursor' src='textures/cursor-interaction.png' /><span id='mouse-hint'></span>");
     _cursor = _root->GetElementById("mouse-cursor");
+    _hint   = _root->GetElementById("mouse-hint");
     if (_cursor)
       _cursor->SetProperty("position", "absolute");
+    if (_hint)
+      _hint->SetProperty("position", "absolute");
   }
   Show();
   _static = this;
+}
+
+void MouseCursor::SetHint(const std::string& key)
+{
+  if (_current_hint != key)
+  {
+    if (key != "")
+    {
+      std::string rml = "<img src='textures/mouse-hints/" + key + ".png' />";
+
+      _hint->SetInnerRML(rml.c_str());
+    }
+    else
+      _hint->SetInnerRML("");
+    _current_hint = key;
+  }
 }
 
 void MouseCursor::Update(void)
 {
   if (_cursor && IsVisible())
   {
-    stringstream strTop, strLeft;
-    string       top,    left;
     MouseData    pointer = _window->get_graphics_window()->get_pointer(0);
 
-    strLeft << ((int)pointer.get_x() + 1);
-    strTop  << ((int)pointer.get_y() + 1);
-    _cursor->SetProperty("top",  strTop.str().c_str());
-    _cursor->SetProperty("left", strLeft.str().c_str());
+    {
+      stringstream strTop, strLeft;
+
+      strLeft << ((int)pointer.get_x() + 1);
+      strTop  << ((int)pointer.get_y() + 1);
+      _cursor->SetProperty("top",  strTop.str().c_str());
+      _cursor->SetProperty("left", strLeft.str().c_str());
+    }
+    {
+      stringstream strTop, strLeft;
+      
+      strLeft << ((int)pointer.get_x() + 30);
+      strTop  << ((int)pointer.get_y() + 30);
+      _hint->SetProperty("top",  strTop.str().c_str());
+      _hint->SetProperty("left", strLeft.str().c_str());
+    }
     _root->PullToFront();
   }
 }

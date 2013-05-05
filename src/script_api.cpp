@@ -370,6 +370,8 @@ void AngelScriptInitialize(void)
   OBJ_REF_REGISTER_METHOD(Quest, bool, IsConditionCompleted, ());
   OBJ_REF_REGISTER_METHOD(Quest, bool, IsOver,               ());
   OBJ_REF_REGISTER_METHOD(Quest, Data, GetData,              ());
+  OBJ_REF_REGISTER_METHOD(Quest, void, Finalize,             ());
+  engine->RegisterObjectMethod(questClass, "void Initialize(Level@)", asMETHOD(Quest,Initialize), asCALL_THISCALL);
 
   const char* questmanagerClass = "QuestManager";
   engine->RegisterObjectType(questmanagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);

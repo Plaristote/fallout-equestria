@@ -10,6 +10,8 @@
 
 # include "observatory.hpp"
 
+struct Waypoint;
+
 struct MouseHovering
 {
   MouseHovering(void) : hasWaypoint(false), hasDynObject(false) {}
@@ -29,9 +31,10 @@ struct MouseHovering
     dynObject    = np;
   }
   
-  bool     hasWaypoint, hasDynObject;
-  NodePath waypoint;
-  NodePath dynObject;
+  bool      hasWaypoint, hasDynObject;
+  NodePath  waypoint;
+  Waypoint* waypoint_ptr;
+  NodePath  dynObject;
 };
 
 struct World;

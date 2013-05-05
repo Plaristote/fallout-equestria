@@ -65,6 +65,7 @@ private:
 Circle solar_circle;
 
 #include "options.hpp"
+#include <mousecursor.hpp>
 Level* Level::CurrentLevel = 0;
 #include <panda3d/cullFaceAttrib.h>
 Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
@@ -150,6 +151,72 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 
   _task_metabolism = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 0, 1);
   _task_metabolism->Interval.Connect(*this, &Level::RunMetabolism);  
+  
+  
+  /*
+   * DIVIDE AND CONQUER WAYPOINTS
+   */
+  std::vector<Waypoint*>                      entries;
+  
+  for_each(_world->waypoints.begin(), _world->waypoints.end(), [&entries](Waypoint& wp) { entries.push_back(&wp); });
+  _world->waypoint_graph.SetHeuristic([](LPoint3f position1, LPoint3f position2) -> float
+  {
+    float   dist_x = position1.get_x() - position2.get_x();
+    float   dist_y = position1.get_y() - position2.get_y();
+    
+    return (ABS(SQRT(dist_x * dist_x + dist_y * dist_y)));
+  });
+  _world->waypoint_graph.Initialize(entries, [](std::vector<Waypoint*> entries) -> std::vector<LPoint3f>
+  {
+    std::vector<LPoint3f> positions;
+    
+    {
+      LPoint3f block_size;
+      LPoint3f max_pos(0, 0, 0);
+      LPoint3f min_pos(0, 0, 0);
+      auto     it  = entries.begin();
+      auto     end = entries.end();
+
+      for (; it != end ; ++it)
+      {
+        LPoint3f pos = (*it)->GetPosition();
+
+        if (pos.get_x() < min_pos.get_x()) { min_pos.set_x(pos.get_x()); }
+        if (pos.get_y() < min_pos.get_y()) { min_pos.set_y(pos.get_y()); }
+        if (pos.get_z() < min_pos.get_z()) { min_pos.set_z(pos.get_z()); }
+        if (pos.get_x() > max_pos.get_x()) { max_pos.set_x(pos.get_x()); }
+        if (pos.get_y() > max_pos.get_y()) { max_pos.set_y(pos.get_y()); }
+        if (pos.get_z() > max_pos.get_z()) { max_pos.set_z(pos.get_z()); }
+      }
+      
+      function<float (float, float)> distance = [](float min_pos, float max_pos) -> float
+      {
+        if (min_pos < 0 && max_pos > 0)
+          return (ABS(min_pos - max_pos));
+        return (ABS(max_pos) - ABS(min_pos));
+      };
+      
+      block_size.set_x(distance(min_pos.get_x(), max_pos.get_x()));
+      block_size.set_y(distance(min_pos.get_y(), max_pos.get_y()));
+      block_size.set_z(distance(min_pos.get_z(), max_pos.get_z()));
+
+      unsigned short block_count = 5;
+      for (unsigned short i = 0 ; i < block_count ; ++i)
+      {
+        LPoint3f block_position;
+        
+        block_position.set_x(min_pos.get_x() + block_size.get_x() / block_count * i);
+        block_position.set_y(min_pos.get_y() + block_size.get_y() / block_count * i);
+        block_position.set_z(min_pos.get_z() + block_size.get_z() / block_count * i);
+        positions.push_back(block_position);
+      }
+    }
+    return (positions);
+  });
+  /*
+   * END DIVIDE AND CONQUER
+   */
+  
 
   window->get_render().set_shader_auto();
   loadingScreen->AppendText("-- Done --");
@@ -705,8 +772,20 @@ AsyncTask::DoneStatus Level::do_task(void)
     _player_halo.set_hpr(GetPlayer()->GetDynamicObject()->nodePath.get_hpr());
   }
   // TEST End
-  
+
   _camera.Run(elapsedTime);  
+  _mouse.ClosestWaypoint(_world, _currentFloor);
+  if (_mouse.Hovering().hasWaypoint)
+  {
+    unsigned int waypoint_id = _mouse.Hovering().waypoint_ptr->id;
+    
+    if (_world->IsInExitZone(waypoint_id))
+      MouseCursor::Get()->SetHint("exit");
+    else
+      MouseCursor::Get()->SetHint("");
+  }
+  else
+    MouseCursor::Get()->SetHint("nowhere");
 
   std::function<void (InstanceDynamicObject*)> run_object = [elapsedTime](InstanceDynamicObject* obj)
   {
@@ -714,7 +793,6 @@ AsyncTask::DoneStatus Level::do_task(void)
     obj->UnprocessCollisions();
     obj->ProcessCollisions();
   };
-  
   switch (_state)
   {
     case Fight:
@@ -722,7 +800,6 @@ AsyncTask::DoneStatus Level::do_task(void)
       _currentCharacter = _itCharacter; // Keep a character from askin NextTurn several times
       if (_itCharacter != _characters.end())
         run_object(*_itCharacter);
-      _mouse.ClosestWaypoint(_world, _currentFloor);
       if (_mouse.Hovering().hasWaypoint && _mouse.Hovering().waypoint != _last_combat_path && _mouseState == MouseAction)
         DisplayCombatPath();
       break ;
