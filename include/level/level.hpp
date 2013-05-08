@@ -103,11 +103,13 @@ public:
   void                   CallbackActionUse(InstanceDynamicObject* object);
   void                   CallbackActionTalkTo(InstanceDynamicObject* object);
   void                   CallbackActionUseObjectOn(InstanceDynamicObject* object);
+  void                   CallbackActionUseSkillOn(InstanceDynamicObject* object);
   void                   CallbackActionTargetUse(unsigned short it);
 
   void                   ActionUse(ObjectCharacter* user, InstanceDynamicObject* target);
   void                   ActionUseObject(ObjectCharacter* user, InventoryObject* object, unsigned char actionIt);
   void                   ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object, unsigned char actionIt);
+  void                   ActionUseSkillOn(ObjectCharacter* user, InstanceDynamicObject* target, const std::string& skill);
   void                   ActionDropObject(ObjectCharacter* user, InventoryObject* object);
   void                   ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* object, unsigned char actionIt);
 
@@ -202,6 +204,7 @@ private:
     UiItInteractMenu,
     UiItRunningDialog,
     UiItUseObjectOn,
+    UiItUseSkillOn,
     UiItLoot,
     UiItEquipMode,
     UiItNextZone,

@@ -2,6 +2,9 @@
 # define SCRIPTABLE_HPP
 
 # include <angelscript.h>
+# include <list>
+# include <utility>
+# include <string>
 
 class Scriptable
 {
@@ -9,7 +12,7 @@ public:
   Scriptable(void);
   virtual ~Scriptable(void);
 
-  void LoadScript(std::string module_name, std::string filepath);
+  void LoadScript(std::string module_name, std::string filepath, asIScriptContext* context = 0);
   void ReloadFunction(asIScriptFunction** pointer);
   
 protected:

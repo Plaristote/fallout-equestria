@@ -84,7 +84,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
     static bool               updated               = false;
     static LPoint2f           last_update;
 
-    std::cout << "Difference -> " << ABS(cursorPos.get_x() - last_update.get_x()) << std::endl;
+    //std::cout << "Difference -> " << ABS(cursorPos.get_x() - last_update.get_x()) << std::endl;
     if (ABS(cursorPos.get_x() - last_update.get_x()) > 0.05 || ABS(cursorPos.get_y() - last_update.get_y()) > 0.05)
       updated         = false;
 //    if (cursorPos != _lastMousePos)

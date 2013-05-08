@@ -7,7 +7,11 @@ using namespace std;
 using namespace Sync;
 using namespace ObjectTypes;
 
-void InstanceDynamicObject::ThatDoesNothing() { _level->ConsoleWrite("That does nothing"); }
+void InstanceDynamicObject::ThatDoesNothing()
+{
+  if (_level->GetPlayer() == this)
+    _level->ConsoleWrite(i18n::T("That does nothing"));
+}
 
 LPoint3 NodePathSize(NodePath np)
 {
@@ -21,7 +25,7 @@ LPoint3 NodePathSize(NodePath np)
   return (ret);
 }
 
-InstanceDynamicObject::InstanceDynamicObject(Level* level, DynamicObject* object) : AnimatedObject(level->GetWorld()->window), _object(object)
+InstanceDynamicObject::InstanceDynamicObject(Level* level, DynamicObject* object) : AnimatedObject(level->GetWorld()->window), _object(object), _skill_target(this)
 {
   _type                 = Other;
   _anim                 = 0;
@@ -71,6 +75,11 @@ InstanceDynamicObject::GoToData   InstanceDynamicObject::GetGoToData(InstanceDyn
   ret.max_distance = 0;
   ret.min_distance = 0;
   return (ret);
+}
+
+void InstanceDynamicObject::CallbackActionUseSkill(ObjectCharacter* character, const std::string& name)
+{
+  _skill_target.UseSkill(character, name);
 }
 
 // Animations

@@ -89,6 +89,27 @@ void Level::CallbackActionUseObjectOn(InstanceDynamicObject* target)
   _currentUis[UiItUseObjectOn] = _currentUseObjectOn;
 }
 
+void Level::CallbackActionUseSkillOn(InstanceDynamicObject* target)
+{
+  CloseRunningUi<UiItInteractMenu>();
+  if (_currentUis[UiItUseSkillOn])
+    delete _currentUis[UiItUseSkillOn];
+  {
+    UiUseSkillOn* ui_use_skill_on = new UiUseSkillOn(_window, _levelUi.GetContext(), GetPlayer()->GetStatController());
+
+    ui_use_skill_on->Closed.Connect(*this, &Level::CloseRunningUi<UiItUseSkillOn>);
+    ui_use_skill_on->SkillPicked.Connect([this, target](const std::string& skill)
+    {
+      ActionUseSkillOn(GetPlayer(), target, skill);
+    });
+    ui_use_skill_on->Show();
+    _mouseActionBlocked = true;
+    _camera.SetEnabledScroll(false);
+    SetInterrupted(true);
+    _currentUis[UiItUseSkillOn] = ui_use_skill_on;
+  }
+}
+
 void Level::CallbackActionTargetUse(unsigned short it)
 {
   ObjectCharacter* player   = GetPlayer();
@@ -229,6 +250,27 @@ struct XpFetcher
   Sync::ObserverId observerId;
   bool             character_died;
 };
+
+void Level::ActionUseSkillOn(ObjectCharacter* user, InstanceDynamicObject* target, const std::string& skill)
+{
+  ActionCallback logic_step, animation_step;
+
+  logic_step = [this, user, skill, target](InstanceDynamicObject*)
+  {
+    if (target != 0)
+      target->CallbackActionUseSkill(user, skill);
+  };
+  animation_step = [this, user, logic_step](InstanceDynamicObject*)
+  {
+    user->AnimationEnded.DisconnectAll();
+    user->AnimationEnded.Connect(logic_step);
+    user->PlayAnimation("use");
+  };
+  user->GoTo(target, 0);
+  user->ReachedDestination.Connect(animation_step);
+  if (user == GetPlayer())
+    CloseRunningUi<UiItUseSkillOn>();
+}
 
 void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* item, unsigned char actionIt)
 {

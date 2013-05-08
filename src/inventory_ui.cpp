@@ -216,6 +216,64 @@ void InventoryViewController::Update(void)
 }
 
 /*
+ * UiUseSkillOn
+ */
+#include <list>
+#include <string>
+UiUseSkillOn::UiUseSkillOn(WindowFramework* window, Rocket::Core::Context* context, StatController* statistics) : UiBase(window, context)
+{
+  _root = context->LoadDocument("data/skill_picker.rml");
+  if (_root)
+  {
+    Rocket::Core::Element* list = _root->GetElementById("skill-list");
+
+    ToggleEventListener(true, "button_cancel", "click", EventCloseClicked);
+    EventCloseClicked.EventReceived.Connect([this](Rocket::Core::Event&) { Hide(); Closed.Emit(); });
+
+    {
+      stringstream stream;
+
+      skill_list = statistics->Model().GetUsableSkills();
+      for_each(skill_list.begin(), skill_list.end(), [&stream](string skill)
+      {
+        stream << "<div class='item'><button id='pick-skill-" << skill << "' class='universal_button' data-skill='" << skill << "'>" << skill << "</button></div>";
+      });
+      list->SetInnerRML(stream.str().c_str());
+      for_each(skill_list.begin(), skill_list.end(), [this](string skill)
+      {
+        string id = "pick-skill-" + skill;
+
+        ToggleEventListener(true, id, "click", EventSkillPicked);
+      });
+      EventSkillPicked.EventReceived.Connect([this](Rocket::Core::Event& event)
+      {
+        Rocket::Core::Variant* var   = event.GetCurrentElement()->GetAttribute("data-skill");
+        std::string            skill = var->Get<Rocket::Core::String>().CString();
+
+        Hide();
+        SkillPicked.Emit(skill);
+        Closed.Emit();
+      });
+    }
+  }
+}
+
+UiUseSkillOn::~UiUseSkillOn()
+{
+  ToggleEventListener(false, "button_cancel", "click", EventCloseClicked);
+  for_each(skill_list.begin(), skill_list.end(), [this](string skill)
+  {
+    string id = "pick-skill-" + skill;
+    
+    ToggleEventListener(false, id, "click", EventSkillPicked);
+  });
+}
+
+void UiUseSkillOn::Destroy(void)
+{
+}
+
+/*
  * UiUseObjectOn
  */
 UiUseObjectOn::UiUseObjectOn(WindowFramework* window, Rocket::Core::Context* context, Inventory& inventory) : UiBase(window, context)

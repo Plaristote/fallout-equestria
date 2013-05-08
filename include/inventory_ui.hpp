@@ -96,6 +96,22 @@ private:
   InventoryViewController                      _viewController;
 };
 
+class UiUseSkillOn : public UiBase
+{
+public:
+  UiUseSkillOn(WindowFramework* window, Rocket::Core::Context* context, StatController* statistics);
+  ~UiUseSkillOn();
+  
+  void Destroy(void);
+  
+  Sync::Signal<void ()>                   Closed;
+  Sync::Signal<void (const std::string&)> SkillPicked;
+private:
+  RocketListener         EventCloseClicked, EventSkillPicked;
+  std::string            skill_picked;
+  std::list<std::string> skill_list;
+};
+
 class UiBarter : public UiBase, public InventoryViewController
 {
 public:

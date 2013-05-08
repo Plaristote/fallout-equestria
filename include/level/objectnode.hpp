@@ -10,8 +10,8 @@
 # include "observatory.hpp"
 # include "world.h"
 # include "inventory.hpp"
-
 # include "animatedobject.hpp"
+# include "skill_target.hpp"
 
 //HAIL MICROSOFT
 #ifdef WIN32
@@ -22,6 +22,7 @@ static inline double round(double val)
 #endif
 
 class Level;
+class ObjectCharacter;
 
 struct WaypointModifier
 {
@@ -71,6 +72,7 @@ struct ObjectType2Code { enum { Type = ObjectTypes::ObjectType::Other }; };
 
 class InstanceDynamicObject : public WaypointModifier, public AnimatedObject
 {
+  friend class SkillTarget;
 public:
   static Sync::Signal<void (InstanceDynamicObject*)> ActionUse;
   static Sync::Signal<void (InstanceDynamicObject*)> ActionUseObjectOn;
@@ -97,7 +99,7 @@ public:
   };
   
   InstanceDynamicObject(Level* level, DynamicObject* object);
-  InstanceDynamicObject(void) : AnimatedObject(_window) {}
+  InstanceDynamicObject(void) : AnimatedObject(_window), _skill_target(this) {}
   virtual ~InstanceDynamicObject() {}
 
   virtual void       Load(Utils::Packet&);
@@ -128,6 +130,7 @@ public:
   Sync::Signal<void (InstanceDynamicObject*)> AnimationEnded;
 
   virtual void             CallbackActionUse(InstanceDynamicObject* object) { ThatDoesNothing(); }
+  virtual void             CallbackActionUseSkill(ObjectCharacter* object, const std::string& skill);
   
   void                     ResetAnimation(void)
   {
@@ -137,6 +140,7 @@ public:
 protected:
   unsigned char            _type;
   DynamicObject*           _object;
+  SkillTarget              _skill_target;
 
   // Interactions
   void                     ResetInteractions(void) { _interactions.clear(); }

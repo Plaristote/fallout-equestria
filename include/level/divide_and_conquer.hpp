@@ -11,17 +11,18 @@ namespace DivideAndConquer
   template<typename T, typename POS>
   class Graph
   {
-    typedef  std::vector<POS>                           Positions;
-    typedef  std::function<Positions (std::vector<T*>)> Initializer;
-    typedef  std::function<float (POS, POS)>            Heuristic;
-    typename std::vector<T*>                            Entries;
+  public:
+    typedef  std::vector<POS>                                  Positions;
+    typedef  std::function<Positions (const std::vector<T*>&)> Initializer;
+    typedef  std::function<float (POS, POS)>                   Heuristic;
+    typename std::vector<T*>                                   Entries;
     
     struct NodeException : public std::exception
     {
       virtual const char* what(void) const throw() { return ("Empty branch in the graph's node tree"); }
     };
     
-  private:
+  //private:
     struct Node
     {
       virtual ~Node()
@@ -162,7 +163,7 @@ namespace DivideAndConquer
       return (best);
     }
 
-  private:
+  //private:
     Heuristic          heuristic;
     Node               node_tree;
   };

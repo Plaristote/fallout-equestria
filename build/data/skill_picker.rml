@@ -1,0 +1,36 @@
+<rml>
+  <head>
+    <title>Skill Picker</title>
+    <link type="text/template" href="tpl_window.rml" />
+    <style>
+      #body
+      {
+        width:  200px;
+        height: 70%;
+        right:  0px;
+        top:    0px;
+      }
+
+      #skill-list
+      {
+        overflow-y:   auto;
+        margin-right: 10px;
+        height:       90%;
+      }
+
+      #button_cancel
+      {
+        width:       20%;
+        margin-left: 40%;
+      }
+
+    </style>
+  </head>
+  <body id="body">
+  <div id="window">
+    <div id="skill-list">
+    </div>
+    <button class="universal_button" id="button_cancel" i18n="Cancel">Cancel</button>
+ 
+  </div></body>
+</rml>

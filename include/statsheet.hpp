@@ -62,6 +62,9 @@ public:
   std::vector<std::string> GetSpecials(void)   const { return (GetStatKeys(_statsheet["Special"])); }
   std::vector<std::string> GetSkills(void)     const { return (GetStatKeys(_statsheet["Skills"])); }
 
+  std::list<std::string>   GetUsableSkills(void);
+  std::list<std::string>   GetUsableSpells(void);
+
   unsigned short GetXpNextLevel(void);
   unsigned short GetExperience(void) const       { return (_statsheet["Variables"]["Experience"]); }
   void           SetExperience(unsigned short e);
@@ -90,6 +93,7 @@ private:
   asIScriptFunction *_scriptXpNextLevel,     *_scriptLevelUp,         *_scriptUpdateAllValues;
   asIScriptFunction *_scriptIsReady,         *_scriptAvailableTraits, *_scriptAddPerk;
   asIScriptFunction *_selectRandomEncounter;
+  asIScriptFunction *_scriptUsableSkills,    *_scriptUsableSpells;
 };
 
 class StatView

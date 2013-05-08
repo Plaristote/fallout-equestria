@@ -72,14 +72,17 @@ Scriptable::~Scriptable(void)
     Script::ModuleManager::Release(_script_module);
 }
 
-void Scriptable::LoadScript(string module_name, string filepath)
+void Scriptable::LoadScript(string module_name, string filepath, asIScriptContext* context)
 {
   asIScriptEngine* engine = Script::Engine::Get();
 
   if (_script_module)
     Script::ModuleManager::Release(_script_module);
-  _script_context = (engine          ? engine->CreateContext() : 0);
-  _script_module  = (_script_context ? Script::ModuleManager::Require(module_name, filepath) : 0);
+  if (context == 0)
+    _script_context = (engine          ? engine->CreateContext() : 0);
+  else
+    _script_context = context;
+  _script_module    = (_script_context ? Script::ModuleManager::Require(module_name, filepath) : 0);
   std::for_each(_script_func_ptrs.begin(), _script_func_ptrs.end(), [](ScriptFuncPtr& func_ptr)
   { *func_ptr.first = 0; });
 }
@@ -116,6 +119,8 @@ void StatModel::LoadFunctions(void)
   _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptUpdateAllValues, "void UpdateAllValues(Data)"));
   _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAddPerk,         "bool AddPerk(Data, string)"));
   _script_func_ptrs.push_back(ScriptFuncPtr(&_selectRandomEncounter, "string SelectRandomEncounter(Data)"));
+  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptUsableSkills,    "StringList AvailableSkills(Data)"));
+  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptUsableSpells,    "StringList AvailableSpells(Data)"));
   LoadScript("special", "scripts/ai/special.as");
 }
 
@@ -194,6 +199,45 @@ bool           StatModel::IsReady(void)
     is_ready = _script_context->GetReturnByte();
   }
   return (is_ready);
+}
+
+list<string>   StatModel::GetUsableSkills(void)
+{
+  list<string> ret;
+
+  ReloadFunction(&_scriptUsableSkills);
+  if (_scriptUsableSkills)
+  {
+    _script_context->Prepare(_scriptUsableSkills);
+    _script_context->SetArgObject(0, &_statsheet);
+    _script_context->Execute();
+    ret = *((list<string>*)_script_context->GetReturnObject());
+  }
+  else // Fallback
+  {
+    ret.push_back("Lockpick");
+    ret.push_back("Medicine");
+    ret.push_back("Science");
+    ret.push_back("Repair");
+    ret.push_back("Sneak");
+    ret.push_back("Steal");
+  }
+  return (ret);
+}
+
+list<string>   StatModel::GetUsableSpells(void)
+{
+  list<string> ret;
+
+  ReloadFunction(&_scriptUsableSpells);
+  if (_scriptUsableSpells)
+  {
+    _script_context->Prepare(_scriptUsableSpells);
+    _script_context->SetArgObject(0, &_statsheet);
+    _script_context->Execute();
+    ret = *((list<string>*)_script_context->GetReturnObject());
+  }
+  return (ret);
 }
 
 list<string>   StatModel::GetAvailableTraits(void)

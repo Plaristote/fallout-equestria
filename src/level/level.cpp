@@ -148,6 +148,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   obs.Connect(InstanceDynamicObject::ActionUse,         *this, &Level::CallbackActionUse);
   obs.Connect(InstanceDynamicObject::ActionTalkTo,      *this, &Level::CallbackActionTalkTo);
   obs.Connect(InstanceDynamicObject::ActionUseObjectOn, *this, &Level::CallbackActionUseObjectOn);
+  obs.Connect(InstanceDynamicObject::ActionUseSkillOn,  *this, &Level::CallbackActionUseSkillOn);
 
   _task_metabolism = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 0, 1);
   _task_metabolism->Interval.Connect(*this, &Level::RunMetabolism);  
@@ -166,7 +167,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     
     return (ABS(SQRT(dist_x * dist_x + dist_y * dist_y)));
   });
-  _world->waypoint_graph.Initialize(entries, [](std::vector<Waypoint*> entries) -> std::vector<LPoint3f>
+  _world->waypoint_graph.Initialize(entries, [](const std::vector<Waypoint*>& entries) -> std::vector<LPoint3f>
   {
     std::vector<LPoint3f> positions;
     
