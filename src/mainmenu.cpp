@@ -146,6 +146,8 @@ void MainMenu::DisplayAlerts(void)
 
 AsyncTask::DoneStatus MainMenu::do_task()
 {
+  static unsigned int fps = 0;
+  static Timer        timer;
   MusicManager* mm = MusicManager::Get();
 
   if (_alerts.size() > 0)
@@ -180,6 +182,13 @@ AsyncTask::DoneStatus MainMenu::do_task()
     _mouseCursor.Update();
   SoundManager::GarbageCollectAll();
   Executor::Run(); // Executor does not have any specific application. It just executes lambdas collected here and there.
+  fps++;
+  if (timer.GetElapsedTime() > 1.f)
+  {
+    std::cout << ":::: Frame per seconds: " << fps << std::endl;
+    fps = 0;
+    timer.Restart();
+  }
   return (quitGamePlz ? AsyncTask::DoneStatus::DS_exit : AsyncTask::DoneStatus::DS_cont);
 }
 

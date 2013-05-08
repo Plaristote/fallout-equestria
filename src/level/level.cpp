@@ -25,7 +25,6 @@ Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSkil
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
 PT(DirectionalLight) workaround_sunlight;
-PT(AmbientLight)     workaround_sunambient;
 
 class Circle
 {
@@ -201,7 +200,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
       block_size.set_y(distance(min_pos.get_y(), max_pos.get_y()));
       block_size.set_z(distance(min_pos.get_z(), max_pos.get_z()));
 
-      unsigned short block_count = 5;
+      unsigned short block_count = 100;
       for (unsigned short i = 0 ; i < block_count ; ++i)
       {
         LPoint3f block_position;
@@ -283,13 +282,10 @@ void Level::InitSun(void)
 {
   if (workaround_sunlight.is_null())
     workaround_sunlight   = new DirectionalLight("sun_light");
-  if (workaround_sunambient.is_null())
-    workaround_sunambient = new AmbientLight("sun_light_ambient");
   _sunLight = workaround_sunlight;
   //_sunLight = new DirectionalLight("sun_light");
-  
-  _sunLightAmbient = workaround_sunambient;
-  //_sunLightAmbient = new AmbientLight("sun_light_ambient");
+
+  _sunLightAmbient = new AmbientLight("sun_light_ambient");
   _sunLightAmbientNode = _window->get_render().attach_new_node(_sunLightAmbient);
   _window->get_render().set_light(_sunLightAmbientNode, 5);
 

@@ -2,6 +2,7 @@
 #include "level/world.h"
 #include "globals.hpp"
 #include <mousecursor.hpp>
+#include <timer.hpp>
 #include <panda3d/cardMaker.h>
 #include <panda3d/collisionPlane.h>
 #include <boost/concept_check.hpp>
@@ -106,6 +107,8 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
 
     collisionHandlerQueue->sort_entries();
 
+    Timer timer;
+    
     _hovering.hasWaypoint = false;
     for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
     {
@@ -117,12 +120,16 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
       if (!map_object)
         continue ;
       pos = entry->get_surface_point(world->floors[map_object->floor]);
+      Timer timer2;
       _hovering.waypoint_ptr = world->waypoint_graph.GetClosest(pos);
+      //timer2.Profile("Assessing closest waypoint");
       //_hovering.waypoint_ptr = world->GetWaypointClosest(pos, map_object->floor);
       if (_hovering.waypoint_ptr)
         _hovering.SetWaypoint(_hovering.waypoint_ptr->nodePath);
       break ;
     }
+    
+    //timer.Profile("Waypoint Picking");
 
     //pickerPath.detach_node(); // TODO find out why hasDynObject stops working after this...
                                 //      this leak has to go away
