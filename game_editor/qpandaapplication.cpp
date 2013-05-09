@@ -8,7 +8,7 @@ QPandaApplication::QPandaApplication(int argc, char **argv) : QApplication(argc,
 {
   _framework.open_framework(argc, argv);
   _continue      = true;
-  _panda_enabled = true;
+  _panda_enabled = false;
   _timer.setInterval(50);
   connect(&_timer, SIGNAL(timeout()), this, SLOT(PandaRefresh()));
 }

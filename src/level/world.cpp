@@ -1,5 +1,4 @@
 #include "level/world.h"
-#include <timer.hpp>
 #include <panda3d/collisionHandlerQueue.h>
 
 using namespace std;
@@ -12,17 +11,19 @@ NodePath debug_pathfinding;
 
 World::World(WindowFramework* window)
 {
-  this->window       = window;
-  rootWaypoints      = window->get_render().attach_new_node("waypoints");
-  rootMapObjects     = window->get_render().attach_new_node("mapobjects");
-  rootDynamicObjects = window->get_render().attach_new_node("dynamicobjects");
-  rootLights         = window->get_render().attach_new_node("lights");
-  waypoint_maps      = window->get_render().attach_new_node("waypoint_maps");
-
-  model_sphere = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
-  debug_pathfinding = window->get_render().attach_new_node("debug_pathfinding");
-  
-  rootWaypoints.set_collide_mask(ColMask::Waypoint);
+  this->window         = window;
+  model_sphere         = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
+  rootWaypoints        = window->get_render().attach_new_node("waypoints");
+  rootMapObjects       = window->get_render().attach_new_node("mapobjects");
+  rootDynamicObjects   = window->get_render().attach_new_node("dynamicobjects");
+  rootLights           = window->get_render().attach_new_node("lights");
+#ifdef GAME_EDITOR
+  lightSymbols         = window->get_render().attach_new_node("lightSymbols");
+  do_compile_doors     = true;
+  do_compile_waypoints = true;
+#endif
+  debug_pathfinding    = window->get_render().attach_new_node("debug_pathfinding");
+  //rootWaypoints.set_collide_mask(ColMask::Waypoint);
 }
 
 World::~World()
@@ -371,6 +372,9 @@ EntryZone* World::GetEntryZoneByName(const std::string& name)
 void World::AddLight(WorldLight::Type type, const std::string& name)
 {
   lights.push_back(WorldLight(type, WorldLight::Type_None, rootLights, name));
+#ifdef GAME_EDITOR
+  lights.rbegin()->symbol.reparent_to(lightSymbols);
+#endif
 }
 
 void World::AddLight(WorldLight::Type type, const std::string& name, MapObject* parent)
@@ -469,12 +473,32 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
   colNp.detach_node();
 }
 
+void WorldLight::SetEnabled(bool set_enabled)
+{
+  std::function<void (NodePath)> set_light;
+  std::function<void (NodePath)> unset_light;
+
+  enabled       = set_enabled;
+  set_light     = [this](NodePath object) { object.set_light(nodePath); };
+  unset_light   = [this](NodePath object) { object.clear_light(nodePath); };
+  for_each(enlightened.begin(), enlightened.end(), enabled ? set_light : unset_light);
+}
+
+void WorldLight::Destroy(void)
+{
+  SetEnabled(false);
+  nodePath.detach_node();
+#ifdef GAME_EDITOR
+  symbol.detach_node();
+#endif
+}
+
 // WAYPOINTS
 
 Waypoint::Waypoint(NodePath root)
 {
   nodePath = root;
-  nodePath.set_collide_mask(CollideMask(ColMask::Waypoint));
+  //nodePath.set_collide_mask(CollideMask(ColMask::Waypoint));
   nodePath.set_scale(2.f);
   nodePath.show();
 
@@ -1050,8 +1074,10 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
   float     pos_x, pos_y, pos_z;
   float     hpr_x, hpr_y, hpr_z;
   string    parent_name;
+  char      tmp_enabled;
 
-  packet >> name >> zoneSize;
+  packet >> name >> tmp_enabled >> zoneSize;
+  enabled = tmp_enabled;
   packet.operator>> <char>(reinterpret_cast<char&>(type));
   packet.operator>> <char>(reinterpret_cast<char&>(parent_type));
   if (parent_type != Type_None)
@@ -1080,7 +1106,7 @@ void WorldLight::Serialize(Utils::Packet& packet)
 {
   LColor color = light->get_color();
 
-  packet << name << zoneSize << (char)type << (char)parent_type;
+  packet << name << (char)enabled << zoneSize << (char)type << (char)parent_type;
   if (parent_i)
     packet << parent_i->nodePath.get_name();
   packet << (float)color.get_x() << (float)color.get_y() << (float)color.get_z() << (float)color.get_w();
@@ -1116,20 +1142,6 @@ void           World::UnSerialize(Utils::Packet& packet)
       (*it).UnserializeLoadArcs(this);
       (*it).SetMouseBox();
     }
-
-    // Creating waypoint maps
-    /*{
-      bool moar_floors;
-      int  i = 0;
-
-      do
-      {
-        WaypointMap wp_map(window);
-
-        moar_floors = wp_map.Initialize(waypoints, i++);
-        wp_map.GetNodePath().reparent_to(waypoint_maps);
-      } while (moar_floors);
-    }*/
   }
 
   // MapObjects
@@ -1242,11 +1254,16 @@ void           World::UnSerialize(Utils::Packet& packet)
   for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light); });
 }
 
+#ifndef GAME_EDITOR
 void           World::Serialize(Utils::Packet& packet)
+#else
+void           World::Serialize(Utils::Packet& packet, std::function<void (const std::string&, float)> progress_callback)
+#endif
 {
   // Compile Step
 # ifdef GAME_EDITOR
-  CompileWaypoints();
+  if (do_compile_waypoints)
+    CompileWaypoints(progress_callback);
 # endif
 
   // Waypoints
@@ -1259,12 +1276,15 @@ void           World::Serialize(Utils::Packet& packet)
     while (it != end)
     {
       if ((*it).arcs.size() == 0)
-	it = waypoints.erase(it);
+        it = waypoints.erase(it);
       else
       {
-	(*it).id = ++id;
-	++it;
+        (*it).id = ++id;
+        ++it;
       }
+#ifdef GAME_EDITOR
+      progress_callback("Serializing Waypoints: ", (float)id / waypoints.size() * 100.f);
+#endif
     }
     size = waypoints.size();
     packet << size;
@@ -1288,7 +1308,8 @@ void           World::Serialize(Utils::Packet& packet)
     for (it = objects.begin() ; it != end ; ++it) { (*it).Serialize(packet); }
   }
 # ifdef GAME_EDITOR
-  CompileDoors();
+  if (do_compile_doors)
+    CompileDoors(progress_callback);
 # endif
 
   // DynamicObjects
@@ -1363,12 +1384,13 @@ void           World::Serialize(Utils::Packet& packet)
 }
 
 // MAP COMPILING
-void           World::CompileWaypoints(void)
+void           World::CompileWaypoints(ProgressCallback progress_callback)
 {
+    unsigned int        i   = 0;
     Waypoints::iterator it  = waypoints.begin();
     Waypoints::iterator end = waypoints.end();
 
-    for (; it != end ; ++it)
+    for (; it != end ; ++it, ++i)
     {
         Waypoint::Arcs::iterator itArc  = (*it).arcs.begin();
         Waypoint::Arcs::iterator endArc = (*it).arcs.end();
@@ -1410,15 +1432,17 @@ void           World::CompileWaypoints(void)
             //np.show();
             np.remove_node();
         }
+        progress_callback("Compiling Waypoints: ", (float)i / waypoints.size() * 100.f);
     }
 }
 
-void World::CompileDoors(void)
+void World::CompileDoors(ProgressCallback progress_callback)
 {
+  unsigned int        i   = 0;
   Waypoints::iterator it  = waypoints.begin();
   Waypoints::iterator end = waypoints.end();
 
-  for (; it != end ; ++it)
+  for (; it != end ; ++it, ++i)
   {
     Waypoint::Arcs::iterator itArc  = (*it).arcs.begin();
     Waypoint::Arcs::iterator endArc = (*it).arcs.end();
@@ -1460,6 +1484,7 @@ void World::CompileDoors(void)
       ++itArc;
       np.remove_node();
     }
+    progress_callback("Compiling Doors: ", (float)i / waypoints.size() * 100.f);
   }
 }
 

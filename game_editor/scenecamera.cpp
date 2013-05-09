@@ -59,19 +59,19 @@ void SceneCamera::Run(float elapsedTime)
   {
 
     if      (_objectiveHpr.get_x() > _currentHpr.get_x())
-      _currentHpr.set_x(_currentHpr.get_x() + 1);
+      _currentHpr.set_x(_currentHpr.get_x() + 10);
     else if (_objectiveHpr.get_x() < _currentHpr.get_x())
-      _currentHpr.set_x(_currentHpr.get_x() - 1);
+      _currentHpr.set_x(_currentHpr.get_x() - 10);
 
     if      (_objectiveHpr.get_y() > _currentHpr.get_y())
-      _currentHpr.set_y(_currentHpr.get_y() + 1);
+      _currentHpr.set_y(_currentHpr.get_y() + 10);
     else if (_objectiveHpr.get_y() < _currentHpr.get_y())
-      _currentHpr.set_y(_currentHpr.get_y() - 1);
+      _currentHpr.set_y(_currentHpr.get_y() - 10);
 
     if      (_objectiveHpr.get_z() > _currentHpr.get_z())
-      _currentHpr.set_z(_currentHpr.get_z() + 1);
+      _currentHpr.set_z(_currentHpr.get_z() + 10);
     else if (_objectiveHpr.get_z() < _currentHpr.get_z())
-      _currentHpr.set_z(_currentHpr.get_z() - 1);
+      _currentHpr.set_z(_currentHpr.get_z() - 10);
 
     _camera.set_hpr(_currentHpr);
   }

@@ -79,6 +79,7 @@ private slots:
     void LoadMap(const QString&);
     void SaveMap(void);
     void CreateMap(void);
+    void MapFocused(void);
 
     void CameraMoveTop(void);
     void CameraMoveLeft(void);

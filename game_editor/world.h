@@ -22,6 +22,8 @@
 # include <algorithm>
 # include "serializer.hpp"
 
+# include "divide_and_conquer.hpp"
+
 # ifndef TRUE_SQRT
 #  define SQRT my_sqrt
 # else
@@ -82,27 +84,37 @@ struct Waypoint
     struct Arc
     {
         Arc(NodePath from, Waypoint* to);
+        Arc(const Arc&);
 	~Arc();
 
         bool operator==(Waypoint* other) { return (to == other); }
         void UpdateDirection(void);
         void Destroy(void);
+        
+        void SetVisible(bool);
 
         PT(CollisionSegment) csegment;
         PT(CollisionNode)    node;
         NodePath             nodePath;
+        NodePath             from;
         Waypoint*            to;
 
         ArcObserver*         observer;
     };
 
     typedef std::list<Arc> Arcs;
+    typedef std::vector<std::pair<Arc, unsigned short> > ArcsWithdrawed;
 
     unsigned int        id;
     unsigned char       floor;
     Arcs                arcs;
+    ArcsWithdrawed      arcs_withdrawed;
     NodePath            nodePath;
     FBoundingBox        mouseBox;
+    
+    void WithdrawArc(Waypoint* other);
+    void UnwithdrawArc(Waypoint* other, ArcObserver* observer);
+    std::pair<Arc, unsigned short>* GetWithdrawable(Waypoint* other);
 
     Waypoint(NodePath root);
     Waypoint(void) {}
@@ -110,6 +122,8 @@ struct Waypoint
     bool                 operator==(const Waypoint& other) const;
     bool                 operator==(const Waypoint* other) const;
     bool                 operator==(unsigned int id)       const { return (this->id == id); }
+    bool                 operator<(const Waypoint& other)  const { return (id < other.id); }
+    bool                 operator>(const Waypoint& other)  const { return (id > other.id); }
     Arcs::iterator       ConnectUnsafe(Waypoint* other);
     Arcs::iterator       Connect(Waypoint* other);
     Arcs::iterator       Disconnect(Waypoint* other);
@@ -119,14 +133,19 @@ struct Waypoint
     void                 UpdateArcDirection(Waypoint*);
     void                 SetSelected(bool);
     bool                 IsSelected(void) const { return (selected); }
+    
+    void                 SetArcsVisible(bool);
 
     // Pathfinding features
     float                GoalDistanceEstimate(const Waypoint& goal) const { return (GetDistanceEstimate(goal)); }
     float                GetDistanceEstimate(const Waypoint& other) const;
     std::list<Waypoint*> GetSuccessors(Waypoint* parent);
     float                GetCost(Waypoint&) { return (1.f); }
+    // Divide and conquer
+    LPoint3f             GetPosition(void) const { return (nodePath.get_pos()); }
 
     // Loading
+    void                 LoadArcs(void);
     void                 Unserialize(Utils::Packet& packet);
     void                 UnserializeLoadArcs(World*);
     void                 Serialize(Utils::Packet& packet);
@@ -181,7 +200,6 @@ struct DynamicObject : public MapObject
     Type      type;
 
     // All
-    std::string          name;
     std::string          script;
 
     // Door / Locker
@@ -206,6 +224,20 @@ struct DynamicObject : public MapObject
 struct Zone
 {
   bool operator==(const std::string& comp) { return (name == comp); }
+
+  bool Contains(unsigned int id) const
+  {
+    auto      it = waypoints.begin(), end = waypoints.end();
+
+    for (; it != end ; ++it)
+    {
+      if ((*it)->id == id)
+        return (true);
+    }
+    return (false);
+  }
+
+  bool Contains(Waypoint* wp) const { return (Contains(wp->id)); }
 
   std::string          name;
   std::list<Waypoint*> waypoints;
@@ -235,14 +267,13 @@ struct WorldLight
     Type_DynamicObject
   };
 
-  WorldLight(WindowFramework* window, Type type, ParentType ptype, NodePath parent, const std::string& name) : name(name), type(type), parent_type(ptype), parent(parent)
+  WorldLight(Type type, ParentType ptype, NodePath parent, const std::string& name) : name(name), type(type), parent_type(ptype), parent(parent), parent_i(0)
   {
-    enabled = true;
-    Initialize(window);
+    Initialize();
   }
-
-  WorldLight(NodePath parent) : parent(parent) {}
-
+  
+  WorldLight(NodePath parent) : parent(parent), parent_i(0) {}
+  
   void   SetEnabled(bool);
   void   Destroy(void);
 
@@ -260,9 +291,9 @@ struct WorldLight
 
   void   SetPosition(LPoint3 position)
   {
-     nodePath.set_pos(position);
+      nodePath.set_pos(position);
 #ifdef GAME_EDITOR
-     symbol.set_pos(position);
+      symbol.set_pos(position);
 #endif
   }
 
@@ -299,14 +330,14 @@ struct WorldLight
   NodePath    symbol;
 #endif
 private:
-  void Initialize(WindowFramework*);
+  void Initialize(void);
   NodePath    parent;
   MapObject*  parent_i;
 };
 
 struct World
 {
-    typedef std::list<Waypoint>      Waypoints;
+    typedef std::vector<Waypoint>    Waypoints;
     typedef std::list<MapObject>     MapObjects;
     typedef std::list<DynamicObject> DynamicObjects;
     typedef std::list<WorldLight>    WorldLights;
@@ -331,6 +362,8 @@ struct World
     WorldLights      lights;
 #ifdef GAME_EDITOR
     NodePath         lightSymbols;
+    bool             do_compile_doors;
+    bool             do_compile_waypoints;
 #endif
     
     ExitZones        exitZones;
@@ -345,7 +378,7 @@ struct World
     void      DeleteWayPoint(Waypoint*);
     Waypoint* GetWaypointFromNodePath(NodePath path);
     Waypoint* GetWaypointFromId(unsigned int id);
-    Waypoint* GetWaypointClosest(LPoint3);
+    Waypoint* GetWaypointClosest(LPoint3, unsigned char floor);
     void      SetWaypointsVisible(bool v)
     { if (v) { rootWaypoints.show();  } else { rootWaypoints.hide();  } }
     void           GetWaypointLimits(short currentFloor, LPoint3& upperRight, LPoint3& upperLeft, LPoint3& bottomLeft) const;
@@ -421,6 +454,7 @@ struct World
     void           AddExitZone(const std::string&);
     void           DeleteExitZone(const std::string&);
     ExitZone*      GetExitZoneByName(const std::string&);
+    bool           IsInExitZone(unsigned int id) const;
     
     void           AddEntryZone(const std::string&);
     void           DeleteEntryZone(const std::string&);
@@ -438,15 +472,18 @@ struct World
     typedef std::function<void (const std::string&, float)> ProgressCallback;
 
     void           UnSerialize(Utils::Packet& packet);
-    void           Serialize(Utils::Packet& packet, ProgressCallback progress_callback);
+#ifndef GAME_EDITOR
+    void           Serialize(Utils::Packet& packet);
+#else
+    void           Serialize(Utils::Packet& packet, std::function<void (const std::string&, float)> progress_callback);
+#endif
 
     void           CompileWaypoints(ProgressCallback);
     void           CompileDoors(ProgressCallback);
-
-#ifdef GAME_EDITOR
-    bool           do_compile_waypoints;
-    bool           do_compile_doors;
-#endif
+    
+    static NodePath model_sphere;
+    
+    DivideAndConquer::Graph<Waypoint, LPoint3f> waypoint_graph;
 };
 
 #endif // WORLD_H

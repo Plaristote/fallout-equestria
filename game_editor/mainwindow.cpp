@@ -345,22 +345,22 @@ void MainWindow::FilterInit()
 
 void MainWindow::CameraMoveBottom()
 {
-    my_task.camera->MoveV(-15.f);
+    my_task.camera->MoveV(-30.f);
 }
 
 void MainWindow::CameraMoveTop()
 {
-    my_task.camera->MoveV(15.f);
+    my_task.camera->MoveV(30.f);
 }
 
 void MainWindow::CameraMoveLeft()
 {
-    my_task.camera->MoveH(-15.f);
+    my_task.camera->MoveH(-30.f);
 }
 
 void MainWindow::CameraMoveRight()
 {
-    my_task.camera->MoveH(15.f);
+    my_task.camera->MoveH(30.f);
 }
 
 void MainWindow::DrawMap()
@@ -535,7 +535,7 @@ void MainWindow::PandaInitialized()
      waypointHovered  = 0;
 
     my_task.timer.start();
-    //AsyncTaskManager::get_global_ptr()->add(&my_task);
+    AsyncTaskManager::get_global_ptr()->add(&my_task);
 
     wizardDynObject = false;
     wizardMapObject = false;
@@ -621,7 +621,10 @@ void MainWindow::DynamicObjectSelect()
         ui->interObjScaleY->setValue(scale.get_y());
         ui->interObjScaleZ->setValue(scale.get_z());
         dialogObject.SetCurrentObject(dynamicObjectSelected);
+        ui->interObjEditor->setEnabled(true);
     }
+    else
+        ui->interObjEditor->setEnabled(false);
 }
 
 void MainWindow::DynamicObjectNameChanged(QString name)
@@ -1141,7 +1144,7 @@ void MainWindow::WaypointDiscardSelection(void)
 
 void MainWindow::WaypointSelectAll(void)
 {
-  std::list<Waypoint>::iterator it;
+  std::vector<Waypoint>::iterator it;
 
   for (it = world->waypoints.begin() ; it != world->waypoints.end() ; ++it)
   {
@@ -1195,14 +1198,15 @@ void MainWindow::WaypointSyncTerrain(void)
       segment->set_point_a(wp.get_x(), wp.get_y(), wp.get_z());
       segment->set_point_b(wp.get_x(), wp.get_y(), wp.get_z() - 100000.f);
 
+      cout << "Looking for collisions" << endl;
       col_traverser.add_collider(np, col_queue);
       col_traverser.traverse(world->window->get_render());
       if (col_queue->get_num_entries())
       {
         col_queue->sort_entries();
         min_pos = col_queue->get_entry(0)->get_surface_point(world->window->get_render());
-        /*std::cout << "Found a collision" << std::endl;
-        std::cout << min_pos.get_x() << ", " << min_pos.get_y() << ", " << min_pos.get_z() << std::endl;*/
+        std::cout << "Found a collision" << std::endl;
+        std::cout << min_pos.get_x() << ", " << min_pos.get_y() << ", " << min_pos.get_z() << std::endl;
 
         // ALMOST DONE !
         LPoint3 min_point, max_point;
@@ -1237,8 +1241,27 @@ void MainWindow::WaypointSyncTerrain(void)
   thread.start();
 }
 
+void MainWindow::MapFocused(void)
+{
+    LoadMap(ui->listMap->currentText());
+    disconnect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(MapFocused()));
+}
+
 void MainWindow::LoadMap(const QString& path)
 {
+    if (ui->tabWidget->currentIndex() != 0)
+    {
+      connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(MapFocused()));
+      return ;
+    }
+    QPandaApplication::SetPandaEnabled(true);
+    my_task.camera->SetPosition(0, 0, 75);
+    mapobjectSelected     = 0;
+    mapobjectHovered      = 0;
+    dynamicObjectSelected = 0;
+    dynamicObjectHovered  = 0;
+    ui->objectEditor->setEnabled(false);
+    ui->interObjEditor->setEnabled(false);
     waypointsSelection.clear();
     levelName = path;
 

@@ -35,6 +35,11 @@ public:
     _maxPosY = maxY;
   }
 
+  void             SetPosition(float x, float y, float z)
+  {
+    _camera.set_pos(x, y, z);
+  }
+
   void             MoveV(float);
   void             MoveH(float);
 

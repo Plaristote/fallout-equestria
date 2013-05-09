@@ -274,6 +274,9 @@ struct WorldLight
   
   WorldLight(NodePath parent) : parent(parent), parent_i(0) {}
   
+  void   SetEnabled(bool);
+  void   Destroy(void);
+
   LColor GetColor(void) const
   {
     return (light->get_color());
@@ -284,6 +287,14 @@ struct WorldLight
     LColor color(r, g, b, a);
     
     light->set_color(color);
+  }
+
+  void   SetPosition(LPoint3 position)
+  {
+      nodePath.set_pos(position);
+#ifdef GAME_EDITOR
+      symbol.set_pos(position);
+#endif
   }
 
   bool operator==(const std::string& comp) { return (name == comp); }
@@ -312,8 +323,12 @@ struct WorldLight
   PT(Light)   light;
   Lens*       lens;
   float       zoneSize;
+  bool        enabled;
 
   std::list<NodePath> enlightened;
+#ifdef GAME_EDITOR
+  NodePath    symbol;
+#endif
 private:
   void Initialize(void);
   NodePath    parent;
@@ -336,7 +351,6 @@ struct World
 
     NodePath         rootWaypoints;
     Waypoints        waypoints;
-    NodePath         waypoint_maps;
 
     NodePath         rootMapObjects;
     MapObjects       objects;
@@ -346,6 +360,11 @@ struct World
     
     NodePath         rootLights;
     WorldLights      lights;
+#ifdef GAME_EDITOR
+    NodePath         lightSymbols;
+    bool             do_compile_doors;
+    bool             do_compile_waypoints;
+#endif
     
     ExitZones        exitZones;
     EntryZones       entryZones;
@@ -450,11 +469,17 @@ struct World
     
     Waypoint*      GetWaypointAt(LPoint2f);
 
-    void           UnSerialize(Utils::Packet& packet);
-    void           Serialize(Utils::Packet& packet);
+    typedef std::function<void (const std::string&, float)> ProgressCallback;
 
-    void           CompileWaypoints(void);
-    void           CompileDoors(void);
+    void           UnSerialize(Utils::Packet& packet);
+#ifndef GAME_EDITOR
+    void           Serialize(Utils::Packet& packet);
+#else
+    void           Serialize(Utils::Packet& packet, std::function<void (const std::string&, float)> progress_callback);
+#endif
+
+    void           CompileWaypoints(ProgressCallback);
+    void           CompileDoors(ProgressCallback);
     
     static NodePath model_sphere;
     
