@@ -10,7 +10,7 @@ SkillTarget::SkillTarget(InstanceDynamicObject* self) : self(self)
 void SkillTarget::Initialize(const std::string& module_name, const std::string& filepath, asIScriptContext* context)
 {
   _script_func_ptrs = {
-    ScriptFuncPtr(&hook_use_skill, "void UseSkill(DynamicObject@, Character@, string)")
+    ScriptFuncPtr(&hook_use_skill, "bool UseSkill(DynamicObject@, Character@, string)")
   };
   LoadScript(module_name, filepath, context);
 }
@@ -27,7 +27,8 @@ void SkillTarget::UseSkill(ObjectCharacter* user, std::string skill)
       _script_context->SetArgObject(1, user);
       _script_context->SetArgObject(2, &skill);
       _script_context->Execute();
-      return ;
+      if (_script_context->GetReturnByte() == true)
+        return ;
     }
   }
   user->ThatDoesNothing();

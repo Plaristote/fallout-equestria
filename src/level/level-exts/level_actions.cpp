@@ -119,6 +119,8 @@ void Level::CallbackActionTargetUse(unsigned short it)
   std::cout << "ActionTargetUse" << std::endl;
   if (object)
   {
+    player->active_object    = object;
+    player->active_object_it = actionIt;
     if ((*object)["actions"][actionIt]["targeted"] == "1")
     {
       if ((*object)["actions"][actionIt]["combat"].Value() == "1" && _state != Fight)

@@ -151,6 +151,8 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
     _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptSendMessage,          "void ReceiveMessage(string)"));
     LoadScript(prefixName + GetName(), prefixPath + object->script + ".as");
 
+    _skill_target.Initialize(prefixName + GetName(), prefixPath + object->script + ".as", _script_context);
+
     // Get Default Weapons from script
     if (_script_module)
     {
@@ -174,8 +176,10 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _inventory->LoadInventory(_object);
 
   // Equiped Items
-  defEquiped[0] = DEFAULT_WEAPON_1;
-  defEquiped[1] = DEFAULT_WEAPON_2;
+  defEquiped[0]    = DEFAULT_WEAPON_1;
+  defEquiped[1]    = DEFAULT_WEAPON_2;
+  active_object    = 0;
+  active_object_it = 0;
   
   for (int i = 0 ; i < 2 ; ++i)
   {

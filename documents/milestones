@@ -97,11 +97,12 @@ x --> Various terrain and movement speed
 
   -> Levels
 x --> Quantity Picker for inventories
-  --> Stairs
+x --> Stairs
 x --> Shader for casting shadows
   --> Advanced Light Management
 x --> Scatter inserted parties in the spawning zones
 x --> Per-context configuration for camera behaviors
+x --> Using skills to interact
 
 x -> GameTask
 x --> Temporaries levels

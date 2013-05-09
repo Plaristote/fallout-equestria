@@ -568,7 +568,7 @@ void Earthscultor2Bam(Data heightmap, const std::string& out)
   });
   result.write_bam_file(out);*/
 
-  /*NodePath terrain;
+  NodePath terrain;
 
   GeoMipTerrain* mip_terrain = new GeoMipTerrain("Terrain");
 
@@ -582,7 +582,7 @@ void Earthscultor2Bam(Data heightmap, const std::string& out)
   mip_terrain->generate();
   mip_terrain->get_root().write_bam_file(out);
 
-  delete mip_terrain;*/
+  delete mip_terrain;
 }
 
 int compile_heightmap(const std::string& sourcefile, const std::string& out)

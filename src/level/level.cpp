@@ -963,6 +963,10 @@ void Level::MouseLeftClicked(void)
 	  InventoryObject*     item      = player->active_object;
 	  unsigned char        actionIt  = player->active_object_it;
 
+          std::cout << "DEBUG COMBAT CRASH" << std::endl;
+          std::cout << "Player name:     " << player->GetName() << std::endl;
+          std::cout << "Active Object:   " << player->active_object->GetName() << std::endl;
+          std::cout << "Action Iterator: " << actionIt << std::endl;
 	  if ((*item)["actions"][actionIt]["combat"] == "1")
 	  {
 	    ObjectCharacter*   target = dynObject->Get<ObjectCharacter>();

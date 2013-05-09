@@ -771,7 +771,8 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     if (params.entry_zone == "")
       _level->FetchParty(*_playerParty);
     SetPlayerInventory();
-    _level->SetEntryZone(*_playerParty, params.entry_zone);
+    if (params.entry_zone != "")
+      _level->SetEntryZone(*_playerParty, params.entry_zone);
     SetLevel(_level);
 
     _level->obs.Connect(_pipbuck.VisibilityToggled, [this](bool visible)
