@@ -103,6 +103,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   try
   {
     _world->UnSerialize(packet);
+    _light_iterator = _world->lights.begin();
   }
   catch (unsigned int error)
   {
@@ -111,7 +112,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   }
   
   // TODO Implement map daylight/nodaylight system
-  if (true)
+  if (!true)
     InitSun();
 
   LPoint3 upperLeft, upperRight, bottomLeft;
@@ -761,6 +762,17 @@ AsyncTask::DoneStatus Level::do_task(void)
     SetMouseState(_mouseState);
   else
     _mouse.SetMouseState('i');
+
+  if (_light_iterator != _world->lights.end())
+  {
+    Timer timer;
+
+    _world->CompileLight(&(*_light_iterator), ColMask::DynObject);
+    cout << "CompileLight: " << timer.GetElapsedTime() << std::endl;
+    ++_light_iterator;
+  }
+  else
+    _light_iterator = _world->lights.begin();
 
   // TEST Transparent Ball of Wrath
   if (!(_player_halo.is_empty()))

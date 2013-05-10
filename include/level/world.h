@@ -346,7 +346,8 @@ struct World
     typedef std::vector<NodePath>    Floors;
 
     WindowFramework* window;
-    
+
+    NodePath         floors_node;    
     Floors           floors;
 
     NodePath         rootWaypoints;

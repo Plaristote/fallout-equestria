@@ -195,6 +195,7 @@ private:
   NodePath             _sunLightNode;
   PT(AmbientLight)     _sunLightAmbient;
   NodePath             _sunLightAmbientNode;
+  World::WorldLights::iterator _light_iterator;
   
   TimeManager::Task*   _task_daylight;
   TimeManager::Task*   _task_metabolism;

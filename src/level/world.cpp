@@ -13,6 +13,7 @@ World::World(WindowFramework* window)
 {
   this->window         = window;
   model_sphere         = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
+  floors_node          = window->get_render().attach_new_node("floors");
   rootWaypoints        = window->get_render().attach_new_node("waypoints");
   rootMapObjects       = window->get_render().attach_new_node("mapobjects");
   rootDynamicObjects   = window->get_render().attach_new_node("dynamicobjects");
@@ -161,7 +162,7 @@ void World::FloorResize(int newSize)
     std::stringstream stream;
 
     stream << "floor-" << it;
-    floors[it] = window->get_render().attach_new_node(stream.str());
+    floors[it] = floors_node.attach_new_node(stream.str());
     floors[it].attach_new_node("mapobjects");
     floors[it].attach_new_node("dynamicobjects");
     floors[it].attach_new_node("lights");
@@ -443,7 +444,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
   // Detecting the new collisions with colmask, and setting the light
   colNode->set_into_collide_mask(colmask);
   colNode->set_from_collide_mask(colmask);
-  traverser.traverse(window->get_render());
+  traverser.traverse(floors_node);
   for (unsigned short i = 0 ; i < handlerQueue->get_num_entries() ; ++i)
   {
     NodePath        node  = handlerQueue->get_entry(i)->get_into_node_path();
@@ -451,7 +452,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
     if (node.is_empty())
       continue ;
 
-    MapObject*     object    = GetMapObjectFromNodePath(node);
+    MapObject*     object    = (colmask & ColMask::Object ? GetMapObjectFromNodePath(node) : 0);
     DynamicObject* dynObject = (object ? 0 : GetDynamicObjectFromNodePath(node));
 
     if (object || dynObject)
@@ -468,7 +469,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
     }
   }
 
-  cout << "Number of enlightened objects -> " << light->enlightened.size() << endl;
+  //cout << "Number of enlightened objects -> " << light->enlightened.size() << endl;
 
   colNp.detach_node();
 }
