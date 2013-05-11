@@ -484,7 +484,7 @@ void WorldLight::SetEnabled(bool set_enabled)
 
   enabled       = set_enabled;
   set_light     = [this](NodePath object) { object.set_light(nodePath); };
-  unset_light   = [this](NodePath object) { object.clear_light(nodePath); };
+  unset_light   = [this](NodePath object) { object.set_light_off(nodePath); object.clear_light(nodePath); };
   for_each(enlightened.begin(), enlightened.end(), enabled ? set_light : unset_light);
 }
 

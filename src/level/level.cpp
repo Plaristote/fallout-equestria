@@ -112,7 +112,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   }
   
   // TODO Implement map daylight/nodaylight system
-  if (!true)
+  if (true)
     InitSun();
 
   LPoint3 upperLeft, upperRight, bottomLeft;
@@ -492,10 +492,14 @@ void Level::SetPlayerInventory(Inventory* inventory)
 
 Level::~Level()
 {
+  _window->get_render().set_light_off(_sunLightAmbientNode);
+  _window->get_render().set_light_off(_sunLightNode);
+  _window->get_render().clear_light(_sunLightAmbientNode);
+  _window->get_render().clear_light(_sunLightNode);
+  _window->get_render().clear_light();
   _sunLightAmbientNode.remove_node();
   _sunLightNode.remove_node();
   _player_halo.remove_node();
-  _window->get_render().clear_light();
 
   _timeManager.ClearTasks(TASK_LVL_CITY);
   obs.DisconnectAll();
