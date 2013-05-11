@@ -1,4 +1,9 @@
-#include "world.h"
+#include "is_game_editor.h"
+#ifdef GAME_EDITOR
+# include "world.h"
+#else
+# include "level/world.h"
+#endif
 #include <panda3d/collisionHandlerQueue.h>
 
 using namespace std;
@@ -140,6 +145,7 @@ Waypoint* World::GetWaypointFromNodePath(NodePath path)
   return (0);
 }
 
+#ifndef GAME_EDITOR
 Waypoint* World::GetWaypointFromId(unsigned int id)
 {
   if (waypoints.size() > id && id > 0)
@@ -153,6 +159,16 @@ Waypoint* World::GetWaypointFromId(unsigned int id)
   cout  << "Wp size -> " << waypoints.size() << ", looking for " << id << endl;
   return (0);
 }
+#else
+Waypoint* World::GetWaypointFromId(unsigned int id)
+{
+  Waypoints::iterator it = std::find(waypoints.begin(), waypoints.end(), id);
+
+  if (it != waypoints.end())
+    return (&(*it));
+  return (0);
+}
+#endif
 
 void World::FloorResize(int newSize)
 {

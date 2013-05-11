@@ -30,7 +30,7 @@
 #  define SQRT sqrt
 # endif
 
-# define GAME_EDITOR
+# include "is_game_editor.h"
 
 # ifdef GAME_EDITOR
 #  define WAYPOINT_DEBUG
@@ -337,7 +337,11 @@ private:
 
 struct World
 {
+#ifndef GAME_EDITOR
     typedef std::vector<Waypoint>    Waypoints;
+#else
+    typedef std::list<Waypoint>      Waypoints;
+#endif
     typedef std::list<MapObject>     MapObjects;
     typedef std::list<DynamicObject> DynamicObjects;
     typedef std::list<WorldLight>    WorldLights;

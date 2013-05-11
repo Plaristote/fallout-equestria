@@ -1144,7 +1144,7 @@ void MainWindow::WaypointDiscardSelection(void)
 
 void MainWindow::WaypointSelectAll(void)
 {
-  std::vector<Waypoint>::iterator it;
+  std::list<Waypoint>::iterator it;
 
   for (it = world->waypoints.begin() ; it != world->waypoints.end() ; ++it)
   {

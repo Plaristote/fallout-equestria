@@ -111,7 +111,6 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     std::cout << "Failed to load file" << std::endl;
   }
   
-  // TODO Implement map daylight/nodaylight system
   if (_world->sunlight_enabled)
     InitSun();
 
