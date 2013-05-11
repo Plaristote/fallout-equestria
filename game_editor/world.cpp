@@ -13,10 +13,12 @@ World::World(WindowFramework* window)
 {
   this->window         = window;
   model_sphere         = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
+  floors_node          = window->get_render().attach_new_node("floors");
   rootWaypoints        = window->get_render().attach_new_node("waypoints");
   rootMapObjects       = window->get_render().attach_new_node("mapobjects");
   rootDynamicObjects   = window->get_render().attach_new_node("dynamicobjects");
   rootLights           = window->get_render().attach_new_node("lights");
+  sunlight_enabled     = false;
 #ifdef GAME_EDITOR
   lightSymbols         = window->get_render().attach_new_node("lightSymbols");
   do_compile_doors     = true;
@@ -31,6 +33,7 @@ World::~World()
   ForEach(waypoints,      [](Waypoint& wp)      { wp.nodePath.remove_node(); });
   ForEach(objects,        [](MapObject& mo)     { mo.nodePath.remove_node(); });
   ForEach(dynamicObjects, [](DynamicObject& dy) { dy.nodePath.remove_node(); });
+  ForEach(lights,         [](WorldLight& wl)    { wl.Destroy();              });
   debug_pathfinding.remove_node();
 }
 
@@ -161,7 +164,7 @@ void World::FloorResize(int newSize)
     std::stringstream stream;
 
     stream << "floor-" << it;
-    floors[it] = window->get_render().attach_new_node(stream.str());
+    floors[it] = floors_node.attach_new_node(stream.str());
     floors[it].attach_new_node("mapobjects");
     floors[it].attach_new_node("dynamicobjects");
     floors[it].attach_new_node("lights");
@@ -426,6 +429,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
   traverser.add_collider(colNp, handlerQueue);
 
   // Reseting the objects corresponding to the collision mask
+#ifdef GAME_EDITOR
   while (it != end)
   {
     NodePath     np     = *it;
@@ -439,11 +443,12 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
     else
       ++it;
   }
+#endif
 
   // Detecting the new collisions with colmask, and setting the light
   colNode->set_into_collide_mask(colmask);
   colNode->set_from_collide_mask(colmask);
-  traverser.traverse(window->get_render());
+  traverser.traverse(floors_node);
   for (unsigned short i = 0 ; i < handlerQueue->get_num_entries() ; ++i)
   {
     NodePath        node  = handlerQueue->get_entry(i)->get_into_node_path();
@@ -451,7 +456,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
     if (node.is_empty())
       continue ;
 
-    MapObject*     object    = GetMapObjectFromNodePath(node);
+    MapObject*     object    = (colmask & ColMask::Object ? GetMapObjectFromNodePath(node) : 0);
     DynamicObject* dynObject = (object ? 0 : GetDynamicObjectFromNodePath(node));
 
     if (object || dynObject)
@@ -462,13 +467,13 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
       alreadyRegistered = find(light->enlightened.begin(), light->enlightened.end(), node);
       if (alreadyRegistered == light->enlightened.end())
       {
-    light->enlightened.push_back(node);
-    node.set_light(light->nodePath);
+        light->enlightened.push_back(node);
+        node.set_light(light->nodePath);
       }
     }
   }
 
-  cout << "Number of enlightened objects -> " << light->enlightened.size() << endl;
+  //cout << "Number of enlightened objects -> " << light->enlightened.size() << endl;
 
   colNp.detach_node();
 }
@@ -480,7 +485,7 @@ void WorldLight::SetEnabled(bool set_enabled)
 
   enabled       = set_enabled;
   set_light     = [this](NodePath object) { object.set_light(nodePath); };
-  unset_light   = [this](NodePath object) { object.clear_light(nodePath); };
+  unset_light   = [this](NodePath object) { object.set_light_off(nodePath); object.clear_light(nodePath); };
   for_each(enlightened.begin(), enlightened.end(), enabled ? set_light : unset_light);
 }
 
@@ -1250,6 +1255,13 @@ void           World::UnSerialize(Utils::Packet& packet)
     }
   }
 
+  {
+    char serialize_sunlight_enabled;
+
+    packet >> serialize_sunlight_enabled;
+    sunlight_enabled = serialize_sunlight_enabled;
+  }
+
   // Post-loading stuff
   for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light); });
 }
@@ -1380,7 +1392,13 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
       packet << zone.name;
       packet << waypointsId;
     }
-  }  
+  }
+
+  {
+    char serialize_sunlight_enabled = sunlight_enabled;
+
+    packet << serialize_sunlight_enabled;
+  }
 }
 
 // MAP COMPILING

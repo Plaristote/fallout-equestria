@@ -346,7 +346,8 @@ struct World
     typedef std::vector<NodePath>    Floors;
 
     WindowFramework* window;
-    
+
+    NodePath         floors_node;    
     Floors           floors;
 
     NodePath         rootWaypoints;
@@ -360,6 +361,7 @@ struct World
     
     NodePath         rootLights;
     WorldLights      lights;
+    bool             sunlight_enabled;
 #ifdef GAME_EDITOR
     NodePath         lightSymbols;
     bool             do_compile_doors;

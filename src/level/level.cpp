@@ -112,7 +112,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   }
   
   // TODO Implement map daylight/nodaylight system
-  if (true)
+  if (_world->sunlight_enabled)
     InitSun();
 
   LPoint3 upperLeft, upperRight, bottomLeft;
@@ -767,7 +767,7 @@ AsyncTask::DoneStatus Level::do_task(void)
   else
     _mouse.SetMouseState('i');
 
-  if (_light_iterator != _world->lights.end())
+  if (_light_iterator != _world->lights.end() && _world->lights.size() > 0)
   {
     if (_light_iterator->zoneSize < 50)
     {

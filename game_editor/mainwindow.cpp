@@ -1309,6 +1309,8 @@ void MainWindow::LoadMap(const QString& path)
 
     if (world)
     {
+        dialogSaveMap.SetEnabledSunlight(world->sunlight_enabled);
+
         ui->entryZoneList->clear();
         ForEach(world->entryZones, [this](EntryZone& zone) { ui->entryZoneList->addItem(zone.name.c_str()); });
 
@@ -1623,6 +1625,7 @@ void MainWindow::SaveMap()
     ui->tabLevelDesigner->setEnabled(false);
     world->do_compile_doors     = dialogSaveMap.DoCompileDoors();
     world->do_compile_waypoints = dialogSaveMap.DoCompileWaypoints();
+    world->sunlight_enabled     = dialogSaveMap.DoEnableSunlight();
 
     FunctorThread& thread = *FunctorThread::Create([this, &thread](void)
     {

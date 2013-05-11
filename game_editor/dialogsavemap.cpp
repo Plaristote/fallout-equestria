@@ -22,3 +22,13 @@ bool DialogSaveMap::DoCompileWaypoints()
 {
   return (ui->compileWaypoints->isChecked());
 }
+
+bool DialogSaveMap::DoEnableSunlight()
+{
+  return (ui->enableSunlight->isChecked());
+}
+
+void DialogSaveMap::SetEnabledSunlight(bool set)
+{
+  ui->enableSunlight->setChecked(set);
+}

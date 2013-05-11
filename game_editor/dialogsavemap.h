@@ -17,6 +17,9 @@ public:
 
     bool DoCompileWaypoints(void);
     bool DoCompileDoors(void);
+    bool DoEnableSunlight(void);
+
+    void SetEnabledSunlight(bool);
     
 private:
     Ui::DialogSaveMap *ui;

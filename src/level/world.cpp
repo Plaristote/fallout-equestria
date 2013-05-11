@@ -18,6 +18,7 @@ World::World(WindowFramework* window)
   rootMapObjects       = window->get_render().attach_new_node("mapobjects");
   rootDynamicObjects   = window->get_render().attach_new_node("dynamicobjects");
   rootLights           = window->get_render().attach_new_node("lights");
+  sunlight_enabled     = false;
 #ifdef GAME_EDITOR
   lightSymbols         = window->get_render().attach_new_node("lightSymbols");
   do_compile_doors     = true;
@@ -1254,6 +1255,13 @@ void           World::UnSerialize(Utils::Packet& packet)
     }
   }
 
+  {
+    char serialize_sunlight_enabled;
+
+    packet >> serialize_sunlight_enabled;
+    sunlight_enabled = serialize_sunlight_enabled;
+  }
+
   // Post-loading stuff
   for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light); });
 }
@@ -1384,7 +1392,13 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
       packet << zone.name;
       packet << waypointsId;
     }
-  }  
+  }
+
+  {
+    char serialize_sunlight_enabled = sunlight_enabled;
+
+    packet << serialize_sunlight_enabled;
+  }
 }
 
 // MAP COMPILING
