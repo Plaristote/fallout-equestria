@@ -32,6 +32,7 @@ World::~World()
   ForEach(waypoints,      [](Waypoint& wp)      { wp.nodePath.remove_node(); });
   ForEach(objects,        [](MapObject& mo)     { mo.nodePath.remove_node(); });
   ForEach(dynamicObjects, [](DynamicObject& dy) { dy.nodePath.remove_node(); });
+  ForEach(lights,         [](WorldLight& wl)    { wl.Destroy();              });
   debug_pathfinding.remove_node();
 }
 
@@ -427,6 +428,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
   traverser.add_collider(colNp, handlerQueue);
 
   // Reseting the objects corresponding to the collision mask
+#ifdef GAME_EDITOR
   while (it != end)
   {
     NodePath     np     = *it;
@@ -440,6 +442,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
     else
       ++it;
   }
+#endif
 
   // Detecting the new collisions with colmask, and setting the light
   colNode->set_into_collide_mask(colmask);
@@ -463,8 +466,8 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
       alreadyRegistered = find(light->enlightened.begin(), light->enlightened.end(), node);
       if (alreadyRegistered == light->enlightened.end())
       {
-    light->enlightened.push_back(node);
-    node.set_light(light->nodePath);
+        light->enlightened.push_back(node);
+        node.set_light(light->nodePath);
       }
     }
   }

@@ -765,11 +765,14 @@ AsyncTask::DoneStatus Level::do_task(void)
 
   if (_light_iterator != _world->lights.end())
   {
-    Timer timer;
+    if (_light_iterator->zoneSize < 50)
+    {
+      Timer timer;
 
-    _world->CompileLight(&(*_light_iterator), ColMask::DynObject);
-    cout << "CompileLight: " << timer.GetElapsedTime() << std::endl;
-    ++_light_iterator;
+      _world->CompileLight(&(*_light_iterator), ColMask::DynObject);
+      cout << "CompileLight: " << timer.GetElapsedTime() << std::endl;
+      ++_light_iterator;
+    }
   }
   else
     _light_iterator = _world->lights.begin();
