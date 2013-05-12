@@ -95,7 +95,7 @@ void Level::CallbackActionUseSkillOn(InstanceDynamicObject* target)
   if (_currentUis[UiItUseSkillOn])
     delete _currentUis[UiItUseSkillOn];
   {
-    UiUseSkillOn* ui_use_skill_on = new UiUseSkillOn(_window, _levelUi.GetContext(), GetPlayer()->GetStatController());
+    UiUseSkillOn* ui_use_skill_on = new UiUseSkillOn(_window, _levelUi.GetContext(), GetPlayer(), target);
 
     ui_use_skill_on->Closed.Connect(*this, &Level::CloseRunningUi<UiItUseSkillOn>);
     ui_use_skill_on->SkillPicked.Connect([this, target](const std::string& skill)
@@ -105,8 +105,8 @@ void Level::CallbackActionUseSkillOn(InstanceDynamicObject* target)
     ui_use_skill_on->Show();
     _mouseActionBlocked = true;
     _camera.SetEnabledScroll(false);
-    SetInterrupted(true);
     _currentUis[UiItUseSkillOn] = ui_use_skill_on;
+    SetInterrupted(true);
   }
 }
 
@@ -268,8 +268,13 @@ void Level::ActionUseSkillOn(ObjectCharacter* user, InstanceDynamicObject* targe
     user->AnimationEnded.Connect(logic_step);
     user->PlayAnimation("use");
   };
-  user->GoTo(target, 0);
-  user->ReachedDestination.Connect(animation_step);
+  if (target != user)
+  {
+    user->GoTo(target, 0);
+    user->ReachedDestination.Connect(animation_step);
+  }
+  else
+    animation_step(target);
   if (user == GetPlayer())
     CloseRunningUi<UiItUseSkillOn>();
 }

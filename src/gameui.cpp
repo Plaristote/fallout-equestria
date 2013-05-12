@@ -756,6 +756,8 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
     ToggleEventListener(true, "charsheet", "click", PersButtonClicked);
     ToggleEventListener(true, "equiped_1", "click", EquipedItem1Clicked);
     ToggleEventListener(true, "equiped_2", "click", EquipedItem2Clicked);
+    ToggleEventListener(true, "skilldex",  "click", SkilldexButtonClicked);
+    ToggleEventListener(true, "spellbook", "click", SpelldexButtonClicked);
     
     _apEnabled = false;
     _apMax     = 0;
@@ -764,6 +766,8 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
     EquipedItem2Clicked.EventReceived.Connect(*this, &GameMainBar::CallbackEquipedItem2Clicked);
     CombatEndClicked.EventReceived.Connect(*this, &GameMainBar::CallbackCombatEndClicked);
     PassTurnClicked.EventReceived.Connect (*this, &GameMainBar::CallbackPassTurnClicked);
+    SkilldexButtonClicked.EventReceived.Connect([this](Rocket::Core::Event&) { OpenSkilldex.Emit(); });
+    SpelldexButtonClicked.EventReceived.Connect([this](Rocket::Core::Event&) { OpenSpelldex.Emit(); });
     
     Translate();
   }
@@ -778,7 +782,9 @@ GameMainBar::~GameMainBar()
   ToggleEventListener(false, "equiped_1",  "click", EquipedItem1Clicked);
   ToggleEventListener(false, "equiped_2",  "click", EquipedItem2Clicked);
   ToggleEventListener(false, "pass_turn",  "click", PassTurnClicked);
-  ToggleEventListener(false, "stop_fight", "click", CombatEndClicked);  
+  ToggleEventListener(false, "stop_fight", "click", CombatEndClicked);
+  ToggleEventListener(false, "skilldex",   "click", SkilldexButtonClicked);
+  ToggleEventListener(false, "spellbook",  "click", SpelldexButtonClicked);
 }
 
 void GameMainBar::AppendToConsole(const std::string& str)

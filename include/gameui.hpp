@@ -60,11 +60,14 @@ public:
   RocketListener         InventoryButtonClicked;
   RocketListener         PersButtonClicked;
   RocketListener         PipbuckButtonClicked;
+  RocketListener         SkilldexButtonClicked, SpelldexButtonClicked;
   
   Sync::Signal<void (unsigned short)> UseEquipedItem;
   Sync::Signal<void (unsigned short)> EquipedItemNextAction;
   Sync::Signal<void>                  CombatPassTurn;
   Sync::Signal<void>                  CombatEnd;
+  Sync::Signal<void>                  OpenSkilldex;
+  Sync::Signal<void>                  OpenSpelldex;
   
 private:
   RocketListener         EquipedItem1Clicked;

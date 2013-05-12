@@ -87,7 +87,7 @@ x --> Execute heavy tasks in threads, show progress with progress bar
 
   -> Statistics
   --> Reputation
-~ --> Interface to check statistics of a party
+x --> Interface to check statistics of a party
 
 x -> Worldmap
 x --> Display circles showing the visitable areas

@@ -4,11 +4,6 @@ LevelExitZone::LevelExitZone(Level* level, std::list<std::string> destinations) 
 {
   ForEach(destinations, [this](std::string dest)
   {
-    // TODO remove this, it's a quickfix for a corrupted map file
-    if (dest == "lvl0")
-      dest = "lvl1";
-    else if (dest  == "lvl1")
-      dest = "lvl0";
     _destinations.push_back(dest);
   });
 }

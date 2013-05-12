@@ -62,8 +62,8 @@ public:
   std::vector<std::string> GetSpecials(void)   const { return (GetStatKeys(_statsheet["Special"])); }
   std::vector<std::string> GetSkills(void)     const { return (GetStatKeys(_statsheet["Skills"])); }
 
-  std::list<std::string>   GetUsableSkills(void);
-  std::list<std::string>   GetUsableSpells(void);
+  std::list<std::string>   GetUsableSkills(bool on_self = false);
+  std::list<std::string>   GetUsableSpells(bool on_self = false);
 
   unsigned short GetXpNextLevel(void);
   unsigned short GetExperience(void) const       { return (_statsheet["Variables"]["Experience"]); }
@@ -234,6 +234,10 @@ public:
   
   void Hide(void);
   void Show(void);
+  
+  void SetPartyMembers(const std::vector<std::string>& members);
+
+  Sync::Signal<void (const std::string&)> SwapToPartyMember;
 
   void SetInformation(const std::string& name, const std::string& value);
   void SetInformation(const std::string& name, short value);
@@ -256,6 +260,7 @@ private:
   RocketListener DoneButton;
   RocketListener EventSpecialClicked, EventSkillClicked, EventGeneralClicked, EventTraitClicked;
   RocketListener ButtonUp, ButtonDown;
+  RocketListener PartyMemberClicked;
   
   RocketListener EventNameChanged, EventAgeChanged, EventGenderChanged;
 

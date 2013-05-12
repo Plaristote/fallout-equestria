@@ -220,8 +220,10 @@ void InventoryViewController::Update(void)
  */
 #include <list>
 #include <string>
-UiUseSkillOn::UiUseSkillOn(WindowFramework* window, Rocket::Core::Context* context, StatController* statistics) : UiBase(window, context)
+UiUseSkillOn::UiUseSkillOn(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* player, InstanceDynamicObject* target) : UiBase(window, context)
 {
+  StatController* statistics = player->GetStatController();
+
   _root = context->LoadDocument("data/skill_picker.rml");
   if (_root)
   {
@@ -233,7 +235,7 @@ UiUseSkillOn::UiUseSkillOn(WindowFramework* window, Rocket::Core::Context* conte
     {
       stringstream stream;
 
-      skill_list = statistics->Model().GetUsableSkills();
+      skill_list = statistics->Model().GetUsableSkills(player == target); // GetUsableSkills(usable_on_self?)
       for_each(skill_list.begin(), skill_list.end(), [&stream](string skill)
       {
         stream << "<div class='item'><button id='pick-skill-" << skill << "' class='universal_button' data-skill='" << skill << "'>" << skill << "</button></div>";

@@ -119,8 +119,8 @@ void StatModel::LoadFunctions(void)
   _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptUpdateAllValues, "void UpdateAllValues(Data)"));
   _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAddPerk,         "bool AddPerk(Data, string)"));
   _script_func_ptrs.push_back(ScriptFuncPtr(&_selectRandomEncounter, "string SelectRandomEncounter(Data)"));
-  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptUsableSkills,    "StringList AvailableSkills(Data)"));
-  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptUsableSpells,    "StringList AvailableSpells(Data)"));
+  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptUsableSkills,    "StringList AvailableSkills(Data, bool)"));
+  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptUsableSpells,    "StringList AvailableSpells(Data, bool)"));
   LoadScript("special", "scripts/ai/special.as");
 }
 
@@ -201,7 +201,7 @@ bool           StatModel::IsReady(void)
   return (is_ready);
 }
 
-list<string>   StatModel::GetUsableSkills(void)
+list<string>   StatModel::GetUsableSkills(bool on_self_only)
 {
   list<string> ret;
 
@@ -210,22 +210,30 @@ list<string>   StatModel::GetUsableSkills(void)
   {
     _script_context->Prepare(_scriptUsableSkills);
     _script_context->SetArgObject(0, &_statsheet);
+    _script_context->SetArgByte(1, on_self_only);
     _script_context->Execute();
     ret = *((list<string>*)_script_context->GetReturnObject());
   }
   else // Fallback
   {
-    ret.push_back("Lockpick");
-    ret.push_back("Medicine");
-    ret.push_back("Science");
-    ret.push_back("Repair");
-    ret.push_back("Sneak");
-    ret.push_back("Steal");
+    if (!on_self_only)
+    {
+      ret.push_back("Lockpick");
+      ret.push_back("Medicine");
+      ret.push_back("Science");
+      ret.push_back("Repair");
+      ret.push_back("Steal");
+    }
+    else
+    {
+      ret.push_back("Medicine");
+      ret.push_back("Sneak");
+    }
   }
   return (ret);
 }
 
-list<string>   StatModel::GetUsableSpells(void)
+list<string>   StatModel::GetUsableSpells(bool on_self_only)
 {
   list<string> ret;
 
@@ -234,6 +242,7 @@ list<string>   StatModel::GetUsableSpells(void)
   {
     _script_context->Prepare(_scriptUsableSpells);
     _script_context->SetArgObject(0, &_statsheet);
+    _script_context->SetArgByte(1, on_self_only);
     _script_context->Execute();
     ret = *((list<string>*)_script_context->GetReturnObject());
   }
@@ -948,7 +957,7 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
   if (_root)
   {
     _i18n = i18n::GetStatistics();
-    
+
     ToggleEventListener(true, "continue", "click", DoneButton);
     ToggleEventListener(true, "cancel",   "click", CancelButton);
     DoneButton.EventReceived.Connect  (*this, &StatViewRocket::Accept);
@@ -965,19 +974,51 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
     EventAgeChanged.EventReceived.Connect   (*this, &StatViewRocket::UpdateAge);
     EventNameChanged.EventReceived.Connect  (*this, &StatViewRocket::UpdateName);
     EventGenderChanged.EventReceived.Connect(*this, &StatViewRocket::UpdateGender);
-    
+
     EventTraitClicked.EventReceived.Connect (*this, &StatViewRocket::TraitClicked);
-    
+
     ToggleEventListener(true, "char-age-edit-ok",       "click", EventAgeChanged);
     ToggleEventListener(true, "char-name-edit-ok",      "click", EventNameChanged);
     ToggleEventListener(true, "char-gender-edit-ok",    "click", EventGenderChanged);
     ToggleEventListener(true, "edit-value-cursor-plus", "click", ButtonUp);
     ToggleEventListener(true, "edit-value-cursor-less", "click", ButtonDown);
+    ToggleEventListener(true, "team-panel",             "click", PartyMemberClicked);
     ButtonUp.EventReceived.Connect  (*this, &StatViewRocket::StatMore);
     ButtonDown.EventReceived.Connect(*this, &StatViewRocket::StatLess);
 
+    PartyMemberClicked.EventReceived.Connect([this](Rocket::Core::Event& event)
+    {
+      Rocket::Core::Element* elem = _context->GetHoverElement();
+
+      while (elem != 0 && elem != event.GetCurrentElement() && elem->GetClassNames() != "party-member")
+        elem = elem->GetParentNode();
+      if (elem != 0 && elem->GetId() != "team-panel")
+        SwapToPartyMember.Emit(elem->GetId().CString());
+      else
+        std::cout << "Unable to find the character clicked sir" << std::endl;
+    });
+
     SetEditMode(Display);
     Translate();
+  }
+}
+
+void StatViewRocket::SetPartyMembers(const std::vector<std::string>& members)
+{
+  Rocket::Core::Element* team_panel = _root->GetElementById("team-panel");
+  
+  if (team_panel)
+  {
+    std::stringstream rml;
+    
+    for_each(members.begin(), members.end(), [&rml](std::string member)
+    {
+      rml << "<div class='party-member' id='" << member << "'>";
+      rml << "<img src='../textures/avatars/" << member << ".png'><br />";
+      rml << "<span class='party-member-name'>" << member << "</span>";
+      rml << "</div>";
+    });
+    team_panel->SetInnerRML(rml.str().c_str());
   }
 }
 

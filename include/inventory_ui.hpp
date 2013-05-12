@@ -99,7 +99,7 @@ private:
 class UiUseSkillOn : public UiBase
 {
 public:
-  UiUseSkillOn(WindowFramework* window, Rocket::Core::Context* context, StatController* statistics);
+  UiUseSkillOn(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* player, InstanceDynamicObject* target);
   ~UiUseSkillOn();
   
   void Destroy(void);

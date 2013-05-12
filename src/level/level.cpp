@@ -111,7 +111,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     std::cout << "Failed to load file" << std::endl;
   }
   
-  if (_world->sunlight_enabled)
+  if (!_world->sunlight_enabled)
     InitSun();
 
   LPoint3 upperLeft, upperRight, bottomLeft;
@@ -327,6 +327,16 @@ void Level::InitPlayer(void)
     if (!(stats["Statistics"]["Action Points"].Nil()))
       _levelUi.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
   }
+  {
+    ObjectCharacter::InteractionList& interactions = GetPlayer()->GetInteractions();
+
+    interactions.clear();
+    interactions.push_back(ObjectCharacter::Interaction("use_object", GetPlayer(), &(GetPlayer()->ActionUseObjectOn)));
+    interactions.push_back(ObjectCharacter::Interaction("use_skill",  GetPlayer(), &(GetPlayer()->ActionUseSkillOn)));
+  }
+  _levelUi.GetMainBar().OpenSkilldex.Connect([this]() { ObjectCharacter::ActionUseSkillOn.Emit(GetPlayer()); });
+  //_levelUi.GetMainBar().OpenSpelldex.Connect([this]() { ObjectCharacter::ActionUseSpellOn.Emit(GetPlayer()); });
+  
   obs_player.Connect(GetPlayer()->HitPointsChanged,         _levelUi.GetMainBar(), &GameMainBar::SetCurrentHp);
   obs_player.Connect(GetPlayer()->ActionPointChanged,       _levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
   obs_player.Connect(GetPlayer()->EquipedItemActionChanged, _levelUi.GetMainBar(), &GameMainBar::SetEquipedItemAction);

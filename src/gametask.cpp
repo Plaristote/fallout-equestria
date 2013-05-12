@@ -494,6 +494,42 @@ bool GameTask::LoadGame(const std::string& savepath)
   _playerStats     = new StatController(_charSheet);
   _quest_manager   = new QuestManager(_dataEngine, _playerStats);
   _playerStats->SetView(&(_gameUi.GetPers()));
+  
+  _gameUi.GetPers().SwapToPartyMember.DisconnectAll();
+  _gameUi.GetPers().SwapToPartyMember.Connect([this, savepath](const std::string& name)
+  {
+    StatController* controller;
+
+    if (name == "self")
+      controller = _playerStats;
+    else
+    {
+      DataTree* charsheet = DataTree::Factory::JSON(savepath + "/stats-" + name + ".json");
+
+      controller = new StatController(charsheet);
+    }
+    controller->SetView(&(_gameUi.GetPers()));
+  });
+  
+  std::function<void (void)> set_party_members = [this]()
+  {
+    cout << "UPDATING THE AVAILABLE CHARACTERS FROM STATSHEET" << endl;
+    Party::Statsheets        statsheets = _playerParty->GetStatsheets();
+    std::vector<std::string> members;
+
+    for_each(statsheets.begin(), statsheets.end(), [this, &members](std::pair<std::string, std::string> statsheet)
+    {
+      if (statsheet.second != "")
+        members.push_back(statsheet.second);
+      else
+        members.push_back("self");
+    });
+    _gameUi.GetPers().SetPartyMembers(members);
+  };
+  
+  set_party_members();
+  _playerParty->Updated.Connect(set_party_members);
+  
   if (_dataEngine["player"]["inventory"].NotNil())
   {
     _playerInventory = new Inventory;
