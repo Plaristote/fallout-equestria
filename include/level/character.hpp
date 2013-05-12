@@ -149,6 +149,12 @@ public:
   void                SetBonusAC(short ac)             { _armorClass += ac; _tmpArmorClass += ac;               }
   Sync::Signal<void (short)>          ArmorClassChanged;
 
+  void                SetFurtive(bool do_set);
+  void                SetVisible(bool do_set)           { _fading_in = do_set == true; _fading_off = !_fading_in; }
+  void                AddFlag(unsigned char flag)       { _flags |= flag; }
+  void                DelFlag(unsigned char flag)       { if (HasFlag(flag)) { _flags -= flag; } }
+  bool                HasFlag(unsigned char flag) const { return ((_flags & flag) != 0); }
+
   void                PlayEquipedItemAnimation(unsigned short it, const std::string& name);
   void                SetEquipedItem(unsigned short it, InventoryObject* object, EquipedMode mode = EquipedMouth);
   InventoryObject*    GetEquipedItem(unsigned short it);
@@ -183,6 +189,7 @@ private:
   void                RunMovement(float elapsedTime);
   void                RunMovementNext(float elaspedTime);
   void                RunDeath(void);
+  void                Fading(void);
   
   void                StartRunAnimation(void);
   void                StopRunAnimation(InstanceDynamicObject*);
@@ -204,6 +211,8 @@ private:
   unsigned int                   _self_enemyMask;
   unsigned short                 _actionPoints;
   short                          _hitPoints, _armorClass, _tmpArmorClass;
+  unsigned char                  _flags;
+  bool                           _fading_off, _fading_in;
 
   public:
     InventoryObject*             active_object;

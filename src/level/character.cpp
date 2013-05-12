@@ -4,6 +4,7 @@
 
 #include "level/level.hpp"
 #include <options.hpp>
+#include <dices.hpp>
 
 #define DEFAULT_WEAPON_1 "hooves"
 #define DEFAULT_WEAPON_2 "buck"
@@ -27,7 +28,9 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 {
   Data   items = _level->GetItems();  
   string defEquiped[2];
-  
+
+  _fading_in          = _fading_off = false;
+  _flags              = 0;
   _goToData.objective = 0;  
   _inventory          = new Inventory;
   
@@ -133,7 +136,8 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   // Script
   _script_context = 0;
   _script_module  = 0;
-  if (object->script != "")
+  if (object->script == "")
+    object->script = "general_pony";
   {
     string prefixName = "IA_";
     string prefixPath = "scripts/ai/";
@@ -199,7 +203,23 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 	  LoadAnimation(anims[i]);
 
   // Others
-  CharacterDied.Connect(*this, &ObjectCharacter::RunDeath);  
+  CharacterDied.Connect(*this, &ObjectCharacter::RunDeath);
+
+  GetNodePath().set_transparency(TransparencyAttrib::M_alpha);
+}
+
+void ObjectCharacter::SetFurtive(bool do_set)
+{
+  if (do_set)
+  {
+    GetNodePath().set_color(0, 0, 0, 0.5);
+    AddFlag(1);
+  }
+  else
+  {
+    GetNodePath().set_color(0, 0, 0, 1);
+    DelFlag(1);
+  }
 }
 
 ObjectCharacter::~ObjectCharacter()
@@ -353,6 +373,37 @@ void ObjectCharacter::RestartActionPoints(void)
   ActionPointChanged.Emit(_actionPoints, _actionPoints);
 }
 
+void ObjectCharacter::Fading(void)
+{
+  LColor color = GetNodePath().get_color();
+
+  if (_fading_off)
+  {
+    if (color.get_w() > 0)
+      color.set_w(color.get_w() - 0.05);
+    else
+      _fading_off = false;
+  }
+  else if (_fading_in)
+  {
+    if (HasFlag(1))
+    {
+      if (color.get_w() < 1)
+        color.set_w(color.get_w() + 0.05);
+      else
+        _fading_in = false;
+    }
+    else
+    {
+      if (color.get_w() < 0.5)
+        color.set_w(color.get_w() + 0.05);
+      else
+        _fading_in = false;
+    }
+  }
+  GetNodePath().set_color(color);
+}
+
 void ObjectCharacter::Run(float elapsedTime)
 {
   PStatCollector collector_ai("Level:Characters:AI");
@@ -363,6 +414,8 @@ void ObjectCharacter::Run(float elapsedTime)
   {
     Level::State state = _level->GetState();
 
+    if (_fading_in || _fading_off)
+      Fading();
     if (state == Level::Normal && _hitPoints > 0)
     {
       ReloadFunction(&_scriptMain);
@@ -862,10 +915,10 @@ Script::StdList<ObjectCharacter*> ObjectCharacter::GetNearbyAllies(void) const
 
 void     ObjectCharacter::CheckFieldOfView(void)
 {
-  if (_hitPoints <= 0 || !_fovNeedsUpdate || _level->GetPlayer() == this)
+  if (_hitPoints <= 0 || !_fovNeedsUpdate)
     return ;
   Timer profile;
-  cout << "Checking Field of View for " << this << endl;
+  cout << "Checking Field of View for " << GetName() << endl;
   PStatCollector     collector("Level:Characters:FieldOfView");
   CollisionTraverser fovTraverser;
   float              fovRadius = 45;
@@ -894,15 +947,6 @@ void     ObjectCharacter::CheckFieldOfView(void)
   _fovSphere->set_radius(fovRadius);
   _fovTraverser.traverse(_level->GetWorld()->window->get_render());
 
-  //_fovNp.show();
-    
-  // Optimization of FOV
-  //if (!(IsEnemy(_level->GetPlayer())) && _level->GetState() != Level::Fight)
-  //  return ;
-  
-  //tmpfix:
-  //InstanceDynamicObject* last_obj = 0;
-  
   for (unsigned short i = 0 ; i < _fovHandlerQueue->get_num_entries() ; ++i)
   {
     //cout << "loop fovhandlerqueue " << i << endl;
@@ -910,12 +954,8 @@ void     ObjectCharacter::CheckFieldOfView(void)
     NodePath               node   = entry->get_into_node_path();
     InstanceDynamicObject* object = _level->FindObjectFromNode(node);
 
-    //if (object == last_obj)
-    //  continue ;
-    //last_obj = object;
     if (object && object != this)
     {
-      //cout << object->GetName() << endl;
       ObjectCharacter* character = object->Get<ObjectCharacter>();
 
       if (character)
@@ -926,18 +966,33 @@ void     ObjectCharacter::CheckFieldOfView(void)
 	  _fovAllies.push_back(character);
 	else if (IsEnemy(character) && HasLineOfSight(character))
 	{
-	  list<FovEnemy>::iterator enemyIt = find(_fovEnemies.begin(), _fovEnemies.end(), character);
+	  list<FovEnemy>::iterator enemyIt  = find(_fovEnemies.begin(), _fovEnemies.end(), character);
+          bool                     detected = true;
 
-	  if (enemyIt != _fovEnemies.end())
-	    enemyIt->ttl = FOV_TTL;
-	  else
-	    _fovEnemies.push_back(FovEnemy(character, FOV_TTL));
+          if (character->HasFlag(1))
+          {
+            short perception = GetStatController()->Model().GetSpecial("PER");
+            short sneak      = character->GetStatController()->Model().GetSkill("Sneak");
+            short value      = sneak - (perception * 3);
+
+            if (!(Dices::Throw(100) >= (value > 95 ? 95 : value)))
+              detected = false;
+          }
+          if (detected)
+          {
+            if (enemyIt != _fovEnemies.end())
+              enemyIt->ttl = FOV_TTL;
+            else
+              _fovEnemies.push_back(FovEnemy(character, FOV_TTL));
+          }
 	}
       }
     }
   }
   if (_fovEnemies.size() > 0 && _level->GetState() != Level::Fight)
     _level->StartFight(this);
+  if (this == _level->GetPlayer())
+    _level->RefreshCharactersVisibility();
   collector.stop();
   profile.Profile("/!\\ CheckFieldOfView");
 }

@@ -111,7 +111,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     std::cout << "Failed to load file" << std::endl;
   }
   
-  if (!_world->sunlight_enabled)
+  if (_world->sunlight_enabled)
     InitSun();
 
   LPoint3 upperLeft, upperRight, bottomLeft;
@@ -216,13 +216,44 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   /*
    * END DIVIDE AND CONQUER
    */
-  
 
   window->get_render().set_shader_auto();
   loadingScreen->AppendText("-- Done --");
   loadingScreen->FadeOut();
   loadingScreen->Destroy();
   delete loadingScreen;
+}
+
+void Level::RefreshCharactersVisibility(void)
+{
+  for_each(_characters.begin(), _characters.end(), [this](ObjectCharacter* character)
+  {
+    std::list<ObjectCharacter*> fov = GetPlayer()->GetNearbyEnemies();
+    auto                        it  = fov.begin();
+    auto                        end = fov.end();
+    NodePath                    np  = character->GetNodePath();
+
+    if (character == GetPlayer())
+      return ;
+    else if (GetPlayer()->IsAlly(character))
+      character->SetVisible(true);
+    else if (GetPlayer()->IsEnemy(character))
+    {
+      for (; it != end ; ++it)
+      {
+        if (character == *it)
+        {
+          character->SetVisible(true);
+          return ;
+        }
+      }
+      character->SetVisible(false);
+    }
+    else if (GetPlayer()->HasLineOfSight(character))
+      character->SetVisible(true);
+    else
+      character->SetVisible(false);
+  });
 }
 
 void Level::InsertCharacter(ObjectCharacter* character)
@@ -382,8 +413,14 @@ void Level::InitPlayer(void)
         child.set_attrib(atr1);
     }
   });  
-  
-  //_world->CompileLight(_world->GetLightByName("toto"));
+
+  {
+    TimeManager::Task*    task    = _timeManager.AddTask(TASK_LVL_CITY, true, 1);
+
+    task->loop   = true;
+    task->lastS += 1;
+    task->Interval.Connect(*(GetPlayer()), &ObjectCharacter::CheckFieldOfView);    
+  }
 }
 
 void Level::InsertParty(PlayerParty& party)

@@ -77,6 +77,7 @@ public:
   ObjectCharacter*       GetPlayer(void);
   void                   UnprocessAllCollisions(void);
   void                   ProcessAllCollisions(void);
+  void                   RefreshCharactersVisibility(void);
 
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);

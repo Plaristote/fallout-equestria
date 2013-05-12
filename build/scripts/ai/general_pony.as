@@ -20,6 +20,33 @@ StringList GetAvailableApps(Data data)
 }
 
 //
+// Skill effects on characters
+//
+bool UseSkill(DynamicObject@ target, Character@ user, string skill)
+{
+  Cout("Character/UseSkill");
+  Character@ self = target.AsCharacter();
+
+  if (skill == "Steal")
+  {
+    Cout("SCRIPT: Steal skill has been used");
+    return (true);
+  }
+  else if (skill == "Sneak")
+  {
+    Cout("UseSkill Sneak");
+    StartSneaking(user);
+    return (true);
+  }
+  return (false);
+}
+
+void StartSneaking(Character@ user)
+{
+  user.SetFurtive(true);
+}
+
+//
 // AI Template
 // Follow Character
 //

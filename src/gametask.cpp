@@ -513,7 +513,6 @@ bool GameTask::LoadGame(const std::string& savepath)
   
   std::function<void (void)> set_party_members = [this]()
   {
-    cout << "UPDATING THE AVAILABLE CHARACTERS FROM STATSHEET" << endl;
     Party::Statsheets        statsheets = _playerParty->GetStatsheets();
     std::vector<std::string> members;
 
