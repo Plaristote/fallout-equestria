@@ -103,6 +103,9 @@ x --> Shader for casting shadows
 x --> Scatter inserted parties in the spawning zones
 x --> Per-context configuration for camera behaviors
 x --> Using skills to interact
+x --> Detection system
+x ----> Character must disappear from the render when the player does not detect them
+x ----> Detection check for characters using the sneak skill
 
 x -> GameTask
 x --> Temporaries levels

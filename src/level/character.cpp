@@ -840,17 +840,19 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
     return (true);
   Timer profiler;
   collector.start();
-  NodePath root  = _object->nodePath;
-  NodePath other = object->GetNodePath();
-  bool ret = true;
-
-  LVecBase3 rot = root.get_hpr();
-  LVector3  dir = root.get_relative_vector(other, other.get_pos() - root.get_pos());
+  NodePath  root  = _object->nodePath;
+  NodePath  other = object->GetNodePath();
+  bool      ret   = true;
+  LVecBase3 rbkp  = root.get_hpr();
+  root.set_hpr(0, 0, 0); // Workaround ? Or definitive solution ?
+  LVecBase3 rot   = root.get_hpr();
+  LVector3  rpos  = root.get_pos();
+  LVector3  dir   = root.get_relative_vector(other, other.get_pos() - rpos);
 
   _losPath.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
-  _losRay->set_point_b(dir.get_x(), dir.get_y(), dir.get_z());
+  _losRay->set_point_b(dir.get_x(), dir.get_y(), dir.get_z() + 4.f);
   _losTraverser.traverse(_level->GetWorld()->window->get_render());
-
+  
   //_losPath.show();
   _losHandlerQueue->sort_entries();
 
@@ -859,12 +861,15 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
     CollisionEntry* entry = _losHandlerQueue->get_entry(i);
     NodePath        node  = entry->get_into_node_path();
 
-    if (root.is_ancestor_of(node))
-      continue ;
-    if (!(other.is_ancestor_of(node)))
+    if ((node.get_collide_mask() & CollideMask(ColMask::Object)).get_word())
       ret = false;
+    else if (other.is_ancestor_of(node))
+      ret = true;
+    else
+      continue ;
     break ;
   }
+  root.set_hpr(rbkp);
   collector.stop();
   profiler.Profile("HasLineOfSight");
   return (ret);
