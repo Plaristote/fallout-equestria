@@ -115,6 +115,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 
   // Statistics
   _stats        = 0;
+  std::string savepath = "saves";
   _statistics   = DataTree::Factory::JSON(savepath + "/stats-" + object->charsheet + ".json");
   if (_statistics == 0)
     _statistics = DataTree::Factory::JSON("data/charsheets/" + object->charsheet + ".json");

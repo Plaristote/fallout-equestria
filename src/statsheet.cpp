@@ -524,6 +524,7 @@ string StatModel::SelectRandomEncounter(void)
  */
 StatController::StatController(Data statsheet) : _model(statsheet), _view(0)
 {
+  _view = 0;
   _model.SpecialChanged.Connect  (*this,   &StatController::SpecialChanged);
   _model.SkillChanged.Connect    (*this,   &StatController::SkillChanged);
   _model.StatisticChanged.Connect(*this,   &StatController::StatisticChanged);

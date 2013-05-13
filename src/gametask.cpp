@@ -498,18 +498,37 @@ bool GameTask::LoadGame(const std::string& savepath)
   _gameUi.GetPers().SwapToPartyMember.DisconnectAll();
   _gameUi.GetPers().SwapToPartyMember.Connect([this, savepath](const std::string& name)
   {
-    StatController* controller;
+    StatController* controller = 0;
 
     if (name == "self")
       controller = _playerStats;
     else
     {
-      DataTree* charsheet = DataTree::Factory::JSON(savepath + "/stats-" + name + ".json");
+      if (_level)
+      {
+        DataTree* charsheet = DataTree::Factory::JSON(savepath + "/stats-" + name + ".json");
 
-      if (charsheet == 0)
-        charsheet = DataTree::Factory::JSON("data/charsheets/" + name + ".json");
-      if (charsheet != 0)
-        controller = new StatController(charsheet);
+        if (charsheet)
+        {
+          Data             char_name = Data(charsheet)["Name"];
+          ObjectCharacter* character = _level->GetCharacter(char_name.Value());
+
+          if (character)
+            controller = character->GetStatController();
+          else
+            cout << "Character " << name << " isn't instancied in the level" << endl;
+          delete charsheet;
+        }
+      }
+      if (!(controller))
+      {
+        DataTree* charsheet = DataTree::Factory::JSON(savepath + "/stats-" + name + ".json");
+
+        if (charsheet == 0)
+          charsheet = DataTree::Factory::JSON("data/charsheets/" + name + ".json");
+        if (charsheet != 0)
+          controller = new StatController(charsheet);
+      }
     }
     if (controller != 0)
       controller->SetView(&(_gameUi.GetPers()));
