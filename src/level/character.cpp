@@ -928,8 +928,9 @@ void     ObjectCharacter::CheckFieldOfView(void)
   Timer profile;
   cout << "Checking Field of View for " << GetName() << endl;
   PStatCollector     collector("Level:Characters:FieldOfView");
+  short              perception = GetStatController()->Model().GetSpecial("PER");
   CollisionTraverser fovTraverser;
-  float              fovRadius = 45;
+  float              fovRadius  = 35 + (perception * 5);
   
   collector.start();
   _fovNeedsUpdate = false;
