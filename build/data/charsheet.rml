@@ -456,7 +456,9 @@ tabset panels panel
 		<button id="cancel"   i18n="Close" class="universal_button">Cancel</button> 
     </p>
    </div>
-   <div id="team-panel" class="console-bg   place-next-to">team placeholder</div>
+   <div id="team-panel" class="console-bg place-next-to">
+     Character list
+   </div>
 		
     
   </body>

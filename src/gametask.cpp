@@ -506,9 +506,13 @@ bool GameTask::LoadGame(const std::string& savepath)
     {
       DataTree* charsheet = DataTree::Factory::JSON(savepath + "/stats-" + name + ".json");
 
-      controller = new StatController(charsheet);
+      if (charsheet == 0)
+        charsheet = DataTree::Factory::JSON("data/charsheets/" + name + ".json");
+      if (charsheet != 0)
+        controller = new StatController(charsheet);
     }
-    controller->SetView(&(_gameUi.GetPers()));
+    if (controller != 0)
+      controller->SetView(&(_gameUi.GetPers()));
   });
   
   std::function<void (void)> set_party_members = [this]()

@@ -114,12 +114,14 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _self_enemyMask = 0;
 
   // Statistics
-  _stats      = 0;
-  _statistics = DataTree::Factory::JSON("data/charsheets/" + object->charsheet + ".json");
+  _stats        = 0;
+  _statistics   = DataTree::Factory::JSON(savepath + "/stats-" + object->charsheet + ".json");
+  if (_statistics == 0)
+    _statistics = DataTree::Factory::JSON("data/charsheets/" + object->charsheet + ".json");
   if (_statistics)
   {
-    Data stats = GetStatistics();
-    
+    Data stats  = GetStatistics();
+
     _inventory->SetCapacity(stats["Statistics"]["Carry Weight"]);
     _armorClass = stats["Statistics"]["Armor Class"].Nil() ? 5  : (int)(stats["Statistics"]["Armor Class"]);
     _hitPoints  = stats["Statistics"]["Hit Points"].Nil()  ? 15 : (int)(stats["Statistics"]["Hit Points"]);

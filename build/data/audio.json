@@ -1,6 +1,7 @@
 {
-  "pipbuck/levelup":  "audio/pipbuck/level-up.ogg",
-  "pipbuck/newquest": "audio/pipbuck/new-quest.ogg",
+  "pipbuck/levelup":   "audio/pipbuck/level-up.ogg",
+  "pipbuck/newquest":  "audio/pipbuck/new-quest.ogg",
+  "pipbuck/questdone": "audio/pipbuck/quest-done.ogg",
   "hoof2hoof/punch": "audio/hoof2hoof/punch.ogg",
   "hoof2hoof/whack": "audio/hoof2hoof/whack.ogg",
   "audiofile": "audio/audiofile.ogg"
