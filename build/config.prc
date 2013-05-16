@@ -1,7 +1,7 @@
 thread-model /Draw
 fullscreen false
 sync-video true
-model-path data
+model-path models
 
 audio-library-name p3openal_audio
 
