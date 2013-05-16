@@ -605,6 +605,31 @@ GameConsole& GameConsole::Get() {
 /*
  * GameInventory
  */
+void GameInventory::ListenEquipModes(bool activate)
+{
+  std::string equip_types[] = { "hoof", "battlesaddle", "magic" };
+
+  for (unsigned short slot = 1 ; slot < 3 ; ++slot)
+  {
+    for (unsigned short i = 0 ; i < 3 ; ++i)
+    {
+      std::stringstream id;
+
+      id << "eq" << slot << '-' << equip_types[i];
+      cout << ">> Listen to equip mode " << id.str() << endl;
+      ToggleEventListener(activate, id.str(), "click", ButtonEquipMode);
+    }
+  }
+}
+
+void GameInventory::ListenDropables(bool activate)
+{
+  std::string dropping[] = { "eq1-equiped", "eq2-equiped", "battlesaddle-container", "armour-container" };
+  
+  for (unsigned short i = 0 ; i < 4 ; ++i)
+    ToggleEventListener(activate, dropping[i], "dragdrop", DropEvent);
+}
+
 GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
   Rocket::Core::ElementDocument* doc     = context->LoadDocument("data/inventory.rml");
@@ -629,14 +654,18 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
     ToggleEventListener(true, "button_equip_2",   "click", ButtonEquip2Clicked);
     ToggleEventListener(true, "button_unequip_1", "click", ButtonUnequip1);
     ToggleEventListener(true, "button_unequip_2", "click", ButtonUnequip2);
+    ListenEquipModes(true);
+    ListenDropables(true);
+    ToggleEventListener(true, "body-inventory-items", "dragdrop", DropEvent);
 
     ButtonUseClicked.EventReceived.Connect   (*this, &GameInventory::CallbackButtonUse);
     ButtonDropClicked.EventReceived.Connect  (*this, &GameInventory::CallbackButtonDrop);
     ButtonEquip1Clicked.EventReceived.Connect(*this, &GameInventory::CallbackButtonEquip1);
     ButtonEquip2Clicked.EventReceived.Connect(*this, &GameInventory::CallbackButtonEquip2);
-    
-    ButtonUnequip1.EventReceived.Connect(*this, &GameInventory::CallbackButtonUnequip1);
-    ButtonUnequip2.EventReceived.Connect(*this, &GameInventory::CallbackButtonUnequip2);
+    ButtonUnequip1.EventReceived.Connect     (*this, &GameInventory::CallbackButtonUnequip1);
+    ButtonUnequip2.EventReceived.Connect     (*this, &GameInventory::CallbackButtonUnequip2);
+    ButtonEquipMode.EventReceived.Connect    (*this, &GameInventory::CallbackSwapEquipMode);
+    DropEvent.EventReceived.Connect          (*this, &GameInventory::CallbackDropEvent);
 
     Translate();
     doc->Show();
@@ -653,6 +682,90 @@ GameInventory::~GameInventory()
   ToggleEventListener(false, "button_equip_2",   "click", ButtonEquip2Clicked);
   ToggleEventListener(false, "button_unequip_1", "click", ButtonUnequip1);
   ToggleEventListener(false, "button_unequip_2", "click", ButtonUnequip2);
+  ListenEquipModes(false);
+  ListenDropables(false);
+}
+
+void GameInventory::CallbackDropEvent(Rocket::Core::Event& event)
+{
+  Rocket::Core::Element* drag_element = static_cast<Rocket::Core::Element*>(event.GetParameter< void* >("drag_element", NULL));
+  Rocket::Core::Element* target       = event.GetTargetElement();
+  Rocket::Core::Element* from         = drag_element;
+
+  while (target && std::string(target->GetClassNames().CString()).find("drop-target") == std::string::npos)
+    target = target->GetParentNode();
+  while (from && std::string(from->GetClassNames().CString()).find("drop-target") == std::string::npos)
+    from   = from->GetParentNode();
+  if (drag_element && target && from)
+  {
+    std::stringstream    str_count;
+    unsigned int         count;
+    auto                 obj_it  = _inventory->GetContent().begin();
+    auto                 obj_end = _inventory->GetContent().end();
+
+    Rocket::Core::String tmp;
+    drag_element->GetInnerRML(tmp);
+
+    str_count << drag_element->GetId().CString();
+    str_count >> count;
+    std::advance(obj_it, count);
+    if (obj_it != obj_end)
+    {
+      InventoryObject*   object    = *obj_it;
+      std::string        target_id = target->GetId().CString();
+      std::string        from_id   = from->GetId().CString();
+
+      if (from_id == "eq1-equiped")
+        UnequipItem.Emit(0);
+      else if (from_id == "eq2-equiped")
+        UnequipItem.Emit(1);
+
+      if (target_id == "eq1-equiped")
+        EquipItem.Emit(0, object);
+      else if (target_id == "eq2-equiped")
+        EquipItem.Emit(1, object);
+    }
+  }
+}
+
+void GameInventory::CallbackSwapEquipMode(Rocket::Core::Event& event)
+{
+  Rocket::Core::Element* element    = event.GetCurrentElement();
+  std::string            id         = element->GetId().CString();
+  unsigned short         slot       = id[2] - '0' - 1;
+  std::string            equip_type = id.substr(4);
+  EquipedMode            equip_mode = EquipedMouth;
+  
+  if (equip_type == "hoof")              { equip_mode = EquipedMouth;        }
+  else if (equip_type == "battlesaddle") { equip_mode = EquipedBattleSaddle; }
+  else if (equip_type == "magic")        { equip_mode = EquipedMagic;        }
+  SwapEquipMode.Emit(slot, equip_mode);
+}
+
+void GameInventory::SetEquipedItem(unsigned short slot, InventoryObject* item)
+{
+  std::stringstream elem_id;
+
+  elem_id << "eq" << (slot + 1) << "-equiped";
+  {
+    Rocket::Core::Element* element = _root->GetElementById(elem_id.str().c_str());
+
+    if (element)
+    {
+      std::stringstream rml;
+
+      if (item)
+      {
+        int item_count = _inventory->GetObjectIterator(item);
+
+        rml << "<p id='" << item_count << "' class='equiped_image";
+        if (!(item->IsHidden()))
+          rml << " inventory-item-draggable";
+        rml << "'><img src='../textures/itemIcons/" << (*item)["icon"].Value() << "' /></p>";
+      }
+      element->SetInnerRML(rml.str().c_str());
+    }
+  }
 }
 
 void GameInventory::SetInventory(Inventory& inventory)
@@ -683,7 +796,7 @@ void GameInventory::UpdateInventoryCapacity(void)
   {
     stringstream stream;
     
-    stream << "Weight: " << (int)(_inventory->GetCurrentWeight()) << " / " << (int)(_inventory->GetCapacity()) << "kg";
+    stream << "Weight: " << (int)(_inventory->GetCurrentWeight()) << " / " << (int)(_inventory->GetCapacity()) << " kg";
     capacity->SetInnerRML(stream.str().c_str());
   }
 }
@@ -750,14 +863,14 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
   if (doc)
   {
     doc->Show();
-    ToggleEventListener(true, "menu",      "click", MenuButtonClicked);
-    ToggleEventListener(true, "inv",       "click", InventoryButtonClicked);
-    ToggleEventListener(true, "pipbuck",   "click", PipbuckButtonClicked);
-    ToggleEventListener(true, "charsheet", "click", PersButtonClicked);
-    ToggleEventListener(true, "equiped_1", "click", EquipedItem1Clicked);
-    ToggleEventListener(true, "equiped_2", "click", EquipedItem2Clicked);
-    ToggleEventListener(true, "skilldex",  "click", SkilldexButtonClicked);
-    ToggleEventListener(true, "spellbook", "click", SpelldexButtonClicked);
+    ToggleEventListener(true, "menu",      "click",   MenuButtonClicked);
+    ToggleEventListener(true, "inv",       "click",   InventoryButtonClicked);
+    ToggleEventListener(true, "pipbuck",   "click",   PipbuckButtonClicked);
+    ToggleEventListener(true, "charsheet", "click",   PersButtonClicked);
+    ToggleEventListener(true, "equiped_1", "mouseup", EquipedItem1Clicked);
+    ToggleEventListener(true, "equiped_2", "mouseup", EquipedItem2Clicked);
+    ToggleEventListener(true, "skilldex",  "click",   SkilldexButtonClicked);
+    ToggleEventListener(true, "spellbook", "click",   SpelldexButtonClicked);
     
     _apEnabled = false;
     _apMax     = 0;
@@ -775,16 +888,16 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
 
 GameMainBar::~GameMainBar()
 {
-  ToggleEventListener(false, "menu",       "click", MenuButtonClicked);
-  ToggleEventListener(false, "inv",        "click", InventoryButtonClicked);
-  ToggleEventListener(false, "pipbuck",    "click", PipbuckButtonClicked);
-  ToggleEventListener(false, "charsheet",  "click", PersButtonClicked);
-  ToggleEventListener(false, "equiped_1",  "click", EquipedItem1Clicked);
-  ToggleEventListener(false, "equiped_2",  "click", EquipedItem2Clicked);
-  ToggleEventListener(false, "pass_turn",  "click", PassTurnClicked);
-  ToggleEventListener(false, "stop_fight", "click", CombatEndClicked);
-  ToggleEventListener(false, "skilldex",   "click", SkilldexButtonClicked);
-  ToggleEventListener(false, "spellbook",  "click", SpelldexButtonClicked);
+  ToggleEventListener(false, "menu",       "click",   MenuButtonClicked);
+  ToggleEventListener(false, "inv",        "click",   InventoryButtonClicked);
+  ToggleEventListener(false, "pipbuck",    "click",   PipbuckButtonClicked);
+  ToggleEventListener(false, "charsheet",  "click",   PersButtonClicked);
+  ToggleEventListener(false, "equiped_1",  "mouseup", EquipedItem1Clicked);
+  ToggleEventListener(false, "equiped_2",  "mouseup", EquipedItem2Clicked);
+  ToggleEventListener(false, "pass_turn",  "click",   PassTurnClicked);
+  ToggleEventListener(false, "stop_fight", "click",   CombatEndClicked);
+  ToggleEventListener(false, "skilldex",   "click",   SkilldexButtonClicked);
+  ToggleEventListener(false, "spellbook",  "click",   SpelldexButtonClicked);
 }
 
 void GameMainBar::AppendToConsole(const std::string& str)
@@ -891,7 +1004,7 @@ void GameMainBar::CallbackEquipedItem1Clicked(Rocket::Core::Event& event)
   button = event.GetParameter<int>("button", button);
   if (button == 0)
     UseEquipedItem.Emit(0);
-  else
+  else if (button == 2)
     EquipedItemNextAction.Emit(0);
 }
 
@@ -902,7 +1015,7 @@ void GameMainBar::CallbackEquipedItem2Clicked(Rocket::Core::Event& event)
   button = event.GetParameter<int>("button", button);
   if (button == 0)
     UseEquipedItem.Emit(1);
-  else
+  else if (button == 2)
     EquipedItemNextAction.Emit(1);
 }
 

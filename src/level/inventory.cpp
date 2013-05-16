@@ -419,6 +419,21 @@ bool Inventory::IncludesObject(InventoryObject* obj) const
   return (it != _content.end());
 }
 
+int              Inventory::GetObjectIterator(InventoryObject* object) const
+{
+  auto it = _content.begin();
+  auto end = _content.end();
+
+  for (int i = 0 ; it != end ; ++it, ++i)
+  {
+    InventoryObject* comp = *it;
+
+    if (object == comp)
+      return (i);
+  }
+  return (-1);
+}
+
 InventoryObject* Inventory::GetObject(const std::string& name)
 {
   Content::iterator it  = _content.begin();

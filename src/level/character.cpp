@@ -980,7 +980,6 @@ void     ObjectCharacter::CheckFieldOfView(void)
 
           if (character->HasFlag(1))
           {
-            short perception = GetStatController()->Model().GetSpecial("PER");
             short sneak      = character->GetStatController()->Model().GetSkill("Sneak");
             short value      = sneak - (perception * 3);
 

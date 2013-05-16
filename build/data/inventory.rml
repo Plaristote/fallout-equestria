@@ -21,6 +21,7 @@
 	   #body{
 			width:  60%;
 			height: 70%;
+			bottom: -5%;
       	margin: 	auto;
 		}
       #body-inventory-items
@@ -68,10 +69,15 @@
       #pipbuck-container,
       #barding-container{width: 90%; height: 80%; margin: 4%;}
       #pip-barding span{width: 48%; height: 100%;}
+      .inventory-item-draggable { drag: clone; }
+      .item-equiped img
+      {
+        width: 80%; height: 80%; margin: 10%;
+      }
 		</style>
 	</head>
   <body id="body" template="tplmainbar">
-  	<div id="body-inventory-items" class="console-bg place-next-to">
+  	<div id="body-inventory-items" class="console-bg place-next-to drop-target">
   		<img src="../textures/itemIcons/key.png" class='inventory-item' />
   	</div>
   	<div id="rest" class="place-next-to">
@@ -79,27 +85,27 @@
   		<div id="eq-containers" class="place-beneath">
   			<div id="eq1" class="place-next-to">
 	  			<div class="eq-type place-beneath">
-  					<button id="eq1-hoof" class="eq-type-selection place-next-to francis">Hoof</button>
-  					<button id="eq1-battlesadle" class="eq-type-selection place-next-to francis">Sadle</button>
-  					<button id="eq1-magick" class="eq-type-selection place-next-to francis">Mag</button>
+  					<button id="eq1-hoof"         class="eq-type-selection place-next-to francis">Hoof</button>
+  					<button id="eq1-battlesaddle" class="eq-type-selection place-next-to francis">Sadle</button>
+  					<button id="eq1-magic"        class="eq-type-selection place-next-to francis">Mag</button>
   				</div>
-  				<div id="eq1-equiped" class="metal-bg place-beneath"></div>
+  				<div id="eq1-equiped" class="metal-bg place-beneath drop-target item-equiped"></div>
   			</div>
   			<div id="eq2" class="palce-next-to">
 	  			<div class="eq-type place-beneath" >
-  					<button id="eq2-hoof" class="eq-type-selection place-next-to francis">Hoof</button>
-  					<button id="eq2-battlesadle" class="eq-type-selection place-next-to francis">Sadle</button>
-  					<button id="eq2-magick" class="eq-type-selection place-next-to francis">Mag</button>
+  					<button id="eq2-hoof"         class="eq-type-selection place-next-to francis">Hoof</button>
+  					<button id="eq2-battlesaddle" class="eq-type-selection place-next-to francis">Sadle</button>
+  					<button id="eq2-magic"        class="eq-type-selection place-next-to francis">Mag</button>
   				</div>
-  				<div id="eq2-equiped" class="metal-bg place-beneath"></div>
+  				<div id="eq2-equiped" class="metal-bg place-beneath drop-target item-equiped"></div>
   			</div>
   		</div>
   		<div id="eq-other" class="place-beneath">
   			<div id="sadle-armour" class="place-next-to">
   				<p class="texts place-beneath">BATTLESADLE</p>
-  				<div id="sadlebag-container" class="place-beneath metal-bg"></div>
+  				<div id="battlesaddle-container" class="place-beneath metal-bg drop-target item-equiped"></div>
   				<p class="texts place-beneath">ARMOUR</p>
-  				<div id="armour-container" class="place-beneath metal-bg"></div>
+  				<div id="armour-container" class="place-beneath metal-bg drop-target item-equiped"></div>
   			</div>
   			<div id="pip-barding" class="place-next-to">
   				<span class="place-next-to">

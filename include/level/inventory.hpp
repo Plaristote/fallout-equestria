@@ -46,6 +46,7 @@ public:
   void              SetEquiped(bool set)  { _equiped = set;    }
   bool              IsEquiped(void) const { return (_equiped); }
   bool              IsGroupableWith(const InventoryObject*) const;
+  bool              IsHidden(void)  const { return ((*this)["hidden"] == 1); }
 
 private:
   template<class C>
@@ -99,6 +100,8 @@ public:
   Content&         GetContent(void)       { return (_content); }
   InventoryObject* GetObject(const std::string& name);
   unsigned short   ContainsHowMany(const std::string& name) const;
+
+  int              GetObjectIterator(InventoryObject* object) const;
 
   unsigned short   GetCurrentWeight(void) const      { return (_currentWeight); }
   unsigned short   GetCapacity(void)      const      { return (_capacity);      }

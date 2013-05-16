@@ -46,8 +46,8 @@ void InventoryView::UpdateView(void)
   {
     InventoryObject&  item = *(*it);
     
-    item["hidden"].Nil();
-    item["hidden"].Value() != "1";
+    //item["hidden"].Nil();
+    //item["hidden"].Value() != "1";
     item.IsEquiped();
     if ((item["hidden"].Nil() || item["hidden"].Value() != "1") && !(item.IsEquiped()))
     {
@@ -128,14 +128,13 @@ InventoryObject* InventoryView::GetObjectFromId(const std::string& id)
 {
   Inventory::Content&          content = _inventory.GetContent();
   Inventory::Content::iterator it      = content.begin();
-  Inventory::Content::iterator end     = content.end();
   std::stringstream            stream;
-  unsigned short               count, intIt;
+  unsigned short               count;
 
   stream << id;
   stream >> count;
-  for (intIt = 0 ; it != end && intIt != count ; ++it, ++intIt);
-  if (it != end)
+  std::advance(it, count);
+  if (it != content.end())
     return (*it);
   return (0);
 }

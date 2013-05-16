@@ -368,11 +368,12 @@ void Level::InitPlayer(void)
   }
   _levelUi.GetMainBar().OpenSkilldex.Connect([this]() { ObjectCharacter::ActionUseSkillOn.Emit(GetPlayer()); });
   //_levelUi.GetMainBar().OpenSpelldex.Connect([this]() { ObjectCharacter::ActionUseSpellOn.Emit(GetPlayer()); });
-  
-  obs_player.Connect(GetPlayer()->HitPointsChanged,         _levelUi.GetMainBar(), &GameMainBar::SetCurrentHp);
-  obs_player.Connect(GetPlayer()->ActionPointChanged,       _levelUi.GetMainBar(), &GameMainBar::SetCurrentAP);
-  obs_player.Connect(GetPlayer()->EquipedItemActionChanged, _levelUi.GetMainBar(), &GameMainBar::SetEquipedItemAction);
-  obs_player.Connect(GetPlayer()->EquipedItemChanged,       _levelUi.GetMainBar(), &GameMainBar::SetEquipedItem);
+
+  obs_player.Connect(GetPlayer()->HitPointsChanged,         _levelUi.GetMainBar(),   &GameMainBar::SetCurrentHp);
+  obs_player.Connect(GetPlayer()->ActionPointChanged,       _levelUi.GetMainBar(),   &GameMainBar::SetCurrentAP);
+  obs_player.Connect(GetPlayer()->EquipedItemActionChanged, _levelUi.GetMainBar(),   &GameMainBar::SetEquipedItemAction);
+  obs_player.Connect(GetPlayer()->EquipedItemChanged,       _levelUi.GetMainBar(),   &GameMainBar::SetEquipedItem);
+  obs_player.Connect(GetPlayer()->EquipedItemChanged,       _levelUi.GetInventory(), &GameInventory::SetEquipedItem);
   _levelUi.GetMainBar().EquipedItemNextAction.Connect(*GetPlayer(), &ObjectCharacter::ItemNextUseType);
   _levelUi.GetMainBar().UseEquipedItem.Connect       (*this, &Level::CallbackActionTargetUse);
   _levelUi.GetMainBar().CombatEnd.Connect            (*this, &Level::StopFight);
@@ -381,10 +382,17 @@ void Level::InitPlayer(void)
   obs.Connect(_levelUi.GetInventory().UnequipItem, *GetPlayer(), &ObjectCharacter::UnequipItem);
   obs.Connect(_levelUi.GetInventory().DropObject,  *this,        &Level::PlayerDropObject);
   obs.Connect(_levelUi.GetInventory().UseObject,   *this,        &Level::PlayerUseObject);
-  
-  _levelUi.GetMainBar().SetEquipedItem(0, GetPlayer()->GetEquipedItem(0));
-  _levelUi.GetMainBar().SetEquipedItem(1, GetPlayer()->GetEquipedItem(1));
-  
+  obs.Connect(_levelUi.GetInventory().SwapEquipMode, [this](unsigned short slot, EquipedMode mode)
+  {
+    GetPlayer()->SetEquipedItem(slot, GetPlayer()->GetEquipedItem(slot), mode);
+  });
+
+  for (unsigned short it = 0 ; it < 2 ; ++it) // For every equiped item slot
+  {
+    _levelUi.GetMainBar().SetEquipedItem(it, GetPlayer()->GetEquipedItem(it));
+    _levelUi.GetInventory().SetEquipedItem(it, GetPlayer()->GetEquipedItem(it));
+  }
+
   //
   // The wall-eating ball of wrath
   //
