@@ -401,27 +401,30 @@ void Level::InitPlayer(void)
   CPT(RenderAttrib) atr2 = StencilAttrib::make(1, StencilAttrib::SCF_always,    StencilAttrib::SO_zero, StencilAttrib::SO_replace, StencilAttrib::SO_replace, 1, 0, 1);
 
   _player_halo = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
-  _player_halo.set_scale(5);
-  _player_halo.set_bin("background", 0);
-  _player_halo.set_depth_write(0);
-  _player_halo.reparent_to(_window->get_render());
-  node        = _player_halo.node();
-  node->set_attrib(atr2);
-  node->set_attrib(ColorBlendAttrib::make(ColorBlendAttrib::M_add));
-  for_each(_world->floors.begin(), _world->floors.end(), [node, atr1](NodePath floor)
+  if ((_player_halo.node()) != 0)
   {
-    NodePath map_objects = floor.get_child(0);
-    
-    for (unsigned short i = 0 ; i < map_objects.get_num_children() ; ++i)
+    _player_halo.set_scale(5);
+    _player_halo.set_bin("background", 0);
+    _player_halo.set_depth_write(0);
+    _player_halo.reparent_to(_window->get_render());
+    node        = _player_halo.node();
+    node->set_attrib(atr2);
+    node->set_attrib(ColorBlendAttrib::make(ColorBlendAttrib::M_add));
+    for_each(_world->floors.begin(), _world->floors.end(), [node, atr1](NodePath floor)
     {
-      NodePath child = map_objects.get_child(i);
+      NodePath map_objects = floor.get_child(0);
+    
+      for (unsigned short i = 0 ; i < map_objects.get_num_children() ; ++i)
+      {
+        NodePath child = map_objects.get_child(i);
 
-      if (child.get_name() == "Terrain")
-        continue ;
-      if (child.node() != node && (child.get_name().substr(0, 6) != "Ground"))
-        child.set_attrib(atr1);
-    }
-  });  
+        if (child.get_name() == "Terrain")
+          continue ;
+        if (child.node() != node && (child.get_name().substr(0, 6) != "Ground"))
+          child.set_attrib(atr1);
+      }
+    });
+  }
 
   {
     TimeManager::Task*    task    = _timeManager.AddTask(TASK_LVL_CITY, true, 1);
