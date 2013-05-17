@@ -335,6 +335,13 @@ void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, E
   item->SetEquiped(true);
   EquipedItemChanged.Emit(it, item);
   _inventory->ContentChanged.Emit();
+  _inventory->ContentChanged.Connect(*this, &ObjectCharacter::RefreshEquipment);
+}
+
+void ObjectCharacter::RefreshEquipment(void)
+{
+  EquipedItemChanged.Emit(0, _equiped[0].equiped);
+  EquipedItemChanged.Emit(1, _equiped[1].equiped);
 }
 
 void ObjectCharacter::UnequipItem(unsigned short it)

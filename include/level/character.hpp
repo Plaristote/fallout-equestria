@@ -156,6 +156,7 @@ public:
   bool                HasFlag(unsigned char flag) const { return ((_flags & flag) != 0); }
 
   void                PlayEquipedItemAnimation(unsigned short it, const std::string& name);
+  void                RefreshEquipment(void);
   void                SetEquipedItem(unsigned short it, InventoryObject* object, EquipedMode mode = EquipedMouth);
   InventoryObject*    GetEquipedItem(unsigned short it);
   unsigned char       GetequipedAction(unsigned short it) const { return (_equiped[it].actionIt); }

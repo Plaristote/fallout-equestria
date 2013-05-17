@@ -6,28 +6,50 @@
       #body
       {
         width:  200px;
-        height: 70%;
-        right:  0px;
-        top:    0px;
+        height: 60%;
+        right:  2%;
+        bottom: 30%;
       }
-
+				
+				.title {
+					width: 60%;
+					margin-left: 20%;
+					margin-top: 2%;
+				}
       #skill-list
       {
         overflow-y:   auto;
         margin-right: 10px;
-        height:       90%;
+        height:       85%;
       }
 
+      
+      .skill-button{
+      	width:	55%; 
+      	float: left;    	
+      	height: 100%;
+      }
+      .skill-points{
+      	width: 25%;
+      	float: right;
+      }
       #button_cancel
       {
-        width:       20%;
-        margin-left: 40%;
+        margin-left: 30%;
+        height: 7%;
+        width: 40%;
+        font-size: 14px;
       }
-
+				.item{
+					padding: 3% 5%;
+					text-align: center;
+					height: 7%;
+					}
     </style>
   </head>
   <body id="body">
   <div id="window">
+		 <div class="metal-bg title">SKILLDEX</div>
     <div id="skill-list">
     </div>
     <button class="universal_button" id="button_cancel" i18n="Cancel">Cancel</button>
