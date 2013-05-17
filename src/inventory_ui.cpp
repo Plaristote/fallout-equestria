@@ -235,9 +235,9 @@ UiUseSkillOn::UiUseSkillOn(WindowFramework* window, Rocket::Core::Context* conte
       stringstream stream;
 
       skill_list = statistics->Model().GetUsableSkills(player == target); // GetUsableSkills(usable_on_self?)
-      for_each(skill_list.begin(), skill_list.end(), [&stream](string skill)
+      for_each(skill_list.begin(), skill_list.end(), [&stream, player](string skill)
       {
-        stream << "<div class='item'><button id='pick-skill-" << skill << "' class='long_button skill-button' data-skill='" << skill << "'>" << skill << "</button><span id='pick-skill-" << skill << "-points' class='points skill-points'>50</span></div>";
+        stream << "<div class='item'><button id='pick-skill-" << skill << "' class='long_button skill-button' data-skill='" << skill << "'>" << skill << "</button><span id='pick-skill-" << skill << "-points' class='points skill-points'>" << player->GetStatController()->Model().GetSkill(skill) << "</span></div>";
       });
       list->SetInnerRML(stream.str().c_str());
       for_each(skill_list.begin(), skill_list.end(), [this](string skill)
