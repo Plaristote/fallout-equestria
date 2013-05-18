@@ -20,6 +20,39 @@ StringList GetAvailableApps(Data data)
 }
 
 //
+// Looting callbacks
+//
+bool LootingTest(DynamicObject@ self_obj, Character@ user, Item@ item)
+{
+  Character@ self = self_obj.AsCharacter();
+
+  if (self.GetHitPoints() > 0) // The character user is stealing from self
+  {
+    Data user_stats      = user.GetStatistics();
+    Data self_stats      = self.GetStatistics();
+    int  steal_skill     = user_stats["Skills"]["Steal"].AsInt();
+    int  self_perception = self_stats["Special"]["PER"].AsInt();
+    int  max_throw       = steal_skill - (10 + 3 * self_perception);
+    int  throw           = Random() % 100;
+
+    if (max_throw > 95)
+      max_throw = 95;
+    else if (max_throw < 5)
+      max_throw = 5;
+    if (throw <= max_throw)
+      return (true);
+    // If didn't return in the past line, the steal check has failed.
+    return (false);
+  }
+  return (true); // Self is dead. There's no need to bother him with statistic checks.
+}
+
+bool LootingFailureTest()
+{
+  return (true);
+}
+
+//
 // Skill effects on characters
 //
 bool UseSkill(DynamicObject@ target, Character@ user, string skill)
@@ -30,6 +63,7 @@ bool UseSkill(DynamicObject@ target, Character@ user, string skill)
   if (skill == "Steal")
   {
     Cout("SCRIPT: Steal skill has been used");
+    StartStealing(user, target);
     return (true);
   }
   else if (skill == "Sneak")
@@ -39,6 +73,11 @@ bool UseSkill(DynamicObject@ target, Character@ user, string skill)
     return (true);
   }
   return (false);
+}
+
+void StartStealing(Character@ user, DynamicObject@ target)
+{
+  level.ActionUse(user, target);
 }
 
 void StartSneaking(Character@ user)

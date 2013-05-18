@@ -897,9 +897,10 @@ void                ObjectCharacter::RunDeath()
   _hitPoints = 0;
 }
 
-void                ObjectCharacter::CallbackActionUse(InstanceDynamicObject*)
+void                ObjectCharacter::CallbackActionUse(InstanceDynamicObject* user)
 {
-  _level->PlayerLoot(&(GetInventory()));
+  if (user == _level->GetPlayer())
+    _level->PlayerLootWithScript(&(GetInventory()), this, _script_context, "scripts/ai/" + _object->script + ".as");
 }
 
 /*

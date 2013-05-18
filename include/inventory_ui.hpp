@@ -8,6 +8,7 @@
 # include <Rocket/Core/Element.h>
 # include "rocket_extension.hpp"
 # include "level/character.hpp"
+#include "as_object.hpp"
 # include <sstream>
 
 class UiObjectQuantityPicker : public UiBase
@@ -71,11 +72,26 @@ public:
   void Destroy(void);
   void Update(void);
 
-  virtual bool AllowDrop(InventoryView& from, InventoryView& to) { return (true); }
+  virtual bool AllowDrop(InventoryView& from, InventoryView& to)
+  {
+    if (_allow_drop)
+      _allow_drop(from, to);
+    return (true);
+  }
+  
+  bool CanSwap(InventoryObject* object) const
+  {
+    if (_can_swap)
+      return (_can_swap(object));
+    return (true);
+  }
+
+  void SetCanSwap(std::function<bool (InventoryObject*)> can_swap) { _can_swap = can_swap; }
 
 private:
   std::vector<InventoryView*>                          _views;
   std::function<bool (InventoryView&, InventoryView&)> _allow_drop;
+  std::function<bool (InventoryObject*)>               _can_swap;
 };
 
 class UiUseObjectOn : public UiBase
@@ -142,7 +158,7 @@ private:
   UiObjectQuantityPicker* _quantity_picker;
 };
 
-class UiLoot : public UiBase
+class UiLoot : public UiBase, public Scriptable
 {
 public:
   UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventory& looter, Inventory& looted);
@@ -150,9 +166,12 @@ public:
 
   void Destroy(void);
   
+  void SetScriptObject(ObjectCharacter* user, InstanceDynamicObject* target, asIScriptContext* context, const std::string& filepath);
+  
   Sync::Signal<void> Done;
 
 private:
+  bool CanSwap(InventoryObject*);
   void SwapObjects(InventoryObject* object);
   void RocketDoneClicked(Rocket::Core::Event&)    { Done.Emit(); }
   void RocketTakeAllClicked(Rocket::Core::Event&);
@@ -163,6 +182,11 @@ private:
 
   Inventory& _looter;
   Inventory& _looted;
+
+  // Scripting Stuff
+  AngelScript::Object*   as_object;
+  InstanceDynamicObject* target_object;
+  ObjectCharacter*       user_character;
 };
 
 class UiEquipMode : public UiBase

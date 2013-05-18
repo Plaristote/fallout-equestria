@@ -1070,6 +1070,15 @@ void Level::ConsoleWrite(const string& str)
   _levelUi.GetMainBar().AppendToConsole(str);
 }
 
+void Level::PlayerLootWithScript(Inventory* inventory, InstanceDynamicObject* target, asIScriptContext* context, const std::string& filepath)
+{
+  UiBase* old_ptr = _currentUis[UiItLoot];
+
+  PlayerLoot(inventory);
+  if (old_ptr == _currentUis[UiItLoot] || _currentUis[UiItLoot] == 0) return ; // If PlayerLoot failed, silent return is advised
+  _currentUiLoot->SetScriptObject(GetPlayer(), target, context, filepath);
+}
+
 void Level::PlayerLoot(Inventory* inventory)
 {
   if (!inventory)

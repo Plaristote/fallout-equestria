@@ -188,7 +188,7 @@ void InventoryViewController::DragObserver(InventoryView* container, Rocket::Cor
     {
       InventoryObject* object = view.GetObjectFromId(std::string(element->GetId().CString()));
 
-      if (container->GetInventory().CanCarry(object))
+      if (container->GetInventory().CanCarry(object) && CanSwap(object))
       {
         view.GetInventory().DelObject(object);
         container->GetInventory().AddObject(object);
@@ -319,6 +319,7 @@ void UiUseObjectOn::Destroy(void)
 UiLoot::UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventory& looter, Inventory& looted) : UiBase(window, context), _looter(looter), _looted(looted)
 {
   _quantity_picker = 0;
+  as_object        = 0;
   _root            = context->LoadDocument("data/looting.rml");
   if (_root)
   {
@@ -334,6 +335,7 @@ UiLoot::UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventor
     if (eInvLooted)
       _viewController.AddView(eInvLooted, looted);
     _viewController.ObjectSelected.Connect(*this, &UiLoot::SwapObjects);
+    _viewController.SetCanSwap([this](InventoryObject* object) -> bool { return (CanSwap(object)); });
     _root->Show();
   }
 }
@@ -341,6 +343,7 @@ UiLoot::UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventor
 UiLoot::~UiLoot()
 {
   if (_quantity_picker) delete _quantity_picker;
+  if (as_object)        delete as_object;
   _viewController.Destroy();
   if (_root)
   {
@@ -356,6 +359,36 @@ void UiLoot::Destroy(void)
 {
   if (_root)
     _root->Hide();
+}
+
+void UiLoot::SetScriptObject(ObjectCharacter* user, InstanceDynamicObject* target, asIScriptContext* context, const std::string& filepath)
+{
+  if (as_object) delete as_object;
+  as_object = new AngelScript::Object(context, filepath);
+  as_object->asDefineMethod("LootingTest",        "bool LootingTest(DynamicObject@,Character@,Item@)");
+  as_object->asDefineMethod("LootingFailureTest", "bool LootingFailureTest()");
+  user_character = user;
+  target_object  = target;
+}
+
+bool UiLoot::CanSwap(InventoryObject* object)
+{
+  bool can_swap = true;
+
+  if (as_object)
+  {
+    AngelScript::Type<InventoryObject*>       param1(object);
+    AngelScript::Type<ObjectCharacter*>       param2(user_character);
+    AngelScript::Type<InstanceDynamicObject*> param3(target_object);
+
+    can_swap = as_object->Call("LootingTest", 3, &param3, &param2, &param1);
+    if (!can_swap)
+    {
+      if ((bool)(as_object->Call("LootingFailureTest")))
+        Done.Emit();
+    }
+  }
+  return (can_swap);
 }
 
 void UiLoot::SwapObjects(InventoryObject* object)
@@ -377,8 +410,15 @@ void UiLoot::SwapObjects(InventoryObject* object)
     {
       InventoryObject* booty = looted.GetObject(object_name);
 
-      looter.AddObject(booty);
-      looted.DelObject(booty);
+      if (!(CanSwap(booty)))
+        return ;
+      if (_looter.CanCarry(booty))
+      {
+        looter.AddObject(booty);
+        looted.DelObject(booty);
+      }
+      else
+        ; // TODO Emit some kind of cannot carry signal ?
     }
     _viewController.Update();
     if (_quantity_picker)
@@ -409,6 +449,8 @@ void UiLoot::RocketTakeAllClicked(Rocket::Core::Event&)
 
     if (!hidden && _looter.CanCarry(object))
     {
+      if (!(CanSwap(object)))
+        return ;
       _looter.AddObject(object);
       _looted.DelObject(object);
       it = _looted.GetContent().begin();

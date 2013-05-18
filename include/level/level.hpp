@@ -118,6 +118,7 @@ public:
   void                   PlayerDropObject(InventoryObject*);
   void                   PlayerUseObject(InventoryObject*);
   void                   PlayerLoot(Inventory*);
+  void                   PlayerLootWithScript(Inventory*, InstanceDynamicObject*, asIScriptContext*, const std::string& script_path);
 
   void                   PlayerEquipObject(unsigned short it, InventoryObject* object);
 

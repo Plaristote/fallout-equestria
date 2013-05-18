@@ -139,12 +139,12 @@ void combat(Character@ self)
       }
       else
       {
-        if (currentTarget.GetPathDistance(self.AsObject()) <= 1)
+        /*if (currentTarget.GetPathDistance(self.AsObject()) <= 1)
         {
           Cout("Path distance <= 1");
           level.NextTurn();
         }
-        else
+        else*/
         {
           Cout("Civilian going to player");
           self.GoTo(level.GetPlayer().AsObject(), 1);

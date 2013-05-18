@@ -30,6 +30,102 @@ void Script::Call(asIScriptContext* context, asIScriptFunction* function, const 
   context->Execute();
 }
 
+/*
+ * Begin AS OBJECT
+ */
+#include "as_object.hpp"
+
+AngelScript::Object::Object(const std::string& filepath) : filepath(filepath), module(0)
+{
+  asIScriptEngine* engine = Script::Engine::Get();
+  
+  if (engine)
+    context = engine->CreateContext();
+  else
+    ; // throw something
+    Initialize();
+}
+
+AngelScript::Object::Object(asIScriptContext* context, const std::string& filepath) : filepath(filepath), context(context), module(0)
+{
+  Initialize();
+}
+
+AngelScript::Object::~Object()
+{
+  if (module)
+    Script::ModuleManager::Release(module);
+}
+
+void AngelScript::Object::Initialize(void)
+{
+  if (!context)
+    ; // throw something
+    if (module)
+      Script::ModuleManager::Release(module);
+    module = Script::ModuleManager::Require(filepath, filepath);
+  std::for_each(functions.begin(), functions.end(), [this](Functions::value_type& item)
+  {
+    item.second.function = 0;
+  });
+}
+
+void AngelScript::Object::asDefineMethod(const std::string& name, const std::string& declaration)
+{
+  Function function;
+
+  function.function  = 0;
+  function.signature = declaration;
+  functions.emplace(Functions::value_type(name, function));
+}
+
+AngelScript::Object::ReturnType AngelScript::Object::Call(const std::string& name, unsigned int argc, ...)
+{
+  va_list ap;
+  auto    it = functions.find(name);
+  
+  if (it == functions.end())
+    ; // throw something
+    if (!(it->second.function))
+      it->second.function = module->GetFunctionByDecl(it->second.signature.c_str());
+    if (!(it->second.function))
+      ; // throw something
+      context->Prepare(it->second.function);
+    va_start(ap, argc);
+  for (unsigned short i = 0 ; argc > i ; ++i)
+  {
+    IType* param = reinterpret_cast<IType*>(va_arg(ap, void*));
+    
+    switch (param->Flag())
+    {
+      case '0':
+        context->SetArgObject(i, param->Ptr());
+        break ;
+      case 'b':
+        context->SetArgByte  (i, *((Type<bool>*)(param)));
+        break ;
+      case 'i':
+        context->SetArgWord  (i, *((Type<int>*)(param)));
+        break ;
+      case 'l':
+        context->SetArgDWord (i, *((Type<long>*)(param)));
+        break ;
+      case 'd':
+        context->SetArgDouble(i, *((Type<double>*)(param)));
+        break ;
+      case 'f':
+        context->SetArgFloat (i, *((Type<float>*)(param)));
+        break ;
+    }
+  }
+  va_end(ap);
+  context->Execute();
+  return (ReturnType(context));
+}
+
+/*
+ * End AS OBJECT
+ */
 void             Engine::Initialize(void)
 {
   _engine = asCreateScriptEngine(ANGELSCRIPT_VERSION);
