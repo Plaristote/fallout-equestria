@@ -90,7 +90,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
       updated         = false;
 //    if (cursorPos != _lastMousePos)
   //    updated         = false;
-    if (!(cursorPos == _lastMousePos && updated == false))
+    if (!(updated == false))
       return ;
     last_update       = cursorPos;
     updated           = true;

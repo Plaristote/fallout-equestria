@@ -254,6 +254,7 @@ tabset panels panel
 {
   height: 90%;
   width: 18%;
+  padding-top: 1%;
 }
 
 .small_button
@@ -268,6 +269,11 @@ tabset panels panel
 
 .traits-row{width: 48%;}
 
+.party-member img
+{
+  width:  64px;
+  height: 64px;
+}
 		</style>
 	</head>
 <body id="body" template="tplmainbar">

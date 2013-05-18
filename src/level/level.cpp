@@ -550,6 +550,7 @@ void Level::SetPlayerInventory(Inventory* inventory)
 
 Level::~Level()
 {
+  MouseCursor::Get()->SetHint("");
   _window->get_render().set_light_off(_sunLightAmbientNode);
   _window->get_render().set_light_off(_sunLightNode);
   _window->get_render().clear_light(_sunLightAmbientNode);
