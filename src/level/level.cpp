@@ -848,6 +848,7 @@ AsyncTask::DoneStatus Level::do_task(void)
   }
   // TEST End
 
+  _camera.SlideToHeight(GetPlayer()->GetDynamicObject()->nodePath.get_z());
   _camera.Run(elapsedTime);  
   _mouse.ClosestWaypoint(_world, _currentFloor);
   if (_mouse.Hovering().hasWaypoint)

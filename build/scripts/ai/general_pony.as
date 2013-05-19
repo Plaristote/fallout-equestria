@@ -42,6 +42,7 @@ bool LootingTest(DynamicObject@ self_obj, Character@ user, Item@ item)
     if (throw <= max_throw)
       return (true);
     // If didn't return in the past line, the steal check has failed.
+    self.SetAsEnemy(user, true);
     return (false);
   }
   return (true); // Self is dead. There's no need to bother him with statistic checks.
@@ -96,7 +97,7 @@ void ai_template_follow_char(Character@ self, Character@ to_follow, float elapse
 {
   follow_char_timer1 += elapsedTime;
   follow_char_timer2 += elapsedTime;
-  if (!(self.IsMoving()) && follow_char_timer1 > 10)
+  if (to_follow.GetDistance(self.AsObject()) > 30)
   {
     self.GoTo(to_follow.AsObject(), 2);
     follow_char_timer1 = 0;
