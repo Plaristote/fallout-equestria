@@ -116,6 +116,10 @@ x --> Pipbuck
 x ----> Quest Application
 x --> Exit zones leading to the same level must only re-deploy the party
 
+  -> General
+x --> Configurable graphism quality
+~ --> Configurable camera behavior
+
 Milestone IV
   -> WorldMap
   --> Asynchronous loading

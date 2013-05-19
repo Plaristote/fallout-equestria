@@ -1,6 +1,7 @@
 #include "globals.hpp"
 #include "level/scene_camera.hpp"
 #include "level/objectnode.hpp"
+#include <options.hpp>
 
 using namespace std;
 
@@ -40,7 +41,7 @@ void SceneCamera::SetEnabledScroll(bool set)
 
 void SceneCamera::SlideToHeight(float height)
 {
-  _destHeight = height + CAMERA_HEIGHT;
+  _destHeight = height + _camera_height;
 }
 
 void SceneCamera::RunSlideHeight(float elapsedTime)
@@ -53,12 +54,18 @@ void SceneCamera::RunSlideHeight(float elapsedTime)
   _camera.set_pos(pos);
 }
 
+void SceneCamera::RefreshCameraHeight(void)
+{
+  _camera_height = OptionsManager::Get()["camera"]["distance"];  
+}
+
 SceneCamera::SceneCamera(WindowFramework* window, NodePath camera) : _window(window), _graphicWindow(window->get_graphics_window()), _camera(camera)
 {
   _scrollEnabled = true;
+  RefreshCameraHeight();
 
-  _destHeight = CAMERA_HEIGHT;
-  camera.set_pos(0, 0, CAMERA_HEIGHT);
+  _destHeight = _camera_height;
+  camera.set_pos(0, 0, _camera_height);
   camera.set_hpr(-40, -40, 0);
 
   _cameraMovementSpeed = 30.f;
@@ -245,7 +252,7 @@ void SceneCamera::CenterCameraOn(NodePath np)
 {
   _centeringCamera   = true;
   _objectivePos      = np.get_pos();
-  _objectivePos.set_z(_objectivePos.get_z() + CAMERA_HEIGHT);
+  _objectivePos.set_z(_objectivePos.get_z() + _camera_height);
 
   LPoint3f cameraRot = _camera.get_hpr();  
   float    rad2deg   = 3.1415926535897 / 180;

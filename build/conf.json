@@ -15,6 +15,7 @@
 }
 ,
 "camera": {
+  "distance": 35,
   "fight": {
     "focus-enemies": 1,
     "focus-self": 0

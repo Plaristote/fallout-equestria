@@ -33,7 +33,11 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
   if (!(events->add_hook("mouse2", &Mouse::CallbackButton2, (void*)this)))
     cerr << "Failed to registrate mouse2 event" << endl;
   if (!(events->add_hook("mouse3", &Mouse::CallbackButton3, (void*)this)))
-    cerr << "Failed to registrate mouse2 event" << endl;
+    cerr << "Failed to registrate mouse3 event" << endl;
+  if (!(events->add_hook("wheel_up", &Mouse::CallbackWheelUp, (void*)this)))
+    cerr << "Failed to register wheel_up event" << endl;
+  if (!(events->add_hook("wheel_down", &Mouse::CallbackWheelDown, (void*)this)))
+    cerr << "Failed to register wheel_down event" << endl;
 
   SetMouseState('a');
 }

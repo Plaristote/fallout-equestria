@@ -39,6 +39,7 @@ public:
     _maxPosY = maxY;
   }
   
+  void            RefreshCameraHeight(void);
   void            SlideToHeight(float);
   void            CenterCameraInstant(LPoint3f);
   void            CenterCameraOn(NodePath np);
@@ -69,6 +70,7 @@ private:
   int              _minPosX, _minPosY, _maxPosX, _maxPosY;
 
   float            _destHeight;
+  float            _camera_height;
 
   bool             _centeringCamera;
   bool             _followingNodePath;

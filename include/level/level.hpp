@@ -141,6 +141,8 @@ public:
   void               SetMouseState(MouseState);
   void               MouseLeftClicked(void);
   void               MouseRightClicked(void);
+  void               MouseWheelUp(void);
+  void               MouseWheelDown(void);
 
   void               StartCombat(void);
 

@@ -52,9 +52,11 @@ public:
   
   void                      ClosestWaypoint(World*, short currentFloor);
 
-  Sync::Signal<void> ButtonLeft;
-  Sync::Signal<void> ButtonMiddle;
-  Sync::Signal<void> ButtonRight;
+  Sync::Signal<void>        ButtonLeft;
+  Sync::Signal<void>        ButtonMiddle;
+  Sync::Signal<void>        ButtonRight;
+  Sync::Signal<void>        WheelUp;
+  Sync::Signal<void>        WheelDown;
 
   static void               CallbackButton1(const Event*, void* ptr)
   {
@@ -69,6 +71,16 @@ public:
   static void               CallbackButton3(const Event*, void* ptr)
   {
     reinterpret_cast<Mouse*>(ptr)->ButtonRight.Emit();
+  }
+  
+  static void               CallbackWheelUp(const Event*, void* ptr)
+  {
+    reinterpret_cast<Mouse*>(ptr)->WheelUp.Emit();
+  }
+  
+  static void               CallbackWheelDown(const Event*, void* ptr)
+  {
+    reinterpret_cast<Mouse*>(ptr)->WheelDown.Emit();
   }
 
 private:

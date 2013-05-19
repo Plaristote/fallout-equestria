@@ -954,6 +954,8 @@ void Level::MouseInit(void)
   SetMouseState(MouseAction);
   _mouse.ButtonLeft.Connect  (*this,   &Level::MouseLeftClicked);
   _mouse.ButtonRight.Connect (*this,   &Level::MouseRightClicked);
+  _mouse.WheelUp.Connect     (*this,   &Level::MouseWheelUp);
+  _mouse.WheelDown.Connect   (*this,   &Level::MouseWheelDown);
   _mouse.ButtonMiddle.Connect(_camera, &SceneCamera::SwapCameraView);
 }
 
@@ -976,6 +978,34 @@ void Level::SetMouseState(MouseState state)
     case MouseTarget:
       _mouse.SetMouseState('t');
       break ;
+  }
+}
+
+void Level::MouseWheelDown(void)
+{
+  if (!(_levelUi.GetContext()->GetHoverElement() != _levelUi.GetContext()->GetRootElement()))
+  {
+    Data options = OptionsManager::Get();
+    float distance = options["camera"]["distance"];
+    
+    if (distance < 140.f)
+      distance += 10.f;
+    options["camera"]["distance"] = distance;
+    _camera.RefreshCameraHeight();
+  }
+}
+
+void Level::MouseWheelUp(void)
+{
+  if (!(_levelUi.GetContext()->GetHoverElement() != _levelUi.GetContext()->GetRootElement()))
+  {
+    Data options = OptionsManager::Get();
+    float distance = options["camera"]["distance"];
+    
+    if (distance > 50.f)
+      distance -= 10.f;
+    options["camera"]["distance"] = distance;
+    _camera.RefreshCameraHeight();
   }
 }
 
