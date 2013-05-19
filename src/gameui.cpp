@@ -321,12 +321,64 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
 	}
       }
     }
+    
+    {
+      typedef std::pair<std::string, Controls::ElementFormControlInput*> RadioButton;
+      RadioButton radios_yes[] = {
+        RadioButton("focus-self",    dynamic_cast<Controls::ElementFormControlInput*>(_root->GetElementById("camera-focus"))),
+        RadioButton("focus-self",    dynamic_cast<Controls::ElementFormControlInput*>(_root->GetElementById("camera-fight-focus"))),
+        RadioButton("focus-enemies", dynamic_cast<Controls::ElementFormControlInput*>(_root->GetElementById("camera-enemy-focus")))
+      };
+      RadioButton radios_no[] = {
+        RadioButton("focus-self",    dynamic_cast<Controls::ElementFormControlInput*>(_root->GetElementById("camera-free"))),
+        RadioButton("focus-self",    dynamic_cast<Controls::ElementFormControlInput*>(_root->GetElementById("camera-fight-free"))),
+        RadioButton("focus-enemies", dynamic_cast<Controls::ElementFormControlInput*>(_root->GetElementById("camera-enemy-free")))
+      };
+      Data        options = OptionsManager::Get();
+
+      for (unsigned int i = 0 ; i < 3 ; ++i)
+      {
+        RadioButton radio_true  = radios_yes[i];
+        RadioButton radio_false = radios_no[i];
+        Data        data        = (i == 0 ? options["camera"] : options["camera"]["fight"]);
+
+        if (data[radio_true.first] == 1)
+          radio_true.second->Click();
+        else
+          radio_false.second->Click();
+      }
+    }
 
     ToggleEventListener(true, "fullscreen",       "click",  FullscreenToggled);
     ToggleEventListener(true, "screen-select",    "change", ScreenSelected);
     ToggleEventListener(true, "language-select",  "change", LanguageSelected);
     ToggleEventListener(true, "graphics-quality", "change", QualitySelected);
     ToggleEventListener(true, "exit",             "click",  ExitClicked);
+
+    std::string camera_options[] = { "camera-focus", "camera-free", "camera-fight-focus", "camera-fight-free", "camera-enemy-focus", "camera-enemy-free" };
+    for (unsigned int i = 0 ; i < 6 ; ++i)
+      ToggleEventListener(true, camera_options[i], "click", CameraFocusChanged);
+
+    CameraFocusChanged.EventReceived.Connect([this](Rocket::Core::Event& event)
+    {
+      Data        options = OptionsManager::Get();
+      std::string option  = event.GetCurrentElement()->GetId().CString();
+
+      if (option == "camera-focus")
+        options["camera"]["focus-self"] = 1;
+      else if (option == "camera-free")
+        options["camera"]["focus-self"] = 0;
+      else if (option == "camera-fight-focus")
+        options["camera"]["fight"]["focus-self"] = 1;
+      else if (option == "camera-fight-free")
+        options["camera"]["fight"]["focus-self"] = 0;
+      else if (option == "camera-enemy-focus")
+        options["camera"]["fight"]["focus-enemies"] = 1;
+      else if (option == "camera-enemy-free")
+        options["camera"]["fight"]["focus-enemies"] = 0;
+      OptionsManager::Refresh();
+    });
+
     ExitClicked.EventReceived.Connect      (*this, &UiBase::FireHide);
     FullscreenToggled.EventReceived.Connect(*this, &GameOptions::ToggleFullscreen);
     QualitySelected.EventReceived.Connect  (*this, &GameOptions::SetQuality);
@@ -343,6 +395,10 @@ GameOptions::~GameOptions()
   ToggleEventListener(false, "language-select", "change", LanguageSelected);
   ToggleEventListener(false, "graphics-quality", "change", QualitySelected);
   ToggleEventListener(false, "exit",            "click",  ExitClicked);
+  std::string camera_options[] = { "camera-focus", "camera-free", "camera-fight-focus", "camera-fight-free", "camera-enemy-focus", "camera-enemy-free" };
+  for (unsigned int i = 0 ; i < 6 ; ++i)
+    ToggleEventListener(false, camera_options[i], "click", CameraFocusChanged);
+  
 }
 
 void GameOptions::ToggleFullscreen(Rocket::Core::Event& event)

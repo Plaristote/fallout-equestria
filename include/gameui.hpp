@@ -242,7 +242,7 @@ public:
   ~GameOptions(void);
 private:
   RocketListener ExitClicked;
-  RocketListener LanguageSelected, QualitySelected, ScreenSelected, FullscreenToggled;
+  RocketListener LanguageSelected, QualitySelected, ScreenSelected, FullscreenToggled, CameraFocusChanged;
   
   void SetLanguage(Rocket::Core::Event&);
   void SetResolution(Rocket::Core::Event&);

@@ -236,6 +236,14 @@ void SceneCamera::CenterCameraInstant(LPoint3f pos)
   
   _camera.set_x(pos.get_x() + sin(cameraRot.get_x()) * 100);
   _camera.set_y(pos.get_y() + sin(cameraRot.get_y()) * 100);
+  
+  if (_currentCameraAngle == 1)
+    _camera.set_y(_camera.get_y() + 80 + (140 - _camera_height) / 1.35);
+  else
+  {
+    _camera.set_x(_camera.get_x() + 25 - (_camera_height - 50) * 0.85);
+    _camera.set_y(_camera.get_y() + 40 - (_camera_height - 50) * 1);
+  }
 }
 
 void SceneCamera::FollowObject(InstanceDynamicObject* object)
@@ -264,6 +272,14 @@ void SceneCamera::CenterCameraOn(NodePath np)
   _objectivePos.set_x(np.get_x() + sin(cameraRot.get_x()) * 100);
   _objectivePos.set_y(np.get_y() + tan(cameraRot.get_y()) * 100);  
   
+  if (_currentCameraAngle == 1)
+    _objectivePos.set_y(_objectivePos.get_y() + 80 + (140 - _camera_height) / 1.35);
+  else
+  {
+    _objectivePos.set_x(_objectivePos.get_x() + 25 - (_camera_height - 50) * 0.85);
+    _objectivePos.set_y(_objectivePos.get_y() + 40 - (_camera_height - 50) * 1);
+  }
+
   // take in account camera decalage
   /*if (_currentCameraAngle == 0)
   {

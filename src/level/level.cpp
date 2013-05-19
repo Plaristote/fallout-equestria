@@ -648,6 +648,7 @@ void Level::SetState(State state)
     ToggleCharacterOutline(false);
   }
   _camera.SetEnabledScroll(state != Interrupted);
+  SetupCamera();  
 }
 
 void Level::SetInterrupted(bool set)
@@ -757,6 +758,8 @@ void Level::SetupCamera(void)
   {
     if (OptionsManager::Get()["camera"]["focus-self"].Value() == "1")
       _camera.FollowObject(GetPlayer());
+    else
+      _camera.StopFollowingNodePath();
   }
 }
 

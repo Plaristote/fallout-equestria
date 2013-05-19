@@ -82,6 +82,25 @@ select selectbox{height: 100px; overflow: auto;}
 		
 		      <tab id="tab-options-sound" class="tab-tab">SOUND</tab>
 		      <panel class="something_button">Empty</panel>
+                      <tab id="tab-options-camera" class="tab-tab">CAMERA</tab>
+		      <panel class="something_button"><br />
+                        Focusing camera on player:<br />
+                        <form>
+                          <input type="radio" class="form-options" name="focus-self" id="camera-focus" /> Yes
+                          <input type="radio" class="form-options" name="focus-self" id="camera-free"  /> No
+                        </form><br />
+                        Focusing camera on player during fights:<br />
+                        <form>
+                          <input type="radio" class="form-options" name="focus-self" id="camera-fight-focus" /> Yes
+                          <input type="radio" class="form-options" name="focus-self" id="camera-fight-free"  /> No
+                        </form><br />
+                        Focusing camera on action during fights:<br />
+                        <form>
+                          <input type="radio" class="form-options" name="focus-enemy" id="camera-enemy-focus" /> Yes
+                          <input type="radio" class="form-options" name="focus-enemy" id="camera-enemy-free"  /> No
+                        </form><br />
+
+                      </panel>
  				</tabset>
     <button id="exit" i18n="Exit" class="universal_button">Exit</button>
   </body>
