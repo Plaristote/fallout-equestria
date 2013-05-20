@@ -121,6 +121,7 @@ public:
   void                   PlayerLootWithScript(Inventory*, InstanceDynamicObject*, asIScriptContext*, const std::string& script_path);
 
   void                   PlayerEquipObject(unsigned short it, InventoryObject* object);
+  void                   PlayerEquipObject(const std::string& target, unsigned int slot, InventoryObject* object);
 
   Sync::Signal<void (Inventory&)> SignalShelfOpened;
 

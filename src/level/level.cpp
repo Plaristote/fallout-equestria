@@ -1147,33 +1147,32 @@ void Level::PlayerLoot(Inventory* inventory)
 
 void Level::PlayerEquipObject(unsigned short it, InventoryObject* object)
 {
-  cout << "PlayerEquipObject #1" << endl;
   bool canWeildMouth        = object->CanWeild(GetPlayer(), EquipedMouth);
   bool canWeildMagic        = object->CanWeild(GetPlayer(), EquipedMagic);
   bool canWeildBattleSaddle = object->CanWeild(GetPlayer(), EquipedBattleSaddle);
   int  canWeildTotal        = (canWeildMouth ? 1 : 0) + (canWeildMagic ? 1 : 0) + (canWeildBattleSaddle ? 1 : 0);
 
-  cout << "PlayerEquipObject #2" << endl;
   if (canWeildTotal >= 2)
   {
-    cout << "PlayerEquipObject #2.1" << endl;
-    UiEquipMode* ui = new UiEquipMode(_window, _levelUi.GetContext(), it, object);
-    cout << "PlayerEquipObject #2.2" << endl;
+    UiEquipMode* ui = new UiEquipMode(_window, _levelUi.GetContext());
+
+    if (canWeildMouth)
+      ui->AddOption(EquipedMouth,        "Mouth/Hoof");
+    if (canWeildMagic)
+      ui->AddOption(EquipedMagic,        "Magic");
+    if (canWeildBattleSaddle)
+      ui->AddOption(EquipedBattleSaddle, "Battlesaddle");
+    ui->Initialize();
 
     if (_currentUis[UiItEquipMode])
       delete _currentUis[UiItEquipMode];
-    cout << "PlayerEquipObject #2.3" << endl;
     _currentUis[UiItEquipMode] = ui;
-  cout << "PlayerEquipObject #2.4" << endl;
     ui->Closed.Connect(*this, &Level::CloseRunningUi<UiItEquipMode>);
-  cout << "PlayerEquipObject #2.5" << endl;
-    ui->EquipModeSelected.Connect(*GetPlayer(), &ObjectCharacter::SetEquipedItem);
-  cout << "PlayerEquipObject #2.6" << endl;
-
-    if (!canWeildMouth)        ui->DisableMode(EquipedMouth);
-    if (!canWeildMagic)        ui->DisableMode(EquipedMagic);
-    if (!canWeildBattleSaddle) ui->DisableMode(EquipedBattleSaddle);
-  cout << "PlayerEquipObject #2.7" << endl;
+    ui->EquipModeSelected.Connect([this, it, object](unsigned char mode)
+    {
+      _currentUis[UiItEquipMode]->Destroy();
+      GetPlayer()->SetEquipedItem(it, object, (EquipedMode)mode);
+    });
   }
   else if (canWeildTotal)
   {
@@ -1182,7 +1181,15 @@ void Level::PlayerEquipObject(unsigned short it, InventoryObject* object)
   }
   else
     ConsoleWrite("You can't equip " + object->GetName());
-  cout << "PlayerEquipObject #3" << endl;  
+}
+
+void Level::PlayerEquipObject(const std::string& target, unsigned int slot, InventoryObject* object)
+{
+  if (target == "equiped")
+    PlayerEquipObject(slot, object);
+  else
+  {
+  }
 }
 
 void Level::PlayerDropObject(InventoryObject* object)

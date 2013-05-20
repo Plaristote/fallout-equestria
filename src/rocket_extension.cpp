@@ -4,6 +4,20 @@
 using namespace std;
 using namespace Rocket;
 
+namespace Rocket
+{
+  void ForeachElement(Rocket::Core::Element* root, const std::string& tag, std::function<void (Rocket::Core::Element*)> lambda)
+  {
+    if (root)
+    {
+      Rocket::Core::ElementList elements;
+
+      root->GetElementsByTagName(elements, tag.c_str());
+      std::for_each(elements.begin(), elements.end(), lambda);
+    }
+  }
+}
+
 UiBase::UiBase(WindowFramework* window, Rocket::Core::Context* context) : _window(window), _root(0), _context(context)
 {
   _languageObs = i18n::LanguageChanged.Connect(*this, &UiBase::Translate);

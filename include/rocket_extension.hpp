@@ -6,6 +6,11 @@
 # include "observatory.hpp"
 # include "i18n.hpp"
 
+namespace Rocket
+{
+  void ForeachElement(Rocket::Core::Element* root, const std::string& tag, std::function<void (Rocket::Core::Element*)> lambda);
+}
+
 struct MyRocket
 {
   static void SetVisibility(Rocket::Core::Context* context, bool visibility);
@@ -55,7 +60,12 @@ public:
 
   Sync::Signal<void (bool)> VisibilityToggled;
   Sync::Signal<void>        VisibilityToggledOn, VisibilityToggledOff;
-  
+
+  void        Foreach(const std::string& tag, std::function<void (Rocket::Core::Element*)> lambda)
+  {
+    Rocket::ForeachElement(_root, tag, lambda);
+  }
+
   static void SetPropertyOnAll(Rocket::Core::Element* elem, const std::string& property, const std::string& value)
   {
     Rocket::Core::Element* child;

@@ -464,90 +464,72 @@ void UiLoot::RocketTakeAllClicked(Rocket::Core::Event&)
 /*
  * Dialog Equip Mode
  */
-UiEquipMode::UiEquipMode(WindowFramework* window, Rocket::Core::Context* context, unsigned short it, InventoryObject* object)
-  : UiBase(window, context), _it(it), _object(*object)
+void UiEquipMode::AddOption(unsigned char mode, const std::string& name)
 {
-  _root = context->LoadDocument("data/dialog_equiped_mode.rml");
+  if (root_choices)
+  {
+    std::stringstream    rml;
+    Rocket::Core::String rml_;
+
+    rml << "<button data-mode='" << (int)mode << "' i18n=\"" << name << "\" class='universal_button'>";
+    rml << name;
+    rml << "</button><br />";
+    root_choices->GetInnerRML(rml_);
+    root_choices->SetInnerRML(rml_ + rml.str().c_str());
+  }
+}
+
+UiEquipMode::UiEquipMode(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
+{
+  _root        = context->LoadDocument("data/dialog_equiped_mode.rml");
+  root_choices = 0;
   if (_root)
   {
-    Rocket::Core::Element* eDialog       = _root->GetElementById("dialog-actions");
-    Rocket::Core::Element* eMouth        = _root->GetElementById("mode_mouth");
-    Rocket::Core::Element* eMagic        = _root->GetElementById("mode_magic");
-    Rocket::Core::Element* eBattleSaddle = _root->GetElementById("mode_battlesaddle");
-
-    if (eDialog)
-    {
-      if (eMouth)
-      {
-	if (_object["mode-mouth"].Value() != "1")
-	  eDialog->RemoveChild(eMouth);
-	else
-	  eMouth->AddEventListener("click", &MouthClicked);
-      }
-      if (eMagic)
-      {
-	if (_object["mode-magic"].Value() != "1")
-	  eDialog->RemoveChild(eMagic);
-	else
-	  eMagic->AddEventListener("click", &MagicClicked);
-      }
-      if (eBattleSaddle)
-      {
-	if (_object["mode-battlesaddle"].Value() != "1")
-	  eDialog->RemoveChild(eBattleSaddle);
-	else
-	  eBattleSaddle->AddEventListener("click", &BattleSaddleClicked);
-      }
-    }
+    root_choices = _root->GetElementById("dialog-actions");
     ToggleEventListener(true, "cancel", "click", CancelClicked);
-    
-    MouthClicked.EventReceived.Connect(*this, &UiEquipMode::CallbackButton<EquipedMouth>);
-    MagicClicked.EventReceived.Connect(*this, &UiEquipMode::CallbackButton<EquipedMagic>);
-    BattleSaddleClicked.EventReceived.Connect(*this, &UiEquipMode::CallbackButton<EquipedBattleSaddle>);
     CancelClicked.EventReceived.Connect(*this, &UiEquipMode::CallbackCancel);
-    
     _root->Show();
   }
 }
 
 UiEquipMode::~UiEquipMode()
 {
-  if (_root)
-  {
-    ToggleEventListener(false, "cancel",            "click", CancelClicked);
-    ToggleEventListener(false, "mode_mouth",        "click", MouthClicked);
-    ToggleEventListener(false, "mode_magic",        "click", MagicClicked);
-    ToggleEventListener(false, "mode_battlesaddle", "click", BattleSaddleClicked);
-  }
-}
-
-void UiEquipMode::DisableMode(EquipedMode mode)
-{
-  Rocket::Core::Element* eDialog = _root->GetElementById("dialog-actions");
-  Rocket::Core::Element* element;
-  
-  if (!eDialog)
-    return ;
-  switch (mode)
-  {
-    case EquipedMouth:
-      element = _root->GetElementById("mode-mouth");
-      break ;
-    case EquipedMagic:
-      element = _root->GetElementById("mode-magic");
-      break ;
-    case EquipedBattleSaddle:
-      element = _root->GetElementById("mode-battlesaddle");
-      break ;
-  }
-  if (element)
-    eDialog->RemoveChild(element);
+  ToggleEventListener(false, "cancel", "click", CancelClicked);
+  ListenButtons(false);
 }
 
 void UiEquipMode::Destroy(void)
 {
   if (_root)
     _root->Hide();
+}
+
+void UiEquipMode::ListenButtons(bool activate)
+{
+  Rocket::ForeachElement(root_choices, "button", [this, activate](Rocket::Core::Element* button)
+  {
+    if (activate)
+      button->AddEventListener   ("click", &ModeClicked);
+    else
+      button->RemoveEventListener("click", &ModeClicked);
+  });
+}
+
+void UiEquipMode::Initialize(void)
+{
+  ListenButtons(true);
+  ModeClicked.EventReceived.Connect([this](Rocket::Core::Event& event)
+  {
+    Rocket::Core::Element* element  = event.GetCurrentElement();
+    Rocket::Core::Variant* variable = element->GetAttribute("data-mode");
+
+    if (variable)
+    {
+      unsigned short       mode     = variable->Get<unsigned short>();
+
+      EquipModeSelected.Emit(mode);
+    }
+  });
 }
 
 /*

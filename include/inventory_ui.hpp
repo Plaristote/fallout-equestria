@@ -192,25 +192,23 @@ private:
 class UiEquipMode : public UiBase
 {
 public:
-  UiEquipMode(WindowFramework* window, Rocket::Core::Context* context, unsigned short it, InventoryObject* object);
+  UiEquipMode(WindowFramework* window, Rocket::Core::Context* context);
   ~UiEquipMode();
 
+  void                               AddOption(unsigned char code, const std::string& name);
+  void                               Initialize(void);
+
+  Sync::Signal<void (unsigned char)> EquipModeSelected;
+  Sync::Signal<void>                 Closed;
+
   void Destroy(void);
-  Sync::Signal<void (unsigned short, InventoryObject*, EquipedMode)> EquipModeSelected;
-  Sync::Signal<void> Closed;
-  
-  void             DisableMode(EquipedMode);
 
 private:
-  RocketListener   MouthClicked, MagicClicked, BattleSaddleClicked, CancelClicked;
-  
-  template<EquipedMode mode>
-  void CallbackButton(Rocket::Core::Event&) { EquipModeSelected.Emit(_it, &_object, mode); Closed.Emit(); }
-  
+  RocketListener   ModeClicked, CancelClicked;
+  Rocket::Core::Element* root_choices;
+
   void CallbackCancel(Rocket::Core::Event&) { Closed.Emit(); }
-  
-  unsigned short   _it;
-  InventoryObject& _object;
+  void ListenButtons(bool);
 };
 
 class UiNextZone : public UiBase
