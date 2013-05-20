@@ -465,3 +465,49 @@ bool Inventory::CanCarry(InventoryObject* object, unsigned short quantity)
 {
   return ((_capacity >= _currentWeight + (unsigned short)((*object)["weight"]) * quantity) || (_capacity == 0));
 }
+
+//
+// Slots
+//
+
+// This here contraption allows to write duplicate a single method to generate a const
+// and a non-const getter at the same time. Might be worth moving into Boots.
+#define DECLARE_GETTER(return_type, name, parameters, code) \
+const return_type name parameters const \
+code \
+return_type name parameters \
+code
+
+DECLARE_GETTER(Inventory::Slot&, Inventory::GetItemSlot, (const std::string& type_slot, unsigned int slot),
+{
+  auto it = std::find(_slots.begin(), _slots.end(), type_slot);
+
+  if (it == _slots.end())
+    ; // TODO throw an exception about unexisting item slot
+  return ((*it)[slot]);
+})
+
+InventoryObject*       Inventory::GetEquipedItem(const std::string& type_slot, unsigned int slot)
+{
+  return (GetItemSlot(type_slot, slot).object);
+}
+
+unsigned char          Inventory::GetEquipedMode(const std::string& type_slot, unsigned int slot) const
+{
+  return (GetItemSlot(type_slot, slot).mode);
+}
+
+bool                   Inventory::SlotHasEquipedItem(const std::string& type_slot, unsigned int slot) const
+{
+  return (GetItemSlot(type_slot, slot).empty);
+}
+
+void                   Inventory::SetEquipedItem(const std::string& type_slot, unsigned int it_slot, InventoryObject* object, unsigned char equip_mode)
+{
+  Inventory::Slot& slot = GetItemSlot(type_slot, it_slot);
+
+  slot.mode   = equip_mode;
+  slot.object = object;
+  slot.empty  = object == 0;
+  EquipedItem.Emit(type_slot, it_slot, object);
+}

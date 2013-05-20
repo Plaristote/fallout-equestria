@@ -680,10 +680,21 @@ void GameInventory::ListenEquipModes(bool activate)
 
 void GameInventory::ListenDropables(bool activate)
 {
-  std::string dropping[] = { "eq1-equiped", "eq2-equiped", "battlesaddle-container", "armour-container" };
-  
-  for (unsigned short i = 0 ; i < 4 ; ++i)
-    ToggleEventListener(activate, dropping[i], "dragdrop", DropEvent);
+  Core::ElementList elements;
+
+  _root->GetElementsByTagName(elements, "itemslot");
+  std::for_each(elements.begin(), elements.end(), [this, activate](Rocket::Core::Element* element)
+  {
+    Rocket::Core::Element* to_listen = element->GetChild(0);
+
+    if (to_listen)
+    {
+      if (activate)
+        to_listen->AddEventListener("dragdrop", &DropEvent);
+      else
+        to_listen->RemoveEventListener("dragdrop", &DropEvent);
+    }
+  });
 }
 
 GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
@@ -706,20 +717,12 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
     
     ToggleEventListener(true, "button_use",       "click", ButtonUseClicked);
     ToggleEventListener(true, "button_drop",      "click", ButtonDropClicked);
-    ToggleEventListener(true, "button_equip_1",   "click", ButtonEquip1Clicked);
-    ToggleEventListener(true, "button_equip_2",   "click", ButtonEquip2Clicked);
-    ToggleEventListener(true, "button_unequip_1", "click", ButtonUnequip1);
-    ToggleEventListener(true, "button_unequip_2", "click", ButtonUnequip2);
     ListenEquipModes(true);
     ListenDropables(true);
     ToggleEventListener(true, "body-inventory-items", "dragdrop", DropEvent);
 
     ButtonUseClicked.EventReceived.Connect   (*this, &GameInventory::CallbackButtonUse);
     ButtonDropClicked.EventReceived.Connect  (*this, &GameInventory::CallbackButtonDrop);
-    ButtonEquip1Clicked.EventReceived.Connect(*this, &GameInventory::CallbackButtonEquip1);
-    ButtonEquip2Clicked.EventReceived.Connect(*this, &GameInventory::CallbackButtonEquip2);
-    ButtonUnequip1.EventReceived.Connect     (*this, &GameInventory::CallbackButtonUnequip1);
-    ButtonUnequip2.EventReceived.Connect     (*this, &GameInventory::CallbackButtonUnequip2);
     ButtonEquipMode.EventReceived.Connect    (*this, &GameInventory::CallbackSwapEquipMode);
     DropEvent.EventReceived.Connect          (*this, &GameInventory::CallbackDropEvent);
 
@@ -734,10 +737,6 @@ GameInventory::~GameInventory()
 {
   ToggleEventListener(false, "button_use",       "click", ButtonUseClicked);
   ToggleEventListener(false, "button_drop",      "click", ButtonDropClicked);
-  ToggleEventListener(false, "button_equip_1",   "click", ButtonEquip1Clicked);
-  ToggleEventListener(false, "button_equip_2",   "click", ButtonEquip2Clicked);
-  ToggleEventListener(false, "button_unequip_1", "click", ButtonUnequip1);
-  ToggleEventListener(false, "button_unequip_2", "click", ButtonUnequip2);
   ListenEquipModes(false);
   ListenDropables(false);
 }
@@ -767,19 +766,26 @@ void GameInventory::CallbackDropEvent(Rocket::Core::Event& event)
     std::advance(obj_it, count);
     if (obj_it != obj_end)
     {
-      InventoryObject*   object    = *obj_it;
-      std::string        target_id = target->GetId().CString();
-      std::string        from_id   = from->GetId().CString();
+      InventoryObject* object          = *obj_it;
+      Core::Variant*   target_slot_var = target->GetAttribute("data-target");
+      Core::Variant*   target_num_var  = target->GetAttribute("data-slot");
+      Core::Variant*   from_slot_var   = from->GetAttribute("data-target");
+      Core::Variant*   from_num_var    = from->GetAttribute("data-slot");
 
-      if (from_id == "eq1-equiped")
-        UnequipItem.Emit(0);
-      else if (from_id == "eq2-equiped")
-        UnequipItem.Emit(1);
+      if (from_slot_var)
+      {
+        unsigned int slot_num  = (from_num_var ? from_num_var->Get<unsigned int>() : 0);
+        std::string  slot_name = from_slot_var->Get<Core::String>().CString();
 
-      if (target_id == "eq1-equiped")
-        EquipItem.Emit(0, object);
-      else if (target_id == "eq2-equiped")
-        EquipItem.Emit(1, object);
+        UnequipItem.Emit(slot_name, slot_num);
+      }
+      if (target_slot_var)
+      {
+        unsigned int slot_num  = (target_num_var ? target_num_var->Get<unsigned int>() : 0);
+        std::string  slot_name = target_slot_var->Get<Core::String>().CString();
+
+        EquipItem.Emit(slot_name, slot_num, object);
+      }
     }
   }
 }

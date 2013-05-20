@@ -378,8 +378,20 @@ void Level::InitPlayer(void)
   _levelUi.GetMainBar().UseEquipedItem.Connect       (*this, &Level::CallbackActionTargetUse);
   _levelUi.GetMainBar().CombatEnd.Connect            (*this, &Level::StopFight);
   _levelUi.GetMainBar().CombatPassTurn.Connect       (*this, &Level::NextTurn);
-  obs.Connect(_levelUi.GetInventory().EquipItem,   *this,        &Level::PlayerEquipObject);
-  obs.Connect(_levelUi.GetInventory().UnequipItem, *GetPlayer(), &ObjectCharacter::UnequipItem);
+
+  obs.Connect(_levelUi.GetInventory().EquipItem,   [this](const std::string& target, unsigned int slot, InventoryObject* object)
+  {
+    if (target == "equiped")
+      PlayerEquipObject(slot, object);
+  });
+  obs.Connect(_levelUi.GetInventory().UnequipItem, [this](const std::string& target, unsigned int slot)
+  {
+    if (target == "equiped")
+      GetPlayer()->UnequipItem(slot);
+  });
+
+  //obs.Connect(_levelUi.GetInventory().EquipItem,   *this,        &Level::PlayerEquipObject);
+  //obs.Connect(_levelUi.GetInventory().UnequipItem, *GetPlayer(), &ObjectCharacter::UnequipItem);
   obs.Connect(_levelUi.GetInventory().DropObject,  *this,        &Level::PlayerDropObject);
   obs.Connect(_levelUi.GetInventory().UseObject,   *this,        &Level::PlayerUseObject);
   obs.Connect(_levelUi.GetInventory().SwapEquipMode, [this](unsigned short slot, EquipedMode mode)

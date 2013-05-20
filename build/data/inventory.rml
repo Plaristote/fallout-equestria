@@ -89,7 +89,7 @@
   					<button id="eq1-battlesaddle" class="eq-type-selection place-next-to francis">Sadle</button>
   					<button id="eq1-magic"        class="eq-type-selection place-next-to francis">Mag</button>
   				</div>
-  				<div id="eq1-equiped" class="metal-bg place-beneath drop-target item-equiped"></div>
+  				<itemslot><div data-target="equiped" data-slot="0" class="metal-bg place-beneath drop-target item-equiped" id="eq1-equiped"></div></itemslot>
   			</div>
   			<div id="eq2" class="palce-next-to">
 	  			<div class="eq-type place-beneath" >
@@ -97,15 +97,15 @@
   					<button id="eq2-battlesaddle" class="eq-type-selection place-next-to francis">Sadle</button>
   					<button id="eq2-magic"        class="eq-type-selection place-next-to francis">Mag</button>
   				</div>
-  				<div id="eq2-equiped" class="metal-bg place-beneath drop-target item-equiped"></div>
+  				<itemslot><div data-target="equiped" data-slot="1" class="metal-bg place-beneath drop-target item-equiped" id="eq2-equiped"></div></itemslot>
   			</div>
   		</div>
   		<div id="eq-other" class="place-beneath">
   			<div id="sadle-armour" class="place-next-to">
   				<p class="texts place-beneath">BATTLESADLE</p>
-  				<div id="battlesaddle-container" class="place-beneath metal-bg drop-target item-equiped"></div>
+  				<itemslot><div data-target="battlesaddle" class="place-beneath metal-bg drop-target item-equiped"></div></itemslot>
   				<p class="texts place-beneath">ARMOUR</p>
-  				<div id="armour-container" class="place-beneath metal-bg drop-target item-equiped"></div>
+  				<itemslot><div data-target="armour" class="place-beneath metal-bg drop-target item-equiped"></div></itemslot>
   			</div>
   			<div id="pip-barding" class="place-next-to">
   				<span class="place-next-to">

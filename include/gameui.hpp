@@ -95,8 +95,8 @@ public:
   void                     SetInventory(Inventory&);
   void                     UpdateInventory(void);
 
-  Sync::Signal<void (unsigned short, InventoryObject*)>    EquipItem;
-  Sync::Signal<void (unsigned short)>                      UnequipItem;
+  Sync::Signal<void (const std::string& slot, unsigned short, InventoryObject*)> EquipItem;
+  Sync::Signal<void (const std::string& slot, unsigned short)>                   UnequipItem;
   Sync::Signal<void (unsigned short, EquipedMode)>         SwapEquipMode;
   Sync::Signal<void (InventoryObject*)>                    UseObject;
   Sync::Signal<void (InventoryObject*)>                    DropObject;
@@ -111,13 +111,9 @@ private:
   void                     ListenDropables(bool);
   
   RocketListener           DropEvent;
-  RocketListener           ButtonUseClicked, ButtonDropClicked, ButtonEquip1Clicked, ButtonEquip2Clicked, ButtonUnequip1, ButtonUnequip2, ButtonEquipMode;
+  RocketListener           ButtonUseClicked, ButtonDropClicked, ButtonEquipMode;
   void                     CallbackButtonUse(Rocket::Core::Event&)      { if (_selectedObject) UseObject.Emit (_selectedObject);    }
   void                     CallbackButtonDrop(Rocket::Core::Event&)     { if (_selectedObject) DropObject.Emit(_selectedObject);    }
-  void                     CallbackButtonEquip1(Rocket::Core::Event&)   { if (_selectedObject) EquipItem.Emit (0, _selectedObject); }
-  void                     CallbackButtonEquip2(Rocket::Core::Event&)   { if (_selectedObject) EquipItem.Emit (1, _selectedObject); }
-  void                     CallbackButtonUnequip1(Rocket::Core::Event&) { UnequipItem.Emit(0); }
-  void                     CallbackButtonUnequip2(Rocket::Core::Event&) { UnequipItem.Emit(1); }
   void                     CallbackSwapEquipMode(Rocket::Core::Event&);
   void                     CallbackDropEvent(Rocket::Core::Event&);
 

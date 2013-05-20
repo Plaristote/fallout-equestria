@@ -85,35 +85,77 @@ class Inventory
 {
 public:
   typedef std::list<InventoryObject*> Content;
-  
+
+  struct Slot
+  {
+    Slot(void) : empty(true) {}
+
+    bool             empty;
+    unsigned char    mode;
+    InventoryObject* object;
+  };
+
+  struct Slots
+  {
+    Slots(const std::string& name) : name(name) {}
+
+    bool        operator==(const std::string& name) const { return (this->name == name); }
+    const Slot& operator[](unsigned int i)          const { return (slots[i]);           }
+    Slot&       operator[](unsigned int i)                { return (slots[i]);           }
+
+  private:
+    const std::string name;
+    std::vector<Slot> slots;
+  };
+
   Inventory(void) { _currentWeight = _capacity = 0; }
   
-  void             LoadInventory(DynamicObject*);
-  void             SaveInventory(DynamicObject*);
-  void             LoadInventory(Data);
-  void             SaveInventory(Data);
+  void               LoadInventory(DynamicObject*);
+  void               SaveInventory(DynamicObject*);
+  void               LoadInventory(Data);
+  void               SaveInventory(Data);
 
-  void             AddObject(InventoryObject*);
-  void             DelObject(InventoryObject*);
-  bool             IncludesObject(InventoryObject*) const;
-  const Content&   GetContent(void) const { return (_content); }
-  Content&         GetContent(void)       { return (_content); }
-  InventoryObject* GetObject(const std::string& name);
-  unsigned short   ContainsHowMany(const std::string& name) const;
+  //
+  // Content
+  //
+  void               AddObject(InventoryObject*);
+  void               DelObject(InventoryObject*);
+  bool               IncludesObject(InventoryObject*) const;
+  const Content&     GetContent(void) const { return (_content); }
+  Content&           GetContent(void)       { return (_content); }
+  InventoryObject*   GetObject(const std::string& name);
+  unsigned short     ContainsHowMany(const std::string& name) const;
 
-  int              GetObjectIterator(InventoryObject* object) const;
+  int                GetObjectIterator(InventoryObject* object) const;
 
-  unsigned short   GetCurrentWeight(void) const      { return (_currentWeight); }
-  unsigned short   GetCapacity(void)      const      { return (_capacity);      }
-  void             SetCapacity(unsigned short value) { _capacity = value;       }
-  bool             CanCarry(InventoryObject*, unsigned short quantity = 1);
+  unsigned short     GetCurrentWeight(void) const      { return (_currentWeight); }
+  unsigned short     GetCapacity(void)      const      { return (_capacity);      }
+  void               SetCapacity(unsigned short value) { _capacity = value;       }
+  bool               CanCarry(InventoryObject*, unsigned short quantity = 1);
   
   Sync::Signal<void> ContentChanged;
 
+  //
+  // Slots
+  //
+  const Slot&        GetItemSlot(const std::string& type_slot, unsigned int slot = 0) const;
+  Slot&              GetItemSlot(const std::string& type_slot, unsigned int slot = 0);
+  bool               SlotHasEquipedItem(const std::string& type_slot, unsigned int slot = 0) const;
+  unsigned char      GetEquipedMode(const std::string& type_slot, unsigned int slot = 0) const;
+  InventoryObject*   GetEquipedItem(const std::string& type_slot, unsigned int slot = 0);
+  void               SetEquipedItem(const std::string& type_slot, unsigned int slot, InventoryObject* object, unsigned char equip_mode = 0);
+  void               SetEquipedItem(const std::string& type_slot, InventoryObject* object, unsigned char equip_mode = 0)
+  {
+    SetEquipedItem(type_slot, 0, object, equip_mode);
+  }
+
+  Sync::Signal<void (const std::string&, unsigned int, InventoryObject* object)> EquipedItem;
+
 private:
-  Content          _content;
-  unsigned short   _currentWeight;
-  unsigned short   _capacity;
+  Content            _content;
+  unsigned short     _currentWeight;
+  unsigned short     _capacity;
+  std::vector<Slots> _slots;
 };
 
 #endif
