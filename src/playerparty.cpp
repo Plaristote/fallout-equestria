@@ -143,7 +143,9 @@ Party::Statsheets Party::GetStatsheets(void) const
   
   for_each(_objects.begin(), _objects.end(), [&statsheets](DynamicObject* object)
   {
-    statsheets.emplace(object->nodePath.get_name(), object->charsheet);
+    // TODO chose one of the following line. First one is more elegant. Second one seems to be more cross-compliant.
+    //statsheets.emplace(object->nodePath.get_name(), object->charsheet);
+    statsheets.insert(Statsheets::value_type(object->nodePath.get_name(), object->charsheet));
   });
   return (statsheets);
 }

@@ -76,7 +76,8 @@ void AngelScript::Object::asDefineMethod(const std::string& name, const std::str
 
   function.function  = 0;
   function.signature = declaration;
-  functions.emplace(Functions::value_type(name, function));
+  //functions.emplace(name, function);
+  functions.insert(Functions::value_type(name, function));
 }
 
 AngelScript::Object::ReturnType AngelScript::Object::Call(const std::string& name, unsigned int argc, ...)
