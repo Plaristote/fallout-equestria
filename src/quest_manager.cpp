@@ -127,7 +127,7 @@ void Quest::InitializeCondition(Data condition, Level* level)
  */
 void Quest::WatcherCharacterInventory(Data condition, Level* level)
 {
-  std::string      character_name = condition["target"];
+  std::string      character_name = condition["target"].Value();
   ObjectCharacter* character      = level->GetCharacter(character_name);
 
   condition.Output();
@@ -151,7 +151,7 @@ void Quest::WatcherCharacterInventory(Data condition, Level* level)
 
 void Quest::WatcherCharacterKill(Data condition, Level* level)
 {
-  std::string      character_name = condition["target"];
+  std::string      character_name = condition["target"].Value();
   ObjectCharacter* character      = level->GetCharacter(character_name);
   
   if (character)
