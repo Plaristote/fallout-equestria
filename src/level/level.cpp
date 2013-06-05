@@ -1222,6 +1222,7 @@ void Level::ActionDropObject(ObjectCharacter* user, InventoryObject* object)
 
     user->GetInventory().DelObject(object);
     item     = new ObjectItem(this, object->CreateDynamicObject(_world), object);
+    _world->DynamicObjectChangeFloor(*item->GetDynamicObject(), waypoint->floor);
     item->SetOccupiedWaypoint(waypoint);
     _world->DynamicObjectSetWaypoint(*(item->GetDynamicObject()), *waypoint);
     item->GetDynamicObject()->nodePath.set_pos(waypoint->nodePath.get_pos());
