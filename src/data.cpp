@@ -111,7 +111,7 @@ Data Data::operator[](const std::string& key)
 	return (Data((*it)));
     }
   }
-  return (Data(key, _data));  
+  return (Data(key, _data));
 }
 
 const Data Data::operator[](const std::string& key) const

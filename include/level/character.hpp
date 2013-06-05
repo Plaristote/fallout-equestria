@@ -86,22 +86,9 @@ public:
     ret.min_distance = 1;
     return (ret);
   }
-  
-  void                SetInventory(Inventory* inventory)
-  {
-    if (inventory)
-    {
-      if (_inventory) delete _inventory;
-      _inventory = inventory;
-      if (_statistics)
-      {
-	Data statistics(_statistics);
 
-	inventory->SetCapacity(statistics["Statistics"]["Carry Weight"]);
-      }
-    }
-  }
-  
+  void                SetInventory(Inventory* inventory);
+
   void                ProcessCollisions() { if (_hitPoints > 0) InstanceDynamicObject::ProcessCollisions(); }
 
   void                Run(float elapsedTime);

@@ -42,8 +42,9 @@ public:
   DynamicObject*    CreateDynamicObject(World* world) const;
   EquipedModel*     CreateEquipedModel(World* world);
 
+  bool              CanWeild(ObjectCharacter*, std::string slot, unsigned char mode = 0);
   bool              CanWeild(ObjectCharacter*, EquipedMode);
-  void              SetEquiped(bool set)  { _equiped = set;    }
+  void              SetEquiped(ObjectCharacter*, bool set);
   bool              IsEquiped(void) const { return (_equiped); }
   bool              IsGroupableWith(const InventoryObject*) const;
   bool              IsHidden(void)  const { return ((*this)["hidden"] == 1); }
@@ -77,7 +78,8 @@ private:
   asIScriptFunction* _hookUseOnDoor;
   asIScriptFunction* _hookUseOnOthers;
   asIScriptFunction* _hookUseAsWeapon;
-  
+ 
+  asIScriptFunction* _hookCanWeild, *_hookSetEquiped;
   asIScriptFunction* _hookCanWeildMouth, *_hookCanWeildMagic, *_hookCanWeildBattleSaddle;
 };
 
@@ -88,7 +90,7 @@ public:
 
   struct Slot
   {
-    Slot(void) : empty(true) {}
+    Slot(void) : empty(true), mode(0), object(0) {}
 
     bool             empty;
     unsigned char    mode;
@@ -101,7 +103,12 @@ public:
 
     bool        operator==(const std::string& name) const { return (this->name == name); }
     const Slot& operator[](unsigned int i)          const { return (slots[i]);           }
-    Slot&       operator[](unsigned int i)                { return (slots[i]);           }
+    Slot&       operator[](unsigned int i)
+    {
+      if (i >= slots.size())
+        slots.resize(i + 1);
+      return (slots[i]);
+    }
 
   private:
     const std::string name;
@@ -138,7 +145,8 @@ public:
   //
   // Slots
   //
-  const Slot&        GetItemSlot(const std::string& type_slot, unsigned int slot = 0) const;
+  void               InitializeSlots(void);
+  const Slot&        GetConstItemSlot(const std::string& type_slot, unsigned int slot = 0) const;
   Slot&              GetItemSlot(const std::string& type_slot, unsigned int slot = 0);
   bool               SlotHasEquipedItem(const std::string& type_slot, unsigned int slot = 0) const;
   unsigned char      GetEquipedMode(const std::string& type_slot, unsigned int slot = 0) const;
@@ -149,7 +157,8 @@ public:
     SetEquipedItem(type_slot, 0, object, equip_mode);
   }
 
-  Sync::Signal<void (const std::string&, unsigned int, InventoryObject* object)> EquipedItem;
+  Sync::Signal<void (const std::string&, unsigned int, InventoryObject*)> UnequipedItem;
+  Sync::Signal<void (const std::string&, unsigned int, InventoryObject*)> EquipedItem;
 
 private:
   Content            _content;

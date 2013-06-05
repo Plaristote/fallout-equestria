@@ -323,7 +323,6 @@ void Level::InitSun(void)
 
   unsigned int shadow_caster_buffer = 128;
   unsigned int film_size            = 128;
-
   unsigned int graphics_quality     = OptionsManager::Get()["graphics-quality"];
 
   while (graphics_quality--)
@@ -394,7 +393,7 @@ void Level::InitPlayer(void)
   //obs.Connect(_levelUi.GetInventory().UnequipItem, *GetPlayer(), &ObjectCharacter::UnequipItem);
   obs.Connect(_levelUi.GetInventory().DropObject,  *this,        &Level::PlayerDropObject);
   obs.Connect(_levelUi.GetInventory().UseObject,   *this,        &Level::PlayerUseObject);
-  obs.Connect(_levelUi.GetInventory().SwapEquipMode, [this](unsigned short slot, EquipedMode mode)
+  obs.Connect(_levelUi.GetInventory().SwapEquipMode, [this](unsigned short slot, EquipedMode mode) // TODO rewrite this for new inventory system
   {
     GetPlayer()->SetEquipedItem(slot, GetPlayer()->GetEquipedItem(slot), mode);
   });
@@ -438,6 +437,9 @@ void Level::InitPlayer(void)
     });
   }
 
+  //
+  // Field of view refreshing
+  //
   {
     TimeManager::Task*    task    = _timeManager.AddTask(TASK_LVL_CITY, true, 1);
 

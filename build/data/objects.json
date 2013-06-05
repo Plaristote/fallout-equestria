@@ -52,7 +52,7 @@
   "scale": 1,
   "weight": 5,
   "script": {
-    "file": "objectsMain.as"
+    "file": "objectsItems.as"
   }
 ,
   "actions": {
@@ -94,10 +94,20 @@
   }
 ,
   "icon": "shotgun.png",
-  "model": "",
-  "texture": "",
-  "scale": 0,
-  "weight": 0,
+  "model": "Shotgun.obj",
+  "texture": "shotgun.tga",
+  "scale": 0.07,
+     "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "rotation": {
+        "x": 90,
+        "y": 90,
+        "z": 90
+      },
+  "weight": 15,
   "mode-mouth": 0,
   "mode-magic": 1,
   "mode-battlesaddle": 1,

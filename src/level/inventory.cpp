@@ -23,38 +23,19 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
   _script_module  = 0;
   _hookUseOnCharacter = _hookUseOnDoor = _hookUseOnOthers = 0;
   _hookCanWeildBattleSaddle = _hookCanWeildMagic = _hookCanWeildMouth = 0;
+  _hookCanWeild = _hookSetEquiped = 0;
   
   Data script = data["script"];
 
   if (!(script.Nil()) && _script_context)
   {
-    Data hookWeildMouth = script["hookWeildMouth"];
-    Data hookWeildMagic = script["hookWeildMagic"];
-    Data hookWeildBS    = script["hookWeildBattleSaddle"];
-
     if (script["file"].Value() != "")
     {
       _script_module       = Script::ModuleManager::Require("item" + data.Key(), "scripts/objects/" + script["file"].Value());
       if (_script_module)
       {
-	if (!(hookWeildMouth.Nil()))
-	{
-	  std::string decl = "bool " + hookWeildMouth.Value() + "(Item@, Character@)";
-	  
-	  _hookCanWeildMouth  = _script_module->GetFunctionByDecl(decl.c_str());
-	}
-	if (!(hookWeildMagic.Nil()))
-	{
-	  std::string decl = "bool " + hookWeildMagic.Value() + "(Item@, Character@)";
-	  
-	  _hookCanWeildMagic  = _script_module->GetFunctionByDecl(decl.c_str());
-	}
-	if (!(hookWeildBS.Nil()))
-	{
-	  std::string decl = "bool " + hookWeildBS.Value() + "(Item@, Character@)";
-	  
-	  _hookCanWeildBattleSaddle  = _script_module->GetFunctionByDecl(decl.c_str());
-	}
+        _hookCanWeild   = _script_module->GetFunctionByDecl("bool CanWeild(Item@, Character@, string, int)");
+        _hookSetEquiped = _script_module->GetFunctionByDecl("void SetEquiped(Item@, Character@, bool)");
       }
     }
   }
@@ -98,35 +79,42 @@ bool InventoryObject::IsGroupableWith(const InventoryObject* other) const
   return (GetName() == other->GetName());
 }
 
-bool InventoryObject::CanWeild(ObjectCharacter* character, EquipedMode mode)
+void InventoryObject::SetEquiped(ObjectCharacter* character, bool set)
 {
-  std::string        modeStr;
-  asIScriptFunction* hook = 0;
-  
-  switch (mode)
+  if (_equiped != set && _hookSetEquiped)
   {
-    case EquipedMouth:
-      modeStr = "mode-mouth";
-      hook    = _hookCanWeildMouth;
-      break ;
-    case EquipedMagic:
-      modeStr = "mode-magic";
-      hook    = _hookCanWeildMagic;
-      break ;
-    case EquipedBattleSaddle:
-      modeStr = "mode-battlesaddle";
-      hook    = _hookCanWeildBattleSaddle;
-      break ;
-  }
-  if (_script_context && hook)
-  {
-    _script_context->Prepare(hook);
+    _script_context->Prepare(_hookSetEquiped);
     _script_context->SetArgObject(0, this);
     _script_context->SetArgObject(1, character);
+    _script_context->SetArgByte(2, set);
+    _script_context->Execute();
+  }
+  _equiped = set;
+}
+
+bool InventoryObject::CanWeild(ObjectCharacter* character, std::string slot, unsigned char mode)
+{
+  if (_hookCanWeild)
+  {
+    std::cout << "Yes can weild hook" << std::endl;
+    _script_context->Prepare(_hookCanWeild);
+    _script_context->SetArgObject(0, this);
+    _script_context->SetArgObject(1, character);
+    _script_context->SetArgObject(2, &slot);
+    _script_context->SetArgDWord(3, mode);
     _script_context->Execute();
     return (_script_context->GetReturnByte());
   }
-  return ((*this)[modeStr].Value() == "1");
+  std::cout << "No can weild hook" << std::endl;
+  return (false);
+}
+
+/*
+ * DEPRECATED Needs to disapear asap
+ */
+bool InventoryObject::CanWeild(ObjectCharacter* character, EquipedMode mode)
+{
+  return (CanWeild(character, "equiped", mode));
 }
 
 InventoryObject::EquipedModel* InventoryObject::CreateEquipedModel(World* world)
@@ -165,6 +153,42 @@ InventoryObject::EquipedModel::EquipedModel(WindowFramework* window, InventoryOb
   _modelName   = "items/" + _modelName;
 
   np = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + object["model"].Value());
+  {
+    float scale = object["scale"];
+
+    if (object["scale"].NotNil())
+      np.set_scale(scale);
+  }
+  {
+    Data offset   = object["offset"];
+    Data rotation = object["rotation"];
+
+    if (offset.NotNil())
+    {
+      LPoint3f position(0, 0, 0);
+
+      if (offset["x"].NotNil())
+        position.set_x(offset["x"]);
+      if (offset["y"].NotNil())
+        position.set_y(offset["y"]);
+      if (offset["z"].NotNil())
+        position.set_z(offset["z"]);
+      np.set_pos(position);
+    }
+    if (rotation.NotNil())
+    {
+      LPoint3f position(0, 0, 0);
+
+      rotation.Output();
+      if (rotation["x"].NotNil())
+        position.set_x(rotation["x"]);
+      if (rotation["y"].NotNil())
+        position.set_y(rotation["y"]);
+      if (rotation["z"].NotNil())
+        position.set_z(rotation["z"]);
+      np.set_hpr(position);
+    }
+  }
   if (texture != "")
   {
     Texture*    texfile = TexturePool::load_texture(TEXT_ROOT + texture);
@@ -269,6 +293,7 @@ const std::string InventoryObject::ExecuteHook(asIScriptFunction* hook, ObjectCh
 /*
  * Inventory
  */
+// WARNING TODO: Implement the new equiping system for this LoadInventory overload.
 void Inventory::LoadInventory(DynamicObject* object)
 {
   ForEach(object->inventory, [this](std::pair<std::string, int> data)
@@ -307,6 +332,7 @@ void Inventory::LoadInventory(DynamicObject* object)
     }
     delete dataTree;
   });
+  InitializeSlots();
 }
 
 void Inventory::LoadInventory(Data items)
@@ -319,18 +345,43 @@ void Inventory::LoadInventory(Data items)
     quantity = (item["quantity"].Nil() ? 1 : (unsigned int)item["quantity"]);
     for (unsigned short i = 0 ; i < quantity ; ++i)
     {
-      InventoryObject* newObject = new InventoryObject(item);
-      (*newObject)["quantity"].Remove();
+      InventoryObject* newObject    = new InventoryObject(item);
+      Data             equiped_data = item["equiped-save"];
+
       AddObject(newObject);
+      if (equiped_data.NotNil() && i < equiped_data.Count())
+      {
+        Data equiped = (*newObject)["equiped"];
+
+        equiped.Duplicate(equiped_data[i]);
+        equiped.SetKey("equiped");
+      }
+      (*newObject)["quantity"].Remove();
+      (*newObject)["equiped-save"].Remove();
     }
+  });
+  InitializeSlots();
+}
+
+void Inventory::InitializeSlots(void)
+{
+  _slots.clear();
+  for_each(_content.begin(), _content.end(), [this](InventoryObject* ptr)
+  {
+    InventoryObject& item = *ptr;
+    Data             slot = item["equiped"];
+
+    if (slot.NotNil())
+    {  SetEquipedItem(slot["target"], slot["slot"], ptr, (unsigned short)slot["mode"]); }
   });
 }
 
+// WARNING TODO: Implement the new equiping system for this SaveInventory overload.
 void Inventory::SaveInventory(DynamicObject* object)
 {
   Content::iterator it  = _content.begin();
   Content::iterator end = _content.end();
-  
+
   object->inventory.clear();
   for (; it != end ; ++it)
   {
@@ -362,13 +413,14 @@ void Inventory::SaveInventory(Data items)
 {
   Content::iterator it  = _content.begin();
   Content::iterator end = _content.end();
-  
+
   for (; it != end ; ++it)
   {
     Content::iterator groupIt  = _content.begin();
     InventoryObject&  item     = **it;
     bool              ignore   = true;
     int               quantity = 0;
+    std::vector<Data> equip_data;
 
     for (; groupIt != end ; ++groupIt)
     {
@@ -376,13 +428,21 @@ void Inventory::SaveInventory(Data items)
 	ignore = false;
       if (item.IsGroupableWith(*groupIt))
 	quantity++;
+      if (item["equiped"].NotNil())
+        equip_data.push_back(item["equiped"]);
     }
     if (quantity == 0) quantity = 1;
     if (!ignore)
     {
+      for (unsigned int i = 0 ; i < equip_data.size() ; ++i)
+      {
+        item["equiped-save"]["new"].Duplicate(equip_data[i]);
+        item["equiped-save"]["new"].SetKey("");
+      }
       item["quantity"] = quantity;
       items[item.Key()].Duplicate(item);
       item["quantity"].Remove();
+      item["equiped-save"].Remove();
     }
   }
 }
@@ -390,9 +450,10 @@ void Inventory::SaveInventory(Data items)
 void Inventory::AddObject(InventoryObject* toAdd)
 {
   Data weight = (*toAdd)["weight"];
-  
+
   if (!(weight.Nil()))
     _currentWeight += (unsigned short)((*toAdd)["weight"]);
+  (*toAdd)["equiped"].Remove();
   _content.push_back(toAdd);
   ContentChanged.Emit();
 }
@@ -404,9 +465,10 @@ void Inventory::DelObject(InventoryObject* toDel)
   if (it != _content.end())
   {
     Data weight = (*toDel)["weight"];
-  
+
     if (!(weight.Nil()))
       _currentWeight -= (unsigned short)((*toDel)["weight"]);
+    (*toDel)["equiped"].Remove();
     _content.erase(it);
     ContentChanged.Emit();
   }
@@ -415,7 +477,7 @@ void Inventory::DelObject(InventoryObject* toDel)
 bool Inventory::IncludesObject(InventoryObject* obj) const
 {
   Content::const_iterator it = std::find(_content.begin(), _content.end(), obj);
-  
+
   return (it != _content.end());
 }
 
@@ -470,7 +532,7 @@ bool Inventory::CanCarry(InventoryObject* object, unsigned short quantity)
 // Slots
 //
 
-// This here contraption allows to write duplicate a single method to generate a const
+// This here contraption allows to duplicate a single method to generate a const
 // and a non-const getter at the same time. Might be worth moving into Boots.
 #define DECLARE_GETTER(return_type, name, parameters, code) \
 const return_type name parameters const \
@@ -478,34 +540,90 @@ code \
 return_type name parameters \
 code
 
-DECLARE_GETTER(Inventory::Slot&, Inventory::GetItemSlot, (const std::string& type_slot, unsigned int slot),
+Inventory::Slot& Inventory::GetItemSlot(const std::string& type_slot, unsigned int slot)
 {
   auto it = std::find(_slots.begin(), _slots.end(), type_slot);
 
   if (it == _slots.end())
-    ; // TODO throw an exception about unexisting item slot
+  {
+    _slots.push_back(Slots(type_slot));
+    return (GetItemSlot(type_slot, slot));
+  }
+  /*if (slot >= it->size())
+    it->resize(slot + 1);*/
+  {
+    Inventory::Slot& obj = (*it)[slot];
+
+    if (obj.object)
+      std::cout << "Lick My Balls" << std::endl;
+    return (obj);
+  }
+}
+
+const Inventory::Slot& Inventory::GetConstItemSlot(const std::string& type_slot, unsigned int slot) const
+{
+  auto it = std::find(_slots.begin(), _slots.end(), type_slot);
+
+  if (it == _slots.end())
+    throw 0; // TODO find some kind of exception for that
   return ((*it)[slot]);
-})
+}
 
 InventoryObject*       Inventory::GetEquipedItem(const std::string& type_slot, unsigned int slot)
 {
-  return (GetItemSlot(type_slot, slot).object);
+  try
+  {
+    return (GetConstItemSlot(type_slot, slot).object);
+  }
+  catch (...)
+  {
+    return (0);
+  }
 }
 
 unsigned char          Inventory::GetEquipedMode(const std::string& type_slot, unsigned int slot) const
 {
-  return (GetItemSlot(type_slot, slot).mode);
+  try
+  {
+    return (GetConstItemSlot(type_slot, slot).mode);
+  }
+  catch (...)
+  {
+    return (0);
+  }
 }
 
 bool                   Inventory::SlotHasEquipedItem(const std::string& type_slot, unsigned int slot) const
 {
-  return (GetItemSlot(type_slot, slot).empty);
+  try
+  {
+    return (!(GetConstItemSlot(type_slot, slot).empty));
+  }
+  catch (...)
+  {
+    return (false);
+  }
 }
 
 void                   Inventory::SetEquipedItem(const std::string& type_slot, unsigned int it_slot, InventoryObject* object, unsigned char equip_mode)
 {
   Inventory::Slot& slot = GetItemSlot(type_slot, it_slot);
 
+  if (slot.object)
+  {
+    Data data = *slot.object;
+
+    data["equiped"].Remove();
+    UnequipedItem.Emit(type_slot, it_slot, slot.object);
+  }
+  if (object)
+  {
+    Data data = *object;
+
+    data["equiped"]["target"] = type_slot;
+    data["equiped"]["slot"]   = it_slot;
+    data["equiped"]["mode"]   = (unsigned short)equip_mode;
+  }
   slot.mode   = equip_mode;
   slot.object = object;
   slot.empty  = object == 0;

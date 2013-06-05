@@ -49,7 +49,9 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
       PT(CharacterJoint) joint;
       NodePath           tmp;
 
-      jointName << "attach_"  << listJoints[i] << "_" << (it + 1);
+      //jointName << "attach_"  << listJoints[i] << "_" << (it + 1);
+      //npName    << "equiped_" << listJoints[i] << "_" << (it + 1);
+      jointName << "Horn"; // TODO Get models with the proper joints
       npName    << "equiped_" << listJoints[i] << "_" << (it + 1);
       joint     = _character->find_joint(jointName.str());
 
@@ -194,7 +196,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
       continue ;
     _equiped[i].default_ = new InventoryObject(items[defEquiped[i]]);
     _equiped[i].equiped  = _equiped[i].default_;
-    _equiped[i].equiped->SetEquiped(true);
+    _equiped[i].equiped->SetEquiped(this, true);
     _inventory->AddObject(_equiped[i].equiped);
   }
   
@@ -209,6 +211,37 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   CharacterDied.Connect(*this, &ObjectCharacter::RunDeath);
 
   GetNodePath().set_transparency(TransparencyAttrib::M_alpha);
+}
+
+void ObjectCharacter::SetInventory(Inventory* inventory)
+{
+  if (inventory)
+  {
+    if (_inventory) delete _inventory;
+    _inventory = inventory;
+    _inventory->ContentChanged.Connect(*this, &ObjectCharacter::RefreshEquipment);
+    _inventory->EquipedItem.Connect([this](const string& target, unsigned short int slot, InventoryObject* object)
+    {
+      if (target == "equiped")
+      {
+        SetEquipedItem(slot, object, (EquipedMode)_inventory->GetEquipedMode(target, slot));
+      }
+    });
+    _inventory->UnequipedItem.Connect([this](const string& target, unsigned short int slot, InventoryObject* object)
+    {
+      if (target == "unequiped")
+      {
+        UnequipItem(slot);
+      }
+    });
+    _inventory->InitializeSlots();
+    if (_statistics)
+    {
+      Data statistics(_statistics);
+
+      inventory->SetCapacity(statistics["Statistics"]["Carry Weight"]);
+    }
+  }
 }
 
 void ObjectCharacter::SetFurtive(bool do_set)
@@ -305,18 +338,34 @@ InventoryObject* ObjectCharacter::GetEquipedItem(unsigned short it)
 
 void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, EquipedMode mode)
 {
+  // New system
+  //_inventory->SetEquipedItem("equiped", it, item, mode);
+  
+  // Old system
   if (_equiped[it].graphics)
+  {
     delete _equiped[it].graphics;
-  _equiped[it].equiped->SetEquiped(false);
+    _equiped[it].graphics = 0;
+  }
+  if (_equiped[it].equiped)
+    _equiped[it].equiped->SetEquiped(this, false);
   _equiped[it].equiped  = item;
   _equiped[it].mode     = mode;
   _equiped[it].actionIt = 0;
 
+  if (!item)
+  {
+    // TODO Equip default item ?
+    return ;
+  }
+
   _equiped[it].graphics = item->CreateEquipedModel(_level->GetWorld());
+  cout << "SetEquipedItem: Start" << endl;
   if (_equiped[it].graphics)
   {
     NodePath itemParentNode;
 
+    cout << "SetEquipedItem: has graphics" << endl;
     switch (mode)
     {
       case EquipedMouth:
@@ -330,12 +379,12 @@ void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, E
 	break ;
     }
     _equiped[it].graphics->GetNodePath().reparent_to(itemParentNode);
+    cout << "SetEquipedItem: done" << endl;
   }
   
-  item->SetEquiped(true);
+  item->SetEquiped(this, true);
   EquipedItemChanged.Emit(it, item);
   _inventory->ContentChanged.Emit();
-  _inventory->ContentChanged.Connect(*this, &ObjectCharacter::RefreshEquipment);
 }
 
 void ObjectCharacter::RefreshEquipment(void)
@@ -346,6 +395,7 @@ void ObjectCharacter::RefreshEquipment(void)
 
 void ObjectCharacter::UnequipItem(unsigned short it)
 {
+  _inventory->SetEquipedItem("equiped", it, 0);
   SetEquipedItem(it, _equiped[it].default_);
 }
 
