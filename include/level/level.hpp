@@ -144,6 +144,7 @@ public:
   void               MouseRightClicked(void);
   void               MouseWheelUp(void);
   void               MouseWheelDown(void);
+  void               MouseSuccessRateHint(void);
 
   void               StartCombat(void);
 

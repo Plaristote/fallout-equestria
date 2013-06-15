@@ -834,6 +834,32 @@ void Level::RunDaylight(void)
   _sunLightNode.look_at(solar_circle.GetPosition());
 }
 
+void Level::MouseSuccessRateHint(void)
+{
+  InstanceDynamicObject* dynObject = FindObjectFromNode(_mouse.Hovering().dynObject);
+
+  if (dynObject)
+  {
+    ObjectCharacter*     player    = GetPlayer();
+    InventoryObject*     item      = player->active_object;
+    unsigned char        actionIt  = player->active_object_it;
+
+    if ((*item)["actions"][actionIt]["combat"] == "1")
+    {
+      ObjectCharacter*   target = dynObject->Get<ObjectCharacter>();
+      int                rate;
+
+      if (!target)
+        return ;
+      rate = item->HitSuccessRate(player, target, actionIt);
+      MouseCursor::Get()->SetHint(rate);
+      std::cout << "SUCCESS RATE -> " << rate << std::endl;
+    }
+    else
+      ; // Not implemented yet
+  }
+}
+
 AsyncTask::DoneStatus Level::do_task(void)
 { 
   float elapsedTime = _timer.GetElapsedTime();
@@ -907,6 +933,8 @@ AsyncTask::DoneStatus Level::do_task(void)
   
   CheckCurrentFloor(elapsedTime);  
   _mouse.Run();
+  if (_mouseState == MouseTarget && _mouse.Hovering().hasDynObject)
+    MouseSuccessRateHint();
   _timer.Restart();
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);
 }
@@ -1004,7 +1032,7 @@ void Level::MouseWheelDown(void)
   {
     Data options = OptionsManager::Get();
     float distance = options["camera"]["distance"];
-    
+
     if (distance < 140.f)
       distance += 10.f;
     options["camera"]["distance"] = distance;
@@ -1018,7 +1046,7 @@ void Level::MouseWheelUp(void)
   {
     Data options = OptionsManager::Get();
     float distance = options["camera"]["distance"];
-    
+
     if (distance > 50.f)
       distance -= 10.f;
     options["camera"]["distance"] = distance;

@@ -90,7 +90,7 @@
 ,
 "Shotgun": {
   "script": {
-    "file": ""
+    "file": "shotgun.as"
   }
 ,
   "icon": "shotgun.png",
@@ -114,11 +114,14 @@
   "actions": {
     "Shoot": {
       "ap-cost": 5,
-      "range": 25,
+      "range": 50,
       "combat": 1,
       "targeted": 1,
       "damage": 15,
-      "damage-max": 20
+      "damage-max": 20,
+      "type":           "Small Guns",
+      "hookHitChanges": "ShootSuccessChance",
+      "hookWeapon":     "Shoot"
     }
 ,
     "Reload": {

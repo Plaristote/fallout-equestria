@@ -39,17 +39,17 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
       }
     }
   }
-  
+
   ForEach(data["actions"], [this](Data action)
   {
     Data        copy = (*this)["actions"][action.Key()];
     ActionHooks hooks;
-    
+
     copy["ap-cost"]        = action["ap-cost"].Value();
     copy["targeted"]       = (action["targeted"].Nil() ? "1" : action["targeted"].Value());
     copy["range"]          = action["range"].Value();
     copy["combat"]         = action["combat"].Value();
-    
+
     if (_script_module)
     {
       if (action["hookUse"].Nil() == false)
@@ -62,6 +62,8 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
 	hooks.UseOnOthers     = _script_module->GetFunctionByDecl(("string " + action["hookOthers"].Value() + "(Item@, Character@, DynamicObject@)").c_str());
       if (action["hookWeapon"].Nil() == false)
 	hooks.UseAsWeapon     = _script_module->GetFunctionByDecl(("string " + action["hookWeapon"].Value() + "(Item@, Character@, Character@)").c_str());
+      if (action["hookHitChances"].Nil() == false)
+        hooks.HitChances      = _script_module->GetFunctionByDecl(("int " + action["hookHitChances"].Value() + "(Item@, Character@, Character@)").c_str());
     }
     _actionHooks.push_back(hooks);
   });
@@ -94,9 +96,10 @@ void InventoryObject::SetEquiped(ObjectCharacter* character, bool set)
 
 bool InventoryObject::CanWeild(ObjectCharacter* character, std::string slot, unsigned char mode)
 {
+  cout << "CALLING HOOK CAN WEILD" << endl;
   if (_hookCanWeild)
   {
-    std::cout << "Yes can weild hook" << std::endl;
+    cout << "SEEMS TO BE WORKING" << endl;
     _script_context->Prepare(_hookCanWeild);
     _script_context->SetArgObject(0, this);
     _script_context->SetArgObject(1, character);
@@ -105,7 +108,6 @@ bool InventoryObject::CanWeild(ObjectCharacter* character, std::string slot, uns
     _script_context->Execute();
     return (_script_context->GetReturnByte());
   }
-  std::cout << "No can weild hook" << std::endl;
   return (false);
 }
 
@@ -223,6 +225,32 @@ DynamicObject* InventoryObject::CreateDynamicObject(World* world) const
   object->waypoint     = 0;
   object->type         = DynamicObject::Item;
   return (object);
+}
+
+int               InventoryObject::HitSuccessRate(ObjectCharacter* user, ObjectCharacter* target, unsigned char use_type)
+{
+  asIScriptFunction* hook = _actionHooks[use_type].HitChances;
+
+  if (hook != 0)
+  {
+    int ret = _script_context->Prepare(hook);
+
+    switch (ret)
+    {
+      case asCONTEXT_ACTIVE:
+        std::cout << "/!\\ Script context still active, couldn't get hit success rate." << std::endl;
+        return (50);
+      default:
+        break ;
+    }
+
+    _script_context->SetArgObject(0, this);
+    _script_context->SetArgObject(1, user);
+    _script_context->SetArgObject(2, target);
+    _script_context->Execute();  
+    return (_script_context->GetReturnDWord());
+  }
+  return (0);
 }
 
 const std::string InventoryObject::UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType)

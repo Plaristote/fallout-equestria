@@ -41,6 +41,21 @@ void MouseCursor::SetHint(const std::string& key)
   }
 }
 
+void MouseCursor::SetHint(int value)
+{
+  std::stringstream stream;
+  std::string       str;
+  
+  stream << value << '%';
+  str = stream.str();
+  if (_current_hint != str)
+  {
+    _current_hint = str;
+    str           = "<span class='mouse-hint-success-rate' style='font-family: JH_Fallout;'>" + str + "</span>";
+    _hint->SetInnerRML(str.c_str());
+  }
+}
+
 void MouseCursor::Update(void)
 {
   if (_cursor && IsVisible())

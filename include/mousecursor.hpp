@@ -11,6 +11,7 @@ public:
 
   void SetCursorTexture(const std::string& texture) { if (_cursor) _cursor->SetAttribute("src", texture.c_str()); }
   void SetHint(const std::string& rml);
+  void SetHint(int);
   
   void Update(void);
   

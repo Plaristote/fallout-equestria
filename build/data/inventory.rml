@@ -81,7 +81,10 @@
   		<img src="../textures/itemIcons/key.png" class='inventory-item' />
   	</div>
   	<div id="rest" class="place-next-to">
-  		<div id="item-description" class="console-bg place-beneath"></div>
+  		<div class="console-bg place-beneath">
+                  <div id="item-description"></div>
+                  <button id="button_drop" class="button">Drop</button>
+                </div>
   		<div id="eq-containers" class="place-beneath">
   			<div id="eq1" class="place-next-to">
 	  			<div class="eq-type place-beneath">

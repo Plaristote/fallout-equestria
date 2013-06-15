@@ -34,6 +34,7 @@ public:
   InventoryObject(Data);
   ~InventoryObject();
 
+  int               HitSuccessRate(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType);
   const std::string UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType);
   const std::string UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType);
   const std::string Use(ObjectCharacter* user, unsigned char useType);
@@ -62,13 +63,14 @@ private:
   
   struct ActionHooks
   {
-    ActionHooks() : Use(0), UseOnCharacter(0), UseOnDoor(0), UseOnOthers(0), UseAsWeapon(0) {}
+    ActionHooks() : Use(0), UseOnCharacter(0), UseOnDoor(0), UseOnOthers(0), UseAsWeapon(0), HitChances(0) {}
 
     asIScriptFunction* Use;
     asIScriptFunction* UseOnCharacter;
     asIScriptFunction* UseOnDoor;
     asIScriptFunction* UseOnOthers;
     asIScriptFunction* UseAsWeapon;
+    asIScriptFunction* HitChances;
   };
   typedef std::vector<ActionHooks> ActionsHooks;
   
