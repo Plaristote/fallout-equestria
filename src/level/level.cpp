@@ -111,8 +111,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     std::cout << "Failed to load file" << std::endl;
   }
   
-  if (_world->sunlight_enabled)
-  //if (false)
+  if (_world->sunlight_enabled && false)
     InitSun();
 
   LPoint3 upperLeft, upperRight, bottomLeft;
@@ -862,7 +861,6 @@ void Level::MouseSuccessRateHint(void)
         return ;
       rate = item->HitSuccessRate(player, target, actionIt);
       MouseCursor::Get()->SetHint(rate);
-      std::cout << "SUCCESS RATE -> " << rate << std::endl;
     }
     else
       ; // Not implemented yet

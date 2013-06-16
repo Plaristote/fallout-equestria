@@ -78,7 +78,13 @@ string Shoot(Item@ item, Character@ user, Character@ target)
   Data item_data = item.AsData();
   Data action    = item_data["actions"]["Shoot"];
   int  ap_cost   = action["ap-cost"].AsInt();
+  int  ammo      = GetAmmoAmount(item_data);
 
+  if (ammo < 1)
+  {
+    level.PlaySound("out-of-ammo");
+    return ("Out of ammo.");
+  }
   if (ap_cost <= ap)
   {
     float range    = action["range"].AsFloat();
@@ -89,6 +95,8 @@ string Shoot(Item@ item, Character@ user, Character@ target)
     if (distance > range)
       return ("Out of range");
     user.SetActionPoints(ap - ap_cost);
+    SetAmmoAmount(item_data, ammo - 1);
+    level.PlaySound("shoot/shotgun");
     success_rate   = ShootSuccessChance(item, user, target);
     if (roll <= success_rate)
     {
@@ -109,15 +117,40 @@ string Shoot(Item@ item, Character@ user, Character@ target)
   return ("Not enough action points");
 }
 
+string GetAmmoType(Data item)
+{
+  return (item["ammo"]["current"].AsString());
+}
+
+int GetAmmoAmount(Data item)
+{
+  if (item["ammo"]["amount"].Nil())
+    return (0);
+  return (item["ammo"]["amount"].AsInt());
+}
+
+void SetAmmoType(Data item, string type)
+{
+  item["ammo"]["current"] = type;
+}
+
+void SetAmmoAmount(Data item, int amount)
+{
+  item["ammo"]["amount"] = amount;
+}
+
 string ReloadWeapon(Item@ item, Character@ user)
 {
+  Cout("RELOADING WEAPON");
   Inventory@ inventory   = user.GetInventory();
   Data       itemData    = item.AsData();
-  string     currentAmmo = itemData["ammo"]["current"].AsString();
-  int        ammountAmmo = itemData["ammo"]["ammount"].AsInt();
+  string     currentAmmo = GetAmmoType(itemData);
+  int        ammountAmmo = GetAmmoAmount(itemData);
   int        maximumAmmo = itemData["ammo"]["maximum"].AsInt();
   Item@      nextAmmunition;
 
+  if (ammountAmmo == maximumAmmo)
+    return (item.GetName() + " is already fully loaded.");
   @nextAmmunition = inventory.GetObject(currentAmmo);
   // If no ammunition of that type left, and barrel is empty, check other types of ammo
   if (@nextAmmunition == null && ammountAmmo == 0)
@@ -126,18 +159,21 @@ string ReloadWeapon(Item@ item, Character@ user)
     int      typeCount = ammoTypes.Count();
     int      i         = 0;
 
+    if (ammoTypes.Nil())
+      typeCount = 0;
     while (i < typeCount)
     {
       string typeName  = ammoTypes[i].AsString();
 
-      if (typeName == currentAmmo)
-        continue ;
-      @nextAmmunition = inventory.GetObject(typeName);
-      if (@nextAmmunition != null)
+      if (typeName != currentAmmo)
       {
-        currentAmmo                 = typeName;
-        itemData["ammo"]["current"] = currentAmmo;
-        break ;
+        @nextAmmunition = inventory.GetObject(typeName);
+        if (@nextAmmunition != null)
+        {
+          currentAmmo                 = typeName;
+          itemData["ammo"]["current"] = currentAmmo;
+          break ;
+        }
       }
       i++;
     }
@@ -145,14 +181,20 @@ string ReloadWeapon(Item@ item, Character@ user)
 
   // If still no ammunition object fetched, impossible to reload
   if (@nextAmmunition == null)
+  {
+    level.PlaySound("out-of-ammo");
     return ("Out of ammo");
+  }
 
-  while (@nextAmmunition != null && ammountAmmo <= maximumAmmo)
+  while (@nextAmmunition != null && ammountAmmo < maximumAmmo)
   {
     inventory.DelObject(nextAmmunition);
     @nextAmmunition = inventory.GetObject(currentAmmo);
     ammountAmmo++;
   }
+  SetAmmoAmount(itemData, ammountAmmo);
 
+  Cout(item.GetName() + " now loaded with " + ammountAmmo + "/" + maximumAmmo + " rounds.");
+  level.PlaySound("reload/pistol");
   return ("");
 }

@@ -339,9 +339,15 @@ InventoryObject* ObjectCharacter::GetEquipedItem(unsigned short it)
 
 void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, EquipedMode mode)
 {
+  if (_equiped[it].equiped == item && _equiped[it].mode == mode)
+  {
+    cout << "Item " << item << " already equiped in this mode" << endl;
+    return ;
+  }
+  cout << "SetEquipedItem called" << endl;
   // New system
   //_inventory->SetEquipedItem("equiped", it, item, mode);
-  
+
   // Old system
   if (_equiped[it].graphics)
   {
@@ -390,8 +396,11 @@ void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, E
 
 void ObjectCharacter::RefreshEquipment(void)
 {
-  EquipedItemChanged.Emit(0, _equiped[0].equiped);
-  EquipedItemChanged.Emit(1, _equiped[1].equiped);
+  for (short i = 0 ; i < 2 ; ++i)
+  {
+    EquipedItemChanged.Emit      (i, _equiped[i].equiped);
+    EquipedItemActionChanged.Emit(i, _equiped[i].equiped, _equiped[i].actionIt);
+  }
 }
 
 void ObjectCharacter::UnequipItem(unsigned short it)

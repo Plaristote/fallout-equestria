@@ -169,6 +169,11 @@ void Level::ActionUseObject(ObjectCharacter* user, InventoryObject* object, unsi
   }
   
   std::cout << "ActionUseObject" << std::endl;
+
+  std::string result = object->Use(user, actionIt);  
+
+  if (result != "" && user == GetPlayer())
+    ConsoleWrite(result);
   // Use the object naow
   //   if (!(user->pendingAnimationDone))
   //   {

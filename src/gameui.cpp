@@ -1091,6 +1091,7 @@ void GameMainBar::SetEquipedItem(unsigned short it, InventoryObject* item)
 
 void GameMainBar::SetEquipedItemAction(unsigned short it, InventoryObject* item, unsigned char actionIt)
 {
+  cout << "SetEquipedItemAction: " << (int)actionIt << endl;
   if (item)
   {
     Rocket::Core::Element* elem;

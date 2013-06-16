@@ -6,7 +6,6 @@
 // 2 -> EquipedBattleSaddle
 bool CanWeild(Item@ item, Character@ user, string slot, int mode)
 {
-  Cout("CAN WEILD HOOK CALLED FFS");
   if (slot == "equiped")
   {
     if (mode == 1)
@@ -20,3 +19,7 @@ bool CanWeild(Item@ item, Character@ user, string slot, int mode)
   return (false);
 }
 
+string ShotgunShoot(Item@ item, Character@ user, Character@ target)
+{
+  return (Shoot(item, user, target));
+}
