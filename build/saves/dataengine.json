@@ -22,20 +22,20 @@
 }
 ,
 "system": {
-  "current-level": 0
+  "current-level": ""
 }
 ,
 "worldmap": {
-  "pos-x": 161,
-  "pos-y": 265
+  "pos-x": 242,
+  "pos-y": 149
 }
 ,
 "time": {
-  "seconds": 41,
-  "minutes": 47,
-  "hours": 10,
-  "days": 29,
-  "month": 5,
+  "seconds": 17,
+  "minutes": 53,
+  "hours": 12,
+  "days": 16,
+  "month": 10,
   "year": 2473
 }
 ,
@@ -46,7 +46,8 @@
 ,
   "Test Town": {
     "Enemies": {
-      "Timberwolves": 1
+      "Timberwolves": 1,
+      "Test Town": 1
     }
 
   }
@@ -61,6 +62,10 @@
     }
 
   }
+,
+  "Pawnee": {
+    "Enemies": ""
+  }
 
 }
 ,
@@ -68,12 +73,17 @@
   "Apps": {
     "clock": {
       "type": 1,
-      "icon": "clock.png"
+      "icon": "pipbuck/clock.png"
+    }
+,
+    "quest manager": {
+      "type": 2,
+      "icon": "pipbuck/quests.png"
     }
 ,
     "helloworld": {
       "type": 0,
-      "icon": "helloworld.png",
+      "icon": "pipbuck/helloworld.png",
       "src": "helloworld.as",
       "hooks": {
         "start": "start",
@@ -221,8 +231,8 @@ Newly refreshed and woken up, not to mention fearing for my skin, I ran to my ba
 ,
       "mode-mouth": 1,
       "mode-magic": 1,
-      "quantity": 1,
-      "Name": "hooves"
+      "Name": "hooves",
+      "quantity": 1
     }
 ,
     "buck": {
@@ -255,13 +265,149 @@ Newly refreshed and woken up, not to mention fearing for my skin, I ran to my ba
         "use": 1
       }
 ,
-      "quantity": 1,
-      "Name": "buck"
+      "Name": "buck",
+      "quantity": 1
+    },
+    "Key": {
+      "equiped-save": [
+        {
+          "target": "equiped",
+          "slot": 0,
+          "mode": 0
+        }
+      ],
+      "icon": "key.png",
+      "texture": "lpip.png",
+      "model": "horse.obj",
+      "scale": 1,
+      "weight": 5,
+      "script": {
+        "file": "objectsItems.as"
+      },
+      "actions": {
+        "use on": {
+          "ap-cost": 2,
+          "hookDoors": "UseKeyOnDoor",
+          "range": 999,
+          "combat": 0,
+          "targeted": 1,
+          "damage": 999,
+          "damage-max": 999
+        }
+      },
+      "mode-mouth": 1,
+      "mode-magic": 1,
+      "mode-battlesaddle": 0,
+      "interactions": {
+        "use": 1
+      },
+      "Name": "Key",
+      "quantity": 5
+    },
+    "Shotgun": {
+      "script": {
+        "file": "shotgun.as"
+      },
+      "icon": "shotgun.png",
+      "model": "Shotgun.obj",
+      "texture": "shotgun.tga",
+      "scale": 0.07,
+      "offset": {
+        "x": -1.25,
+        "y": -1.25,
+        "z": 0.5
+      },
+      "rotation": {
+        "x": -90,
+        "y": 0,
+        "z": 0
+      },
+      "weight": 15,
+      "mode-mouth": 0,
+      "mode-magic": 1,
+      "mode-battlesaddle": 1,
+      "ammo": {
+        "types": [ "ammoCaliber22" ],
+        "current": "ammoCaliber22",
+        "amount":  0,
+        "maximum": 2
+      },
+      "actions": {
+        "Shoot": {
+          "ap-cost": 5,
+          "range": 50,
+          "combat": 1,
+          "targeted": 1,
+          "damage": 15,
+          "damage-max": 20,
+          "type": "Small Guns",
+          "hookHitChances": "ShootSuccessChance",
+          "hookWeapon": "Shoot"
+        },
+        "Reload": {
+          "ap-cost": 2,
+          "range": 0,
+          "combat": 0,
+          "targeted": 0,
+          "damage": 0,
+          "damage-max": 0,
+          "hookUse": "ReloadWeapon"
+        }
+      },
+      "Name": "Shotgun",
+      "quantity": 1
+    },
+    "ammoCaliber22": {
+      "script": {
+        "file": ""
+      }
+    ,
+      "icon": "22caliber.png",
+      "model": "",
+      "texture": "",
+      "scale": 0,
+      "weight": 0,
+      "mode-mouth": 0,
+      "mode-magic": 0,
+      "mode-battlesaddle": 0,
+      "Name": "Caliber 22.",
+      "quantity": 3
+    }
+  }
+},
+"my_quests": {
+  "Sterling's Quest": {
+    "description": "Sterling wants you to bring back a key",
+    "script": "sterling",
+    "objectives": {
+      "Give me the key": {
+        "description": "Find the key and give it to Sterling",
+        "conditions": {
+          "InventoryContains": {
+            "target": "Sterling",
+            "object_type": "key",
+            "object_quantity": 1
+          }
+
+        }
+
+      }
+
     }
 
   }
 
 }
 ,
+"Quests": "",
+"dialogs": {
+  "Sterling": ""
+}
+,
+"poisoning": "",
+"variables": {
+  "Sterling": ""
+}
+
 
 }

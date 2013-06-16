@@ -10,7 +10,7 @@
   "END": 3,
   "CHA": 9,
   "INT": 7,
-  "AGI": 5,
+  "AGI": 12,
   "LUC": 7
 }
 ,
@@ -22,7 +22,7 @@
   "Critical Chance": 7,
   "Damage Resistance": 5,
   "Healing Rate": 1,
-  "Hit Points": 27,
+  "Hit Points": 33,
   "Melee Damage": 1,
   "Perk Rate": 3,
   "Poison Resistance": 15,
@@ -43,7 +43,7 @@
   "Science": 39,
   "Sneak": 30,
   "Spellcasting": 46,
-  "Steal": 5,
+  "Steal": 85,
   "Barter": 38,
   "Outdoorspony": 55,
   "Speech": 43,
@@ -78,7 +78,7 @@
   "Critical Chance": 0,
   "Damage Resistance": 5,
   "Healing Rate": 0,
-  "Hit Points": 3,
+  "Hit Points": 7,
   "Melee Damage": 0,
   "Perk Rate": 0,
   "Poison Resistance": 0,
@@ -87,12 +87,12 @@
 }
 ,
 "Variables": {
-  "Hit Points": 21,
-  "Level": 4,
-  "Experience": 12750,
-  "Skill Points": 57,
+  "Hit Points": 7,
+  "Level": 2,
+  "Experience": 1301,
+  "Skill Points": 19,
   "Special Points": 0,
-  "Perks": 3,
+  "Perks": 4,
   "Traits": 0
 }
 ,
@@ -102,5 +102,10 @@
 }
 ,
 "Affinities": "",
+"Kills": {
+  "Unicorn": 2,
+  "Timberwolf": 2
+}
+
 
 }

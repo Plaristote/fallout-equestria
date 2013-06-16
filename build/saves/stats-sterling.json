@@ -1,0 +1,94 @@
+{
+"Special": {
+  "STR": 5,
+  "PER": 6,
+  "END": 5,
+  "CHA": 8,
+  "INT": 5,
+  "AGI": 6,
+  "LUC": 5
+}
+,
+"Variables": {
+  "Hit Points": 30,
+  "Level": 5
+}
+,
+"Name": "Sterling",
+"Age": 21,
+"Race": "Earth Pony",
+"Faction": "Pawnee",
+"Statistics": {
+  "Action Points": 6,
+  "Armor Class": 6,
+  "Bonus Damage": 0,
+  "Carry Weight": 150,
+  "Critical Chance": 5,
+  "Damage Resistance": 0,
+  "Healing Rate": 1,
+  "Hit Points": 30,
+  "Melee Damage": 1,
+  "Perk Rate": 3,
+  "Poison Resistance": 25,
+  "Radiation Resistance": 8,
+  "Skill Rate": 15
+}
+,
+"Skills": {
+  "Small Guns": 41,
+  "Big Guns": 16,
+  "Energy Guns": 16,
+  "Explosives": 80,
+  "Unarmed": 95,
+  "Lockpick": 80,
+  "Melee Weapons": 110,
+  "Medicine": 70,
+  "Repair": 25,
+  "Science": 35,
+  "Sneak": 31,
+  "Spellcasting": 40,
+  "Steal": 6,
+  "Barter": 86,
+  "Outdoorspony": 55,
+  "Speech": 61,
+  "Gambling": 35
+}
+,
+"Skill Points": {
+  "Small Guns": 0,
+  "Big Guns": 0,
+  "Energy Guns": 0,
+  "Explosives": 0,
+  "Unarmed": 0,
+  "Lockpick": 0,
+  "Melee Weapons": 0,
+  "Medicine": 0,
+  "Repair": 0,
+  "Science": 0,
+  "Sneak": 0,
+  "Spellcasting": 0,
+  "Steal": 0,
+  "Barter": 0,
+  "Outdoorspony": 0,
+  "Speech": 0,
+  "Gambling": 0
+}
+,
+"Statistics Modifiers": {
+  "Action Points": 0,
+  "Armor Class": 0,
+  "Bonus Damage": 0,
+  "Carry Weight": 0,
+  "Critical Chance": 0,
+  "Damage Resistance": 0,
+  "Healing Rate": 0,
+  "Hit Points": 0,
+  "Melee Damage": 0,
+  "Perk Rate": 0,
+  "Poison Resistance": 0,
+  "Radiation Resistance": 0,
+  "Skill Rate": 0
+}
+
+
+}
