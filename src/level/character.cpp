@@ -82,7 +82,8 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _losNode      = new CollisionNode("losRay");
   _losNode->set_from_collide_mask(CollideMask(ColMask::Object | ColMask::FovTarget));
   _losNode->set_into_collide_mask(0);
-  _losPath      = object->nodePath.attach_new_node(_losNode);
+  _losPath      = _window->get_render().attach_new_node(_losNode);
+//  _losPath      = object->nodePath.attach_new_node(_losNode);
   _losRay       = new CollisionSegment();
   _losRay->set_point_a(0, 0, 0);
   _losRay->set_point_b(-10, 0, 0);
@@ -903,16 +904,16 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
   NodePath  root  = _object->nodePath;
   NodePath  other = object->GetNodePath();
   bool      ret   = true;
-  LVecBase3 rbkp  = root.get_hpr();
-  root.set_hpr(0, 0, 0); // Workaround ? Or definitive solution ?
   LVecBase3 rot   = root.get_hpr();
   LVector3  rpos  = root.get_pos();
   LVector3  dir   = root.get_relative_vector(other, other.get_pos() - rpos);
 
-  _losPath.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
-  _losRay->set_point_b(dir.get_x(), dir.get_y(), dir.get_z() + 4.f);
+  _losPath.set_hpr(0, 0, 0);
+  _losRay->set_point_a(rpos.get_x(), rpos.get_y(), rpos.get_z() + 4.f);
+  _losRay->set_point_b(other.get_x(), other.get_y(), other.get_z() + 4.f);
   _losTraverser.traverse(_level->GetWorld()->window->get_render());
   
+  //if (object == _level->GetPlayer())
   //_losPath.show();
   _losHandlerQueue->sort_entries();
 
@@ -929,7 +930,6 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
       continue ;
     break ;
   }
-  root.set_hpr(rbkp);
   collector.stop();
   profiler.Profile("HasLineOfSight");
   return (ret);
@@ -979,6 +979,17 @@ Script::StdList<ObjectCharacter*> ObjectCharacter::GetNearbyAllies(void) const
   return (_fovAllies);
 }
 
+void     ObjectCharacter::SetEnemyDetected(ObjectCharacter* character)
+{
+  list<FovEnemy>::iterator enemyIt  = find(_fovEnemies.begin(), _fovEnemies.end(), character);
+
+  cout << "[FOV] " << character->GetName() << " detected" << endl;
+  if (enemyIt != _fovEnemies.end())
+    enemyIt->ttl = FOV_TTL;
+  else
+    _fovEnemies.push_back(FovEnemy(character, FOV_TTL));
+}
+
 void     ObjectCharacter::CheckFieldOfView(void)
 {
   if (_hitPoints <= 0 || !_fovNeedsUpdate)
@@ -988,7 +999,7 @@ void     ObjectCharacter::CheckFieldOfView(void)
   PStatCollector     collector("Level:Characters:FieldOfView");
   short              perception = GetStatController()->Model().GetSpecial("PER");
   CollisionTraverser fovTraverser;
-  float              fovRadius  = 35 + (perception * 5);
+  float              fovRadius  = 20 + (perception * 5);
   
   collector.start();
   _fovNeedsUpdate = false;
@@ -996,27 +1007,24 @@ void     ObjectCharacter::CheckFieldOfView(void)
   {
     list<FovEnemy>::iterator it = _fovEnemies.begin();
 
+    // Decrement TTL of nearby enemies
     while (it != _fovEnemies.end())
     {
       it->ttl--;
-      cout << "TTL left is '" << (int)it->ttl << '\'' << endl;
+      cout << "[FOV] TTL left is '" << (int)it->ttl << '\'' << endl;
       if (it->ttl == 0)
 	it = _fovEnemies.erase(it);
       else
 	++it;
     }
     _fovAllies.clear();
-    // Decrement TTL of nearby enemies
   }
 
-  //Timer timer;
-  
   _fovSphere->set_radius(fovRadius);
   _fovTraverser.traverse(_level->GetWorld()->window->get_render());
 
   for (unsigned short i = 0 ; i < _fovHandlerQueue->get_num_entries() ; ++i)
   {
-    //cout << "loop fovhandlerqueue " << i << endl;
     CollisionEntry*        entry  = _fovHandlerQueue->get_entry(i);
     NodePath               node   = entry->get_into_node_path();
     InstanceDynamicObject* object = _level->FindObjectFromNode(node);
@@ -1033,7 +1041,6 @@ void     ObjectCharacter::CheckFieldOfView(void)
 	  _fovAllies.push_back(character);
 	else if (IsEnemy(character) && HasLineOfSight(character))
 	{
-	  list<FovEnemy>::iterator enemyIt  = find(_fovEnemies.begin(), _fovEnemies.end(), character);
           bool                     detected = true;
 
           if (character->HasFlag(1))
@@ -1045,13 +1052,12 @@ void     ObjectCharacter::CheckFieldOfView(void)
               detected = false;
           }
           if (detected)
-          {
-            if (enemyIt != _fovEnemies.end())
-              enemyIt->ttl = FOV_TTL;
-            else
-              _fovEnemies.push_back(FovEnemy(character, FOV_TTL));
-          }
+            SetEnemyDetected(character);
+          else
+            cout << "[FOV] " << character->GetName() << " remains undetected" << endl;
 	}
+        else
+          cout << "[FOV] " << character->GetName() << " is out of my line of sight" << endl;
       }
     }
   }

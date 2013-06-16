@@ -156,6 +156,7 @@ public:
   void                DelBuff(CharacterBuff* buff);
 
   void                CheckFieldOfView(void);
+  void                SetEnemyDetected(ObjectCharacter*);
   void                SetFaction(const std::string&);
   void                SetFaction(unsigned int flag);
   void                SetAsEnemy(const ObjectCharacter*, bool);

@@ -218,7 +218,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
    * END DIVIDE AND CONQUER
    */
 
-  window->get_render().set_shader_auto();
+  //window->get_render().set_shader_auto();
   loadingScreen->AppendText("-- Done --");
   loadingScreen->FadeOut();
   loadingScreen->Destroy();
@@ -375,7 +375,12 @@ void Level::InitPlayer(void)
   obs_player.Connect(GetPlayer()->EquipedItemChanged,       _levelUi.GetInventory(), &GameInventory::SetEquipedItem);
   _levelUi.GetMainBar().EquipedItemNextAction.Connect(*GetPlayer(), &ObjectCharacter::ItemNextUseType);
   _levelUi.GetMainBar().UseEquipedItem.Connect       (*this, &Level::CallbackActionTargetUse);
-  _levelUi.GetMainBar().CombatEnd.Connect            (*this, &Level::StopFight);
+  _levelUi.GetMainBar().CombatEnd.Connect            ([this](void)
+  {
+    StopFight();
+    if (_state == Fight)
+      ConsoleWrite("You can't leave combat mode if enemies are nearby.");
+  });
   _levelUi.GetMainBar().CombatPassTurn.Connect       (*this, &Level::NextTurn);
 
   obs.Connect(_levelUi.GetInventory().EquipItem,   [this](const std::string& target, unsigned int slot, InventoryObject* object)
@@ -699,6 +704,8 @@ void Level::StartFight(ObjectCharacter* starter)
   }
   _levelUi.GetMainBar().SetEnabledAP(true);
   (*_itCharacter)->RestartActionPoints();
+  if (_state != Fight)
+    ConsoleWrite("You are now in combat mode.");
   SetState(Fight);
 }
 
@@ -711,16 +718,17 @@ void Level::StopFight(void)
     
     for (; it != end ; ++it)
     {
-      list<ObjectCharacter*> listEnemies = (*it)->GetNearbyEnemies();
-
-      if (!(listEnemies.empty()) && (*it)->IsAlive())
+      if (!((*it)->IsAlly(GetPlayer())))
       {
-	ConsoleWrite("You can't leave combat mode if enemies are nearby");
-	return ;
+        list<ObjectCharacter*> listEnemies = (*it)->GetNearbyEnemies();
+
+        if (!(listEnemies.empty()) && (*it)->IsAlive())
+          return ;
       }
     }
     if (_mouseState == MouseTarget)
       SetMouseState(MouseAction);
+    ConsoleWrite("Combat ended.");
     SetState(Normal);
     _levelUi.GetMainBar().SetEnabledAP(false);
   }
@@ -740,6 +748,7 @@ void Level::NextTurn(void)
   if ((++_itCharacter) == _characters.end())
   {
     _itCharacter = _characters.begin();
+    (*_itCharacter)->CheckFieldOfView();
     _timeManager.AddElapsedTime(WORLDTIME_TURN);
   }
   if (_itCharacter != _characters.end())
@@ -893,6 +902,10 @@ AsyncTask::DoneStatus Level::do_task(void)
 
   _camera.SlideToHeight(GetPlayer()->GetDynamicObject()->nodePath.get_z());
   _camera.Run(elapsedTime);  
+
+  //
+  // Level Mouse HInts
+  //
   _mouse.ClosestWaypoint(_world, _currentFloor);
   if (_mouse.Hovering().hasWaypoint)
   {
@@ -905,6 +918,11 @@ AsyncTask::DoneStatus Level::do_task(void)
   }
   else
     MouseCursor::Get()->SetHint("nowhere");
+  if (_mouseState == MouseTarget && _mouse.Hovering().hasDynObject)
+    MouseSuccessRateHint();
+  //
+  // End Level Mouse Hints
+  //
 
   std::function<void (InstanceDynamicObject*)> run_object = [elapsedTime](InstanceDynamicObject* obj)
   {
@@ -933,8 +951,6 @@ AsyncTask::DoneStatus Level::do_task(void)
   
   CheckCurrentFloor(elapsedTime);  
   _mouse.Run();
-  if (_mouseState == MouseTarget && _mouse.Hovering().hasDynObject)
-    MouseSuccessRateHint();
   _timer.Restart();
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);
 }

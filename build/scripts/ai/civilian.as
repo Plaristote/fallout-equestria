@@ -56,6 +56,10 @@ Character@ SelectTarget(Character@ self)
     Cout("-> Selected enemy: " + bestMatch.GetName());
     Write("-> Selected enemy: " + bestMatch.GetName());
   }
+  else
+  {
+    Cout("-> No enemy detected");
+  }
   return (bestMatch);
 }
 

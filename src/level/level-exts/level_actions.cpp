@@ -292,6 +292,8 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
     output = (item->UseAsWeapon(user, target, actionIt));
     MouseRightClicked();
     ConsoleWrite(output);
+    if (!(target->IsAlly(user)))
+      target->SetEnemyDetected(user);
     if (xpFetcher.character_died)
     {
       xpFetcher.Execute();

@@ -34,13 +34,13 @@ int ShootSuccessChance(Item@ item, Character@ user, Character@ target)
   {
     if (!(action["precision"].Nil()))
       precision        = action["precision"].AsInt();
-    Cout("Skill Points: " + skill);
-    Cout("Distance:     " + distance);
+    //Cout("Skill Points: " + skill);
+    //Cout("Distance:     " + distance);
     int hit_chances = 10 + skill - distance + precision - armor_class;
 
-    Cout("Precision:   " + precision);
-    Cout("Armor Class: " + armor_class);
-    Cout("Hit Chances: " + hit_chances);
+    //Cout("Precision:   " + precision);
+    //Cout("Armor Class: " + armor_class);
+    //Cout("Hit Chances: " + hit_chances);
     if (hit_chances > 95)
       hit_chances = 95;
     return (hit_chances);
