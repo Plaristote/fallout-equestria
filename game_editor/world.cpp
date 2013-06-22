@@ -17,7 +17,7 @@ NodePath debug_pathfinding;
 World::World(WindowFramework* window)
 {
   this->window         = window;
-  model_sphere         = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
+  model_sphere         = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + "misc/sphere");
   floors_node          = window->get_render().attach_new_node("floors");
   rootWaypoints        = window->get_render().attach_new_node("waypoints");
   rootMapObjects       = window->get_render().attach_new_node("mapobjects");
@@ -48,10 +48,13 @@ Waypoint* World::AddWayPoint(float x, float y, float z)
   Waypoint  waypoint(nodePath);
   Waypoint* ptr;
 
-  model_sphere.instance_to(nodePath);
-  waypoint.nodePath.set_pos(x, y, z);
-  waypoints.push_back(waypoint);
-  nodePath.reparent_to(rootWaypoints);
+  if (!(model_sphere.is_empty()))
+  {
+    model_sphere.instance_to(nodePath);
+    waypoint.nodePath.set_pos(x, y, z);
+    waypoints.push_back(waypoint);
+    nodePath.reparent_to(rootWaypoints);
+  }
   ptr = &(*(--(waypoints.end())));
   return (ptr);
 }
@@ -63,7 +66,8 @@ void World::DeleteWayPoint(Waypoint* toDel)
   if (it != waypoints.end())
   {
       toDel->DisconnectAll();
-      toDel->nodePath.remove_node();
+      if (!(toDel->nodePath.is_empty()))
+        toDel->nodePath.remove_node();
       waypoints.erase(it);
   }
 }
@@ -191,11 +195,10 @@ void World::FloorResize(int newSize)
 MapObject* World::AddMapObject(const string &name, const string &model, const string &texture, float x, float y, float z)
 {
   MapObject object;
-  string    model2 = model;
 
   object.strModel   = model;
   object.strTexture = texture;
-  object.nodePath   = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model2);
+  object.nodePath   = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model);
   if (texture != "")
   {
     object.texture    = TexturePool::load_texture(TEXT_ROOT + texture);
@@ -708,7 +711,8 @@ Waypoint::Arc::Arc(const Waypoint::Arc& arc) : from(arc.from), to(arc.to)
   observer = arc.observer;
 #ifdef WAYPOINT_DEBUG
   node     = arc.node;
-  nodePath.reparent_to(arc.from);
+  if (!(nodePath.is_empty()))
+    nodePath.reparent_to(arc.from);
 #endif
 }
 
@@ -716,17 +720,21 @@ Waypoint::Arc::~Arc()
 {
 #ifdef WAYPOINT_DEBUG
   //node->remove_solid(0);
-  nodePath.detach_node();
+  if (!(nodePath.is_empty()))
+    nodePath.detach_node();
 #endif
 }
 
 void Waypoint::Arc::SetVisible(bool set)
 {
 #ifdef WAYPOINT_DEBUG
-  if (set)
-    nodePath.show();
-  else
-    nodePath.hide();
+  if (!(nodePath.is_empty()))
+  {
+    if (set)
+      nodePath.show();
+    else
+      nodePath.hide();
+  }
 #endif
 }
 
@@ -737,15 +745,19 @@ void Waypoint::Arc::UpdateDirection(void)
   LVecBase3 rot    = parent.get_hpr();
   LVector3  dir    = parent.get_relative_vector(other, other.get_pos() - parent.get_pos());
 
-  nodePath.set_scale(1 / parent.get_scale().get_x());
-  nodePath.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
+  if (!(nodePath.is_empty()))
+  {
+    nodePath.set_scale(1 / parent.get_scale().get_x());
+    nodePath.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
+  }
   csegment->set_point_b(dir);
 }
 
 void Waypoint::Arc::Destroy(void)
 {
 #ifdef WAYPOINT_DEBUG
-  nodePath.detach_node();
+  if (!(nodePath.is_empty()))
+    nodePath.detach_node();
 #endif
 }
 
@@ -851,7 +863,8 @@ void Waypoint::Unserialize(Utils::Packet &packet)
   packet >> floor;
   packet >> tmpArcs;
 
-  nodePath.set_pos(posx, posy, posz);
+  if (!(nodePath.is_empty()))
+    nodePath.set_pos(posx, posy, posz);
 }
 
 void Waypoint::LoadArcs(void)
@@ -884,9 +897,14 @@ void Waypoint::Serialize(Utils::Packet &packet)
   float            posx, posy, posz;
   vector<int>      arcs;
 
-  posx = nodePath.get_x();
-  posy = nodePath.get_y();
-  posz = nodePath.get_z();
+  if (nodePath.is_empty())
+    posx = posy = posz = 0;
+  else
+  {
+    posx = nodePath.get_x();
+    posy = nodePath.get_y();
+    posz = nodePath.get_z();
+  }
 
   Arcs::iterator it  = this->arcs.begin();
   Arcs::iterator end = this->arcs.end();
@@ -1150,7 +1168,8 @@ void           World::UnSerialize(Utils::Packet& packet)
       NodePath sphere = rootWaypoints.attach_new_node("waypoint");
       Waypoint waypoint(sphere);
 
-      model_sphere.instance_to(sphere);
+      if (!(model_sphere.is_empty()))
+        model_sphere.instance_to(sphere);
       waypoint.Unserialize(packet);
       sphere.reparent_to(rootWaypoints);
       waypoints.push_back(waypoint);

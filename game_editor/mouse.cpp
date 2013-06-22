@@ -69,6 +69,6 @@ void Mouse::Run(void)
   {
     LPoint2f cursorPos = _mouseWatcher->get_mouse();
 
-    GetHoveredAt(cursorPos);
+    //GetHoveredAt(cursorPos);
   }
 }
