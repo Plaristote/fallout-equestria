@@ -131,7 +131,9 @@ public:
 
   virtual void             CallbackActionUse(InstanceDynamicObject* object) { ThatDoesNothing(); }
   virtual void             CallbackActionUseSkill(ObjectCharacter* object, const std::string& skill);
-  
+
+  void                     AddTextBox(const std::string& text, unsigned short r, unsigned short g, unsigned short b, float timeout = 5.f);
+
   void                     ResetAnimation(void)
   {
     AnimationEnded.DisconnectAll();

@@ -24,6 +24,7 @@
 
 # include "gameui.hpp"
 # include "dialog.hpp"
+# include "chatter_manager.hpp"
 # include "inventory_ui.hpp"
 
 # include "world.h"
@@ -81,9 +82,10 @@ public:
 
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);
-  TimeManager&           GetTimeManager(void) { return (_timeManager);  }
-  Data                   GetDataEngine(void)  { return (*_dataEngine);  }
-  Data                   GetItems(void)       { return (_items);        }
+  TimeManager&           GetTimeManager(void)    { return (_timeManager);     }
+  ChatterManager&        GetChatterManager(void) { return (_chatter_manager); }
+  Data                   GetDataEngine(void)     { return (*_dataEngine);     }
+  Data                   GetItems(void)          { return (_items);           }
   void                   ConsoleWrite(const std::string& str);
 
   void                   RemoveObject(InstanceDynamicObject* object);
@@ -187,6 +189,7 @@ private:
 
   World*               _world;
   SoundManager         _sound_manager;
+  ChatterManager       _chatter_manager;
   InstanceObjects      _objects;
   Characters           _characters;
   Characters::iterator _itCharacter;

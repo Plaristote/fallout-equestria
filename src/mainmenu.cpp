@@ -50,8 +50,15 @@ void MouseCursor::SetHint(int value)
   str = stream.str();
   if (_current_hint != str)
   {
+    std::string css;
+
+    css          += "font-family: JH_Fallout;";
+    css          += "color: white;";
+    css          += "hint-font-effect: outline;";
+    css          += "hint-width: 2px;";
+    css          += "hint-colour: black;";
     _current_hint = str;
-    str           = "<span class='mouse-hint-success-rate' style='font-family: JH_Fallout;'>" + str + "</span>";
+    str           = "<span class='mouse-hint-success-rate' style='" + css + "'>" + str + "</span>";
     _hint->SetInnerRML(str.c_str());
   }
 }

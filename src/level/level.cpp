@@ -68,7 +68,7 @@ Circle solar_circle;
 Level* Level::CurrentLevel = 0;
 #include <panda3d/cullFaceAttrib.h>
 Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
-  _camera(window, window->get_camera_group()), _timeManager(tm), _levelUi(window, gameUi)
+  _camera(window, window->get_camera_group()), _timeManager(tm), _chatter_manager(window), _levelUi(window, gameUi)
 {
   LoadingScreen* loadingScreen = new LoadingScreen(window, gameUi.GetContext());
 
@@ -868,7 +868,7 @@ void Level::MouseSuccessRateHint(void)
 }
 
 AsyncTask::DoneStatus Level::do_task(void)
-{ 
+{
   float elapsedTime = _timer.GetElapsedTime();
 
   if (_levelUi.GetContext()->GetHoverElement() == _levelUi.GetContext()->GetRootElement())
@@ -947,7 +947,8 @@ AsyncTask::DoneStatus Level::do_task(void)
       break ;
   }
   
-  CheckCurrentFloor(elapsedTime);  
+  CheckCurrentFloor(elapsedTime);
+  _chatter_manager.Run(elapsedTime);
   _mouse.Run();
   _timer.Restart();
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);

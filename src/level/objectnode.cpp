@@ -82,6 +82,11 @@ void InstanceDynamicObject::CallbackActionUseSkill(ObjectCharacter* character, c
   _skill_target.UseSkill(character, name);
 }
 
+void InstanceDynamicObject::AddTextBox(const std::string& text, unsigned short r, unsigned short g, unsigned short b, float timeout)
+{
+  _level->GetChatterManager().PushTextBox(this, text, r, g, b, timeout);
+}
+
 // Animations
 AnimatedObject::AnimatedObject(WindowFramework* window) : _window(window)
 {
