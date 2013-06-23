@@ -10,10 +10,10 @@
 
 namespace Sync
 {
-  class Thread
+  class MyThread
   {
   public:
-    virtual ~Thread(void) {}
+    virtual ~MyThread(void) {}
     void          Launch(void);
     void          Join(void);
 
@@ -26,7 +26,7 @@ namespace Sync
 # ifdef _WIN32
     static DWORD WINAPI CallbackLaunch(LPVOID lpParam)
     {
-      reinterpret_cast<Thread*>(lpParam)->Run();
+      reinterpret_cast<MyThread*>(lpParam)->Run();
       return (0);
     }
 
@@ -34,7 +34,7 @@ namespace Sync
 # else
     static void* CallbackLaunch(void* arg)
     {
-      reinterpret_cast<Thread*>(arg)->Run();
+      reinterpret_cast<MyThread*>(arg)->Run();
       return (0);
     }
 

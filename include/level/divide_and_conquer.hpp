@@ -4,7 +4,6 @@
 # include <functional>
 # include <vector>
 # include <algorithm>
-#include <boost/concept_check.hpp>
 
 namespace DivideAndConquer
 {

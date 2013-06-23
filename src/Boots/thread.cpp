@@ -4,30 +4,30 @@ using namespace Sync;
 using namespace std;
 
 #ifdef _WIN32
-void Thread::Launch(void)
+void MyThread::Launch(void)
 {
-  _handle = CreateThread(NULL, 0, &Thread::CallbackLaunch, this, 0, NULL);
+  _handle = CreateThread(NULL, 0, &MyThread::CallbackLaunch, this, 0, NULL);
   if (_handle == NULL)
     LaunchFailed();
 }
 
-void Thread::Join(void)
+void MyThread::Join(void)
 {
   WaitForSingleObject(_handle, INFINITE);
 }
 #else
-void Thread::Launch(void)
+void MyThread::Launch(void)
 {
-  if ((pthread_create(&_handle, NULL, &Thread::CallbackLaunch, this)) < 0)
+  if ((pthread_create(&_handle, NULL, &MyThread::CallbackLaunch, this)) < 0)
     LaunchFailed();
 }
 
-void Thread::Join(void)
+void MyThread::Join(void)
 {
   pthread_join(_handle, 0);
 }
 #endif
 
-void Thread::LaunchFailed(void)
+void MyThread::LaunchFailed(void)
 {
 }

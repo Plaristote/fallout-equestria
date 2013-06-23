@@ -103,6 +103,13 @@ public:
   {
     Slots(const std::string& name) : name(name) {}
 
+	Slots&       operator=(const Slots& cpy)
+	{
+		name  = cpy.name;
+		slots = cpy.slots;
+		return (*this);
+	}
+
     bool        operator==(const std::string& name) const { return (this->name == name); }
     const Slot& operator[](unsigned int i)          const { return (slots[i]);           }
     Slot&       operator[](unsigned int i)
@@ -113,7 +120,7 @@ public:
     }
 
   private:
-    const std::string name;
+    std::string       name;
     std::vector<Slot> slots;
   };
 

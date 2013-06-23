@@ -18,7 +18,7 @@ namespace Sync
   };
 
   template<typename RETURN>
-  class FunctorThread : public Thread
+  class FunctorThread : public MyThread
   {
   public:
     void         Set(std::function<RETURN (void)> functor)

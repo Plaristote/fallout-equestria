@@ -5,7 +5,6 @@
 #include <timer.hpp>
 #include <panda3d/cardMaker.h>
 #include <panda3d/collisionPlane.h>
-#include <boost/concept_check.hpp>
 
 using namespace std;
 

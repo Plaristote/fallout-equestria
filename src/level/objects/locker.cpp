@@ -18,6 +18,14 @@ ObjectLocker::~ObjectLocker()
 {
 }
 
+// Callback for AnimationEnded after CallbackActionUse has been called...
+// Apparently you can't call 'super' in a lambda with MSVC2010. Nice...
+void ObjectLocker::FuckYouMSVC(InstanceDynamicObject* object)
+{
+  AnimationEnded.DisconnectAll();
+  ObjectShelf::CallbackActionUse(object);
+}
+
 void ObjectLocker::CallbackActionUse(InstanceDynamicObject* object)
 {
   if (_closed == false)
@@ -29,8 +37,7 @@ void ObjectLocker::CallbackActionUse(InstanceDynamicObject* object)
     AnimationEnded.DisconnectAll();
     AnimationEnded.Connect([this, object](InstanceDynamicObject*)
     {
-      AnimationEnded.DisconnectAll();
-      ObjectShelf::CallbackActionUse(object);
+      FuckYouMSVC(object);
     });
     PlayAnimation("open");
   }

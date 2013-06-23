@@ -9,9 +9,8 @@ SkillTarget::SkillTarget(InstanceDynamicObject* self) : self(self)
 
 void SkillTarget::Initialize(const std::string& module_name, const std::string& filepath, asIScriptContext* context)
 {
-  _script_func_ptrs = {
-    ScriptFuncPtr(&hook_use_skill, "bool UseSkill(DynamicObject@, Character@, string)")
-  };
+  _script_func_ptrs.clear();
+  _script_func_ptrs.push_back(ScriptFuncPtr(&hook_use_skill, "bool UseSkill(DynamicObject@, Character@, string)"));
   LoadScript(module_name, filepath, context);
 }
 

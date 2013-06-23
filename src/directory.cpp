@@ -8,7 +8,8 @@ bool Filesystem::FileContent(const string& filepath, string& out)
 
   if (file.is_open())
   {
-    long           size, begin, end;
+    long           size;
+    std::streamoff begin, end;
     char*          raw;
 
     begin       = file.tellg();
@@ -33,7 +34,7 @@ bool Filesystem::FileCopy(const string& from, const string& dest)
 
   if (stream_src.is_open() && stream_dest.is_open())
   {
-    long           begin, end;
+    std::streamoff begin, end;
     long           size;
     char*          raw;
 

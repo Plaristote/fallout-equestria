@@ -105,7 +105,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     _world->UnSerialize(packet);
     _light_iterator = _world->lights.begin();
   }
-  catch (unsigned int error)
+  catch (unsigned int&)
   {
     loadingScreen->AppendText("/!\\ Failed to load world file");
     std::cout << "Failed to load file" << std::endl;

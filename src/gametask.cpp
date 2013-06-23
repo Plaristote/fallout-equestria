@@ -538,15 +538,16 @@ bool GameTask::LoadGame(const std::string& savepath)
   {
     Party::Statsheets        statsheets = _playerParty->GetStatsheets();
     std::vector<std::string> members;
+	GameUi&                  game_ui    = _gameUi;
 
-    for_each(statsheets.begin(), statsheets.end(), [this, &members](std::pair<std::string, std::string> statsheet)
+    for_each(statsheets.begin(), statsheets.end(), [&game_ui, &members](std::pair<std::string, std::string> statsheet)
     {
       if (statsheet.second != "")
         members.push_back(statsheet.second);
       else
         members.push_back("self");
     });
-    _gameUi.GetPers().SetPartyMembers(members);
+    game_ui.GetPers().SetPartyMembers(members);
   };
   
   set_party_members();
