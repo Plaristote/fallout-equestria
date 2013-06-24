@@ -115,7 +115,6 @@ private:
   SoundInstances       _sounds_playing;
 };
 
-# define AUDIO_BACKEND_PANDA3D
 # ifdef AUDIO_BACKEND_PANDA3D
 #  include <panda3d/audioManager.h>
 #  define AUDIO_SAMPLE_TYPE p3_Sample
@@ -195,7 +194,7 @@ private:
 
 # endif
 
-# ifdef AUDIO_BACKEND_SFML2
+# ifdef AUDIO_BACKEND_SFML
 #  include <SFML/Audio.hpp>
 #  define AUDIO_SAMPLE_TYPE sf_Sample
 

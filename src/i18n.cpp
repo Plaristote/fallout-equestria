@@ -75,7 +75,7 @@ Data i18n::GetStatistics(void)
 
 string i18n::T(const std::string& str)
 {
-  if (_self)
+  if (_self && _self->_statistics && _self->_dialogs)
   {
     Data statistics(_self->_statistics);
     Data dialogs(_self->_dialogs);
