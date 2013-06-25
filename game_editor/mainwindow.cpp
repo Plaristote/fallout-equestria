@@ -1627,7 +1627,14 @@ void MainWindow::SaveMap()
     world->do_compile_waypoints = dialogSaveMap.DoCompileWaypoints();
     world->sunlight_enabled     = dialogSaveMap.DoEnableSunlight();
 
-    FunctorThread& thread = *FunctorThread::Create([this, &thread](void)
+    auto update_progress_bar = [this](const std::string& label, float percentage)
+    {
+      QString format = QString::fromStdString(label) + "%p%";
+
+      SigUpdateProgressBar(format, percentage);
+    };
+
+    FunctorThread& thread = *FunctorThread::Create([this, &thread, update_progress_bar](void)
     {
       std::ofstream file;
       std::string   path = (QDir::currentPath() + "/maps/" + levelName + ".blob").toStdString();
@@ -1637,12 +1644,7 @@ void MainWindow::SaveMap()
       {
         Utils::Packet packet;
 
-        world->Serialize(packet, [this, &thread](const std::string& label, float percentage)
-        {
-          QString format = QString::fromStdString(label) + "%p%";
-
-          SigUpdateProgressBar(format, percentage);
-        });
+        world->Serialize(packet, update_progress_bar);
         packet.PrintContent();
         file.write(packet.raw(), packet.size());
         file.close();
