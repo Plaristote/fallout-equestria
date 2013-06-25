@@ -5,6 +5,65 @@
 
 namespace AngelScript
 {
+  class Object;
+  struct ContextLock
+  {
+  public:
+    ContextLock(asIScriptContext* context, asIScriptModule* module, AngelScript::Object* object)
+    {
+      old_context     = current_context;
+      old_module      = current_module;
+      current_context = context;
+      current_module  = module;
+      old_object      = current_object;
+      current_object  = object;
+    }
+
+    ~ContextLock(void)
+    {
+      current_context = old_context;
+      current_module  = old_module;
+      current_object  = old_object;
+    }
+
+    static asIScriptContext* Context(void)       { return (current_context); }
+    static asIScriptModule*  Module(void)        { return (current_module);  }
+    static Object*           CurrentObject(void) { return (current_object);  }
+
+  private:
+    asIScriptContext*        old_context;
+    asIScriptModule*         old_module;
+    static asIScriptContext* current_context;
+    static asIScriptModule*  current_module;
+    AngelScript::Object*        old_object;
+    static AngelScript::Object* current_object;
+  };
+
+  struct Exception : public std::exception
+  {
+  public:
+    enum Code
+    {
+      UndeclaredFunction,
+      UnloadableFunction
+    };
+
+    Exception(Code code, const std::string& target = "")
+    {
+      switch (code)
+      {
+      case UndeclaredFunction:
+        message = "The function '" + target + "' hasn't been decalred.";
+      case UnloadableFunction:
+        message = "The function '" + target + "' couldn't be loaded.";
+      }
+    }
+
+    const char* what(void) const throw() { return (message.c_str()); }
+  private:
+    std::string message;
+  };
+
   template<typename TYPE> struct TypeFlags         { enum { value = 'O' }; };
   template<>              struct TypeFlags<int>    { enum { value = 'i' }; };
   template<>              struct TypeFlags<bool>   { enum { value = 'b' }; };

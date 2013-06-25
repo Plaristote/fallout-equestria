@@ -35,6 +35,10 @@ void Script::Call(asIScriptContext* context, asIScriptFunction* function, const 
  */
 #include "as_object.hpp"
 
+asIScriptContext*    AngelScript::ContextLock::current_context = 0;
+asIScriptModule*     AngelScript::ContextLock::current_module  = 0;
+AngelScript::Object* AngelScript::ContextLock::current_object  = 0;
+
 AngelScript::Object::Object(const std::string& filepath) : filepath(filepath), module(0)
 {
   asIScriptEngine* engine = Script::Engine::Get();
@@ -43,7 +47,7 @@ AngelScript::Object::Object(const std::string& filepath) : filepath(filepath), m
     context = engine->CreateContext();
   else
     ; // throw something
-    Initialize();
+  Initialize();
 }
 
 AngelScript::Object::Object(asIScriptContext* context, const std::string& filepath) : filepath(filepath), context(context), module(0)
@@ -55,15 +59,16 @@ AngelScript::Object::~Object()
 {
   if (module)
     Script::ModuleManager::Release(module);
+  context->Release(); // ??
 }
 
 void AngelScript::Object::Initialize(void)
 {
   if (!context)
     ; // throw something
-    if (module)
-      Script::ModuleManager::Release(module);
-    module = Script::ModuleManager::Require(filepath, filepath);
+  if (module)
+    Script::ModuleManager::Release(module);
+  module = Script::ModuleManager::Require(filepath, filepath);
   std::for_each(functions.begin(), functions.end(), [this](Functions::value_type& item)
   {
     item.second.function = 0;
@@ -82,17 +87,18 @@ void AngelScript::Object::asDefineMethod(const std::string& name, const std::str
 
 AngelScript::Object::ReturnType AngelScript::Object::Call(const std::string& name, unsigned int argc, ...)
 {
-  va_list ap;
-  auto    it = functions.find(name);
+  ContextLock context_lock(context, module, this);
+  va_list     ap;
+  auto        it = functions.find(name);
   
   if (it == functions.end())
-    ; // throw something
-    if (!(it->second.function))
-      it->second.function = module->GetFunctionByDecl(it->second.signature.c_str());
-    if (!(it->second.function))
-      ; // throw something
-      context->Prepare(it->second.function);
-    va_start(ap, argc);
+    throw AngelScript::Exception(AngelScript::Exception::UndeclaredFunction, name);
+  if (!(it->second.function))
+    it->second.function = module->GetFunctionByDecl(it->second.signature.c_str());
+  if (!(it->second.function))
+    throw AngelScript::Exception(AngelScript::Exception::UnloadableFunction, name);
+  context->Prepare(it->second.function);
+  va_start(ap, argc);
   for (unsigned short i = 0 ; argc > i ; ++i)
   {
     IType* param = reinterpret_cast<IType*>(va_arg(ap, void*));

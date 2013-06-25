@@ -15,6 +15,57 @@ asIScriptContext* as_current_context;
 asIScriptModule*  as_current_module;
 
 /*
+ * Script Interface for Tasks
+ */
+#include "timer.hpp"
+#include "executor.hpp"
+#include "gameui.hpp"
+
+void ScriptApiDeclareFunction(const std::string& name, const std::string& decl)
+{
+  std::cout << "ScriptApiDefiningMethod" << std::endl;
+  AngelScript::Object* object = AngelScript::ContextLock::CurrentObject();
+
+  if (object)
+    object->asDefineMethod(name, decl);
+}
+
+void ScriptApiPushTask(const std::string& function, unsigned short seconds)
+{
+  std::cout << "ScriptApiPushTask" << std::endl;
+  if (GameTask::CurrentGameTask != 0)
+  {
+    std::cout << "CurrentGameTask Ok" << std::endl;
+    TimeManager&         time_manager = GameTask::CurrentGameTask->GetTimeManager();
+    TimeManager::Task*   task         = time_manager.AddTask(TASK_LVL_CITY, false, seconds);
+    AngelScript::Object* object     = AngelScript::ContextLock::CurrentObject();
+
+    task->Interval.Connect([task, object, function](void)
+    {
+      std::cout << "ScriptApiPushTask: Task Running right now" << std::endl;
+      TimeManager::Task* _task     = task;
+      const std::string  _function = function;
+
+      Executor::ExecuteLater([_task, _function](void)
+      {
+        GameTask::CurrentGameTask->GetTimeManager().DelTask(_task);
+      });
+      try
+      {
+        object->Call(_function);
+      }
+      catch (const AngelScript::Exception& exception)
+      {
+        const std::string message = "A script crashed: ";
+
+        AlertUi::NewAlert.Emit(message + exception.what());
+      }
+    });
+  }
+}
+
+
+/*
  * Script Interface for Rocket Listeners
  */
 class RocketAsListener : public Rocket::Core::EventListener
@@ -44,12 +95,6 @@ public:
     if (_module && _element)
     {
       asIScriptFunction* callback = _module->GetFunctionByDecl(_callback.c_str());
-
-      // WARNING About the present bug
-      // GetFunctionByDecl doesn't find the function declaration for some unknown reason.
-      // The function declaration is valid and should be present in the module, unless
-      // we're using the wrong module. Which is unlikely, but is the last explanation.
-      // TODO isn't this bug fixed ? investigate
 
       if (_context && callback)
       {
@@ -184,6 +229,9 @@ void AngelScriptInitialize(void)
   engine->RegisterGlobalFunction("void Write(const string &in)", asFUNCTION(GameConsole::WriteOn), asCALL_CDECL);
   engine->RegisterGlobalFunction("void SetLanguage(const string& in)", asFUNCTION(i18n::Load), asCALL_CDECL);
   engine->RegisterGlobalFunction("int  Random()", asFUNCTION(rand), asCALL_CDECL);
+
+  engine->RegisterGlobalFunction("void ApiDefineFunction(string, string)", asFUNCTION(ScriptApiDeclareFunction), asCALL_CDECL);
+  engine->RegisterGlobalFunction("void PushLevelTask(string, int)", asFUNCTION(ScriptApiPushTask), asCALL_CDECL);
 
   Script::StdList<string>::Register(engine, "StringList", "string");
 

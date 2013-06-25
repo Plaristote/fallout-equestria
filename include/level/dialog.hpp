@@ -3,8 +3,9 @@
 
 # include "rocket_extension.hpp"
 # include "scriptengine.hpp"
-#include "datatree.hpp"
-#include <inventory_ui.hpp>
+# include "as_object.hpp"
+# include "datatree.hpp"
+# include <inventory_ui.hpp>
 # include <list>
 # include <string>
 # include <algorithm>
@@ -102,10 +103,9 @@ private:
   void             SetCurrentNode(const std::string& nodeName);
   void             OpenBarter(Rocket::Core::Event& event);
 
-  asIScriptContext* _context;
-  asIScriptModule*  _module;
-  DialogModel       _model;
-  ObjectCharacter*  _character;
+  AngelScript::Object _script;
+  DialogModel         _model;
+  ObjectCharacter*    _character;
 };
 
 

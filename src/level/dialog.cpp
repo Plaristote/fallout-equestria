@@ -96,39 +96,61 @@ void DialogView::CleanView(const DialogAnswers& answers)
 }
 
 // CONTROLLER
-DialogController::DialogController(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* character, Data l18n) : DialogView(window, context), _model(character->GetDialog(), l18n)
+#include "gameui.hpp"
+extern asIScriptContext* as_current_context;
+extern asIScriptContext* as_current_module;
+
+DialogController::DialogController(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* character, Data l18n) : DialogView(window, context), _script("scripts/dialogs/" + character->GetDialog() + ".as"), _model(character->GetDialog(), l18n)
 {
-  const string& dialogId = character->GetDialog();
+  //const string& dialogId = character->GetDialog();
 
   _character = character;
-  _context   = Script::Engine::Get()->CreateContext();
-  _module    = Script::Engine::LoadModule("Dialog-" + dialogId, "scripts/dialogs/" + dialogId + ".as");
+  //_context   = Script::Engine::Get()->CreateContext();
+  //_module    = Script::Engine::LoadModule("Dialog-" + dialogId, "scripts/dialogs/" + dialogId + ".as");
   AnswerSelected.EventReceived.Connect(*this, &DialogController::ExecuteAnswer);
 
-  if (_module)
+  //if (_module)
   {
     // Init Dialogue
-    asIScriptFunction* hook = _module->GetFunctionByDecl("string HookInit()");
+    //asIScriptFunction* hook = _module->GetFunctionByDecl("string HookInit()");
 
-    if (hook)
+    _script.asDefineMethod("HookInit", "string HookInit()");
+
+    try
+    {
+      string npc_line = *(string*)(_script.Call("HookInit"));
+
+      SetCurrentNode(npc_line);
+    }
+    catch (const AngelScript::Exception& exception)
+    {
+      const std::string message = "Dialog script crashed: ";
+
+      AlertUi::NewAlert.Emit(message + exception.what());
+      DialogEnded.Emit();
+    }
+
+    /*if (hook)
     {
       _context->Prepare(hook);
+      as_current_context = _context;
+      as_current_module  = _module;
       if ((_context->Execute()) == asEXECUTION_FINISHED)
       {
         string npcLine = *(reinterpret_cast<string*>(_context->GetReturnObject()));
 
         SetCurrentNode(npcLine);
       }
-    }
+    }*/
     BarterOpened.EventReceived.Connect(*this, &DialogController::OpenBarter);
   }
-  else
-    DialogEnded.Emit();
+  /*else
+    DialogEnded.Emit();*/
 }
 
 DialogController::~DialogController()
 {
-  _context->Release();
+  //_context->Release();
   cout << "Destroyed Dialog Controller" << endl;
 }
 
@@ -156,15 +178,28 @@ void DialogController::SetCurrentNode(const string& node)
     if (availableHook != "")
     {
       string             sign          = "bool " + availableHook + "()";
-      asIScriptFunction* hook          = _module->GetFunctionByDecl(sign.c_str());
+      //asIScriptFunction* hook          = _module->GetFunctionByDecl(sign.c_str());
 
-      _context->Prepare(hook);
-      if ((_context->Execute()) == asEXECUTION_FINISHED)
+      try
+      {
+        _script.asDefineMethod(availableHook, "bool " + availableHook + "()");
+        available = _script.Call(availableHook);
+      }
+      catch (const AngelScript::Exception& exception)
+      {
+        const string message = "Dialog crashed: ";
+
+        AlertUi::NewAlert.Emit(message + exception.what());
+      }
+      //_context->Prepare(hook);
+      //as_current_context = _context;
+      //as_current_module  = _module;
+      /*if ((_context->Execute()) == asEXECUTION_FINISHED)
       {
         char test = _context->GetReturnByte();
 
         available = test != 0;
-      }
+      }*/
     }
     if (!available)
       it = answers.answers.erase(it);
@@ -183,15 +218,27 @@ void DialogController::ExecuteAnswer(Rocket::Core::Event& event)
 
   if (exMethod != "")
   {
-    string             sign = "string " + exMethod + "()";
-    asIScriptFunction* hook = _module->GetFunctionByDecl(sign.c_str());
+    //asIScriptFunction* hook = _module->GetFunctionByDecl(sign.c_str());
 
-    if (hook)
+    try
+    {
+      _script.asDefineMethod(exMethod, "string " + exMethod + "()");
+      nextNpcLine = *(string*)(_script.Call(exMethod));
+    } catch (const AngelScript::Exception& exception)
+    {
+      const string message = "Dialog script crashed: ";
+
+      AlertUi::NewAlert.Emit(message + exception.what());
+    }
+
+    /*if (hook)
     {
       _context->Prepare(hook);
+      as_current_context = _context;
+      as_current_module  = _module;
       if ((_context->Execute()) == asEXECUTION_FINISHED)
         nextNpcLine = *(reinterpret_cast<string*>(_context->GetReturnObject()));
-    }
+    }*/
   }
   if (exMethod == "")
     nextNpcLine = _model.GetDefaultNextLine(idAnswer);
