@@ -45,7 +45,7 @@ void ChatterManager::PushTextBox(InstanceDynamicObject* object, const string& te
   }
 }
 
-void ChatterManager::Run(float elapsed_time)
+void ChatterManager::Run(float elapsed_time, NodePath camera)
 {
   auto it = text_boxes.begin();
   
@@ -68,6 +68,7 @@ void ChatterManager::Run(float elapsed_time)
     else
     {
       SetTextOffset(it->parent, it->text_node);
+      //it->text_node.look_at(camera);
       ++it;
     }
   }

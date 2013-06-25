@@ -15,7 +15,14 @@ void Parser::ParseString(DataBranch* value)
       break ;
   }
   if (_it < _str.length())
+  {
     value->value = _str.substr(start, _it - start);
+    for (unsigned int i = 0 ; i < value->value.length() ; ++i)
+    {
+      if (value->value[i] == '\\' && value->value[i + 1] == '"')
+        value->value.erase(i, 1);
+    }
+  }
 }
 
 void Parser::ParseOther(DataBranch* value)
@@ -258,7 +265,17 @@ static std::string appendValue(Data data, unsigned short indent = 0)
         if (value.size() == 0)
           value = "\"\"";
         else if (!(isNumeric(value)))
-          value = "\"" + value + "\"";
+        {
+          std::string escaped_value = "";
+
+          for (unsigned int i = 0 ; i < value.length() ; ++i)
+          {
+            if (value[i] == '"')
+              escaped_value += '\\';
+            escaped_value += value[i];
+          }
+          value = "\"" + escaped_value + "\"";
+        }
         toWrite += value;
     }
     return (toWrite);

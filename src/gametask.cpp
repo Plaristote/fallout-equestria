@@ -482,7 +482,7 @@ bool GameTask::LoadGame(const std::string& savepath)
     _playerInventory = 0;
   }
 
-  _dataEngine.Load(savepath + "/dataengine.json");
+  try { _dataEngine.Load(savepath + "/dataengine.json"); } catch (int&) { return (false); }
   currentLevel     = _dataEngine["system"]["current-level"];
   time             = _dataEngine["time"];
   _pipbuck.Restart();

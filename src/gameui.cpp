@@ -477,12 +477,35 @@ void GameOptions::SetLanguage(Core::Event& event)
 /*
  * GameConsole
  */
+template<typename T>
+void ArrayToJson(std::vector<T> array, std::string output)
+{
+  DataTree tmp;
+
+  {
+    Data     root(&tmp);
+    Data     data = root["array"];
+
+    for_each(array.begin(), array.end(), [data](const T& value)
+    {
+      Data node = data["new_value"];
+
+      node = value;
+      node.SetKey("");
+    });
+    DataTree::Writers::JSON(root, output);
+  }
+}
+
 #include "scriptengine.hpp"
 #include <scripthelper/scripthelper.h>
 #include <sstream>
 GameConsole* GameConsole::GConsole= 0;
 GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
+  //
+  // Load Script context
+  //
   GConsole= this;
 
   if (Script::Engine::Get())
@@ -495,17 +518,36 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
 
   _observerError = Script::Engine::ScriptError.Connect(*this, &GameConsole::Output);
 
+  //
+  // Load History
+  //
+  {
+    DataTree* history_file = DataTree::Factory::JSON("data/history_console.json");
+    if (history_file)
+    {
+      Data   data_history(history_file);
+
+      ForEach(data_history["array"], [this](Data entry)
+      {
+        _history.push_back(entry.Value());
+      });
+      delete history_file;
+    }
+    _history.push_back("LF();");
+    _histIter = _history.end();
+    _histIter--;
+  }
+
+  //
+  // Load Interface
+  //
   Core::ElementDocument* doc     = context->LoadDocument("data/console.rml");
 
   _root = doc;
   _input = doc->GetElementById("console_input");
-  _history.push_back("LF();");
-  _histIter= _history.end();
   if (doc)
   {
     doc->Show();
-
-
     if (_input)
     {
       cout << "[UI] Console is ready" << endl;
@@ -534,6 +576,7 @@ void GameConsole::Execute(Rocket::Core::Event&)
   if (string != "")
   {
     _history.push_back(string.CString());
+    ArrayToJson(_history, "data/history_console.json");
     _histIter= _history.end();
 
     if (_script_context)

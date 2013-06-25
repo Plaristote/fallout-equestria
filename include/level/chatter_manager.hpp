@@ -18,7 +18,7 @@ public:
   ChatterManager(WindowFramework* window);
 
   void PushTextBox(InstanceDynamicObject* object, const std::string& text, unsigned short r, unsigned short g, unsigned short b, float timeout = 5.f);  
-  void Run(float elapsed_time);
+  void Run(float elapsed_time, NodePath camera);
   
 private:
   static void SetTextOffset(NodePath parent, NodePath node);

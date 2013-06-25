@@ -884,8 +884,8 @@ AsyncTask::DoneStatus Level::do_task(void)
 
       _world->CompileLight(&(*_light_iterator), ColMask::DynObject);
       cout << "CompileLight: " << timer.GetElapsedTime() << std::endl;
-      ++_light_iterator;
     }
+    ++_light_iterator;
   }
   else
     _light_iterator = _world->lights.begin();
@@ -948,7 +948,7 @@ AsyncTask::DoneStatus Level::do_task(void)
   }
   
   CheckCurrentFloor(elapsedTime);
-  _chatter_manager.Run(elapsedTime);
+  _chatter_manager.Run(elapsedTime, _camera.GetNodePath());
   _mouse.Run();
   _timer.Restart();
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);

@@ -21,6 +21,8 @@ void      DataEngine::Load(const std::string& filepath)
   if (_dataTree)
     delete _dataTree;
   _dataTree = DataTree::Factory::JSON(filepath);
+  if (!_dataTree)
+    throw 0;
   _data     = _dataTree;
   _diplomacy->Initialize();
 }
