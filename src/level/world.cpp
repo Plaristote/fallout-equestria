@@ -40,6 +40,7 @@ World::~World()
   ForEach(dynamicObjects, [](DynamicObject& dy) { dy.nodePath.remove_node(); });
   ForEach(lights,         [](WorldLight& wl)    { wl.Destroy();              });
   debug_pathfinding.remove_node();
+  floors_node.remove_node();
 }
 
 Waypoint* World::AddWayPoint(float x, float y, float z)

@@ -311,14 +311,16 @@ void Level::InsertDynamicObject(DynamicObject& object)
 
 void Level::InitSun(void)
 {
+  NodePath sun_root = _world->floors_node;
+
   if (workaround_sunlight.is_null())
     workaround_sunlight   = new DirectionalLight("sun_light");
   _sunLight = workaround_sunlight;
   //_sunLight = new DirectionalLight("sun_light");
 
-  _sunLightAmbient = new AmbientLight("sun_light_ambient");
-  _sunLightAmbientNode = _window->get_render().attach_new_node(_sunLightAmbient);
-  _window->get_render().set_light(_sunLightAmbientNode, 5);
+  _sunLightAmbient     = new AmbientLight("sun_light_ambient");
+  _sunLightAmbientNode = sun_root.attach_new_node(_sunLightAmbient);
+  sun_root.set_light(_sunLightAmbientNode, 5);
 
   unsigned int shadow_caster_buffer = 128;
   unsigned int film_size            = 128;
@@ -334,11 +336,11 @@ void Level::InitSun(void)
   _sunLight->get_lens()->set_near_far(10.f, 1200.f);
   _sunLight->get_lens()->set_film_size(film_size);
 
-  _sunLightNode = _window->get_render().attach_new_node(_sunLight);
+  _sunLightNode = sun_root.attach_new_node(_sunLight);
   _sunLightNode.set_pos(150.f, 50, 50.f);
   _sunLightNode.set_hpr(127, -31,  0);
-  _window->get_render().set_light(_sunLightNode, 6);
-  _window->get_render().set_two_sided(false);
+  sun_root.set_light(_sunLightNode, 6);
+  sun_root.set_two_sided(false);
 
   _task_daylight   = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
   _task_daylight->Interval.Connect(*this, &Level::RunDaylight);
