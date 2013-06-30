@@ -24,8 +24,6 @@ Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseObje
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSkillOn;
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
-PT(DirectionalLight) workaround_sunlight;
-
 class Circle
 {
 public:
@@ -111,7 +109,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
     std::cout << "Failed to load file" << std::endl;
   }
   
-  if (_world->sunlight_enabled && false)
+  if (_world->sunlight_enabled)
     InitSun();
 
   LPoint3 upperLeft, upperRight, bottomLeft;
@@ -311,17 +309,7 @@ void Level::InsertDynamicObject(DynamicObject& object)
 
 void Level::InitSun(void)
 {
-  NodePath sun_root = _world->floors_node;
-
-  if (workaround_sunlight.is_null())
-    workaround_sunlight   = new DirectionalLight("sun_light");
-  _sunLight = workaround_sunlight;
-  //_sunLight = new DirectionalLight("sun_light");
-
-  _sunLightAmbient     = new AmbientLight("sun_light_ambient");
-  _sunLightAmbientNode = sun_root.attach_new_node(_sunLightAmbient);
-  sun_root.set_light(_sunLightAmbientNode, 5);
-
+  NodePath     sun_root             = _world->floors_node;
   unsigned int shadow_caster_buffer = 128;
   unsigned int film_size            = 128;
   unsigned int graphics_quality     = OptionsManager::Get()["graphics-quality"];
@@ -331,22 +319,24 @@ void Level::InitSun(void)
     shadow_caster_buffer *= 2;
     film_size            += 128;
   }
-
+  _sunLight            = new DirectionalLight("sun_light");
   _sunLight->set_shadow_caster(true, shadow_caster_buffer, shadow_caster_buffer);
   _sunLight->get_lens()->set_near_far(10.f, 1200.f);
   _sunLight->get_lens()->set_film_size(film_size);
-
-  _sunLightNode = sun_root.attach_new_node(_sunLight);
+  _sunLightNode        = sun_root.attach_new_node(_sunLight);
   _sunLightNode.set_pos(150.f, 50, 50.f);
   _sunLightNode.set_hpr(127, -31,  0);
+
+  _sunLightAmbient     = new AmbientLight("sun_light_ambient");
+  _sunLightAmbientNode = sun_root.attach_new_node(_sunLightAmbient);
+
   sun_root.set_light(_sunLightNode, 6);
+  sun_root.set_light(_sunLightAmbientNode, 5);
   sun_root.set_two_sided(false);
 
   _task_daylight   = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
   _task_daylight->Interval.Connect(*this, &Level::RunDaylight);
-
   solar_circle.SetFromWorld(_world);
-
   RunDaylight();
 }
 
