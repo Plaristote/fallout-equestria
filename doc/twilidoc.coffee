@@ -73,7 +73,7 @@ class Widget
 class Attribute
   TypeBox: (name, attrs, classname, is_typedef) ->
     html  = ''
-#    html += "<p class='btn-group'>"
+    html += "<p class='btn-group'>"
     html +=   "<button class='btn btn-mini btn-info'>ptr</button>" if (attrs & ATTR_PTR)
     html +=   "<button class='btn btn-mini btn-info'>ref</button>" if (attrs & ATTR_REF)
     html +=   "<button class='btn btn-mini'>const</button>"        if (attrs & ATTR_CONST)
@@ -92,7 +92,7 @@ class Attribute
       html += ">#{name}</button>"
     else
       html += "<button class='btn btn-mini btn-inverse'>#{name}</button>"
-#    html += "</p>"
+    html += "</p>"
     html
     
   Attribufy: (html) ->
@@ -138,10 +138,17 @@ class Member extends View
     else if obj_type?
       html += Attribute::TypeBox method.return_type, method.return_attrs, obj_type.name
 
+    visibility = {
+      class:  '<span class="label label-warning"><i class="icon-tag"></i> Class</span>',
+      object: '<span class="label label-primary"><i class="icon-tag"></i> Object</span>'
+    }
+    visibility = if method.attrs & ATTR_STATIC then visibility.class else visibility.object
+
     html += "</span>"
     html += "<div class='span9'>"
     html +=   "<span class='span3'><h4>" + method.name + "</h4></span>"
     html +=   "<span class='span6'><pre class='sh_cpp'>" + method.params + "</pre></span>"
+    html +=   "<span class='span3'><div style='float:right;'>#{visibility}</div></span>"
     html += "</div>"
     html += @RenderDoc method if method.doc?
     html += "</div>"
@@ -163,10 +170,16 @@ class Member extends View
     else
       html += Attribute::TypeBox attribute.type, attribute.attrs
     html += "</span>"
-    html += "<span class='span9'>"
+    html += "<span class='span6'>"
     html += "<h4>" + attribute.name + "</h4>"
     html += @RenderDoc attribute if attribute.doc?
     html += "</span>"
+    visibility = {
+      class:  '<span class="label label-warning"><i class="icon-tag"></i> Class</span>',
+      object: '<span class="label label-primary"><i class="icon-tag"></i> Object</span>'
+    }
+    visibility = if attribute.attrs & ATTR_STATIC then visibility.class else visibility.object
+    html += "<span class='span3'><div style='float:right;'>#{visibility}</div></span>"
     html += "</div>"
     html += "</div></div>"
     html

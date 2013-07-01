@@ -286,6 +286,173 @@ var project = {
         ]
       },
       {
+        name:       "Graph",
+        file:       "include/level/divide_and_conquer.hpp",
+        decl:       "class",
+        namespaces: ["Graph"],
+        
+        methods: [
+          {
+              name:        "SetHeuristic",
+              params:      ["(Heuristic heuristic)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "Initialize",
+              params:      ["(const std::vector<T*>& entries","Initializer initializer","unsigned short max_per_node = 100)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "GetClosest",
+              params:      ["(POS position)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "T",
+              return_attrs: 1,
+              visibility:  "public"
+            }
+        ],
+        attributes: [
+          
+          {
+            name:       "heuristic",
+            type:       "Heuristic",
+            
+            obj_type:   "Graph::Heuristic",
+            
+            attrs:      0,
+            visibility: "public"
+          },
+          {
+            name:       "node_tree",
+            type:       "Node",
+            
+            attrs:      0,
+            visibility: "public"
+          }
+        ],
+        ancestors: [
+          
+        ]
+      },
+      {
+        name:       "DivideAndConquer::Graph::NodeException",
+        file:       "include/level/divide_and_conquer.hpp",
+        decl:       "struct",
+        namespaces: ["DivideAndConquer","DivideAndConquer::Graph","DivideAndConquer::Graph::NodeException",""],
+        
+        methods: [
+          {
+              name:        "what",
+              params:      ["(void)"],
+              attrs:       68,
+              desc:        "",
+              return_type: "char",
+              return_attrs: 5,
+              visibility:  "public"
+            },
+        ],
+        attributes: [
+          
+        ],
+        ancestors: [
+          
+          {
+            name:       "std::exception",
+            visibility: "public"
+          }
+        ]
+      },
+      {
+        name:       "DivideAndConquer::Graph::Node",
+        file:       "include/level/divide_and_conquer.hpp",
+        decl:       "struct",
+        namespaces: ["DivideAndConquer","DivideAndConquer::Graph","DivideAndConquer::Graph::Node"],
+        
+        methods: [
+          {
+              name:        "GetEntries",
+              params:      ["(POS position_from","Heuristic heuristic)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "",
+              return_attrs: 2,
+              visibility:  "public"
+            },{
+              name:        "FindBestNode",
+              params:      ["(POS position_from","Heuristic heuristic)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "DivideAndConquer::Graph::Node",
+              return_attrs: 5,
+              visibility:  "public"
+            },{
+              name:        "FindBestNode",
+              params:      ["(POS position_from","Heuristic heuristic)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "DivideAndConquer::Graph::Node",
+              return_attrs: 1,
+              visibility:  "public"
+            },{
+              name:        "Initialize",
+              params:      ["(Heuristic heuristic","Initializer initializer","unsigned short max_per_node)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            }
+        ],
+        attributes: [
+          
+          {
+            name:       "position",
+            type:       "POS",
+            
+            attrs:      0,
+            visibility: "public"
+          }
+        ],
+        ancestors: [
+          
+        ]
+      },
+      {
+        name:       "DivideAndConquer::Graph::FinalNode",
+        file:       "include/level/divide_and_conquer.hpp",
+        decl:       "struct",
+        namespaces: ["DivideAndConquer","DivideAndConquer::Graph","DivideAndConquer::Graph::FinalNode","","DivideAndConquer","DivideAndConquer::Graph","DivideAndConquer::Graph::Node"],
+        
+        methods: [
+          {
+              name:        "GetEntries",
+              params:      ["(POS position_from","Heuristic heuristic)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "",
+              return_attrs: 2,
+              visibility:  "public"
+            }
+        ],
+        attributes: [
+          
+        ],
+        ancestors: [
+          
+          {
+            name:       "Node",
+            visibility: "public"
+          }
+        ]
+      },
+      {
         name:       "FBoundingBox",
         file:       "include/level/world.h",
         decl:       "struct",
@@ -510,6 +677,14 @@ var project = {
               attrs:       0,
               desc:        "",
               return_type: "float",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "GetPosition",
+              params:      ["(void)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "LPoint3f",
               return_attrs: 0,
               visibility:  "public"
             },{
@@ -897,6 +1072,22 @@ var project = {
               return_type: "bool",
               return_attrs: 0,
               visibility:  "public"
+            },{
+              name:        "Contains",
+              params:      ["(unsigned int id)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "bool",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "Contains",
+              params:      ["(Waypoint* wp)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "bool",
+              return_attrs: 0,
+              visibility:  "public"
             }
         ],
         attributes: [
@@ -941,6 +1132,22 @@ var project = {
         
         methods: [
           {
+              name:        "SetEnabled",
+              params:      ["(bool)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "Destroy",
+              params:      ["(void)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
               name:        "GetColor",
               params:      ["(void)"],
               attrs:       4,
@@ -962,6 +1169,14 @@ var project = {
               attrs:       0,
               desc:        "",
               return_type: "LColor",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "SetPosition",
+              params:      ["(LPoint3 position)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
               return_attrs: 0,
               visibility:  "public"
             },{
@@ -1054,6 +1269,13 @@ var project = {
           {
             name:       "zoneSize",
             type:       "float",
+            
+            attrs:      0,
+            visibility: "public"
+          },
+          {
+            name:       "enabled",
+            type:       "bool",
             
             attrs:      0,
             visibility: "public"
@@ -1327,6 +1549,14 @@ var project = {
               return_attrs: 1,
               visibility:  "public"
             },{
+              name:        "IsInExitZone",
+              params:      ["(unsigned int id)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "bool",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
               name:        "AddEntryZone",
               params:      ["(const std::string&)"],
               attrs:       0,
@@ -1424,7 +1654,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CompileWaypoints",
-              params:      ["(void)"],
+              params:      ["(ProgressCallback)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1432,7 +1662,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "CompileDoors",
-              params:      ["(void)"],
+              params:      ["(ProgressCallback)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -1447,6 +1677,13 @@ var project = {
             type:       "WindowFramework",
             
             attrs:      1,
+            visibility: "public"
+          },
+          {
+            name:       "floors_node",
+            type:       "NodePath",
+            
+            attrs:      0,
             visibility: "public"
           },
           {
@@ -1470,13 +1707,6 @@ var project = {
             type:       "Waypoints",
             
             obj_type:   "World::Waypoints",
-            
-            attrs:      0,
-            visibility: "public"
-          },
-          {
-            name:       "waypoint_maps",
-            type:       "NodePath",
             
             attrs:      0,
             visibility: "public"
@@ -1525,6 +1755,13 @@ var project = {
             type:       "WorldLights",
             
             obj_type:   "World::WorldLights",
+            
+            attrs:      0,
+            visibility: "public"
+          },
+          {
+            name:       "sunlight_enabled",
+            type:       "bool",
             
             attrs:      0,
             visibility: "public"
@@ -3963,14 +4200,30 @@ var project = {
               visibility:  "public",
               doc:         {"name":"CallbackActionUse"}
             },{
+              name:        "CallbackActionUseSkill",
+              params:      ["(ObjectCharacter* object","const std::string& skill)"],
+              attrs:       64,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public",
+              doc:         {"name":"ResetAnimation","short":"Interrupts all animation running on the object's [NodePath]"}
+            },{
+              name:        "AddTextBox",
+              params:      ["(const std::string& text","unsigned short r","unsigned short g","unsigned short b","float timeout = 5.f)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
               name:        "ResetAnimation",
               params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public",
-              doc:         {"name":"ResetAnimation","short":"Interrupts all animation running on the object's [NodePath]"}
+              visibility:  "public"
             },{
               name:        "ResetInteractions",
               params:      ["(void)"],
@@ -4018,6 +4271,16 @@ var project = {
             doc:         {"name":"_object","short":"Pointer to the [DynamicObject] that this object represent in the [Level]"}
           },
           {
+            name:       "_skill_target",
+            type:       "SkillTarget",
+            
+            obj_type:   "SkillTarget",
+            
+            attrs:      0,
+            visibility: "protected",
+            doc:         {"name":"_interactions","short":"List of interactions available for this object, as specified in the [DynamicObject]"}
+          },
+          {
             name:       "_interactions",
             type:       "InteractionList",
             
@@ -4025,15 +4288,14 @@ var project = {
             
             attrs:      0,
             visibility: "protected",
-            doc:         {"name":"_interactions","short":"List of interactions available for this object, as specified in the [DynamicObject]"}
+            doc:         {"name":"_idle_size","short":"Stores the three dimensional size of the [DynamicObjecŧ]'s model while it is playing the idle animation"}
           },
           {
             name:       "_idle_size",
             type:       "LPoint3",
             
             attrs:      0,
-            visibility: "protected",
-            doc:         {"name":"_idle_size","short":"Stores the three dimensional size of the [DynamicObjecŧ]'s model while it is playing the idle animation"}
+            visibility: "protected"
           }
         ],
         ancestors: [
@@ -5027,6 +5289,14 @@ var project = {
               return_attrs: 0,
               visibility:  "public"
             },{
+              name:        "Foreach",
+              params:      ["(const std::string& tag","std::function<void (Rocket::Core::Element*)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
               name:        "SetPropertyOnAll",
               params:      ["(Rocket::Core::Element* elem","const std::string& property","const std::string& value)"],
               attrs:       16,
@@ -5384,6 +5654,22 @@ var project = {
             visibility: "public"
           },
           {
+            name:       "SkilldexButtonClicked",
+            type:       "RocketListener",
+            
+            obj_type:   "RocketListener",
+            
+            attrs:      0,
+            visibility: "public"
+          },
+          {
+            name:       "SpelldexButtonClicked",
+            type:       "RocketListener         ",
+            
+            attrs:      0,
+            visibility: "public"
+          },
+          {
             name:       "EquipedItem1Clicked",
             type:       "RocketListener",
             
@@ -5450,6 +5736,14 @@ var project = {
         
         methods: [
           {
+              name:        "HitSuccessRate",
+              params:      ["(ObjectCharacter* user","ObjectCharacter* target","unsigned char useType)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "int",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
               name:        "UseAsWeapon",
               params:      ["(ObjectCharacter* user","ObjectCharacter* target","unsigned char useType)"],
               attrs:       0,
@@ -5507,6 +5801,14 @@ var project = {
               visibility:  "public"
             },{
               name:        "CanWeild",
+              params:      ["(ObjectCharacter*","std::string slot","unsigned char mode = 0)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "bool",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "CanWeild",
               params:      ["(ObjectCharacter*","EquipedMode)"],
               attrs:       0,
               desc:        "",
@@ -5515,7 +5817,7 @@ var project = {
               visibility:  "public"
             },{
               name:        "SetEquiped",
-              params:      ["(bool set)"],
+              params:      ["(ObjectCharacter*","bool set)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -5532,6 +5834,14 @@ var project = {
             },{
               name:        "IsGroupableWith",
               params:      ["(const InventoryObject*)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "bool",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "IsHidden",
+              params:      ["(void)"],
               attrs:       4,
               desc:        "",
               return_type: "bool",
@@ -5612,6 +5922,20 @@ var project = {
           {
             name:       "_hookUseAsWeapon",
             type:       "asIScriptFunction",
+            
+            attrs:      1,
+            visibility: "private"
+          },
+          {
+            name:       "_hookCanWeild",
+            type:       "asIScriptFunction",
+            
+            attrs:      1,
+            visibility: "private"
+          },
+          {
+            name:       "_hookSetEquiped",
+            type:       "asIScriptFunction* ",
             
             attrs:      1,
             visibility: "private"
@@ -5743,6 +6067,13 @@ var project = {
             
             attrs:      1,
             visibility: "public"
+          },
+          {
+            name:       "HitChances",
+            type:       "asIScriptFunction",
+            
+            attrs:      1,
+            visibility: "public"
           }
         ],
         ancestors: [
@@ -5763,7 +6094,7 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "private"
             },{
               name:        "SaveInventory",
               params:      ["(DynamicObject*)"],
@@ -5771,7 +6102,7 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "private"
             },{
               name:        "LoadInventory",
               params:      ["(Data)"],
@@ -5779,7 +6110,7 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "private"
             },{
               name:        "SaveInventory",
               params:      ["(Data)"],
@@ -5787,7 +6118,7 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "private"
             },{
               name:        "AddObject",
               params:      ["(InventoryObject*)"],
@@ -5795,7 +6126,7 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "private"
             },{
               name:        "DelObject",
               params:      ["(InventoryObject*)"],
@@ -5803,7 +6134,7 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "private"
             },{
               name:        "IncludesObject",
               params:      ["(InventoryObject*)"],
@@ -5811,7 +6142,7 @@ var project = {
               desc:        "",
               return_type: "bool",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "private"
             },{
               name:        "GetContent",
               params:      ["(void)"],
@@ -5819,7 +6150,7 @@ var project = {
               desc:        "",
               return_type: "Inventory::Content",
               return_attrs: 6,
-              visibility:  "public"
+              visibility:  "private"
             },{
               name:        "GetContent",
               params:      ["(void)"],
@@ -5827,7 +6158,7 @@ var project = {
               desc:        "",
               return_type: "Inventory::Content",
               return_attrs: 2,
-              visibility:  "public"
+              visibility:  "private"
             },{
               name:        "GetObject",
               params:      ["(const std::string& name)"],
@@ -5835,7 +6166,7 @@ var project = {
               desc:        "",
               return_type: "InventoryObject",
               return_attrs: 1,
-              visibility:  "public"
+              visibility:  "private"
             },{
               name:        "ContainsHowMany",
               params:      ["(const std::string& name)"],
@@ -5843,7 +6174,15 @@ var project = {
               desc:        "",
               return_type: "short",
               return_attrs: 8,
-              visibility:  "public"
+              visibility:  "private"
+            },{
+              name:        "GetObjectIterator",
+              params:      ["(InventoryObject* object)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "int",
+              return_attrs: 0,
+              visibility:  "private"
             },{
               name:        "GetCurrentWeight",
               params:      ["(void)"],
@@ -5851,7 +6190,7 @@ var project = {
               desc:        "",
               return_type: "short",
               return_attrs: 8,
-              visibility:  "public"
+              visibility:  "private"
             },{
               name:        "GetCapacity",
               params:      ["(void)"],
@@ -5859,7 +6198,7 @@ var project = {
               desc:        "",
               return_type: "short",
               return_attrs: 8,
-              visibility:  "public"
+              visibility:  "private"
             },{
               name:        "SetCapacity",
               params:      ["(unsigned short value)"],
@@ -5867,7 +6206,7 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "private"
             },{
               name:        "CanCarry",
               params:      ["(InventoryObject*","unsigned short quantity = 1)"],
@@ -5875,7 +6214,71 @@ var project = {
               desc:        "",
               return_type: "bool",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "private"
+            },{
+              name:        "InitializeSlots",
+              params:      ["(void)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "private"
+            },{
+              name:        "GetConstItemSlot",
+              params:      ["(const std::string& type_slot","unsigned int slot = 0)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "Inventory::Slot",
+              return_attrs: 6,
+              visibility:  "private"
+            },{
+              name:        "GetItemSlot",
+              params:      ["(const std::string& type_slot","unsigned int slot = 0)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "Inventory::Slot",
+              return_attrs: 2,
+              visibility:  "private"
+            },{
+              name:        "SlotHasEquipedItem",
+              params:      ["(const std::string& type_slot","unsigned int slot = 0)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "bool",
+              return_attrs: 0,
+              visibility:  "private"
+            },{
+              name:        "GetEquipedMode",
+              params:      ["(const std::string& type_slot","unsigned int slot = 0)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "char",
+              return_attrs: 8,
+              visibility:  "private"
+            },{
+              name:        "GetEquipedItem",
+              params:      ["(const std::string& type_slot","unsigned int slot = 0)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "InventoryObject",
+              return_attrs: 1,
+              visibility:  "private"
+            },{
+              name:        "SetEquipedItem",
+              params:      ["(const std::string& type_slot","unsigned int slot","InventoryObject* object","unsigned char equip_mode = 0)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "private"
+            },{
+              name:        "SetEquipedItem",
+              params:      ["(const std::string& type_slot","InventoryObject* object","unsigned char equip_mode = 0)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "private"
             }
         ],
         attributes: [
@@ -5909,6 +6312,100 @@ var project = {
         ]
       },
       {
+        name:       "Inventory::Slot",
+        file:       "include/level/inventory.hpp",
+        decl:       "struct",
+        namespaces: ["Inventory","Inventory::Slot"],
+        
+        methods: [
+          
+        ],
+        attributes: [
+          
+          {
+            name:       "empty",
+            type:       "bool",
+            
+            attrs:      0,
+            visibility: "public"
+          },
+          {
+            name:       "mode",
+            type:       "char",
+            
+            attrs:      8,
+            visibility: "public"
+          },
+          {
+            name:       "object",
+            type:       "InventoryObject",
+            
+            obj_type:   "InventoryObject",
+            
+            attrs:      1,
+            visibility: "public"
+          }
+        ],
+        ancestors: [
+          
+        ]
+      },
+      {
+        name:       "Inventory::Slots",
+        file:       "include/level/inventory.hpp",
+        decl:       "struct",
+        namespaces: ["Inventory","Inventory::Slots"],
+        
+        methods: [
+          {
+              name:        "operator=",
+              params:      ["(const Slots& cpy)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "Inventory::Slots",
+              return_attrs: 2,
+              visibility:  "public"
+            },{
+              name:        "operator==",
+              params:      ["(const std::string& name)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "bool",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "operator[]",
+              params:      ["(unsigned int i)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "Inventory::Slot",
+              return_attrs: 6,
+              visibility:  "public"
+            },{
+              name:        "operator[]",
+              params:      ["(unsigned int i)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "Inventory::Slot",
+              return_attrs: 2,
+              visibility:  "public"
+            }
+        ],
+        attributes: [
+          
+          {
+            name:       "name",
+            type:       "std::string",
+            
+            attrs:      0,
+            visibility: "private"
+          }
+        ],
+        ancestors: [
+          
+        ]
+      },
+      {
         name:       "Scriptable",
         file:       "include/scriptable.hpp",
         decl:       "class",
@@ -5917,7 +6414,7 @@ var project = {
         methods: [
           {
               name:        "LoadScript",
-              params:      ["(std::string module_name","std::string filepath)"],
+              params:      ["(std::string module_name","std::string filepath","asIScriptContext* context = 0)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -6386,6 +6883,20 @@ var project = {
           {
             name:       "_selectRandomEncounter",
             type:       "asIScriptFunction",
+            
+            attrs:      1,
+            visibility: "private"
+          },
+          {
+            name:       "_scriptUsableSkills",
+            type:       "asIScriptFunction",
+            
+            attrs:      1,
+            visibility: "private"
+          },
+          {
+            name:       "_scriptUsableSpells",
+            type:       "asIScriptFunction ",
             
             attrs:      1,
             visibility: "private"
@@ -6904,6 +7415,14 @@ var project = {
               return_attrs: 0,
               visibility:  "public"
             },{
+              name:        "SetPartyMembers",
+              params:      ["(const std::vector<std::string>& members)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
               name:        "SetInformation",
               params:      ["(const std::string& name","const std::string& value)"],
               attrs:       0,
@@ -7189,6 +7708,15 @@ var project = {
           {
             name:       "ButtonDown",
             type:       "RocketListener ",
+            
+            attrs:      0,
+            visibility: "private"
+          },
+          {
+            name:       "PartyMemberClicked",
+            type:       "RocketListener",
+            
+            obj_type:   "RocketListener",
             
             attrs:      0,
             visibility: "private"
@@ -7615,15 +8143,6 @@ var project = {
               visibility:  "public",
               doc:         {"name":"SetInventory"}
             },{
-              name:        "statistics",
-              params:      ["(_statistics)"],
-              attrs:       0,
-              desc:        "",
-              return_type: "Data",
-              return_attrs: 0,
-              visibility:  "public",
-              doc:         {"name":"statistics"}
-            },{
               name:        "ProcessCollisions",
               params:      ["()"],
               attrs:       0,
@@ -7631,7 +8150,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"ProcessCollisions","short":"Overload of the [WaypointModifier]'s ProcessCollisions. Ensure that the character does not block\npathes when he's dead.\n"}
+              doc:         {"name":"statistics"}
             },{
               name:        "Run",
               params:      ["(float elapsedTime)"],
@@ -7640,7 +8159,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"Run","short":"Procedure run once every frame if the level is running, never if it is interrupted, and in combat run\nonly when it is the character's instance turn to play.\n"}
+              doc:         {"name":"ProcessCollisions","short":"Overload of the [WaypointModifier]'s ProcessCollisions. Ensure that the character does not block\npathes when he's dead.\n"}
             },{
               name:        "LookAt",
               params:      ["(LVecBase3)"],
@@ -7649,7 +8168,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"LookAt"}
+              doc:         {"name":"Run","short":"Procedure run once every frame if the level is running, never if it is interrupted, and in combat run\nonly when it is the character's instance turn to play.\n"}
             },{
               name:        "LookAt",
               params:      ["(InstanceDynamicObject*)"],
@@ -7667,7 +8186,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"GoTo"}
+              doc:         {"name":"LookAt"}
             },{
               name:        "GoTo",
               params:      ["(Waypoint* waypoint)"],
@@ -7694,7 +8213,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"GoToRandomWaypoint","short":"Sets up the character to go one waypoint away in a random direction"}
+              doc:         {"name":"GoTo"}
             },{
               name:        "TruncatePath",
               params:      ["(unsigned short max_length)"],
@@ -7703,7 +8222,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"TruncatePath","short":"If the path the [ObjectCharacter] is following is longer than the given value, it is reduced to the given value"}
+              doc:         {"name":"GoToRandomWaypoint","short":"Sets up the character to go one waypoint away in a random direction"}
             },{
               name:        "GetPathDistance",
               params:      ["(Waypoint* waypoint)"],
@@ -7712,7 +8231,7 @@ var project = {
               return_type: "short",
               return_attrs: 8,
               visibility:  "public",
-              doc:         {"name":"GetPathDistance","short":"Get the shortest path from the current [ObjectCharacter] to the [Waypoint]'s."}
+              doc:         {"name":"TruncatePath","short":"If the path the [ObjectCharacter] is following is longer than the given value, it is reduced to the given value"}
             },{
               name:        "GetPathDistance",
               params:      ["(InstanceDynamicObject* object)"],
@@ -7721,7 +8240,7 @@ var project = {
               return_type: "short",
               return_attrs: 8,
               visibility:  "public",
-              doc:         {"name":"GetPathDistance","short":"Get the shortest path from the current [ObjectCharacter] to the [InstanceDyanamicObject]'s position"}
+              doc:         {"name":"GetPathDistance","short":"Get the shortest path from the current [ObjectCharacter] to the [Waypoint]'s."}
             },{
               name:        "GetDistance",
               params:      ["(InstanceDynamicObject* object)"],
@@ -7730,7 +8249,7 @@ var project = {
               return_type: "float",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"GetDistance","short":"Returns the physical distance between the [InstanceDynamicObject] and the current [ObjectCharacter]"}
+              doc:         {"name":"GetPathDistance","short":"Get the shortest path from the current [ObjectCharacter] to the [InstanceDyanamicObject]'s position"}
             },{
               name:        "GetBestWaypoint",
               params:      ["(InstanceDynamicObject* object","bool farthest)"],
@@ -7739,7 +8258,7 @@ var project = {
               return_type: "int",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"GetBestWaypoint"}
+              doc:         {"name":"GetDistance","short":"Returns the physical distance between the [InstanceDynamicObject] and the current [ObjectCharacter]"}
             },{
               name:        "GetNearestWaypoint",
               params:      ["(InstanceDynamicObject* object)"],
@@ -7748,7 +8267,7 @@ var project = {
               return_type: "int",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"GetNearestWaypoint"}
+              doc:         {"name":"GetBestWaypoint"}
             },{
               name:        "GetFarthestWaypoint",
               params:      ["(InstanceDynamicObject* object)"],
@@ -7757,7 +8276,7 @@ var project = {
               return_type: "int",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"GetFarthestWaypoint"}
+              doc:         {"name":"GetNearestWaypoint"}
             },{
               name:        "GetPathSize",
               params:      ["(void)"],
@@ -7766,7 +8285,7 @@ var project = {
               return_type: "int",
               return_attrs: 8,
               visibility:  "public",
-              doc:         {"name":"GetPathSize","short":"Returns the length of the path currently being followed by a moving [ObjectCharacter]."}
+              doc:         {"name":"GetFarthestWaypoint"}
             },{
               name:        "HasLineOfSight",
               params:      ["(InstanceDynamicObject* object)"],
@@ -7775,7 +8294,7 @@ var project = {
               return_type: "bool",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"HasLineOfSight","short":"Returns true if the [ObjectCharacter] can see the target passed as parameter."}
+              doc:         {"name":"GetPathSize","short":"Returns the length of the path currently being followed by a moving [ObjectCharacter]."}
             },{
               name:        "IsMoving",
               params:      ["(void)"],
@@ -7784,7 +8303,7 @@ var project = {
               return_type: "bool",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"IsMoving","short":"Returns true if the [ObjectCharacter] is currently moving."}
+              doc:         {"name":"HasLineOfSight","short":"Returns true if the [ObjectCharacter] can see the target passed as parameter."}
             },{
               name:        "IsAlive",
               params:      ["(void)"],
@@ -7793,7 +8312,7 @@ var project = {
               return_type: "bool",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"IsAlive","short":"Returns true if the [ObjectCharacter] is alive (hit points > 0)."}
+              doc:         {"name":"IsMoving","short":"Returns true if the [ObjectCharacter] is currently moving."}
             },{
               name:        "IsInterrupted",
               params:      ["(void)"],
@@ -7802,7 +8321,7 @@ var project = {
               return_type: "bool",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"IsInterrupted"}
+              doc:         {"name":"IsAlive","short":"Returns true if the [ObjectCharacter] is alive (hit points > 0)."}
             },{
               name:        "GetInventory",
               params:      ["(void)"],
@@ -7811,7 +8330,7 @@ var project = {
               return_type: "Inventory",
               return_attrs: 2,
               visibility:  "public",
-              doc:         {"name":"GetInventory"}
+              doc:         {"name":"IsInterrupted"}
             },{
               name:        "GetStatistics",
               params:      ["(void)"],
@@ -7820,7 +8339,7 @@ var project = {
               return_type: "Data",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"GetStatistics"}
+              doc:         {"name":"GetInventory"}
             },{
               name:        "GetStatController",
               params:      ["(void)"],
@@ -7829,7 +8348,7 @@ var project = {
               return_type: "StatController",
               return_attrs: 1,
               visibility:  "public",
-              doc:         {"name":"GetStatControler"}
+              doc:         {"name":"GetStatistics"}
             },{
               name:        "GetFactionName",
               params:      ["(void)"],
@@ -7838,7 +8357,7 @@ var project = {
               return_type: "std::string",
               return_attrs: 4,
               visibility:  "public",
-              doc:         {"name":"GetFactionName"}
+              doc:         {"name":"GetStatControler"}
             },{
               name:        "GetFaction",
               params:      ["(void)"],
@@ -7847,7 +8366,7 @@ var project = {
               return_type: "int",
               return_attrs: 8,
               visibility:  "public",
-              doc:         {"name":"GetFaction"}
+              doc:         {"name":"GetFactionName"}
             },{
               name:        "GetActionPoints",
               params:      ["(void)"],
@@ -7856,7 +8375,7 @@ var project = {
               return_type: "short",
               return_attrs: 8,
               visibility:  "public",
-              doc:         {"name":"GetActionPoints"}
+              doc:         {"name":"GetFaction"}
             },{
               name:        "SetActionPoints",
               params:      ["(unsigned short ap)"],
@@ -7865,7 +8384,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"SetActionPoints"}
+              doc:         {"name":"GetActionPoints"}
             },{
               name:        "RestartActionPoints",
               params:      ["(void)"],
@@ -7874,7 +8393,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"RestartActionPoints"}
+              doc:         {"name":"SetActionPoints"}
             },{
               name:        "GetHitPoints",
               params:      ["(void)"],
@@ -7883,7 +8402,7 @@ var project = {
               return_type: "short",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"GetHitPoints"}
+              doc:         {"name":"RestartActionPoints"}
             },{
               name:        "SetHitPoints",
               params:      ["(short hp)"],
@@ -7892,7 +8411,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"SetHitPoints"}
+              doc:         {"name":"GetHitPoints"}
             },{
               name:        "StatHpUpdate",
               params:      ["(short)"],
@@ -7901,7 +8420,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"StatHpUpdate"}
+              doc:         {"name":"SetHitPoints"}
             },{
               name:        "GetArmorClass",
               params:      ["(void)"],
@@ -7910,7 +8429,7 @@ var project = {
               return_type: "short",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"GetArmorClass"}
+              doc:         {"name":"StatHpUpdate"}
             },{
               name:        "SetArmorClass",
               params:      ["(short ac)"],
@@ -7919,7 +8438,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"SetArmorClass"}
+              doc:         {"name":"GetArmorClass"}
             },{
               name:        "RestartArmorClass",
               params:      ["(void)"],
@@ -7928,7 +8447,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"RestartArmorClass"}
+              doc:         {"name":"SetArmorClass"}
             },{
               name:        "SetBonusAC",
               params:      ["(short ac)"],
@@ -7937,7 +8456,52 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
+              doc:         {"name":"RestartArmorClass"}
+            },{
+              name:        "SetFurtive",
+              params:      ["(bool do_set)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public",
               doc:         {"name":"SetBonusAC"}
+            },{
+              name:        "SetVisible",
+              params:      ["(bool do_set)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public",
+              doc:         {"name":"PlayEquipedItemAnimation"}
+            },{
+              name:        "AddFlag",
+              params:      ["(unsigned char flag)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public",
+              doc:         {"name":"SetEquipedItem"}
+            },{
+              name:        "DelFlag",
+              params:      ["(unsigned char flag)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public",
+              doc:         {"name":"GetEquipedItem"}
+            },{
+              name:        "HasFlag",
+              params:      ["(unsigned char flag)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "bool",
+              return_attrs: 0,
+              visibility:  "public",
+              doc:         {"name":"GetEquipedAction"}
             },{
               name:        "PlayEquipedItemAnimation",
               params:      ["(unsigned short it","const std::string& name)"],
@@ -7946,7 +8510,16 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"PlayEquipedItemAnimation"}
+              doc:         {"name":"UnequipItem"}
+            },{
+              name:        "RefreshEquipment",
+              params:      ["(void)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public",
+              doc:         {"name":"ItemNextUseType"}
             },{
               name:        "SetEquipedItem",
               params:      ["(unsigned short it","InventoryObject* object","EquipedMode mode = EquipedMouth)"],
@@ -7955,7 +8528,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"SetEquipedItem"}
+              doc:         {"name":"PushBuff"}
             },{
               name:        "GetEquipedItem",
               params:      ["(unsigned short it)"],
@@ -7964,7 +8537,7 @@ var project = {
               return_type: "InventoryObject",
               return_attrs: 1,
               visibility:  "public",
-              doc:         {"name":"GetEquipedItem"}
+              doc:         {"name":"DelBuff"}
             },{
               name:        "GetequipedAction",
               params:      ["(unsigned short it)"],
@@ -7973,7 +8546,7 @@ var project = {
               return_type: "char",
               return_attrs: 8,
               visibility:  "public",
-              doc:         {"name":"GetEquipedAction"}
+              doc:         {"name":"CheckFieldOfView"}
             },{
               name:        "UnequipItem",
               params:      ["(unsigned short it)"],
@@ -7982,7 +8555,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"UnequipItem"}
+              doc:         {"name":"SetFaction"}
             },{
               name:        "ItemNextUseType",
               params:      ["(unsigned short it)"],
@@ -7991,7 +8564,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"ItemNextUseType"}
+              doc:         {"name":"SetFaction"}
             },{
               name:        "PushBuff",
               params:      ["(Data","ObjectCharacter* caster)"],
@@ -8000,7 +8573,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"PushBuff"}
+              doc:         {"name":"SetAsEnemy"}
             },{
               name:        "DelBuff",
               params:      ["(CharacterBuff* buff)"],
@@ -8009,7 +8582,7 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"DelBuff"}
+              doc:         {"name":"IsEnemy"}
             },{
               name:        "CheckFieldOfView",
               params:      ["(void)"],
@@ -8018,7 +8591,15 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public",
-              doc:         {"name":"CheckFieldOfView"}
+              doc:         {"name":"IsAlly"}
+            },{
+              name:        "SetEnemyDetected",
+              params:      ["(ObjectCharacter*)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
             },{
               name:        "SetFaction",
               params:      ["(const std::string&)"],
@@ -8026,8 +8607,7 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public",
-              doc:         {"name":"SetFaction"}
+              visibility:  "public"
             },{
               name:        "SetFaction",
               params:      ["(unsigned int flag)"],
@@ -8035,8 +8615,7 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public",
-              doc:         {"name":"SetFaction"}
+              visibility:  "public"
             },{
               name:        "SetAsEnemy",
               params:      ["(const ObjectCharacter*","bool)"],
@@ -8044,8 +8623,7 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public",
-              doc:         {"name":"SetAsEnemy"}
+              visibility:  "public"
             },{
               name:        "IsEnemy",
               params:      ["(const ObjectCharacter*)"],
@@ -8053,8 +8631,7 @@ var project = {
               desc:        "",
               return_type: "bool",
               return_attrs: 0,
-              visibility:  "public",
-              doc:         {"name":"IsEnemy"}
+              visibility:  "public"
             },{
               name:        "IsAlly",
               params:      ["(const ObjectCharacter*)"],
@@ -8062,8 +8639,7 @@ var project = {
               desc:        "",
               return_type: "bool",
               return_attrs: 0,
-              visibility:  "public",
-              doc:         {"name":"IsAlly"}
+              visibility:  "public"
             },{
               name:        "RequestAttack",
               params:      ["(ObjectCharacter* attack","ObjectCharacter* from)"],
@@ -8130,6 +8706,14 @@ var project = {
               visibility:  "private"
             },{
               name:        "RunDeath",
+              params:      ["(void)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "private"
+            },{
+              name:        "Fading",
               params:      ["(void)"],
               attrs:       0,
               desc:        "",
@@ -8256,6 +8840,27 @@ var project = {
           {
             name:       "_tmpArmorClass",
             type:       "short",
+            
+            attrs:      0,
+            visibility: "private"
+          },
+          {
+            name:       "_flags",
+            type:       "char",
+            
+            attrs:      8,
+            visibility: "private"
+          },
+          {
+            name:       "_fading_off",
+            type:       "bool",
+            
+            attrs:      0,
+            visibility: "private"
+          },
+          {
+            name:       "_fading_in",
+            type:       "bool                           ",
             
             attrs:      0,
             visibility: "private"
@@ -8516,6 +9121,393 @@ var project = {
         ]
       },
       {
+        name:       "AngelScript::ContextLock",
+        file:       "include/as_object.hpp",
+        decl:       "struct",
+        namespaces: ["AngelScript","AngelScript::ContextLock"],
+        
+        methods: [
+          {
+              name:        "Context",
+              params:      ["(void)"],
+              attrs:       16,
+              desc:        "",
+              return_type: "asIScriptContext",
+              return_attrs: 17,
+              visibility:  "public"
+            },{
+              name:        "Module",
+              params:      ["(void)"],
+              attrs:       16,
+              desc:        "",
+              return_type: "asIScriptModule",
+              return_attrs: 17,
+              visibility:  "public"
+            },{
+              name:        "CurrentObject",
+              params:      ["(void)"],
+              attrs:       16,
+              desc:        "",
+              return_type: "Object",
+              return_attrs: 17,
+              visibility:  "public"
+            }
+        ],
+        attributes: [
+          
+          {
+            name:       "old_context",
+            type:       "asIScriptContext",
+            
+            attrs:      1,
+            visibility: "private"
+          },
+          {
+            name:       "old_module",
+            type:       "asIScriptModule",
+            
+            attrs:      1,
+            visibility: "private"
+          },
+          {
+            name:       "current_context",
+            type:       "asIScriptContext",
+            
+            attrs:      17,
+            visibility: "private"
+          },
+          {
+            name:       "current_module",
+            type:       "asIScriptModule",
+            
+            attrs:      17,
+            visibility: "private"
+          },
+          {
+            name:       "old_object",
+            type:       "AngelScript::Object",
+            
+            attrs:      1,
+            visibility: "private"
+          },
+          {
+            name:       "current_object",
+            type:       "AngelScript::Object",
+            
+            attrs:      17,
+            visibility: "private"
+          }
+        ],
+        ancestors: [
+          
+        ]
+      },
+      {
+        name:       "AngelScript::Exception",
+        file:       "include/as_object.hpp",
+        decl:       "struct",
+        namespaces: ["AngelScript","AngelScript::Exception",""],
+        
+        methods: [
+          {
+              name:        "what",
+              params:      ["(void)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "char",
+              return_attrs: 5,
+              visibility:  "public"
+            },
+        ],
+        attributes: [
+          
+          {
+            name:       "message",
+            type:       "std::string",
+            
+            attrs:      0,
+            visibility: "private"
+          }
+        ],
+        ancestors: [
+          
+          {
+            name:       "std::exception",
+            visibility: "public"
+          }
+        ]
+      },
+      {
+        name:       "AngelScript::TypeFlags",
+        file:       "include/as_object.hpp",
+        decl:       "struct",
+        namespaces: ["AngelScript","AngelScript::TypeFlags"],
+        
+        methods: [
+          
+        ],
+        attributes: [
+          
+        ],
+        ancestors: [
+          
+        ]
+      },
+      {
+        name:       "AngelScript::IType",
+        file:       "include/as_object.hpp",
+        decl:       "struct",
+        namespaces: ["AngelScript","AngelScript::IType"],
+        
+        methods: [
+          {
+              name:        "Flag",
+              params:      ["(void)"],
+              attrs:       68,
+              desc:        "",
+              return_type: "char",
+              return_attrs: 8,
+              visibility:  "public"
+            },{
+              name:        "Ptr",
+              params:      ["(void)"],
+              attrs:       64,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 1,
+              visibility:  "public"
+            }
+        ],
+        attributes: [
+          
+        ],
+        ancestors: [
+          
+        ]
+      },
+      {
+        name:       "AngelScript::Type",
+        file:       "include/as_object.hpp",
+        decl:       "class",
+        namespaces: ["AngelScript","AngelScript::Type","","AngelScript","AngelScript::IType"],
+        
+        methods: [
+          {
+              name:        "TYPE",
+              params:      ["()"],
+              attrs:       4,
+              desc:        "",
+              return_type: "operator",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "Flag",
+              params:      ["(void)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "char",
+              return_attrs: 8,
+              visibility:  "public"
+            },{
+              name:        "Ptr",
+              params:      ["(void)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 1,
+              visibility:  "public"
+            }
+        ],
+        attributes: [
+          
+          {
+            name:       "value",
+            type:       "TYPE",
+            
+            attrs:      0,
+            visibility: "private"
+          }
+        ],
+        ancestors: [
+          
+          {
+            name:       "IType",
+            visibility: "public"
+          }
+        ]
+      },
+      {
+        name:       "Object",
+        file:       "include/as_object.hpp",
+        decl:       "class",
+        namespaces: ["Object"],
+        
+        methods: [
+          {
+              name:        "Initialize",
+              params:      ["(void)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "protected"
+            },{
+              name:        "asDefineMethod",
+              params:      ["(const std::string& name","const std::string& declaration)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "Call",
+              params:      ["(const std::string& name","unsigned int argc = 0","...)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "ReturnType",
+              return_attrs: 0,
+              visibility:  "protected"
+            }
+        ],
+        attributes: [
+          
+          {
+            name:       "filepath",
+            type:       "std::string",
+            
+            attrs:      4,
+            visibility: "private"
+          },
+          {
+            name:       "context",
+            type:       "asIScriptContext",
+            
+            attrs:      1,
+            visibility: "private"
+          },
+          {
+            name:       "module",
+            type:       "asIScriptModule",
+            
+            attrs:      1,
+            visibility: "private"
+          },
+          {
+            name:       "functions",
+            type:       "Functions",
+            
+            obj_type:   "Object::Functions",
+            
+            attrs:      0,
+            visibility: "private"
+          }
+        ],
+        ancestors: [
+          
+        ]
+      },
+      {
+        name:       "AngelScript::Object::Function",
+        file:       "include/as_object.hpp",
+        decl:       "struct",
+        namespaces: ["AngelScript","AngelScript::Object","AngelScript::Object::Function"],
+        
+        methods: [
+          
+        ],
+        attributes: [
+          
+          {
+            name:       "signature",
+            type:       "std::string",
+            
+            attrs:      0,
+            visibility: "public"
+          },
+          {
+            name:       "function",
+            type:       "asIScriptFunction",
+            
+            attrs:      1,
+            visibility: "public"
+          }
+        ],
+        ancestors: [
+          
+        ]
+      },
+      {
+        name:       "AngelScript::Object::ReturnType",
+        file:       "include/as_object.hpp",
+        decl:       "struct",
+        namespaces: ["AngelScript","AngelScript::Object","AngelScript::Object::ReturnType"],
+        
+        methods: [
+          {
+              name:        "TYPE",
+              params:      ["()"],
+              attrs:       4,
+              desc:        "",
+              return_type: "operator",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "bool",
+              params:      ["()"],
+              attrs:       4,
+              desc:        "",
+              return_type: "operator",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "int",
+              params:      ["()"],
+              attrs:       4,
+              desc:        "",
+              return_type: "operator",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "long",
+              params:      ["()"],
+              attrs:       4,
+              desc:        "",
+              return_type: "operator",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "float",
+              params:      ["()"],
+              attrs:       4,
+              desc:        "",
+              return_type: "operator",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "double",
+              params:      ["()"],
+              attrs:       4,
+              desc:        "",
+              return_type: "operator",
+              return_attrs: 0,
+              visibility:  "public"
+            }
+        ],
+        attributes: [
+          
+          {
+            name:       "context",
+            type:       "asIScriptContext",
+            
+            attrs:      1,
+            visibility: "protected"
+          }
+        ],
+        ancestors: [
+          
+        ]
+      },
+      {
         name:       "UiObjectQuantityPicker",
         file:       "include/inventory_ui.hpp",
         decl:       "class",
@@ -8764,6 +9756,22 @@ var project = {
               return_type: "bool",
               return_attrs: 0,
               visibility:  "public"
+            },{
+              name:        "CanSwap",
+              params:      ["(InventoryObject* object)"],
+              attrs:       4,
+              desc:        "",
+              return_type: "bool",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "SetCanSwap",
+              params:      ["(std::function<bool (InventoryObject*)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
             }
         ],
         attributes: [
@@ -8814,6 +9822,57 @@ var project = {
             type:       "InventoryViewController",
             
             obj_type:   "InventoryViewController",
+            
+            attrs:      0,
+            visibility: "private"
+          }
+        ],
+        ancestors: [
+          
+          {
+            name:       "UiBase",
+            visibility: "public"
+          }
+        ]
+      },
+      {
+        name:       "UiUseSkillOn",
+        file:       "include/inventory_ui.hpp",
+        decl:       "class",
+        namespaces: ["UiUseSkillOn","","UiBase"],
+        
+        methods: [
+          {
+              name:        "Destroy",
+              params:      ["(void)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            }
+        ],
+        attributes: [
+          
+          {
+            name:       "EventCloseClicked",
+            type:       "RocketListener",
+            
+            obj_type:   "RocketListener",
+            
+            attrs:      0,
+            visibility: "private"
+          },
+          {
+            name:       "EventSkillPicked",
+            type:       "RocketListener         ",
+            
+            attrs:      0,
+            visibility: "private"
+          },
+          {
+            name:       "skill_picked",
+            type:       "std::string",
             
             attrs:      0,
             visibility: "private"
@@ -9002,7 +10061,7 @@ var project = {
         name:       "UiLoot",
         file:       "include/inventory_ui.hpp",
         decl:       "class",
-        namespaces: ["UiLoot","","UiBase"],
+        namespaces: ["UiLoot","","UiBase","","Scriptable"],
         doc:        {"overview":"UI used when the player is looting other inventories (bodies, lockers, etc).\n","detail":null},
         methods: [
           {
@@ -9013,6 +10072,22 @@ var project = {
               return_type: "void",
               return_attrs: 0,
               visibility:  "public"
+            },{
+              name:        "SetScriptObject",
+              params:      ["(ObjectCharacter* user","InstanceDynamicObject* target","asIScriptContext* context","const std::string& filepath)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "CanSwap",
+              params:      ["(InventoryObject*)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "bool",
+              return_attrs: 0,
+              visibility:  "private"
             },{
               name:        "SwapObjects",
               params:      ["(InventoryObject* object)"],
@@ -9092,12 +10167,41 @@ var project = {
             
             attrs:      2,
             visibility: "private"
+          },
+          {
+            name:       "as_object",
+            type:       "AngelScript::Object",
+            
+            attrs:      1,
+            visibility: "private"
+          },
+          {
+            name:       "target_object",
+            type:       "InstanceDynamicObject",
+            
+            obj_type:   "InstanceDynamicObject",
+            
+            attrs:      1,
+            visibility: "private"
+          },
+          {
+            name:       "user_character",
+            type:       "ObjectCharacter",
+            
+            obj_type:   "ObjectCharacter",
+            
+            attrs:      1,
+            visibility: "private"
           }
         ],
         ancestors: [
           
           {
             name:       "UiBase",
+            visibility: "public"
+          },
+          {
+            name:       "Scriptable",
             visibility: "public"
           }
         ]
@@ -9110,6 +10214,22 @@ var project = {
         doc:        {"overview":"UI for picking the way a character will yield an object.\n","detail":null},
         methods: [
           {
+              name:        "AddOption",
+              params:      ["(unsigned char code","const std::string& name)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "Initialize",
+              params:      ["(void)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
               name:        "Destroy",
               params:      ["(void)"],
               attrs:       0,
@@ -9118,15 +10238,7 @@ var project = {
               return_attrs: 0,
               visibility:  "public"
             },{
-              name:        "DisableMode",
-              params:      ["(EquipedMode)"],
-              attrs:       0,
-              desc:        "",
-              return_type: "void",
-              return_attrs: 0,
-              visibility:  "public"
-            },{
-              name:        "CallbackButton",
+              name:        "CallbackCancel",
               params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
@@ -9134,8 +10246,8 @@ var project = {
               return_attrs: 0,
               visibility:  "private"
             },{
-              name:        "CallbackCancel",
-              params:      ["(Rocket::Core::Event&)"],
+              name:        "ListenButtons",
+              params:      ["(bool)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9146,23 +10258,7 @@ var project = {
         attributes: [
           
           {
-            name:       "MouthClicked",
-            type:       "RocketListener",
-            
-            obj_type:   "RocketListener",
-            
-            attrs:      0,
-            visibility: "private"
-          },
-          {
-            name:       "MagicClicked",
-            type:       "RocketListener   ",
-            
-            attrs:      0,
-            visibility: "private"
-          },
-          {
-            name:       "BattleSaddleClicked",
+            name:       "ModeClicked",
             type:       "RocketListener",
             
             obj_type:   "RocketListener",
@@ -9172,27 +10268,16 @@ var project = {
           },
           {
             name:       "CancelClicked",
-            type:       "RocketListener",
-            
-            obj_type:   "RocketListener",
+            type:       "RocketListener   ",
             
             attrs:      0,
             visibility: "private"
           },
           {
-            name:       "_it",
-            type:       "short",
+            name:       "root_choices",
+            type:       "Rocket::Core::Element",
             
-            attrs:      8,
-            visibility: "private"
-          },
-          {
-            name:       "_object",
-            type:       "InventoryObject",
-            
-            obj_type:   "InventoryObject",
-            
-            attrs:      2,
+            attrs:      1,
             visibility: "private"
           }
         ],
@@ -9280,6 +10365,14 @@ var project = {
               return_attrs: 0,
               visibility:  "public"
             },{
+              name:        "SetEquipedItem",
+              params:      ["(unsigned short slot","InventoryObject* object)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
               name:        "UpdateInventoryCapacity",
               params:      ["(void)"],
               attrs:       0,
@@ -9290,6 +10383,22 @@ var project = {
             },{
               name:        "SetSelectedObject",
               params:      ["(InventoryObject*)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "private"
+            },{
+              name:        "ListenEquipModes",
+              params:      ["(bool)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "private"
+            },{
+              name:        "ListenDropables",
+              params:      ["(bool)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -9312,7 +10421,7 @@ var project = {
               return_attrs: 0,
               visibility:  "private"
             },{
-              name:        "CallbackButtonEquip1",
+              name:        "CallbackSwapEquipMode",
               params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
@@ -9320,23 +10429,7 @@ var project = {
               return_attrs: 0,
               visibility:  "private"
             },{
-              name:        "CallbackButtonEquip2",
-              params:      ["(Rocket::Core::Event&)"],
-              attrs:       0,
-              desc:        "",
-              return_type: "void",
-              return_attrs: 0,
-              visibility:  "private"
-            },{
-              name:        "CallbackButtonUnequip1",
-              params:      ["(Rocket::Core::Event&)"],
-              attrs:       0,
-              desc:        "",
-              return_type: "void",
-              return_attrs: 0,
-              visibility:  "private"
-            },{
-              name:        "CallbackButtonUnequip2",
+              name:        "CallbackDropEvent",
               params:      ["(Rocket::Core::Event&)"],
               attrs:       0,
               desc:        "",
@@ -9347,6 +10440,15 @@ var project = {
         ],
         attributes: [
           
+          {
+            name:       "DropEvent",
+            type:       "RocketListener",
+            
+            obj_type:   "RocketListener",
+            
+            attrs:      0,
+            visibility: "private"
+          },
           {
             name:       "ButtonUseClicked",
             type:       "RocketListener",
@@ -9364,34 +10466,7 @@ var project = {
             visibility: "private"
           },
           {
-            name:       "ButtonEquip1Clicked",
-            type:       "RocketListener",
-            
-            obj_type:   "RocketListener",
-            
-            attrs:      0,
-            visibility: "private"
-          },
-          {
-            name:       "ButtonEquip2Clicked",
-            type:       "RocketListener",
-            
-            obj_type:   "RocketListener",
-            
-            attrs:      0,
-            visibility: "private"
-          },
-          {
-            name:       "ButtonUnequip1",
-            type:       "RocketListener",
-            
-            obj_type:   "RocketListener",
-            
-            attrs:      0,
-            visibility: "private"
-          },
-          {
-            name:       "ButtonUnequip2",
+            name:       "ButtonEquipMode",
             type:       "RocketListener",
             
             obj_type:   "RocketListener",
@@ -9736,10 +10811,10 @@ var project = {
         ]
       },
       {
-        name:       "Sync::Thread",
+        name:       "Sync::MyThread",
         file:       "include/Boots/thread.hpp",
         decl:       "class",
-        namespaces: ["Sync","Sync::Thread"],
+        namespaces: ["Sync","Sync::MyThread"],
         
         methods: [
           {
@@ -9818,7 +10893,7 @@ var project = {
         name:       "Sync::FunctorThread",
         file:       "include/Boots/functorthread.hpp",
         decl:       "class",
-        namespaces: ["Sync","Sync::FunctorThread","","Sync","Sync::Thread"],
+        namespaces: ["Sync","Sync::FunctorThread","","Sync","Sync::MyThread"],
         
         methods: [
           {
@@ -9861,7 +10936,7 @@ var project = {
         ancestors: [
           
           {
-            name:       "Thread",
+            name:       "MyThread",
             visibility: "public"
           }
         ]
@@ -10082,6 +11157,15 @@ var project = {
           },
           {
             name:       "FullscreenToggled",
+            type:       "RocketListener",
+            
+            obj_type:   "RocketListener",
+            
+            attrs:      0,
+            visibility: "private"
+          },
+          {
+            name:       "CameraFocusChanged",
             type:       "RocketListener",
             
             obj_type:   "RocketListener",
@@ -11044,6 +12128,14 @@ var project = {
               return_attrs: 0,
               visibility:  "public"
             },{
+              name:        "RefreshCharactersVisibility",
+              params:      ["(void)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
               name:        "FindObjectFromNode",
               params:      ["(NodePath node)"],
               attrs:       0,
@@ -11065,6 +12157,22 @@ var project = {
               attrs:       0,
               desc:        "",
               return_type: "TimeManager",
+              return_attrs: 2,
+              visibility:  "public"
+            },{
+              name:        "GetParticleManager",
+              params:      ["(void)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "ParticleSystemManager",
+              return_attrs: 2,
+              visibility:  "public"
+            },{
+              name:        "GetChatterManager",
+              params:      ["(void)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "ChatterManager",
               return_attrs: 2,
               visibility:  "public"
             },{
@@ -11212,6 +12320,14 @@ var project = {
               return_attrs: 0,
               visibility:  "public"
             },{
+              name:        "CallbackActionUseSkillOn",
+              params:      ["(InstanceDynamicObject* object)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
               name:        "CallbackActionTargetUse",
               params:      ["(unsigned short it)"],
               attrs:       0,
@@ -11238,6 +12354,14 @@ var project = {
             },{
               name:        "ActionUseObjectOn",
               params:      ["(ObjectCharacter* user","InstanceDynamicObject* target","InventoryObject* object","unsigned char actionIt)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "ActionUseSkillOn",
+              params:      ["(ObjectCharacter* user","InstanceDynamicObject* target","const std::string& skill)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11284,8 +12408,24 @@ var project = {
               return_attrs: 0,
               visibility:  "public"
             },{
+              name:        "PlayerLootWithScript",
+              params:      ["(Inventory*","InstanceDynamicObject*","asIScriptContext*","const std::string& script_path)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
               name:        "PlayerEquipObject",
               params:      ["(unsigned short it","InventoryObject* object)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "PlayerEquipObject",
+              params:      ["(const std::string& target","unsigned int slot","InventoryObject* object)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -11341,6 +12481,30 @@ var project = {
               visibility:  "public"
             },{
               name:        "MouseRightClicked",
+              params:      ["(void)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "MouseWheelUp",
+              params:      ["(void)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "MouseWheelDown",
+              params:      ["(void)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "MouseSuccessRateHint",
               params:      ["(void)"],
               attrs:       0,
               desc:        "",
@@ -11610,10 +12774,26 @@ var project = {
             visibility: "private"
           },
           {
+            name:       "_particle_manager",
+            type:       "ParticleSystemManager",
+            
+            attrs:      0,
+            visibility: "private"
+          },
+          {
             name:       "_sound_manager",
             type:       "SoundManager",
             
             obj_type:   "SoundManager",
+            
+            attrs:      0,
+            visibility: "private"
+          },
+          {
+            name:       "_chatter_manager",
+            type:       "ChatterManager",
+            
+            obj_type:   "ChatterManager",
             
             attrs:      0,
             visibility: "private"
@@ -11682,7 +12862,7 @@ var project = {
           },
           {
             name:       "_exitingZoneName",
-            type:       "std::string          ",
+            type:       "std::string           ",
             
             attrs:      0,
             visibility: "private"
@@ -11697,6 +12877,13 @@ var project = {
           {
             name:       "_sunLightAmbientNode",
             type:       "NodePath",
+            
+            attrs:      0,
+            visibility: "private"
+          },
+          {
+            name:       "_light_iterator",
+            type:       "World::WorldLights::iterator",
             
             attrs:      0,
             visibility: "private"
@@ -11913,7 +13100,7 @@ var project = {
         file:       "include/level/mouse.hpp",
         decl:       "struct",
         namespaces: ["MouseHovering"],
-        
+        doc:        {"overview":"Contained in the [Mouse] object, it provides information about the different types of objects currently hovered.\n","detail":null},
         methods: [
           {
               name:        "Reset",
@@ -11922,7 +13109,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"Reset","short":"Reset the data, as if no waypoints or objects are hovered"}
             },{
               name:        "SetWaypoint",
               params:      ["(NodePath np)"],
@@ -11930,7 +13118,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"SetWaypoint","short":"Forces the current hovered waypoint to be the one represented by the NodePath sent as parameter"}
             },{
               name:        "SetDynObject",
               params:      ["(NodePath np)"],
@@ -11938,7 +13127,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"SetDynObject","short":"Forces the current hovered dynamic object to be the one represented by the NodePath sent as parameter"}
             }
         ],
         attributes: [
@@ -11948,28 +13138,42 @@ var project = {
             type:       "bool",
             
             attrs:      0,
-            visibility: "public"
+            visibility: "public",
+            doc:         {"name":"hasWaypoint","short":"Is set to true if a waypoint is currently being hovered"}
           },
           {
             name:       "hasDynObject",
-            type:       "bool     ",
+            type:       "bool      ",
             
             attrs:      0,
-            visibility: "public"
+            visibility: "public",
+            doc:         {"name":"hasDynObject","short":"Is set to true if a dynamic object is currently being hovered"}
           },
           {
             name:       "waypoint",
             type:       "NodePath",
             
             attrs:      0,
-            visibility: "public"
+            visibility: "public",
+            doc:         {"name":"waypoint","short":"NodePath of the hovered [Waypoint]. If hasWaypoint is false, the value is undefined"}
+          },
+          {
+            name:       "waypoint_ptr",
+            type:       "Waypoint",
+            
+            obj_type:   "Waypoint",
+            
+            attrs:      1,
+            visibility: "public",
+            doc:         {"name":"waypoint_ptr","short":"Hovered waypoint. If hasWaypoint is false, the value is undefined"}
           },
           {
             name:       "dynObject",
             type:       "NodePath",
             
             attrs:      0,
-            visibility: "public"
+            visibility: "public",
+            doc:         {"name":"dynObject","short":"NodePath of the hovered [DynamicObject]. If hasDynObject is false, the value is undefined"}
           }
         ],
         ancestors: [
@@ -11981,7 +13185,7 @@ var project = {
         file:       "include/level/mouse.hpp",
         decl:       "class",
         namespaces: ["Mouse"],
-        
+        doc:        {"overview":"Handle mouse-driven events and provide hovering data during the execution of a [Level]. See [MouseCursor] for cursor and hints management.\n","detail":null},
         methods: [
           {
               name:        "Run",
@@ -11990,7 +13194,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"Run","short":"Used in [Level::do_task] to update the data about hovering objects"}
             },{
               name:        "Hovering",
               params:      ["(void)"],
@@ -11998,7 +13203,8 @@ var project = {
               desc:        "",
               return_type: "MouseHovering",
               return_attrs: 6,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"Hovering","short":"Returns a reference to _hovering, providing data about currently hovered objects"}
             },{
               name:        "SetMouseState",
               params:      ["(char)"],
@@ -12006,7 +13212,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"SetMouseState","short":"Refreshes the texture of the mouse cursor","desc":"Depending on the parameter, the following textures will be loaded:\n<u>'a'</u>: textures/cursor-action.png\n<u>'i'</u>: textures/cursor-interaction.png\n<u>'t'</u>: textures/cursor-target.png\nAny other parameter will cause nothing to happen.\n"}
             },{
               name:        "ClosestWaypoint",
               params:      ["(World*","short currentFloor)"],
@@ -12014,7 +13221,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"ClosestWaypoint","short":"Seek the closest waypoint to the mouse cursor and store it in [MouseHovering]::_hovering","desc":"This is optimized through a divide&conquer algorithm. The amount of [Waypoint] in the current [Level] should have very little influence on the overhead"}
             },{
               name:        "CallbackButton1",
               params:      ["(const Event*","void* ptr)"],
@@ -12033,6 +13241,22 @@ var project = {
               visibility:  "public"
             },{
               name:        "CallbackButton3",
+              params:      ["(const Event*","void* ptr)"],
+              attrs:       16,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 16,
+              visibility:  "public"
+            },{
+              name:        "CallbackWheelUp",
+              params:      ["(const Event*","void* ptr)"],
+              attrs:       16,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 16,
+              visibility:  "public"
+            },{
+              name:        "CallbackWheelDown",
               params:      ["(const Event*","void* ptr)"],
               attrs:       16,
               desc:        "",
@@ -12097,7 +13321,7 @@ var project = {
         file:       "include/level/dialog.hpp",
         decl:       "struct",
         namespaces: ["DialogAnswers"],
-        
+        doc:        {"overview":"List of answers that a player can pick in a dialog node. Provided by [DialogModel], used in [DialogController].\n","detail":null},
         methods: [
           
         ],
@@ -12122,7 +13346,7 @@ var project = {
         file:       "include/level/dialog.hpp",
         decl:       "class",
         namespaces: ["DialogModel"],
-        
+        doc:        {"overview":"Provides an interface to handle the data from a dialog's JSON description.\n","detail":null},
         methods: [
           {
               name:        "SetCurrentNpcLine",
@@ -12131,7 +13355,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"SetCurrentNpcLine","short":"Sets the current node for the dialog","desc":"The model needse to be informed of the current node in order to provide the answers available to the player"}
             },{
               name:        "GetHookAvailable",
               params:      ["(const std::string& answerId)"],
@@ -12139,7 +13364,8 @@ var project = {
               desc:        "",
               return_type: "std::string",
               return_attrs: 4,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"GetHookAvailable"}
             },{
               name:        "GetExecuteMethod",
               params:      ["(const std::string& answerId)"],
@@ -12147,7 +13373,8 @@ var project = {
               desc:        "",
               return_type: "std::string",
               return_attrs: 4,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"GetExecuteMethod"}
             },{
               name:        "GetDefaultNextLine",
               params:      ["(const std::string& answerId)"],
@@ -12155,7 +13382,8 @@ var project = {
               desc:        "",
               return_type: "std::string",
               return_attrs: 4,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"GetDefaultNextLine"}
             },{
               name:        "GetNpcLine",
               params:      ["(void)"],
@@ -12163,7 +13391,8 @@ var project = {
               desc:        "",
               return_type: "std::string",
               return_attrs: 4,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"GetNpcLine"}
             },{
               name:        "GetDialogAnswers",
               params:      ["(void)"],
@@ -12171,7 +13400,8 @@ var project = {
               desc:        "",
               return_type: "DialogAnswers",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"GetDialogAnswers","short":"Returns the answers available to the player given the current node"}
             }
         ],
         attributes: [
@@ -12183,7 +13413,8 @@ var project = {
             obj_type:   "DataTree",
             
             attrs:      1,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_tree","short":"DataTree provided by the JSON description of the dialog"}
           },
           {
             name:       "_data",
@@ -12192,7 +13423,8 @@ var project = {
             obj_type:   "Data",
             
             attrs:      0,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_data","short":"[Data] object wrapping the _tree attribute"}
           },
           {
             name:       "_l18n",
@@ -12201,14 +13433,16 @@ var project = {
             obj_type:   "Data",
             
             attrs:      0,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_l18n","short":"Internationalization data, allowing traduction of the dialogs"}
           },
           {
             name:       "_currentNpcLine",
             type:       "std::string",
             
             attrs:      0,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_currentNpcLine"}
           }
         ],
         ancestors: [
@@ -12220,7 +13454,7 @@ var project = {
         file:       "include/level/dialog.hpp",
         decl:       "class",
         namespaces: ["DialogView","","UiBase"],
-        
+        doc:        {"overview":"Handles the libRocket interface used for dialogs and barter\n","detail":null},
         methods: [
           {
               name:        "Destroy",
@@ -12229,7 +13463,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"Destroy"}
             },{
               name:        "UpdateView",
               params:      ["(const std::string& npcLine","const DialogAnswers& answers)"],
@@ -12237,7 +13472,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "protected"
+              visibility:  "protected",
+              doc:         {"name":"UpdateView","short":"Must be used by the DialogController to notify that the NPC line and player answers must be updated"}
             },{
               name:        "CleanView",
               params:      ["(const DialogAnswers& answers)"],
@@ -12245,7 +13481,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "protected"
+              visibility:  "protected",
+              doc:         {"name":"CleanView","short":"Clean up the RocketListener from the current answers"}
             }
         ],
         attributes: [
@@ -12296,7 +13533,7 @@ var project = {
         file:       "include/level/dialog.hpp",
         decl:       "class",
         namespaces: ["DialogController","","DialogView","","UiBase"],
-        
+        doc:        {"overview":"Controller for the MVC Design Pattern in charge of dialogs between a player and an NPC.\n","detail":null},
         methods: [
           {
               name:        "WithCharacter",
@@ -12305,7 +13542,8 @@ var project = {
               desc:        "",
               return_type: "ObjectCharacter",
               return_attrs: 1,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"WithCharacter","short":"Returns the [ObjectCharacter] object of the NPC with which the dialog is taking place"}
             },{
               name:        "ExecuteAnswer",
               params:      ["(Rocket::Core::Event& event)"],
@@ -12313,7 +13551,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "private"
+              visibility:  "private",
+              doc:         {"name":"ExecuteAnswer","short":"Callback executed when the player has picked an answer"}
             },{
               name:        "SetCurrentNode",
               params:      ["(const std::string& nodeName)"],
@@ -12321,7 +13560,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "private"
+              visibility:  "private",
+              doc:         {"name":"SetCurrentNode","short":"Forces the dialog to the specified node.","desc":"A 'node' defines the NPC's current line and the possible answers for the player. This method is used to go from one node to another in response to the answer the player given and the reaction it triggered for the NPC"}
             },{
               name:        "OpenBarter",
               params:      ["(Rocket::Core::Event& event)"],
@@ -12329,24 +13569,19 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "private"
+              visibility:  "private",
+              doc:         {"name":"OpenBarter","short":"Slot for the signal opening the barter dialog","desc":"Pauses the dialog and open the barter interface."}
             }
         ],
         attributes: [
           
           {
-            name:       "_context",
-            type:       "asIScriptContext",
+            name:       "_script",
+            type:       "AngelScript::Object",
             
-            attrs:      1,
-            visibility: "private"
-          },
-          {
-            name:       "_module",
-            type:       "asIScriptModule",
-            
-            attrs:      1,
-            visibility: "private"
+            attrs:      0,
+            visibility: "private",
+            doc:         {"name":"_script","short":"Handle to the script controlling te current dialog"}
           },
           {
             name:       "_model",
@@ -12355,7 +13590,8 @@ var project = {
             obj_type:   "DialogModel",
             
             attrs:      0,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_model","short":"Contains and provide informations from the JSON file describing the dialog"}
           },
           {
             name:       "_character",
@@ -12364,7 +13600,8 @@ var project = {
             obj_type:   "ObjectCharacter",
             
             attrs:      1,
-            visibility: "private"
+            visibility: "private",
+            doc:         {"name":"_character","short":"Pointer to the NPC with which the dialog is happening"}
           }
         ],
         ancestors: [
@@ -12459,6 +13696,14 @@ var project = {
               return_type: "string",
               return_attrs: 0,
               visibility:  "public"
+            },{
+              name:        "FuckYouMSVC",
+              params:      ["(InstanceDynamicObject*)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "private"
             }
         ],
         attributes: [
@@ -12546,6 +13791,104 @@ var project = {
         ]
       },
       {
+        name:       "ChatterManager",
+        file:       "include/level/chatter_manager.hpp",
+        decl:       "class",
+        namespaces: ["ChatterManager"],
+        doc:        {"overview":"Handles the on-screen chatboxes for real-time dialogs (boxes over the characters heads). The ChatterManager must have a single instance, which can be retrieved through an accessor of the Level class.\n","detail":null},
+        methods: [
+          {
+              name:        "PushTextBox",
+              params:      ["(InstanceDynamicObject* object","const std::string& text","unsigned short r","unsigned short g","unsigned short b","float timeout = 5.f)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public",
+              doc:         {"name":"PushTextBox","short":"Creates a new text box which will be displayed above an [InstanceDynamicObject]"}
+            },{
+              name:        "Run",
+              params:      ["(float elapsed_time","NodePath camera)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public",
+              doc:         {"name":"Run","short":"Used by the level class to perform periodic tasks over the chatter boxes (updating the opacity, collecting the expired ones)","desc":"This method should only be run once and only by the [Level] class in the do_task method."}
+            },{
+              name:        "SetTextOffset",
+              params:      ["(NodePath parent","NodePath node)"],
+              attrs:       16,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 16,
+              visibility:  "private",
+              doc:         {"name":"SetTextOffset","short":"Set the offset of a text NodePath above the parent NodePath"}
+            }
+        ],
+        attributes: [
+          
+          {
+            name:       "window",
+            type:       "WindowFramework",
+            
+            attrs:      1,
+            visibility: "private",
+            doc:         {"name":"window"}
+          },
+          {
+            name:       "text_boxes",
+            type:       "TextBoxes",
+            
+            obj_type:   "ChatterManager::TextBoxes",
+            
+            attrs:      0,
+            visibility: "private",
+            doc:         {"name":"text_boxes","short":"List of chatter boxes currently displayed on the screen."}
+          }
+        ],
+        ancestors: [
+          
+        ]
+      },
+      {
+        name:       "ChatterManager::Text",
+        file:       "include/level/chatter_manager.hpp",
+        decl:       "struct",
+        namespaces: ["ChatterManager","ChatterManager::Text"],
+        
+        methods: [
+          
+        ],
+        attributes: [
+          
+          {
+            name:       "parent",
+            type:       "NodePath",
+            
+            attrs:      0,
+            visibility: "public"
+          },
+          {
+            name:       "text_node",
+            type:       "NodePath",
+            
+            attrs:      0,
+            visibility: "public"
+          },
+          {
+            name:       "timeout",
+            type:       "float",
+            
+            attrs:      0,
+            visibility: "public"
+          }
+        ],
+        ancestors: [
+          
+        ]
+      },
+      {
         name:       "SceneCamera",
         file:       "include/level/scene_camera.hpp",
         decl:       "class",
@@ -12579,6 +13922,14 @@ var project = {
             },{
               name:        "SetLimits",
               params:      ["(unsigned int minX","unsigned int minY","unsigned int maxX","unsigned maxY)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "RefreshCameraHeight",
+              params:      ["(void)"],
               attrs:       0,
               desc:        "",
               return_type: "void",
@@ -12775,6 +14126,13 @@ var project = {
             visibility: "private"
           },
           {
+            name:       "_camera_height",
+            type:       "float",
+            
+            attrs:      0,
+            visibility: "private"
+          },
+          {
             name:       "_centeringCamera",
             type:       "bool",
             
@@ -12812,6 +14170,58 @@ var project = {
         ],
         ancestors: [
           
+        ]
+      },
+      {
+        name:       "SkillTarget",
+        file:       "include/level/skill_target.hpp",
+        decl:       "class",
+        namespaces: ["SkillTarget","","Scriptable"],
+        
+        methods: [
+          {
+              name:        "Initialize",
+              params:      ["(const std::string& module_name","const std::string& filepath","asIScriptContext* context)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            },{
+              name:        "UseSkill",
+              params:      ["(ObjectCharacter* user","std::string skill)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public"
+            }
+        ],
+        attributes: [
+          
+          {
+            name:       "self",
+            type:       "InstanceDynamicObject",
+            
+            obj_type:   "InstanceDynamicObject",
+            
+            attrs:      1,
+            visibility: "private"
+          },
+          {
+            name:       "hook_use_skill",
+            type:       "asIScriptFunction",
+            
+            attrs:      1,
+            visibility: "private"
+          }
+        ],
+        ancestors: [
+          
+          {
+            name:       "Scriptable",
+            visibility: "public"
+          }
         ]
       },
       {
@@ -12923,52 +14333,6 @@ var project = {
             name:       "UiBase",
             visibility: "public"
           }
-        ]
-      },
-      {
-        name:       "WaypointMap",
-        file:       "include/level/waypoint_map.hpp",
-        decl:       "class",
-        namespaces: ["WaypointMap"],
-        
-        methods: [
-          {
-              name:        "Initialize",
-              params:      ["(const std::vector<Waypoint>& waypoints","unsigned char floor)"],
-              attrs:       0,
-              desc:        "",
-              return_type: "bool",
-              return_attrs: 0,
-              visibility:  "public"
-            },{
-              name:        "GetNodePath",
-              params:      ["(void)"],
-              attrs:       4,
-              desc:        "",
-              return_type: "NodePath",
-              return_attrs: 0,
-              visibility:  "public"
-            }
-        ],
-        attributes: [
-          
-          {
-            name:       "window",
-            type:       "WindowFramework",
-            
-            attrs:      1,
-            visibility: "private"
-          },
-          {
-            name:       "waypoint_map",
-            type:       "NodePath",
-            
-            attrs:      0,
-            visibility: "private"
-          }
-        ],
-        ancestors: [
-          
         ]
       },
       {
@@ -15576,7 +16940,7 @@ var project = {
         file:       "include/mousecursor.hpp",
         decl:       "class",
         namespaces: ["MouseCursor","","UiBase"],
-        
+        doc:        {"overview":"Singleton handling the mouse cursor and the mouse hints.\n","detail":null},
         methods: [
           {
               name:        "SetCursorTexture",
@@ -15585,7 +16949,26 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"SetCursorTexture"}
+            },{
+              name:        "SetHint",
+              params:      ["(const std::string& rml)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public",
+              doc:         {"name":"SetHint","short":"Set the hint element to the specified RML"}
+            },{
+              name:        "SetHint",
+              params:      ["(int)"],
+              attrs:       0,
+              desc:        "",
+              return_type: "void",
+              return_attrs: 0,
+              visibility:  "public",
+              doc:         {"name":"SetHint","short":"Set the hint to a percentage (for success chances)"}
             },{
               name:        "Update",
               params:      ["(void)"],
@@ -15593,7 +16976,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"Update","short":"Updates the texture and hint position accordingly to the cursor position","desc":"This procedure is executed in the [MainMenu] handler to ensure it is executed once per turn of the main loop"}
             },{
               name:        "PullToFront",
               params:      ["(void)"],
@@ -15601,7 +16985,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 0,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"PullToFront","short":"Ensures that the mouse cursor is always on top of everything"}
             },{
               name:        "Get",
               params:      ["(void)"],
@@ -15609,7 +16994,8 @@ var project = {
               desc:        "",
               return_type: "MouseCursor",
               return_attrs: 17,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"Get","short":"Accessor for the singleton instance"}
             }
         ],
         attributes: [
@@ -15619,6 +17005,20 @@ var project = {
             type:       "Rocket::Core::Element",
             
             attrs:      1,
+            visibility: "private"
+          },
+          {
+            name:       "_hint",
+            type:       "Rocket::Core::Element",
+            
+            attrs:      1,
+            visibility: "private"
+          },
+          {
+            name:       "_current_hint",
+            type:       "std::string",
+            
+            attrs:      0,
             visibility: "private"
           },
           {
@@ -16575,12 +17975,19 @@ var project = {
             doc:         {"name":"observers","short":"Handle for the quest event observers set up when a [Level] is created."}
           },
           {
+            name:       "_updating",
+            type:       "bool",
+            
+            attrs:      0,
+            visibility: "private",
+            doc:         {"name":"_update_hook","short":"If a script has been specified for the quest, points to the corresponding AngelScript function"}
+          },
+          {
             name:       "_update_hook",
             type:       "asIScriptFunction",
             
             attrs:      1,
-            visibility: "private",
-            doc:         {"name":"_update_hook","short":"If a script has been specified for the quest, points to the corresponding AngelScript function"}
+            visibility: "private"
           }
         ],
         ancestors: [
@@ -16776,7 +18183,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 16,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"ExecuteLater","short":"Will execute the lambda sent as a parameter at the end of the next loop turn.","desc":"Though it can be used for many things, this class is mainly aimed at garbage collecting, allowing differed deletion of objects."}
             },{
               name:        "Run",
               params:      ["(void)"],
@@ -16784,7 +18192,8 @@ var project = {
               desc:        "",
               return_type: "void",
               return_attrs: 16,
-              visibility:  "public"
+              visibility:  "public",
+              doc:         {"name":"Run","short":"Is run every loop turn execute and flush all the lambdas added via ExecuteLater"}
             }
         ],
         attributes: [
@@ -16990,7 +18399,10 @@ var project = {
   ]
 //};
 ,
-  typedefs: [{ name: "Waypoint::Arcs", to: "std::list<Arc>" },
+  typedefs: [{ name: "Graph::Positions", to: "std::vector<POS>                                 " },
+{ name: "Graph::Initializer", to: "std::function<Positions (const std::vector<T*>&)>" },
+{ name: "Graph::Heuristic", to: "std::function<float (POS, POS)>                  " },
+{ name: "Waypoint::Arcs", to: "std::list<Arc>" },
 { name: "Waypoint::ArcsWithdrawed", to: "std::vector<std::pair<Arc, unsigned short> >" },
 { name: "EntryZone", to: "Zone" },
 { name: "World::Waypoints", to: "std::vector<Waypoint>   " },
@@ -17000,6 +18412,7 @@ var project = {
 { name: "World::ExitZones", to: "std::list<ExitZone>     " },
 { name: "World::EntryZones", to: "std::list<EntryZone>    " },
 { name: "World::Floors", to: "std::vector<NodePath>   " },
+{ name: "World::ProgressCallback", to: "std::function<void (const std::string&, float)>" },
 { name: "Sync::Semaphore::Handle", to: "sem_t          " },
 { name: "Sync::Semaphore::ThreadId", to: "std::thread::id" },
 { name: "Sync::Semaphore::Handle", to: "HANDLE" },
@@ -17025,6 +18438,7 @@ var project = {
 { name: "Inventory::Content", to: "std::list<InventoryObject*>" },
 { name: "Scriptable::ScriptFuncPtr", to: "std::pair<asIScriptFunction**, std::string>" },
 { name: "Scriptable::ScriptFuncPtrs", to: "std::list<ScriptFuncPtr>                   " },
+{ name: "Object::Functions", to: "std::map<std::string, Function>" },
 { name: "Sync::FunctorThreadFoo::(callback_fptr)(RETURN)", to: "void" },
 { name: "(callback_fptr)()", to: "void" },
 { name: "LoadingScreen::StringQueue", to: "std::queue<std::string>" },
@@ -17037,6 +18451,7 @@ var project = {
 { name: "Level::ExitZones", to: "std::list<LevelExitZone*>        " },
 { name: "DialogAnswers::KeyValue", to: "std::pair<std::string, std::string>" },
 { name: "DialogAnswers::AnswerList", to: "std::list<KeyValue>                " },
+{ name: "ChatterManager::TextBoxes", to: "std::list<Text>" },
 { name: "InteractMenu::Listeners", to: "std::vector<InstanceDynamicObject::Interaction*>" },
 { name: "InteractMenu::Buttons", to: "std::vector<Rocket::Core::Element*>             " },
 { name: "WorldDiplomacy::Factions", to: "std::list<Faction>" },

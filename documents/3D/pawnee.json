@@ -1,0 +1,30 @@
+[
+  {
+    "heightmap": "../documents/3D/map-pawnee/part1-256.png",
+    "block_size": 32,
+    "factor": 400,
+    "min_level": 3,
+    "max_height": 65
+  },
+  {
+    "heightmap": "../documents/3D/map-pawnee/part2-256.png",
+    "block_size": 32,
+    "factor": 400,
+    "min_level": 3,
+    "max_height": 65
+  },
+  {
+    "heightmap": "../documents/3D/map-pawnee/part3-256.png",
+    "block_size": 32,
+    "factor": 400,
+    "min_level": 3,
+    "max_height": 65
+  },
+  {
+    "heightmap": "../documents/3D/map-pawnee/part4-256.png",
+    "block_size": 32,
+    "factor": 400,
+    "min_level": 3,
+    "max_height": 65
+  }
+]

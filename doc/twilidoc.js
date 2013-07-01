@@ -133,6 +133,7 @@
     Attribute.prototype.TypeBox = function(name, attrs, classname, is_typedef) {
       var desc, html, klass, type;
       html = '';
+      html += "<p class='btn-group'>";
       if (attrs & ATTR_PTR) {
         html += "<button class='btn btn-mini btn-info'>ptr</button>";
       }
@@ -159,6 +160,7 @@
       } else {
         html += "<button class='btn btn-mini btn-inverse'>" + name + "</button>";
       }
+      html += "</p>";
       return html;
     };
 
@@ -204,7 +206,7 @@
     };
 
     Member.prototype.RenderMethod = function(method) {
-      var html, obj_type, typedef;
+      var html, obj_type, typedef, visibility;
       html = '';
       obj_type = window.get_project_type(method.return_type);
       html += "<div class='span12' style='margin-top: 10px;'><div>";
@@ -220,10 +222,16 @@
       } else if (obj_type != null) {
         html += Attribute.prototype.TypeBox(method.return_type, method.return_attrs, obj_type.name);
       }
+      visibility = {
+        "class": '<span class="label label-warning"><i class="icon-tag"></i> Class</span>',
+        object: '<span class="label label-primary"><i class="icon-tag"></i> Object</span>'
+      };
+      visibility = method.attrs & ATTR_STATIC ? visibility["class"] : visibility.object;
       html += "</span>";
       html += "<div class='span9'>";
       html += "<span class='span3'><h4>" + method.name + "</h4></span>";
       html += "<span class='span6'><pre class='sh_cpp'>" + method.params + "</pre></span>";
+      html += "<span class='span3'><div style='float:right;'>" + visibility + "</div></span>";
       html += "</div>";
       if (method.doc != null) {
         html += this.RenderDoc(method);
@@ -235,7 +243,7 @@
     };
 
     Member.prototype.RenderAttribute = function(attribute) {
-      var html, obj_type, typedef;
+      var html, obj_type, typedef, visibility;
       html = '';
       if (attribute.obj_type != null) {
         obj_type = window.get_project_type(attribute.obj_type);
@@ -252,12 +260,18 @@
         html += Attribute.prototype.TypeBox(attribute.type, attribute.attrs);
       }
       html += "</span>";
-      html += "<span class='span9'>";
+      html += "<span class='span6'>";
       html += "<h4>" + attribute.name + "</h4>";
       if (attribute.doc != null) {
         html += this.RenderDoc(attribute);
       }
       html += "</span>";
+      visibility = {
+        "class": '<span class="label label-warning"><i class="icon-tag"></i> Class</span>',
+        object: '<span class="label label-primary"><i class="icon-tag"></i> Object</span>'
+      };
+      visibility = attribute.attrs & ATTR_STATIC ? visibility["class"] : visibility.object;
+      html += "<span class='span3'><div style='float:right;'>" + visibility + "</div></span>";
       html += "</div>";
       html += "</div></div>";
       return html;
