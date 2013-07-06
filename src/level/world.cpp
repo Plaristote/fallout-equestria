@@ -291,37 +291,6 @@ DynamicObject* World::GetDynamicObjectFromNodePath(NodePath path)
   return (GetObjectFromNodePath(path, dynamicObjects));
 }
 
-Waypoint*      World::GetWaypointAt(LPoint2f point)
-{
-  Waypoint*    nearest =  0;
-  float        min     = -1;
-
-  Waypoints::iterator it  = waypoints.begin();
-  Waypoints::iterator end = waypoints.end();
-
-  for (; it != end ; ++it)
-  {
-      Waypoint& waypoint = *it;
-
-      if ((waypoint.mouseBox.Intersects(point.get_x(), point.get_y())))
-      {
-        float x        = waypoint.mouseBox.left + waypoint.mouseBox.width  / 2;
-        float y        = waypoint.mouseBox.top  + waypoint.mouseBox.height / 2;
-        float distance;
-
-        x        = ABS(x - point.get_x());
-        y        = ABS(y - point.get_y());
-        distance = (x < y ? x : y);
-        if (min == -1 || distance < min)
-        {
-          min     = distance;
-          nearest = &waypoint;
-        }
-      }
-  }
-  return (nearest);
-}
-
 // EXIT ZONES
 void World::AddExitZone(const std::string& name)
 {
@@ -677,10 +646,6 @@ void Waypoint::SetMouseBox(void)
     if (dist_x > max_x) max_x = dist_x;
     if (dist_y > max_y) max_y = dist_y;
   }
-  mouseBox.left   = pos_a.get_x() - max_x;
-  mouseBox.width  = max_x * 2;
-  mouseBox.top    = pos_a.get_y() - max_y;
-  mouseBox.height = max_y * 2;
 }
 
 //#define WAYPOINT_DEBUG

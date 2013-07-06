@@ -1,0 +1,93 @@
+
+'AngelScript::ContextLock':
+  overview: |
+    This class can be called before calling an AngelScript function in order to store the current context and module. Class methods can then be used by the C++ bindings in order to know which context and module called them (warning: does not work with threads. Yet. Need to re-implement ThreadSingleton)
+  methods:
+    - name:  'ContextLock'
+      short: 'Constructing this object will lock the context, module and object sent as parameters.'
+    - name:  '~ContextLock'
+      short: 'Destructing this object will restitute the previous locked context, if there was any.'
+    - name:  'Context'
+      short: 'Returns the currently locked script context'
+    - name:  'Module'
+      short: 'Returns the currently locked script module'
+    - name:  'CurrentObject'
+      short: 'When using [AngelScript::Object], returns the currently locked script object. Otherwise, returns zero.'
+  attributes:
+    - name:  'old_context'
+      short: 'stores the context that was locked before this instance was created'
+    - name:  'old_module'
+      short: 'stores the module that was locked before this instance was created'
+    - name:  'current_context'
+      short: 'stores the context currently locked'
+    - name:  'current_module'
+      short: 'stores the module currently locked'
+    - name:  'old_object'
+      short: 'stores the object that was locked before this instance was created'
+    - name:  'current_object'
+      short: 'stores the object currently locked'
+
+'AngelScript::Object':
+  overview: |
+    An interface for AngelScript files. It represent a file as an object with which you define and call methods.
+  methods:
+    - name:  'Constructor'
+      short: 'Create a new script context and loads a script from the path given as a parameter.'
+    - name:  'Constructor2'
+      short: 'Load a script and run it in an existing context.'
+    - name:  'Destructor'
+    - name: 'Initialize'
+      short: 'Loads the script file, creates a context and module'
+      desc:  'This method is already called in the constructor. You will only need it if for some reason you need to reload the script.'
+    - name: 'asDefineMethod'
+      short: 'Before calling a function, you shall use this method to define it.'
+      desc:  'The first parameter is an [std::string] which will be used an an alias to the method you are defining.<br />The second parameter is the signature of the function.<br/><br/>Example:<br/><pre>object.asDefineMethod("my_method", "bool my_method(string)");</pre>'
+    - name:  'Call'
+      short: 'Attempts to call the matching function.'
+      desc:  'The first argument must be the alias defined for the function with asDefinedMethod.<br />
+The second parameter is the number of arguments the method takes.<br/>
+Any other parameters passed to this method must be wrapped in the [AngelScript::Type] object.<br/>
+It returns an [AngelScript::Object::ReturnType] object that can be casted to what it is supposed to be.<br/><br/>
+Example:<br />
+<pre>void call_my_function(AngelScript::Object& object)<br/>
+{<br/>
+  std::string                     _str("Coucou");<br/>
+  AngelScript::Type&lt;int&gt;          number(42);<br/>
+  AngelScript::Type&lt;std::string*&gt; str(&_str);<br/>
+
+  object.asDefineMethod("my_function", "bool my_function(int, string)");<br/>
+  // As the next line shows, the return type of Call can be casted<br/>
+  // directly to bool. Same goes for int, long, float, double, and any pointer.<br/>
+  bool = object.Call("my_function", 2, &number, &str);<br/>
+}</pre>'
+  attributes:
+    - name:  'filepath'
+      short: 'Path to the AngelScript source file.'
+    - name:  'context'
+      short: 'Context in which the source file is running.'
+    - name:  'module'
+      short: 'Module containing the compiled AngelScript source.'
+    - name:  'functions'
+      short: 'List of the methods defined with asDefinedMethod.'
+
+'AngelScript::Exception':
+  overview: |
+    Exception thrown by [AngelScript::Object] when something goes wrong while calling or loading a script. It implements [std::exception].
+  methods:
+    - name:  'Constructor'
+    - name:  'what'
+      short: 'returns a message describing the error'
+
+'AngelScript::Object::Function':
+  overview: |
+    Structure containing the signature of a script function and the pointer to its AngelScript handle, if it was already loaded.
+
+'AngelScript::Object::ReturnType':
+  overview: |
+    Wrapper returned by AngelScript::Object::Call which allows to cast the return type to bool, int, long, float, double or a pointer to any type.
+
+'AngelScript::Type':
+  overview: |
+    This wrapper must be used when passing parameters to AngelScript::Object::Call. They are used to properly cast the parameters and send them to AngelScript with the proper flags.
+
+

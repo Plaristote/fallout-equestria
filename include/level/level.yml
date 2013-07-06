@@ -7,6 +7,9 @@ InstanceDynamicObject:
     Instance of a [DynamicObject] created by the [Level].
 
   methods:
+    - name:   'InstanceDynamicObject'
+    - name:   'InstanceDynamicObject'
+    - name:   '~InstanceDynamicObject'
     - name:   'Load'
     - name:   'Save'
     - name:   'Run'
@@ -20,16 +23,27 @@ InstanceDynamicObject:
     - name:   'GetDialog'
     - name:   'GetDynamicObject'
     - name:   'GetGoToData'
-    - name:   'Get'
-      shorts: 'Template method to cast the current object to the correct mapobject type it personifies'
-      desc: |
-        Use the 'type' attribute to determine the actual type of the object. If the expected type
-        matches, then a pointer of the correct class is returned. Otherwise, returns a null pointer.
+#   - name:   'Get'
+#     shorts: 'Template method to cast the current object to the correct mapobject type it personifies'
+#     desc: |
+#       Use the 'type' attribute to determine the actual type of the object. If the expected type
+#       matches, then a pointer of the correct class is returned. Otherwise, returns a null pointer.
     - name: 'CallbackActionUse'
     - name:  'ResetAnimation'
       short: "Interrupts all animation running on the object's [NodePath]"
       
   attributes:
+    - name:  'ActionUse'
+      short: 'Signal emitted when the player ask to use the Use interaction on a dynamic object'
+    - name:  'ActionUseObjectOn'
+      short: 'Signal emitted when the player ask to use the Use Object On interaction on a dynamic object'
+    - name:  'ActionUseSkillOn'
+      short: 'Signal emitted when the player ask to use the Skill On interaction on a dynamic object'
+    - name:  'ActionTalkTo'
+      short: 'Signal emitted when the player ask to use the Talk To interaction on a dynamic object'
+    - name:  'AnimationEnded'
+      short: 'After calling PlayAnimation, it is possible to hook to this signal to be warned when the animation finished.'
+      desc:  'Note that if another animation takes over, your callback will never be called.'
     - name:  '_type'
       short: "Allows mapping of the actual instance's type"
       desc:  'The value is based on the [ObjectTypes::ObjectType] enum, and is used in the Get method to ensure that a null pointer is returned if the intented cast is impossible'
@@ -43,8 +57,24 @@ InstanceDynamicObject:
 ObjectCharacter:
   overview: |
     Controls the logical and displaying parts of a character or NPC.
-    
+
+  attributes:
+    - name:  'ReachedDestination'
+      short: 'Signal emitted when the player reaches its destination.'
+      desc:  'After calling a GoTo method, it is possible to hook a callback to the ReachedDestination callback.<br/>Note that if for some reason the character changes of course, the callback will never be called.'
+    - name:  'ActionPointChanged'
+      short: 'Signal emitted when the amount of action points of the character needs to be updated.'
+    - name:  'HitPointsChanged'
+      short: 'Signal emitted when the amount of hit points of the character needs to be updated.'
+    - name:  'CharacterDied'
+    - name:  'ArmorClassChanged'
+    - name:  'EquipedItemChanged'
+      short: 'Signal emitted when the character equips a new item'
+    - name:  'EquipedItemActionChanged'
+      short: 'Signal emitted when the character asks to use another type of action with his weapon.'
   methods:
+    - name: 'ObjectCharacter'
+    - name: '~ObjectCharacter'
     - name: 'Load'
     - name: 'Save'
     - name:  'SetStatistics'

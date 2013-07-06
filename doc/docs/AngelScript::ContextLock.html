@@ -1,0 +1,87 @@
+<h3>Using the ContextLock with AngelScript::Object</h3><br />
+<p>
+  The ContextLock is usually used with AngelScript::Object to allow C++ bindings to know
+  which script contexts are calling them. This features can be used to implement
+  event-driven behaviors in scripting (script registering callbacks to observers for
+  instance).
+</p>
+
+<p>
+  Here's a simple example of a binding using the ContextLock to declare and callback a
+  function from an Object:<br /><br >
+
+  <b>AngelScript:</b>
+  <pre>
+void as_function(void)
+{
+  binding_function("thename", "void as_callback()");
+}
+
+void as_callback(void)
+{
+  Cout("Hello world !");
+}</pre>
+  <b>C++:</b>
+  <pre class='sh_cpp'>/*
+ * In this example, we assume binding_function has been binded on the AngelScript
+ * Engine with the signature 'void binding_function(string, string)'
+ */
+void binding_function(const std::string& name, const std::string& signature)
+{
+  // Here we use AngelScript::ContextLock to get the current AngelScript object.
+  // We do not have to allocate our own ContextLock: AngelScript::Object
+  // already takes care of that in AngelScript::Object::Call.
+  AngelScript::Object* object = AngelScript::ContextLock::CurrentObject();
+
+  if (object)
+  {
+    object-&gt;asDefineMethod(name, signature);
+    object-&gt;Call(name); // This should call as_callback from the script
+  }
+}
+
+void entry_point(void)
+{
+  AngelScript::Object object("script_filepath.as");
+
+  object.asDefineMethod("as_function", "void as_function()");
+  object.Call("as_function");
+}</pre>
+</p><br /><br /><br />
+
+<h3>Using the ContextLock without AngelScript::Object</h3><br />
+<p>
+  If you are not using AngelScript::Object to manage your scripts, you should still
+  use the ContextLock, in case anyone ever does, or in order to ease the implementation
+  of callbacks behaviors in your scripting API.
+</p>
+<p>
+  The ContextLock basically locks a pair of asIScriptContext* and asIScriptModule*
+  when it is instantiated, and get back to the previous context/module as soon as it
+  goes out of scope. You need nothing more than the following implementation:<br /><br />
+  <pre class='sh_cpp'>void call_my_function(asIScriptContext* context, asIScriptModule* module, asIScriptFunction* function)
+{
+  AngelScript::ContextLock lock(context, module);
+
+  context-&gt;Prepare(function);
+  context-&gt;Execute();
+}
+
+/*
+ * Your script might then call a binding pointing to the following function:
+ */
+void binded_function(void)
+{
+  asIScriptContext* context = AngelScript::ContextLock::Context();
+  asIScriptModule*  module  = AngelScript::ContextLock::Module();
+
+  // Some security won't hurt:
+  if (!context || !module)
+    std::cerr &lt;&lt; "binded_function was not called by a script" &lt;&lt; std::endl;
+  else
+  {
+    // And here you can do whatever you need with the context and module
+    // belonging to the script who just called this function.
+  }
+}</pre>
+</p>

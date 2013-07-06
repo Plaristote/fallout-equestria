@@ -393,6 +393,7 @@ margin-bottom: 45px;
 width: 98%;
 position: fixed;
 z-index: 100;
+top: 0px;
 }
 div.dataTables_length select {
 width: 50px;
