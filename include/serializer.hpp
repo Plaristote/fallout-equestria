@@ -1,6 +1,8 @@
 #ifndef PACKET_HPP
 # define PACKET_HPP
 
+# include "globals.hpp"
+
 # include <string>
 # include <list>
 # include <vector>

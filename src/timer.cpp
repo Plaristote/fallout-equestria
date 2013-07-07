@@ -237,5 +237,5 @@ void TimeManager::Task::Unserialize(Utils::Packet& packet)
   char looping;
   
   packet >> lastY >> lastMo >> lastD >> lastH >> lastM >> lastS >> level >> it >> looping;
-  loop = looping;
+  loop = looping != 0;
 }

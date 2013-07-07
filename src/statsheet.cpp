@@ -145,7 +145,7 @@ bool           StatModel::AddPerk(const string& perk)
     _script_context->SetArgObject(0, &_statsheet);
     _script_context->SetArgObject(1, &tmp);
     _script_context->Execute();
-    success = _script_context->GetReturnByte();
+    success = _script_context->GetReturnByte() != 0;
   }
   else
   {
@@ -196,7 +196,7 @@ bool           StatModel::IsReady(void)
     _script_context->Prepare(_scriptIsReady);
     _script_context->SetArgObject(0, &_statsheet);
     _script_context->Execute();
-    is_ready = _script_context->GetReturnByte();
+    is_ready = _script_context->GetReturnByte() != 0;
   }
   return (is_ready);
 }
@@ -344,7 +344,7 @@ void           StatModel::SetSpecial(const std::string& stat, short value)
     _script_context->SetArgObject(1, &stat_);
     _script_context->SetArgDWord(2, (value - currentValue));
     _script_context->Execute();
-    sendSignal = _script_context->GetReturnByte();
+    sendSignal = _script_context->GetReturnByte() != 0;
   }
   else
     _statsheet["Special"][stat] = value;

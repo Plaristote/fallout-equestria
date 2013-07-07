@@ -99,7 +99,7 @@ void Buff::Refresh(void)
       _context->SetArgObject(0, &_buff);
       _context->SetArgObject(1, _target_stats);
       _context->Execute();
-      keep_going = _context->GetReturnByte();
+      keep_going = _context->GetReturnByte() != 0;
     }
   }
   if (!keep_going || !looping)
@@ -374,7 +374,7 @@ AsyncTask::DoneStatus GameTask::do_task()
   }
   if (_level)
   {
-    if (_level->do_task() == AsyncTask::DoneStatus::DS_done)
+    if (_level->do_task() == AsyncTask::DS_done)
     {
       const string nextZone  = _level->GetNextZone();
       const string exitPoint = _level->GetExitZone();
@@ -392,7 +392,7 @@ AsyncTask::DoneStatus GameTask::do_task()
   _pipbuck.Run();
   _timeManager.ExecuteTasks();
   _buff_manager.CollectGarbage();
-  return (AsyncTask::DoneStatus::DS_cont);
+  return (AsyncTask::DS_cont);
 }
 
 bool GameTask::SaveGame(const std::string& savepath)

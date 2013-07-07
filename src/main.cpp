@@ -226,32 +226,44 @@ int main(int argc, char *argv[])
     WindowFramework* window;
     ConfigPage*      config = load_prc_file("config.prc");
 
+    cout << "[FoE] Loading configuration" << endl;
     if (!(PStatClient::connect("localhost", 5185))) // Initialize client for profiling collector
-      cout << "Can't connect to PStat client" << endl;
+      cout << "[FoE] Can't connect to PStat client" << endl;
+    cout << "[FoE] Opening Panda3D Framework" << endl;
     framework.open_framework(argc, argv);
+    cout << "[FoE] Setting window's title" << endl;
     framework.set_window_title("Fallout Equestria");
+    cout << "[FoE] Opening Window" << endl;
     window = framework.open_window();
-    window->enable_keyboard();
-    window->get_render().set_shader_auto();
+    cout << "[FoE] Enabling keyboard" << endl;
+    //window->enable_keyboard();
+    //window->get_render().set_shader_auto();
 
     // Set Windows Properties
+    cout << "[FoE] Setting window's properties" << endl;
     {
       WindowProperties props = window->get_graphics_window()->get_properties();
 
+      cout << "[FoE] Hiding system cursor" << endl;
       props.set_cursor_hidden(true);
+      cout << "[FoE] Setting window icon" << endl;
       props.set_icon_filename("data/icon.ico");
+      cout << "[FoE] Applying changes" << endl;
       window->get_graphics_window()->request_properties(props);
     }
 
+    cout << "[FoE] Loading configuration" << endl;
     OptionsManager::Initialize(); // Loads and handle conf.json file
     {
       MainMenu       mainMenu(window); // MainMenu will take over as a Panda3D async_task.
 
+      cout << "[FoE] Starting Main Loop" << std::endl;
       framework.main_loop();
       framework.close_framework();
 
       unload_prc_file(config);
     }
+    cout << "[FoE] Properly wrapping up." << endl;
     OptionsManager::Finalize();
     Script::Engine::Finalize();
   }

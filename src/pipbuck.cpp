@@ -765,7 +765,7 @@ bool PipbuckAppScript::Started(DataEngine& de)
       _context->Prepare(function);
       _context->SetArgObject(0, &de);
       _context->Execute();
-      ret_value = _context->GetReturnByte();
+      ret_value = _context->GetReturnByte() != 0;
     }
     else
       cout << "App missing start hook (prototype is configured to be: '" << function_name << "'" << endl;

@@ -965,7 +965,7 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
       packet >> iLocked >> key;
     else if (type == Item)
       packet >> key;
-    locked = iLocked;
+    locked = iLocked != 0;
 
     packet >> iWaypoint;
     waypoint = world->GetWaypointFromId(iWaypoint);
@@ -1099,7 +1099,7 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
   char      tmp_enabled;
 
   packet >> name >> tmp_enabled >> zoneSize;
-  enabled = tmp_enabled;
+  enabled = tmp_enabled != 0;
   packet.operator>> <char>(reinterpret_cast<char&>(type));
   packet.operator>> <char>(reinterpret_cast<char&>(parent_type));
   if (parent_type != Type_None)
@@ -1276,7 +1276,7 @@ void           World::UnSerialize(Utils::Packet& packet)
     char serialize_sunlight_enabled;
 
     packet >> serialize_sunlight_enabled;
-    sunlight_enabled = serialize_sunlight_enabled;
+    sunlight_enabled = serialize_sunlight_enabled != 0;
   }
 
   // Post-loading stuff

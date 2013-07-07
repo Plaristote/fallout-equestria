@@ -1,6 +1,7 @@
 #ifndef  SCRIPTENGINE_HPP
 # define SCRIPTENGINE_HPP
 
+# include "globals.hpp"
 # include <angelscript.h>
 # include <scriptbuilder/scriptbuilder.h>
 # include <scriptstdstring/scriptstdstring.h>

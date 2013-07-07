@@ -1,6 +1,7 @@
 #ifndef  SCRIPTABLE_HPP
 # define SCRIPTABLE_HPP
 
+# include "globals.hpp"
 # include <angelscript.h>
 # include <list>
 # include <utility>

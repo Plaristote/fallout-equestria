@@ -108,7 +108,7 @@ public:
   int                 GetFarthestWaypoint(InstanceDynamicObject* object);
   unsigned int        GetPathSize(void) const    { return (_path.size());          }
   bool                HasLineOfSight(InstanceDynamicObject* object);
-  bool                IsMoving(void) const       { return (_path.size());          }
+  bool                IsMoving(void) const       { return (_path.size() > 0);      }
   bool                IsAlive(void) const        { return (_hitPoints > 0);        }
   bool                IsInterrupted(void) const  { return (AnimationEnded.ObserverCount() > 0); }
   Inventory&          GetInventory(void)         { return (*_inventory);           }
@@ -255,6 +255,6 @@ private:
   asIScriptFunction* _scriptSendMessage;
 };
 
-template<> struct ObjectType2Code<ObjectCharacter> { enum { Type = ObjectTypes::ObjectType::Character }; };
+template<> struct ObjectType2Code<ObjectCharacter> { enum { Type = ObjectTypes::Character }; };
 
 #endif

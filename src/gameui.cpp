@@ -36,7 +36,9 @@ GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
   _rocket = RocketRegion::make("interface", window->get_graphics_output());
   _rocket->set_active(true);
   
+#ifndef _WIN32
   Rocket::Controls::Initialise();
+#endif
 
   _ih      = new RocketInputHandler();
   window->get_mouse().attach_new_node(_ih);
@@ -135,25 +137,11 @@ LoadingScreen::LoadingScreen(WindowFramework* window, Core::Context* context) : 
   if (_root)
     Translate();
   Show();
-  /*thread = Sync::FunctorThread<void>::Create([this](void)
-  {
-    do
-    {
-      Refresh();
-    } while (done);
-  });
-  thread->Launch();*/
   done = false;
 }
 
 LoadingScreen::~LoadingScreen()
 {
-  /*if (thread)
-  {
-    done = true;
-    //thread->Join();
-    thread = 0;
-  }*/
 }
 
 void LoadingScreen::AppendText(const std::string& str)
@@ -286,6 +274,7 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
       language_select->SetInnerRML(rml.str().c_str());
     }
 
+#ifndef _WIN32
     {
       Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("language-select"));
       
@@ -321,6 +310,7 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
 	}
       }
     }
+#endif
     
     {
       typedef std::pair<std::string, Controls::ElementFormControlInput*> RadioButton;
@@ -417,6 +407,7 @@ void GameOptions::ToggleFullscreen(Rocket::Core::Event& event)
 
 void GameOptions::SetQuality(Rocket::Core::Event&)
 {
+#ifndef _WIN32
   Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("graphics-quality"));
   int                                 it_select = select->GetSelection();
   Controls::SelectOption*             option    = select->GetOption(it_select);
@@ -429,10 +420,12 @@ void GameOptions::SetQuality(Rocket::Core::Event&)
     opts["graphics-quality"] = str;
     OptionsManager::Refresh();
   }
+#endif
 }
 
 void GameOptions::SetResolution(Rocket::Core::Event&)
 {
+#ifndef _WIN32
   Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("screen-select"));
   int                                 it_select = select->GetSelection();
   Controls::SelectOption*             option    = select->GetOption(it_select);
@@ -456,10 +449,12 @@ void GameOptions::SetResolution(Rocket::Core::Event&)
       OptionsManager::Refresh();
     }
   }
+#endif
 }
 
 void GameOptions::SetLanguage(Core::Event& event)
 {
+#ifndef _WIN32
   Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("language-select"));
   int                                 it_select = select->GetSelection();
   Controls::SelectOption*             option    = select->GetOption(it_select);
@@ -472,6 +467,7 @@ void GameOptions::SetLanguage(Core::Event& event)
     opts["language"] = str.CString();
     OptionsManager::Refresh();    
   }
+#endif
 }
 
 /*

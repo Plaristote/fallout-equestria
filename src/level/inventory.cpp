@@ -106,7 +106,7 @@ bool InventoryObject::CanWeild(ObjectCharacter* character, std::string slot, uns
     _script_context->SetArgObject(2, &slot);
     _script_context->SetArgDWord(3, mode);
     _script_context->Execute();
-    return (_script_context->GetReturnByte());
+    return (_script_context->GetReturnByte() != 0);
   }
   return (false);
 }

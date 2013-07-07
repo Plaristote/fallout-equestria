@@ -17,6 +17,6 @@ private:
   InventoryObject*  _item;
 };
 
-template<> struct ObjectType2Code<ObjectItem> { enum { Type = ObjectTypes::ObjectType::Item }; };
+template<> struct ObjectType2Code<ObjectItem> { enum { Type = ObjectTypes::Item }; };
 
 #endif

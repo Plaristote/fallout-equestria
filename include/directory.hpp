@@ -1,6 +1,8 @@
 #ifndef  DIRECTORY_HPP
 # define DIRECTORY_HPP
 
+# include "globals.hpp"
+
 # ifndef _WIN32
 #  include <dirent.h>
 #  include <sys/stat.h>
