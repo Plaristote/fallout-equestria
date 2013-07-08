@@ -3,6 +3,8 @@ GameTask:
   overview: 'The task class that handles the proper execution of an in-progress game.'
 
   methods:
+    - name:  'GameTask'
+    - name:  '~GameTask'
     - name:  'MapOpenLevel'
     - name:  'SetLevel'
     - name:  'do_task'
@@ -16,6 +18,8 @@ GameTask:
     - name:  'CurrentGameTask'
       short: 'Static accessor to the current running GameTask. Null if none exists'
       desc:  'Among other things, it is what the "game" global variable points to in the scripting context.'
+    - name:  '_is_level_buff'
+      short: 'Temporary store for lambdas used in the [BuffManager]'
     - name:  '_signals'
       short: 'Handle for registered observers'
     - name:  '_continue'
@@ -41,6 +45,8 @@ GameTask:
       short: 'Stores the savepath value from [[OptionsManager]].'
     - name:  '_uiSaveGame'
     - name:  '_uiLoadGame'
+    - name:  'SyncLoadLevel'
+      short: 'An asynchronous signal used to react to LoadLevel events after the current main loop turn ends'
     - name:  'obs_level_unpersistent'
       short: 'Used in special encounters to handle the observers spawning creeps after the unpersistent level has been loaded.'
 
@@ -136,6 +142,14 @@ Data:
     provide different tools to ease the management of a data tree.
     
   methods:
+    - name:  'Data'
+    - name:  'Data'
+    - name:  'Data'
+    - name:  'Data'
+    - name:  '~Data'
+    - name:  'operator[]'
+    - name:  'operator[]'
+    - name:  'operator[]'
     - name:  'Key'
       short: 'Returns the key of the current element as a string'
     - name:  'Value'
@@ -205,7 +219,13 @@ Directory:
 Executor:
   overview: |
     Singleton for executing lambdas asynchronously
-    
+  methods:
+    - name:  'ExecuteLater'
+      short: 'Will execute the lambda sent as a parameter at the end of the next loop turn.'
+      desc:  'Though it can be used for many things, this class is mainly aimed at garbage collecting, allowing differed deletion of objects.'
+    - name:  'Run'
+      short: 'Is run every loop turn execute and flush all the lambdas added via ExecuteLater'
+ 
 Buff:
   overview: |
     This class controls the effects of buffs that are placed on a character.
@@ -380,22 +400,172 @@ NewGameTask:
   overview: |
     Task executed when the player is starting a new game.
 
-Signal:
+'Sync::Signal':
   overview: |
     Template for the Observer design pattern. Allows the implementation of signal/slot behaviors.
     
-ObserverHandler:
+'Sync::ObserverHandler':
   overview: |
     Handles a set of observers connected to signals. Automatically disconnect all the observers when the instance of ObserverHandler is destroyed.
     
-StdList:
+'Script::StdList':
   overview: |
     Script interface for std::list.
     
-Serializable:
+'Utils::Serializable':
   overview: |
     Interface for declaring objects that can be passed through the [Packet] serializer.
     
-Packet:
+'Utils::Packet':
   overview: |
     Object for packing in / packing out objects in a serializable fashion.
+
+
+ChatterManager:
+  overview: |
+    Handles the on-screen chatboxes for real-time dialogs (boxes over the characters heads). The ChatterManager must have a single instance, which can be retrieved through an accessor of the Level class.
+  methods:
+    - name:  'ChatterManager'
+    - name:  'PushTextBox'
+      short: 'Creates a new text box which will be displayed above an [InstanceDynamicObject]'
+    - name:  'Run'
+      short: 'Used by the level class to perform periodic tasks over the chatter boxes (updating the opacity, collecting the expired ones)'
+      desc:  'This method should only be run once and only by the [Level] class in the do_task method.'
+    - name:  'SetTextOffset'
+      short: 'Set the offset of a text NodePath above the parent NodePath'
+  attributes:
+    - name:  'window'
+    - name:  'text_boxes'
+      short: 'List of chatter boxes currently displayed on the screen.'
+
+DialogController:
+  overview: |
+    Controller for the MVC Design Pattern in charge of dialogs between a player and an NPC.
+  methods:
+    - name:  'DialogController'
+    - name:  '~DialogController'
+    - name:  'WithCharacter'
+      short: 'Returns the [ObjectCharacter] object of the NPC with which the dialog is taking place'
+    - name:  'ExecuteAnswer'
+      short: 'Callback executed when the player has picked an answer'
+    - name:  'SetCurrentNode'
+      short: 'Forces the dialog to the specified node.'
+      desc:  "A 'node' defines the NPC's current line and the possible answers for the player. This method is used to go from one node to another in response to the answer the player given and the reaction it triggered for the NPC"
+    - name:  'OpenBarter'
+      short: 'Slot for the signal opening the barter dialog'
+      desc:  'Pauses the dialog and open the barter interface.'
+  attributes:
+    - name:  'DialogEnded'
+      short: 'Signal emitted when the dialog has ended'
+      desc:  'The dialog may be ended by the script or the interface. This signal will be emitted regardless.'
+    - name:  'StartBarter'
+      short: 'Signal emitted when the DialogController is asking for a barter interface to open'
+      desc:  'The [ObjectCharacter] parameter is a pointer to the NPC with which the player will barter'
+    - name:  '_script'
+      short: 'Handle to the script controlling te current dialog'
+    - name:  '_model'
+      short: 'Contains and provide informations from the JSON file describing the dialog'
+    - name:  '_character'
+      short: 'Pointer to the NPC with which the dialog is happening'
+
+DialogView:
+  overview: |
+    Handles the libRocket interface used for dialogs and barter
+  methods:
+    - name:  'Destroy'
+    - name:  'UpdateView'
+      short: 'Must be used by the DialogController to notify that the NPC line and player answers must be updated'
+    - name:  'CleanView'
+      short: 'Clean up the RocketListener from the current answers'
+
+DialogModel:
+  overview: |
+    Provides an interface to handle the data from a dialog's JSON description.
+  methods:
+    - name:  'DialogModel'
+    - name:  '~DialogModel'
+    - name:  'SetCurrentNpcLine'
+      short: 'Sets the current node for the dialog'
+      desc:  'The model needse to be informed of the current node in order to provide the answers available to the player'
+    - name:  'GetHookAvailable'
+    - name:  'GetExecuteMethod'
+    - name:  'GetDefaultNextLine'
+    - name:  'GetNpcLine'
+    - name:  'GetDialogAnswers'
+      short: 'Returns the answers available to the player given the current node'
+  attributes:
+    - name:  '_tree'
+      short: 'DataTree provided by the JSON description of the dialog'
+    - name:  '_data'
+      short: '[Data] object wrapping the _tree attribute'
+    - name:  '_l18n'
+      short: 'Internationalization data, allowing traduction of the dialogs'
+    - name:  '_currentNpcLine'
+
+DialogAnswers:
+  overview: |
+    List of answers that a player can pick in a dialog node. Provided by [DialogModel], used in [DialogController].
+
+Mouse:
+  overview: |
+    Handle mouse-driven events and provide hovering data during the execution of a [Level]. See [MouseCursor] for cursor and hints management.
+  methods:
+    - name:  'Mouse'
+    - name:  '~Mouse'
+    - name:  'Run'
+      short: 'Used in [Level::do_task] to update the data about hovering objects'
+    - name:  'Hovering'
+      short: 'Returns a reference to _hovering, providing data about currently hovered objects'
+    - name:  'SetMouseState'
+      short: 'Refreshes the texture of the mouse cursor'
+      desc:  |
+        Depending on the parameter, the following textures will be loaded:
+        <u>'a'</u>: textures/cursor-action.png
+        <u>'i'</u>: textures/cursor-interaction.png
+        <u>'t'</u>: textures/cursor-target.png
+        Any other parameter will cause nothing to happen.
+    - name:  'ClosestWaypoint'
+      short: 'Seek the closest waypoint to the mouse cursor and store it in [MouseHovering]::_hovering'
+      desc:  'This is optimized through a divide&conquer algorithm. The amount of [Waypoint] in the current [Level] should have very little influence on the overhead'
+
+MouseHovering:
+  overview: |
+    Contained in the [Mouse] object, it provides information about the different types of objects currently hovered.
+  methods:
+    - name:  'MouseHovering'
+    - name:  'Reset'
+      short: 'Reset the data, as if no waypoints or objects are hovered'
+    - name:  'SetWaypoint'
+      short: 'Forces the current hovered waypoint to be the one represented by the NodePath sent as parameter'
+    - name:  'SetDynObject'
+      short: 'Forces the current hovered dynamic object to be the one represented by the NodePath sent as parameter'
+  attributes:
+    - name:  'hasWaypoint'
+      short: 'Is set to true if a waypoint is currently being hovered'
+    - name:  'hasDynObject'
+      short: 'Is set to true if a dynamic object is currently being hovered'
+    - name:  'waypoint'
+      short: 'NodePath of the hovered [Waypoint]. If hasWaypoint is false, the value is undefined'
+    - name:  'waypoint_ptr'
+      short: 'Hovered waypoint. If hasWaypoint is false, the value is undefined'
+    - name:  'dynObject'
+      short: 'NodePath of the hovered [DynamicObject]. If hasDynObject is false, the value is undefined'
+
+MouseCursor:
+  overview: |
+    Singleton handling the mouse cursor and the mouse hints.
+  methods:
+    - name:  'MouseCursor'
+    - name:  '~MouseCursor'
+    - name:  'SetCursorTexture'
+    - name:  'SetHint'
+      short: 'Set the hint element to the specified RML'
+    - name:  'SetHint'
+      short: 'Set the hint to a percentage (for success chances)'
+    - name:  'Update'
+      short: 'Updates the texture and hint position accordingly to the cursor position'
+      desc:  'This procedure is executed in the [MainMenu] handler to ensure it is executed once per turn of the main loop'
+    - name:  'PullToFront'
+      short: 'Ensures that the mouse cursor is always on top of everything'
+    - name:  'Get'
+      short: 'Accessor for the singleton instance'

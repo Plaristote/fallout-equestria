@@ -90,7 +90,6 @@ void InstanceDynamicObject::AddTextBox(const std::string& text, unsigned short r
 // Animations
 AnimatedObject::AnimatedObject(WindowFramework* window) : _window(window)
 {
-  pendingAnimationDone = false;
   AnimationEnd.Connect(*this, &AnimatedObject::PlayIdleAnimation);
 }
 
@@ -129,9 +128,7 @@ void                     AnimatedObject::PlayAnimation(const std::string& name, 
     PlayAnimation(ANIMATION_DEFAULT, loop);
   else
   {
-    pendingAnimationDone = true;
     AnimationEnd.Emit();
-    pendingAnimationDone = false;
   }
 }
 
@@ -143,10 +140,8 @@ void                      AnimatedObject::TaskAnimation(void)
       _anim->play();
     else
     {
-      pendingAnimationDone = true;
       AnimationEnd.Emit();
       ResetAnimation();
-      pendingAnimationDone = false;
       _anim = 0;
     }
   }

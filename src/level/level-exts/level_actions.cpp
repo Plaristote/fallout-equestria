@@ -174,14 +174,6 @@ void Level::ActionUseObject(ObjectCharacter* user, InventoryObject* object, unsi
 
   if (result != "" && user == GetPlayer())
     ConsoleWrite(result);
-  // Use the object naow
-  //   if (!(user->pendingAnimationDone))
-  //   {
-  //     user->pendingActionObject         = object;
-  //     user->pendingActionObjectActionIt = actionIt;
-  //     user->AnimationEnded.Connect(*this, &Level::PendingActionUseWeaponOn);
-  //     user->PlayEquipedItemAnimation(user->GetEquipedItem(0) == object ? 0 : 1);
-  //   }
 }
 
 void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object, unsigned char actionIt)

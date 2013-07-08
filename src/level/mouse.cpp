@@ -69,6 +69,8 @@ void Mouse::SetMouseState(char i)
     case 't':
       texture = "textures/cursor-target.png";
       break ;
+    default:
+      break ;
   }
   if (MouseCursor::Get())
     MouseCursor::Get()->SetCursorTexture(texture);

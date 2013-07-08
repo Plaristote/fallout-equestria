@@ -27,5 +27,10 @@
 std::string humanize(const std::string&);
 std::string underscore(const std::string&);
 
+// Twilidoc cannot see Panda3D's PT macro.
+# ifndef PT
+#  define PT(PTTYPE) PointerTo< PTTYPE >
+# endif
+
 
 #endif // GLOBALS_HPP

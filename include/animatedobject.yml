@@ -14,9 +14,6 @@ AnimatedObject:
       short: 'This hook will be called whenever an animation finishes'
 
   attributes:
-    - name:  'pendingAnimationDone'
-      short: ''
-      desc:  ''
     - name:  '_window'
       short: ''
       desc:  ''

@@ -6,6 +6,7 @@
 # include <panda3d/pandaSystem.h>
 # include <panda3d/texturePool.h>
 # include <panda3d/directionalLight.h>
+# include <panda3d/particleSystemManager.h>
 
 # include "playerparty.hpp"
 
@@ -28,6 +29,7 @@
 # include "inventory_ui.hpp"
 
 # include "world.h"
+#include "projectile.hpp"
 # include "soundmanager.hpp"
 
 class Level
@@ -82,10 +84,11 @@ public:
 
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);
-  TimeManager&           GetTimeManager(void)    { return (_timeManager);     }
-  ChatterManager&        GetChatterManager(void) { return (_chatter_manager); }
-  Data                   GetDataEngine(void)     { return (*_dataEngine);     }
-  Data                   GetItems(void)          { return (_items);           }
+  TimeManager&           GetTimeManager(void)    { return (_timeManager);      }
+  ParticleSystemManager& GetParticleManager(void){ return (_particle_manager); }
+  ChatterManager&        GetChatterManager(void) { return (_chatter_manager);  }
+  Data                   GetDataEngine(void)     { return (*_dataEngine);      }
+  Data                   GetItems(void)          { return (_items);            }
   void                   ConsoleWrite(const std::string& str);
 
   void                   RemoveObject(InstanceDynamicObject* object);
@@ -158,17 +161,20 @@ public:
   void               SpawnEnemies(const std::string& type, unsigned short quantity, unsigned short n_spawn);
   bool               IsWaypointOccupied(unsigned int id) const;
   ISampleInstance*   PlaySound(const std::string& name);
+  void               InsertProjectile(Projectile* projectile) { _projectiles.push_back(projectile); }
 
   Sync::ObserverHandler obs;
 private:
   typedef std::list<InstanceDynamicObject*> InstanceObjects;
   typedef std::list<ObjectCharacter*>       Characters;
   typedef std::list<LevelExitZone*>         ExitZones;
+  typedef std::list<Projectile*>            Projectiles;
   
   void              SetupCamera(void);
 
   void              RunDaylight(void);
   void              RunMetabolism(void);
+  void              RunProjectiles(float elapsed_time);
   void              MouseInit(void);
   void              ToggleCharacterOutline(bool);
   
@@ -177,37 +183,39 @@ private:
   
   Sync::ObserverHandler obs_player;
 
-  std::string          _level_name;
-  WindowFramework*     _window;
-  GraphicsWindow*      _graphicWindow;
-  Mouse                _mouse;
-  SceneCamera          _camera;
-  Timer                _timer;
-  TimeManager&         _timeManager;
-  State                _state;
-  bool                 _persistent;
+  std::string           _level_name;
+  WindowFramework*      _window;
+  GraphicsWindow*       _graphicWindow;
+  Mouse                 _mouse;
+  SceneCamera           _camera;
+  Timer                 _timer;
+  TimeManager&          _timeManager;
+  State                 _state;
+  bool                  _persistent;
 
-  World*               _world;
-  SoundManager         _sound_manager;
-  ChatterManager       _chatter_manager;
-  InstanceObjects      _objects;
-  Characters           _characters;
-  Characters::iterator _itCharacter;
-  Characters::iterator _currentCharacter;
-  NodePath             _player_halo;
+  World*                _world;
+  ParticleSystemManager _particle_manager;
+  SoundManager          _sound_manager;
+  ChatterManager        _chatter_manager;
+  Projectiles           _projectiles;
+  InstanceObjects       _objects;
+  Characters            _characters;
+  Characters::iterator  _itCharacter;
+  Characters::iterator  _currentCharacter;
+  NodePath              _player_halo;
   
-  ExitZones            _exitZones;
-  bool                 _exitingZone;
-  std::string          _exitingZoneTo, _exitingZoneName;
+  ExitZones             _exitZones;
+  bool                  _exitingZone;
+  std::string           _exitingZoneTo, _exitingZoneName;
 
-  PT(DirectionalLight) _sunLight;
-  NodePath             _sunLightNode;
-  PT(AmbientLight)     _sunLightAmbient;
-  NodePath             _sunLightAmbientNode;
+  PT(DirectionalLight)  _sunLight;
+  NodePath              _sunLightNode;
+  PT(AmbientLight)      _sunLightAmbient;
+  NodePath              _sunLightAmbientNode;
   World::WorldLights::iterator _light_iterator;
   
-  TimeManager::Task*   _task_daylight;
-  TimeManager::Task*   _task_metabolism;
+  TimeManager::Task*    _task_daylight;
+  TimeManager::Task*    _task_metabolism;
 
   enum UiIterator
   {

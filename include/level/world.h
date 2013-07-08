@@ -60,19 +60,6 @@ namespace ColMask
 
 struct World;
 
-struct FBoundingBox
-{
-  float left;
-  float top;
-  float width;
-  float height;
-
-  bool  Intersects(float x, float y)
-  {
-    return (x >= left && x <= left + width && y >= top && y <= top + height);
-  }
-};
-
 struct Waypoint
 {
     struct ArcObserver
@@ -110,7 +97,6 @@ struct Waypoint
     Arcs                arcs;
     ArcsWithdrawed      arcs_withdrawed;
     NodePath            nodePath;
-    FBoundingBox        mouseBox;
     
     void WithdrawArc(Waypoint* other);
     void UnwithdrawArc(Waypoint* other, ArcObserver* observer);
@@ -473,8 +459,6 @@ struct World
     WorldLight*    GetLightByName(const std::string&);
     void           CompileLight(WorldLight*, unsigned char = ColMask::Object | ColMask::DynObject);
     
-    Waypoint*      GetWaypointAt(LPoint2f);
-
     typedef std::function<void (const std::string&, float)> ProgressCallback;
 
     void           UnSerialize(Utils::Packet& packet);
