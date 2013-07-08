@@ -502,3 +502,6 @@ box-shadow: 0 0 10px #BDBDBD;
 .box-content.buttons{
 min-height:297px;
 }
+.box-params,.method-name{
+font-family: "Lucida Console", Monaco, monospace;
+}

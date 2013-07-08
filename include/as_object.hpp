@@ -135,6 +135,7 @@ namespace AngelScript
   public:
     void asDefineMethod(const std::string& name, const std::string& declaration);
 
+
     struct ReturnType
     {
       ReturnType(asIScriptContext* context) : context(context) {}
@@ -156,7 +157,6 @@ namespace AngelScript
     };
 
     ReturnType Call(const std::string& name, unsigned int argc = 0, ...);
-
   private:
     const std::string filepath;
     asIScriptContext* context;

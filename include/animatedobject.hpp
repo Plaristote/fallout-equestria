@@ -34,8 +34,6 @@ public:
    **/
   Sync::Signal<void> AnimationEnd;
 
-  bool                      pendingAnimationDone;
-
 protected:
   typedef std::map<std::string, AnimControl*> MapAnims;
 

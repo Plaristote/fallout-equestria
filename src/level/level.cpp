@@ -573,8 +573,9 @@ Level::~Level()
   _timeManager.ClearTasks(TASK_LVL_CITY);
   obs.DisconnectAll();
   obs_player.DisconnectAll();
-  ForEach(_objects,   [](InstanceDynamicObject* obj) { delete obj;  });
-  ForEach(_exitZones, [](LevelExitZone* zone)        { delete zone; });
+  ForEach(_projectiles, [](Projectile* projectile)     { delete projectile; });
+  ForEach(_objects,     [](InstanceDynamicObject* obj) { delete obj;        });
+  ForEach(_exitZones,   [](LevelExitZone* zone)        { delete zone;       });
   CurrentLevel = 0;
   for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
   {
@@ -777,6 +778,26 @@ void Level::SetupCamera(void)
   }
 }
 
+void Level::RunProjectiles(float elapsed_time)
+{
+  auto it  = _projectiles.begin();
+  auto end = _projectiles.end();
+
+  while (it != end)
+  {
+    if ((*it)->HasExpired())
+    {
+      delete *it;
+      it = _projectiles.erase(it);
+    }
+    else
+    {
+      (*it)->Run(elapsed_time);
+      ++it;
+    }
+  }
+}
+
 void Level::RunMetabolism(void)
 {
   for_each(_characters.begin(), _characters.end(), [this](ObjectCharacter* character)
@@ -923,6 +944,7 @@ AsyncTask::DoneStatus Level::do_task(void)
   switch (_state)
   {
     case Fight:
+      RunProjectiles(elapsedTime);
       ForEach(_objects, run_object);
       _currentCharacter = _itCharacter; // Keep a character from askin NextTurn several times
       if (_itCharacter != _characters.end())
@@ -931,6 +953,7 @@ AsyncTask::DoneStatus Level::do_task(void)
         DisplayCombatPath();
       break ;
     case Normal:
+      RunProjectiles(elapsedTime);
       _timeManager.AddElapsedSeconds(elapsedTime);
       ForEach(_objects,    run_object);
       ForEach(_characters, run_object);
@@ -938,9 +961,10 @@ AsyncTask::DoneStatus Level::do_task(void)
     case Interrupted:
       break ;
   }
-  
+
   CheckCurrentFloor(elapsedTime);
   _chatter_manager.Run(elapsedTime, _camera.GetNodePath());
+  _particle_manager.do_particles(ClockObject::get_global_clock()->get_dt());
   _mouse.Run();
   _timer.Restart();
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);

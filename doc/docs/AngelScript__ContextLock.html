@@ -1,6 +1,6 @@
 <h3>Using the ContextLock with AngelScript::Object</h3><br />
 <p>
-  The ContextLock is usually used with AngelScript::Object to allow C++ bindings to know
+  The ContextLock is usually used with [AngelScript::Object] to allow C++ bindings to know
   which script contexts are calling them. This features can be used to implement
   event-driven behaviors in scripting (script registering callbacks to observers for
   instance).
@@ -51,12 +51,12 @@ void entry_point(void)
 
 <h3>Using the ContextLock without AngelScript::Object</h3><br />
 <p>
-  If you are not using AngelScript::Object to manage your scripts, you should still
+  If you are not using [AngelScript::Object] to manage your scripts, you should still
   use the ContextLock, in case anyone ever does, or in order to ease the implementation
   of callbacks behaviors in your scripting API.
 </p>
 <p>
-  The ContextLock basically locks a pair of asIScriptContext* and asIScriptModule*
+  The ContextLock basically locks a pair of [asIScriptContext]* and [asIScriptModule]*
   when it is instantiated, and get back to the previous context/module as soon as it
   goes out of scope. You need nothing more than the following implementation:<br /><br />
   <pre class='sh_cpp'>void call_my_function(asIScriptContext* context, asIScriptModule* module, asIScriptFunction* function)
