@@ -23,6 +23,6 @@ private:
   Inventory   _inventory;
 };
 
-template<> struct ObjectType2Code<ObjectShelf>      { enum { Type = ObjectTypes::ObjectType::Shelf }; };
+template<> struct ObjectType2Code<ObjectShelf>      { enum { Type = ObjectTypes::Shelf }; };
 
 #endif

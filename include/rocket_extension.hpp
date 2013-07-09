@@ -1,6 +1,7 @@
 #ifndef  ROCKET_EXTENSION_HPP
 # define ROCKET_EXTENSION_HPP
 
+# include "globals.hpp"
 # include <panda3d/pandaFramework.h>
 # include <Rocket/Core.h>
 # include "observatory.hpp"

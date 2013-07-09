@@ -1,6 +1,7 @@
 #ifndef  QUEST_MANAGER_HPP
 # define QUEST_MANAGER_HPP
 
+# include "globals.hpp"
 # include "datatree.hpp"
 # include "observatory.hpp"
 # include "dataengine.hpp"

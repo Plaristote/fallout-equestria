@@ -1,6 +1,8 @@
 #ifndef  SEMAPHORE_HPP
 # define SEMAPHORE_HPP
 
+# include "globals.hpp"
+
 # ifdef __linux__
 #  include <semaphore.h>
 #  include <thread>

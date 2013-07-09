@@ -1,6 +1,7 @@
 #ifndef  DATATREE_JSON_HPP
 # define DATATREE_JSON_HPP
 
+# include "globals.hpp"
 # include "datatree.hpp"
 
 namespace Json

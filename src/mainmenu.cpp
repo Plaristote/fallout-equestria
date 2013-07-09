@@ -184,10 +184,10 @@ AsyncTask::DoneStatus MainMenu::do_task()
 
       switch (done)
       {
-        case AsyncTask::DoneStatus::DS_exit:
+        case AsyncTask::DS_exit:
           quitGamePlz = true;
           break ;
-        case AsyncTask::DoneStatus::DS_done:
+        case AsyncTask::DS_done:
           EndGame();
           break ;
         default:
@@ -211,7 +211,7 @@ AsyncTask::DoneStatus MainMenu::do_task()
     fps = 0;
     timer.Restart();
   }
-  return (quitGamePlz ? AsyncTask::DoneStatus::DS_exit : AsyncTask::DoneStatus::DS_cont);
+  return (quitGamePlz ? AsyncTask::DS_exit : AsyncTask::DS_cont);
 }
 
 void MainMenu::AsyncCreateLevel(void)

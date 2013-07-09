@@ -89,7 +89,7 @@ bool Directory::OpenDir(const string& str)
 
 bool Directory::MakeDir(const string& str)
 {
-  return (CreateDirectory(str.c_str(), NULL));
+  return ((CreateDirectory(str.c_str(), NULL)) != 0);
 }
 
 bool Directory::RemoveDir(const string& str)

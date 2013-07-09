@@ -3,10 +3,11 @@
 
 # ifndef AUDIO_BACKEND_SFML
 #  ifndef AUDIO_BACKEND_PANDA3D
-#    define AUDIO_BACKEND_SFML
+#    define AUDIO_BACKEND_PANDA3D
 #  endif
 # endif
 
+# include "globals.hpp"
 # include <string>
 # include "datatree.hpp"
 # include "timer.hpp"

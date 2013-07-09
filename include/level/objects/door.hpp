@@ -74,6 +74,6 @@ public:
   std::list<std::pair<int, int> > _workaround_wp_disconnected;
 };
 
-template<> struct ObjectType2Code<ObjectDoor>      { enum { Type = ObjectTypes::ObjectType::Door      }; };
+template<> struct ObjectType2Code<ObjectDoor>      { enum { Type = ObjectTypes::Door      }; };
 
 #endif

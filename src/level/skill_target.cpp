@@ -26,7 +26,7 @@ void SkillTarget::UseSkill(ObjectCharacter* user, std::string skill)
       _script_context->SetArgObject(1, user);
       _script_context->SetArgObject(2, &skill);
       _script_context->Execute();
-      if (_script_context->GetReturnByte() == true)
+      if (_script_context->GetReturnByte() != 0)
         return ;
     }
   }

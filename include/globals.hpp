@@ -12,6 +12,10 @@
 
 # define ABS(x) ((x) < 0 ? -(x) : (x))
 
+# ifdef _WIN32
+#  include <winsock2.h>
+# endif
+
 # include <panda3d/cmath.h>
 # include <algorithm>
 # include <string>

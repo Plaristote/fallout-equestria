@@ -1,6 +1,7 @@
 #ifndef  GAMETASK_HPP
 # define GAMETASK_HPP
 
+# include "globals.hpp"
 # include "level/level.hpp"
 # include "worldmap/worldmap.hpp"
 # include "playerparty.hpp"

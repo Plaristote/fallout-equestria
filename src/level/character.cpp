@@ -1319,8 +1319,8 @@ bool     ObjectCharacter::IsEnemy(const ObjectCharacter* other) const
   if (other->GetFaction() == 0 && _faction)
     return (other->IsEnemy(this));
   if (_faction)
-    return (_faction->enemyMask & other->GetFaction());
-  return (_self_enemyMask & other->GetFaction());
+    return ((_faction->enemyMask & other->GetFaction()) != 0);
+  return ((_self_enemyMask & other->GetFaction()) != 0);
 }
 
 bool     ObjectCharacter::IsAlly(const ObjectCharacter* other) const

@@ -65,7 +65,7 @@ WorldDiplomacy::Faction* WorldDiplomacy::GetFaction(unsigned int flag)
 {
   auto it = find(_factions.begin(), _factions.end(), flag);
 
-  if (it != _factions.end());
+  if (it != _factions.end())
     return (&(*it));
   return (0);
 }

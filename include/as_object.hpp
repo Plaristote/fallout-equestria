@@ -146,7 +146,7 @@ namespace AngelScript
         return (reinterpret_cast<TYPE>(context->GetReturnObject()));
       }
 
-      operator bool()   const { return (context->GetReturnByte());  }
+      operator bool()   const { return (context->GetReturnByte() != 0); }
       operator int()    const { return (context->GetReturnWord());  }
       operator long()   const { return (context->GetReturnDWord()); }
       operator float()  const { return (context->GetReturnFloat()); }

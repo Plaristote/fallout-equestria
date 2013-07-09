@@ -1,6 +1,7 @@
 #ifndef  GAME_UI_HPP
 # define GAME_UI_HPP
 
+# include "globals.hpp"
 # include <panda3d/pgVirtualFrame.h>
 # include <panda3d/rocketRegion.h>
 # include <Rocket/Core.h>
@@ -194,7 +195,6 @@ private:
 };
 
 #include <queue>
-#include "Boots/functorthread.hpp"
 class LoadingScreen : public UiBase, public Sync::Semaphore
 {
   typedef std::queue<std::string> StringQueue;
@@ -207,7 +207,6 @@ public:
 private:
   void             Refresh(void);
 
-  Sync::FunctorThread<void>* thread;
   bool                       done;
 };
 

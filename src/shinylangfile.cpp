@@ -11,10 +11,10 @@ Parser::Parser(const string& filename)
 
   if (file.is_open())
   {
-    long  begin, end;
-    long  size;
-    char* raw;
-    std::string text;
+    std::streamoff  begin, end;
+    std::streamoff  size;
+    char*           raw;
+    std::string     text;
 
     begin     = file.tellg();
     file.seekg (0, ios::end);
