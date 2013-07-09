@@ -34,6 +34,7 @@ void Script::Call(asIScriptContext* context, asIScriptFunction* function, const 
  * Begin AS OBJECT
  */
 #include "as_object.hpp"
+#include "directory.hpp"
 
 asIScriptContext*    AngelScript::ContextLock::current_context = 0;
 asIScriptModule*     AngelScript::ContextLock::current_module  = 0;
@@ -42,7 +43,9 @@ AngelScript::Object* AngelScript::ContextLock::current_object  = 0;
 AngelScript::Object::Object(const std::string& filepath) : filepath(filepath), module(0)
 {
   asIScriptEngine* engine = Script::Engine::Get();
-  
+
+  required_module  = false;
+  required_context = true;
   if (engine)
     context = engine->CreateContext();
   else
@@ -52,14 +55,21 @@ AngelScript::Object::Object(const std::string& filepath) : filepath(filepath), m
 
 AngelScript::Object::Object(asIScriptContext* context, const std::string& filepath) : filepath(filepath), context(context), module(0)
 {
+  required_module = required_context = false;
   Initialize();
+}
+
+AngelScript::Object::Object(asIScriptContext* context, asIScriptModule* module) : filepath(), context(context), module(module)
+{
+  required_module = required_context = false;
 }
 
 AngelScript::Object::~Object()
 {
-  if (module)
+  if (required_module == true)
     Script::ModuleManager::Release(module);
-  context->Release(); // ??
+  if (required_context == true)
+    context->Release();
 }
 
 void AngelScript::Object::Initialize(void)
@@ -68,7 +78,11 @@ void AngelScript::Object::Initialize(void)
     ; // throw something
   if (module)
     Script::ModuleManager::Release(module);
-  module = Script::ModuleManager::Require(filepath, filepath);
+  if (filepath[filepath.size() - 1] != '/' && Filesystem::FileExists(filepath))
+  {
+    module          = Script::ModuleManager::Require(filepath, filepath);
+    required_module = true;
+  }
   std::for_each(functions.begin(), functions.end(), [this](Functions::value_type& item)
   {
     item.second.function = 0;
@@ -79,10 +93,13 @@ void AngelScript::Object::asDefineMethod(const std::string& name, const std::str
 {
   Function function;
 
-  function.function  = 0;
-  function.signature = declaration;
-  //functions.emplace(name, function);
-  functions.insert(Functions::value_type(name, function));
+  if (module)
+    function.function = module->GetFunctionByDecl(declaration.c_str());
+  else
+    function.function = 0;
+  function.signature  = declaration;
+  if (function.function || !module)
+    functions.insert(Functions::value_type(name, function));
 }
 
 AngelScript::Object::ReturnType AngelScript::Object::Call(const std::string& name, unsigned int argc, ...)
@@ -90,7 +107,9 @@ AngelScript::Object::ReturnType AngelScript::Object::Call(const std::string& nam
   ContextLock context_lock(context, module, this);
   va_list     ap;
   auto        it = functions.find(name);
-  
+
+  if (!context || !module)
+    throw AngelScript::Exception(AngelScript::Exception::UnloadableFunction, name);
   if (it == functions.end())
     throw AngelScript::Exception(AngelScript::Exception::UndeclaredFunction, name);
   if (!(it->second.function))

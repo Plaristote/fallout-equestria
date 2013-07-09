@@ -139,6 +139,8 @@ void SceneCamera::Run(float elapsedTime)
 
 void SceneCamera::RunScroll(float elapsedTime)
 {
+  if (_window->get_graphics_window() == 0)
+    return ;
   MouseData     pointer      = _graphicWindow->get_pointer(0);
   unsigned char cameraMotion = MotionNone;
   LPoint3       cameraPos    = _camera.get_pos();

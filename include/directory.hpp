@@ -37,6 +37,7 @@ class Filesystem
 public:
   static bool FileContent(const std::string& filepath, std::string& out);
   static bool FileCopy(const std::string& from, const std::string& dest);
+  static bool FileExists(const std::string& filepath);
 
 private:
   Filesystem() {}

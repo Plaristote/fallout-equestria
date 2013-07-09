@@ -2,6 +2,7 @@
 # define AS_OBJECT_HPP
 
 # include "scriptengine.hpp"
+#include <boost/concept_check.hpp>
 
 namespace AngelScript
 {
@@ -129,12 +130,32 @@ namespace AngelScript
   public:
     Object(const std::string& filepath);
     Object(asIScriptContext* context, const std::string& filepath);
+    Object(asIScriptContext* context, asIScriptModule* module);
     ~Object();
   protected:
     void Initialize(void);    
   public:
     void asDefineMethod(const std::string& name, const std::string& declaration);
+    bool IsDefined(const std::string& name) const
+    {
+      if (!module)
+        return (false);
+      return (functions.find(name) != functions.end());
+    }
+    
+    asIScriptContext* GetContext(void) { return (context); }
+    asIScriptModule*  GetModule(void)  { return (module);  }
 
+    void OutputMethods(std::ostream& out)
+    {
+      auto it  = functions.begin();
+      auto end = functions.end();
+
+      for (; it != end ; ++it)
+      {
+        out << "  " << it->first << ' ' << it->second.signature << ' ' << it->second.function << endl;
+      }
+    }
 
     struct ReturnType
     {
@@ -161,6 +182,7 @@ namespace AngelScript
     const std::string filepath;
     asIScriptContext* context;
     asIScriptModule*  module;
+    bool              required_module, required_context;
     Functions         functions;
   };
 }

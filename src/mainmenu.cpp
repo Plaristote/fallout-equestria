@@ -65,7 +65,7 @@ void MouseCursor::SetHint(int value)
 
 void MouseCursor::Update(void)
 {
-  if (_cursor && IsVisible())
+  if (_cursor && IsVisible() && _window->get_graphics_window() != 0)
   {
     MouseData    pointer = _window->get_graphics_window()->get_pointer(0);
 

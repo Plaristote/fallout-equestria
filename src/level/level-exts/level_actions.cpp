@@ -292,19 +292,7 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
     if (!(target->IsAlly(user)))
       target->SetEnemyDetected(user);
     if (xpFetcher.character_died)
-    {
       xpFetcher.Execute();
-      if (user->GetStatController() && target->GetStatController())
-      {
-        string race  = target->GetStatistics()["Race"].Value();
-        Data   kills = user->GetStatistics()["Kills"];
-        
-        if (kills[race].Nil())
-          kills[race] = 0;
-        else
-          kills[race] = (unsigned int)kills[race] + 1;
-      }
-    }
   };
   if (user == target && target == GetPlayer())
   {
