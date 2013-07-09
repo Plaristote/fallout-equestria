@@ -961,6 +961,7 @@ AsyncTask::DoneStatus Level::do_task(void)
     case Interrupted:
       break ;
   }
+  ForEach(_characters, [elapsedTime](ObjectCharacter* character) { character->RunEffects(elapsedTime); });
 
   CheckCurrentFloor(elapsedTime);
   _chatter_manager.Run(elapsedTime, _camera.GetNodePath());

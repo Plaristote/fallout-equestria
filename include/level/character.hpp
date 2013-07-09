@@ -92,6 +92,7 @@ public:
   void                ProcessCollisions() { if (_hitPoints > 0) InstanceDynamicObject::ProcessCollisions(); }
 
   void                Run(float elapsedTime);
+  void                RunEffects(float elapsedTime);
   void                LookAt(LVecBase3);
   void                LookAt(InstanceDynamicObject*);
   void                GoTo(unsigned int id);
@@ -175,6 +176,7 @@ public:
   void                SendMessage(const std::string&);
   
 private:
+  void                RunRotate(float elapsedTime);
   void                RunMovement(float elapsedTime);
   void                RunMovementNext(float elaspedTime);
   void                RunDeath(void);
@@ -201,7 +203,8 @@ private:
   unsigned short                 _actionPoints;
   short                          _hitPoints, _armorClass, _tmpArmorClass;
   unsigned char                  _flags;
-  bool                           _fading_off, _fading_in;
+  bool                           _fading_off, _fading_in, _rotating;
+  float                          _rotation_goal;
 
   public:
     InventoryObject*             active_object;

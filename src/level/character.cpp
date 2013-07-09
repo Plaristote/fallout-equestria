@@ -29,6 +29,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   Data   items = _level->GetItems();  
   string defEquiped[2];
 
+  _rotating           = false;
   _fading_in          = _fading_off = false;
   _flags              = 0;
   _goToData.objective = 0;  
@@ -480,6 +481,14 @@ void ObjectCharacter::Fading(void)
   GetNodePath().set_color(color);
 }
 
+void ObjectCharacter::RunEffects(float elapsedTime)
+{
+  if (_fading_in || _fading_off)
+    Fading();
+  if (_rotating && _rotation_goal != _object->nodePath.get_hpr().get_x())
+    RunRotate(elapsedTime);
+}
+
 void ObjectCharacter::Run(float elapsedTime)
 {
   PStatCollector collector_ai("Level:Characters:AI");
@@ -490,8 +499,6 @@ void ObjectCharacter::Run(float elapsedTime)
   {
     Level::State state = _level->GetState();
 
-    if (_fading_in || _fading_off)
-      Fading();
     if (state == Level::Normal && _hitPoints > 0)
     {
       ReloadFunction(&_scriptMain);
@@ -994,15 +1001,37 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
   //profile.Profile("Level:Characters:Movement");
 }
 
+void                ObjectCharacter::RunRotate(float elapsedTime)
+{
+  LVecBase3 rot    = _object->nodePath.get_hpr();
+  float     factor = elapsedTime * 500;
+
+  if ((ABS(_rotation_goal - rot.get_x())) < factor)
+  {
+    rot.set_x(_rotation_goal);
+    _rotating = false;
+  }
+  else if (_rotation_goal > rot.get_x())
+    rot.set_x(rot.get_x() + factor);
+  else if (_rotation_goal < rot.get_x())
+    rot.set_x(rot.get_x() - factor);
+  _object->nodePath.set_hpr(rot);
+}
+
 void                ObjectCharacter::LookAt(LVecBase3 pos)
 {
    LVecBase3 rot;
+   float     backup;
 
+   backup = _object->nodePath.get_hpr().get_x();
    _object->nodePath.look_at(pos);
    rot = _object->nodePath.get_hpr();
    rot.set_x(rot.get_x() - 180);
    rot.set_y(-rot.get_y());
-   _object->nodePath.set_hpr(rot);  
+   _rotation_goal = rot.get_x();
+   rot.set_x(backup);
+   _rotating      = true;
+   _object->nodePath.set_hpr(rot);
 }
 
 void                ObjectCharacter::LookAt(InstanceDynamicObject* object)
