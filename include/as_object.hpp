@@ -46,7 +46,9 @@ namespace AngelScript
     enum Code
     {
       UndeclaredFunction,
-      UnloadableFunction
+      UnloadableFunction,
+      AngelScriptException,
+      InternalError
     };
 
     Exception(Code code, const std::string& target = "")
@@ -55,8 +57,16 @@ namespace AngelScript
       {
       case UndeclaredFunction:
         message = "The function '" + target + "' hasn't been decalred.";
+        break ;
       case UnloadableFunction:
         message = "The function '" + target + "' couldn't be loaded.";
+        break ;
+      case InternalError:
+        message = "An internal error has occured when executing function " + target;
+        break ;
+      case AngelScriptException:
+        message = "An exception has been thrown inside the function " + target;
+        break ;
       }
     }
 

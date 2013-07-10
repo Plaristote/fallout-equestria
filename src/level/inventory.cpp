@@ -52,6 +52,8 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts
       hooks.asDefineMethod("UseAsWeapon", "string " + action["hookWeapon"].Value() + "(Item@, Character@, Character@)");
     if (action["hookHitChances"].NotNil())
       hooks.asDefineMethod("HitChances", "int " + action["hookHitChances"].Value() + "(Item@, Character@, Character@)");
+    if (action["hookCanUse"].NotNil())
+      hooks.asDefineMethod("CanUse", "bool " + action["hookCanUse"].Value() + "(Item@, Character@, DynamicObject@)");
     _actionHooks.push_back(hooks);
   });
 }
@@ -78,15 +80,21 @@ void InventoryObject::SetEquiped(ObjectCharacter* character, bool set)
   _equiped = set;
 }
 
+// TODO Implement this here contraption as a wrapper for all parameters to AngelScript::Object
+/*template<typename TYPE>
+AngelScript::IType* as_wrap(TYPE var)
+{
+  return (new AngelScript::Type<TYPE>(var));
+}*/
+
 bool InventoryObject::CanWeild(ObjectCharacter* character, std::string slot, unsigned char mode)
 {
-  cout << "CALLING HOOK CAN WEILD" << endl;
   if (_object.IsDefined("CanWeild"))
   {
     AngelScript::Type<InventoryObject*> this_param(this);
     AngelScript::Type<ObjectCharacter*> character_param(character);
     AngelScript::Type<std::string*>     slot_param(&slot);
-    AngelScript::Type<unsigned int>     mode_param(mode);
+    AngelScript::Type<int>              mode_param(mode);
 
     return (_object.Call("CanWeild", 4, &this_param, &character_param, &slot_param, &mode_param));
   }
@@ -209,6 +217,23 @@ DynamicObject* InventoryObject::CreateDynamicObject(World* world) const
   return (object);
 }
 
+bool              InventoryObject::CanUse(ObjectCharacter* user, InstanceDynamicObject* target, unsigned int use_type)
+{
+  AngelScript::Object& hooks = _actionHooks[use_type];
+
+  cout << "Object " << GetName() << " for action " << use_type << " has methods:" << endl;
+  hooks.OutputMethods(cout);
+  if (hooks.IsDefined("CanUse"))
+  {
+    AngelScript::Type<InventoryObject*>       this_param(this);
+    AngelScript::Type<ObjectCharacter*>       user_param(user);
+    AngelScript::Type<InstanceDynamicObject*> target_param(target);
+
+    return (hooks.Call("CanUse", 3, &this_param, &user_param, &target_param));
+  }
+  return (true);
+}
+
 int               InventoryObject::HitSuccessRate(ObjectCharacter* user, ObjectCharacter* target, unsigned char use_type)
 {
   AngelScript::Object& hooks = _actionHooks[use_type];
@@ -226,13 +251,11 @@ int               InventoryObject::HitSuccessRate(ObjectCharacter* user, ObjectC
 
 const std::string InventoryObject::UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType)
 {
-  cout << "CALLED USEASWEAPON" << endl;
   return (ExecuteHook("UseAsWeapon", user, target, useType));
 }
 
 const std::string InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType)
 {
-  cout << "CALLED USEON" << endl;
   ObjectCharacter*     charTarget;
   Lockable*            lockTarget;
   AngelScript::Object& hooks = _actionHooks[useType];

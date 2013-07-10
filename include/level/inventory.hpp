@@ -44,6 +44,7 @@ public:
   DynamicObject*    CreateDynamicObject(World* world) const;
   EquipedModel*     CreateEquipedModel(World* world);
 
+  bool              CanUse(ObjectCharacter*, InstanceDynamicObject* target, unsigned int use_type);
   bool              CanWeild(ObjectCharacter*, std::string slot, unsigned char mode = 0);
   bool              CanWeild(ObjectCharacter*, EquipedMode);
   void              SetEquiped(ObjectCharacter*, bool set);

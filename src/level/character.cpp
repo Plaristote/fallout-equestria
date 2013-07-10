@@ -331,11 +331,14 @@ void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& 
       _equiped[it].graphics->PlayAnimation(name);
     PlayAnimation(playerAnimName);
 
-    /*Projectile* projectile = new Projectile(_level->GetWorld(), _equiped[it].graphics->GetNodePath());
+    if (_equiped[it].graphics)
+    {
+      Projectile* projectile = new Projectile(_level->GetWorld(), _equiped[it].graphics->GetNodePath());
 
-    projectile->SetTimeout(1);
-    projectile->SetColor(255, 255, 0, 1);
-    _level->InsertProjectile(projectile);*/
+      projectile->SetTimeout(0.5);
+      projectile->SetColor(255, 255, 0, 1);
+      _level->InsertProjectile(projectile);
+    }
   }
 }
 

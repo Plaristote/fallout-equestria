@@ -91,15 +91,27 @@ void AngelScript::Object::Initialize(void)
 
 void AngelScript::Object::asDefineMethod(const std::string& name, const std::string& declaration)
 {
-  Function function;
+  auto     existing = functions.find(name);
 
-  if (module)
-    function.function = module->GetFunctionByDecl(declaration.c_str());
-  else
-    function.function = 0;
-  function.signature  = declaration;
-  if (function.function || !module)
-    functions.insert(Functions::value_type(name, function));
+  if (existing == functions.end() && declaration != "")
+  {
+    Function function;
+
+    if (module)
+      function.function = module->GetFunctionByDecl(declaration.c_str());
+    else
+      function.function = 0;
+    function.signature  = declaration;
+    if (function.function || !module)
+      functions.insert(Functions::value_type(name, function));
+  }
+  else if (existing->second.function == 0 || (declaration != existing->second.signature))
+  {
+    if (declaration != "")
+      existing->second.signature = declaration;
+    if (module)
+      existing->second.function  = module->GetFunctionByDecl(existing->second.signature.c_str());
+  }
 }
 
 AngelScript::Object::ReturnType AngelScript::Object::Call(const std::string& name, unsigned int argc, ...)
@@ -113,39 +125,52 @@ AngelScript::Object::ReturnType AngelScript::Object::Call(const std::string& nam
   if (it == functions.end())
     throw AngelScript::Exception(AngelScript::Exception::UndeclaredFunction, name);
   if (!(it->second.function))
+  {
     it->second.function = module->GetFunctionByDecl(it->second.signature.c_str());
-  if (!(it->second.function))
-    throw AngelScript::Exception(AngelScript::Exception::UnloadableFunction, name);
+    if (!(it->second.function))
+      throw AngelScript::Exception(AngelScript::Exception::UnloadableFunction, name);
+  }
   context->Prepare(it->second.function);
   va_start(ap, argc);
   for (unsigned short i = 0 ; argc > i ; ++i)
   {
     IType* param = reinterpret_cast<IType*>(va_arg(ap, void*));
-    
+
     switch (param->Flag())
     {
       case '0':
         context->SetArgObject(i, param->Ptr());
         break ;
       case 'b':
-        context->SetArgByte  (i, *((Type<bool>*)(param)));
+        context->SetArgByte  (i, (bool)(*((Type<bool>*)(param))));
         break ;
       case 'i':
-        context->SetArgWord  (i, *((Type<int>*)(param)));
+        context->SetArgDWord (i, (int)(*((Type<int>*)(param))));
+        //context->SetArgWord  (i, (int)(*((Type<int>*)(param)))); // This isn't the proper call. Pretty sure it should be.
         break ;
       case 'l':
-        context->SetArgDWord (i, *((Type<long>*)(param)));
+        context->SetArgDWord (i, (long)(*((Type<long>*)(param))));
         break ;
       case 'd':
-        context->SetArgDouble(i, *((Type<double>*)(param)));
+        context->SetArgDouble(i, (double)(*((Type<double>*)(param))));
         break ;
       case 'f':
-        context->SetArgFloat (i, *((Type<float>*)(param)));
+        context->SetArgFloat (i, (float)(*((Type<float>*)(param))));
         break ;
     }
   }
   va_end(ap);
-  context->Execute();
+  switch (context->Execute())
+  {
+    case asCONTEXT_NOT_PREPARED:
+      throw AngelScript::Exception(AngelScript::Exception::InternalError, name); 
+    case asEXECUTION_ABORTED:
+    case asEXECUTION_SUSPENDED:
+    case asEXECUTION_EXCEPTION:
+      throw AngelScript::Exception(AngelScript::Exception::AngelScriptException, name);
+    case asEXECUTION_FINISHED:
+      break ;
+  }
   return (ReturnType(context));
 }
 
