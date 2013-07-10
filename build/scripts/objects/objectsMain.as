@@ -80,11 +80,6 @@ string Shoot(Item@ item, Character@ user, Character@ target)
   int  ap_cost   = action["ap-cost"].AsInt();
   int  ammo      = GetAmmoAmount(item_data);
 
-  if (ammo < 1)
-  {
-    level.PlaySound("out-of-ammo");
-    return ("Out of ammo.");
-  }
   if (ap_cost <= ap)
   {
     float range    = action["range"].AsFloat();
@@ -141,9 +136,9 @@ void SetAmmoAmount(Data item, int amount)
 
 string ReloadWeapon(Item@ item, Character@ user)
 {
-  Cout("RELOADING WEAPON");
   Inventory@ inventory   = user.GetInventory();
   Data       itemData    = item.AsData();
+  int        ap_cost     = itemData["actions"]["Reload"]["ap-cost"].AsInt();
   string     currentAmmo = GetAmmoType(itemData);
   int        ammountAmmo = GetAmmoAmount(itemData);
   int        maximumAmmo = itemData["ammo"]["maximum"].AsInt();
@@ -151,6 +146,8 @@ string ReloadWeapon(Item@ item, Character@ user)
 
   if (ammountAmmo == maximumAmmo)
     return (item.GetName() + " is already fully loaded.");
+  if (user.GetActionPoints() < ap_cost)
+    return ("Not enough action points");
   @nextAmmunition = inventory.GetObject(currentAmmo);
   // If no ammunition of that type left, and barrel is empty, check other types of ammo
   if (@nextAmmunition == null && ammountAmmo == 0)
@@ -194,7 +191,9 @@ string ReloadWeapon(Item@ item, Character@ user)
   }
   SetAmmoAmount(itemData, ammountAmmo);
 
-  Cout(item.GetName() + " now loaded with " + ammountAmmo + "/" + maximumAmmo + " rounds.");
+  if (@user == @(level.GetPlayer()))
+    level.ConsoleWrite(item.GetName() + " now loaded with " + ammountAmmo + "/" + maximumAmmo + " rounds.");
   level.PlaySound("reload/pistol");
+  user.SetActionPoints(user.GetActionPoints() - ap_cost);
   return ("");
 }

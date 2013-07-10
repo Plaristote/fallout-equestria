@@ -121,7 +121,8 @@
       "damage-max": 20,
       "type":           "Small Guns",
       "hookHitChanges": "ShootSuccessChance",
-      "hookWeapon":     "Shoot"
+      "hookWeapon":     "Shoot",
+      "hookCanUse":     "CanUse"
     }
 ,
     "Reload": {
