@@ -259,10 +259,8 @@ int main(int argc, char *argv[])
 
       cout << "[FoE] Starting Main Loop" << std::endl;
       framework.main_loop();
-      framework.close_framework();
-
-      unload_prc_file(config);
     }
+    unload_prc_file(config);
     cout << "[FoE] Properly wrapping up." << endl;
     OptionsManager::Finalize();
     Script::Engine::Finalize();

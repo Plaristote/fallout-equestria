@@ -6,87 +6,9 @@
 
 extern PandaFramework framework;
 
-MouseCursor* MouseCursor::_static = 0;
-
-MouseCursor::MouseCursor(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
+static AsyncTask::DoneStatus main_menu_task(GenericAsyncTask* task, void* main_menu)
 {
-  _root   = context->CreateDocument();
-  if (_root)
-  {
-    _root->SetInnerRML("<img id='mouse-cursor' src='textures/cursor-interaction.png' /><span id='mouse-hint'></span>");
-    _cursor = _root->GetElementById("mouse-cursor");
-    _hint   = _root->GetElementById("mouse-hint");
-    if (_cursor)
-      _cursor->SetProperty("position", "absolute");
-    if (_hint)
-      _hint->SetProperty("position", "absolute");
-  }
-  Show();
-  _static = this;
-}
-
-void MouseCursor::SetHint(const std::string& key)
-{
-  if (_current_hint != key)
-  {
-    if (key != "")
-    {
-      std::string rml = "<img src='textures/mouse-hints/" + key + ".png' />";
-
-      _hint->SetInnerRML(rml.c_str());
-    }
-    else
-      _hint->SetInnerRML("");
-    _current_hint = key;
-  }
-}
-
-void MouseCursor::SetHint(int value)
-{
-  std::stringstream stream;
-  std::string       str;
-  
-  stream << value << '%';
-  str = stream.str();
-  if (_current_hint != str)
-  {
-    std::string css;
-
-    css          += "font-family: JH_Fallout;";
-    css          += "color: white;";
-    css          += "hint-font-effect: outline;";
-    css          += "hint-width: 2px;";
-    css          += "hint-colour: black;";
-    _current_hint = str;
-    str           = "<span class='mouse-hint-success-rate' style='" + css + "'>" + str + "</span>";
-    _hint->SetInnerRML(str.c_str());
-  }
-}
-
-void MouseCursor::Update(void)
-{
-  if (_cursor && IsVisible() && _window->get_graphics_window() != 0)
-  {
-    MouseData    pointer = _window->get_graphics_window()->get_pointer(0);
-
-    {
-      stringstream strTop, strLeft;
-
-      strLeft << ((int)pointer.get_x() + 1);
-      strTop  << ((int)pointer.get_y() + 1);
-      _cursor->SetProperty("top",  strTop.str().c_str());
-      _cursor->SetProperty("left", strLeft.str().c_str());
-    }
-    {
-      stringstream strTop, strLeft;
-      
-      strLeft << ((int)pointer.get_x() + 30);
-      strTop  << ((int)pointer.get_y() + 30);
-      _hint->SetProperty("top",  strTop.str().c_str());
-      _hint->SetProperty("left", strLeft.str().c_str());
-    }
-    _root->PullToFront();
-  }
+  return (reinterpret_cast<MainMenu*>(main_menu)->do_task());
 }
 
 MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window), _mouseCursor(window, _generalUi.GetRocketRegion()->get_context()), _view(window, _generalUi.GetRocketRegion()->get_context())
@@ -94,7 +16,8 @@ MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window
   _new_game_task = 0;
   _uiLoad        = 0;
   _levelTask     = 0;
-  AsyncTaskManager::get_global_ptr()->add(this);
+
+  AsyncTaskManager::get_global_ptr()->add(new GenericAsyncTask("Everything", &main_menu_task, this));
 
   AlertUi::NewAlert.Connect([this](const string message)
   { _alerts.push_back(new AlertUi(_window, _generalUi.GetRocketRegion()->get_context(), message)); });
@@ -109,7 +32,7 @@ MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window
   createLevelPlz        = false;
   quitGamePlz           = false;
   _need_garbage_collect = false;
-  
+
   _window->set_background_type(WindowFramework::BT_black);
 
   MusicManager::Initialize();
@@ -202,6 +125,8 @@ AsyncTask::DoneStatus MainMenu::do_task()
   }
   if (!quitGamePlz)
     _mouseCursor.Update();
+  else
+    framework.close_framework();
   SoundManager::GarbageCollectAll();
   Executor::Run(); // Executor does not have any specific application. It just executes lambdas collected here and there.
   fps++;
@@ -260,9 +185,9 @@ MainMenu::View::View(WindowFramework* window, Rocket::Core::Context* context) : 
 
   if (_root)
   {
-    std::string                      idz[]                        = { "button-continue", "button-new-game", "button-load-game", "button-options", "button-quit" };
+    std::string                      idz[]                 = { "button-continue", "button-new-game", "button-load-game", "button-options", "button-quit" };
     Sync::Signal<void (Rocket::Core::Event&)>* signalz[]   = { &Continue, &NewGame, &LoadGame, &Options, &Quit };
-    RocketListener*                  listenerz[]                  = { &ContinueClicked, &NewGameClicked, &LoadGameClicked, &OptionsClicked, &QuitClicked };
+    RocketListener*                  listenerz[]           = { &ContinueClicked, &NewGameClicked, &LoadGameClicked, &OptionsClicked, &QuitClicked };
 
     for (int it = 0 ; it < 5 ; ++it)
     {
