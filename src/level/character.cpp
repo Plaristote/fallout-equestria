@@ -482,6 +482,11 @@ void ObjectCharacter::Fading(void)
     }
   }
   GetNodePath().set_color(color);
+  // Alpha not supported ? Fallback to this.
+  if (color.get_w() == 0)
+    GetNodePath().hide();
+  else if (GetNodePath().is_hidden())
+    GetNodePath().show();
 }
 
 void ObjectCharacter::RunEffects(float elapsedTime)
@@ -502,6 +507,8 @@ void ObjectCharacter::Run(float elapsedTime)
   {
     Level::State state = _level->GetState();
 
+    if (_fading_in || _fading_off)
+      Fading();
     if (state == Level::Normal && _hitPoints > 0)
     {
       ReloadFunction(&_scriptMain);

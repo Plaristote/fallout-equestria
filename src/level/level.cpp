@@ -224,6 +224,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 
 void Level::RefreshCharactersVisibility(void)
 {
+  cout << "RefreshCharactersVisibility" << endl;
   for_each(_characters.begin(), _characters.end(), [this](ObjectCharacter* character)
   {
     std::list<ObjectCharacter*> fov = GetPlayer()->GetNearbyEnemies();
