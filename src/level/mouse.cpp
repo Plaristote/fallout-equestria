@@ -47,9 +47,12 @@ Mouse::~Mouse()
   
   EventHandler* events = EventHandler::get_global_event_handler();
   
-  events->remove_hook("mouse1", &Mouse::CallbackButton1, (void*)this);
-  events->remove_hook("mouse2", &Mouse::CallbackButton2, (void*)this);
-  events->remove_hook("mouse3", &Mouse::CallbackButton3, (void*)this);
+  
+  events->remove_hook("mouse1",     &Mouse::CallbackButton1,   (void*)this);
+  events->remove_hook("mouse2",     &Mouse::CallbackButton2,   (void*)this);
+  events->remove_hook("mouse3",     &Mouse::CallbackButton3,   (void*)this);
+  events->remove_hook("wheel_up",   &Mouse::CallbackWheelUp,   (void*)this);
+  events->remove_hook("wheel_down", &Mouse::CallbackWheelDown, (void*)this);
   
   MouseCursor::Get()->SetCursorTexture("textures/cursor-interaction.png");
 }
