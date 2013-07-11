@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
     window = framework.open_window();
     cout << "[FoE] Enabling keyboard" << endl;
     //window->enable_keyboard();
-    //window->get_render().set_shader_auto();
+    window->get_render().set_shader_auto();
 
     // Set Windows Properties
     cout << "[FoE] Setting window's properties" << endl;
