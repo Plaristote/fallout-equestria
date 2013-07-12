@@ -29,15 +29,16 @@
 # include "inventory_ui.hpp"
 
 # include "world.h"
-#include "projectile.hpp"
+# include "projectile.hpp"
 # include "soundmanager.hpp"
+# include "main_script.hpp"
 
 class Level
 {
 public:
   static Level* CurrentLevel;
   
-  Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& data, TimeManager& tm);
+  Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& data, TimeManager& tm);
   
   void InitSun(void);
   void InitPlayer(void);
@@ -190,6 +191,7 @@ private:
   SceneCamera           _camera;
   Timer                 _timer;
   TimeManager&          _timeManager;
+  MainScript            _main_script;
   State                 _state;
   bool                  _persistent;
 

@@ -803,8 +803,7 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     {
       Level*   level = 0;
 
-      level = new Level(_window, _gameUi, packet, _timeManager);
-      level->SetName(params.name);
+      level = new Level(params.name, _window, _gameUi, packet, _timeManager);
       SetLevel(level);
       if (params.isSaveFile)
 	level->Load(packet);

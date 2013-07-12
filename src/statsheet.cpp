@@ -904,8 +904,8 @@ list<string> StatModel::GetAvailablePerks(void)
       {
 	Data           requirements = perk["Requirements"];
 	bool           do_add       = true;
-	Data::my_iterator it           = requirements.begin();
-	Data::my_iterator end          = requirements.end();
+	Data::iterator it           = requirements.begin();
+	Data::iterator end          = requirements.end();
 	
 	for (; it != end ; ++it)
 	{

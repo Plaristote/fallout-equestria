@@ -65,8 +65,8 @@ Circle solar_circle;
 #include <mousecursor.hpp>
 Level* Level::CurrentLevel = 0;
 #include <panda3d/cullFaceAttrib.h>
-Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
-  _camera(window, window->get_camera_group()), _timeManager(tm), _chatter_manager(window), _levelUi(window, gameUi)
+Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
+  _camera(window, window->get_camera_group()), _timeManager(tm), _main_script(name), _chatter_manager(window), _levelUi(window, gameUi)
 {
   LoadingScreen* loadingScreen = new LoadingScreen(window, gameUi.GetContext());
 
@@ -75,6 +75,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   _state       = Normal;
   _mouseState  = MouseAction;
   _persistent  = true;
+  _level_name  = name;
 
   obs.Connect(_levelUi.InterfaceOpened, *this, &Level::SetInterrupted);
 
@@ -963,6 +964,13 @@ AsyncTask::DoneStatus Level::do_task(void)
       break ;
   }
   ForEach(_characters, [elapsedTime](ObjectCharacter* character) { character->RunEffects(elapsedTime); });
+  
+  if (_main_script.IsDefined("Run"))
+  {
+    AngelScript::Type<float> param_time(elapsedTime);
+
+    _main_script.Call("Run", 1, &param_time);
+  }
 
   CheckCurrentFloor(elapsedTime);
   _chatter_manager.Run(elapsedTime, _camera.GetNodePath());

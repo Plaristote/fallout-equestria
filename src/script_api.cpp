@@ -376,15 +376,21 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(doorClass, "bool   IsLocked()",   asMETHOD(Lockable,IsLocked),       asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "bool   IsOpen()",     asMETHOD(Lockable,IsOpen),         asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "string GetKeyName()", asMETHOD(Lockable,GetKeyName),     asCALL_THISCALL);
-  
+
   engine->RegisterObjectMethod(shelfClass,  "Inventory@ GetInventory()", asMETHOD(ObjectShelf,GetInventory), asCALL_THISCALL);
+
+  const char* worldLight = "Light";
+  engine->RegisterObjectType(worldLight, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(worldLight, "void SetEnabled(bool)", asMETHOD(WorldLight,SetEnabled), asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldLight, "void SetColor(float,float,float,float)", asMETHOD(WorldLight,SetColor), asCALL_THISCALL);
   
   const char* worldClass = "World";
   engine->RegisterObjectType(worldClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(worldClass, "void SetWaypointsVisible(bool) const",      asMETHOD(World,SetWaypointsVisible),      asCALL_THISCALL);
-  engine->RegisterObjectMethod(worldClass, "void SetMapObjectsVisible(bool) const",     asMETHOD(World,SetMapObjectsVisible),     asCALL_THISCALL);
-  engine->RegisterObjectMethod(worldClass, "void SetDynamicObjectsVisible(bool) const", asMETHOD(World,SetDynamicObjectsVisible), asCALL_THISCALL);  
-  
+  engine->RegisterObjectMethod(worldClass, "void SetWaypointsVisible(bool)",      asMETHOD(World,SetWaypointsVisible),      asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldClass, "void SetMapObjectsVisible(bool)",     asMETHOD(World,SetMapObjectsVisible),     asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldClass, "void SetDynamicObjectsVisible(bool)", asMETHOD(World,SetDynamicObjectsVisible), asCALL_THISCALL);  
+  engine->RegisterObjectMethod(worldClass, "Light@ GetLight(string)",        asMETHOD(World,GetLightByName),           asCALL_THISCALL);
+
   const char* cameraClass = "Camera";
   engine->RegisterObjectType(cameraClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(cameraClass, "void CenterOn(DynamicObject@)", asMETHOD(SceneCamera,CenterOnObject), asCALL_THISCALL);
@@ -395,7 +401,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectType(levelClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(levelClass, "void           ConsoleWrite(string)",                  asMETHOD(Level,ConsoleWrite),        asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Data           GetDataEngine()",                       asMETHOD(Level,GetDataEngine),       asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "const World@   GetWorld() const",                      asMETHOD(Level,GetWorld),            asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "World@         GetWorld()",                            asMETHOD(Level,GetWorld),            asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Camera@        GetCamera()",                           asMETHOD(Level,GetCamera),           asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Character@     GetCharacter(string)",                  asMETHODPR(Level,GetCharacter,(const std::string&),ObjectCharacter*), asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Character@     GetPlayer()",                           asMETHOD(Level,GetPlayer),           asCALL_THISCALL);  
