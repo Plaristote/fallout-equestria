@@ -117,23 +117,22 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   _world->GetWaypointLimits(0, upperRight, upperLeft, bottomLeft);
   _camera.SetLimits(bottomLeft.get_x() - 50, bottomLeft.get_y() - 50, upperRight.get_x() - 50, upperRight.get_y() - 50);  
 
+  ForEach(_world->entryZones, [this](EntryZone& zone)
+  {
+    LevelZone* lvl_zone = new LevelZone(this, zone);
+
+    cout << "Registering Zone '" << zone.name << '\'' << endl;
+    _zones.push_back(lvl_zone);
+  });
   ForEach(_world->exitZones, [this](ExitZone& zone)
   {
-    LevelExitZone* exitZone = new LevelExitZone(this, zone.destinations);
-    
+    LevelExitZone* exitZone = new LevelExitZone(this, zone, zone.destinations);
+
     cout << "Registering ExitZone '" << zone.name << '\'' << endl;
-    exitZone->SetName(zone.name);
-    ForEach(zone.waypoints, [exitZone](Waypoint* wp)
-    {
-      LevelExitZone* ez= exitZone; //MSVC2010: Captured variables lambda stuffs (compiler bug, I think) 
-      ForEach(wp->arcs, [ez](Waypoint::Arc& arc)
-      {
-	arc.observer = ez;
-      });
-    });
     exitZone->ExitZone.Connect      (*this, &Level::CallbackExitZone);
     exitZone->GoToNextZone.Connect  (*this, &Level::CallbackGoToZone);
     exitZone->SelectNextZone.Connect(*this, &Level::CallbackSelectNextZone);
+    _zones.push_back(exitZone);
   });
   _exitingZone = false;
 
@@ -221,6 +220,20 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   loadingScreen->FadeOut();
   loadingScreen->Destroy();
   delete loadingScreen;
+}
+
+LevelZone* Level::GetZoneByName(const std::string& name)
+{
+  auto it  = _zones.begin();
+  auto end = _zones.end();
+
+  while (it != end)
+  {
+    if ((*it)->GetName() == name)
+      return (*it);
+    ++it;
+  }
+  return (0);
 }
 
 void Level::RefreshCharactersVisibility(void)
@@ -445,6 +458,12 @@ void Level::InitPlayer(void)
     task->lastS += 1;
     task->Interval.Connect(*(GetPlayer()), &ObjectCharacter::CheckFieldOfView);    
   }
+  
+  //
+  // Initializing Main Script
+  //
+  if (_main_script.IsDefined("Initialize"))
+    _main_script.Call("Initialize");
 }
 
 void Level::InsertParty(PlayerParty& party)
@@ -562,6 +581,8 @@ void Level::SetPlayerInventory(Inventory* inventory)
 
 Level::~Level()
 {
+  if (_main_script.IsDefined("Finalize"))
+    _main_script.Call("Finalize");
   MouseCursor::Get()->SetHint("");
   _window->get_render().set_light_off(_sunLightAmbientNode);
   _window->get_render().set_light_off(_sunLightNode);
@@ -575,6 +596,7 @@ Level::~Level()
   _timeManager.ClearTasks(TASK_LVL_CITY);
   obs.DisconnectAll();
   obs_player.DisconnectAll();
+  ForEach(_zones,       [](LevelZone* zone)            { delete zone;       });
   ForEach(_projectiles, [](Projectile* projectile)     { delete projectile; });
   ForEach(_objects,     [](InstanceDynamicObject* obj) { delete obj;        });
   ForEach(_exitZones,   [](LevelExitZone* zone)        { delete zone;       });
@@ -964,6 +986,7 @@ AsyncTask::DoneStatus Level::do_task(void)
       break ;
   }
   ForEach(_characters, [elapsedTime](ObjectCharacter* character) { character->RunEffects(elapsedTime); });
+  ForEach(_zones,      []           (LevelZone* zone)            { zone->Refresh();                    });
   
   if (_main_script.IsDefined("Run"))
   {

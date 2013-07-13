@@ -1,6 +1,7 @@
+#include "level/level_zone.hpp"
 #include "level/level.hpp"
 
-LevelExitZone::LevelExitZone(Level* level, std::list<std::string> destinations) : _level(level)
+LevelExitZone::LevelExitZone(Level* level, Zone& zone, std::list<std::string> destinations) : LevelZone(level, zone)
 {
   ForEach(destinations, [this](std::string dest)
   {
@@ -10,10 +11,13 @@ LevelExitZone::LevelExitZone(Level* level, std::list<std::string> destinations) 
 
 void LevelExitZone::GoingThrough(void* character)
 {
-  if (_name.substr(0, 9) == "LocalExit")
-    GoingThroughLocal(character);
-  else
-    GoingThroughExit(character);
+  if (IsEnabled())
+  {
+    if (_name.substr(0, 9) == "LocalExit")
+      GoingThroughLocal(character);
+    else
+      GoingThroughExit(character);
+  }
 }
 
 void LevelExitZone::GoingThroughLocal(void* ptr)

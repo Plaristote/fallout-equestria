@@ -8,7 +8,9 @@ class MainScript : public AngelScript::Object
 public:
   MainScript(const std::string& level_name) : AngelScript::Object("scripts/level/" + level_name + ".as")
   {
-    asDefineMethod("Run", "void run(float)");
+    asDefineMethod("Run",        "void run(float)");
+    asDefineMethod("Initialize", "void initialize()");
+    asDefineMethod("Finalize",   "void finalize()");
   }
 };
 

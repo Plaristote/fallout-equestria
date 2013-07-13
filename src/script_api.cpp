@@ -379,17 +379,26 @@ void AngelScriptInitialize(void)
 
   engine->RegisterObjectMethod(shelfClass,  "Inventory@ GetInventory()", asMETHOD(ObjectShelf,GetInventory), asCALL_THISCALL);
 
+  const char* zoneClass = "Zone";
+  engine->RegisterObjectType(zoneClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(zoneClass, "void SetEnabled(bool)",         asMETHOD(ScriptZone,SetEnabled), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "bool IsEnabled() const",        asMETHOD(ScriptZone,IsEnabled), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "bool IsInside(DynamicObject@)", asMETHOD(ScriptZone,IsInside), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void Delete()",                 asMETHOD(ScriptZone,Delete), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void SetExitCallback(string)",  asMETHOD(ScriptZone,SetExitCallback), asCALL_THISCALL);
+  engine->RegisterGlobalFunction("Zone@ Zone_Factory(string, string)", asFUNCTION(ScriptZone::Factory), asCALL_CDECL);
+  
   const char* worldLight = "Light";
   engine->RegisterObjectType(worldLight, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(worldLight, "void SetEnabled(bool)", asMETHOD(WorldLight,SetEnabled), asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldLight, "void SetEnabled(bool)",                  asMETHOD(WorldLight,SetEnabled), asCALL_THISCALL);
   engine->RegisterObjectMethod(worldLight, "void SetColor(float,float,float,float)", asMETHOD(WorldLight,SetColor), asCALL_THISCALL);
   
   const char* worldClass = "World";
   engine->RegisterObjectType(worldClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(worldClass, "void SetWaypointsVisible(bool)",      asMETHOD(World,SetWaypointsVisible),      asCALL_THISCALL);
-  engine->RegisterObjectMethod(worldClass, "void SetMapObjectsVisible(bool)",     asMETHOD(World,SetMapObjectsVisible),     asCALL_THISCALL);
-  engine->RegisterObjectMethod(worldClass, "void SetDynamicObjectsVisible(bool)", asMETHOD(World,SetDynamicObjectsVisible), asCALL_THISCALL);  
-  engine->RegisterObjectMethod(worldClass, "Light@ GetLight(string)",        asMETHOD(World,GetLightByName),           asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldClass, "void   SetWaypointsVisible(bool)",       asMETHOD(World,SetWaypointsVisible),      asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldClass, "void   SetMapObjectsVisible(bool)",      asMETHOD(World,SetMapObjectsVisible),     asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldClass, "void   SetDynamicObjectsVisible(bool)",  asMETHOD(World,SetDynamicObjectsVisible), asCALL_THISCALL);  
+  engine->RegisterObjectMethod(worldClass, "Light@ GetLight(string)",                asMETHOD(World,GetLightByName),           asCALL_THISCALL);
 
   const char* cameraClass = "Camera";
   engine->RegisterObjectType(cameraClass, 0, asOBJ_REF | asOBJ_NOCOUNT);

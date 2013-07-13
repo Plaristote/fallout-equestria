@@ -32,6 +32,7 @@
 # include "projectile.hpp"
 # include "soundmanager.hpp"
 # include "main_script.hpp"
+# include "script_zone.hpp"
 
 class Level
 {
@@ -79,6 +80,7 @@ public:
   ObjectCharacter*       GetCharacter(const std::string& name);
   ObjectCharacter*       GetCharacter(const DynamicObject*);
   ObjectCharacter*       GetPlayer(void);
+  LevelZone*             GetZoneByName(const std::string& name);
   void                   UnprocessAllCollisions(void);
   void                   ProcessAllCollisions(void);
   void                   RefreshCharactersVisibility(void);
@@ -170,6 +172,7 @@ private:
   typedef std::list<ObjectCharacter*>       Characters;
   typedef std::list<LevelExitZone*>         ExitZones;
   typedef std::list<Projectile*>            Projectiles;
+  typedef std::vector<LevelZone*>           LevelZones;
   
   void              SetupCamera(void);
 
@@ -196,6 +199,7 @@ private:
   bool                  _persistent;
 
   World*                _world;
+  LevelZones            _zones;
   ParticleSystemManager _particle_manager;
   SoundManager          _sound_manager;
   ChatterManager        _chatter_manager;
