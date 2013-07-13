@@ -274,6 +274,29 @@ struct WorldLight
     
     light->set_color(color);
   }
+  
+  void   SetAttenuation(float a, float b, float c)
+  {
+    switch (type)
+    {
+      case Point:
+      {
+        PT(PointLight) point_light = reinterpret_cast<PointLight*>(light.p());
+
+        point_light->set_attenuation(LVecBase3(a, b, c));
+        break ;
+      }
+      case Spot:
+      {
+        PT(Spotlight) spot_light = reinterpret_cast<Spotlight*>(light.p());
+
+        spot_light->set_attenuation(LVecBase3(a, b, c));
+        break ;
+      }
+      default:
+        break ;
+    }
+  }
 
   void   SetPosition(LPoint3 position)
   {

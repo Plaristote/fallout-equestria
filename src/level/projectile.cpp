@@ -7,7 +7,7 @@ Projectile::Projectile(World* world, NodePath parent) : node_path(parent)
   enlightened = world->floors_node;
   light       = new PointLight("projectile-light");
   light_node  = node_path.attach_new_node(light);
-  enlightened.set_light(light_node, 7);
+  enlightened.set_light(light_node, 8);
   SetAttenuation(0, 0, 1);
   SetColor(255, 255, 255, 1);
 }

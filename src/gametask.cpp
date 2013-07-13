@@ -4,6 +4,8 @@
 #include <options.hpp>
 #include <dices.hpp>
 #include <ui_dialog.hpp>
+#include <Boots/thread.hpp>
+#include <panda_lock.hpp>
 #include <iostream>
 
 using namespace std;
@@ -361,10 +363,14 @@ void                  GameTask::Exit(Rocket::Core::Event&)
   dialog->SetModal(true);
 }
 
+bool is_loading = false;
+
 AsyncTask::DoneStatus GameTask::do_task()
 {
   if (!_continue)
     return (AsyncTask::DS_done);
+  else if (is_loading == true)
+    return (AsyncTask::DS_cont);
   _signals.ExecuteRecordedCalls();
 
   {
@@ -789,11 +795,24 @@ void   GameTask::SetPlayerInventory(void)
   _level->SetPlayerInventory(_playerInventory);
 }
 
+class LoadingTask : public Sync::MyThread
+{
+public:
+  Sync::Signal<void> StartLoading;
+  
+private:
+  void Run(void)
+  {
+    StartLoading.Emit();
+    delete this;
+  }
+};
+
 void GameTask::DoLoadLevel(LoadLevelParams params)
 {
   ifstream file;
   string   name  = params.path;
-  
+
   file.open(name.c_str(), std::ios::binary);
   if (file.is_open())
   {

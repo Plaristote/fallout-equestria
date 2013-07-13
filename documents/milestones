@@ -126,7 +126,6 @@ x --> Configurable camera behavior
 
 Milestone IV
   -> WorldMap
-  --> Asynchronous loading
   --> Visibility and detection of cities
   --> Dynamically generated places (like random encounter, without encounter)
 
@@ -134,14 +133,13 @@ Milestone IV
   --> Reputation
 
   -> Level
-  --> Asynchronous loading
 x --> Factorize Actions code. Every part of the process (temporizing, animating, executing) must be contiguous.
-~ --> Main script for levels
-x ----> General hook running at every loop turn
-  ----> Exposing waypoint observers to scripts
+x --> Main script for levels
+x ----> General hooks running at every level start, end and each loop turn
+x ----> Exposing waypoint observers to scripts
   --> Zone effects
   --> Advanced Light Management
-~ ----> Script interface for light management
+x ----> Script interface for light management
   ----> Hour-based light switch (for lighting cities at night)
   ----> Combinable light effects
   ------> Blinking
@@ -158,7 +156,10 @@ x ----> General hook running at every loop turn
 
   -> Game Editor
   --> Re-organize the MapObjects as a hierarchy (a MapObject must be able to contain others)
+  --> Tree view for the object hierarchy
+  --> Prefabs ?
+  --> Progress bar for map loading
 
-  -> General
+-> General
 ~ --> Porting every AngelScript usage to the new AngelScript::Object tool
   --> Any ressource accessible through AngelScript::ContextLock must be handled with a smart pointer

@@ -387,11 +387,12 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(zoneClass, "void Delete()",                 asMETHOD(ScriptZone,Delete), asCALL_THISCALL);
   engine->RegisterObjectMethod(zoneClass, "void SetExitCallback(string)",  asMETHOD(ScriptZone,SetExitCallback), asCALL_THISCALL);
   engine->RegisterGlobalFunction("Zone@ Zone_Factory(string, string)", asFUNCTION(ScriptZone::Factory), asCALL_CDECL);
-  
+
   const char* worldLight = "Light";
   engine->RegisterObjectType(worldLight, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(worldLight, "void SetEnabled(bool)",                  asMETHOD(WorldLight,SetEnabled), asCALL_THISCALL);
-  engine->RegisterObjectMethod(worldLight, "void SetColor(float,float,float,float)", asMETHOD(WorldLight,SetColor), asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldLight, "void SetEnabled(bool)",                    asMETHOD(WorldLight,SetEnabled),     asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldLight, "void SetColor(float,float,float,float)",   asMETHOD(WorldLight,SetColor),       asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldLight, "void SetAttenuation(float, float, float)", asMETHOD(WorldLight,SetAttenuation), asCALL_THISCALL);
   
   const char* worldClass = "World";
   engine->RegisterObjectType(worldClass, 0, asOBJ_REF | asOBJ_NOCOUNT);

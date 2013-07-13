@@ -63,14 +63,12 @@ Circle solar_circle;
 
 #include "options.hpp"
 #include <mousecursor.hpp>
+#include <panda_lock.hpp>
 Level* Level::CurrentLevel = 0;
 #include <panda3d/cullFaceAttrib.h>
 Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
   _camera(window, window->get_camera_group()), _timeManager(tm), _main_script(name), _chatter_manager(window), _levelUi(window, gameUi)
 {
-  LoadingScreen* loadingScreen = new LoadingScreen(window, gameUi.GetContext());
-
-  loadingScreen->FadeIn();
   CurrentLevel = this;
   _state       = Normal;
   _mouseState  = MouseAction;
@@ -79,7 +77,6 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
 
   obs.Connect(_levelUi.InterfaceOpened, *this, &Level::SetInterrupted);
 
-  loadingScreen->AppendText("-> Loading textual content");
   _items = DataTree::Factory::JSON("data/objects.json");
 
   _floor_lastWp = 0;
@@ -96,7 +93,6 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   MouseInit();
   _timer.Restart();
 
-  loadingScreen->AppendText("-> Loading World...");
   // WORLD LOADING
   _world = new World(window);  
   try
@@ -106,7 +102,6 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   }
   catch (unsigned int&)
   {
-    loadingScreen->AppendText("/!\\ Failed to load world file");
     std::cout << "Failed to load file" << std::endl;
   }
   
@@ -141,7 +136,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
 
   _world->SetWaypointsVisible(false);
 
-  loadingScreen->AppendText("Loading interface");
+  //loadingScreen->AppendText("Loading interface");
   obs.Connect(InstanceDynamicObject::ActionUse,         *this, &Level::CallbackActionUse);
   obs.Connect(InstanceDynamicObject::ActionTalkTo,      *this, &Level::CallbackActionTalkTo);
   obs.Connect(InstanceDynamicObject::ActionUseObjectOn, *this, &Level::CallbackActionUseObjectOn);
@@ -149,8 +144,8 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
 
   _task_metabolism = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 0, 1);
   _task_metabolism->Interval.Connect(*this, &Level::RunMetabolism);  
-  
-  
+
+
   /*
    * DIVIDE AND CONQUER WAYPOINTS
    */
@@ -216,10 +211,6 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
    */
 
   //window->get_render().set_shader_auto();
-  loadingScreen->AppendText("-- Done --");
-  loadingScreen->FadeOut();
-  loadingScreen->Destroy();
-  delete loadingScreen;
 }
 
 LevelZone* Level::GetZoneByName(const std::string& name)
@@ -480,6 +471,8 @@ void Level::InsertParty(PlayerParty& party)
     DynamicObject*   object    = _world->InsertDynamicObject(**it);
     ObjectCharacter* character = new ObjectCharacter(this, object);
 
+    if (character->GetStatistics().NotNil())
+      character->SetActionPoints(character->GetStatistics()["Statistics"]["Action Points"]);
     _characters.insert(_characters.begin(), character);
     // Replace the Party DynamicObject pointer to the new one
     delete *it;

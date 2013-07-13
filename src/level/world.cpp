@@ -393,6 +393,7 @@ WorldLight* World::GetLightByName(const std::string& name)
 {
   WorldLights::iterator it = std::find(lights.begin(), lights.end(), name);
 
+  cout << "Getting light by name... light count: " << lights.size() << endl;
   if (it != lights.end())
     return (&(*it));
   return (0);
@@ -454,7 +455,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
       if (alreadyRegistered == light->enlightened.end())
       {
         light->enlightened.push_back(node);
-        node.set_light(light->nodePath);
+        node.set_light(light->nodePath, 7);
       }
     }
   }
@@ -1064,6 +1065,7 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
   char      tmp_enabled;
 
   packet >> name >> tmp_enabled >> zoneSize;
+  cout << "[World] Loading light " << name << endl;
   enabled = tmp_enabled != 0;
   packet.operator>> <char>(reinterpret_cast<char&>(type));
   packet.operator>> <char>(reinterpret_cast<char&>(parent_type));

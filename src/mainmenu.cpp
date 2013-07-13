@@ -3,8 +3,10 @@
 #include "soundmanager.hpp"
 #include "executor.hpp"
 #include <ui_dialog.hpp>
+#include <panda_lock.hpp>
 
 extern PandaFramework framework;
+PandaLock*            PandaLock::instance = 0;
 
 static AsyncTask::DoneStatus main_menu_task(GenericAsyncTask* task, void* main_menu)
 {
