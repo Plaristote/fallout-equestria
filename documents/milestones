@@ -160,5 +160,5 @@ x ----> Script interface for light management
   --> Progress bar for map loading
 
 -> General
-~ --> Porting every AngelScript usage to the new AngelScript::Object tool
+x --> Porting every AngelScript usage to the new AngelScript::Object tool
   --> Any ressource accessible through AngelScript::ContextLock must be handled with a smart pointer

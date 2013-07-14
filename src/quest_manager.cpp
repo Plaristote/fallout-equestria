@@ -60,13 +60,15 @@ void Quest::Initialize(Level* level)
 
   _updating = false;
   
-  if (script.NotNil())
+  if (script.NotNil() && !_script)
   {
     string path = script.Value();
-	_script_func_ptrs.clear();
-	_script_func_ptrs.push_back(ScriptFuncPtr(&_update_hook, "void update(Data quest)"));
-    LoadScript(path, "scripts/quests/" + path + ".as");
+
+    _script = new AngelScript::Object("scripts/quests/" + path + ".as");
+    _script->asDefineMethod("Update", "void update(Data quest)");
   }
+  else
+    _script = 0;
   
   for_each(objectives.begin(), objectives.end(), [this, level](Data objective)
   {
@@ -178,13 +180,12 @@ bool Quest::CheckIfCompleted(void)
   Data objectives = data["objectives"];
 
   if (_updating) return (false);
-  ReloadFunction(&_update_hook);
-  if (_update_hook)
+  if (_script->IsDefined("Update"))
   {
+    AngelScript::Type<Data*> params_data(&data);
+
     _updating = true;
-    _script_context->Prepare(_update_hook);
-    _script_context->SetArgObject(0, &data);
-    _script_context->Execute();
+    _script->Call("Update", 1, &params_data);
     _updating = false;
   }
   

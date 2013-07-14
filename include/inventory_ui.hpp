@@ -158,7 +158,7 @@ private:
   UiObjectQuantityPicker* _quantity_picker;
 };
 
-class UiLoot : public UiBase, public Scriptable
+class UiLoot : public UiBase
 {
 public:
   UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventory& looter, Inventory& looted);

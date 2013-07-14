@@ -5,14 +5,16 @@
 # include "datatree.hpp"
 # include "observatory.hpp"
 # include "dataengine.hpp"
-# include "scriptable.hpp"
+# include "as_object.hpp"
 
 class Level;
 class StatController;
 
-class Quest : private Scriptable
+class Quest
 {
 public:
+  Quest(void) : _script(0) {}
+  
   Data                             data;
   Sync::Signal<void (Data)>        ObjectiveCompleted;
   Sync::Signal<void (Quest*)>      QuestCompleted;
@@ -49,9 +51,8 @@ private:
   void WatcherTime(Data condition, Level* level);
 
   Sync::ObserverHandler _observers;
-  
-  bool               _updating;
-  asIScriptFunction* _update_hook;
+  bool                  _updating;
+  AngelScript::Object*  _script;
 };
 
 class QuestManager

@@ -5,10 +5,10 @@
 # include "rocket_extension.hpp"
 # include "datatree.hpp"
 # include "scriptengine.hpp"
-# include "scriptable.hpp"
+# include "as_object.hpp"
 # include <cstdarg>
 
-class StatModel : public Scriptable
+class StatModel : public AngelScript::Object
 {
 public:
   StatModel(Data statsheet);
@@ -83,17 +83,10 @@ public:
   bool           UpdateAllValues(void);  
   
 private:
-  void           LoadFunctions(void);
-  
   std::vector<std::string> GetStatKeys(Data stats) const;
 
   Data               _statsheet;
   Data               _statsheet_backup;
-  asIScriptFunction *_scriptAddSpecialPoint, *_scriptActivateTraits,  *_scriptAddExperience;
-  asIScriptFunction *_scriptXpNextLevel,     *_scriptLevelUp,         *_scriptUpdateAllValues;
-  asIScriptFunction *_scriptIsReady,         *_scriptAvailableTraits, *_scriptAddPerk;
-  asIScriptFunction *_selectRandomEncounter;
-  asIScriptFunction *_scriptUsableSkills,    *_scriptUsableSpells;
 };
 
 class StatView
