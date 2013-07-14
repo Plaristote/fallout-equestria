@@ -26,7 +26,7 @@ class ObjectCharacter;
 
 struct WaypointModifier
 {
-  WaypointModifier() : _collision_processed(0)
+  WaypointModifier() : _collision_processed(0), _level(0), _waypointOccupied(0)
   {}
   
   virtual void ProcessCollisions(void);

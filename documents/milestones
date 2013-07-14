@@ -148,7 +148,7 @@ x ----> Script interface for light management
   ---> Allow including of the return value of a script function in dialog's text
   --> In-game cinematics
 ~ --> Projectiles and gunshot effects
-  --> Character Import/Export via scripts
+x --> Party Create/Import/Export via scripts
 
   -> GameTask
   --> Compression for save slots
@@ -159,6 +159,6 @@ x ----> Script interface for light management
   --> Prefabs ?
   --> Progress bar for map loading
 
--> General
+  -> General
 x --> Porting every AngelScript usage to the new AngelScript::Object tool
   --> Any ressource accessible through AngelScript::ContextLock must be handled with a smart pointer

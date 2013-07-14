@@ -448,8 +448,11 @@ void AngelScriptInitialize(void)
   
   const char* partyClass = "Party";
   engine->RegisterObjectType(partyClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(partyClass, "void Join(Character@)",  asMETHODPR(Party,Join,(InstanceDynamicObject*),void), asCALL_THISCALL);
-  engine->RegisterObjectMethod(partyClass, "void Leave(Character@)", asMETHODPR(Party,Join,(InstanceDynamicObject*),void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(partyClass, "void Join(Character@)",     asMETHODPR(Party,Join,(InstanceDynamicObject*),void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(partyClass, "void Leave(Character@)",    asMETHODPR(Party,Join,(InstanceDynamicObject*),void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(partyClass, "void Export(string) const", asMETHOD(Party,Export), asCALL_THISCALL);
+  engine->RegisterGlobalFunction("Party@ ImportParty(string)", asFUNCTION(Party::Import), asCALL_CDECL);
+  engine->RegisterObjectMethod(levelClass, "void SetEntryZone(Party@, string)", asMETHODPR(Level,SetEntryZone,(Party&, const std::string&),void), asCALL_THISCALL);
 
   const char* gametaskClass = "Game";
   engine->RegisterObjectType(gametaskClass, 0, asOBJ_REF | asOBJ_NOCOUNT);

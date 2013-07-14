@@ -38,40 +38,43 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   NodePath bodyNP = object->nodePath.find("**/+Character");
   _character      = dynamic_cast<Character*>(bodyNP.node());
 
-  PT(CharacterJointBundle) bodyBundle = _character->get_bundle(0);
+  if (_character && _character->get_bundle(0))
+  {
+    PT(CharacterJointBundle) bodyBundle = _character->get_bundle(0);
 
-  //HAIL MICROSOFT
-  string listJoints[] = { "Horn", "Mouth", "BattleSaddle" };
-  for (unsigned int i = 0; i<GET_ARRAY_SIZE(listJoints); i++) {
-    for (unsigned short it = 0 ; it < 2 ; ++it)
-    {
-      stringstream       jointName;
-      stringstream       npName;
-      PT(CharacterJoint) joint;
-      NodePath           tmp;
-
-      //jointName << "attach_"  << listJoints[i] << "_" << (it + 1);
-      //npName    << "equiped_" << listJoints[i] << "_" << (it + 1);
-      jointName << "Horn"; // TODO Get models with the proper joints
-      npName    << "equiped_" << listJoints[i] << "_" << (it + 1);
-      joint     = _character->find_joint(jointName.str());
-
-      if (joint)
+    //HAIL MICROSOFT
+    string listJoints[] = { "Horn", "Mouth", "BattleSaddle" };
+    for (unsigned int i = 0; i<GET_ARRAY_SIZE(listJoints); i++) {
+      for (unsigned short it = 0 ; it < 2 ; ++it)
       {
-        tmp     = bodyNP.attach_new_node(npName.str());
-        bodyBundle->control_joint(jointName.str(), tmp.node());
+        stringstream       jointName;
+        stringstream       npName;
+        PT(CharacterJoint) joint;
+        NodePath           tmp;
 
-        if (listJoints[i] == "Horn")
-          _equiped[it].jointHorn         = tmp;
-        else if (listJoints[i] == "Mouth")
-          _equiped[it].jointMouth        = tmp;
+        //jointName << "attach_"  << listJoints[i] << "_" << (it + 1);
+        //npName    << "equiped_" << listJoints[i] << "_" << (it + 1);
+        jointName << "Horn"; // TODO Get models with the proper joints
+        npName    << "equiped_" << listJoints[i] << "_" << (it + 1);
+        joint     = _character->find_joint(jointName.str());
+
+        if (joint)
+        {
+          tmp     = bodyNP.attach_new_node(npName.str());
+          bodyBundle->control_joint(jointName.str(), tmp.node());
+
+          if (listJoints[i] == "Horn")
+            _equiped[it].jointHorn         = tmp;
+          else if (listJoints[i] == "Mouth")
+            _equiped[it].jointMouth        = tmp;
+          else
+            _equiped[it].jointBattleSaddle = tmp;
+        }
         else
-          _equiped[it].jointBattleSaddle = tmp;
+          cout << "/!\\ Joint " << jointName.str() << " doesn't exist for Character " << _object->nodePath.get_name() << endl;
       }
-      else
-	cout << "/!\\ Joint " << jointName.str() << " doesn't exist for Character " << _object->nodePath.get_name() << endl;
     }
-  };
+  }
 
   _type         = ObjectTypes::Character;
   _actionPoints = 0;
@@ -147,6 +150,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
     string prefixPath  = "scripts/ai/";
 
     _script = new AngelScript::Object(prefixPath + object->script + ".as");
+    _skill_target.Initialize(prefixPath + object->script + ".as", _script->GetContext());
     _script->asDefineMethod("main",                 "void   main(Character@, float)");
     _script->asDefineMethod("combat",               "void   combat(Character@)");
     _script->asDefineMethod("RequestStopFollowing", "void   RequestStopFollowing(Character@, Character@)");
@@ -464,9 +468,10 @@ void ObjectCharacter::Fading(void)
       else
         _fading_in = false;
     }
+    if (_fading_in == false) // Quick hack for characters not fading back in completely
+      color.set_w(255);
   }
   GetNodePath().set_color(color);
-  // Alpha not supported ? Fallback to this.
   if (color.get_w() == 0)
     GetNodePath().hide();
   else if (GetNodePath().is_hidden())
@@ -1136,7 +1141,7 @@ void     ObjectCharacter::CheckFieldOfView(void)
   Timer profile;
   cout << "Checking Field of View for " << GetName() << endl;
   PStatCollector     collector("Level:Characters:FieldOfView");
-  short              perception = GetStatController()->Model().GetSpecial("PER");
+  short              perception = (GetStatController() != 0) ? GetStatController()->Model().GetSpecial("PER") : 5;
   CollisionTraverser fovTraverser;
   float              fovRadius  = 20 + (perception * 5);
   

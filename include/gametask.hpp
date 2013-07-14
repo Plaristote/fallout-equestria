@@ -101,10 +101,11 @@ public:
   std::function<bool (const std::string&)> _is_level_buff;
 
   // Getters
-  TimeManager&          GetTimeManager(void)  { return (_timeManager); }
-  WorldDiplomacy&       GetDiplomacy(void)    { return (_dataEngine.GetDiplomacy()); }
-  QuestManager&         GetQuestManager(void) { return (*_quest_manager); }
-  Party*                GetPlayerParty(void)  { return (_playerParty); }
+  TimeManager&          GetTimeManager(void)    { return (_timeManager); }
+  WorldDiplomacy&       GetDiplomacy(void)      { return (_dataEngine.GetDiplomacy()); }
+  QuestManager&         GetQuestManager(void)   { return (*_quest_manager); }
+  Party*                GetPlayerParty(void)    { return (_playerParty); }
+  const std::string&    GetSavePath(void) const { return (_savePath); }
 
   ISampleInstance*      PlaySound(const std::string&);
 

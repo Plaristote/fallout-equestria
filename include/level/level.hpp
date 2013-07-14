@@ -36,6 +36,7 @@
 
 class Level
 {
+  friend class Party;
 public:
   static Level* CurrentLevel;
   
@@ -173,6 +174,7 @@ private:
   typedef std::list<LevelExitZone*>         ExitZones;
   typedef std::list<Projectile*>            Projectiles;
   typedef std::vector<LevelZone*>           LevelZones;
+  typedef std::list<Party*>                 Parties;
   
   void              SetupCamera(void);
 
@@ -208,6 +210,7 @@ private:
   Characters            _characters;
   Characters::iterator  _itCharacter;
   Characters::iterator  _currentCharacter;
+  Parties               _parties;
   NodePath              _player_halo;
   
   ExitZones             _exitZones;

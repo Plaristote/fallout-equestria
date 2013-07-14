@@ -104,7 +104,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   {
     std::cout << "Failed to load file" << std::endl;
   }
-  
+
   if (_world->sunlight_enabled)
     InitSun();
 
@@ -593,6 +593,7 @@ Level::~Level()
   ForEach(_projectiles, [](Projectile* projectile)     { delete projectile; });
   ForEach(_objects,     [](InstanceDynamicObject* obj) { delete obj;        });
   ForEach(_exitZones,   [](LevelExitZone* zone)        { delete zone;       });
+  ForEach(_parties,     [](Party* party)               { delete party;      });
   CurrentLevel = 0;
   for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
   {

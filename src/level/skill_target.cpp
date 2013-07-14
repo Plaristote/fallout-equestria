@@ -7,9 +7,18 @@ SkillTarget::SkillTarget(InstanceDynamicObject* self) : self(self)
   script = 0;
 }
 
-void SkillTarget::Initialize(const std::string& module_name, const std::string& filepath, asIScriptContext* context)
+SkillTarget::~SkillTarget()
 {
-  script = new AngelScript::Object(context, filepath);
+  if (script != 0)
+    delete script;
+}
+
+void SkillTarget::Initialize(const std::string& filepath, asIScriptContext* context)
+{
+  if (context != 0)
+    script = new AngelScript::Object(context, filepath);
+  else
+    script = new AngelScript::Object(filepath);
   script->asDefineMethod("UseSkill", "bool UseSkill(DynamicObject@, Character@, string)");
 }
 

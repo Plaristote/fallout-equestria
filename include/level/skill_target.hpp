@@ -11,7 +11,8 @@ class SkillTarget
 {
 public:
   SkillTarget(InstanceDynamicObject* self);
-  void Initialize(const std::string& module_name, const std::string& filepath, asIScriptContext* context);
+  ~SkillTarget();
+  void Initialize(const std::string& filepath, asIScriptContext* context);
   void UseSkill(ObjectCharacter* user, std::string skill);  
 private:
   InstanceDynamicObject* self;

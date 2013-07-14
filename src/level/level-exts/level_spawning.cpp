@@ -86,7 +86,7 @@ bool Level::MoveCharacterTo(ObjectCharacter* character, Waypoint* wp)
   return (false);
 }
 
-void Level::SetEntryZone(Party& player_party, const std::string& name)
+void Level::SetEntryZone(Party& party, const std::string& name)
 {
   EntryZone* zone               = _world->GetEntryZoneByName(name);
 
@@ -110,8 +110,8 @@ void Level::SetEntryZone(Party& player_party, const std::string& name)
   if (zone)
   {
     cout << "[Level][SetEntryZone] Inserting characters into entry zone '" << zone->name << "'" << endl;
-    auto party_it  = player_party.GetObjects().begin();
-    auto party_end = player_party.GetObjects().end();
+    auto party_it  = party.GetObjects().begin();
+    auto party_end = party.GetObjects().end();
 
     for (; party_it != party_end ; ++party_it)
     {
@@ -123,7 +123,15 @@ void Level::SetEntryZone(Party& player_party, const std::string& name)
       for (; it != end ; ++it)
       {
         if (MoveCharacterTo(character, *it))
+        {
+          // Forcing the character to fade in
+          LColor color = character->GetNodePath().get_color();
+
+          color.set_w(0);
+          character->GetNodePath().set_color(color);
+          character->SetVisible(true);
           break ;
+        }
       }
     }
   }
