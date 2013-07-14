@@ -4,31 +4,27 @@
 
 SkillTarget::SkillTarget(InstanceDynamicObject* self) : self(self)
 {
-  hook_use_skill = 0;
+  script = 0;
 }
 
 void SkillTarget::Initialize(const std::string& module_name, const std::string& filepath, asIScriptContext* context)
 {
-  _script_func_ptrs.clear();
-  _script_func_ptrs.push_back(ScriptFuncPtr(&hook_use_skill, "bool UseSkill(DynamicObject@, Character@, string)"));
-  LoadScript(module_name, filepath, context);
+  script = new AngelScript::Object(context, filepath);
+  script->asDefineMethod("UseSkill", "bool UseSkill(DynamicObject@, Character@, string)");
 }
 
 void SkillTarget::UseSkill(ObjectCharacter* user, std::string skill)
 {
-  if (_script_context != 0)
+  if (script != 0 && script->IsDefined("UseSkill"))
   {
-    ReloadFunction(&hook_use_skill);
-    if (hook_use_skill)
-    {
-      _script_context->Prepare(hook_use_skill);
-      _script_context->SetArgObject(0, self);
-      _script_context->SetArgObject(1, user);
-      _script_context->SetArgObject(2, &skill);
-      _script_context->Execute();
-      if (_script_context->GetReturnByte() != 0)
-        return ;
-    }
+    AngelScript::Type<InstanceDynamicObject*> param_self(self);
+    AngelScript::Type<ObjectCharacter*>       param_user(user);
+    AngelScript::Type<std::string*>           param_skill(&skill);
+    bool                                      has_effect;
+
+    has_effect = script->Call("UseSkill", 3, &param_self, &param_user, &param_skill);
+    if (has_effect)
+      return ;
   }
   user->ThatDoesNothing();
 }

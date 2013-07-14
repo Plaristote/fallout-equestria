@@ -152,7 +152,6 @@ x ----> Script interface for light management
 
   -> GameTask
   --> Compression for save slots
-  --> Interactive interfaces for loading screens
 
   -> Game Editor
   --> Re-organize the MapObjects as a hierarchy (a MapObject must be able to contain others)

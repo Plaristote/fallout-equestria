@@ -50,7 +50,7 @@ private:
   NodePath           _graphicalEffect;
 };
 
-class ObjectCharacter : public InstanceDynamicObject, public Scriptable
+class ObjectCharacter : public InstanceDynamicObject
 {
 public:
   struct FovEnemy
@@ -173,7 +173,7 @@ public:
   void                RequestFollow(ObjectCharacter* follow, ObjectCharacter* from);
   void                RequestStopFollowing(ObjectCharacter* follow, ObjectCharacter* from);
   int                 AskMorale(void);
-  void                SendMessage(const std::string&);
+  void                SendMessage(std::string&);
   
 private:
   void                RunRotate(float elapsedTime);
@@ -185,7 +185,7 @@ private:
   void                StartRunAnimation(void);
   void                StopRunAnimation(InstanceDynamicObject*);
   
-  void                RequestCharacter(ObjectCharacter*, ObjectCharacter*, asIScriptFunction*);
+  void                RequestCharacter(ObjectCharacter*, ObjectCharacter*, const std::string& func);
   
   void                CallbackActionUse(InstanceDynamicObject* object);
   void                DebugPathfinding(void);
@@ -250,12 +250,7 @@ private:
   std::list<ObjectCharacter*> _fovAllies;
   
   // Script
-  asIScriptFunction* _scriptMain;
-  asIScriptFunction* _scriptFight;
-
-  asIScriptFunction *_scriptRequestAttack, *_scriptRequestHeal, *_scriptRequestFollow, *_scriptRequestStopFollowing;
-  asIScriptFunction *_scriptAskMorale;
-  asIScriptFunction* _scriptSendMessage;
+  AngelScript::Object*      _script;
 };
 
 template<> struct ObjectType2Code<ObjectCharacter> { enum { Type = ObjectTypes::Character }; };

@@ -141,45 +141,29 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   }
   
   // Script
-  _script_context = 0;
-  _script_module  = 0;
   if (object->script == "")
     object->script = "general_pony";
   {
-    string prefixName = "IA_";
-    string prefixPath = "scripts/ai/";
+    string prefixPath  = "scripts/ai/";
 
-    // Get the running functions
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptMain,  "void main(Character@, float)"));
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptFight, "void combat(Character@)"));
+    _script = new AngelScript::Object(prefixPath + object->script + ".as");
+    _script->asDefineMethod("main",                 "void   main(Character@, float)");
+    _script->asDefineMethod("combat",               "void   combat(Character@)");
+    _script->asDefineMethod("RequestStopFollowing", "void   RequestStopFollowing(Character@, Character@)");
+    _script->asDefineMethod("RequestFollow",        "void   RequestFollow(Character@, Character@)");
+    _script->asDefineMethod("RequestHeal",          "void   RequestHeal(Character@, Character@)");
+    _script->asDefineMethod("AskMorale",            "int    AskMorale(Character@)");
+    _script->asDefineMethod("SendMessage",          "void   ReceiveMessage(string)");
+    _script->asDefineMethod("Load",                 "void   Load(Serializer@)");
+    _script->asDefineMethod("Save",                 "void   Save(Serializer@)");
+    _script->asDefineMethod("DefaultWeapon1",       "string default_weapon_1()");
+    _script->asDefineMethod("DefaultWeapon2",       "string default_weapon_2()");
 
-    // Get the communication functions
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestStopFollowing, "void RequestStopFollowing(Character@, Character@)"));
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestFollow,        "void RequestFollow(Character@, Character@)"));
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestAttack,        "void RequestAttack(Character@, Character@)"));
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestHeal,          "void RequestHeal(Character@, Character@)"));
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAskMorale,            "int  AskMorale()"));
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptSendMessage,          "void ReceiveMessage(string)"));
-    LoadScript(prefixName + GetName(), prefixPath + object->script + ".as");
-
-    _skill_target.Initialize(prefixName + GetName(), prefixPath + object->script + ".as", _script_context);
-
-    // Get Default Weapons from script
-    if (_script_module)
+    const char* default_weapons[] = { "DefaultWeapon1", "DefaultWeapon2" };
+    for (unsigned short i = 0 ; i < 2 ; ++i)
     {
-      asIScriptFunction* funcGetDefWeapon[2];
-
-      funcGetDefWeapon[0] = _script_module->GetFunctionByDecl("string default_weapon_1()");
-      funcGetDefWeapon[1] = _script_module->GetFunctionByDecl("string default_weapon_2()");
-      for (int i = 0 ; i < 2 ; ++i)
-      {
-        if (funcGetDefWeapon[i])
-        {
-          _script_context->Prepare(funcGetDefWeapon[i]);
-          _script_context->Execute();
-          defEquiped[i] = *(reinterpret_cast<string*>(_script_context->GetReturnAddress()));
-        }
-      }
+      if (_script->IsDefined(default_weapons[i]))
+        defEquiped[i] = *(string*)(_script->Call(default_weapons[i]));
     }
   }
   
@@ -511,31 +495,27 @@ void ObjectCharacter::Run(float elapsedTime)
       Fading();
     if (state == Level::Normal && _hitPoints > 0)
     {
-      ReloadFunction(&_scriptMain);
-      if (_scriptMain)
+      if (_script->IsDefined("main"))
       {
         collector_ai.start();
-        _script_context->Prepare(_scriptMain);
-        _script_context->SetArgObject(0, this);
-        _script_context->SetArgFloat(1, elapsedTime);
-        _script_context->Execute();
+        AngelScript::Type<ObjectCharacter*> self(this);
+        AngelScript::Type<float>            p_time(elapsedTime);
+        
+        _script->Call("main", 2, &self, &p_time);
         collector_ai.stop();
       }
     }
     else if (state == Level::Fight)
     {
-      ReloadFunction(&_scriptFight);
       if (_hitPoints <= 0 || _actionPoints == 0)
 	_level->NextTurn();
-      else if (!(IsMoving()) && _scriptFight) // TODO replace with something more appropriate
+      else if (!(IsMoving()) && _script->IsDefined("combat")) // TODO replace with something more appropriate
       {
-        unsigned int ap_before = _actionPoints;
-
         collector_ai.start();
-        ReloadFunction(&_scriptFight);
-	_script_context->Prepare(_scriptFight);
-	_script_context->SetArgObject(0, this);
-	_script_context->Execute();
+        AngelScript::Type<ObjectCharacter*> self(this);
+        unsigned int                        ap_before = _actionPoints;
+
+        _script->Call("combat", 1, &self);
         collector_ai.stop();
         if (ap_before == _actionPoints && !IsInterrupted() && !IsMoving()) // If stalled, skip turn
         {
@@ -1109,7 +1089,7 @@ void                ObjectCharacter::RunDeath()
 void                ObjectCharacter::CallbackActionUse(InstanceDynamicObject* user)
 {
   if (user == _level->GetPlayer())
-    _level->PlayerLootWithScript(&(GetInventory()), this, _script_context, "scripts/ai/" + _object->script + ".as");
+    _level->PlayerLootWithScript(&(GetInventory()), this, _script->GetContext(), "scripts/ai/" + _object->script + ".as");
 }
 
 /*
@@ -1231,57 +1211,56 @@ void     ObjectCharacter::CheckFieldOfView(void)
 /*
  * Script Communication
  */
-void     ObjectCharacter::SendMessage(const string& str)
+void     ObjectCharacter::SendMessage(string& str)
 {
-  if (_scriptSendMessage)
+  if (_script->IsDefined("SendMessage"))
   {
-    string cpy = str;
-
-    _script_context->Prepare(_scriptSendMessage);
-    _script_context->SetArgObject(0, &cpy);
-    _script_context->Execute();
+    AngelScript::Type<ObjectCharacter*> self(this);
+    AngelScript::Type<std::string*>     message(&str);
+    
+    _script->Call("SendMessage", 2, &self, &message);
   }
 }
 
 int      ObjectCharacter::AskMorale(void)
 {
-  if (_scriptAskMorale)
+  if (_script->IsDefined("AskMorale"))
   {
-    _script_context->Prepare(_scriptAskMorale);
-    _script_context->Execute();
-    return (_script_context->GetReturnByte());
+    AngelScript::Type<ObjectCharacter*> self(this);
+    
+    return (_script->Call("AskMorale", 1, &self));
   }
   return (0);
 }
 
 void     ObjectCharacter::RequestAttack(ObjectCharacter* f, ObjectCharacter* s)
 {
-  RequestCharacter(f, s, _scriptRequestAttack);
+  RequestCharacter(f, s, "RequestAttack");
 }
 
 void     ObjectCharacter::RequestHeal(ObjectCharacter* f, ObjectCharacter* s)
 {
-  RequestCharacter(f, s, _scriptRequestHeal);
+  RequestCharacter(f, s, "RequestHeal");
 }
 
 void     ObjectCharacter::RequestFollow(ObjectCharacter* f, ObjectCharacter* s)
 {
-  RequestCharacter(f, s, _scriptRequestFollow);
+  RequestCharacter(f, s, "RequestFollow");
 }
 
 void     ObjectCharacter::RequestStopFollowing(ObjectCharacter* f, ObjectCharacter* s)
 {
-  RequestCharacter(f, s, _scriptRequestStopFollowing);
+  RequestCharacter(f, s, "RequestStopFollowing");
 }
 
-void     ObjectCharacter::RequestCharacter(ObjectCharacter* f, ObjectCharacter* s, asIScriptFunction* func)
+void     ObjectCharacter::RequestCharacter(ObjectCharacter* f, ObjectCharacter* s, const std::string& func)
 {
-  if (func)
+  if (_script->IsDefined(func))
   {
-    _script_context->Prepare(func);
-    _script_context->SetArgObject(0, f);
-    _script_context->SetArgObject(1, s);
-    _script_context->Execute();
+    AngelScript::Type<ObjectCharacter*> self(f);
+    AngelScript::Type<ObjectCharacter*> buddy(s);
+    
+    _script->Call(func, 2, &self, &buddy);
   }
 }
 
