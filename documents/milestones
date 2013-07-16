@@ -124,7 +124,7 @@ x --> Configurable camera behavior
 ~ --> Stabilizing
 ~ --> Preparing a Windows building environment to get Windows nightly builds
 
-Milestone IV
+Milestone IV [Started July 2013]
   -> WorldMap
   --> Visibility and detection of cities
   --> Dynamically generated places (like random encounter, without encounter)
@@ -154,10 +154,13 @@ x --> Party Create/Import/Export via scripts
   --> Compression for save slots
 
   -> Game Editor
-  --> Re-organize the MapObjects as a hierarchy (a MapObject must be able to contain others)
-  --> Tree view for the object hierarchy
+x --> Asynchronous Map Loading
+x --> Re-organize the MapObjects as a hierarchy (a MapObject must be able to contain others)
+x --> Tree view for the object hierarchy
+x --> Focusing camera on selected objects
+  --> Free camera
   --> Prefabs ?
-  --> Progress bar for map loading
+  --> Indexing wp in game fixed slow wp solving. Find a way to do it in the GameEditor.
 
   -> General
 x --> Porting every AngelScript usage to the new AngelScript::Object tool

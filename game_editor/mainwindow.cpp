@@ -9,31 +9,33 @@
 #include "functorthread.h"
 #include "selectableresource.h"
 
+#define PANDA_TAB 1
+
 extern PandaFramework framework;
 
 QString objectTypes[] = { "NPC", "Shelf", "Locker", "Door" };
 
 struct PandaTask : public AsyncTask
 {
-    WindowFramework* window;
-    SceneCamera*     camera;
-    Mouse*           mouse;
-    QElapsedTimer    timer;
+  QWidget*         panda_widget;
+  WindowFramework* window;
+  SceneCamera*     camera;
+  Mouse*           mouse;
+  QElapsedTimer    timer;
 
-    int              brushTileId, brushTileX, brushTileY;
+  PandaTask() : window(0), camera(0), mouse(0) { }
 
-    PandaTask() { }
+  DoneStatus do_task(void)
+  {
+    float elapsedTime = timer.elapsed();
 
-    DoneStatus do_task(void)
-    {
-        float elapsedTime = timer.elapsed();
-
-        elapsedTime /= 1000;
-        camera->Run(elapsedTime);
-        mouse->Run();
-        timer.start();
-        return (AsyncTask::DS_cont);
-    }
+    elapsedTime /= 1000;
+    camera->SetEnabledScroll(dynamic_cast<MouseWatcher*>(window->get_mouse().node())->has_mouse());
+    camera->Run(elapsedTime);
+    mouse->Run();
+    timer.start();
+    return (AsyncTask::DS_cont);
+  }
 };
 
 PandaTask my_task;
@@ -122,10 +124,6 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(ui->widget, SIGNAL(Initialized()), this, SLOT(PandaInitialized()));
     connect(this,       SIGNAL(Closed()),      app,  SLOT(Terminate()));
 
-    for (short i = 0 ; i < 4 ; ++i)
-    {
-    }
-
     for (short i = 0 ; i < 5 ; ++i)
     {
         tabScript.scriptCategories[i].setText(0, strScriptCategories[i]);
@@ -181,6 +179,10 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(ui->charsheetDel,  SIGNAL(clicked()),                   this,                SLOT(DeleteCharsheet()));
     connect(ui->charsheetSave, SIGNAL(clicked()),                   ui->charsheetEditor, SLOT(Save()));
 
+    connect(ui->treeWidget, SIGNAL(FocusObject(MapObject*)),            this, SLOT(MapObjectFocus(MapObject*)));
+    connect(ui->treeWidget, SIGNAL(FocusDynamicObject(DynamicObject*)), this, SLOT(DynamicObjectFocus(DynamicObject*)));
+
+    ui->treeWidget->header()->hide();
     ui->scriptList->header()->hide();
 }
 
@@ -191,7 +193,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::CurrentTabChanged(int ntab)
 {
-    _app.SetPandaEnabled(ntab == 0); // The first tab is the only one using Panda3D
+    _app.SetPandaEnabled(ntab == PANDA_TAB); // The first tab is the only one using Panda3D
 }
 
 void MainWindow::AddCharsheet()
@@ -231,7 +233,6 @@ void MainWindow::CreateMap(void)
     if (world)
       delete world;
     world     = new World(_window);
-    levelName = name;
     save_map_use_thread = false;
     SaveMap();
     save_map_use_thread = true;
@@ -363,21 +364,6 @@ void MainWindow::CameraMoveRight()
     my_task.camera->MoveH(30.f);
 }
 
-void MainWindow::DrawMap()
-{
-   if (currentHoveredCaseX != -1)
-   {
-      if (my_task.brushTileId == -1)
-      {
-        my_task.brushTileId = 0;
-        my_task.brushTileX  = currentHoveredCaseX;
-        my_task.brushTileY  = currentHoveredCaseY;
-      }
-      else
-        my_task.brushTileId = -1;
-   }
-}
-
 void MainWindow::PandaButtonPressed(QMouseEvent*)
 {
 }
@@ -396,6 +382,37 @@ void MainWindow::PandaButtonRelease(QMouseEvent*)
       DynamicObjectSelect();
 }
 
+#define MAP_TABS_OBJECTS            2
+#define OBJECT_TABS_MAP_OBJECTS     0
+#define OBJECT_TABS_DYNAMIC_OBJECTS 1
+#define OBJECT_TABS_LIGHTS          2
+
+void MainWindow::MapObjectFocus(MapObject* mapobject)
+{
+  if (mapobject)
+  {
+    mapobjectHovered = mapobject;
+    MapObjectSelect();
+    ui->map_tabs->setCurrentIndex(MAP_TABS_OBJECTS);
+    ui->object_tabs->setCurrentIndex(OBJECT_TABS_MAP_OBJECTS);
+    my_task.camera->CenterCameraInstant(mapobject->nodePath.get_pos());
+  }
+}
+
+void MainWindow::DynamicObjectFocus(DynamicObject* dynamic_object)
+{
+    cout << "DynamicObjectFocus" << endl;
+  if (dynamic_object)
+  {
+    cout << "-> Non zero pointre" << endl;
+    dynamicObjectHovered = dynamic_object;
+    DynamicObjectSelect();
+    ui->map_tabs->setCurrentIndex(MAP_TABS_OBJECTS);
+    ui->object_tabs->setCurrentIndex(OBJECT_TABS_DYNAMIC_OBJECTS);
+    my_task.camera->CenterCameraInstant(dynamic_object->nodePath.get_pos());
+  }
+}
+
 //Pass the locale data from the localization manager to the dialog editor
 void MainWindow::SetDefaultLocalization() {
 	tabDialog.LoadLocale( tabL18n.GetDefaultLanguage() );
@@ -408,7 +425,7 @@ void MainWindow::PandaInitialized()
 
     _window = window;
 
-    my_task.brushTileId = -1;
+    my_task.panda_widget = ui->widget;
     my_task.window  = window;
     my_task.camera  = new SceneCamera(window, window->get_camera_group());
     my_task.mouse   = new Mouse(window);
@@ -539,6 +556,12 @@ void MainWindow::PandaInitialized()
 
     wizardDynObject = false;
     wizardMapObject = false;
+    {
+      QString level = ui->listMap->currentText();
+
+      if (level != "")
+        LoadMap(level);
+    }
 }
 
 void MainWindow::ObjectAdd()
@@ -1249,13 +1272,16 @@ void MainWindow::MapFocused(void)
 
 void MainWindow::LoadMap(const QString& path)
 {
-    if (ui->tabWidget->currentIndex() != 0)
+    if (ui->tabWidget->currentIndex() != PANDA_TAB)
     {
       connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(MapFocused()));
       return ;
     }
+    if (my_task.camera == 0 || (world != 0 && levelName == path))
+      return ;
     QPandaApplication::SetPandaEnabled(true);
     my_task.camera->SetPosition(0, 0, 75);
+    levelName             = path;
     mapobjectSelected     = 0;
     mapobjectHovered      = 0;
     dynamicObjectSelected = 0;
@@ -1263,8 +1289,9 @@ void MainWindow::LoadMap(const QString& path)
     ui->objectEditor->setEnabled(false);
     ui->interObjEditor->setEnabled(false);
     waypointsSelection.clear();
-    levelName = path;
 
+    FunctorThread& thread = *FunctorThread::Create([this](void)
+    {
     std::ifstream file;
     std::string   fullpath = (QDir::currentPath() + "/maps/" + levelName + ".blob").toStdString();
 
@@ -1295,6 +1322,7 @@ void MainWindow::LoadMap(const QString& path)
                 delete world;
             world = new World(_window);
             world->UnSerialize(*packet);
+            std::cout << "World unserialized" << std::endl;
 
             delete   packet;
             delete[] raw;
@@ -1307,8 +1335,10 @@ void MainWindow::LoadMap(const QString& path)
     else
       QMessageBox::warning(this, "Fatal Error", "Can't load map file '" + QString::fromStdString(fullpath) + "'");
 
+    std::cout << "Post loading map" << std::endl;
     if (world)
     {
+        ui->treeWidget->SetWorld(world);
         dialogSaveMap.SetEnabledSunlight(world->sunlight_enabled);
 
         ui->entryZoneList->clear();
@@ -1332,7 +1362,15 @@ void MainWindow::LoadMap(const QString& path)
 
         waypointGenerate.SetWorld(world);
         dialogObject.SetWorld(world);
+        std::cout << "Finished Loading Map" << std::endl;
     }
+    });
+
+    QPandaApplication::SetPandaEnabled(false);
+    DisableLevelEditor();
+    connect(&thread, SIGNAL(Done()), ui->progressBar, SLOT(hide()),              Qt::QueuedConnection);
+    connect(&thread, SIGNAL(Done()), this,            SLOT(EnableLevelEditor()), Qt::QueuedConnection);
+    thread.start();
 }
 
 void MainWindow::EntryZoneAdd()
@@ -1600,6 +1638,7 @@ void MainWindow::ExitZoneDestinationDelete()
 void MainWindow::EnableLevelEditor(void)
 {
     ui->tabLevelDesigner->setEnabled(true);
+    QPandaApplication::SetPandaEnabled(true);
 }
 
 void MainWindow::DisableLevelEditor(void)
@@ -1627,14 +1666,7 @@ void MainWindow::SaveMap()
     world->do_compile_waypoints = dialogSaveMap.DoCompileWaypoints();
     world->sunlight_enabled     = dialogSaveMap.DoEnableSunlight();
 
-    auto update_progress_bar = [this](const std::string& label, float percentage)
-    {
-      QString format = QString::fromStdString(label) + "%p%";
-
-      SigUpdateProgressBar(format, percentage);
-    };
-
-    FunctorThread& thread = *FunctorThread::Create([this, &thread, update_progress_bar](void)
+    FunctorThread& thread = *FunctorThread::Create([this, &thread](void)
     {
       std::ofstream file;
       std::string   path = (QDir::currentPath() + "/maps/" + levelName + ".blob").toStdString();
@@ -1644,7 +1676,12 @@ void MainWindow::SaveMap()
       {
         Utils::Packet packet;
 
-        world->Serialize(packet, update_progress_bar);
+        world->Serialize(packet, [this, &thread](const std::string& label, float percentage)
+        {
+          QString format = QString::fromStdString(label) + "%p%";
+
+          SigUpdateProgressBar(format, percentage);
+        });
         packet.PrintContent();
         file.write(packet.raw(), packet.size());
         file.close();

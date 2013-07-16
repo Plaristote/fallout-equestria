@@ -30,7 +30,7 @@ public slots:
 private:
     static bool           _continue;
     static PandaFramework _framework;
-    QTimer                _timer;
+    static QTimer         _timer;
     static bool           _panda_enabled;
 };
 

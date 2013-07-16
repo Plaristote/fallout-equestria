@@ -27,7 +27,7 @@
    <item>
     <widget class="QWidget" name="widget" native="true">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -50,8 +50,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>305</width>
-           <height>194</height>
+           <width>127</width>
+           <height>186</height>
           </rect>
          </property>
          <attribute name="label">
@@ -129,7 +129,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>288</width>
+           <width>176</width>
            <height>260</height>
           </rect>
          </property>
@@ -228,7 +228,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>288</width>
+           <width>201</width>
            <height>388</height>
           </rect>
          </property>
@@ -374,7 +374,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>288</width>
+           <width>242</width>
            <height>234</height>
           </rect>
          </property>
@@ -442,6 +442,14 @@
          </layout>
         </widget>
         <widget class="QWidget" name="page_2">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>264</width>
+           <height>194</height>
+          </rect>
+         </property>
          <attribute name="label">
           <string>Special Encounters</string>
          </attribute>

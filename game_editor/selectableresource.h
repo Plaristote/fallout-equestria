@@ -2,7 +2,6 @@
 #define SELECTABLERESOURCE_H
 
 #include <QDialog>
-#include <functional>
 
 namespace Ui { class SelectableResource; }
 

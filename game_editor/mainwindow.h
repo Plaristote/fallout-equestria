@@ -141,6 +141,7 @@ private slots:
     void MapObjectScaleY(void);
     void MapObjectScaleZ(void);
     void MapObjectFloor(void);
+    void MapObjectFocus(MapObject*);
 
     // DYNAMICOBJECTS
     void DynamicObjectVisible(void);
@@ -159,6 +160,7 @@ private slots:
     void DynamicObjectScaleY(void);
     void DynamicObjectScaleZ(void);
     void DynamicObjectSetWaypoint(void);
+    void DynamicObjectFocus(DynamicObject*);
 
     // LIGHTS
     void LightVisible(void);
@@ -170,9 +172,6 @@ private slots:
     void LightUpdatePosition(void);
     void LightUpdateType(void);
     void LightCompile(void);
-
-public:
-    void DrawMap(void);
 
 private:
     QPandaApplication&       _app;

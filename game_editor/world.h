@@ -60,19 +60,6 @@ namespace ColMask
 
 struct World;
 
-struct FBoundingBox
-{
-  float left;
-  float top;
-  float width;
-  float height;
-
-  bool  Intersects(float x, float y)
-  {
-    return (x >= left && x <= left + width && y >= top && y <= top + height);
-  }
-};
-
 struct Waypoint
 {
     struct ArcObserver
@@ -110,7 +97,6 @@ struct Waypoint
     Arcs                arcs;
     ArcsWithdrawed      arcs_withdrawed;
     NodePath            nodePath;
-    FBoundingBox        mouseBox;
     
     void WithdrawArc(Waypoint* other);
     void UnwithdrawArc(Waypoint* other, ArcObserver* observer);
@@ -168,6 +154,16 @@ struct MapObject
 
     std::string   strModel;
     std::string   strTexture;
+    std::string   parent;
+
+    void ReparentTo(MapObject* object)
+    {
+      if (object)
+      {
+        parent = object->nodePath.get_name();
+        nodePath.reparent_to(object->nodePath);
+      }
+    }
 
     void UnSerialize(WindowFramework* window, Utils::Packet& packet);
     void Serialize(Utils::Packet& packet);
@@ -288,6 +284,29 @@ struct WorldLight
     
     light->set_color(color);
   }
+  
+  void   SetAttenuation(float a, float b, float c)
+  {
+    switch (type)
+    {
+      case Point:
+      {
+        PT(PointLight) point_light = reinterpret_cast<PointLight*>(light.p());
+
+        point_light->set_attenuation(LVecBase3(a, b, c));
+        break ;
+      }
+      case Spot:
+      {
+        PT(Spotlight) spot_light = reinterpret_cast<Spotlight*>(light.p());
+
+        spot_light->set_attenuation(LVecBase3(a, b, c));
+        break ;
+      }
+      default:
+        break ;
+    }
+  }
 
   void   SetPosition(LPoint3 position)
   {
@@ -307,6 +326,7 @@ struct WorldLight
     parent_type = Type_DynamicObject;
     parent      = object->nodePath;
     parent_i    = object;
+    nodePath.reparent_to(parent);
   }
   
   void ReparentTo(MapObject* object)
@@ -314,6 +334,12 @@ struct WorldLight
     parent_type = Type_MapObject;
     parent      = object->nodePath;
     parent_i    = object;
+    nodePath.reparent_to(parent);
+  }
+
+  MapObject*  Parent(void) const
+  {
+      return (parent_i);
   }
   
   std::string name;
@@ -456,6 +482,9 @@ struct World
     void           SetDynamicObjectsVisible(bool v);
     void           DynamicObjectSetWaypoint(DynamicObject&, Waypoint&);
     void           DynamicObjectChangeFloor(DynamicObject&, unsigned char floor);
+
+    void           ReparentObject(MapObject* object, MapObject*     new_parent);
+    void           ReparentObject(MapObject* object, const std::string& name);
     
     void           AddExitZone(const std::string&);
     void           DeleteExitZone(const std::string&);
@@ -473,8 +502,6 @@ struct World
     WorldLight*    GetLightByName(const std::string&);
     void           CompileLight(WorldLight*, unsigned char = ColMask::Object | ColMask::DynObject);
     
-    Waypoint*      GetWaypointAt(LPoint2f);
-
     typedef std::function<void (const std::string&, float)> ProgressCallback;
 
     void           UnSerialize(Utils::Packet& packet);
@@ -493,5 +520,3 @@ struct World
 };
 
 #endif // WORLD_H
-
-class BoundingBox;
