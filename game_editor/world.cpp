@@ -390,7 +390,7 @@ void World::AddLight(WorldLight::Type type, const std::string& name)
 {
   lights.push_back(WorldLight(type, WorldLight::Type_None, rootLights, name));
 #ifdef GAME_EDITOR
-  lights.rbegin()->symbol.reparent_to(lightSymbols);
+  lights.rbegin()->symbol.reparent_to(rootLights);
 #endif
 }
 
@@ -491,6 +491,17 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
   //cout << "Number of enlightened objects -> " << light->enlightened.size() << endl;
 
   colNp.detach_node();
+}
+
+void WorldLight::ReparentTo(World* world)
+{
+  parent_type = Type_None;
+  parent_i    = 0;
+  nodePath.reparent_to(world->rootLights);
+#ifdef GAME_EDITOR
+  //symbol.reparent_to(world->lightSymbols);
+  nodePath.reparent_to(world->rootLights);
+#endif
 }
 
 void WorldLight::SetEnabled(bool set_enabled)
@@ -1089,6 +1100,8 @@ void WorldLight::Initialize(void)
 #ifdef GAME_EDITOR
   if (!(World::model_sphere.is_empty()))
     World::model_sphere.instance_to(symbol);
+  else
+    cout << "The horror ! Model spehre is unavailable" << endl;
 #endif
 }
 
@@ -1153,7 +1166,10 @@ void WorldLight::Serialize(Utils::Packet& packet)
  */
 void           World::UnSerialize(Utils::Packet& packet)
 {
-    cout << "Unserialize waypoints" << endl;
+  if (blob_revision >= 1)
+    packet >> blob_revision;
+
+  cout << "Unserialize waypoints" << endl;
   // Waypoints
   {
     int size;
@@ -1376,6 +1392,8 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
   if (do_compile_waypoints)
     CompileWaypoints(progress_callback);
 # endif
+
+  packet << blob_revision;
 
   // Waypoints
   {

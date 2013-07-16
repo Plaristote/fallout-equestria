@@ -284,6 +284,28 @@ struct WorldLight
     
     light->set_color(color);
   }
+
+  LVecBase3f GetAttenuation(void) const
+  {
+    switch (type)
+    {
+      case Point:
+      {
+        PT(PointLight) point_light = reinterpret_cast<PointLight*>(light.p());
+
+        return (point_light->get_attenuation());
+      }
+      case Spot:
+      {
+        PT(Spotlight) spot_light = reinterpret_cast<Spotlight*>(light.p());
+
+        return (spot_light->get_attenuation());
+      }
+      default:
+          break;
+    }
+    return (LVecBase3f(0, 0, 0));
+  }
   
   void   SetAttenuation(float a, float b, float c)
   {
@@ -320,13 +342,13 @@ struct WorldLight
 
   void UnSerialize(World*, Utils::Packet& packet);
   void Serialize(Utils::Packet& packet);
-  
+
+  void ReparentTo(World* world);
+
   void ReparentTo(DynamicObject* object)
   {
+    ReparentTo((MapObject*)object);
     parent_type = Type_DynamicObject;
-    parent      = object->nodePath;
-    parent_i    = object;
-    nodePath.reparent_to(parent);
   }
   
   void ReparentTo(MapObject* object)
@@ -335,6 +357,9 @@ struct WorldLight
     parent      = object->nodePath;
     parent_i    = object;
     nodePath.reparent_to(parent);
+#ifdef GAME_EDITOR
+    symbol.reparent_to(parent);
+#endif
   }
 
   MapObject*  Parent(void) const

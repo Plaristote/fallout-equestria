@@ -181,6 +181,7 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
 
     connect(ui->treeWidget, SIGNAL(FocusObject(MapObject*)),            this, SLOT(MapObjectFocus(MapObject*)));
     connect(ui->treeWidget, SIGNAL(FocusDynamicObject(DynamicObject*)), this, SLOT(DynamicObjectFocus(DynamicObject*)));
+    connect(ui->treeWidget, SIGNAL(FocusLight(WorldLight*)),            this, SLOT(LightFocus(WorldLight*)));
 
     ui->treeWidget->header()->hide();
     ui->scriptList->header()->hide();
@@ -387,6 +388,17 @@ void MainWindow::PandaButtonRelease(QMouseEvent*)
 #define OBJECT_TABS_DYNAMIC_OBJECTS 1
 #define OBJECT_TABS_LIGHTS          2
 
+void MainWindow::LightFocus(WorldLight* light)
+{
+  if (light)
+  {
+    // TODO Focus the light in the interface too
+    ui->map_tabs->setCurrentIndex(MAP_TABS_OBJECTS);
+    ui->object_tabs->setCurrentIndex(OBJECT_TABS_LIGHTS);
+    my_task.camera->CenterCameraInstant(light->symbol.get_pos());
+  }
+}
+
 void MainWindow::MapObjectFocus(MapObject* mapobject)
 {
   if (mapobject)
@@ -525,24 +537,27 @@ void MainWindow::PandaInitialized()
 // LIGHTS
      lightSelected      = 0;
      lightIgnoreChanges = false;
-     connect(ui->lightsAdd,      SIGNAL(clicked()),                 this, SLOT(LightAdd()));
-     connect(ui->lightsDel,      SIGNAL(clicked()),                 this, SLOT(LightDelete()));
-     connect(ui->lightCompile,   SIGNAL(clicked()),                 this, SLOT(LightCompile()));
-     connect(ui->lightsSelect,   SIGNAL(currentIndexChanged(int)),  this, SLOT(LightSelected()));
-     connect(ui->lightTypesList, SIGNAL(currentIndexChanged(int)),  this, SLOT(LightUpdateType()));
-     connect(ui->lightColorR,    SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
-     connect(ui->lightColorG,    SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
-     connect(ui->lightColorB,    SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
-     connect(ui->lightColorA,    SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
-     connect(ui->lightPosX,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
-     connect(ui->lightPosY,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
-     connect(ui->lightPosZ,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
-     connect(ui->lightRotX,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
-     connect(ui->lightRotY,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
-     connect(ui->lightRotZ,      SIGNAL(valueChanged(double)),      this, SLOT(LightUpdatePosition()));
-     connect(ui->lightsVisible,  SIGNAL(toggled(bool)),             this, SLOT(LightVisible()));
-     connect(ui->lightSetEnabled,  SIGNAL(toggled(bool)),           this, SLOT(LightSetEnabled()));
-     connect(ui->lightSetDisabled, SIGNAL(toggled(bool)),           this, SLOT(LightSetDisabled()));
+     connect(ui->lightsAdd,         SIGNAL(clicked()),                this, SLOT(LightAdd()));
+     connect(ui->lightsDel,         SIGNAL(clicked()),                this, SLOT(LightDelete()));
+     connect(ui->lightCompile,      SIGNAL(clicked()),                this, SLOT(LightCompile()));
+     connect(ui->lightsSelect,      SIGNAL(currentIndexChanged(int)), this, SLOT(LightSelected()));
+     connect(ui->lightTypesList,    SIGNAL(currentIndexChanged(int)), this, SLOT(LightUpdateType()));
+     connect(ui->lightColorR,       SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
+     connect(ui->lightColorG,       SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
+     connect(ui->lightColorB,       SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
+     connect(ui->lightColorA,       SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
+     connect(ui->lightPosX,         SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
+     connect(ui->lightPosY,         SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
+     connect(ui->lightPosZ,         SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
+     connect(ui->lightRotX,         SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
+     connect(ui->lightRotY,         SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
+     connect(ui->lightRotZ,         SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
+     connect(ui->lightAttenuationA, SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
+     connect(ui->lightAttenuationB, SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
+     connect(ui->lightAttenuationC, SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
+     connect(ui->lightsVisible,     SIGNAL(toggled(bool)),            this, SLOT(LightVisible()));
+     connect(ui->lightSetEnabled,   SIGNAL(toggled(bool)),            this, SLOT(LightSetEnabled()));
+     connect(ui->lightSetDisabled,  SIGNAL(toggled(bool)),            this, SLOT(LightSetDisabled()));
 
      connect(my_task.mouse,      SIGNAL(WaypointHovered(NodePath)), this, SLOT(WaypointHovered(NodePath)));
      connect(my_task.mouse,      SIGNAL(ObjectHovered(NodePath)),   this, SLOT(MapObjectHovered(NodePath)));
@@ -1279,15 +1294,12 @@ void MainWindow::LoadMap(const QString& path)
     }
     if (my_task.camera == 0 || (world != 0 && levelName == path))
       return ;
-    QPandaApplication::SetPandaEnabled(true);
     my_task.camera->SetPosition(0, 0, 75);
     levelName             = path;
     mapobjectSelected     = 0;
     mapobjectHovered      = 0;
     dynamicObjectSelected = 0;
     dynamicObjectHovered  = 0;
-    ui->objectEditor->setEnabled(false);
-    ui->interObjEditor->setEnabled(false);
     waypointsSelection.clear();
 
     FunctorThread& thread = *FunctorThread::Create([this](void)
@@ -1370,7 +1382,7 @@ void MainWindow::LoadMap(const QString& path)
     DisableLevelEditor();
     connect(&thread, SIGNAL(Done()), ui->progressBar, SLOT(hide()),              Qt::QueuedConnection);
     connect(&thread, SIGNAL(Done()), this,            SLOT(EnableLevelEditor()), Qt::QueuedConnection);
-    thread.start();
+    thread.start_sync();
 }
 
 void MainWindow::EntryZoneAdd()
@@ -1534,6 +1546,21 @@ void MainWindow::LightSelected(void)
         ui->lightColorB->setValue(color.get_z());
         ui->lightColorA->setValue(0.f);
 
+        if (light->type == WorldLight::Point || light->type == WorldLight::Spot)
+        {
+          ui->lightAttenuationA->setValue(light->GetAttenuation().get_x());
+          ui->lightAttenuationB->setValue(light->GetAttenuation().get_y());
+          ui->lightAttenuationC->setValue(light->GetAttenuation().get_z());
+          ui->lightAttenuation->show();
+        }
+        else
+          ui->lightAttenuation->hide();
+
+        if (light->type == WorldLight::Point || light->type == WorldLight::Ambient)
+          ui->lightRot->hide();
+        else
+          ui->lightRot->show();
+
         ui->lightRadius->setValue(light->zoneSize);
 
         lightIgnoreChanges = false;
@@ -1556,6 +1583,8 @@ void MainWindow::LightUpdateType(void)
         world->AddLight(type, name.toStdString());
         lightSelected = world->GetLightByName(name.toStdString());
         LightUpdatePosition();
+        ui->lightAttenuation->setVisible(lightSelected->type == WorldLight::Point || lightSelected->type == WorldLight::Spot);
+        ui->lightRot->setVisible(!(lightSelected->type == WorldLight::Point || lightSelected->type == WorldLight::Ambient));
     }
 }
 
@@ -1574,6 +1603,9 @@ void MainWindow::LightUpdatePosition(void)
                             ui->lightColorG->value(),
                             ui->lightColorB->value(),
                             ui->lightColorA->value());
+    lightSelected->SetAttenuation(ui->lightAttenuationA->value(),
+                                  ui->lightAttenuationB->value(),
+                                  ui->lightAttenuationC->value());
     lightSelected->zoneSize = ui->lightRadius->value();
 }
 

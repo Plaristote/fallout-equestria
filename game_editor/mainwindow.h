@@ -172,6 +172,7 @@ private slots:
     void LightUpdatePosition(void);
     void LightUpdateType(void);
     void LightCompile(void);
+    void LightFocus(WorldLight*);
 
 private:
     QPandaApplication&       _app;
