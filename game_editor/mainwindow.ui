@@ -50,6 +50,9 @@
            </sizepolicy>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_10">
+           <property name="margin">
+            <number>0</number>
+           </property>
            <item>
             <widget class="QWidget" name="widget_2" native="true">
              <layout class="QGridLayout" name="gridLayout_16">
@@ -507,7 +510,7 @@
                <item>
                 <widget class="QToolBox" name="object_tabs">
                  <property name="currentIndex">
-                  <number>0</number>
+                  <number>2</number>
                  </property>
                  <widget class="QWidget" name="objects">
                   <property name="geometry">
@@ -921,7 +924,7 @@
                     <x>0</x>
                     <y>0</y>
                     <width>361</width>
-                    <height>317</height>
+                    <height>363</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -954,8 +957,35 @@
                       <enum>QFrame::Raised</enum>
                      </property>
                      <layout class="QGridLayout" name="gridLayout_13">
-                      <item row="5" column="0" colspan="3">
-                       <widget class="QLabel" name="label_12">
+                      <item row="9" column="2">
+                       <widget class="QDoubleSpinBox" name="lightColorB">
+                        <property name="maximum">
+                         <double>255.000000000000000</double>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="9" column="0">
+                       <widget class="QDoubleSpinBox" name="lightColorR">
+                        <property name="maximum">
+                         <double>255.000000000000000</double>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="4" column="1">
+                       <widget class="QDoubleSpinBox" name="lightPosY">
+                        <property name="minimum">
+                         <double>-9999.000000000000000</double>
+                        </property>
+                        <property name="maximum">
+                         <double>9999.000000000000000</double>
+                        </property>
+                        <property name="value">
+                         <double>0.000000000000000</double>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="2" column="0">
+                       <widget class="QLabel" name="label_15">
                         <property name="maximumSize">
                          <size>
                           <width>16777215</width>
@@ -963,14 +993,7 @@
                          </size>
                         </property>
                         <property name="text">
-                         <string>Rotation</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="2" column="1" colspan="2">
-                       <widget class="QDoubleSpinBox" name="lightRadius">
-                        <property name="maximum">
-                         <double>500.000000000000000</double>
+                         <string>Radius</string>
                         </property>
                        </widget>
                       </item>
@@ -978,37 +1001,6 @@
                        <widget class="QLabel" name="label_13">
                         <property name="text">
                          <string>Type</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="6" column="0">
-                       <widget class="QDoubleSpinBox" name="lightRotX">
-                        <property name="maximum">
-                         <double>359.000000000000000</double>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="4" column="2">
-                       <widget class="QDoubleSpinBox" name="lightPosZ">
-                        <property name="minimum">
-                         <double>-9999.000000000000000</double>
-                        </property>
-                        <property name="maximum">
-                         <double>9999.000000000000000</double>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="8" column="1">
-                       <widget class="QDoubleSpinBox" name="lightColorG">
-                        <property name="maximum">
-                         <double>255.000000000000000</double>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="6" column="1">
-                       <widget class="QDoubleSpinBox" name="lightRotY">
-                        <property name="maximum">
-                         <double>359.000000000000000</double>
                         </property>
                        </widget>
                       </item>
@@ -1055,70 +1047,34 @@
                         </item>
                        </widget>
                       </item>
-                      <item row="8" column="3">
+                      <item row="9" column="3">
                        <widget class="QDoubleSpinBox" name="lightColorA">
                         <property name="maximum">
                          <double>255.000000000000000</double>
                         </property>
                        </widget>
                       </item>
-                      <item row="6" column="2">
-                       <widget class="QDoubleSpinBox" name="lightRotZ">
-                        <property name="maximum">
-                         <double>359.000000000000000</double>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="8" column="2">
-                       <widget class="QDoubleSpinBox" name="lightColorB">
-                        <property name="maximum">
-                         <double>255.000000000000000</double>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="7" column="0" colspan="3">
-                       <widget class="QLabel" name="label_14">
-                        <property name="maximumSize">
-                         <size>
-                          <width>16777215</width>
-                          <height>20</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>Color (RGBA)</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="8" column="0">
-                       <widget class="QDoubleSpinBox" name="lightColorR">
-                        <property name="maximum">
-                         <double>255.000000000000000</double>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="4" column="1">
-                       <widget class="QDoubleSpinBox" name="lightPosY">
+                      <item row="4" column="2">
+                       <widget class="QDoubleSpinBox" name="lightPosZ">
                         <property name="minimum">
                          <double>-9999.000000000000000</double>
                         </property>
                         <property name="maximum">
                          <double>9999.000000000000000</double>
                         </property>
-                        <property name="value">
-                         <double>0.000000000000000</double>
+                       </widget>
+                      </item>
+                      <item row="9" column="1">
+                       <widget class="QDoubleSpinBox" name="lightColorG">
+                        <property name="maximum">
+                         <double>255.000000000000000</double>
                         </property>
                        </widget>
                       </item>
-                      <item row="2" column="0">
-                       <widget class="QLabel" name="label_15">
-                        <property name="maximumSize">
-                         <size>
-                          <width>16777215</width>
-                          <height>20</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>Radius</string>
+                      <item row="2" column="1" colspan="2">
+                       <widget class="QDoubleSpinBox" name="lightRadius">
+                        <property name="maximum">
+                         <double>500.000000000000000</double>
                         </property>
                        </widget>
                       </item>
@@ -1132,7 +1088,7 @@
                         </property>
                        </widget>
                       </item>
-                      <item row="9" column="0" colspan="4">
+                      <item row="10" column="0" colspan="4">
                        <widget class="QPushButton" name="lightCompile">
                         <property name="text">
                          <string>Apply changes</string>
@@ -1151,6 +1107,87 @@
                         <property name="text">
                          <string>Off</string>
                         </property>
+                       </widget>
+                      </item>
+                      <item row="5" column="0" colspan="4">
+                       <widget class="QWidget" name="lightRot" native="true">
+                        <layout class="QGridLayout" name="gridLayout_14">
+                         <property name="margin">
+                          <number>0</number>
+                         </property>
+                         <item row="0" column="0">
+                          <widget class="QLabel" name="label_12">
+                           <property name="maximumSize">
+                            <size>
+                             <width>16777215</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                           <property name="text">
+                            <string>Rotation</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="0">
+                          <widget class="QDoubleSpinBox" name="lightRotX">
+                           <property name="maximum">
+                            <double>359.000000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="1">
+                          <widget class="QDoubleSpinBox" name="lightRotY">
+                           <property name="maximum">
+                            <double>359.000000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="2">
+                          <widget class="QDoubleSpinBox" name="lightRotZ">
+                           <property name="maximum">
+                            <double>359.000000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item row="8" column="0" colspan="3">
+                       <widget class="QLabel" name="label_14">
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>Color (RGBA)</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="7" column="0" colspan="4">
+                       <widget class="QWidget" name="lightAttenuation" native="true">
+                        <layout class="QGridLayout" name="gridLayout_18">
+                         <property name="margin">
+                          <number>0</number>
+                         </property>
+                         <item row="0" column="0">
+                          <widget class="QLabel" name="label_16">
+                           <property name="text">
+                            <string>Attenuation</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="0">
+                          <widget class="QDoubleSpinBox" name="lightAttenuationA"/>
+                         </item>
+                         <item row="1" column="1">
+                          <widget class="QDoubleSpinBox" name="lightAttenuationB"/>
+                         </item>
+                         <item row="1" column="2">
+                          <widget class="QDoubleSpinBox" name="lightAttenuationC"/>
+                         </item>
+                        </layout>
                        </widget>
                       </item>
                      </layout>
