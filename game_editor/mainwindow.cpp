@@ -35,7 +35,7 @@ struct PandaTask : public AsyncTask
     camera->Run(elapsedTime);
     mouse->Run();
     timer.start();
-    main_window->ShowWaypointZone();
+    //main_window->ShowWaypointZone();
     return (AsyncTask::DS_cont);
   }
 

@@ -28,6 +28,8 @@ WorldmapEditor::WorldmapEditor(QWidget *parent) :
 
     connect(ui->cityList, SIGNAL(currentTextChanged(QString)), this, SLOT(SelectedCity(QString)));
 
+    connect(&splash_edit,         SIGNAL(accepted()),           this, SLOT(UpdateCitySplash()));
+    connect(ui->setSplashScreen,  SIGNAL(clicked()),            this, SLOT(OpenSplashEditor()));
     connect(ui->cityPosX,         SIGNAL(valueChanged(double)), this, SLOT(UpdateCityData()));
     connect(ui->cityPosY,         SIGNAL(valueChanged(double)), this, SLOT(UpdateCityData()));
     connect(ui->cityRadius,       SIGNAL(valueChanged(double)), this, SLOT(UpdateCityData()));
@@ -420,14 +422,43 @@ void WorldmapEditor::SelectedCity(QString name)
   }
 }
 
+void WorldmapEditor::OpenSplashEditor()
+{
+  Data      city = GetCityData(ui->cityList->currentItem()->text());
+
+  if (!(city.Nil()))
+  {
+    splash_edit.Load(city);
+    splash_edit.open();
+  }
+}
+
+void WorldmapEditor::UpdateCitySplash()
+{
+  Data      city = GetCityData(ui->cityList->currentItem()->text());
+
+  if (!(city.Nil()))
+  {
+    splash_edit.Save(city);
+    splash_edit.close();
+  }
+}
+
+Data WorldmapEditor::GetCityData(const QString &name)
+{
+  Data      data(file_cities);
+  Data      city  = data[name.toStdString()];
+
+  return (city);
+}
+
 void WorldmapEditor::UpdateCityData()
 {
   QListWidgetItem* list_item = ui->cityList->currentItem();
 
   if (list_item && !lock_cities)
   {
-    Data      data(file_cities);
-    Data      city  = data[list_item->text().toStdString()];
+    Data      city  = GetCityData(list_item->text());
     CityHalo& halo  = GetCityHalo(list_item->text());
     float     rect_x, rect_y;
 

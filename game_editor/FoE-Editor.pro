@@ -46,7 +46,8 @@ SOURCES += main.cpp\
     selectableresource.cpp \
     charsheeteditor.cpp \
     formkeyvalue.cpp \
-    maptreewidget.cpp
+    maptreewidget.cpp \
+    citysplashdialog.cpp
 
 HEADERS  += mainwindow.h \
     qpandawidget.h \
@@ -77,7 +78,8 @@ HEADERS  += mainwindow.h \
     selectableresource.h \
     charsheeteditor.h \
     formkeyvalue.h \
-    maptreewidget.h
+    maptreewidget.h \
+    citysplashdialog.h
 
 FORMS    += mainwindow.ui \
     dialognewscript.ui \
@@ -94,4 +96,5 @@ FORMS    += mainwindow.ui \
     dialogsavemap.ui \
     selectableresource.ui \
     charsheeteditor.ui \
-    formkeyvalue.ui
+    formkeyvalue.ui \
+    citysplashdialog.ui

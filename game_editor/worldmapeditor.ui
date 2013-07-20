@@ -43,15 +43,15 @@
       <item>
        <widget class="QToolBox" name="toolBox">
         <property name="currentIndex">
-         <number>4</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="pageMap">
          <property name="geometry">
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>127</width>
-           <height>186</height>
+           <width>130</width>
+           <height>194</height>
           </rect>
          </property>
          <attribute name="label">
@@ -128,9 +128,9 @@
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>0</y>
-           <width>176</width>
-           <height>260</height>
+           <y>-94</y>
+           <width>247</width>
+           <height>288</height>
           </rect>
          </property>
          <attribute name="label">
@@ -218,6 +218,13 @@
                </property>
               </widget>
              </item>
+             <item row="5" column="0" colspan="2">
+              <widget class="QPushButton" name="setSplashScreen">
+               <property name="text">
+                <string>Configure splash screen</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -228,7 +235,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>201</width>
+           <width>275</width>
            <height>388</height>
           </rect>
          </property>
@@ -374,7 +381,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>242</width>
+           <width>261</width>
            <height>234</height>
           </rect>
          </property>

@@ -8,7 +8,7 @@
 
 using namespace std;
 
-unsigned int          blob_revision = 2;
+unsigned int          blob_revision = 3;
 
 unsigned char         gPathfindingUnitType = 0;
 void*                 gPathfindingData     = 0;
@@ -1222,6 +1222,13 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
   packet >> r >> g >> b >> a;
   packet >> pos_x >> pos_y >> pos_z;
   packet >> hpr_x >> hpr_y >> hpr_z;
+  if (blob_revision >= 3)
+  {
+    float     attenuation[3];
+
+    packet >> attenuation[0] >> attenuation[1] >> attenuation[2];
+    SetAttenuation(attenuation[0], attenuation[1], attenuation[2]);
+  }
   switch (parent_type)
   {
     case Type_MapObject:
@@ -1251,9 +1258,10 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
 
 void WorldLight::Serialize(Utils::Packet& packet)
 {
-  LColor color  = light->get_color();
-  char   _type  = type;
-  char   _ptype = parent_type;
+  LColor     color  = light->get_color();
+  char       _type  = type;
+  char       _ptype = parent_type;
+  LVecBase3f attenuation = GetAttenuation();
 
   packet << name << (char)enabled << zoneSize << _type << _ptype;
   if (parent_i)
@@ -1261,6 +1269,7 @@ void WorldLight::Serialize(Utils::Packet& packet)
   packet << (float)color.get_x() << (float)color.get_y() << (float)color.get_z() << (float)color.get_w();
   packet << (float)nodePath.get_x() << (float)nodePath.get_y() << (float)nodePath.get_z();
   packet << (float)nodePath.get_hpr().get_x() << (float)nodePath.get_hpr().get_y() << (float)nodePath.get_hpr().get_z();
+  packet << (float)attenuation.get_x() << (float)attenuation.get_y() << (float)attenuation.get_z();
 }
 
 /*
@@ -1498,7 +1507,7 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
     CompileWaypoints(progress_callback);
 # endif
 
-  packet << (unsigned int)2; // #blob revision
+  packet << (unsigned int)3; // #blob revision
 
   // Waypoints
   {

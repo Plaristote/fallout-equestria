@@ -6,6 +6,7 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSceneMouseEvent>
 #include "datatree.hpp"
+#include "citysplashdialog.h"
 
 namespace Ui {
 class WorldmapEditor;
@@ -83,6 +84,8 @@ public slots:
 
     void ClickedCity(QString);
     void SelectedCity(QString);
+    void OpenSplashEditor(void);
+    void UpdateCitySplash(void);
     void UpdateCityData(void);
     void UpdateMapData(void);
     void AddCity(void);
@@ -120,6 +123,7 @@ private:
     typedef QList<MapTile*>       Tiles;
 
     CityHalo& GetCityHalo(const QString& name);
+    Data      GetCityData(const QString& name);
     void      AddCityHalo(const QString& name);
     void      DelCityHalo(const QString& name);
 
@@ -137,6 +141,8 @@ private:
 
     CityHalos           city_halos;
     Tiles               tile_selection;
+
+    CitySplashDialog    splash_edit;
 
     bool                lock_cities, lock_mspeed, lock_critters;
 };
