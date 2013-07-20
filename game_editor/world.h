@@ -42,7 +42,8 @@
 #  define TEXT_ROOT  "textures/"
 # endif
 
-float my_sqrt(const float x);
+float   my_sqrt(const float x);
+LPoint3 NodePathSize(NodePath np);
 
 namespace ColMask
 {
@@ -136,8 +137,6 @@ struct Waypoint
     void                 UnserializeLoadArcs(World*);
     void                 Serialize(Utils::Packet& packet);
 
-    void                 SetMouseBox(void);
-
 private:
     friend struct World;
     bool                 selected;
@@ -147,26 +146,25 @@ private:
 
 struct MapObject
 {
-    NodePath      nodePath;
-    PT(Texture)   texture;
-    
-    unsigned char floor;
+  typedef std::vector<Waypoint*> Waypoints;
 
-    std::string   strModel;
-    std::string   strTexture;
-    std::string   parent;
+  NodePath      nodePath;
+  PT(Texture)   texture;
+  unsigned char floor;
+  Waypoints     waypoints;
+  NodePath      waypoints_root;
 
-    void ReparentTo(MapObject* object)
-    {
-      if (object)
-      {
-        parent = object->nodePath.get_name();
-        nodePath.reparent_to(object->nodePath);
-      }
-    }
+  std::string   strModel;
+  std::string   strTexture;
+  std::string   parent;
 
-    void UnSerialize(WindowFramework* window, Utils::Packet& packet);
-    void Serialize(Utils::Packet& packet);
+  void          SetFloor(unsigned char floor);
+  void          ReparentTo(MapObject* object);
+
+  void          UnSerialize(WindowFramework* window, Utils::Packet& packet);
+  void          UnserializeWaypoints(World*, Utils::Packet& packet);
+  void          Serialize(Utils::Packet& packet);
+  static void   InitializeTree(World* world);
 };
 
 namespace Interactions
@@ -431,13 +429,12 @@ struct World
     
     void      FloorResize(int);
 
-    Waypoint* AddWayPoint(float x, float y, float z);
-    void      DeleteWayPoint(Waypoint*);
-    Waypoint* GetWaypointFromNodePath(NodePath path);
-    Waypoint* GetWaypointFromId(unsigned int id);
-    Waypoint* GetWaypointClosest(LPoint3, unsigned char floor);
-    void      SetWaypointsVisible(bool v)
-    { if (v) { rootWaypoints.show();  } else { rootWaypoints.hide();  } }
+    Waypoint*      AddWayPoint(float x, float y, float z);
+    void           DeleteWayPoint(Waypoint*);
+    Waypoint*      GetWaypointFromNodePath(NodePath path);
+    Waypoint*      GetWaypointFromId(unsigned int id);
+    Waypoint*      GetWaypointClosest(LPoint3, unsigned char floor);
+    void           SetWaypointsVisible(bool v);
     void           GetWaypointLimits(short currentFloor, LPoint3& upperRight, LPoint3& upperLeft, LPoint3& bottomLeft) const;
     LPlane         GetWaypointPlane(short currentFloor) const;
 

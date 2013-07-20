@@ -17,6 +17,7 @@ QString objectTypes[] = { "NPC", "Shelf", "Locker", "Door" };
 
 struct PandaTask : public AsyncTask
 {
+  MainWindow*      main_window;
   QWidget*         panda_widget;
   WindowFramework* window;
   SceneCamera*     camera;
@@ -34,7 +35,35 @@ struct PandaTask : public AsyncTask
     camera->Run(elapsedTime);
     mouse->Run();
     timer.start();
+    main_window->ShowWaypointZone();
     return (AsyncTask::DS_cont);
+  }
+
+  LPoint3 CollidingAt(MapObject* object)
+  {
+    NodePath                  camera                  = window->get_camera_group();
+    PT(CollisionRay)          picker_ray              = new CollisionRay();
+    PT(CollisionNode)         picker_node             = new CollisionNode("mouse_ray");
+    NodePath                  picker_path             = camera.attach_new_node(picker_node);
+    CollisionTraverser        traverser;
+    PT(CollisionHandlerQueue) collision_handler_queue = new CollisionHandlerQueue();
+    LPoint2f                  cursor_pos              = mouse->GetPosition();
+
+    picker_ray->set_from_lens(window->get_camera(0), cursor_pos.get_x(), cursor_pos.get_y());
+    picker_node->add_solid(picker_ray);
+    traverser.add_collider(picker_path, collision_handler_queue);
+    traverser.traverse(object->nodePath);
+    collision_handler_queue->sort_entries();
+    for (int i = 0 ; i < collision_handler_queue->get_num_entries() ; ++i)
+    {
+      CollisionEntry* entry = collision_handler_queue->get_entry(i);
+      NodePath        np    = entry->get_into_node_path();
+      LPoint3         pos;
+
+      if (object->nodePath.is_ancestor_of(np))
+        return (entry->get_surface_point(object->nodePath));
+    }
+    return (LPoint3(0, 0, 0));
   }
 };
 
@@ -69,19 +98,17 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     QIcon iconDisconnect("icons/disconnect.png");
     QIcon waypointGenerate("icons/waypoint-generate.png");
 
-    world         = 0;
-    objectFile    = 0;
+    level_editor_lock = 0;
+    world             = 0;
+    objectFile        = 0;
     ui->setupUi(this);
 
     ui->charsheetAdd->setIcon(iconAdd);
     ui->charsheetDel->setIcon(iconDelete);
     ui->charsheetSave->setIcon(iconSave);
 
-    ui->waypointAdd->setIcon(iconAdd);
-    ui->waypointRemove->setIcon(iconDelete);
     ui->waypointConnect->setIcon(iconConnect);
     ui->waypointDisconnect->setIcon(iconDisconnect);
-    ui->waypointGenerate->setIcon(waypointGenerate);
     ui->waypointSelDelete->setIcon(iconDelete);
     waypointSelX = waypointSelY = waypointSelZ = 0;
 
@@ -167,12 +194,8 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(this, SIGNAL(SigUpdateProgressBar(QString, float)), this, SLOT(UpdateProgressBar(QString, float)), Qt::QueuedConnection);
     save_map_use_thread = true;
 
-    connect(&this->waypointGenerate, SIGNAL(SigUpdateProgressbar(QString, float)), this,            SIGNAL(SigUpdateProgressBar(QString,float)), Qt::QueuedConnection);
-    connect(&this->waypointGenerate, SIGNAL(StartedGeneration()),                  this,            SLOT(DisableLevelEditor()),                  Qt::QueuedConnection);
-    connect(&this->waypointGenerate, SIGNAL(StartedGeneration()),                  ui->progressBar, SLOT(show()),                                Qt::QueuedConnection);
-    connect(&this->waypointGenerate, SIGNAL(EndedGeneration()),                    this,            SLOT(EnableLevelEditor()),                   Qt::QueuedConnection);
-    connect(&this->waypointGenerate, SIGNAL(EndedGeneration()),                    ui->progressBar, SLOT(hide()),                                Qt::QueuedConnection);
-    connect(&this->waypointGenerate, SIGNAL(EndedGeneration()),                    this,            SLOT(SelectGeneratedWaypoints()),            Qt::QueuedConnection);
+    connect(&this->waypointGenerate, SIGNAL(Generate()), this, SLOT(MapObjectGenerateWaypoints()));
+    connect(ui->waypointGenerateObject, SIGNAL(clicked()), &this->waypointGenerate, SLOT(show()));
 
     connect(ui->charsheetList, SIGNAL(currentTextChanged(QString)), ui->charsheetEditor, SLOT(Load(QString)));
     connect(ui->charsheetAdd,  SIGNAL(clicked()),                   this,                SLOT(AddCharsheet()));
@@ -367,6 +390,89 @@ void MainWindow::CameraMoveRight()
 
 void MainWindow::PandaButtonPressed(QMouseEvent*)
 {
+  if (ui->waypointZoneSelector->isChecked() && mapobjectSelected)
+  {
+    LPoint3 pos = my_task.CollidingAt(mapobjectSelected);
+
+    wp_select_x = pos.get_x();
+    wp_select_y = pos.get_y();
+  }
+}
+
+void MainWindow::SelectWaypointZone(float from_x, float from_y, float to_x, float to_y)
+{
+  if (mapobjectSelected)
+  {
+    auto it  = mapobjectSelected->waypoints.begin();
+    auto end = mapobjectSelected->waypoints.end();
+
+    for (; it != end ; ++it)
+    {
+      LPoint3 pos = (*it)->nodePath.get_pos();
+
+      if ((!(*it)->IsSelected()) &&
+          (pos.get_x() >= from_x && pos.get_x() <= to_x) &&
+          (pos.get_y() >= from_y && pos.get_y() <= to_y))
+      {
+        (*it)->SetSelected(true);
+        waypointsSelection.push_back(*it);
+      }
+    }
+  }
+}
+
+void MainWindow::ShowWaypointZone(void)
+{
+  if (mapobjectSelected && !(mapobjectSelected->waypoints_root.is_hidden()))
+  {
+    static LPoint2f last_position    = LPoint2f(0, 0);
+    static bool     needs_update     = true;
+    LPoint2f        current_position = my_task.mouse->GetPosition();
+
+    if (last_position != current_position)
+      needs_update = true;
+    if (needs_update == false || last_position != current_position)
+    {
+      last_position = current_position;
+      return ;
+    }
+    last_position = current_position;
+
+    LPoint3                   position       = my_task.CollidingAt(mapobjectSelected);
+    PT(CollisionSphere)       collision_box  = new CollisionSphere(position, 50);
+    PT(CollisionNode)         collision_node = new CollisionNode("waypoint_box");
+    NodePath                  collision_path = mapobjectSelected->nodePath.attach_new_node(collision_node);
+    CollisionTraverser        traverser;
+    PT(CollisionHandlerQueue) collision_handler_queue = new CollisionHandlerQueue();
+
+    collision_node->set_from_collide_mask(CollideMask(ColMask::Waypoint));
+    collision_node->add_solid(collision_box);
+    traverser.add_collider(collision_path, collision_handler_queue);
+    traverser.traverse(mapobjectSelected->nodePath);
+    std::for_each(mapobjectSelected->waypoints.begin(), mapobjectSelected->waypoints.end(), [](Waypoint* wp)
+    {
+      if (wp->IsSelected())
+        wp->nodePath.show();
+      else
+        wp->nodePath.hide();
+    });
+    for (int i = 0 ; i < collision_handler_queue->get_num_entries() ; ++i)
+    {
+      CollisionEntry* entry  = collision_handler_queue->get_entry(i);
+      NodePath        into   = entry->get_into_node_path();
+      NodePath        parent = into.get_parent();
+
+      while (!(parent.is_empty()) && parent != mapobjectSelected->waypoints_root)
+      {
+        into   = parent;
+        parent = into.get_parent();
+      }
+      if (parent == mapobjectSelected->waypoints_root)
+        into.show();
+    }
+    collision_path.remove_node();
+    needs_update = false;
+  }
 }
 
 void MainWindow::PandaButtonRelease(QMouseEvent*)
@@ -375,8 +481,24 @@ void MainWindow::PandaButtonRelease(QMouseEvent*)
     mapobjectHovered     = 0;
     dynamicObjectHovered = 0;
     my_task.mouse->GetHoveredAt(my_task.mouse->GetPosition());
-    if      (waypointHovered)
-      WaypointSelect(waypointHovered);
+    if (mapobjectSelected && !(mapobjectSelected->waypoints_root.is_hidden()))
+    {
+      if (ui->waypointPicker->isChecked())
+      {
+        my_task.mouse->GetWaypointHoveredAt(my_task.mouse->GetPosition(), mapobjectSelected->waypoints_root);
+        if (waypointHovered)
+          WaypointSelect(waypointHovered);
+      }
+      else if (ui->waypointZoneSelector->isChecked())
+      {
+        LPoint3 pos = my_task.CollidingAt(mapobjectSelected);
+
+        SelectWaypointZone(std::min(pos.get_x(), wp_select_x),
+                           std::min(pos.get_y(), wp_select_y),
+                           std::max(pos.get_x(), wp_select_x),
+                           std::max(pos.get_y(), wp_select_y));
+      }
+    }
     if (mapobjectHovered)
       MapObjectSelect();
     if (dynamicObjectHovered)
@@ -438,6 +560,7 @@ void MainWindow::PandaInitialized()
     _window = window;
 
     my_task.panda_widget = ui->widget;
+    my_task.main_window  = this;
     my_task.window  = window;
     my_task.camera  = new SceneCamera(window, window->get_camera_group());
     my_task.mouse   = new Mouse(window);
@@ -455,28 +578,17 @@ void MainWindow::PandaInitialized()
      connect(ui->itemEditor, SIGNAL(ItemListChanged(QStringList)), &dialogObject, SLOT(SetObjectList(QStringList)));
 
 // WAYPOINTS
-     connect(ui->waypointAdd,        SIGNAL(clicked()),            this, SLOT(WaypointAdd()));
-     connect(ui->waypointRemove,     SIGNAL(clicked()),            this, SLOT(WaypointDelete()));
      connect(ui->waypointVisible,    SIGNAL(toggled(bool)),        this, SLOT(WaypointVisible()));
-     connect(ui->waypointX,          SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateX()));
-     connect(ui->waypointY,          SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateY()));
-     connect(ui->waypointZ,          SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateZ()));
 
      connect(ui->waypointConnect,    SIGNAL(clicked()),            this, SLOT(WaypointConnect()));
      connect(ui->waypointDisconnect, SIGNAL(clicked()),            this, SLOT(WaypointDisconnect()));
      connect(ui->waypointSelX,       SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateSelX()));
      connect(ui->waypointSelY,       SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateSelY()));
      connect(ui->waypointSelZ,       SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateSelZ()));
-     connect(ui->waypointSelFloor,   SIGNAL(valueChanged(int)),    this, SLOT(WaypointSelFloor()));
      connect(ui->waypointSelDelete,  SIGNAL(clicked()),            this, SLOT(WaypointSelDelete()));
 
 
-     connect(ui->waypointSelectAll,  SIGNAL(clicked()), this, SLOT(WaypointSelectAll()));
      connect(ui->waypointDiscardSelection, SIGNAL(clicked()), this, SLOT(WaypointDiscardSelection()));
-     connect(ui->waypointSyncTerrain, SIGNAL(clicked()), this, SLOT(WaypointSyncTerrain()));
-
-     waypointGenerate.SetWorld(world);
-     connect(ui->waypointGenerate,   SIGNAL(clicked()), &waypointGenerate, SLOT(open()));
 
      connect(&wizardObject, SIGNAL(accepted()), this, SLOT(ObjectAdd()));
 
@@ -499,7 +611,6 @@ void MainWindow::PandaInitialized()
      connect(ui->mapNewObject, SIGNAL(clicked()), this, SLOT(MapObjectWizard()));
      //connect(ui->objectEdit, SIGNAL(clicked()), &dialogObject, SLOT(open()));
      //connect(&dialogObject, SIGNAL(accepted()), this, SLOT(EditObject()));
-     connect(ui->mapObjectVisible, SIGNAL(toggled(bool)), this, SLOT(MapObjectVisible()));
 
      connect(ui->objectRemove, SIGNAL(clicked()), this, SLOT(MapObjectDelete()));
      connect(ui->objectPosX, SIGNAL(valueChanged(double)), this, SLOT(MapObjectUpdateX()));
@@ -632,7 +743,6 @@ void MainWindow::DynamicObjectHovered(NodePath np)
     if (ui->interObjVisible->isChecked())
     {
       dynamicObjectHovered = world->GetDynamicObjectFromNodePath(np);
-      ui->labelStatus->setText(QString::fromStdString(dynamicObjectHovered->nodePath.get_name()));
     }
 }
 
@@ -784,11 +894,6 @@ void MainWindow::DynamicObjectVisible()
     world->SetDynamicObjectsVisible(ui->interObjVisible->isChecked());
 }
 
-void MainWindow::MapObjectVisible()
-{
-    world->SetMapObjectsVisible(ui->mapObjectVisible->isChecked());
-}
-
 void MainWindow::MapObjectWizard()
 {
     std::cout << "MAP OBJECT WIZARD" << std::endl;
@@ -827,11 +932,25 @@ void MainWindow::MapObjectDelete()
 
 void MainWindow::MapObjectHovered(NodePath path)
 {
-    if (ui->mapObjectVisible->isChecked())
-    {
-      mapobjectHovered     = world->GetMapObjectFromNodePath(path);
-      ui->labelStatus->setText(QString::fromStdString(mapobjectHovered->nodePath.get_name()));
-    }
+  mapobjectHovered     = world->GetMapObjectFromNodePath(path);
+}
+
+void MainWindow::MapObjectGenerateWaypoints(void)
+{
+  if (mapobjectSelected)
+  {
+    wp_generator = new WaypointGenerator(world,
+                                         mapobjectSelected,
+                                         waypointGenerate.GetMargin(),
+                                         waypointGenerate.GetSpacing());
+    connect(wp_generator, SIGNAL(Started()),                     this,            SLOT(DisableLevelEditor()),             Qt::QueuedConnection);
+    connect(wp_generator, SIGNAL(Started()),                     ui->progressBar, SLOT(show()),                           Qt::QueuedConnection);
+    connect(wp_generator, SIGNAL(UpdateProgress(QString,float)), this,            SLOT(UpdateProgressBar(QString,float)), Qt::QueuedConnection);
+    connect(wp_generator, SIGNAL(Done()),                        this,            SLOT(EnableLevelEditor()),              Qt::QueuedConnection);
+    connect(wp_generator, SIGNAL(Done()),                        ui->progressBar, SLOT(hide()),                           Qt::QueuedConnection);
+
+    wp_generator->Run();
+  }
 }
 
 void MainWindow::MapObjectFloor()
@@ -851,22 +970,23 @@ void MainWindow::MapObjectSelect()
     mapobjectSelected = mapobjectHovered;
     if (mapobjectSelected)
     {
-        ui->objectFloor->setValue(mapobjectSelected->floor);
-        ui->objectScaleX->setValue(mapobjectSelected->nodePath.get_scale().get_x());
-        ui->objectScaleY->setValue(mapobjectSelected->nodePath.get_scale().get_y());
-        ui->objectScaleZ->setValue(mapobjectSelected->nodePath.get_scale().get_z());
-        ui->objectPosX->setValue(mapobjectSelected->nodePath.get_x());
-        ui->objectPosY->setValue(mapobjectSelected->nodePath.get_y());
-        ui->objectPosZ->setValue(mapobjectSelected->nodePath.get_z());
-        ui->objectRotationX->setValue(mapobjectSelected->nodePath.get_hpr().get_x());
-        ui->objectRotationY->setValue(mapobjectSelected->nodePath.get_hpr().get_y());
-        ui->objectRotationZ->setValue(mapobjectSelected->nodePath.get_hpr().get_z());
-        ui->objectName->setText(QString::fromStdString(mapobjectSelected->nodePath.get_name()));
-        ui->objectEditor->setEnabled(true);
-        ui->objectName->setEnabled(true);
+      ui->waypointVisible->setChecked(!(mapobjectSelected->waypoints_root.is_hidden()));
+      ui->objectFloor->setValue(mapobjectSelected->floor);
+      ui->objectScaleX->setValue(mapobjectSelected->nodePath.get_scale().get_x());
+      ui->objectScaleY->setValue(mapobjectSelected->nodePath.get_scale().get_y());
+      ui->objectScaleZ->setValue(mapobjectSelected->nodePath.get_scale().get_z());
+      ui->objectPosX->setValue(mapobjectSelected->nodePath.get_x());
+      ui->objectPosY->setValue(mapobjectSelected->nodePath.get_y());
+      ui->objectPosZ->setValue(mapobjectSelected->nodePath.get_z());
+      ui->objectRotationX->setValue(mapobjectSelected->nodePath.get_hpr().get_x());
+      ui->objectRotationY->setValue(mapobjectSelected->nodePath.get_hpr().get_y());
+      ui->objectRotationZ->setValue(mapobjectSelected->nodePath.get_hpr().get_z());
+      ui->objectName->setText(QString::fromStdString(mapobjectSelected->nodePath.get_name()));
+      ui->objectEditor->setEnabled(true);
+      ui->objectName->setEnabled(true);
     }
     else
-        ui->objectEditor->setEnabled(false);
+      ui->objectEditor->setEnabled(false);
 }
 
 void MainWindow::MapObjectUpdateX()
@@ -996,39 +1116,17 @@ void MainWindow::WaypointHovered(NodePath path)
     if (ui->waypointVisible->isChecked())
     {
       waypointHovered      = world->GetWaypointFromNodePath(path);
-      ui->labelStatus->setText("Hovering a waypoint");
     }
 }
 
 void MainWindow::WaypointVisible()
 {
-    world->SetWaypointsVisible(ui->waypointVisible->isChecked());
-}
-
-void MainWindow::WaypointUpdateX()
-{
-  if (waypointSelected)
+  if (mapobjectSelected)
   {
-    waypointSelected->nodePath.set_x(ui->waypointX->value());
-    waypointSelected->PositionChanged();
-  }
-}
-
-void MainWindow::WaypointUpdateY()
-{
-  if (waypointSelected)
-  {
-    waypointSelected->nodePath.set_y(ui->waypointY->value());
-    waypointSelected->PositionChanged();
-  }
-}
-
-void MainWindow::WaypointUpdateZ()
-{
-  if (waypointSelected)
-  {
-    waypointSelected->nodePath.set_z(ui->waypointZ->value());
-    waypointSelected->PositionChanged();
+    if (ui->waypointVisible->isChecked())
+      mapobjectSelected->waypoints_root.show();
+    else
+      mapobjectSelected->waypoints_root.hide();
   }
 }
 
@@ -1047,29 +1145,6 @@ void MainWindow::UpdateSelection()
     ui->waypointSelX->setValue(waypointSelX);
     ui->waypointSelY->setValue(waypointSelY);
     ui->waypointSelZ->setValue(waypointSelZ);
-}
-
-void MainWindow::WaypointAdd()
-{
-    float     posx, posy, posz;
-    Waypoint* created;
-
-    posx = ui->waypointX->value();
-    posy = ui->waypointY->value();
-    posz = ui->waypointZ->value();
-    created = world->AddWayPoint(posx, posy, posz);
-    WaypointSelect(created);
-}
-
-void MainWindow::WaypointDelete()
-{
-    Waypoint* toDel = waypointSelected;
-
-    if (toDel)
-    {
-        WaypointSelect(toDel); // This unselects the waypoint
-        world->DeleteWayPoint(toDel);
-    }
 }
 
 void MainWindow::WaypointSelDelete()
@@ -1104,20 +1179,8 @@ void MainWindow::WaypointSelect(Waypoint* waypoint)
       waypoint->SetSelected(true);
       waypointSelected = waypoint;
       waypointsSelection.push_back(waypoint);
-      ui->waypointX->setValue(waypoint->nodePath.get_x());
-      ui->waypointY->setValue(waypoint->nodePath.get_y());
-      ui->waypointZ->setValue(waypoint->nodePath.get_z());
     }
     UpdateSelection();
-}
-
-void MainWindow::WaypointSelFloor()
-{
-    std::list<Waypoint*>::iterator it;
-    std::list<Waypoint*>::iterator end    = waypointsSelection.end();
-
-    for (it = waypointsSelection.begin() ; it != end ; ++it)
-      (*it)->floor = ui->waypointSelFloor->value();
 }
 
 void MainWindow::WaypointUpdateSelX()
@@ -1178,30 +1241,6 @@ void MainWindow::WaypointDiscardSelection(void)
 {
     while (waypointsSelection.size())
       WaypointSelect(waypointsSelection.front());
-}
-
-void MainWindow::WaypointSelectAll(void)
-{
-  std::list<Waypoint>::iterator it;
-
-  for (it = world->waypoints.begin() ; it != world->waypoints.end() ; ++it)
-  {
-      std::list<Waypoint*>::iterator exists = std::find(waypointsSelection.begin(), waypointsSelection.end(), &(*it));
-
-    if (exists == waypointsSelection.end())
-      WaypointSelect(&(*it));
-  }
-}
-
-void MainWindow::SelectGeneratedWaypoints(void)
-{
-  WaypointList to_select = waypointGenerate.GetToSelect();
-
-  WaypointDiscardSelection();
-  foreach(Waypoint* wp, to_select)
-  {
-    WaypointSelect(wp);
-  }
 }
 
 #include <panda3d/collisionRay.h>
@@ -1302,54 +1341,52 @@ void MainWindow::LoadMap(const QString& path)
     dynamicObjectHovered  = 0;
     waypointsSelection.clear();
 
-    FunctorThread& thread = *FunctorThread::Create([this](void)
+    FunctorThread&  thread   = *FunctorThread::Create([this](void)
     {
-    std::ifstream file;
-    std::string   fullpath = (QDir::currentPath() + "/maps/" + levelName + ".blob").toStdString();
+      std::string   fullpath = (QDir::currentPath() + "/maps/" + levelName + ".blob").toStdString();
+      std::ifstream file;
 
-	file.open(fullpath.c_str(),ios::binary);
-    if (file.is_open())
-    {
+      file.open(fullpath.c_str(),ios::binary);
+      if (file.is_open())
+      {
         try
         {
-            long  begin, end;
-            long  size;
-            char* raw;
+          Utils::Packet* packet;
+          long           begin, end;
+          long           size;
+          char*          raw;
 
-            begin     = file.tellg();
-            file.seekg (0, ios::end);
-            end       = file.tellg();
-            file.seekg(0, ios::beg);
-            size      = end - begin;
-            raw       = new char[size + 1];
-            file.read(raw, size);
-            file.close();
-            raw[size] = 0;
+          begin     = file.tellg();
+          file.seekg (0, ios::end);
+          end       = file.tellg();
+          file.seekg(0, ios::beg);
+          size      = end - begin;
+          raw       = new char[size + 1];
+          file.read(raw, size);
+          file.close();
+          raw[size] = 0;
 
-            Utils::Packet* packet;
+          packet = new Utils::Packet(raw, size);
+          if (world)
+            delete world;
+          world = new World(_window);
+          world->UnSerialize(*packet);
+          std::cout << "World unserialized" << std::endl;
 
-            packet = new Utils::Packet(raw, size);
-
-            if (world)
-                delete world;
-            world = new World(_window);
-            world->UnSerialize(*packet);
-            std::cout << "World unserialized" << std::endl;
-
-            delete   packet;
-            delete[] raw;
+          delete   packet;
+          delete[] raw;
         }
         catch (unsigned int error)
         {
           QMessageBox::warning(this, "Fatal Error", "Map file is corrupted. You are sooooo screwed.");
         }
-    }
-    else
-      QMessageBox::warning(this, "Fatal Error", "Can't load map file '" + QString::fromStdString(fullpath) + "'");
+      }
+      else
+        QMessageBox::warning(this, "Fatal Error", "Can't load map file '" + QString::fromStdString(fullpath) + "'");
 
-    std::cout << "Post loading map" << std::endl;
-    if (world)
-    {
+      std::cout << "Post loading map" << std::endl;
+      if (world)
+      {
         ui->treeWidget->SetWorld(world);
         dialogSaveMap.SetEnabledSunlight(world->sunlight_enabled);
 
@@ -1365,17 +1402,16 @@ void MainWindow::LoadMap(const QString& path)
 
         for (int i = 0 ; i < ui->listMap->count() ; ++i)
         {
-            if (ui->listMap->itemText(i) == levelName)
-            {
-               ui->listMap->setCurrentIndex(i);
-               break ;
-            }
+          if (ui->listMap->itemText(i) == levelName)
+          {
+            ui->listMap->setCurrentIndex(i);
+            break ;
+          }
         }
 
-        waypointGenerate.SetWorld(world);
         dialogObject.SetWorld(world);
         std::cout << "Finished Loading Map" << std::endl;
-    }
+      }
     });
 
     QPandaApplication::SetPandaEnabled(false);
@@ -1383,6 +1419,7 @@ void MainWindow::LoadMap(const QString& path)
     connect(&thread, SIGNAL(Done()), ui->progressBar, SLOT(hide()),              Qt::QueuedConnection);
     connect(&thread, SIGNAL(Done()), this,            SLOT(EnableLevelEditor()), Qt::QueuedConnection);
     thread.start_sync();
+    //thread.start();
 }
 
 void MainWindow::EntryZoneAdd()
@@ -1669,13 +1706,20 @@ void MainWindow::ExitZoneDestinationDelete()
 
 void MainWindow::EnableLevelEditor(void)
 {
+  if (level_editor_lock > 0)
+    level_editor_lock--;
+  if (level_editor_lock == 0)
+  {
     ui->tabLevelDesigner->setEnabled(true);
     QPandaApplication::SetPandaEnabled(true);
+  }
 }
 
 void MainWindow::DisableLevelEditor(void)
 {
-    ui->tabLevelDesigner->setEnabled(false);
+    if (level_editor_lock == 0)
+      ui->tabLevelDesigner->setEnabled(false);
+    level_editor_lock++;
 }
 
 void MainWindow::UpdateProgressBar(QString fmt, float percentage)

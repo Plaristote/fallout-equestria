@@ -53,7 +53,7 @@ MapTreeWidget::ItemType MapTreeWidget::GetType(QTreeWidgetItem* item) const
   return (ItemUnknown);
 }
 
-bool MapTreeWidget::dropMimeData(QTreeWidgetItem *parent, int index, const QMimeData *data, Qt::DropAction action)
+bool MapTreeWidget::dropMimeData(QTreeWidgetItem *parent, int, const QMimeData *data, Qt::DropAction)
 {
   ItemType parent_type = GetType(parent);
 
@@ -128,6 +128,7 @@ bool MapTreeWidget::dropMimeData(QTreeWidgetItem *parent, int index, const QMime
         switch (parent_type)
         {
         case ItemUnknown:
+        case ItemLight:
           light->parent_type = WorldLight::Type_None;
           break ;
         case ItemMapObject:

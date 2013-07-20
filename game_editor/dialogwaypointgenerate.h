@@ -11,6 +11,40 @@ class DialogWaypointGenerate;
 
 typedef QList<Waypoint*> WaypointList;
 
+#include "functorthread.h"
+
+class WaypointGenerator : public QObject
+{
+  Q_OBJECT
+
+  typedef std::vector<std::vector<Waypoint*> > WaypointGrid;
+public:
+  WaypointGenerator(World* world, MapObject* object, LPoint4 margin, LPoint2 spacing);
+
+  void Run(void);
+
+private:
+  void ClearObject(void);
+  void Generating(WaypointGrid&);
+  void Linking(WaypointGrid&);
+  void Leveling(void);
+
+  bool LevelWaypoint(Waypoint*);
+
+signals:
+  void UpdateProgress(QString,float);
+  void Started(void);
+  void Done(void);
+
+private:
+  World*         world;
+  MapObject*     object;
+  unsigned int   sizex, sizey;
+  float          initPosX, initPosY, initPosZ;
+  float          spacingx, spacingy;
+  FunctorThread* thread;
+};
+
 class DialogWaypointGenerate : public QDialog
 {
     Q_OBJECT
@@ -19,22 +53,14 @@ public:
     explicit DialogWaypointGenerate(QWidget *parent = 0);
     ~DialogWaypointGenerate();
 
-    void SetWorld(World* world);
-    WaypointList GetToSelect(void) const { return (to_select); }
-
-private slots:
-    void Generate(void);
+    LPoint4 GetMargin(void) const;
+    LPoint2 GetSpacing(void) const;
 
 signals:
-    void SigUpdateProgressbar(QString, float);
-    void StartedGeneration(void);
-    void EndedGeneration(void);
+    void Generate(void);
 
 private:
     Ui::DialogWaypointGenerate* ui;
-
-    World*                      world;
-    WaypointList                to_select;
 };
 
 #endif // DIALOGWAYPOINTGENERATE_H

@@ -47,9 +47,7 @@ public:
 
     bool CloseAllScript(void);
 
-    int currentHoveredCaseX;
-    int currentHoveredCaseY;
-
+    void ShowWaypointZone(void);
 signals:
     void Closed(void);
     void SigDisplayError(QString title, QString message);
@@ -88,24 +86,16 @@ private slots:
 
     // WAYPOINTS
     void WaypointVisible(void);
-    void WaypointAdd(void);
-    void WaypointDelete(void);
     void WaypointConnect(void);
     void WaypointDisconnect(void);
-    void WaypointUpdateX(void);
-    void WaypointUpdateY(void);
-    void WaypointUpdateZ(void);
     void WaypointUpdateSelX(void);
     void WaypointUpdateSelY(void);
     void WaypointUpdateSelZ(void);
-    void WaypointSelFloor(void);
     void WaypointSelDelete(void);
     void WaypointHovered(NodePath);
     void WaypointSelect(Waypoint*);
-    void SelectGeneratedWaypoints(void);
     void UpdateSelection(void);
     void WaypointDiscardSelection(void);
-    void WaypointSelectAll(void);
     void WaypointSyncTerrain(void);
 
     // ENTRY/EXIT ZONES
@@ -125,7 +115,6 @@ private slots:
     void ObjectAdd(void);
 
     // MAPOBJECTS
-    void MapObjectVisible(void);
     void MapObjectWizard(void);
     void MapObjectAdd(void);
     void MapObjectDelete(void);
@@ -142,6 +131,7 @@ private slots:
     void MapObjectScaleZ(void);
     void MapObjectFloor(void);
     void MapObjectFocus(MapObject*);
+    void MapObjectGenerateWaypoints(void);
 
     // DYNAMICOBJECTS
     void DynamicObjectVisible(void);
@@ -174,6 +164,9 @@ private slots:
     void LightCompile(void);
     void LightFocus(WorldLight*);
 
+    void SelectWaypointZone(float from_x, float from_y, float to_x, float to_y);
+
+
 private:
     QPandaApplication&       _app;
     WindowFramework*         _window;
@@ -184,8 +177,10 @@ private:
 
     DialogSplashscreen       splashScreen;
 
+    unsigned short           level_editor_lock;
     QString                  levelName;
     World*                   world;
+    float                    wp_select_x, wp_select_y;
     std::list<Waypoint*>     waypointsSelection;
     Waypoint*                waypointSelected;
     Waypoint*                waypointHovered;
@@ -213,6 +208,8 @@ private:
 
     DialogObject             dialogObject;
     DataTree*                objectFile;
+
+    WaypointGenerator*       wp_generator;
 };
 
 #endif // MAINWINDOW_H

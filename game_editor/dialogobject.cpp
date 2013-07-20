@@ -64,6 +64,9 @@ void DialogObject::SetCurrentObject(DynamicObject* object)
     case DynamicObject::Door:
         ui->type->setCurrentIndex(3);
         break ;
+    case DynamicObject::Item:
+        ui->type->setCurrentIndex(4);
+        break ;
     }
     UpdateType(ui->type->currentText());
 
