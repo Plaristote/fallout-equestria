@@ -908,6 +908,8 @@ void GameTask::DoCheckRandomEncounter(int x, int y)
 {
   short encounter_chance  = 25;
 
+  encounter_chance = 0; // WARNING remove this during release compiling
+  
   if (Dices::Throw(100) <= encounter_chance)
   {
     short     luck        = _playerStats->Model().GetSpecial("LUC");

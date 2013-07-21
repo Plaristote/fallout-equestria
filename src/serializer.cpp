@@ -10,7 +10,6 @@ namespace Utils
   template Packet& Packet::operator<< <float>(float& i);
   template Packet& Packet::operator<< <short>(short& i);
   template Packet& Packet::operator<< <char>(char& i);
-  template Packet& Packet::operator<< <unsigned int>(unsigned int& i);
   template Packet& Packet::operator<< <unsigned short>(unsigned short& i);
   template Packet& Packet::operator<< <unsigned char>(unsigned char& i);
   template Packet& Packet::operator<< <long>(long&);
@@ -18,29 +17,25 @@ namespace Utils
   template Packet& Packet::operator<< <float>(const float& i);
   template Packet& Packet::operator<< <short>(const short& i);
   template Packet& Packet::operator<< <char>(const char& i);
-  template Packet& Packet::operator<< <unsigned int>(const unsigned int& i);
   template Packet& Packet::operator<< <unsigned short>(const unsigned short& i);
   template Packet& Packet::operator<< <unsigned char>(const unsigned char& i);  
-  template Packet& Packet::operator<< <long>(const long&);
   // => There's also a String specialization.
 
-  template Packet& Packet::operator>> <int>(int& i);
+  template Packet& Packet::operator>> <std::int32_t>(std::int32_t& i);
   template Packet& Packet::operator>> <short>(short& i);
   template Packet& Packet::operator>> <char>(char& i);
   template Packet& Packet::operator>> <float>(float& i);
-  template Packet& Packet::operator>> <unsigned int>(unsigned int& i);
   template Packet& Packet::operator>> <unsigned short>(unsigned short& i);
   template Packet& Packet::operator>> <unsigned char>(unsigned char& i);
-  template Packet& Packet::operator>> <long>(long&);
   // => Same shit. Also a String specialization.
 
-  template Packet& Packet::operator<< <int>(list<int>& list);
+  template Packet& Packet::operator<< <std::int32_t>(list<int>& list);
   template Packet& Packet::operator<< <float>(list<float>& list);
   template Packet& Packet::operator<< <std::string>(list<std::string>& list);
   template Packet& Packet::operator<< <short>(list<short>& list);
   template Packet& Packet::operator<< <char>(list<char>& list);
 
-  template Packet& Packet::operator<< <int>(vector<int>& list);
+  template Packet& Packet::operator<< <std::int32_t>(vector<int>& list);
   template Packet& Packet::operator<< <float>(vector<float>& list);
   template Packet& Packet::operator<< <std::string>(vector<std::string>& list);
   template Packet& Packet::operator<< <short>(vector<short>& list);
@@ -265,46 +260,6 @@ namespace Utils
     reading = reinterpret_cast<void*>((long)reading + sizeof(char) * size);
     return (*this);
   }
-  // TODO: find a way to template this bullshit (list & vector unserializer)
-  /*template<typename T>
-  Packet&		Packet::operator>>(list<T>& list)
-  {
-    unsigned int	size, it;
-    std::int32_t	tmp = 0;
-
-    list.clear();
-    checkType(Packet::Array);
-    read<std::int32_t>(tmp);
-    size = tmp;
-    for (it = 0 ; it < size ; ++it)
-    {
-      T		reading;
-
-      *this >> reading;
-      list.push_back(reading);
-    }
-    return (*this);
-  }
-
-  template<typename T>
-  Packet&		Packet::operator>>(vector<T>& list)
-  {
-    unsigned int	size, it;
-    std::int32_t	tmp = 0;
-
-    list.clear();
-    checkType(Packet::Array);
-    read<std::int32_t>(tmp);
-    size = tmp;
-    for (it = 0 ; it < size ; ++it)
-    {
-      T		reading;
-
-      *this >> reading;
-      list.push_back(reading);
-    }
-    return (*this);
-  }*/
 
   /*
   * Utility Methods for Packet

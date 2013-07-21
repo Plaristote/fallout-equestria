@@ -963,9 +963,6 @@ void MapObject::UnSerialize(WindowFramework* window, Utils::Packet& packet)
   packet >> floor;
   if (blob_revision >= 1)
     packet >> parent;
-  if (blob_revision >= 2)
-  {
-  }
 
   nodePath   = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + strModel);
   nodePath.set_depth_offset(1);
@@ -1489,6 +1486,24 @@ void           World::UnSerialize(Utils::Packet& packet)
     { set_relations(object.nodePath, object.nodePath.get_name()); });
     set_relations(floors_node, "");
   }
+
+#ifndef GAME_EDITOR
+  // Setting waypoint positions
+  {
+    std::for_each(objects.begin(), objects.end(), [this](MapObject& object)
+    {
+      auto it  = object.waypoints.begin();
+      auto end = object.waypoints.end();
+
+      for (; it != end ; ++it)
+      {
+        Waypoint* wp = *it;
+
+        wp->nodePath.set_pos(wp->nodePath.get_pos() + object.nodePath.get_pos(window->get_render()));
+      }
+    });
+  }
+#endif
 
     cout << "Compiling lights" << endl;
   // Post-loading stuff

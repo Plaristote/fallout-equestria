@@ -32,7 +32,7 @@ struct WaypointModifier
   virtual void ProcessCollisions(void);
   void         UnprocessCollisions(void);
   bool         HasOccupiedWaypoint(void)      const { return (_waypointOccupied != 0); }
-  int          GetOccupiedWaypointAsInt(void) const { return (_waypointOccupied->id);  }
+  int          GetOccupiedWaypointAsInt(void) const { return (_waypointOccupied ? _waypointOccupied->id : 0);  }
   Waypoint*    GetOccupiedWaypoint(void)      const { return (_waypointOccupied);      }
   void         SetOccupiedWaypoint(Waypoint* wp);
 

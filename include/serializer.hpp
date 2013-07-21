@@ -45,8 +45,7 @@ public:
     Array  = 6,
     UInt   = 7,
     UShort = 8,
-    UChar  = 9,
-    Long   = 10
+    UChar  = 9
   };
 
   enum Errors
@@ -89,19 +88,7 @@ public:
 
   template<typename T> Packet&	operator<<(T& i)
   {
-    int	    newSize = sizeBuffer;
-    char*   typeCode;
-    T*	    copy;
-
-    newSize += sizeof(T) + sizeof(char);
-    realloc(newSize);
-    typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
-    copy = reinterpret_cast<T*>((long)typeCode + sizeof(char));
-    *typeCode = TypeToCode<T>::TypeCode;
-    *copy = i;
-    sizeBuffer = newSize;
-    updateHeader();
-    return (*this);
+    return (this->operator<< <T>((const T&)i));
   }
 
   template<typename T> Packet&	operator<<(const T& i)
@@ -110,6 +97,11 @@ public:
     char*   typeCode;
     T*	    copy;
 
+    if (TypeToCode<T>::TypeCode == 0)
+    {
+      cerr << "[Serializer] Trying to unserialize unknown type" << endl;
+      throw 5;
+    }
     newSize += sizeof(T) + sizeof(char);
     realloc(newSize);
     typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
@@ -239,7 +231,6 @@ private:
   template<> struct Packet::TypeToCode<unsigned int>   { enum { TypeCode = Packet::UInt   }; };
   template<> struct Packet::TypeToCode<unsigned short> { enum { TypeCode = Packet::UShort }; };
   template<> struct Packet::TypeToCode<unsigned char>  { enum { TypeCode = Packet::UChar  }; };
-  template<> struct Packet::TypeToCode<long>           { enum { TypeCode = Packet::Long   }; };
 }
 
 #endif
