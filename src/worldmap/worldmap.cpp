@@ -1,5 +1,6 @@
 #include "worldmap/worldmap.hpp"
 #include "musicmanager.hpp"
+#include "executor.hpp"
 #include <dices.hpp>
 
 #ifdef _WIN32
@@ -32,7 +33,12 @@ WorldMap::~WorldMap()
   });
   
   Destroy();
-  delete _mapTree;
+  if (_mapTree)
+    delete _mapTree;
+  if (_cityTree)
+    delete _cityTree;
+  if (_city_splash)
+    delete _city_splash;
   CurrentWorldMap = 0;
   _root->Close();
   _root->RemoveReference();
@@ -46,6 +52,7 @@ void WorldMap::Save(const string& savepath)
 
 WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, TimeManager& tm) : UiBase(window, gameUi->GetContext()), _dataEngine(de), _timeManager(tm), _gameUi(*gameUi)
 {
+  _city_splash   = 0;
   _interrupted   = false;
   _current_pos_x = _goal_x = _dataEngine["worldmap"]["pos-x"];
   _current_pos_y = _goal_y = _dataEngine["worldmap"]["pos-y"];
@@ -58,13 +65,13 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, Time
     //
     // Adds the known cities to the CityList.
     //
-    DataTree* cityTree = DataTree::Factory::JSON("saves/cities.json");
+    _cityTree = DataTree::Factory::JSON("saves/cities.json");
+    if (_cityTree)
     {
-      Data      cities(cityTree);
+      Data      cities(_cityTree);
 
       std::for_each(cities.begin(), cities.end(), [this](Data city) { AddCityToList(city); });
     }
-    delete cityTree;
 
     //
     // Get some required elements
@@ -280,14 +287,44 @@ void WorldMap::CityClicked(Rocket::Core::Event& event)
   }
 }
 
+void WorldMap::CloseCitySplash(void)
+{
+  _city_splash->Hide();
+  Executor::ExecuteLater([this](void) { delete _city_splash; });
+}
+
+void WorldMap::OpenCitySplash(const std::string& cityname)
+{
+  Data      cities(_cityTree);
+  Data      city = cities[cityname];
+
+  if (city["zones"].Count() > 0)
+  {
+    _city_splash = new CitySplash(city, _window, _context);
+    _city_splash->Canceled.Connect(*this, &WorldMap::CloseCitySplash);
+    _city_splash->EntryZonePicked.Connect([this, cityname](std::string zone)
+    {
+      CloseCitySplash();
+      GoToCityZone.Emit(cityname, zone);
+    });
+  }
+  else
+    GoToPlace.Emit(cityname);
+}
+
 void WorldMap::PartyClicked(Rocket::Core::Event&)
 {
   string cityname;
 
   if (IsPartyInCity(cityname))
-    GoToPlace.Emit(cityname);
+    OpenCitySplash(cityname);
   else
-    cout << "You aren't in any city" << endl;
+  {
+    int x, y;
+
+    GetCurrentCase(x, y);
+    RequestRandomEncounterCheck.Emit(x, y, Dices::Throw(100) >= 85);
+  }
 }
 
 bool WorldMap::IsPartyInCity(string& cityname) const
@@ -355,12 +392,12 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
     string which_city;
     
     UpdateClock();
-    if (!(IsPartyInCity(which_city)) && Dices::Throw(24) < 3)
+    if (!(IsPartyInCity(which_city)) && Dices::Throw(92) < 3)
     {
       int x, y;
 
       GetCurrentCase(x, y);
-      RequestRandomEncounterCheck.Emit(x, y);
+      RequestRandomEncounterCheck.Emit(x, y, true);
     }
   }
 }
