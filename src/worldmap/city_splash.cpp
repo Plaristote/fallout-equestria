@@ -7,14 +7,18 @@ CitySplash::CitySplash(Data data, WindowFramework* w, Rocket::Core::Context* c) 
 {
   _root = _context->LoadDocument("data/city_splash.rml");
   if (!_root)
-    ; //TODO throw something here
+    throw 0;
 
   Rocket::Core::Element* splash      = _root->GetElementById("splash");
   Data                   entry_zones = data["zones"];
   Rocket::Core::Element* zone_root   = _root->GetElementById("zones");
 
   if (splash)
-    splash->SetAttribute("src", data["splashscreen"].Value().c_str());
+  {
+    string path = "../textures/" + data["splashscreen"].Value();
+
+    splash->SetAttribute("src", path.c_str());
+  }
   if (zone_root)
   {
     for_each(entry_zones.begin(), entry_zones.end(), [this, zone_root](Data zone)
@@ -28,7 +32,7 @@ CitySplash::CitySplash(Data data, WindowFramework* w, Rocket::Core::Context* c) 
         stream << "<div class='zone-button' id='" << zone_name << "'>";
         stream << zone.Key();
         stream << "</div>";
-        _root->GetInnerRML(rml);
+        zone_root->GetInnerRML(rml);
         rml += stream.str().c_str();
         zone_root->SetInnerRML(rml);
         {
@@ -52,7 +56,9 @@ CitySplash::~CitySplash()
 {
   for_each(zone_listeners.begin(), zone_listeners.end(), [this](ZoneListeners::value_type listener)
   {
-    ToggleEventListener(false, listener.first, "click", *listener.second);
+    string name = "zone-" + humanize(listener.first);
+
+    ToggleEventListener(false, name, "click", *listener.second);
   });
 }
 

@@ -201,7 +201,6 @@ void WorldMap::AddCityToList(Data cityData)
     rml << "<img src='worldmap-city.png' style='width:" << radius << "px;height:" << radius << "px;' />";
     rml << "</div>";
 
-    // NOTE might need to do something about Rocket::Core::Factory and Windows (replace with RFactory ?)
     if ((ROCKET_FACTORY::InstanceElementText(elem, Core::String(rml.str().c_str()))))
       ToggleEventListener(true, elem_id.str(), "click", MapClickedEvent);
   }
@@ -300,13 +299,22 @@ void WorldMap::OpenCitySplash(const std::string& cityname)
 
   if (city["zones"].Count() > 0)
   {
-    _city_splash = new CitySplash(city, _window, _context);
-    _city_splash->Canceled.Connect(*this, &WorldMap::CloseCitySplash);
-    _city_splash->EntryZonePicked.Connect([this, cityname](std::string zone)
+    try
     {
-      CloseCitySplash();
-      GoToCityZone.Emit(cityname, zone);
-    });
+      _city_splash = new CitySplash(city, _window, _context);
+      _city_splash->Canceled.Connect(*this, &WorldMap::CloseCitySplash);
+      _city_splash->EntryZonePicked.Connect([this, cityname](std::string zone)
+      {
+        CloseCitySplash();
+        GoToCityZone.Emit(cityname, zone);
+      });
+      _city_splash->Show();
+    }
+    catch (...)
+    {
+      if (_city_splash) { delete _city_splash; }
+      AlertUi::NewAlert.Emit("Could not load splashscreen for the place named '" + cityname + '\'');
+    }
   }
   else
     GoToPlace.Emit(cityname);
