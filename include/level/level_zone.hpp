@@ -2,11 +2,15 @@
 # define LEVEL_ZONE_HPP
 
 # include "level/objectnode.hpp"
+# include <algorithm>
 
 class LevelZone : public Waypoint::ArcObserver
 {
   typedef std::list<InstanceDynamicObject*> Residents;
 public:
+  typedef std::function<void ()> Effect;
+  typedef std::list<Effect>      EffectStack;
+
   LevelZone(Level* level, Zone& zone);
   virtual ~LevelZone();
 
@@ -19,6 +23,7 @@ public:
   bool                     CanGoThrough(unsigned char)      { return (true);  }
   virtual void             GoingThrough(void* object);
   void                     Refresh(void);
+  void                     AddEffect(Effect effect, unsigned short time);
 
   Sync::Signal<void (InstanceDynamicObject*)> Entered;
   Sync::Signal<void (InstanceDynamicObject*)> Exited;
@@ -29,6 +34,7 @@ protected:
   Level*      _level;
   Zone&       _zone;
   bool        _enabled;
+  EffectStack _effects;
 };
 
 class LevelExitZone : public LevelZone

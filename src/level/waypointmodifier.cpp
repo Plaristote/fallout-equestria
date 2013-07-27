@@ -91,5 +91,27 @@ void        WaypointModifier::WithdrawArc(Waypoint* first, Waypoint* second)
 
 void        WaypointModifier::SetOccupiedWaypoint(Waypoint* wp)
 {
+#ifndef GAME_EDITOR
+  if (_waypointOccupied)
+  {
+    auto     it  = _waypointOccupied->lights.begin();
+    auto     end = _waypointOccupied->lights.end();
+    NodePath np  = GetNodePath();
+
+    for (; it != end ; ++it)
+      np.set_light_off((*it)->light->as_node());
+  }
   _waypointOccupied = wp;
+  if (wp)
+  {
+    auto     it  = _waypointOccupied->lights.begin();
+    auto     end = _waypointOccupied->lights.end();
+    NodePath np  = GetNodePath();
+
+    for (; it != end ; ++it)
+      np.set_light((*it)->light->as_node());
+  }
+#else
+  _waypointOccupied = wp;
+#endif
 }

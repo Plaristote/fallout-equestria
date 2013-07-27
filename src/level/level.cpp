@@ -907,7 +907,8 @@ AsyncTask::DoneStatus Level::do_task(void)
   else
     _mouse.SetMouseState('i');
 
-  if (_light_iterator != _world->lights.end() && _world->lights.size() > 0)
+  // TODO discard this when it has become certain it will never be useful again
+  /*if (_light_iterator != _world->lights.end() && _world->lights.size() > 0)
   {
     if (_light_iterator->zoneSize < 50)
     {
@@ -919,7 +920,7 @@ AsyncTask::DoneStatus Level::do_task(void)
     ++_light_iterator;
   }
   else
-    _light_iterator = _world->lights.begin();
+    _light_iterator = _world->lights.begin();*/
 
   // TEST Transparent Ball of Wrath
   if (!(_player_halo.is_empty()))

@@ -869,7 +869,7 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
     GoTo(_level->GetWorld()->GetWaypointFromId((*(--(_path.end()))).id));
     return ;
   }
-  _waypointOccupied = wp;
+  SetOccupiedWaypoint(wp);
 
   // Has reached object objective, if there is one ?
   if (_goToData.objective)

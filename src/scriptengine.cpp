@@ -36,9 +36,9 @@ void Script::Call(asIScriptContext* context, asIScriptFunction* function, const 
 #include "as_object.hpp"
 #include "directory.hpp"
 
-asIScriptContext*    AngelScript::ContextLock::current_context = 0;
-asIScriptModule*     AngelScript::ContextLock::current_module  = 0;
-AngelScript::Object* AngelScript::ContextLock::current_object  = 0;
+asIScriptContext*                   AngelScript::ContextLock::current_context = 0;
+asIScriptModule*                    AngelScript::ContextLock::current_module  = 0;
+AngelScript::ContextLock::ObjectPtr AngelScript::ContextLock::current_object;
 
 AngelScript::Object::Object(const std::string& filepath) : filepath(filepath), module(0)
 {
@@ -87,6 +87,14 @@ void AngelScript::Object::Initialize(void)
   {
     item.second.function = 0;
   });
+}
+
+void AngelScript::Object::asUndefineMethod(const std::string& name)
+{
+  auto existing = functions.find(name);
+
+  if (existing != functions.end())
+    functions.erase(existing);
 }
 
 void AngelScript::Object::asDefineMethod(const std::string& name, const std::string& declaration)

@@ -57,6 +57,16 @@ void LevelZone::Refresh(void)
     else
       ++it;
   }
+  _effects.clear();
+}
+
+#include "executor.hpp"
+void LevelZone::AddEffect(Effect effect, unsigned short time)
+{
+  TimeManager&       time_manager = _level->GetTimeManager();
+  TimeManager::Task* task         = time_manager.AddTask(1, false, time);
+
+  task->Interval.Connect(effect);
 }
 
 bool LevelZone::IsInside(InstanceDynamicObject* object) const

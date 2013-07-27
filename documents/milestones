@@ -85,7 +85,7 @@ x --> Selection tools for waypoints
 x --> Automatic leveling of waypoints
 x --> Execute heavy tasks in threads, show progress with progress bar
 
-x  -> Statistics
+x -> Statistics
 # --> Reputation
 x --> Interface to check statistics of a party
 
@@ -127,26 +127,27 @@ x --> Configurable camera behavior
 Milestone IV [Started July 2013]
   -> WorldMap
   --> Visibility and detection of cities
-  --> Dynamically generated places (like random encounter, without encounter)
-  --> City splashscreen, allowing to pick between several entry zones
+x --> Dynamically generated places (like random encounter, without encounter)
+x --> City splashscreen, allowing to pick between several entry zones
 
   -> Statistics
-  --> Reputation
+x --> Reputation
+  --> Traits interface for the Edit and Show modes of the Statistic interface
 
   -> Level
 x --> Factorize Actions code. Every part of the process (temporizing, animating, executing) must be contiguous.
 x --> Main script for levels
 x ----> General hooks running at every level start, end and each loop turn
 x ----> Exposing waypoint observers to scripts
-  --> Zone effects
+x --> Zone effects
   --> Advanced Light Management
 x ----> Script interface for light management
   ----> Hour-based light switch (for lighting cities at night)
   ----> Combinable light effects
   ------> Blinking
   ------> Fading
-  --> Dialogs
-  ---> Allow including of the return value of a script function in dialog's text
+x --> Dialogs
+x ---> Allow inclusion of the return value of a script function in dialog's text
   --> In-game cinematics
 ~ --> Projectiles and gunshot effects
 x --> Party Create/Import/Export via scripts
@@ -155,12 +156,12 @@ x --> Party Create/Import/Export via scripts
   --> Compression for save slots
 
   -> Game Editor
-x --> Asynchronous Map Loading
+~ --> Asynchronous Map Loading
 x --> Re-organize the MapObjects as a hierarchy (a MapObject must be able to contain others)
-x --> Tree view for the object hierarchy
+~ --> Tree view for the object hierarchy
 ~ --> Focusing camera on selected objects
   --> Zoom/unzoom using mouse wheel
-  --> Free camera
+x --> Free camera
 x --> Generate waypoint for MapObject
 x --> Zone selector for waypoints
 x --> Arcs preview when selecting a waypoint
@@ -168,6 +169,6 @@ x --> Arcs preview when selecting a waypoint
   --> Copy/Paste
 x --> Interface to edit cities' splashscreens
 
-  -> General
+x -> General
 x --> Porting every AngelScript usage to the new AngelScript::Object tool
-  --> Any ressource accessible through AngelScript::ContextLock must be handled with a smart pointer
+x --> Any object accessible through AngelScript::ContextLock must be handled with a smart pointer

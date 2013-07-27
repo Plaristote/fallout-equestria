@@ -18,11 +18,15 @@ public:
   bool IsInside(InstanceDynamicObject* object) const { return (zone.IsInside(object)); }
   void Delete(void);
 
+  void SetEffect(const std::string&, int);
+  void DisableEffect(void);
+
   static ScriptZone* Factory(const std::string& zone, const std::string& callback);
 
 private:
   LevelZone&            zone;
   Sync::ObserverHandler signals;
+  bool                  effect_enable;
 };
 
 #endif

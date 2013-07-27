@@ -118,7 +118,7 @@ private:
   void                  DoLoadLevel(LoadLevelParams);
   void                  GameOver(void);
   
-  void                  DoCheckRandomEncounter(int x, int y);
+  void                  DoCheckRandomEncounter(int x, int y, bool is_event = true);
   
   void                  SetPlayerInventory(void);
   

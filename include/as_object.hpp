@@ -2,44 +2,10 @@
 # define AS_OBJECT_HPP
 
 # include "scriptengine.hpp"
-#include <boost/concept_check.hpp>
+# include <memory>
 
 namespace AngelScript
 {
-  class Object;
-  struct ContextLock
-  {
-  public:
-    ContextLock(asIScriptContext* context, asIScriptModule* module, AngelScript::Object* object)
-    {
-      old_context     = current_context;
-      old_module      = current_module;
-      current_context = context;
-      current_module  = module;
-      old_object      = current_object;
-      current_object  = object;
-    }
-
-    ~ContextLock(void)
-    {
-      current_context = old_context;
-      current_module  = old_module;
-      current_object  = old_object;
-    }
-
-    static asIScriptContext* Context(void)       { return (current_context); }
-    static asIScriptModule*  Module(void)        { return (current_module);  }
-    static Object*           CurrentObject(void) { return (current_object);  }
-
-  private:
-    asIScriptContext*        old_context;
-    asIScriptModule*         old_module;
-    static asIScriptContext* current_context;
-    static asIScriptModule*  current_module;
-    AngelScript::Object*        old_object;
-    static AngelScript::Object* current_object;
-  };
-
   struct Exception : public std::exception
   {
   public:
@@ -142,10 +108,13 @@ namespace AngelScript
     Object(asIScriptContext* context, const std::string& filepath);
     Object(asIScriptContext* context, asIScriptModule* module);
     ~Object();
+
+    std::weak_ptr<Object> GetPtr(void) { return (shared_ptr); }
   protected:
     void Initialize(void);    
   public:
     void asDefineMethod(const std::string& name, const std::string& declaration);
+    void asUndefineMethod(const std::string& name);
     bool IsDefined(const std::string& name) const
     {
       if (!module)
@@ -189,12 +158,48 @@ namespace AngelScript
 
     ReturnType Call(const std::string& name, unsigned int argc = 0, ...);
   private:
-    const std::string filepath;
-    asIScriptContext* context;
-    asIScriptModule*  module;
-    bool              required_module, required_context;
-    Functions         functions;
+    const std::string       filepath;
+    asIScriptContext*       context;
+    asIScriptModule*        module;
+    bool                    required_module, required_context;
+    Functions               functions;
+    std::shared_ptr<Object> shared_ptr;
   };
+
+  struct ContextLock
+  {
+    typedef std::weak_ptr<AngelScript::Object> ObjectPtr;
+  public:
+    ContextLock(asIScriptContext* context, asIScriptModule* module, AngelScript::Object* object)
+    {
+      old_context     = current_context;
+      old_module      = current_module;
+      current_context = context;
+      current_module  = module;
+      old_object      = current_object;
+      current_object  = object->GetPtr();
+    }
+
+    ~ContextLock(void)
+    {
+      current_context = old_context;
+      current_module  = old_module;
+      current_object  = old_object;
+    }
+
+    static asIScriptContext* Context(void)       { return (current_context); }
+    static asIScriptModule*  Module(void)        { return (current_module);  }
+    static Object*           CurrentObject(void) { return ((current_object.expired()) ? 0 : &(*(current_object.lock()))); }
+
+  private:
+    asIScriptContext*           old_context;
+    asIScriptModule*            old_module;
+    static asIScriptContext*    current_context;
+    static asIScriptModule*     current_module;
+    ObjectPtr                   old_object;
+    static ObjectPtr            current_object;
+  };
+
 }
 
 #endif

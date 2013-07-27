@@ -28,7 +28,9 @@ struct WaypointModifier
 {
   WaypointModifier() : _collision_processed(0), _level(0), _waypointOccupied(0)
   {}
-  
+
+  virtual NodePath GetNodePath() const = 0;
+
   virtual void ProcessCollisions(void);
   void         UnprocessCollisions(void);
   bool         HasOccupiedWaypoint(void)      const { return (_waypointOccupied != 0); }

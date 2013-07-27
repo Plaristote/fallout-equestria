@@ -260,7 +260,29 @@ void World::DynamicObjectChangeFloor(DynamicObject& object, unsigned char floor)
 
 void World::DeleteMapObject(MapObject* ptr)
 {
-  DeleteObject(ptr, objects);
+  if (ptr)
+  {
+    // Children waypoints removal
+    {
+      MapObject::Waypoints::iterator it;
+
+      while ((it = ptr->waypoints.begin()) != ptr->waypoints.end())
+        DeleteWayPoint(*it);
+    }
+    // Children mapobjects removal
+    {
+      auto it = objects.begin();
+
+      while (it != objects.end())
+      {
+        if (it->parent == ptr->nodePath.get_name())
+          it = objects.erase(it);
+        else
+          ++it;
+      }
+    }
+    DeleteObject(ptr, objects);
+  }
 }
 
 MapObject* World::GetMapObjectFromName(const string &name)
@@ -493,10 +515,13 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
     if (node.is_empty())
       continue ;
 
-    MapObject*     object    = (colmask & ColMask::Object ? GetMapObjectFromNodePath(node) : 0);
+    Waypoint*      waypoint  = (colmask & ColMask::Waypoint ? GetWaypointFromNodePath(node) : 0);
+    MapObject*     object    = (!waypoint && (colmask & ColMask::Object) ? GetMapObjectFromNodePath(node) : 0);
     DynamicObject* dynObject = (object ? 0 : GetDynamicObjectFromNodePath(node));
 
-    if (object || dynObject)
+    if (waypoint)
+      waypoint->lights.push_back(light);
+    else if (object || dynObject)
     {
       list<NodePath>::iterator alreadyRegistered;
 
@@ -1219,13 +1244,6 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
   packet >> r >> g >> b >> a;
   packet >> pos_x >> pos_y >> pos_z;
   packet >> hpr_x >> hpr_y >> hpr_z;
-  if (blob_revision >= 3)
-  {
-    float     attenuation[3];
-
-    packet >> attenuation[0] >> attenuation[1] >> attenuation[2];
-    SetAttenuation(attenuation[0], attenuation[1], attenuation[2]);
-  }
   switch (parent_type)
   {
     case Type_MapObject:
@@ -1241,6 +1259,13 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
   }
   cout << "Light type = " << (int)type << endl;
   Initialize();
+  if (blob_revision >= 3)
+  {
+    float     attenuation[3];
+
+    packet >> attenuation[0] >> attenuation[1] >> attenuation[2];
+    SetAttenuation(attenuation[0], attenuation[1], attenuation[2]);
+  }
   SetColor(r, g, b, a);
   if (!(nodePath.is_empty()))
   {
@@ -1507,7 +1532,11 @@ void           World::UnSerialize(Utils::Packet& packet)
 
     cout << "Compiling lights" << endl;
   // Post-loading stuff
-  for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light); });
+#ifndef GAME_EDITOR
+  for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light, ColMask::Object | ColMask::Waypoint | ColMask::DynObject); });
+#else
+  for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light, ColMask::Object | ColMask::DynObject); });
+#endif
 }
 
 #ifndef GAME_EDITOR

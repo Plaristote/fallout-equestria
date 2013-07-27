@@ -305,10 +305,11 @@ void AngelScriptInitialize(void)
 
   const char* statsheetClass = "Special";
   engine->RegisterObjectType(statsheetClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(statsheetClass, "void SetCurrentHp(int)",         asMETHOD(StatController,SetCurrentHp),  asCALL_THISCALL);
-  engine->RegisterObjectMethod(statsheetClass, "void AddExperience(int)",        asMETHOD(StatController,AddExperience), asCALL_THISCALL);
-  engine->RegisterObjectMethod(statsheetClass, "void SetStatistic(string, int)", asMETHOD(StatController,SetStatistic),  asCALL_THISCALL);
-  engine->RegisterObjectMethod(statsheetClass, "Data GetData()",                 asMETHOD(StatController,GetData),       asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void SetCurrentHp(int)",          asMETHOD(StatController,SetCurrentHp),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void AddExperience(int)",         asMETHOD(StatController,AddExperience), asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void AddReputation(string, int)", asMETHOD(StatController,AddReputation), asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void SetStatistic(string, int)",  asMETHOD(StatController,SetStatistic),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "Data GetData()",                  asMETHOD(StatController,GetData),       asCALL_THISCALL);
 
   const char* itemClass      = "Item";
   const char* inventoryClass = "Inventory";
@@ -382,6 +383,8 @@ void AngelScriptInitialize(void)
   const char* zoneClass = "Zone";
   engine->RegisterObjectType(zoneClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(zoneClass, "void SetEnabled(bool)",         asMETHOD(ScriptZone,SetEnabled), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void SetEffect(string, int)",   asMETHOD(ScriptZone,SetEffect), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void DisableEffect()",          asMETHOD(ScriptZone,DisableEffect), asCALL_THISCALL);
   engine->RegisterObjectMethod(zoneClass, "bool IsEnabled() const",        asMETHOD(ScriptZone,IsEnabled), asCALL_THISCALL);
   engine->RegisterObjectMethod(zoneClass, "bool IsInside(DynamicObject@)", asMETHOD(ScriptZone,IsInside), asCALL_THISCALL);
   engine->RegisterObjectMethod(zoneClass, "void Delete()",                 asMETHOD(ScriptZone,Delete), asCALL_THISCALL);

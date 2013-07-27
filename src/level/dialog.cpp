@@ -97,60 +97,29 @@ void DialogView::CleanView(const DialogAnswers& answers)
 
 // CONTROLLER
 #include "gameui.hpp"
-extern asIScriptContext* as_current_context;
-extern asIScriptContext* as_current_module;
-
 DialogController::DialogController(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* character, Data l18n) : DialogView(window, context), _script("scripts/dialogs/" + character->GetDialog() + ".as"), _model(character->GetDialog(), l18n)
 {
-  //const string& dialogId = character->GetDialog();
-
   _character = character;
-  //_context   = Script::Engine::Get()->CreateContext();
-  //_module    = Script::Engine::LoadModule("Dialog-" + dialogId, "scripts/dialogs/" + dialogId + ".as");
   AnswerSelected.EventReceived.Connect(*this, &DialogController::ExecuteAnswer);
-
-  //if (_module)
+  _script.asDefineMethod("HookInit", "string HookInit()");
+  try
   {
-    // Init Dialogue
-    //asIScriptFunction* hook = _module->GetFunctionByDecl("string HookInit()");
+    string npc_line = *(string*)(_script.Call("HookInit"));
 
-    _script.asDefineMethod("HookInit", "string HookInit()");
-
-    try
-    {
-      string npc_line = *(string*)(_script.Call("HookInit"));
-
-      SetCurrentNode(npc_line);
-    }
-    catch (const AngelScript::Exception& exception)
-    {
-      const std::string message = "Dialog script crashed: ";
-
-      AlertUi::NewAlert.Emit(message + exception.what());
-      DialogEnded.Emit();
-    }
-
-    /*if (hook)
-    {
-      _context->Prepare(hook);
-      as_current_context = _context;
-      as_current_module  = _module;
-      if ((_context->Execute()) == asEXECUTION_FINISHED)
-      {
-        string npcLine = *(reinterpret_cast<string*>(_context->GetReturnObject()));
-
-        SetCurrentNode(npcLine);
-      }
-    }*/
+    SetCurrentNode(npc_line);
     BarterOpened.EventReceived.Connect(*this, &DialogController::OpenBarter);
   }
-  /*else
-    DialogEnded.Emit();*/
+  catch (const AngelScript::Exception& exception)
+  {
+    const std::string message = "Dialog script crashed: ";
+
+    AlertUi::NewAlert.Emit(message + exception.what());
+    DialogEnded.Emit();
+  }
 }
 
 DialogController::~DialogController()
 {
-  //_context->Release();
   cout << "Destroyed Dialog Controller" << endl;
 }
 
@@ -162,14 +131,16 @@ void DialogController::OpenBarter(Core::Event& event)
 
 void DialogController::SetCurrentNode(const string& node)
 {
-  DialogAnswers answers;
+  std::string                         npc_line;
+  DialogAnswers                       answers;
   DialogAnswers::AnswerList::iterator it;
   DialogAnswers::AnswerList::iterator end;
 
   CleanView(_model.GetDialogAnswers());
   _model.SetCurrentNpcLine(node);
   std::cout << "currentNpcLine is  " << _model.GetNpcLine() << std::endl;
-  answers = _model.GetDialogAnswers();
+  npc_line = SolveStringVariables(_model.GetNpcLine());
+  answers  = _model.GetDialogAnswers();
   for (it = answers.answers.begin(), end = answers.answers.end() ; it != end ;)
   {
     const string         availableHook = _model.GetHookAvailable((*it).first);
@@ -178,7 +149,6 @@ void DialogController::SetCurrentNode(const string& node)
     if (availableHook != "")
     {
       string             sign          = "bool " + availableHook + "()";
-      //asIScriptFunction* hook          = _module->GetFunctionByDecl(sign.c_str());
 
       try
       {
@@ -191,22 +161,13 @@ void DialogController::SetCurrentNode(const string& node)
 
         AlertUi::NewAlert.Emit(message + exception.what());
       }
-      //_context->Prepare(hook);
-      //as_current_context = _context;
-      //as_current_module  = _module;
-      /*if ((_context->Execute()) == asEXECUTION_FINISHED)
-      {
-        char test = _context->GetReturnByte();
-
-        available = test != 0;
-      }*/
     }
     if (!available)
       it = answers.answers.erase(it);
     else
       ++it;
   }
-  UpdateView(_model.GetNpcLine(), answers);
+  UpdateView(npc_line, answers);
 }
 
 void DialogController::ExecuteAnswer(Rocket::Core::Event& event)
@@ -218,8 +179,6 @@ void DialogController::ExecuteAnswer(Rocket::Core::Event& event)
 
   if (exMethod != "")
   {
-    //asIScriptFunction* hook = _module->GetFunctionByDecl(sign.c_str());
-
     try
     {
       _script.asDefineMethod(exMethod, "string " + exMethod + "()");
@@ -230,15 +189,6 @@ void DialogController::ExecuteAnswer(Rocket::Core::Event& event)
 
       AlertUi::NewAlert.Emit(message + exception.what());
     }
-
-    /*if (hook)
-    {
-      _context->Prepare(hook);
-      as_current_context = _context;
-      as_current_module  = _module;
-      if ((_context->Execute()) == asEXECUTION_FINISHED)
-        nextNpcLine = *(reinterpret_cast<string*>(_context->GetReturnObject()));
-    }*/
   }
   if (exMethod == "")
     nextNpcLine = _model.GetDefaultNextLine(idAnswer);
@@ -249,6 +199,57 @@ void DialogController::ExecuteAnswer(Rocket::Core::Event& event)
     SetCurrentNode(nextNpcLine);
   else
     DialogEnded.Emit();
+}
+
+#include <sstream>
+std::string DialogController::SolveStringVariables(const std::string& text)
+{
+  std::stringstream stream;
+  bool              fetching_func_name = false;
+  unsigned int      func_name_begin;
+  unsigned int      text_begin         = 0;
+
+  for (unsigned int i = 0 ; i < text.length() ; ++i)
+  {
+    if (fetching_func_name)
+    {
+      if (text[i] == '}')
+      {
+        std::string func_name = text.substr(func_name_begin, i - func_name_begin);
+
+        // GETTING FUNC RESULT
+        try
+        {
+          if (!(_script.IsDefined(func_name)))
+          {
+            std::string signature = "string " + func_name + "()";
+
+            _script.asDefineMethod(func_name, signature);
+          }
+          stream << *(std::string*)(_script.Call(func_name));
+        }
+        catch (const AngelScript::Exception& exception)
+        {
+          stream << "#{Pipbuck Failure: " << exception.what() << "}";
+        }
+        text_begin         = i + 1;
+        fetching_func_name = false;
+      }
+    }
+    else
+    {
+      if ((text.substr(i, 2) == "#{") &&
+          (i == 0 || text[i - 1] != '\\'))
+      {
+        stream << text.substr(text_begin, i - text_begin);
+        func_name_begin    = i + 2;
+        fetching_func_name = true;
+        ++i;
+      }
+    }
+  }
+  stream << text.substr(text_begin);
+  return (stream.str());
 }
 
 // MODEL
