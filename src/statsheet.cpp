@@ -435,6 +435,22 @@ string StatModel::SelectRandomEncounter(void)
   return ("");
 }
 
+int StatModel::GetReputation(const std::string& faction) const
+{
+  return (_statsheet["Reputation"][faction]);
+}
+
+void StatModel::AddReputation(const std::string& faction, int amount)
+{
+  Data reputation         = _statsheet["Reputation"][faction];
+  int  current_reputation = 0;
+
+  if (reputation.NotNil())
+    current_reputation    = reputation;
+  current_reputation     += amount;
+  reputation              = current_reputation;
+}
+
 /*
  * StatController
  */
@@ -554,6 +570,13 @@ void StatController::AddExperience(unsigned int exp)
     _view->SetIdValue("current-xp", exp);
 }
 
+void StatController::AddReputation(const std::string& faction, int amount)
+{
+  _model.AddReputation(faction, amount);
+  if (_view)
+    _view->SetReputation(faction, _model.GetReputation(faction));
+}
+
 void StatController::UpSpecial(const std::string& stat)
 {
   SetSpecial(stat, _model.GetSpecial(stat) + 1);
@@ -656,6 +679,9 @@ void StatController::SetView(StatView* view)
 
   for_each(_model.GetAll()["Kills"].begin(), _model.GetAll()["Kills"].end(), [this](Data data)
   { _view->SetFieldValue("Kills", data.Key(), data.Value()); });
+
+  for_each(_model.GetAll()["Reputation"].begin(), _model.GetAll()["Reputation"].end(), [this](Data data)
+  { _view->SetReputation(data.Key(), data); });
 
   _view->SetInformation("Name",   _model.GetName());
   _view->SetInformation("Age",    _model.GetAge());
@@ -918,6 +944,17 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
     SetEditMode(Display);
     Translate();
   }
+}
+
+void StatViewRocket::SetReputation(const std::string& faction, int reputation)
+{
+  std::string reputation_level;
+
+  if (reputation < 0)
+    reputation_level = "bad";
+  else
+    reputation_level = "good";
+  SetFieldValue("Reputation", faction, reputation_level);
 }
 
 void StatViewRocket::SetPartyMembers(const std::vector<std::string>& members)
@@ -1200,6 +1237,21 @@ void StatViewRocket::SetFieldValue(const std::string& category, const std::strin
         rml << "<datagrid>";
         rml << "<col width='80%'><span class='kills-key' i18n='" << key << "'>" << i18n::T(key) << "</span></col>";
         rml << "<col width='20%'><span class='kills-value' id='" << strId << "'>" << value << "</span></col>";
+        rml << "</datagrid>";
+        element->SetInnerRML(old_rml + rml.str().c_str());
+      }
+    }
+    else if (category == "Reputation")
+    {
+      stringstream rml;
+      Core::String old_rml;
+
+      if ((element = _root->GetElementById("panel-reputation")))
+      {
+        element->GetInnerRML(old_rml);
+        rml << "<datagrid>";
+        rml << "<col width='80%'><span class='reputation-key' i18n='" << key << "'>" << i18n::T(key) << "</span></col>";
+        rml << "<col width='20%'><span class='reputation-value' id='" << strId << "'>" << i18n::T(value) << "</span></col>";
         rml << "</datagrid>";
         element->SetInnerRML(old_rml + rml.str().c_str());
       }
