@@ -31,7 +31,7 @@ LPoint3 NodePathSize(NodePath np)
 World::World(WindowFramework* window)
 {
   this->window         = window;
-  model_sphere         = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
+  model_sphere         = window->load_model(window->get_panda_framework()->get_models(), std::string(MODEL_ROOT) + "misc/sphere.egg.pz");
   floors_node          = window->get_render().attach_new_node("floors");
   rootWaypoints        = window->get_render().attach_new_node("waypoints");
   rootMapObjects       = window->get_render().attach_new_node("mapobjects");
