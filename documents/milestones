@@ -158,7 +158,7 @@ x --> Party Create/Import/Export via scripts
   -> Game Editor
 ~ --> Asynchronous Map Loading
 x --> Re-organize the MapObjects as a hierarchy (a MapObject must be able to contain others)
-~ --> Tree view for the object hierarchy
+x --> Tree view for the object hierarchy
 ~ --> Focusing camera on selected objects
   --> Zoom/unzoom using mouse wheel
 x --> Free camera
