@@ -31,7 +31,7 @@ LPoint3 NodePathSize(NodePath np)
 World::World(WindowFramework* window)
 {
   this->window         = window;
-  model_sphere         = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
+  model_sphere         = window->load_model(window->get_panda_framework()->get_models(), std::string(MODEL_ROOT) + "misc/sphere.egg.pz");
   floors_node          = window->get_render().attach_new_node("floors");
   rootWaypoints        = window->get_render().attach_new_node("waypoints");
   rootMapObjects       = window->get_render().attach_new_node("mapobjects");
@@ -322,6 +322,11 @@ DynamicObject* World::InsertDynamicObject(DynamicObject& object)
 {
   object.waypoint = 0;
   object.nodePath = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + object.strModel);
+  if (object.nodePath.is_empty())
+  {
+    std::cerr << "[World::InsertDynamicObject] Could not load " << object.strModel << std::endl;
+    return (0);
+  }
   if (object.strTexture != "")
   {
     object.texture    = TexturePool::load_texture(TEXT_ROOT + object.strTexture);
@@ -990,19 +995,26 @@ void MapObject::UnSerialize(WindowFramework* window, Utils::Packet& packet)
     packet >> parent;
 
   nodePath   = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + strModel);
-  nodePath.set_depth_offset(1);
-  nodePath.set_two_sided(false);
-  if (strTexture != "")
+  if (nodePath.is_empty())
   {
-    texture    = TexturePool::load_texture(TEXT_ROOT + strTexture);
-    if (texture)
-      nodePath.set_texture(texture);
+    std::cerr << "[World][Unserialize] Could not load model " << strModel << " for object '" << name << '\'' << std::endl;
   }
-  nodePath.set_name(name);
-  nodePath.set_hpr(rotX, rotY, rotZ);
-  nodePath.set_scale(scaleX, scaleY, scaleZ);
-  nodePath.set_pos(posX, posY, posZ);
-  waypoints_root = nodePath.attach_new_node("waypoints");
+  else
+  {
+    nodePath.set_depth_offset(1);
+    nodePath.set_two_sided(false);
+    if (strTexture != "")
+    {
+      texture    = TexturePool::load_texture(TEXT_ROOT + strTexture);
+      if (texture)
+        nodePath.set_texture(texture);
+    }
+    nodePath.set_name(name);
+    nodePath.set_hpr(rotX, rotY, rotZ);
+    nodePath.set_scale(scaleX, scaleY, scaleZ);
+    nodePath.set_pos(posX, posY, posZ);
+    waypoints_root = nodePath.attach_new_node("waypoints");
+  }
 }
 
 void MapObject::UnserializeWaypoints(World* world, Utils::Packet& packet)

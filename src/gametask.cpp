@@ -845,27 +845,37 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     _level->SetDataEngine(&_dataEngine);
     if (params.entry_zone != "")
       _level->InsertParty(*_playerParty);
-    _level->InitPlayer();
-    _level->GetPlayer()->SetStatistics(_charSheet, _playerStats);
-    if (params.entry_zone == "")
-      _level->FetchParty(*_playerParty);
-    SetPlayerInventory();
-    if (params.entry_zone != "")
-      _level->SetEntryZone(*_playerParty, params.entry_zone);
-    SetLevel(_level);
-
-    _level->obs.Connect(_pipbuck.VisibilityToggled, [this](bool visible)
+    if (_level->GetPlayer() != 0)
     {
-      _level->GetCamera().SetEnabledScroll(!visible);
-    });
+      _level->InitPlayer();
+      _level->GetPlayer()->SetStatistics(_charSheet, _playerStats);
+      if (params.entry_zone == "")
+        _level->FetchParty(*_playerParty);
+      SetPlayerInventory();
+      if (params.entry_zone != "")
+        _level->SetEntryZone(*_playerParty, params.entry_zone);
+      SetLevel(_level);
 
-    _quest_manager->Initialize(_level);
+      _level->obs.Connect(_pipbuck.VisibilityToggled, [this](bool visible)
+      {
+        _level->GetCamera().SetEnabledScroll(!visible);
+      });
+      _quest_manager->Initialize(_level);
+    }
+    else
+    {
+      delete _level;
+      _level = 0;
+      AlertUi::NewAlert.Emit("The characters couldn't be loaded properly.");
+      _worldMap->Show();
+    }
 
     // TODO remove this when we're done with deploying creeps
     //_level->SpawnEnemies("critters", 10, 1);
   }
   else
   {
+    AlertUi::NewAlert.Emit("Cannot load level's map file.");
     cerr << "?? Can't open level !!" << endl;
     _worldMap->Show();
   }
