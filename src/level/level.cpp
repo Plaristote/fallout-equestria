@@ -274,7 +274,7 @@ void Level::InsertCharacter(ObjectCharacter* character)
 void Level::InsertDynamicObject(DynamicObject& object)
 {
   InstanceDynamicObject* instance = 0;
-  
+
   switch (object.type)
   {
     case DynamicObject::Character:
@@ -469,14 +469,18 @@ void Level::InsertParty(PlayerParty& party)
   for (; it != end ; ++it)
   {
     DynamicObject*   object    = _world->InsertDynamicObject(**it);
-    ObjectCharacter* character = new ObjectCharacter(this, object);
 
-    if (character->GetStatistics().NotNil())
-      character->SetActionPoints(character->GetStatistics()["Statistics"]["Action Points"]);
-    _characters.insert(_characters.begin(), character);
-    // Replace the Party DynamicObject pointer to the new one
-    delete *it;
-    *it = object;
+    if (object)
+    {
+      ObjectCharacter* character = new ObjectCharacter(this, object);
+
+      if (character->GetStatistics().NotNil())
+        character->SetActionPoints(character->GetStatistics()["Statistics"]["Action Points"]);
+      _characters.insert(_characters.begin(), character);
+      // Replace the Party DynamicObject pointer to the new one
+      delete *it;
+      *it = object;
+    }
   }
   party.SetHasLocalObjects(false);
   SetupCamera();
@@ -663,6 +667,8 @@ ObjectCharacter* Level::GetCharacter(const DynamicObject* object)
 
 ObjectCharacter* Level::GetPlayer(void)
 {
+  if (_characters.size() == 0)
+    return (0);
   return (_characters.front());
 }
 
@@ -907,6 +913,7 @@ AsyncTask::DoneStatus Level::do_task(void)
   else
     _mouse.SetMouseState('i');
 
+  std::cout << "do_task #1" << std::endl;
   // TODO discard this when it has become certain it will never be useful again
   /*if (_light_iterator != _world->lights.end() && _world->lights.size() > 0)
   {
@@ -954,6 +961,7 @@ AsyncTask::DoneStatus Level::do_task(void)
   // End Level Mouse Hints
   //
 
+  std::cout << "do_task#50" << std::endl;
   std::function<void (InstanceDynamicObject*)> run_object = [elapsedTime](InstanceDynamicObject* obj)
   {
     obj->Run(elapsedTime);
@@ -995,6 +1003,7 @@ AsyncTask::DoneStatus Level::do_task(void)
   _particle_manager.do_particles(ClockObject::get_global_clock()->get_dt());
   _mouse.Run();
   _timer.Restart();
+  std::cout << "do_task #100" << std::endl;
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);
 }
 
