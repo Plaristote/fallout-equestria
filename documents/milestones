@@ -122,6 +122,7 @@ x -> General
 x --> Configurable graphism quality
 x --> Configurable camera behavior
 ~ --> Stabilizing
+x --> 32/64bit cross-compatibility
 ~ --> Preparing a Windows building environment to get Windows nightly builds
 
 Milestone IV [Started July 2013]
@@ -159,7 +160,7 @@ x --> Party Create/Import/Export via scripts
 ~ --> Asynchronous Map Loading
 x --> Re-organize the MapObjects as a hierarchy (a MapObject must be able to contain others)
 x --> Tree view for the object hierarchy
-~ --> Focusing camera on selected objects
+x --> Focusing camera on selected objects
   --> Zoom/unzoom using mouse wheel
 x --> Free camera
 x --> Generate waypoint for MapObject

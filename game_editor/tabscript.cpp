@@ -47,7 +47,7 @@ void TabScript::LoadAllScript(void)
 
         foreach (QString string, fileList)
         {
-            QRegExp regexp("\.as$");
+            QRegExp regexp("\\.as$");
             if (!(string.contains(regexp)))
               continue ;
 

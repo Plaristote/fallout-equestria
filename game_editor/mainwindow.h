@@ -68,6 +68,7 @@ private slots:
     void DisableLevelEditor(void);
     void UpdateProgressBar(QString label, float value);
     void DisplayError(QString title, QString message);
+    void SetFreeCamera(bool);
 
     // CHARSHEETS
     void AddCharsheet(void);

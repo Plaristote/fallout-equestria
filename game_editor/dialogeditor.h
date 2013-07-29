@@ -15,7 +15,7 @@ class DialogEditor;
 class NoEditDelegate: public QStyledItemDelegate {
     public:
       NoEditDelegate(QObject* parent=0): QStyledItemDelegate(parent) {}
-      virtual QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const {
+      virtual QWidget* createEditor(QWidget *, const QStyleOptionViewItem &, const QModelIndex &) const {
         return 0;
       }
 };
@@ -59,7 +59,7 @@ private:
 
     DataTree*				tree;
 	DataTree*				locale;
-	inline QString			I18n(std::string key) {Data d(locale); return QString::fromStdString( d[key].Value()); };
+    inline QString			I18n(std::string key) { return QString::fromStdString( Data(locale)[key].Value()); }
 
 	QTextDocument*			nodeDoc;
 };

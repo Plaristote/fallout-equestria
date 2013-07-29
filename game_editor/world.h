@@ -60,6 +60,7 @@ namespace ColMask
 }
 
 struct World;
+struct WorldLight;
 
 struct Waypoint
 {
@@ -93,11 +94,12 @@ struct Waypoint
     typedef std::list<Arc> Arcs;
     typedef std::vector<std::pair<Arc, unsigned short> > ArcsWithdrawed;
 
-    unsigned int        id;
-    unsigned char       floor;
-    Arcs                arcs;
-    ArcsWithdrawed      arcs_withdrawed;
-    NodePath            nodePath;
+    unsigned int           id;
+    unsigned char          floor;
+    Arcs                   arcs;
+    ArcsWithdrawed         arcs_withdrawed;
+    NodePath               nodePath;
+    std::list<WorldLight*> lights;
     
     void WithdrawArc(Waypoint* other);
     void UnwithdrawArc(Waypoint* other, ArcObserver* observer);

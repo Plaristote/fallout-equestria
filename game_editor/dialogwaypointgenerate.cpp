@@ -13,8 +13,8 @@ WaypointGenerator::WaypointGenerator(World* world, MapObject* object, LPoint4 ma
 
   spacingx = spacing.get_x();
   spacingy = spacing.get_y();
-  initPosX = margin.get_x();
-  initPosY = margin.get_y();
+  initPosX = margin.get_x() - (size.get_x() / 2);
+  initPosY = margin.get_y() - (size.get_y() / 2);
   initPosZ = size.get_z() + 50.f;
   sizex    = (size.get_x() - (margin.get_x() + margin.get_z())) / spacingx + 1;
   sizey    = (size.get_y() - (margin.get_y() + margin.get_w())) / spacingy + 1;
@@ -127,13 +127,11 @@ void WaypointGenerator::Leveling(void)
 {
   float step  = 0;
   float steps = object->waypoints.size();
-  auto  it    = object->waypoints.begin();
-  auto  end  = object->waypoints.end();
 
-  while (it != end)
+  for (unsigned int it = 0 ; it < object->waypoints.size() ; ++it)
   {
     unsigned int attempts = 0;
-    Waypoint*    wp       = *it;
+    Waypoint*    wp       = object->waypoints[it];
     NodePath     np       = wp->nodePath;
 
     while (LevelWaypoint(wp) == false && attempts < 20)
@@ -146,11 +144,9 @@ void WaypointGenerator::Leveling(void)
     }
     if (attempts == 20)
     {
+      it--;
       world->DeleteWayPoint(wp);
-      it = object->waypoints.erase(it);
     }
-    else
-      ++it;
     UpdateProgress("Waypoint Leveling (4/4): %p%", ++step / steps * 100);
   }
 }

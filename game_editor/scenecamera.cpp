@@ -41,6 +41,28 @@ void SceneCamera::SetEnabledScroll(bool set)
   _scrollEnabled = set;
 }
 
+void SceneCamera::SetEnabledTrackball(bool set)
+{
+  SetEnabledScroll(!set);
+  _useTrackball = set;
+  if (_useTrackball)
+  {
+    if (_trackball.is_empty())
+    {
+      _window->setup_trackball();
+      _trackball = _window->get_mouse().find("trackball");
+    }
+    else
+      _trackball.reparent_to(_window->get_mouse());
+  }
+  else
+  {
+    _trackball.detach_node();
+    CenterCameraInstant(LPoint3f(0, 0, 0));
+    _camera.set_hpr(cameraAngles[_currentCameraAngle]);
+  }
+}
+
 void SceneCamera::SlideToHeight(float height)
 {
   _destHeight = height + _camera_height;
@@ -67,6 +89,7 @@ void SceneCamera::RefreshCameraHeight(void)
 
 SceneCamera::SceneCamera(WindowFramework* window, NodePath camera) : _window(window), _graphicWindow(window->get_graphics_window()), _camera(camera)
 {
+  _useTrackball  = false;
   _scrollEnabled = true;
   RefreshCameraHeight();
 
@@ -113,6 +136,8 @@ void SceneCamera::Run(float elapsedTime)
 {
   PStatCollector collector("Level:SceneCamera");
 
+  if (_useTrackball)
+    return ;
   collector.set_level(2);
   collector.start();
   if (_scrollEnabled)
@@ -268,39 +293,32 @@ void SceneCamera::CenterOnObject(InstanceDynamicObject* object)
 
 void SceneCamera::CenterCameraOn(NodePath np)
 {
-  _centeringCamera   = true;
-  _objectivePos      = np.get_pos();
-  _objectivePos.set_z(_objectivePos.get_z() + _camera_height);
-
-  LPoint3f cameraRot = _camera.get_hpr();
-  float    rad2deg   = 3.1415926535897 / 180;
-
-  cameraRot.set_x(cameraRot.get_x() * rad2deg);
-  cameraRot.set_y(cameraRot.get_y() * rad2deg);
-  cameraRot.set_z(cameraRot.get_z() * rad2deg);
-
-  _objectivePos.set_x(np.get_x() + sin(cameraRot.get_x()) * 100);
-  _objectivePos.set_y(np.get_y() + tan(cameraRot.get_y()) * 100);
-
-  if (_currentCameraAngle == 1)
-    _objectivePos.set_y(_objectivePos.get_y() + 80 + (140 - _camera_height) / 1.35);
+  if (_useTrackball)
+    _window->center_trackball(np);
   else
   {
-    _objectivePos.set_x(_objectivePos.get_x() + 25 - (_camera_height - 50) * 0.85);
-    _objectivePos.set_y(_objectivePos.get_y() + 40 - (_camera_height - 50) * 1);
-  }
+    _centeringCamera   = true;
+    _objectivePos      = np.get_pos(_window->get_render());
+    _objectivePos.set_z(_objectivePos.get_z() + _camera_height);
 
-  // take in account camera decalage
-  /*if (_currentCameraAngle == 0)
-  {
-    _objectivePos.set_y(_objectivePos.get_y() - 65);
-    _objectivePos.set_x(_objectivePos.get_x() - 60);
+    LPoint3f cameraRot = _camera.get_hpr();
+    float    rad2deg   = 3.1415926535897 / 180;
+
+    cameraRot.set_x(cameraRot.get_x() * rad2deg);
+    cameraRot.set_y(cameraRot.get_y() * rad2deg);
+    cameraRot.set_z(cameraRot.get_z() * rad2deg);
+
+    _objectivePos.set_x(np.get_x() + sin(cameraRot.get_x()) * 100);
+    _objectivePos.set_y(np.get_y() + tan(cameraRot.get_y()) * 100);
+
+    if (_currentCameraAngle == 1)
+      _objectivePos.set_y(_objectivePos.get_y() + 80 + (140 - _camera_height) / 1.35);
+    else
+    {
+      _objectivePos.set_x(_objectivePos.get_x() + 25 - (_camera_height - 50) * 0.85);
+      _objectivePos.set_y(_objectivePos.get_y() + 40 - (_camera_height - 50) * 1);
+    }
   }
-  else if (_currentCameraAngle == 1)
-  {
-    _objectivePos.set_y(_objectivePos.get_y() - 40);
-    _objectivePos.set_x(_objectivePos.get_x());
-  }*/
 }
 
 void SceneCamera::FollowNodePath(NodePath np)

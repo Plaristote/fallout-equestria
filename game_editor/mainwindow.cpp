@@ -206,6 +206,8 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(ui->treeWidget, SIGNAL(FocusDynamicObject(DynamicObject*)), this, SLOT(DynamicObjectFocus(DynamicObject*)));
     connect(ui->treeWidget, SIGNAL(FocusLight(WorldLight*)),            this, SLOT(LightFocus(WorldLight*)));
 
+    connect(ui->freeCamera, SIGNAL(toggled(bool)), this, SLOT(SetFreeCamera(bool)));
+
     ui->treeWidget->header()->hide();
     ui->scriptList->header()->hide();
 }
@@ -213,6 +215,12 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::SetFreeCamera(bool value)
+{
+  if (my_task.camera != 0)
+    my_task.camera->SetEnabledTrackball(value);
 }
 
 void MainWindow::CurrentTabChanged(int ntab)
@@ -326,7 +334,7 @@ void MainWindow::LoadAllStatsheets()
 {
     QDir        dir("data/charsheets");
     QStringList fileList = dir.entryList();
-    QRegExp     regexp("\.json$");
+    QRegExp     regexp("\\.json$");
 
     foreach (QString string, fileList)
     {
@@ -346,7 +354,7 @@ void MainWindow::LoadAllMaps()
 {
   QDir        dir("maps/");
   QStringList fileList = dir.entryList();
-  QRegExp     regexp("\.blob$");
+  QRegExp     regexp("\\.blob$");
 
   foreach (QString string, fileList)
   {
@@ -514,10 +522,13 @@ void MainWindow::LightFocus(WorldLight* light)
 {
   if (light)
   {
+    LPoint3f relative_pos = light->symbol.get_pos(_window->get_render());
+
     // TODO Focus the light in the interface too
     ui->map_tabs->setCurrentIndex(MAP_TABS_OBJECTS);
     ui->object_tabs->setCurrentIndex(OBJECT_TABS_LIGHTS);
-    my_task.camera->CenterCameraInstant(light->symbol.get_pos());
+    my_task.camera->CenterCameraInstant(relative_pos);
+    my_task.camera->SlideToHeight(relative_pos.get_z());
   }
 }
 
@@ -525,11 +536,14 @@ void MainWindow::MapObjectFocus(MapObject* mapobject)
 {
   if (mapobject)
   {
+    LPoint3f relative_pos = mapobject->nodePath.get_pos(_window->get_render());
+
     mapobjectHovered = mapobject;
     MapObjectSelect();
     ui->map_tabs->setCurrentIndex(MAP_TABS_OBJECTS);
     ui->object_tabs->setCurrentIndex(OBJECT_TABS_MAP_OBJECTS);
-    my_task.camera->CenterCameraInstant(mapobject->nodePath.get_pos());
+    my_task.camera->CenterCameraInstant(relative_pos);
+    my_task.camera->SlideToHeight(relative_pos.get_z());
   }
 }
 
@@ -538,12 +552,15 @@ void MainWindow::DynamicObjectFocus(DynamicObject* dynamic_object)
     cout << "DynamicObjectFocus" << endl;
   if (dynamic_object)
   {
+    LPoint3f relative_pos = dynamic_object->nodePath.get_pos(_window->get_render());
+
     cout << "-> Non zero pointre" << endl;
     dynamicObjectHovered = dynamic_object;
     DynamicObjectSelect();
     ui->map_tabs->setCurrentIndex(MAP_TABS_OBJECTS);
     ui->object_tabs->setCurrentIndex(OBJECT_TABS_DYNAMIC_OBJECTS);
-    my_task.camera->CenterCameraInstant(dynamic_object->nodePath.get_pos());
+    my_task.camera->CenterCameraInstant(relative_pos);
+    my_task.camera->SlideToHeight(relative_pos.get_z());
   }
 }
 
@@ -723,6 +740,7 @@ void MainWindow::DynamicObjectAdd()
     dynamicObjectHovered = world->AddDynamicObject(name.toStdString(), DynamicObject::Character, mod.toStdString(), tex.toStdString());
     dynamicObjectHovered->nodePath.set_pos(posx, posy, posz);
     dynamicObjectHovered->nodePath.set_scale(scale);
+    ui->treeWidget->AddDynamicObject(dynamicObjectHovered);
     DynamicObjectSelect();
 }
 
@@ -734,6 +752,7 @@ void MainWindow::DynamicObjectDelete()
 
       dynamicObjectHovered  = 0;
       DynamicObjectSelect();
+      ui->treeWidget->DelObject(toDel);
       world->DeleteDynamicObject(toDel);
     }
 }
@@ -915,6 +934,7 @@ void MainWindow::MapObjectAdd()
     mapobjectHovered = world->AddMapObject(name.toStdString(), model.toStdString(), text.toStdString(), posx, posy, posz);
     mapobjectHovered->nodePath.set_scale(scale);
     mapobjectHovered->nodePath.show();
+    ui->treeWidget->AddMapObject(mapobjectHovered);
     MapObjectSelect();
 }
 
@@ -926,6 +946,7 @@ void MainWindow::MapObjectDelete()
 
       mapobjectHovered  = 0;
       MapObjectSelect();
+      ui->treeWidget->DelObject(toDel);
       world->DeleteMapObject(toDel);
     }
 }
@@ -1655,6 +1676,7 @@ void MainWindow::LightAdd(void)
         world->AddLight(WorldLight::Directional, name.toStdString());
         ui->lightsSelect->addItem(name);
         ui->lightsSelect->setCurrentIndex(ui->lightsSelect->count() - 1);
+        ui->treeWidget->AddWorldLight(world->GetLightByName(name.toStdString()));
     }
 }
 
@@ -1665,6 +1687,7 @@ void MainWindow::LightDelete(void)
         int index = ui->lightsSelect->currentIndex();
 
         world->DeleteLight(lightSelected->name);
+        ui->treeWidget->DelLight(lightSelected);
         lightSelected = 0;
         ui->lightsSelect->removeItem(index);
     }

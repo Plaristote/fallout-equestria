@@ -29,6 +29,7 @@ public:
 
   void            Run(float elapsedTime);
   void            SetEnabledScroll(bool set);
+  void            SetEnabledTrackball(bool set);
 
   void            SwapCameraView(void);
 
@@ -71,6 +72,7 @@ private:
   LPoint3f         _cameraPos;
   float            _cameraMovementSpeed;
   bool             _scrollEnabled;
+  bool             _useTrackball;
 
   unsigned char    _currentCameraAngle;
   LPoint3f         _currentHpr;
@@ -86,6 +88,8 @@ private:
   NodePath         _toFollow;
   LPoint3f         _currentPos;
   LPoint3f         _objectivePos;
+
+  NodePath         _trackball;
 };
 
 #endif

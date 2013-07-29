@@ -3,6 +3,7 @@
 
 #include "globals.hpp"
 #include <QTreeWidget>
+#include <QMap>
 
 class World;
 class MapObject;
@@ -33,6 +34,13 @@ signals:
     
 public slots:
     void             ItemFocused();
+    void             AddMapObject(MapObject*);
+    void             AddDynamicObject(DynamicObject*);
+    void             AddWorldLight(WorldLight*);
+    void             DelObject(MapObject*);
+    void             DelLight(WorldLight*);
+    void             DelItem(QString);
+
 protected:
     virtual bool dropMimeData(QTreeWidgetItem *parent, int index, const QMimeData *data, Qt::DropAction action);
 
@@ -42,6 +50,9 @@ private:
 
     void             ProbeWorld(const std::string& parent_name, QTreeWidgetItem* item);
     void             SetItemIcon(QTreeWidgetItem*, ItemType t);
+    void             ReparentTo(QTreeWidgetItem* to_reparent, QTreeWidgetItem* parent);
+
+    QMap<QString, QTreeWidgetItem*> map;
 };
 
 #endif // MAPTREEWIDGET_H

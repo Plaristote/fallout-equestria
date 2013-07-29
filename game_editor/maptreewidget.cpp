@@ -53,6 +53,85 @@ MapTreeWidget::ItemType MapTreeWidget::GetType(QTreeWidgetItem* item) const
   return (ItemUnknown);
 }
 
+void MapTreeWidget::ReparentTo(QTreeWidgetItem* current, QTreeWidgetItem* parent)
+{
+  ItemType         parent_type = GetType(parent);
+  QTreeWidgetItem* clone       = 0;
+
+  /*
+   * Aborting if dropping in a sub-branch
+   */
+  if (!current)
+    return ;
+  for (int i = 0 ; i < current->childCount() ; ++i)
+  {
+    QTreeWidgetItem* item = current->child(i);
+
+    if (item == parent)
+      return ;
+  }
+
+  /*
+   * Reparenting the objects in the TreeWidget
+   */
+  if (parent != 0)
+    clone = new QTreeWidgetItem(parent);
+  else
+    clone = new QTreeWidgetItem(this);
+  clone->setText(0, current->text(0));
+  while (current->childCount())
+  {
+    QTreeWidgetItem* item = current->child(0);
+
+    current->removeChild(item);
+    clone->addChild(item);
+  }
+
+  SetItemIcon(clone, GetType(clone));
+  *(map.find(current->text(0))) = clone;
+  delete current;
+
+  /*
+   * Reparenting the objects in World
+   */
+  {
+    ItemType    type           = GetType(clone);
+    std::string name           = clone->text(0).toStdString();
+
+    if (type == ItemMapObject || type == ItemDynamicObject)
+    {
+       MapObject*  tmp_map_object = 0;
+
+       if (type == ItemMapObject)
+         tmp_map_object = world->GetMapObjectFromName(name);
+       else
+         tmp_map_object = world->GetDynamicObjectFromName(name);
+       if (parent == 0)
+         world->ReparentObject(tmp_map_object, 0);
+       else
+         world->ReparentObject(tmp_map_object, parent->text(0).toStdString());
+    }
+    else if (type == ItemLight)
+    {
+      WorldLight* light = world->GetLightByName(name);
+
+      switch (parent_type)
+      {
+      case ItemUnknown:
+      case ItemLight:
+        light->ReparentTo(world);
+        break ;
+      case ItemMapObject:
+        light->ReparentTo(world->GetMapObjectFromName(parent->text(0).toStdString()));
+        break ;
+      case ItemDynamicObject:
+        light->ReparentTo(world->GetDynamicObjectFromName(parent->text(0).toStdString()));
+        break ;
+      }
+    }
+  }
+}
+
 bool MapTreeWidget::dropMimeData(QTreeWidgetItem *parent, int, const QMimeData *data, Qt::DropAction)
 {
   ItemType parent_type = GetType(parent);
@@ -68,78 +147,7 @@ bool MapTreeWidget::dropMimeData(QTreeWidgetItem *parent, int, const QMimeData *
 
   if (data->hasFormat("application/x-qabstractitemmodeldatalist"))
   {
-    QTreeWidgetItem* current = this->currentItem();
-    QTreeWidgetItem* clone;
-
-    /*
-     * Aborting if dropping in a sub-branch
-     */
-    for (int i = 0 ; i < current->childCount() ; ++i)
-    {
-      QTreeWidgetItem* item = current->child(i);
-
-      if (item == parent)
-        return (false);
-    }
-
-    /*
-     * Reparenting the objects in the TreeWidget
-     */
-    if (parent != 0)
-      clone = new QTreeWidgetItem(parent);
-    else
-      clone = new QTreeWidgetItem(this);
-    clone->setText(0, current->text(0));
-    while (current->childCount())
-    {
-      QTreeWidgetItem* item = current->child(0);
-
-      current->removeChild(item);
-      clone->addChild(item);
-    }
-
-    SetItemIcon(clone, GetType(clone));
-    delete current;
-
-    /*
-     * Reparenting the objects in World
-     */
-    {
-      ItemType    type           = GetType(clone);
-      std::string name           = clone->text(0).toStdString();
-
-      if (type == ItemMapObject || type == ItemDynamicObject)
-      {
-         MapObject*  tmp_map_object = 0;
-
-         if (type == ItemMapObject)
-           tmp_map_object = world->GetMapObjectFromName(name);
-         else
-           tmp_map_object = world->GetDynamicObjectFromName(name);
-         if (parent == 0)
-           world->ReparentObject(tmp_map_object, 0);
-         else
-           world->ReparentObject(tmp_map_object, parent->text(0).toStdString());
-      }
-      else if (type == ItemLight)
-      {
-        WorldLight* light = world->GetLightByName(name);
-
-        switch (parent_type)
-        {
-        case ItemUnknown:
-        case ItemLight:
-          light->parent_type = WorldLight::Type_None;
-          break ;
-        case ItemMapObject:
-          light->ReparentTo(world->GetMapObjectFromName(parent->text(0).toStdString()));
-          break ;
-        case ItemDynamicObject:
-          light->ReparentTo(world->GetDynamicObjectFromName(parent->text(0).toStdString()));
-          break ;
-        }
-      }
-    }
+    ReparentTo(this->currentItem(), parent);
     return (true);
   }
   return (false);
@@ -163,6 +171,106 @@ void MapTreeWidget::SetItemIcon(QTreeWidgetItem* item, ItemType type)
   }
 }
 
+void MapTreeWidget::AddMapObject(MapObject* object)
+{
+  QTreeWidgetItem* new_item = new QTreeWidgetItem(this);
+  QString          name     = QString::fromStdString(object->nodePath.get_name());
+
+  new_item->setText(0, name);
+  SetItemIcon(new_item, ItemMapObject);
+  map.insert(name, new_item);
+}
+
+void MapTreeWidget::AddDynamicObject(DynamicObject* object)
+{
+  QTreeWidgetItem* new_item = new QTreeWidgetItem(this);
+  QString          name     = QString::fromStdString(object->nodePath.get_name());
+
+  new_item->setText(0, name);
+  SetItemIcon(new_item, ItemDynamicObject);
+  map.insert(name, new_item);
+}
+
+void MapTreeWidget::AddWorldLight(WorldLight* light)
+{
+  QTreeWidgetItem* new_item = new QTreeWidgetItem(this);
+  QString          name     = QString::fromStdString(light->name);
+
+  new_item->setText(0, name);
+  SetItemIcon(new_item, ItemLight);
+  map.insert(name, new_item);
+}
+
+void MapTreeWidget::DelLight(WorldLight* light)
+{
+  DelItem(QString::fromStdString(light->name));
+}
+
+void MapTreeWidget::DelObject(MapObject* object)
+{
+  DelItem(QString::fromStdString(object->nodePath.get_name()));
+}
+
+void MapTreeWidget::DelItem(QString name)
+{
+  auto it =  map.find(name);
+
+  if (it != map.end())
+  {
+    QTreeWidgetItem* item = *it;
+
+    // Reparenting children to the parent node
+    if (item->childCount() > 0)
+    {
+      MapObject*     object     = world->GetMapObjectFromName(name.toStdString());
+      DynamicObject* dyn_object = 0;
+
+      if (!object)
+      {
+        dyn_object = world->GetDynamicObjectFromName(name.toStdString());
+        object     = dyn_object;
+      }
+      if (object != 0)
+      {
+        auto parent_widget = map.find(QString::fromStdString(object->parent));
+
+        // Reparenting Objects
+        {
+          auto it            = world->objects.begin();
+
+          for (; it != world->objects.end() ; ++it)
+          {
+            if (it->parent == object->nodePath.get_name())
+            {
+              auto widget = map.find(QString::fromStdString(it->nodePath.get_name()));
+
+              if (widget != map.end())
+                ReparentTo(*widget, parent_widget == map.end() ? nullptr : *parent_widget);
+              it->parent = object->parent;
+            }
+          }
+        }
+        // Reparenting Lights
+        {
+          auto it = world->lights.begin();
+
+          for (; it != world->lights.end() ; ++it)
+          {
+            auto widget = map.find(QString::fromStdString(it->name));
+
+            if (widget != map.end())
+              ReparentTo(*widget, parent_widget == map.end() ? nullptr : *parent_widget);
+            if (parent_widget == map.end())
+              it->ReparentTo(world);
+          }
+        }
+      }
+    }
+    delete item;
+    map.erase(it);
+  }
+}
+
 void MapTreeWidget::ProbeWorld(const std::string& parent_name, QTreeWidgetItem* parent)
 {
   ItemType                        type;
@@ -179,6 +287,7 @@ void MapTreeWidget::ProbeWorld(const std::string& parent_name, QTreeWidgetItem* 
         new_item = new QTreeWidgetItem(this);
       new_item->setText(0, QString::fromStdString(name));
       SetItemIcon(new_item, type);
+      map.insert(QString::fromStdString(name), new_item);
       ProbeWorld(name, new_item);
     }
   };
@@ -200,6 +309,7 @@ void MapTreeWidget::ProbeWorld(const std::string& parent_name, QTreeWidgetItem* 
           new_item = new QTreeWidgetItem(this);
       new_item->setText(0, light.name.c_str());
       SetItemIcon(new_item, ItemLight);
+      map.insert(QString::fromStdString(light.name), new_item);
     }
   });
 }
@@ -208,5 +318,6 @@ void MapTreeWidget::SetWorld(World* world)
 {
   this->world = world;
   this->clear();
+  map.clear();
   ProbeWorld("", 0);
 }
