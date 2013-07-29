@@ -18,12 +18,14 @@ QPandaWidget::QPandaWidget(QWidget *parent) : QWidget(parent), _initialized(fals
     setAttribute(Qt::WA_NoSystemBackground);
     setAttribute(Qt::WA_OpaquePaintEvent);
     setFocusPolicy(Qt::StrongFocus);
-    events.add_hook("mouse1",    QPandaWidget::CallbackMouse, this);
-    events.add_hook("mouse2",    QPandaWidget::CallbackMouse, this);
-    events.add_hook("mouse3",    QPandaWidget::CallbackMouse, this);
-    events.add_hook("mouse1-up", QPandaWidget::CallbackMouse, this);
-    events.add_hook("mouse2-up", QPandaWidget::CallbackMouse, this);
-    events.add_hook("mouse3-up", QPandaWidget::CallbackMouse, this);
+    events.add_hook("mouse1",     QPandaWidget::CallbackMouse, this);
+    events.add_hook("mouse2",     QPandaWidget::CallbackMouse, this);
+    events.add_hook("mouse3",     QPandaWidget::CallbackMouse, this);
+    events.add_hook("mouse1-up",  QPandaWidget::CallbackMouse, this);
+    events.add_hook("mouse2-up",  QPandaWidget::CallbackMouse, this);
+    events.add_hook("mouse3-up",  QPandaWidget::CallbackMouse, this);
+    events.add_hook("wheel_up",   QPandaWidget::CallbackWheel, this);
+    events.add_hook("wheel_down", QPandaWidget::CallbackWheel, this);
 
 	//WTF to the power of a million
 #ifdef WIN32
@@ -104,6 +106,28 @@ void QPandaWidget::closeEvent(QCloseEvent*)
 }
 
 // MOUSE MANAGEMENT
+void QPandaWidget::CallbackWheel(const Event *event, void *ptr)
+{
+  QPandaWidget* instance = reinterpret_cast<QPandaWidget*>(ptr);
+  MouseData     data     = instance->_window->get_graphics_window()->get_pointer(0);
+
+  if (data.get_in_window())
+  {
+    QPointF      pos(data.get_x(), data.get_y());
+    int          delta = 0;
+
+    if (event->get_name() == "wheel_up")
+      delta = 10;
+    else
+      delta = -10;
+    {
+      QWheelEvent  event(pos, delta, 0, Qt::NoModifier);
+
+      instance->wheelEvent(&event);
+    }
+  }
+}
+
 void QPandaWidget::CallbackMouse(const Event* event, void* ptr)
 {
     QPandaWidget*     instance = reinterpret_cast<QPandaWidget*>(ptr);

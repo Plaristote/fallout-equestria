@@ -78,12 +78,17 @@ void SceneCamera::RunSlideHeight(float elapsedTime)
   _camera.set_pos(pos);
 }
 
+#ifdef GAME_EDITOR
+float editor_camera_height = 110;
+#endif
+
 void SceneCamera::RefreshCameraHeight(void)
 {
 #ifndef GAME_EDITOR
   _camera_height = OptionsManager::Get()["camera"]["distance"];
 #else
-  _camera_height = 110;
+  _destHeight   += -(_camera_height - editor_camera_height);
+  _camera_height = editor_camera_height;
 #endif
 }
 

@@ -569,6 +569,16 @@ void MainWindow::SetDefaultLocalization() {
 	tabDialog.LoadLocale( tabL18n.GetDefaultLanguage() );
 };
 
+extern float editor_camera_height;
+
+void MainWindow::UpdateCameraZoom(int value)
+{
+  editor_camera_height -= value;
+  if (editor_camera_height < 10)
+    editor_camera_height = 10;
+  my_task.camera->RefreshCameraHeight();
+}
+
 void MainWindow::PandaInitialized()
 {
     waypointHovered = 0;
@@ -584,6 +594,7 @@ void MainWindow::PandaInitialized()
 
     connect(ui->widget, SIGNAL(MousePressed(QMouseEvent*)), this, SLOT(PandaButtonPressed(QMouseEvent*)));
     connect(ui->widget, SIGNAL(MouseRelease(QMouseEvent*)), this, SLOT(PandaButtonRelease(QMouseEvent*)));
+    connect(ui->widget, SIGNAL(Scroll(int)),                this, SLOT(UpdateCameraZoom(int)));
 
     connect(ui->mapMoveLeft,   SIGNAL(clicked()), this, SLOT(CameraMoveLeft()));
     connect(ui->mapMoveBottom, SIGNAL(clicked()), this, SLOT(CameraMoveBottom()));
