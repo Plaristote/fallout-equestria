@@ -46,11 +46,13 @@ namespace Utils
   */
   Packet::Packet(void)
   {
+    std::int32_t tmp_buffer = 0;
+
     buffer      = 0;
     sizeBuffer  = 0;
     reading     = 0;
     isDuplicate = true;
-    *this << (std::int32_t&)sizeBuffer;
+    *this << tmp_buffer;
   }
   
   Packet::Packet(std::ifstream& file)
@@ -123,94 +125,6 @@ namespace Utils
   /*
   * Serializer
   */
-
-  /*template<typename T>
-  Packet&		Packet::operator<<(T& i)
-  {
-    int	    newSize = sizeBuffer;
-    char*   typeCode;
-    T*	    copy;
-
-    newSize += sizeof(T) + sizeof(char);
-    realloc(newSize);
-    typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
-    copy = reinterpret_cast<T*>((long)typeCode + sizeof(char));
-    *typeCode = TypeToCode<T>::TypeCode;
-    *copy = i;
-    sizeBuffer = newSize;
-    updateHeader();
-    return (*this);
-  }*/
-  
-  /*template<typename T>
-  Packet&		Packet::operator<<(const T& i)
-  {
-    int	    newSize = sizeBuffer;
-    char*   typeCode;
-    T*	    copy;
-
-    newSize += sizeof(T) + sizeof(char);
-    realloc(newSize);
-    typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
-    copy = reinterpret_cast<T*>((long)typeCode + sizeof(char));
-    *typeCode = TypeToCode<T>::TypeCode;
-    *copy = i;
-    sizeBuffer = newSize;
-    updateHeader();
-    return (*this);
-  }*/
-
-  template<typename T>
-  void				Packet::SerializeArray(T& tehList)
-  {
-    typename T::iterator		current = tehList.begin();
-    typename T::iterator		end = tehList.end();
-    int				newSize = sizeBuffer;
-    char*			        typeCode;
-    std::int32_t*			sizeArray;
-
-    newSize += sizeof(char) + sizeof(std::int32_t);
-    realloc(newSize);
-    typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
-    sizeArray = reinterpret_cast<std::int32_t*>((long)typeCode + sizeof(char));
-    *typeCode = Packet::Array;
-    *sizeArray = tehList.size();
-    sizeBuffer = newSize;
-    while (current != end)
-    {
-      *this << *current;
-      current++;
-    }
-    updateHeader();
-  }
-
-
-  /*template<typename T>
-  Packet&		Packet::operator<<(list<T>& tehList)
-  {
-    SerializeArray(tehList);
-    return (*this);
-  }
-
-  template<typename T>
-  Packet&		Packet::operator<<(vector<T>& tehList)
-  {
-    SerializeArray(tehList);
-    return (*this);
-  }*/
-
-  /*
-  * Unserializer
-  */
-  /*template<typename T>
-  Packet&		Packet::operator>>(T& v)
-  {
-    checkType(TypeToCode<T>::TypeCode);
-    v = 0;
-    read<T>(v);
-    return (*this);
-  }*/
-
   template<>
   Packet& Packet::operator<< <std::string>(const std::string& str)
   {

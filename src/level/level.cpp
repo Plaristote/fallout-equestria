@@ -913,7 +913,6 @@ AsyncTask::DoneStatus Level::do_task(void)
   else
     _mouse.SetMouseState('i');
 
-  std::cout << "do_task #1" << std::endl;
   // TODO discard this when it has become certain it will never be useful again
   /*if (_light_iterator != _world->lights.end() && _world->lights.size() > 0)
   {
@@ -961,7 +960,6 @@ AsyncTask::DoneStatus Level::do_task(void)
   // End Level Mouse Hints
   //
 
-  std::cout << "do_task#50" << std::endl;
   std::function<void (InstanceDynamicObject*)> run_object = [elapsedTime](InstanceDynamicObject* obj)
   {
     obj->Run(elapsedTime);
@@ -1003,7 +1001,6 @@ AsyncTask::DoneStatus Level::do_task(void)
   _particle_manager.do_particles(ClockObject::get_global_clock()->get_dt());
   _mouse.Run();
   _timer.Restart();
-  std::cout << "do_task #100" << std::endl;
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);
 }
 

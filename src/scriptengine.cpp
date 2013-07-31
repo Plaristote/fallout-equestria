@@ -49,7 +49,10 @@ AngelScript::Object::Object(const std::string& filepath) : filepath(filepath), m
   if (engine)
     context = engine->CreateContext();
   else
-    ; // throw something
+  {
+    context = 0;
+    std::cerr << "[AngelScript] Could not create context." << std::endl;
+  }
   Initialize();
 }
 
@@ -68,7 +71,7 @@ AngelScript::Object::~Object()
 {
   if (required_module == true)
     Script::ModuleManager::Release(module);
-  if (required_context == true)
+  if (required_context == true && context != 0)
     context->Release();
 }
 

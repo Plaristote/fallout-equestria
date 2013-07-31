@@ -187,7 +187,28 @@ public:
   }
 
 private:
-  template<typename T> void	SerializeArray(T& tehList);
+  template<typename T> void	SerializeArray(T& tehList)
+  {
+    typename T::iterator current = tehList.begin();
+    typename T::iterator end     = tehList.end();
+    int                  newSize = sizeBuffer;
+    char*                typeCode;
+    std::int32_t*        sizeArray;
+
+    newSize   += sizeof(char) + sizeof(std::int32_t);
+    realloc(newSize);
+    typeCode   = reinterpret_cast<char*>((long)buffer + sizeBuffer);
+    sizeArray  = reinterpret_cast<std::int32_t*>((long)typeCode + sizeof(char));
+    *typeCode  = Packet::Array;
+    *sizeArray = tehList.size();
+    sizeBuffer = newSize;
+    while (current != end)
+    {
+      *this << *current;
+      current++;
+    }
+    updateHeader();
+  }
 
   bool		canIHaz(size_t sizeType, int howMany); // Checks if the buffer is big enough for Packet to read size_t
   void		checkType(int assumedType);            // Check if the next type in buffer match the assumed type
