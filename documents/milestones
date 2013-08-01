@@ -126,8 +126,8 @@ x --> 32/64bit cross-compatibility
 ~ --> Preparing a Windows building environment to get Windows nightly builds
 
 Milestone IV [Started July 2013]
-  -> WorldMap
-  --> Visibility and detection of cities
+x -> WorldMap
+x --> Visibility and detection of cities
 x --> Dynamically generated places (like random encounter, without encounter)
 x --> City splashscreen, allowing to pick between several entry zones
 

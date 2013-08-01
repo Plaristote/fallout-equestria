@@ -15,6 +15,7 @@ class WorldMap : public UiBase
     int         pos_x;
     int         pos_y;
     int         radius;
+    bool        hidden, visible;
     std::string name;
   };
 
@@ -59,7 +60,7 @@ private:
   void                   MapTileGenerator(Data map);
   void                   UpdatePartyCursor(float elapsedTime);
   void                   UpdateClock(void);
-  bool                   IsPartyInCity(std::string& ret) const;
+  bool                   IsPartyInCity(std::string& ret, bool not_hidden = true) const;
   Rocket::Core::Element* GetCaseAt(int x, int y) const;
   void                   GetCurrentCase(int&, int&) const;
   void                   SetCaseVisibility(int x, int y, char visibility) const;

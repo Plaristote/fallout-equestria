@@ -160,14 +160,20 @@ void WorldMap::SaveMapStatus(void) const
 
 void WorldMap::AddCityToList(Data cityData)
 {
-  City city;
+  City  new_city;
+  auto  it     = find(_cities.begin(), _cities.end(), cityData.Key());
+  City& city   = (it == _cities.end() ? new_city : *it);
+  bool  show   = (it == _cities.end() ? true : cityData["visible"].Value() == "1" && city.visible == false);
 
-  city.pos_x  = cityData["pos_x"];
-  city.pos_y  = cityData["pos_y"];
-  city.radius = cityData["radius"];
-  city.name   = cityData.Key();
-  _cities.push_back(city);
-  if (cityData["visible"].Value() == "1")
+  city.hidden  = cityData["hidden"] == "1";
+  city.visible = cityData["visible"].Value() == "1";
+  city.pos_x   = cityData["pos_x"];
+  city.pos_y   = cityData["pos_y"];
+  city.radius  = cityData["radius"];
+  city.name    = cityData.Key();
+  if (it == _cities.end())
+    _cities.push_back(city);
+  if (city.visible)
   {
     Core::Element* elem = _root->GetElementById("city-list");
     Core::String   innerRml;
@@ -182,8 +188,10 @@ void WorldMap::AddCityToList(Data cityData)
     if ((ROCKET_FACTORY::InstanceElementText(elem, innerRml)))
       ToggleEventListener(true, "city-" + cityData.Key(), "click", CityButtonClicked);
   }
-  if (cityData["hidden"].Value() != "1")
+  cout << "SHOWING CITY " << city.name << " ???" << endl;
+  if (show && city.visible)
   {
+    cout << "SHOWING FUCKING CITY" << endl;
     Core::Element* elem = _root->GetElementById("pworldmap");
     Core::String inner_rml;
     stringstream rml, css, elem_id;
@@ -335,7 +343,7 @@ void WorldMap::PartyClicked(Rocket::Core::Event&)
   }
 }
 
-bool WorldMap::IsPartyInCity(string& cityname) const
+bool WorldMap::IsPartyInCity(string& cityname, bool not_hidden) const
 {
   Cities::const_iterator it  = _cities.begin();
   Cities::const_iterator end = _cities.end();
@@ -347,7 +355,7 @@ bool WorldMap::IsPartyInCity(string& cityname) const
     float       dist_y = city.pos_y - _current_pos_y;
     float       dist   = SQRT(dist_x * dist_x + dist_y * dist_y);
 
-    if (dist <= city.radius)
+    if ((!not_hidden || !city.hidden || city.visible) && dist <= city.radius)
     {
       cityname = city.name;
       return (true);
@@ -361,6 +369,7 @@ bool WorldMap::IsPartyInCity(string& cityname) const
 
 void WorldMap::UpdatePartyCursor(float elapsedTime)
 {
+  // Update the position
   int   current_case_x, current_case_y;
   GetCurrentCase(current_case_x, current_case_y);
   Data  case_data     = GetCaseData(current_case_x, current_case_y);
@@ -388,6 +397,18 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
     _cursor->SetProperty("top",  str_y.str().c_str());
   }
 
+  // Check for a city to display
+  std::string city;
+
+  if (IsPartyInCity(city, false))
+  {
+    auto it = find(_cities.begin(), _cities.end(), city);
+
+    if (!it->hidden && !it->visible)
+      SetCityVisible(city);
+  }
+
+  // Update the clock
   unsigned short lastHour       = _timeManager.GetHour();
   unsigned short lastDay        = _timeManager.GetDay();
   unsigned short elapsedHours   = movementTime;
