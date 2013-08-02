@@ -3,13 +3,14 @@
 PandaFramework QPandaApplication::_framework;
 bool           QPandaApplication::_continue;
 bool           QPandaApplication::_panda_enabled;
+QTimer         QPandaApplication::_timer;
 
 QPandaApplication::QPandaApplication(int argc, char **argv) : QApplication(argc, argv)
 {
   _framework.open_framework(argc, argv);
   _continue      = true;
   _panda_enabled = false;
-  _timer.setInterval(50);
+  _timer.setInterval(25);
   connect(&_timer, SIGNAL(timeout()), this, SLOT(PandaRefresh()));
 }
 
@@ -42,7 +43,9 @@ void           QPandaApplication::Close(void)
 
 void           QPandaApplication::SetPandaEnabled(bool enabled)
 {
-  /*if (_panda_enabled == false && enabled)
-    _timer.start();*/
+  if (_panda_enabled == false && enabled)
+    _timer.start();
+  else if (_panda_enabled == true && !enabled)
+    _timer.stop();
   _panda_enabled = enabled;
 }

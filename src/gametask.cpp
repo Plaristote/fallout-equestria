@@ -4,6 +4,8 @@
 #include <options.hpp>
 #include <dices.hpp>
 #include <ui_dialog.hpp>
+#include <Boots/thread.hpp>
+#include <panda_lock.hpp>
 #include <iostream>
 
 using namespace std;
@@ -361,10 +363,14 @@ void                  GameTask::Exit(Rocket::Core::Event&)
   dialog->SetModal(true);
 }
 
+bool is_loading = false;
+
 AsyncTask::DoneStatus GameTask::do_task()
 {
   if (!_continue)
     return (AsyncTask::DS_done);
+  else if (is_loading == true)
+    return (AsyncTask::DS_cont);
   _signals.ExecuteRecordedCalls();
 
   {
@@ -562,6 +568,8 @@ bool GameTask::LoadGame(const std::string& savepath)
 
   _worldMap    = new WorldMap(_window, &_gameUi, _dataEngine, _timeManager);
   _worldMap->GoToPlace.Connect(*this, &GameTask::MapOpenLevel);
+  _worldMap->GoToCityZone.Connect([this](string level, string zone)
+  { OpenLevel(_savePath, level, zone); });
   _worldMap->RequestRandomEncounterCheck.Connect(*this, &GameTask::DoCheckRandomEncounter);
 
   if (!(currentLevel.Nil()) && currentLevel.Value() != "0")
@@ -789,11 +797,24 @@ void   GameTask::SetPlayerInventory(void)
   _level->SetPlayerInventory(_playerInventory);
 }
 
+class LoadingTask : public Sync::MyThread
+{
+public:
+  Sync::Signal<void> StartLoading;
+  
+private:
+  void Run(void)
+  {
+    StartLoading.Emit();
+    delete this;
+  }
+};
+
 void GameTask::DoLoadLevel(LoadLevelParams params)
 {
   ifstream file;
   string   name  = params.path;
-  
+
   file.open(name.c_str(), std::ios::binary);
   if (file.is_open())
   {
@@ -803,8 +824,7 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     {
       Level*   level = 0;
 
-      level = new Level(_window, _gameUi, packet, _timeManager);
-      level->SetName(params.name);
+      level = new Level(params.name, _window, _gameUi, packet, _timeManager);
       SetLevel(level);
       if (params.isSaveFile)
 	level->Load(packet);
@@ -825,27 +845,37 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     _level->SetDataEngine(&_dataEngine);
     if (params.entry_zone != "")
       _level->InsertParty(*_playerParty);
-    _level->InitPlayer();
-    _level->GetPlayer()->SetStatistics(_charSheet, _playerStats);
-    if (params.entry_zone == "")
-      _level->FetchParty(*_playerParty);
-    SetPlayerInventory();
-    if (params.entry_zone != "")
-      _level->SetEntryZone(*_playerParty, params.entry_zone);
-    SetLevel(_level);
-
-    _level->obs.Connect(_pipbuck.VisibilityToggled, [this](bool visible)
+    if (_level->GetPlayer() != 0)
     {
-      _level->GetCamera().SetEnabledScroll(!visible);
-    });
+      _level->InitPlayer();
+      _level->GetPlayer()->SetStatistics(_charSheet, _playerStats);
+      if (params.entry_zone == "")
+        _level->FetchParty(*_playerParty);
+      SetPlayerInventory();
+      if (params.entry_zone != "")
+        _level->SetEntryZone(*_playerParty, params.entry_zone);
+      SetLevel(_level);
 
-    _quest_manager->Initialize(_level);
+      _level->obs.Connect(_pipbuck.VisibilityToggled, [this](bool visible)
+      {
+        _level->GetCamera().SetEnabledScroll(!visible);
+      });
+      _quest_manager->Initialize(_level);
+    }
+    else
+    {
+      delete _level;
+      _level = 0;
+      AlertUi::NewAlert.Emit("The characters couldn't be loaded properly.");
+      _worldMap->Show();
+    }
 
     // TODO remove this when we're done with deploying creeps
     //_level->SpawnEnemies("critters", 10, 1);
   }
   else
   {
+    AlertUi::NewAlert.Emit("Cannot load level's map file.");
     cerr << "?? Can't open level !!" << endl;
     _worldMap->Show();
   }
@@ -886,113 +916,109 @@ void GameTask::SetLevelEncounter(const string& encounter_type, short n_creeps)
   SyncLoadLevel.Disconnect(obs_level_unpersistent);
 }
 
-void GameTask::DoCheckRandomEncounter(int x, int y)
+void GameTask::DoCheckRandomEncounter(int x, int y, bool is_event)
 {
-  short encounter_chance  = 25;
+  short     luck        = _playerStats->Model().GetSpecial("LUC");
+  short     outdoorsman = _playerStats->Model().GetSkill("Outdoorspony");
+  bool      has_choice  = (is_event == true) && (Dices::Throw(200) <= outdoorsman);
+  UiDialog* dialog      = (has_choice ? new UiDialog(_window, _gameUi.GetContext()) : 0);
+  Data      case_data   = _worldMap->GetCaseData(x, y);
 
-  if (Dices::Throw(100) <= encounter_chance)
+  function<void ()> callback;
+
+  if (is_event && Dices::Throw(20) <= luck)
   {
-    short     luck        = _playerStats->Model().GetSpecial("LUC");
-    short     outdoorsman = _playerStats->Model().GetSkill("Outdoorspony");
-    bool      has_choice  = Dices::Throw(200) <= outdoorsman;
-    UiDialog* dialog      = (has_choice ? new UiDialog(_window, _gameUi.GetContext()) : 0);
-    Data      case_data   = _worldMap->GetCaseData(x, y);
+    // Launch an unhostile encounter
 
-    function<void ()> callback;
-
-    if (Dices::Throw(20) <= luck)
+    // Launch a special encounter
+    if (Dices::Throw(100) <= 4 + luck)
     {
-      // Launch an unhostile encounter
+      string special_encounter = _playerStats->Model().SelectRandomEncounter();
 
-      // Launch a special encounter
-      if (Dices::Throw(100) <= 4 + luck)
+      if (special_encounter == "") // Abort
       {
-        string special_encounter = _playerStats->Model().SelectRandomEncounter();
-
-        if (special_encounter == "") // Abort
-        {
-          Data special_encounters = _dataEngine["special-encounters"];
-          
-          if (special_encounters.Count() > 0)
-            special_encounter = special_encounters[0].Value();
-          else
-          {
-            if (dialog) delete dialog;
-            return ;
-          }
-        }
-        if (_worldMap->HasCity(special_encounter))
+        Data special_encounters = _dataEngine["special-encounters"];
+         
+        if (special_encounters.Count() > 0)
+          special_encounter = special_encounters[0].Value();
+        else
         {
           if (dialog) delete dialog;
           return ;
         }
-        callback = [this, special_encounter](void)
-        {
-          auto   _this          = this;
-          string encounter_name = special_encounter;
-
-          MapOpenLevel(special_encounter);
-          obs_level_unpersistent = SyncLoadLevel.Connect([_this, encounter_name](LoadLevelParams) { _this->SetLevelSpecialEncounter(encounter_name); });
-        };
-        if (dialog)
-          dialog->SetMessage(i18n::T("You discovered ") + i18n::T(special_encounter) + ". Do you want to go in ?");
       }
-      // Launch a regular good encounter
-      else
-      {
-        // TODO Implement good encounters
-        if (dialog) delete dialog;
-        return ;
-      }
-    }
-    else
-    {
-      // Launch a hostile encounter
-      short  n_creeps            = 5 + Dices::Throw(20) - (luck * Dices::Throw(2));
-      string encounter_type, encounter_map;
-      Data   bad_encounters = case_data["type-encounters"];
-      Data   map_encounters = case_data["map-encounters"];
-
-      if (map_encounters.Count() > 0)
-        encounter_map  = map_encounters[Dices::Throw(map_encounters.Count()) - 1].Value();
-      if (bad_encounters.Count() > 0)
-        encounter_type = bad_encounters[Dices::Throw(bad_encounters.Count()) - 1].Value(); 
-      if (n_creeps > 5)
-        n_creeps = 5;
-
-      encounter_map  = "random-desert-1";
-      encounter_type = "timberwolves";
-      if (encounter_map == "" || encounter_type == "")
+      if (_worldMap->HasCity(special_encounter))
       {
         if (dialog) delete dialog;
         return ;
       }
-
-      callback = [this, encounter_type, encounter_map, n_creeps](void)
+      callback = [this, special_encounter](void)
       {
-        auto   _this   = this;
-        string type    = encounter_type;
-        short  n       = n_creeps;
+        auto   _this          = this;
+        string encounter_name = special_encounter;
 
-        MapOpenLevel(encounter_map);
-        obs_level_unpersistent = SyncLoadLevel.Connect([_this, type, n](LoadLevelParams) { _this->SetLevelEncounter(type, n); });
+        MapOpenLevel(special_encounter);
+        obs_level_unpersistent = SyncLoadLevel.Connect([_this, encounter_name](LoadLevelParams) { _this->SetLevelSpecialEncounter(encounter_name); });
       };
-
       if (dialog)
-        dialog->SetMessage(i18n::T("Do you want to encounter ") + i18n::T(encounter_type) + " ?");
+        dialog->SetMessage(i18n::T("You discovered ") + i18n::T(special_encounter) + ". Do you want to go in ?");
     }
-    if (has_choice)
-    {
-      _playerStats->AddExperience(50); // Xp for detecting a threat with outdoorsman
-      dialog->AddChoice(i18n::T("Yes"), [this, callback](Rocket::Core::Event&) { callback(); });
-      dialog->AddChoice(i18n::T("No"),  [this](Rocket::Core::Event&) { _worldMap->SetInterrupted(false); });
-      dialog->Show();
-      dialog->SetModal(true);
-      _worldMap->SetInterrupted(true);
-    }
+    // Launch a regular good encounter
     else
-      callback();
+    {
+      // TODO Implement good encounters
+      if (dialog) delete dialog;
+      return ;
+    }
   }
+  else
+  {
+    // Launch a hostile encounter
+    short  n_creeps            = 5 + Dices::Throw(20) - (luck * Dices::Throw(2));
+    string encounter_type, encounter_map;
+    Data   bad_encounters = case_data["type-encounters"];
+    Data   map_encounters = case_data["map-encounters"];
+
+    if (map_encounters.Count() > 0)
+      encounter_map  = map_encounters[Dices::Throw(map_encounters.Count()) - 1].Value();
+    if (bad_encounters.Count() > 0)
+      encounter_type = bad_encounters[Dices::Throw(bad_encounters.Count()) - 1].Value(); 
+    if (is_event == false)
+      n_creeps = 0;
+    else if (n_creeps > 5)
+      n_creeps = 5;
+
+    encounter_map  = "random-desert-1";
+    encounter_type = "timberwolves";
+    if (encounter_map == "" || encounter_type == "")
+    {
+      if (dialog) delete dialog;
+      return ;
+    }
+    callback = [this, encounter_type, encounter_map, n_creeps](void)
+    {
+      auto   _this   = this;
+      string type    = encounter_type;
+      short  n       = n_creeps;
+
+      MapOpenLevel(encounter_map);
+      obs_level_unpersistent = SyncLoadLevel.Connect([_this, type, n](LoadLevelParams) { _this->SetLevelEncounter(type, n); });
+    };
+
+    if (dialog)
+      dialog->SetMessage(i18n::T("Do you want to encounter ") + i18n::T(encounter_type) + " ?");
+  }
+  if (has_choice)
+  {
+    _playerStats->AddExperience(50); // Xp for detecting a threat with outdoorsman
+    dialog->AddChoice(i18n::T("Yes"), [this, callback](Rocket::Core::Event&) { callback(); });
+    dialog->AddChoice(i18n::T("No"),  [this](Rocket::Core::Event&) { _worldMap->SetInterrupted(false); });
+    dialog->Show();
+    dialog->SetModal(true);
+    _worldMap->SetInterrupted(true);
+  }
+  else
+    callback();
 }
 
 ISampleInstance* GameTask::PlaySound(const std::string& name)

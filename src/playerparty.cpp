@@ -2,6 +2,7 @@
 #include "level/world.h"
 #include <fstream>
 #include <level/objectnode.hpp>
+#include <gametask.hpp>
 
 using namespace std;
 
@@ -73,7 +74,7 @@ bool PlayerParty::Save(const string& savepath) const
   return (false);
 }
 
-void PlayerParty::Serialize(Utils::Packet& packet) const
+void Party::Serialize(Utils::Packet& packet) const
 {
   unsigned short size     = _objects.size();
 
@@ -94,7 +95,7 @@ void PlayerParty::Serialize(Utils::Packet& packet) const
   });
 }
 
-void PlayerParty::UnSerialize(Utils::Packet& packet)
+void Party::UnSerialize(Utils::Packet& packet)
 {
   unsigned short size;
 
@@ -147,4 +148,74 @@ Party::Statsheets Party::GetStatsheets(void) const
     statsheets.insert(Party::Statsheets::value_type(object->nodePath.get_name(), object->charsheet));
   });
   return (statsheets);
+}
+
+void Party::Export(const std::string& name) const
+{
+  cout << "Party::Export" << endl;
+  const string& savepath = GameTask::CurrentGameTask->GetSavePath();
+  string        path     = savepath + "/party-" + name + ".blob";
+  ofstream      file;
+  Utils::Packet packet;
+
+  file.open(path.c_str(), ios::binary);
+  if (file.is_open())
+  {
+    Serialize(packet);
+    file.write(packet.raw(), packet.size());
+    file.close();
+  }
+  ForEach(_objects, [savepath](DynamicObject* object)
+  {
+    ObjectCharacter* character = Level::CurrentLevel->GetCharacter(object);
+
+    if (character)
+      DataTree::Writers::JSON(character->GetStatistics(),
+                              savepath + "/stats-" + object->charsheet + ".json");
+  });
+}
+
+Party* Party::Import(const std::string& name)
+{
+  cout << "Party::Import" << endl;
+  Level*        level    = Level::CurrentLevel;
+
+  if (level)
+  {
+    auto it  = level->_parties.begin();
+    auto end = level->_parties.end();
+
+    while (it != end)
+    {
+      if ((*it)->_name == name)
+        return (0);
+    }
+    {
+      Party*        party    = new Party;
+      const string& savepath = GameTask::CurrentGameTask->GetSavePath();
+      string        save_party = savepath + "/party-" + name + ".blob";
+      ifstream      file(save_party.c_str());
+
+      party->_name = name;
+      if (file.is_open())
+      {
+        Utils::Packet packet(file);
+
+        party->UnSerialize(packet);
+      }
+      ForEach(party->_objects, [level](DynamicObject* object)
+      {
+        ObjectCharacter* character;
+
+        level->GetWorld()->InsertDynamicObject(*object);
+        level->InsertDynamicObject(*object);
+        character = level->GetCharacter(object);
+        if (character)
+          character->SetOccupiedWaypoint(0);
+      });
+      level->_parties.push_back(party);
+      return (party);
+    }
+  }
+  return (0);
 }

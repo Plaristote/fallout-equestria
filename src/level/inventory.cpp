@@ -3,8 +3,10 @@
 #include <level/objects/locker.hpp>
 #include <algorithm>
 
-InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
+InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts/objects/" + data["script"]["file"].Value())
 {
+  std::cout << "LOADING OBJECT " << data.Key() << " WITH SCRIPT " << "scripts/objects/" << data["script"]["file"].Value() << endl;
+  
   // Duplicate the DataBranch into the InventoryObject
   Duplicate(data);
 
@@ -19,61 +21,45 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree)
 
   _equiped = false;
 
-  _script_context = Script::Engine::Get()->CreateContext();
-  _script_module  = 0;
-  _hookUseOnCharacter = _hookUseOnDoor = _hookUseOnOthers = 0;
-  _hookCanWeildBattleSaddle = _hookCanWeildMagic = _hookCanWeildMouth = 0;
-  _hookCanWeild = _hookSetEquiped = 0;
-  
   Data script = data["script"];
 
-  if (!(script.Nil()) && _script_context)
+  if (!(script.Nil()))
   {
     if (script["file"].Value() != "")
     {
-      _script_module       = Script::ModuleManager::Require("item" + data.Key(), "scripts/objects/" + script["file"].Value());
-      if (_script_module)
-      {
-        _hookCanWeild   = _script_module->GetFunctionByDecl("bool CanWeild(Item@, Character@, string, int)");
-        _hookSetEquiped = _script_module->GetFunctionByDecl("void SetEquiped(Item@, Character@, bool)");
-      }
+      _object.asDefineMethod("CanWeild", "bool CanWeild(Item@, Character@, string, int)");
+      _object.asDefineMethod("SetEquiped", "void SetEquiped(Item@, Character@, bool)");
     }
   }
 
   ForEach(data["actions"], [this](Data action)
   {
-    Data        copy = (*this)["actions"][action.Key()];
-    ActionHooks hooks;
+    AngelScript::Object hooks(_object.GetContext(), _object.GetModule());
+    Data                action_data = (*this)["actions"][action.Key()];
 
-    copy["ap-cost"]        = action["ap-cost"].Value();
-    copy["targeted"]       = (action["targeted"].Nil() ? "1" : action["targeted"].Value());
-    copy["range"]          = action["range"].Value();
-    copy["combat"]         = action["combat"].Value();
-
-    if (_script_module)
-    {
-      if (action["hookUse"].Nil() == false)
-	hooks.Use             = _script_module->GetFunctionByDecl(("string " + action["hookUse"].Value() + "(Item@, Character@)").c_str());
-      if (action["hookCharacters"].Nil() == false)
-	hooks.UseOnCharacter  = _script_module->GetFunctionByDecl(("string " + action["hookCharacters"].Value() + "(Item@, Character@, Character@)").c_str());
-      if (action["hookDoors"].Nil() == false)
-	hooks.UseOnDoor       = _script_module->GetFunctionByDecl(("string " + action["hookDoors"].Value() + "(Item@, Character@, Door@)").c_str());
-      if (action["hookOthers"].Nil() == false)
-	hooks.UseOnOthers     = _script_module->GetFunctionByDecl(("string " + action["hookOthers"].Value() + "(Item@, Character@, DynamicObject@)").c_str());
-      if (action["hookWeapon"].Nil() == false)
-	hooks.UseAsWeapon     = _script_module->GetFunctionByDecl(("string " + action["hookWeapon"].Value() + "(Item@, Character@, Character@)").c_str());
-      if (action["hookHitChances"].Nil() == false)
-        hooks.HitChances      = _script_module->GetFunctionByDecl(("int " + action["hookHitChances"].Value() + "(Item@, Character@, Character@)").c_str());
-    }
+    action_data.Duplicate(action);
+    if (action_data["targeted"].Nil())
+      action_data["targeted"] = 1;
+    if (action["hookUse"].NotNil())
+      hooks.asDefineMethod("Use", "string " + action["hookUse"].Value() + "(Item@, Character@)");
+    if (action["hookCharacters"].NotNil())
+      hooks.asDefineMethod("UseOnCharacter", "string " + action["hookCharacters"].Value() + "(Item@, Character@, Character@");
+    if (action["hookDoors"].NotNil())
+      hooks.asDefineMethod("UseOnDoor", "string " + action["hookDoors"].Value() + "(Item@, Character@, Door@)");
+    if (action["hookOthers"].NotNil())
+      hooks.asDefineMethod("UseOnOthers", "string " + action["hookOthers"].Value() + "(Item@, Character@, DynamicObject@");
+    if (action["hookWeapon"].NotNil())
+      hooks.asDefineMethod("UseAsWeapon", "string " + action["hookWeapon"].Value() + "(Item@, Character@, Character@)");
+    if (action["hookHitChances"].NotNil())
+      hooks.asDefineMethod("HitChances", "int " + action["hookHitChances"].Value() + "(Item@, Character@, Character@)");
+    if (action["hookCanUse"].NotNil())
+      hooks.asDefineMethod("CanUse", "bool " + action["hookCanUse"].Value() + "(Item@, Character@, DynamicObject@)");
     _actionHooks.push_back(hooks);
   });
 }
 
 InventoryObject::~InventoryObject()
 {
-  Script::ModuleManager::Release(_script_module);
-  if (_script_context)
-    _script_context->Release();
 }
 
 bool InventoryObject::IsGroupableWith(const InventoryObject* other) const
@@ -83,30 +69,34 @@ bool InventoryObject::IsGroupableWith(const InventoryObject* other) const
 
 void InventoryObject::SetEquiped(ObjectCharacter* character, bool set)
 {
-  if (_equiped != set && _hookSetEquiped)
+  if (_equiped != set && _object.IsDefined("SetEquiped"))
   {
-    _script_context->Prepare(_hookSetEquiped);
-    _script_context->SetArgObject(0, this);
-    _script_context->SetArgObject(1, character);
-    _script_context->SetArgByte(2, set);
-    _script_context->Execute();
+    AngelScript::Type<InventoryObject*> this_param(this);
+    AngelScript::Type<ObjectCharacter*> character_param(character);
+    AngelScript::Type<bool>             set_param(set);
+
+    _object.Call("SetEquiped", 3, &this_param, &character_param, &set_param);
   }
   _equiped = set;
 }
 
+// TODO Implement this here contraption as a wrapper for all parameters to AngelScript::Object
+/*template<typename TYPE>
+AngelScript::IType* as_wrap(TYPE var)
+{
+  return (new AngelScript::Type<TYPE>(var));
+}*/
+
 bool InventoryObject::CanWeild(ObjectCharacter* character, std::string slot, unsigned char mode)
 {
-  cout << "CALLING HOOK CAN WEILD" << endl;
-  if (_hookCanWeild)
+  if (_object.IsDefined("CanWeild"))
   {
-    cout << "SEEMS TO BE WORKING" << endl;
-    _script_context->Prepare(_hookCanWeild);
-    _script_context->SetArgObject(0, this);
-    _script_context->SetArgObject(1, character);
-    _script_context->SetArgObject(2, &slot);
-    _script_context->SetArgDWord(3, mode);
-    _script_context->Execute();
-    return (_script_context->GetReturnByte() != 0);
+    AngelScript::Type<InventoryObject*> this_param(this);
+    AngelScript::Type<ObjectCharacter*> character_param(character);
+    AngelScript::Type<std::string*>     slot_param(&slot);
+    AngelScript::Type<int>              mode_param(mode);
+
+    return (_object.Call("CanWeild", 4, &this_param, &character_param, &slot_param, &mode_param));
   }
   return (false);
 }
@@ -227,94 +217,83 @@ DynamicObject* InventoryObject::CreateDynamicObject(World* world) const
   return (object);
 }
 
+bool              InventoryObject::CanUse(ObjectCharacter* user, InstanceDynamicObject* target, unsigned int use_type)
+{
+  AngelScript::Object& hooks = _actionHooks[use_type];
+
+  cout << "Object " << GetName() << " for action " << use_type << " has methods:" << endl;
+  hooks.OutputMethods(cout);
+  if (hooks.IsDefined("CanUse"))
+  {
+    AngelScript::Type<InventoryObject*>       this_param(this);
+    AngelScript::Type<ObjectCharacter*>       user_param(user);
+    AngelScript::Type<InstanceDynamicObject*> target_param(target);
+
+    return (hooks.Call("CanUse", 3, &this_param, &user_param, &target_param));
+  }
+  return (true);
+}
+
 int               InventoryObject::HitSuccessRate(ObjectCharacter* user, ObjectCharacter* target, unsigned char use_type)
 {
-  asIScriptFunction* hook = _actionHooks[use_type].HitChances;
+  AngelScript::Object& hooks = _actionHooks[use_type];
 
-  if (hook != 0)
+  if (hooks.IsDefined("HitChances"))
   {
-    int ret = _script_context->Prepare(hook);
+    AngelScript::Type<InventoryObject*> this_param(this);
+    AngelScript::Type<ObjectCharacter*> user_param(user);
+    AngelScript::Type<ObjectCharacter*> target_param(target);
 
-    switch (ret)
-    {
-      case asCONTEXT_ACTIVE:
-        std::cout << "/!\\ Script context still active, couldn't get hit success rate." << std::endl;
-        return (50);
-      default:
-        break ;
-    }
-
-    _script_context->SetArgObject(0, this);
-    _script_context->SetArgObject(1, user);
-    _script_context->SetArgObject(2, target);
-    _script_context->Execute();  
-    return (_script_context->GetReturnDWord());
+    return (hooks.Call("HitChances", 3, &this_param, &user_param, &target_param));
   }
   return (0);
 }
 
 const std::string InventoryObject::UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType)
 {
-  return (ExecuteHook(_actionHooks[useType].UseAsWeapon, user, target, useType));
+  return (ExecuteHook("UseAsWeapon", user, target, useType));
 }
 
 const std::string InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType)
 {
-  ObjectCharacter* charTarget;
-  Lockable*        lockTarget;
-  ActionHooks&     hooks = _actionHooks[useType];
+  ObjectCharacter*     charTarget;
+  Lockable*            lockTarget;
+  AngelScript::Object& hooks = _actionHooks[useType];
 
-  if (hooks.UseOnCharacter && (charTarget = target->Get<ObjectCharacter>()) != 0)
-    return (ExecuteHook(hooks.UseOnCharacter, user, charTarget, useType));
-  if (hooks.UseOnDoor      && (lockTarget = target->Get<ObjectDoor>())      != 0)
-    return (ExecuteHook(hooks.UseOnDoor, user, lockTarget, useType));
-  if (hooks.UseOnDoor      && (lockTarget = target->Get<ObjectLocker>())  != 0)
-    return (ExecuteHook(hooks.UseOnDoor, user, lockTarget, useType));
-  if (hooks.UseOnOthers)
-    return (ExecuteHook(hooks.UseOnOthers, user, target, useType));
+  if (hooks.IsDefined("UseOnCharacter") && (charTarget = target->Get<ObjectCharacter>()) != 0)
+    return (ExecuteHook("UseOnCharacter", user, charTarget, useType));
+  if (hooks.IsDefined("UseOnDoor")      &&
+     (((lockTarget = target->Get<ObjectDoor>()) != 0) ||
+       (lockTarget = target->Get<ObjectLocker>()) != 0))
+    return (ExecuteHook("UseOnDoor", user, lockTarget, useType));
+  if (hooks.IsDefined("UseOnOthers"))
+    return (ExecuteHook("UseOnOthers", user, target, useType));
   return ("That does nothing");
 }
 
 const std::string InventoryObject::Use(ObjectCharacter* user, unsigned char useType)
 {
-  return (ExecuteHook(_actionHooks[useType].Use, user, (ObjectCharacter*)0, useType));
+  return (ExecuteHook("Use", user, (ObjectCharacter*)0, useType));
 }
 
 template<class C>
-const std::string InventoryObject::ExecuteHook(asIScriptFunction* hook, ObjectCharacter* user, C* target, unsigned char useType)
+const std::string InventoryObject::ExecuteHook(const std::string& hook, ObjectCharacter* user, C* target, unsigned char useType)
 {
-  if (hook)
-  {
-    int ret;
+  AngelScript::Object& handle = _actionHooks[useType];
 
-    ret = _script_context->Prepare(hook);
-    
-    switch (ret)
-    {
-      case asCONTEXT_ACTIVE:
-	return ("/!\\ Script Context still active");
-      default:
-	break ;
-    }
-    
-    _script_context->SetArgObject(0, this);
-    _script_context->SetArgObject(1, user);
-    if (target != nullptr)
-      _script_context->SetArgObject(2, target);
-    ret = _script_context->Execute();
-    switch (ret)
-    {
-      case asEXECUTION_FINISHED:
-	break ;
-      case asERROR:
-	return ("/!\\ Failed to execute script (Invalid Context) !");
-      case asEXECUTION_EXCEPTION:
-	return ("/!\\ Failed to execute script (Exception) !");
-      default:
-	return ("/!\\ Failed to execute script !");
-    }
-    return (*(reinterpret_cast<std::string*>(_script_context->GetReturnObject())));
+  cout << GetName() << " object has methods:" << endl;
+  handle.OutputMethods(cout);
+  if (handle.IsDefined(hook))
+  {
+    AngelScript::Type<InventoryObject*> this_param(this);
+    AngelScript::Type<ObjectCharacter*> user_param(user);
+    AngelScript::Type<C*>               target_param(target);
+
+    if (target == nullptr)
+      return (*(std::string*)(handle.Call(hook, 2, &this_param, &user_param)));
+    return (*(std::string*)(handle.Call(hook, 3, &this_param, &user_param, &target_param)));
   }
+  cout << "Method " << hook << " undefined" << endl;
   return ("That does nothing");
 }
 

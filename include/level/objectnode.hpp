@@ -26,13 +26,15 @@ class ObjectCharacter;
 
 struct WaypointModifier
 {
-  WaypointModifier() : _collision_processed(0)
+  WaypointModifier() : _collision_processed(0), _level(0), _waypointOccupied(0)
   {}
-  
+
+  virtual NodePath GetNodePath() const = 0;
+
   virtual void ProcessCollisions(void);
   void         UnprocessCollisions(void);
   bool         HasOccupiedWaypoint(void)      const { return (_waypointOccupied != 0); }
-  int          GetOccupiedWaypointAsInt(void) const { return (_waypointOccupied->id);  }
+  int          GetOccupiedWaypointAsInt(void) const { return (_waypointOccupied ? _waypointOccupied->id : 0);  }
   Waypoint*    GetOccupiedWaypoint(void)      const { return (_waypointOccupied);      }
   void         SetOccupiedWaypoint(Waypoint* wp);
 

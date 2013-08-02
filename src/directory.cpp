@@ -56,6 +56,11 @@ bool Filesystem::FileCopy(const string& from, const string& dest)
 
 #ifndef _WIN32 // UNIX
 
+bool Filesystem::FileExists(const string& file)
+{
+  return (!(::access(file.c_str(), F_OK)));
+}
+
 bool Directory::MakeDir(const string& str)
 {
   return (mkdir(str.c_str() , S_IRWXU | S_IRWXG | S_IRWXO) == 0);
@@ -86,6 +91,12 @@ bool Directory::OpenDir(const string& str)
 }
 
 #else // WINDOWS
+# include <io.h>
+
+bool Filesystem::FileExists(const string& file)
+{
+  return (!(_access(file.c_str(), 0)));
+}
 
 bool Directory::MakeDir(const string& str)
 {

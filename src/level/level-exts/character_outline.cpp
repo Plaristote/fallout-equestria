@@ -17,7 +17,7 @@ void Level::ToggleCharacterOutline(bool toggle)
            outline = original.copy_to(original);
     outline.set_name("outline");
     outline.set_texture_off();
-    outline.set_light_off();
+    outline.set_light_off(10);
     outline.set_attrib(RenderModeAttrib::make(RenderModeAttrib::M_wireframe));
     outline.set_attrib(DepthTestAttrib::make(DepthTestAttrib::M_always));
     outline.set_transparency(TransparencyAttrib::M_alpha);

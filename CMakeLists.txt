@@ -4,7 +4,10 @@ set(CMAKE_BUILD_TYPE Debug)
 
 project(FalloutEquestria)
 
-include_directories(include angelscript)
+cmake_policy(SET CMP0015 NEW) # Linked directories are relative to the CMakeLists.txt file
+
+include_directories(include angelscript 3rd_parties/include)
+link_directories(3rd_parties/lib)
 
 if(UNIX)
   if(CMAKE_COMPILER_IS_GNUCC)
@@ -23,9 +26,9 @@ file(GLOB_RECURSE sourceFiles
 add_executable(game ${sourceFiles})
 
 if (UNIX)
-  target_link_libraries(game -L/usr/lib/panda3d p3framework panda pandafx pandaexpress p3dtoolconfig p3dtool p3direct
+  target_link_libraries(game -L/usr/lib/panda3d p3framework panda pandafx pandaphysics pandaexpress p3dtoolconfig p3dtool p3direct pandaegg
                                               p3rocket RocketCore RocketControls
-                                              angelscript sfml-audio pthread)
+                                              angelscript pthread)
 else()
-  target_link_libraries(game libp3framework libpanda libpandafx libpandaexpress libp3dtoolconfig libp3dtool libp3direct libp3rocket RocketCore RocketControls angelscript sfml-audio)
+  target_link_libraries(game libp3framework libpanda libpandafx libpandaphysics libpandaexpress libp3dtoolconfig libp3dtool libp3direct libpandaegg libp3rocket RocketCore RocketControls angelscript)
 endif()

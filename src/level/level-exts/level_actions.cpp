@@ -182,6 +182,8 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
 
   if (!object || !target || !user)              ScriptErrorEmit("[ActionUseObjectOn] Aborted: NullPointer Error");
   if ((*object)["actions"].Count() <= actionIt) ScriptErrorEmit("[ActionuseObjectOn] Invalid action iterator");
+  if (!(object->CanUse(user, target, actionIt)))
+    return ;
   logic_step     = [this, user, target, object, actionIt](InstanceDynamicObject*)
   {
     Data           data_use_cost = (*object)["use_cost"];
@@ -292,28 +294,18 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
     if (!(target->IsAlly(user)))
       target->SetEnemyDetected(user);
     if (xpFetcher.character_died)
-    {
       xpFetcher.Execute();
-      if (user->GetStatController() && target->GetStatController())
-      {
-        string race  = target->GetStatistics()["Race"].Value();
-        Data   kills = user->GetStatistics()["Kills"];
-        
-        if (kills[race].Nil())
-          kills[race] = 0;
-        else
-          kills[race] = (unsigned int)kills[race] + 1;
-      }
-    }
   };
   if (user == target && target == GetPlayer())
   {
     ConsoleWrite("Stop hitting yourself !");
     return ;
   }
-    
+  if (!(item->CanUse(user, target, actionIt)))
+    return ;
+
   user->LookAt(target);
-    
+
   if (target->GetDistance(user) > (float)((*item)["actions"][actionIt]["range"]))
     ConsoleWrite("Out of range");
   else if (!(user->HasLineOfSight(target)))
@@ -321,12 +313,12 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
   else
   {
     unsigned int equipedIt            = 0;
-      
+
     user->AnimationEnded.DisconnectAll();
     user->AnimationEnded.Connect(logic_step);
-    if (user->GetEquipedItem(0))
+    if (user->GetEquipedItem(0) == item)
       equipedIt = 0;
-    else if (user->GetEquipedItem(1))
+    else if (user->GetEquipedItem(1) == item)
       equipedIt = 1;
     user->PlayEquipedItemAnimation(equipedIt, "attack");
   }

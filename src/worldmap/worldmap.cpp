@@ -1,5 +1,6 @@
 #include "worldmap/worldmap.hpp"
 #include "musicmanager.hpp"
+#include "executor.hpp"
 #include <dices.hpp>
 
 #ifdef _WIN32
@@ -32,7 +33,12 @@ WorldMap::~WorldMap()
   });
   
   Destroy();
-  delete _mapTree;
+  if (_mapTree)
+    delete _mapTree;
+  if (_cityTree)
+    delete _cityTree;
+  if (_city_splash)
+    delete _city_splash;
   CurrentWorldMap = 0;
   _root->Close();
   _root->RemoveReference();
@@ -46,6 +52,7 @@ void WorldMap::Save(const string& savepath)
 
 WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, TimeManager& tm) : UiBase(window, gameUi->GetContext()), _dataEngine(de), _timeManager(tm), _gameUi(*gameUi)
 {
+  _city_splash   = 0;
   _interrupted   = false;
   _current_pos_x = _goal_x = _dataEngine["worldmap"]["pos-x"];
   _current_pos_y = _goal_y = _dataEngine["worldmap"]["pos-y"];
@@ -58,13 +65,13 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, Time
     //
     // Adds the known cities to the CityList.
     //
-    DataTree* cityTree = DataTree::Factory::JSON("saves/cities.json");
+    _cityTree = DataTree::Factory::JSON("saves/cities.json");
+    if (_cityTree)
     {
-      Data      cities(cityTree);
+      Data      cities(_cityTree);
 
       std::for_each(cities.begin(), cities.end(), [this](Data city) { AddCityToList(city); });
     }
-    delete cityTree;
 
     //
     // Get some required elements
@@ -153,14 +160,20 @@ void WorldMap::SaveMapStatus(void) const
 
 void WorldMap::AddCityToList(Data cityData)
 {
-  City city;
+  City  new_city;
+  auto  it     = find(_cities.begin(), _cities.end(), cityData.Key());
+  City& city   = (it == _cities.end() ? new_city : *it);
+  bool  show   = (it == _cities.end() ? true : cityData["visible"].Value() == "1" && city.visible == false);
 
-  city.pos_x  = cityData["pos_x"];
-  city.pos_y  = cityData["pos_y"];
-  city.radius = cityData["radius"];
-  city.name   = cityData.Key();
-  _cities.push_back(city);
-  if (cityData["visible"].Value() == "1")
+  city.hidden  = cityData["hidden"] == "1";
+  city.visible = cityData["visible"].Value() == "1";
+  city.pos_x   = cityData["pos_x"];
+  city.pos_y   = cityData["pos_y"];
+  city.radius  = cityData["radius"];
+  city.name    = cityData.Key();
+  if (it == _cities.end())
+    _cities.push_back(city);
+  if (city.visible)
   {
     Core::Element* elem = _root->GetElementById("city-list");
     Core::String   innerRml;
@@ -175,8 +188,10 @@ void WorldMap::AddCityToList(Data cityData)
     if ((ROCKET_FACTORY::InstanceElementText(elem, innerRml)))
       ToggleEventListener(true, "city-" + cityData.Key(), "click", CityButtonClicked);
   }
-  if (cityData["hidden"].Value() != "1")
+  cout << "SHOWING CITY " << city.name << " ???" << endl;
+  if (show && city.visible)
   {
+    cout << "SHOWING FUCKING CITY" << endl;
     Core::Element* elem = _root->GetElementById("pworldmap");
     Core::String inner_rml;
     stringstream rml, css, elem_id;
@@ -194,7 +209,6 @@ void WorldMap::AddCityToList(Data cityData)
     rml << "<img src='worldmap-city.png' style='width:" << radius << "px;height:" << radius << "px;' />";
     rml << "</div>";
 
-    // NOTE might need to do something about Rocket::Core::Factory and Windows (replace with RFactory ?)
     if ((ROCKET_FACTORY::InstanceElementText(elem, Core::String(rml.str().c_str()))))
       ToggleEventListener(true, elem_id.str(), "click", MapClickedEvent);
   }
@@ -280,17 +294,56 @@ void WorldMap::CityClicked(Rocket::Core::Event& event)
   }
 }
 
+void WorldMap::CloseCitySplash(void)
+{
+  _city_splash->Hide();
+  Executor::ExecuteLater([this](void) { delete _city_splash; });
+}
+
+void WorldMap::OpenCitySplash(const std::string& cityname)
+{
+  Data      cities(_cityTree);
+  Data      city = cities[cityname];
+
+  if (city["zones"].Count() > 0)
+  {
+    try
+    {
+      _city_splash = new CitySplash(city, _window, _context);
+      _city_splash->Canceled.Connect(*this, &WorldMap::CloseCitySplash);
+      _city_splash->EntryZonePicked.Connect([this, cityname](std::string zone)
+      {
+        CloseCitySplash();
+        GoToCityZone.Emit(cityname, zone);
+      });
+      _city_splash->Show();
+    }
+    catch (...)
+    {
+      if (_city_splash) { delete _city_splash; }
+      AlertUi::NewAlert.Emit("Could not load splashscreen for the place named '" + cityname + '\'');
+    }
+  }
+  else
+    GoToPlace.Emit(cityname);
+}
+
 void WorldMap::PartyClicked(Rocket::Core::Event&)
 {
   string cityname;
 
   if (IsPartyInCity(cityname))
-    GoToPlace.Emit(cityname);
+    OpenCitySplash(cityname);
   else
-    cout << "You aren't in any city" << endl;
+  {
+    int x, y;
+
+    GetCurrentCase(x, y);
+    RequestRandomEncounterCheck.Emit(x, y, Dices::Throw(100) >= 85);
+  }
 }
 
-bool WorldMap::IsPartyInCity(string& cityname) const
+bool WorldMap::IsPartyInCity(string& cityname, bool not_hidden) const
 {
   Cities::const_iterator it  = _cities.begin();
   Cities::const_iterator end = _cities.end();
@@ -302,7 +355,7 @@ bool WorldMap::IsPartyInCity(string& cityname) const
     float       dist_y = city.pos_y - _current_pos_y;
     float       dist   = SQRT(dist_x * dist_x + dist_y * dist_y);
 
-    if (dist <= city.radius)
+    if ((!not_hidden || !city.hidden || city.visible) && dist <= city.radius)
     {
       cityname = city.name;
       return (true);
@@ -316,6 +369,7 @@ bool WorldMap::IsPartyInCity(string& cityname) const
 
 void WorldMap::UpdatePartyCursor(float elapsedTime)
 {
+  // Update the position
   int   current_case_x, current_case_y;
   GetCurrentCase(current_case_x, current_case_y);
   Data  case_data     = GetCaseData(current_case_x, current_case_y);
@@ -343,6 +397,18 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
     _cursor->SetProperty("top",  str_y.str().c_str());
   }
 
+  // Check for a city to display
+  std::string city;
+
+  if (IsPartyInCity(city, false))
+  {
+    auto it = find(_cities.begin(), _cities.end(), city);
+
+    if (!it->hidden && !it->visible)
+      SetCityVisible(city);
+  }
+
+  // Update the clock
   unsigned short lastHour       = _timeManager.GetHour();
   unsigned short lastDay        = _timeManager.GetDay();
   unsigned short elapsedHours   = movementTime;
@@ -355,12 +421,12 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
     string which_city;
     
     UpdateClock();
-    if (!(IsPartyInCity(which_city)) && Dices::Throw(24) < 3)
+    if (!(IsPartyInCity(which_city)) && Dices::Throw(92) < 3)
     {
       int x, y;
 
       GetCurrentCase(x, y);
-      RequestRandomEncounterCheck.Emit(x, y);
+      RequestRandomEncounterCheck.Emit(x, y, true);
     }
   }
 }

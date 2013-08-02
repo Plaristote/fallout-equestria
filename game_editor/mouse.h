@@ -18,6 +18,7 @@ public:
     void                      Run(void);
     LPoint2f                  GetPosition(void) const;
     void                      GetHoveredAt(LPoint2f);
+    void                      GetWaypointHoveredAt(LPoint2f, NodePath);
 
 signals:
     void WaypointHovered(NodePath);

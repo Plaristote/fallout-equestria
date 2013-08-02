@@ -14,8 +14,6 @@
 #  include <cstdint>
 # endif
 
-# include "helpers.hpp"
-
 /*! \namespace Utils
  * \brief Various essentials utilities for all-purpose programming
  */
@@ -45,8 +43,7 @@ public:
     Array  = 6,
     UInt   = 7,
     UShort = 8,
-    UChar  = 9,
-    Long   = 10
+    UChar  = 9
   };
 
   enum Errors
@@ -89,19 +86,7 @@ public:
 
   template<typename T> Packet&	operator<<(T& i)
   {
-    int	    newSize = sizeBuffer;
-    char*   typeCode;
-    T*	    copy;
-
-    newSize += sizeof(T) + sizeof(char);
-    realloc(newSize);
-    typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
-    copy = reinterpret_cast<T*>((long)typeCode + sizeof(char));
-    *typeCode = TypeToCode<T>::TypeCode;
-    *copy = i;
-    sizeBuffer = newSize;
-    updateHeader();
-    return (*this);
+    return (this->operator<< <T>((const T&)i));
   }
 
   template<typename T> Packet&	operator<<(const T& i)
@@ -110,6 +95,11 @@ public:
     char*   typeCode;
     T*	    copy;
 
+    if (TypeToCode<T>::TypeCode == 0)
+    {
+      cerr << "[Serializer] Trying to unserialize unknown type" << endl;
+      throw 5;
+    }
     newSize += sizeof(T) + sizeof(char);
     realloc(newSize);
     typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
@@ -197,7 +187,28 @@ public:
   }
 
 private:
-  template<typename T> void	SerializeArray(T& tehList);
+  template<typename T> void	SerializeArray(T& tehList)
+  {
+    typename T::iterator current = tehList.begin();
+    typename T::iterator end     = tehList.end();
+    int                  newSize = sizeBuffer;
+    char*                typeCode;
+    std::int32_t*        sizeArray;
+
+    newSize   += sizeof(char) + sizeof(std::int32_t);
+    realloc(newSize);
+    typeCode   = reinterpret_cast<char*>((long)buffer + sizeBuffer);
+    sizeArray  = reinterpret_cast<std::int32_t*>((long)typeCode + sizeof(char));
+    *typeCode  = Packet::Array;
+    *sizeArray = tehList.size();
+    sizeBuffer = newSize;
+    while (current != end)
+    {
+      *this << *current;
+      current++;
+    }
+    updateHeader();
+  }
 
   bool		canIHaz(size_t sizeType, int howMany); // Checks if the buffer is big enough for Packet to read size_t
   void		checkType(int assumedType);            // Check if the next type in buffer match the assumed type
@@ -239,7 +250,6 @@ private:
   template<> struct Packet::TypeToCode<unsigned int>   { enum { TypeCode = Packet::UInt   }; };
   template<> struct Packet::TypeToCode<unsigned short> { enum { TypeCode = Packet::UShort }; };
   template<> struct Packet::TypeToCode<unsigned char>  { enum { TypeCode = Packet::UChar  }; };
-  template<> struct Packet::TypeToCode<long>           { enum { TypeCode = Packet::Long   }; };
 }
 
 #endif

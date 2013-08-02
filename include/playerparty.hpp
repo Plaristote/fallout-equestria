@@ -20,14 +20,21 @@ public:
   void                  Leave(InstanceDynamicObject* i);  
   void                  Leave(DynamicObject*);
 
+  void                  Export(const std::string& name) const;
+  static Party*         Import(const std::string& name);
+
   const DynamicObjects& ConstGetObjects(void) const { return (_objects); }
   DynamicObjects&       GetObjects(void)            { return (_objects); }
   Statsheets            GetStatsheets(void)   const;
-  
+
   Sync::Signal<void>    Updated;
   
 protected:
-  DynamicObjects _objects;
+  void                  Serialize(Utils::Packet&) const;
+  void                  UnSerialize(Utils::Packet&);
+
+  DynamicObjects        _objects;
+  std::string           _name;
 };
 
 class PlayerParty : public Party
@@ -44,9 +51,6 @@ public:
 private:
   PlayerParty() {};
   
-  void                  Serialize(Utils::Packet&) const;
-  void                  UnSerialize(Utils::Packet&);
-
   bool                  _local_objects;
 };
 

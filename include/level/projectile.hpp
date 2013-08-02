@@ -9,11 +9,16 @@
 # include <panda3d/particleSystem.h>
 # include "level/world.h"
 
+class ObjectCharacter;
+class InventoryObject;
+
 class Projectile
 {
 public:
   Projectile(World* world, NodePath parent);
   ~Projectile(void);
+
+  static Projectile* Factory(World*, ObjectCharacter*, InventoryObject*);
 
   NodePath GetNodePath(void) const { return (node_path); }
 

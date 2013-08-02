@@ -92,38 +92,6 @@ private:
   unsigned char  month, day, hour, minute, second;
 };
 
-string humanize(const std::string& str)
-{
-  string ret;
-  
-  for (unsigned short i = 0 ;  i < str.size() ; ++i)
-  {
-    if (i == 0 || str[i - 1] == '_')
-      ret += str[i] - 'a' + 'A';
-    else if (str[i] == '_')
-      ret += ' ';
-    else
-      ret += str[i];
-  }
-  return (ret);
-}
-
-string underscore(const std::string& str)
-{
-  string ret;
-  
-  for (unsigned short i = 0 ;  i < str.size() ; ++i)
-  {
-    if      (str[i] >= 'A' && str[i] <= 'Z')
-      ret += str[i] - 'A' + 'a';
-    else if (str[i] == ' ')
-      ret += '_';
-    else
-      ret += str[i];
-  }
-  return (ret);
-}
-
 void AngelScriptInitialize(void);
 int  compile_statsheet(std::string);
 
@@ -242,7 +210,7 @@ int main(int argc, char *argv[])
 	}
     cout << "[FoE] Enabling keyboard" << endl;
     //window->enable_keyboard();
-    //window->get_render().set_shader_auto();
+    window->get_render().set_shader_auto();
 
     // Set Windows Properties
     cout << "[FoE] Setting window's properties" << endl;
@@ -264,10 +232,8 @@ int main(int argc, char *argv[])
 
       cout << "[FoE] Starting Main Loop" << std::endl;
       framework.main_loop();
-      framework.close_framework();
-
-      unload_prc_file(config);
     }
+    unload_prc_file(config);
     cout << "[FoE] Properly wrapping up." << endl;
     OptionsManager::Finalize();
     Script::Engine::Finalize();

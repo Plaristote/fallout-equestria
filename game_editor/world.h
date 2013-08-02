@@ -42,7 +42,8 @@
 #  define TEXT_ROOT  "textures/"
 # endif
 
-float my_sqrt(const float x);
+float   my_sqrt(const float x);
+LPoint3 NodePathSize(NodePath np);
 
 namespace ColMask
 {
@@ -59,19 +60,7 @@ namespace ColMask
 }
 
 struct World;
-
-struct FBoundingBox
-{
-  float left;
-  float top;
-  float width;
-  float height;
-
-  bool  Intersects(float x, float y)
-  {
-    return (x >= left && x <= left + width && y >= top && y <= top + height);
-  }
-};
+struct WorldLight;
 
 struct Waypoint
 {
@@ -105,12 +94,12 @@ struct Waypoint
     typedef std::list<Arc> Arcs;
     typedef std::vector<std::pair<Arc, unsigned short> > ArcsWithdrawed;
 
-    unsigned int        id;
-    unsigned char       floor;
-    Arcs                arcs;
-    ArcsWithdrawed      arcs_withdrawed;
-    NodePath            nodePath;
-    FBoundingBox        mouseBox;
+    unsigned int           id;
+    unsigned char          floor;
+    Arcs                   arcs;
+    ArcsWithdrawed         arcs_withdrawed;
+    NodePath               nodePath;
+    std::list<WorldLight*> lights;
     
     void WithdrawArc(Waypoint* other);
     void UnwithdrawArc(Waypoint* other, ArcObserver* observer);
@@ -150,8 +139,6 @@ struct Waypoint
     void                 UnserializeLoadArcs(World*);
     void                 Serialize(Utils::Packet& packet);
 
-    void                 SetMouseBox(void);
-
 private:
     friend struct World;
     bool                 selected;
@@ -161,16 +148,25 @@ private:
 
 struct MapObject
 {
-    NodePath      nodePath;
-    PT(Texture)   texture;
-    
-    unsigned char floor;
+  typedef std::vector<Waypoint*> Waypoints;
 
-    std::string   strModel;
-    std::string   strTexture;
+  NodePath      nodePath;
+  PT(Texture)   texture;
+  unsigned char floor;
+  Waypoints     waypoints;
+  NodePath      waypoints_root;
 
-    void UnSerialize(WindowFramework* window, Utils::Packet& packet);
-    void Serialize(Utils::Packet& packet);
+  std::string   strModel;
+  std::string   strTexture;
+  std::string   parent;
+
+  void          SetFloor(unsigned char floor);
+  void          ReparentTo(MapObject* object);
+
+  void          UnSerialize(WindowFramework* window, Utils::Packet& packet);
+  void          UnserializeWaypoints(World*, Utils::Packet& packet);
+  void          Serialize(Utils::Packet& packet);
+  static void   InitializeTree(World* world);
 };
 
 namespace Interactions
@@ -289,6 +285,51 @@ struct WorldLight
     light->set_color(color);
   }
 
+  LVecBase3f GetAttenuation(void) const
+  {
+    switch (type)
+    {
+      case Point:
+      {
+        PT(PointLight) point_light = reinterpret_cast<PointLight*>(light.p());
+
+        return (point_light->get_attenuation());
+      }
+      case Spot:
+      {
+        PT(Spotlight) spot_light = reinterpret_cast<Spotlight*>(light.p());
+
+        return (spot_light->get_attenuation());
+      }
+      default:
+          break;
+    }
+    return (LVecBase3f(0, 0, 0));
+  }
+  
+  void   SetAttenuation(float a, float b, float c)
+  {
+    switch (type)
+    {
+      case Point:
+      {
+        PT(PointLight) point_light = reinterpret_cast<PointLight*>(light.p());
+
+        point_light->set_attenuation(LVecBase3(a, b, c));
+        break ;
+      }
+      case Spot:
+      {
+        PT(Spotlight) spot_light = reinterpret_cast<Spotlight*>(light.p());
+
+        spot_light->set_attenuation(LVecBase3(a, b, c));
+        break ;
+      }
+      default:
+        break ;
+    }
+  }
+
   void   SetPosition(LPoint3 position)
   {
       nodePath.set_pos(position);
@@ -301,12 +342,13 @@ struct WorldLight
 
   void UnSerialize(World*, Utils::Packet& packet);
   void Serialize(Utils::Packet& packet);
-  
+
+  void ReparentTo(World* world);
+
   void ReparentTo(DynamicObject* object)
   {
+    ReparentTo((MapObject*)object);
     parent_type = Type_DynamicObject;
-    parent      = object->nodePath;
-    parent_i    = object;
   }
   
   void ReparentTo(MapObject* object)
@@ -314,6 +356,15 @@ struct WorldLight
     parent_type = Type_MapObject;
     parent      = object->nodePath;
     parent_i    = object;
+    nodePath.reparent_to(parent);
+#ifdef GAME_EDITOR
+    symbol.reparent_to(parent);
+#endif
+  }
+
+  MapObject*  Parent(void) const
+  {
+      return (parent_i);
   }
   
   std::string name;
@@ -380,13 +431,12 @@ struct World
     
     void      FloorResize(int);
 
-    Waypoint* AddWayPoint(float x, float y, float z);
-    void      DeleteWayPoint(Waypoint*);
-    Waypoint* GetWaypointFromNodePath(NodePath path);
-    Waypoint* GetWaypointFromId(unsigned int id);
-    Waypoint* GetWaypointClosest(LPoint3, unsigned char floor);
-    void      SetWaypointsVisible(bool v)
-    { if (v) { rootWaypoints.show();  } else { rootWaypoints.hide();  } }
+    Waypoint*      AddWayPoint(float x, float y, float z);
+    void           DeleteWayPoint(Waypoint*);
+    Waypoint*      GetWaypointFromNodePath(NodePath path);
+    Waypoint*      GetWaypointFromId(unsigned int id);
+    Waypoint*      GetWaypointClosest(LPoint3, unsigned char floor);
+    void           SetWaypointsVisible(bool v);
     void           GetWaypointLimits(short currentFloor, LPoint3& upperRight, LPoint3& upperLeft, LPoint3& bottomLeft) const;
     LPlane         GetWaypointPlane(short currentFloor) const;
 
@@ -456,6 +506,9 @@ struct World
     void           SetDynamicObjectsVisible(bool v);
     void           DynamicObjectSetWaypoint(DynamicObject&, Waypoint&);
     void           DynamicObjectChangeFloor(DynamicObject&, unsigned char floor);
+
+    void           ReparentObject(MapObject* object, MapObject*     new_parent);
+    void           ReparentObject(MapObject* object, const std::string& name);
     
     void           AddExitZone(const std::string&);
     void           DeleteExitZone(const std::string&);
@@ -473,8 +526,6 @@ struct World
     WorldLight*    GetLightByName(const std::string&);
     void           CompileLight(WorldLight*, unsigned char = ColMask::Object | ColMask::DynObject);
     
-    Waypoint*      GetWaypointAt(LPoint2f);
-
     typedef std::function<void (const std::string&, float)> ProgressCallback;
 
     void           UnSerialize(Utils::Packet& packet);
@@ -493,5 +544,3 @@ struct World
 };
 
 #endif // WORLD_H
-
-class BoundingBox;

@@ -29,6 +29,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   Data   items = _level->GetItems();  
   string defEquiped[2];
 
+  _rotating           = false;
   _fading_in          = _fading_off = false;
   _flags              = 0;
   _goToData.objective = 0;  
@@ -37,40 +38,43 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   NodePath bodyNP = object->nodePath.find("**/+Character");
   _character      = dynamic_cast<Character*>(bodyNP.node());
 
-  PT(CharacterJointBundle) bodyBundle = _character->get_bundle(0);
+  if (_character && _character->get_bundle(0))
+  {
+    PT(CharacterJointBundle) bodyBundle = _character->get_bundle(0);
 
-  //HAIL MICROSOFT
-  string listJoints[] = { "Horn", "Mouth", "BattleSaddle" };
-  for (unsigned int i = 0; i<GET_ARRAY_SIZE(listJoints); i++) {
-    for (unsigned short it = 0 ; it < 2 ; ++it)
-    {
-      stringstream       jointName;
-      stringstream       npName;
-      PT(CharacterJoint) joint;
-      NodePath           tmp;
-
-      //jointName << "attach_"  << listJoints[i] << "_" << (it + 1);
-      //npName    << "equiped_" << listJoints[i] << "_" << (it + 1);
-      jointName << "Horn"; // TODO Get models with the proper joints
-      npName    << "equiped_" << listJoints[i] << "_" << (it + 1);
-      joint     = _character->find_joint(jointName.str());
-
-      if (joint)
+    //HAIL MICROSOFT
+    string listJoints[] = { "Horn", "Mouth", "BattleSaddle" };
+    for (unsigned int i = 0; i<GET_ARRAY_SIZE(listJoints); i++) {
+      for (unsigned short it = 0 ; it < 2 ; ++it)
       {
-        tmp     = bodyNP.attach_new_node(npName.str());
-        bodyBundle->control_joint(jointName.str(), tmp.node());
+        stringstream       jointName;
+        stringstream       npName;
+        PT(CharacterJoint) joint;
+        NodePath           tmp;
 
-        if (listJoints[i] == "Horn")
-          _equiped[it].jointHorn         = tmp;
-        else if (listJoints[i] == "Mouth")
-          _equiped[it].jointMouth        = tmp;
+        //jointName << "attach_"  << listJoints[i] << "_" << (it + 1);
+        //npName    << "equiped_" << listJoints[i] << "_" << (it + 1);
+        jointName << "Horn"; // TODO Get models with the proper joints
+        npName    << "equiped_" << listJoints[i] << "_" << (it + 1);
+        joint     = _character->find_joint(jointName.str());
+
+        if (joint)
+        {
+          tmp     = bodyNP.attach_new_node(npName.str());
+          bodyBundle->control_joint(jointName.str(), tmp.node());
+
+          if (listJoints[i] == "Horn")
+            _equiped[it].jointHorn         = tmp;
+          else if (listJoints[i] == "Mouth")
+            _equiped[it].jointMouth        = tmp;
+          else
+            _equiped[it].jointBattleSaddle = tmp;
+        }
         else
-          _equiped[it].jointBattleSaddle = tmp;
+          cout << "/!\\ Joint " << jointName.str() << " doesn't exist for Character " << _object->nodePath.get_name() << endl;
       }
-      else
-	cout << "/!\\ Joint " << jointName.str() << " doesn't exist for Character " << _object->nodePath.get_name() << endl;
     }
-  };
+  }
 
   _type         = ObjectTypes::Character;
   _actionPoints = 0;
@@ -140,45 +144,30 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   }
   
   // Script
-  _script_context = 0;
-  _script_module  = 0;
   if (object->script == "")
     object->script = "general_pony";
   {
-    string prefixName = "IA_";
-    string prefixPath = "scripts/ai/";
+    string prefixPath  = "scripts/ai/";
 
-    // Get the running functions
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptMain,  "void main(Character@, float)"));
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptFight, "void combat(Character@)"));
+    _script = new AngelScript::Object(prefixPath + object->script + ".as");
+    _skill_target.Initialize(prefixPath + object->script + ".as", _script->GetContext());
+    _script->asDefineMethod("main",                 "void   main(Character@, float)");
+    _script->asDefineMethod("combat",               "void   combat(Character@)");
+    _script->asDefineMethod("RequestStopFollowing", "void   RequestStopFollowing(Character@, Character@)");
+    _script->asDefineMethod("RequestFollow",        "void   RequestFollow(Character@, Character@)");
+    _script->asDefineMethod("RequestHeal",          "void   RequestHeal(Character@, Character@)");
+    _script->asDefineMethod("AskMorale",            "int    AskMorale(Character@)");
+    _script->asDefineMethod("SendMessage",          "void   ReceiveMessage(string)");
+    _script->asDefineMethod("Load",                 "void   Load(Serializer@)");
+    _script->asDefineMethod("Save",                 "void   Save(Serializer@)");
+    _script->asDefineMethod("DefaultWeapon1",       "string default_weapon_1()");
+    _script->asDefineMethod("DefaultWeapon2",       "string default_weapon_2()");
 
-    // Get the communication functions
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestStopFollowing, "void RequestStopFollowing(Character@, Character@)"));
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestFollow,        "void RequestFollow(Character@, Character@)"));
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestAttack,        "void RequestAttack(Character@, Character@)"));
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptRequestHeal,          "void RequestHeal(Character@, Character@)"));
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAskMorale,            "int  AskMorale()"));
-    _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptSendMessage,          "void ReceiveMessage(string)"));
-    LoadScript(prefixName + GetName(), prefixPath + object->script + ".as");
-
-    _skill_target.Initialize(prefixName + GetName(), prefixPath + object->script + ".as", _script_context);
-
-    // Get Default Weapons from script
-    if (_script_module)
+    const char* default_weapons[] = { "DefaultWeapon1", "DefaultWeapon2" };
+    for (unsigned short i = 0 ; i < 2 ; ++i)
     {
-      asIScriptFunction* funcGetDefWeapon[2];
-
-      funcGetDefWeapon[0] = _script_module->GetFunctionByDecl("string default_weapon_1()");
-      funcGetDefWeapon[1] = _script_module->GetFunctionByDecl("string default_weapon_2()");
-      for (int i = 0 ; i < 2 ; ++i)
-      {
-        if (funcGetDefWeapon[i])
-        {
-          _script_context->Prepare(funcGetDefWeapon[i]);
-          _script_context->Execute();
-          defEquiped[i] = *(reinterpret_cast<string*>(_script_context->GetReturnAddress()));
-        }
-      }
+      if (_script->IsDefined(default_weapons[i]))
+        defEquiped[i] = *(string*)(_script->Call(default_weapons[i]));
     }
   }
   
@@ -330,11 +319,14 @@ void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& 
       _equiped[it].graphics->PlayAnimation(name);
     PlayAnimation(playerAnimName);
 
-    /*Projectile* projectile = new Projectile(_level->GetWorld(), _equiped[it].graphics->GetNodePath());
+    if (_equiped[it].graphics)
+    {
+      Projectile* projectile = new Projectile(_level->GetWorld(), _equiped[it].graphics->GetNodePath());
 
-    projectile->SetTimeout(1);
-    projectile->SetColor(255, 255, 0, 1);
-    _level->InsertProjectile(projectile);*/
+      projectile->SetTimeout(0.5);
+      projectile->SetColor(255, 255, 0, 1);
+      _level->InsertProjectile(projectile);
+    }
   }
 }
 
@@ -476,8 +468,22 @@ void ObjectCharacter::Fading(void)
       else
         _fading_in = false;
     }
+    if (_fading_in == false) // Quick hack for characters not fading back in completely
+      color.set_w(255);
   }
   GetNodePath().set_color(color);
+  if (color.get_w() == 0)
+    GetNodePath().hide();
+  else if (GetNodePath().is_hidden())
+    GetNodePath().show();
+}
+
+void ObjectCharacter::RunEffects(float elapsedTime)
+{
+  if (_fading_in || _fading_off)
+    Fading();
+  if (_rotating && _rotation_goal != _object->nodePath.get_hpr().get_x())
+    RunRotate(elapsedTime);
 }
 
 void ObjectCharacter::Run(float elapsedTime)
@@ -494,31 +500,27 @@ void ObjectCharacter::Run(float elapsedTime)
       Fading();
     if (state == Level::Normal && _hitPoints > 0)
     {
-      ReloadFunction(&_scriptMain);
-      if (_scriptMain)
+      if (_script->IsDefined("main"))
       {
         collector_ai.start();
-        _script_context->Prepare(_scriptMain);
-        _script_context->SetArgObject(0, this);
-        _script_context->SetArgFloat(1, elapsedTime);
-        _script_context->Execute();
+        AngelScript::Type<ObjectCharacter*> self(this);
+        AngelScript::Type<float>            p_time(elapsedTime);
+        
+        _script->Call("main", 2, &self, &p_time);
         collector_ai.stop();
       }
     }
     else if (state == Level::Fight)
     {
-      ReloadFunction(&_scriptFight);
       if (_hitPoints <= 0 || _actionPoints == 0)
 	_level->NextTurn();
-      else if (!(IsMoving()) && _scriptFight) // TODO replace with something more appropriate
+      else if (!(IsMoving()) && _script->IsDefined("combat")) // TODO replace with something more appropriate
       {
-        unsigned int ap_before = _actionPoints;
-
         collector_ai.start();
-        ReloadFunction(&_scriptFight);
-	_script_context->Prepare(_scriptFight);
-	_script_context->SetArgObject(0, this);
-	_script_context->Execute();
+        AngelScript::Type<ObjectCharacter*> self(this);
+        unsigned int                        ap_before = _actionPoints;
+
+        _script->Call("combat", 1, &self);
         collector_ai.stop();
         if (ap_before == _actionPoints && !IsInterrupted() && !IsMoving()) // If stalled, skip turn
         {
@@ -867,7 +869,7 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
     GoTo(_level->GetWorld()->GetWaypointFromId((*(--(_path.end()))).id));
     return ;
   }
-  _waypointOccupied = wp;
+  SetOccupiedWaypoint(wp);
 
   // Has reached object objective, if there is one ?
   if (_goToData.objective)
@@ -994,15 +996,37 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
   //profile.Profile("Level:Characters:Movement");
 }
 
+void                ObjectCharacter::RunRotate(float elapsedTime)
+{
+  LVecBase3 rot    = _object->nodePath.get_hpr();
+  float     factor = elapsedTime * 500;
+
+  if ((ABS(_rotation_goal - rot.get_x())) < factor)
+  {
+    rot.set_x(_rotation_goal);
+    _rotating = false;
+  }
+  else if (_rotation_goal > rot.get_x())
+    rot.set_x(rot.get_x() + factor);
+  else if (_rotation_goal < rot.get_x())
+    rot.set_x(rot.get_x() - factor);
+  _object->nodePath.set_hpr(rot);
+}
+
 void                ObjectCharacter::LookAt(LVecBase3 pos)
 {
    LVecBase3 rot;
+   float     backup;
 
+   backup = _object->nodePath.get_hpr().get_x();
    _object->nodePath.look_at(pos);
    rot = _object->nodePath.get_hpr();
    rot.set_x(rot.get_x() - 180);
    rot.set_y(-rot.get_y());
-   _object->nodePath.set_hpr(rot);  
+   _rotation_goal = rot.get_x();
+   rot.set_x(backup);
+   _rotating      = true;
+   _object->nodePath.set_hpr(rot);
 }
 
 void                ObjectCharacter::LookAt(InstanceDynamicObject* object)
@@ -1070,7 +1094,7 @@ void                ObjectCharacter::RunDeath()
 void                ObjectCharacter::CallbackActionUse(InstanceDynamicObject* user)
 {
   if (user == _level->GetPlayer())
-    _level->PlayerLootWithScript(&(GetInventory()), this, _script_context, "scripts/ai/" + _object->script + ".as");
+    _level->PlayerLootWithScript(&(GetInventory()), this, _script->GetContext(), "scripts/ai/" + _object->script + ".as");
 }
 
 /*
@@ -1117,7 +1141,7 @@ void     ObjectCharacter::CheckFieldOfView(void)
   Timer profile;
   cout << "Checking Field of View for " << GetName() << endl;
   PStatCollector     collector("Level:Characters:FieldOfView");
-  short              perception = GetStatController()->Model().GetSpecial("PER");
+  short              perception = (GetStatController() != 0) ? GetStatController()->Model().GetSpecial("PER") : 5;
   CollisionTraverser fovTraverser;
   float              fovRadius  = 20 + (perception * 5);
   
@@ -1192,57 +1216,56 @@ void     ObjectCharacter::CheckFieldOfView(void)
 /*
  * Script Communication
  */
-void     ObjectCharacter::SendMessage(const string& str)
+void     ObjectCharacter::SendMessage(string& str)
 {
-  if (_scriptSendMessage)
+  if (_script->IsDefined("SendMessage"))
   {
-    string cpy = str;
-
-    _script_context->Prepare(_scriptSendMessage);
-    _script_context->SetArgObject(0, &cpy);
-    _script_context->Execute();
+    AngelScript::Type<ObjectCharacter*> self(this);
+    AngelScript::Type<std::string*>     message(&str);
+    
+    _script->Call("SendMessage", 2, &self, &message);
   }
 }
 
 int      ObjectCharacter::AskMorale(void)
 {
-  if (_scriptAskMorale)
+  if (_script->IsDefined("AskMorale"))
   {
-    _script_context->Prepare(_scriptAskMorale);
-    _script_context->Execute();
-    return (_script_context->GetReturnByte());
+    AngelScript::Type<ObjectCharacter*> self(this);
+    
+    return (_script->Call("AskMorale", 1, &self));
   }
   return (0);
 }
 
 void     ObjectCharacter::RequestAttack(ObjectCharacter* f, ObjectCharacter* s)
 {
-  RequestCharacter(f, s, _scriptRequestAttack);
+  RequestCharacter(f, s, "RequestAttack");
 }
 
 void     ObjectCharacter::RequestHeal(ObjectCharacter* f, ObjectCharacter* s)
 {
-  RequestCharacter(f, s, _scriptRequestHeal);
+  RequestCharacter(f, s, "RequestHeal");
 }
 
 void     ObjectCharacter::RequestFollow(ObjectCharacter* f, ObjectCharacter* s)
 {
-  RequestCharacter(f, s, _scriptRequestFollow);
+  RequestCharacter(f, s, "RequestFollow");
 }
 
 void     ObjectCharacter::RequestStopFollowing(ObjectCharacter* f, ObjectCharacter* s)
 {
-  RequestCharacter(f, s, _scriptRequestStopFollowing);
+  RequestCharacter(f, s, "RequestStopFollowing");
 }
 
-void     ObjectCharacter::RequestCharacter(ObjectCharacter* f, ObjectCharacter* s, asIScriptFunction* func)
+void     ObjectCharacter::RequestCharacter(ObjectCharacter* f, ObjectCharacter* s, const std::string& func)
 {
-  if (func)
+  if (_script->IsDefined(func))
   {
-    _script_context->Prepare(func);
-    _script_context->SetArgObject(0, f);
-    _script_context->SetArgObject(1, s);
-    _script_context->Execute();
+    AngelScript::Type<ObjectCharacter*> self(f);
+    AngelScript::Type<ObjectCharacter*> buddy(s);
+    
+    _script->Call(func, 2, &self, &buddy);
   }
 }
 

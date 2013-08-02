@@ -29,15 +29,18 @@
 # include "inventory_ui.hpp"
 
 # include "world.h"
-#include "projectile.hpp"
+# include "projectile.hpp"
 # include "soundmanager.hpp"
+# include "main_script.hpp"
+# include "script_zone.hpp"
 
 class Level
 {
+  friend class Party;
 public:
   static Level* CurrentLevel;
   
-  Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& data, TimeManager& tm);
+  Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& data, TimeManager& tm);
   
   void InitSun(void);
   void InitPlayer(void);
@@ -78,6 +81,7 @@ public:
   ObjectCharacter*       GetCharacter(const std::string& name);
   ObjectCharacter*       GetCharacter(const DynamicObject*);
   ObjectCharacter*       GetPlayer(void);
+  LevelZone*             GetZoneByName(const std::string& name);
   void                   UnprocessAllCollisions(void);
   void                   ProcessAllCollisions(void);
   void                   RefreshCharactersVisibility(void);
@@ -169,6 +173,8 @@ private:
   typedef std::list<ObjectCharacter*>       Characters;
   typedef std::list<LevelExitZone*>         ExitZones;
   typedef std::list<Projectile*>            Projectiles;
+  typedef std::vector<LevelZone*>           LevelZones;
+  typedef std::list<Party*>                 Parties;
   
   void              SetupCamera(void);
 
@@ -190,10 +196,12 @@ private:
   SceneCamera           _camera;
   Timer                 _timer;
   TimeManager&          _timeManager;
+  MainScript            _main_script;
   State                 _state;
   bool                  _persistent;
 
   World*                _world;
+  LevelZones            _zones;
   ParticleSystemManager _particle_manager;
   SoundManager          _sound_manager;
   ChatterManager        _chatter_manager;
@@ -202,6 +210,7 @@ private:
   Characters            _characters;
   Characters::iterator  _itCharacter;
   Characters::iterator  _currentCharacter;
+  Parties               _parties;
   NodePath              _player_halo;
   
   ExitZones             _exitZones;

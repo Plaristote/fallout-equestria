@@ -1,5 +1,6 @@
 #include "test.hpp"
 #include "serializer.hpp"
+#include "directory.hpp"
 
 using namespace std;
 
@@ -59,6 +60,5 @@ void TestsSerializer(UnitTest& tester)
       return ("");
     return ("Something was wrong with the array");
   });
-
 }
 

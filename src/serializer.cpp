@@ -10,7 +10,6 @@ namespace Utils
   template Packet& Packet::operator<< <float>(float& i);
   template Packet& Packet::operator<< <short>(short& i);
   template Packet& Packet::operator<< <char>(char& i);
-  template Packet& Packet::operator<< <unsigned int>(unsigned int& i);
   template Packet& Packet::operator<< <unsigned short>(unsigned short& i);
   template Packet& Packet::operator<< <unsigned char>(unsigned char& i);
   template Packet& Packet::operator<< <long>(long&);
@@ -18,29 +17,25 @@ namespace Utils
   template Packet& Packet::operator<< <float>(const float& i);
   template Packet& Packet::operator<< <short>(const short& i);
   template Packet& Packet::operator<< <char>(const char& i);
-  template Packet& Packet::operator<< <unsigned int>(const unsigned int& i);
   template Packet& Packet::operator<< <unsigned short>(const unsigned short& i);
   template Packet& Packet::operator<< <unsigned char>(const unsigned char& i);  
-  template Packet& Packet::operator<< <long>(const long&);
   // => There's also a String specialization.
 
-  template Packet& Packet::operator>> <int>(int& i);
+  template Packet& Packet::operator>> <std::int32_t>(std::int32_t& i);
   template Packet& Packet::operator>> <short>(short& i);
   template Packet& Packet::operator>> <char>(char& i);
   template Packet& Packet::operator>> <float>(float& i);
-  template Packet& Packet::operator>> <unsigned int>(unsigned int& i);
   template Packet& Packet::operator>> <unsigned short>(unsigned short& i);
   template Packet& Packet::operator>> <unsigned char>(unsigned char& i);
-  template Packet& Packet::operator>> <long>(long&);
   // => Same shit. Also a String specialization.
 
-  template Packet& Packet::operator<< <int>(list<int>& list);
+  template Packet& Packet::operator<< <std::int32_t>(list<int>& list);
   template Packet& Packet::operator<< <float>(list<float>& list);
   template Packet& Packet::operator<< <std::string>(list<std::string>& list);
   template Packet& Packet::operator<< <short>(list<short>& list);
   template Packet& Packet::operator<< <char>(list<char>& list);
 
-  template Packet& Packet::operator<< <int>(vector<int>& list);
+  template Packet& Packet::operator<< <std::int32_t>(vector<int>& list);
   template Packet& Packet::operator<< <float>(vector<float>& list);
   template Packet& Packet::operator<< <std::string>(vector<std::string>& list);
   template Packet& Packet::operator<< <short>(vector<short>& list);
@@ -51,11 +46,13 @@ namespace Utils
   */
   Packet::Packet(void)
   {
+    std::int32_t tmp_buffer = 0;
+
     buffer      = 0;
     sizeBuffer  = 0;
     reading     = 0;
     isDuplicate = true;
-    *this << (std::int32_t&)sizeBuffer;
+    *this << tmp_buffer;
   }
   
   Packet::Packet(std::ifstream& file)
@@ -128,94 +125,6 @@ namespace Utils
   /*
   * Serializer
   */
-
-  /*template<typename T>
-  Packet&		Packet::operator<<(T& i)
-  {
-    int	    newSize = sizeBuffer;
-    char*   typeCode;
-    T*	    copy;
-
-    newSize += sizeof(T) + sizeof(char);
-    realloc(newSize);
-    typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
-    copy = reinterpret_cast<T*>((long)typeCode + sizeof(char));
-    *typeCode = TypeToCode<T>::TypeCode;
-    *copy = i;
-    sizeBuffer = newSize;
-    updateHeader();
-    return (*this);
-  }*/
-  
-  /*template<typename T>
-  Packet&		Packet::operator<<(const T& i)
-  {
-    int	    newSize = sizeBuffer;
-    char*   typeCode;
-    T*	    copy;
-
-    newSize += sizeof(T) + sizeof(char);
-    realloc(newSize);
-    typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
-    copy = reinterpret_cast<T*>((long)typeCode + sizeof(char));
-    *typeCode = TypeToCode<T>::TypeCode;
-    *copy = i;
-    sizeBuffer = newSize;
-    updateHeader();
-    return (*this);
-  }*/
-
-  template<typename T>
-  void				Packet::SerializeArray(T& tehList)
-  {
-    typename T::iterator		current = tehList.begin();
-    typename T::iterator		end = tehList.end();
-    int				newSize = sizeBuffer;
-    char*			        typeCode;
-    std::int32_t*			sizeArray;
-
-    newSize += sizeof(char) + sizeof(std::int32_t);
-    realloc(newSize);
-    typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
-    sizeArray = reinterpret_cast<std::int32_t*>((long)typeCode + sizeof(char));
-    *typeCode = Packet::Array;
-    *sizeArray = tehList.size();
-    sizeBuffer = newSize;
-    while (current != end)
-    {
-      *this << *current;
-      current++;
-    }
-    updateHeader();
-  }
-
-
-  /*template<typename T>
-  Packet&		Packet::operator<<(list<T>& tehList)
-  {
-    SerializeArray(tehList);
-    return (*this);
-  }
-
-  template<typename T>
-  Packet&		Packet::operator<<(vector<T>& tehList)
-  {
-    SerializeArray(tehList);
-    return (*this);
-  }*/
-
-  /*
-  * Unserializer
-  */
-  /*template<typename T>
-  Packet&		Packet::operator>>(T& v)
-  {
-    checkType(TypeToCode<T>::TypeCode);
-    v = 0;
-    read<T>(v);
-    return (*this);
-  }*/
-
   template<>
   Packet& Packet::operator<< <std::string>(const std::string& str)
   {
@@ -265,46 +174,6 @@ namespace Utils
     reading = reinterpret_cast<void*>((long)reading + sizeof(char) * size);
     return (*this);
   }
-  // TODO: find a way to template this bullshit (list & vector unserializer)
-  /*template<typename T>
-  Packet&		Packet::operator>>(list<T>& list)
-  {
-    unsigned int	size, it;
-    std::int32_t	tmp = 0;
-
-    list.clear();
-    checkType(Packet::Array);
-    read<std::int32_t>(tmp);
-    size = tmp;
-    for (it = 0 ; it < size ; ++it)
-    {
-      T		reading;
-
-      *this >> reading;
-      list.push_back(reading);
-    }
-    return (*this);
-  }
-
-  template<typename T>
-  Packet&		Packet::operator>>(vector<T>& list)
-  {
-    unsigned int	size, it;
-    std::int32_t	tmp = 0;
-
-    list.clear();
-    checkType(Packet::Array);
-    read<std::int32_t>(tmp);
-    size = tmp;
-    for (it = 0 ; it < size ; ++it)
-    {
-      T		reading;
-
-      *this >> reading;
-      list.push_back(reading);
-    }
-    return (*this);
-  }*/
 
   /*
   * Utility Methods for Packet

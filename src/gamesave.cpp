@@ -116,7 +116,6 @@ void InstanceDynamicObject::Save(Utils::Packet& packet)
 void ObjectCharacter::Load(Utils::Packet& packet)
 {
   unsigned int       pathSize, buffs_size;
-  asIScriptFunction* loadFunc = (_script_context && _script_module ? _script_module->GetFunctionByDecl("void Load(Serializer@)") : 0);
 
   InstanceDynamicObject::Load(packet);
   packet >> _actionPoints >> _hitPoints >> _armorClass >> _tmpArmorClass;
@@ -142,11 +141,11 @@ void ObjectCharacter::Load(Utils::Packet& packet)
   packet >> hazScriptSave;
   if (hazScriptSave == '1')
   {
-    if (!loadFunc)
+    if (_script->IsDefined("Load"))
     {
-      _script_context->Prepare(loadFunc);
-      _script_context->SetArgAddress(0, &packet);
-      _script_context->Execute();
+      AngelScript::Type<Utils::Packet*> param_packet(&packet);
+      
+      _script->Call("Load", 1, &param_packet);
     }
     else
       std::cerr << "/!\\ FATAL ERROR: " << this->GetName() << "'s Script Load function couldn't be loaded, and the whole loading will probably screw up starting now.";
@@ -158,8 +157,6 @@ void ObjectCharacter::Load(Utils::Packet& packet)
 
 void ObjectCharacter::Save(Utils::Packet& packet)
 {
-  asIScriptFunction* saveFunc    = (_script_context && _script_module ? _script_module->GetFunctionByDecl("void Save(Serializer@)") : 0);
-
   InstanceDynamicObject::Save(packet);
   packet << _actionPoints << _hitPoints << _armorClass << _tmpArmorClass;
   packet << (unsigned int)_path.size();
@@ -167,12 +164,12 @@ void ObjectCharacter::Save(Utils::Packet& packet)
   packet << (unsigned int)_buffs.size();
   for_each(_buffs.begin(), _buffs.end(), [this, &packet](CharacterBuff* buff) { buff->Save(packet); });
   
-  if (saveFunc)
+  if (_script->IsDefined("Save"))
   {
+    AngelScript::Type<Utils::Packet*> param_packet(&packet);
+
     packet << '1'; // Haz script save
-    _script_context->Prepare(saveFunc);
-    _script_context->SetArgAddress(0, &packet);
-    _script_context->Execute();
+    _script->Call("Save", 1, &param_packet);
   }
   else
     packet << '0'; // Haz not script save

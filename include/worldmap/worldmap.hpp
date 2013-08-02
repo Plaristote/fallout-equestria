@@ -3,6 +3,7 @@
 
 # include "gameui.hpp"
 # include "dataengine.hpp"
+# include "worldmap/city_splash.hpp"
 # include <fstream>
 
 class WorldMap : public UiBase
@@ -14,6 +15,7 @@ class WorldMap : public UiBase
     int         pos_x;
     int         pos_y;
     int         radius;
+    bool        hidden, visible;
     std::string name;
   };
 
@@ -47,14 +49,18 @@ public:
   Data        GetCaseData(int x, int y) const;
   void        GetCurrentPosition(float& x, float& y) const { x = _current_pos_x; y = _current_pos_y; }
 
-  Sync::Signal<void (std::string)> GoToPlace;
-  Sync::Signal<void (int, int)>    RequestRandomEncounterCheck;
+  Sync::Signal<void (std::string)>              GoToPlace;
+  Sync::Signal<void (std::string, std::string)> GoToCityZone;
+  Sync::Signal<void (int, int, bool)>           RequestRandomEncounterCheck;
 
 private:
+  void                   OpenCitySplash(const std::string& cityname);
+  void                   CloseCitySplash(void);
+
   void                   MapTileGenerator(Data map);
   void                   UpdatePartyCursor(float elapsedTime);
   void                   UpdateClock(void);
-  bool                   IsPartyInCity(std::string& ret) const;
+  bool                   IsPartyInCity(std::string& ret, bool not_hidden = true) const;
   Rocket::Core::Element* GetCaseAt(int x, int y) const;
   void                   GetCurrentCase(int&, int&) const;
   void                   SetCaseVisibility(int x, int y, char visibility) const;
@@ -67,6 +73,7 @@ private:
 
   RocketListener         MapClickedEvent, PartyCursorClicked, CityButtonClicked, ButtonInventory, ButtonCharacter, ButtonPipbuck, ButtonMenu;
   DataTree*              _mapTree;
+  DataTree*              _cityTree;
   DataEngine&            _dataEngine;
   TimeManager&           _timeManager;
   GameUi&                _gameUi;
@@ -82,6 +89,8 @@ private:
 
   Cities                 _cities;
   Cases                  _cases;
+
+  CitySplash*            _city_splash;
 };
 
 #endif

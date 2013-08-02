@@ -9,23 +9,36 @@ include_directories(../include ../angelscript src)
 if(UNIX)
   if(CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_CXX_FLAGS "-std=c++0x -Wno-deprecated-declarations")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DAUDIO_BACKEND_SFML -DUNIT_TESTER")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNIT_TESTER")
   endif()
 endif()
 
+#file(GLOB_RECURSE sourceFiles
+#     ../include/*.h
+#     ../include/*.hpp
+#     ../src/timer.cpp
+#     ../src/statsheet.cpp
+#     ../src/serializer.cpp
+#     ../src/world.cpp
+#     ../src/data.cpp
+#     ../src/json.cpp
+#     ../src/directory.cpp
+#     ../src/Boots/semaphore.cpp
+#     ../src/strings.cpp
+#     ../src/level/waypointmodifier.cpp
+#     ../src/scriptengine.cpp
+#     ../src/gameui.cpp
+#     ../src/rocket_extension.cpp
+#     src/*.cpp)
+
 file(GLOB_RECURSE sourceFiles
-     ../include/*.h
-     ../include/*.hpp
-     ../src/*.cpp
      ../angelscript/*.cpp
+     ../src/*.cpp
      src/*.cpp)
 
 add_executable(testing ${sourceFiles})
 
 if (UNIX)
-  target_link_libraries(testing -L/usr/lib/panda3d p3framework panda pandafx pandaexpress p3dtoolconfig p3dtool p3direct
-                                              p3rocket RocketCore RocketControls
-                                              angelscript sfml-audio pthread)
-else()
-  target_link_libraries(testing libp3framework libpanda libpandafx libpandaexpress libp3dtoolconfig libp3dtool libp3direct libp3rocket RocketCore RocketControls angelscript sfml-audio)
+ target_link_libraries(testing -L/usr/lib/panda3d p3framework panda pandafx pandaphysics pandaexpress p3dtoolconfig p3dtool p3direct pandaegg                                                                      p3rocket RocketCore RocketControls
+                                                  angelscript pthread sfml-audio)
 endif()

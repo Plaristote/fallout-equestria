@@ -5,10 +5,10 @@
 # include "rocket_extension.hpp"
 # include "datatree.hpp"
 # include "scriptengine.hpp"
-# include "scriptable.hpp"
+# include "as_object.hpp"
 # include <cstdarg>
 
-class StatModel : public Scriptable
+class StatModel : public AngelScript::Object
 {
 public:
   StatModel(Data statsheet);
@@ -72,6 +72,9 @@ public:
   void           SetCurrentHp(short hp);
   short          GetCurrentHp(void) const { return (_statsheet["Variables"]["Hit Points"]);  }
   short          GetMaxHp(void)     const { return (_statsheet["Statistics"]["Hit Points"]); }
+
+  int            GetReputation(const std::string& faction) const;
+  void           AddReputation(const std::string& faction, int amount);
   
   bool           IsReady(void);
   
@@ -83,17 +86,10 @@ public:
   bool           UpdateAllValues(void);  
   
 private:
-  void           LoadFunctions(void);
-  
   std::vector<std::string> GetStatKeys(Data stats) const;
 
   Data               _statsheet;
   Data               _statsheet_backup;
-  asIScriptFunction *_scriptAddSpecialPoint, *_scriptActivateTraits,  *_scriptAddExperience;
-  asIScriptFunction *_scriptXpNextLevel,     *_scriptLevelUp,         *_scriptUpdateAllValues;
-  asIScriptFunction *_scriptIsReady,         *_scriptAvailableTraits, *_scriptAddPerk;
-  asIScriptFunction *_selectRandomEncounter;
-  asIScriptFunction *_scriptUsableSkills,    *_scriptUsableSpells;
 };
 
 class StatView
@@ -122,6 +118,7 @@ public:
   virtual void SetPerks(std::list<std::string>)                                                             = 0;
   virtual void SetAvailablePerks(std::list<std::string> perks)                                              = 0;
   virtual void SetSkillAffinity(const std::string& skill, bool)                                             = 0;
+  virtual void SetReputation(const std::string& faction, int)                                               = 0;
 
   Sync::Signal<void (const std::string&, const std::string&)> StatUpped, StatDowned; 
   Sync::Signal<void (const std::string&, const std::string&)> InformationChanged;
@@ -158,14 +155,14 @@ public:
   void UpSkill(const std::string& stat);
   void DownSkill(const std::string& stat);
   void SetSkill(const std::string& stat, short value);
+  void TriggerSkillAffinity(const std::string& stat, bool);
 
   void AddExperience(unsigned int experience);
   void SetCurrentHp(short hp);
-
-  void TriggerSkillAffinity(const std::string& stat, bool);
+  void RunMetabolism(void);
 
   void AddKill(const std::string& race);
-  void RunMetabolism(void);
+  void AddReputation(const std::string& faction, int);
 
   Sync::Signal<void (short)>          HpChanged;
   Sync::Signal<void (unsigned short)> LevelUp;
@@ -252,6 +249,7 @@ public:
   void SetSkillAffinity(const std::string& skill, bool);
   void SetPerks(std::list<std::string>);
   void SetAvailablePerks(std::list<std::string>);
+  void SetReputation(const std::string&, int);
 
 private:
   Data           _i18n;

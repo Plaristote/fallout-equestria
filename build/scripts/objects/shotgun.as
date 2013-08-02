@@ -23,3 +23,19 @@ string ShotgunShoot(Item@ item, Character@ user, Character@ target)
 {
   return (Shoot(item, user, target));
 }
+
+bool CanUse(Item@ item, Character@ user, DynamicObject@ target)
+{
+  Data item_data = item.AsData();
+
+  if (GetAmmoAmount(item_data) < 1)
+  {
+    if (@user == @(level.GetPlayer()))
+    {
+      level.PlaySound("out-of-ammo");
+      level.ConsoleWrite(item.GetName() + " is out of ammo.");
+    }
+    return (false);
+  }
+  return (true);
+}

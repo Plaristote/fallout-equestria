@@ -16,7 +16,7 @@ void TabDialog::LoadAllDialogs()
 
     foreach (QString string, fileList)
     {
-        QRegExp regexp("\.json$");
+        QRegExp regexp("\\.json$");
         if (!(string.contains(regexp)))
           continue ;
 

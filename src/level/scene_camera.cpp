@@ -1,7 +1,9 @@
 #include "globals.hpp"
 #include "level/scene_camera.hpp"
-#include "level/objectnode.hpp"
-#include <options.hpp>
+#ifndef GAME_EDITOR
+# include "level/objectnode.hpp"
+# include <options.hpp>
+#endif
 
 using namespace std;
 
@@ -56,7 +58,11 @@ void SceneCamera::RunSlideHeight(float elapsedTime)
 
 void SceneCamera::RefreshCameraHeight(void)
 {
-  _camera_height = OptionsManager::Get()["camera"]["distance"];  
+#ifndef GAME_EDITOR
+  _camera_height = OptionsManager::Get()["camera"]["distance"];
+#else
+  _camera_height = 110;
+#endif
 }
 
 SceneCamera::SceneCamera(WindowFramework* window, NodePath camera) : _window(window), _graphicWindow(window->get_graphics_window()), _camera(camera)
@@ -139,6 +145,8 @@ void SceneCamera::Run(float elapsedTime)
 
 void SceneCamera::RunScroll(float elapsedTime)
 {
+  if (_window->get_graphics_window() == 0)
+    return ;
   MouseData     pointer      = _graphicWindow->get_pointer(0);
   unsigned char cameraMotion = MotionNone;
   LPoint3       cameraPos    = _camera.get_pos();
@@ -246,6 +254,7 @@ void SceneCamera::CenterCameraInstant(LPoint3f pos)
   }
 }
 
+#ifndef GAME_EDITOR
 void SceneCamera::FollowObject(InstanceDynamicObject* object)
 {
   FollowNodePath(object->GetNodePath());
@@ -255,6 +264,7 @@ void SceneCamera::CenterOnObject(InstanceDynamicObject* object)
 {
   CenterCameraOn(object->GetNodePath());
 }
+#endif
 
 void SceneCamera::CenterCameraOn(NodePath np)
 {

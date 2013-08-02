@@ -305,10 +305,11 @@ void AngelScriptInitialize(void)
 
   const char* statsheetClass = "Special";
   engine->RegisterObjectType(statsheetClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(statsheetClass, "void SetCurrentHp(int)",         asMETHOD(StatController,SetCurrentHp),  asCALL_THISCALL);
-  engine->RegisterObjectMethod(statsheetClass, "void AddExperience(int)",        asMETHOD(StatController,AddExperience), asCALL_THISCALL);
-  engine->RegisterObjectMethod(statsheetClass, "void SetStatistic(string, int)", asMETHOD(StatController,SetStatistic),  asCALL_THISCALL);
-  engine->RegisterObjectMethod(statsheetClass, "Data GetData()",                 asMETHOD(StatController,GetData),       asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void SetCurrentHp(int)",          asMETHOD(StatController,SetCurrentHp),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void AddExperience(int)",         asMETHOD(StatController,AddExperience), asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void AddReputation(string, int)", asMETHOD(StatController,AddReputation), asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void SetStatistic(string, int)",  asMETHOD(StatController,SetStatistic),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "Data GetData()",                  asMETHOD(StatController,GetData),       asCALL_THISCALL);
 
   const char* itemClass      = "Item";
   const char* inventoryClass = "Inventory";
@@ -376,15 +377,33 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(doorClass, "bool   IsLocked()",   asMETHOD(Lockable,IsLocked),       asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "bool   IsOpen()",     asMETHOD(Lockable,IsOpen),         asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "string GetKeyName()", asMETHOD(Lockable,GetKeyName),     asCALL_THISCALL);
-  
+
   engine->RegisterObjectMethod(shelfClass,  "Inventory@ GetInventory()", asMETHOD(ObjectShelf,GetInventory), asCALL_THISCALL);
+
+  const char* zoneClass = "Zone";
+  engine->RegisterObjectType(zoneClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(zoneClass, "void SetEnabled(bool)",         asMETHOD(ScriptZone,SetEnabled), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void SetEffect(string, int)",   asMETHOD(ScriptZone,SetEffect), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void DisableEffect()",          asMETHOD(ScriptZone,DisableEffect), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "bool IsEnabled() const",        asMETHOD(ScriptZone,IsEnabled), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "bool IsInside(DynamicObject@)", asMETHOD(ScriptZone,IsInside), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void Delete()",                 asMETHOD(ScriptZone,Delete), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void SetExitCallback(string)",  asMETHOD(ScriptZone,SetExitCallback), asCALL_THISCALL);
+  engine->RegisterGlobalFunction("Zone@ Zone_Factory(string, string)", asFUNCTION(ScriptZone::Factory), asCALL_CDECL);
+
+  const char* worldLight = "Light";
+  engine->RegisterObjectType(worldLight, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(worldLight, "void SetEnabled(bool)",                    asMETHOD(WorldLight,SetEnabled),     asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldLight, "void SetColor(float,float,float,float)",   asMETHOD(WorldLight,SetColor),       asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldLight, "void SetAttenuation(float, float, float)", asMETHOD(WorldLight,SetAttenuation), asCALL_THISCALL);
   
   const char* worldClass = "World";
   engine->RegisterObjectType(worldClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(worldClass, "void SetWaypointsVisible(bool) const",      asMETHOD(World,SetWaypointsVisible),      asCALL_THISCALL);
-  engine->RegisterObjectMethod(worldClass, "void SetMapObjectsVisible(bool) const",     asMETHOD(World,SetMapObjectsVisible),     asCALL_THISCALL);
-  engine->RegisterObjectMethod(worldClass, "void SetDynamicObjectsVisible(bool) const", asMETHOD(World,SetDynamicObjectsVisible), asCALL_THISCALL);  
-  
+  engine->RegisterObjectMethod(worldClass, "void   SetWaypointsVisible(bool)",       asMETHOD(World,SetWaypointsVisible),      asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldClass, "void   SetMapObjectsVisible(bool)",      asMETHOD(World,SetMapObjectsVisible),     asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldClass, "void   SetDynamicObjectsVisible(bool)",  asMETHOD(World,SetDynamicObjectsVisible), asCALL_THISCALL);  
+  engine->RegisterObjectMethod(worldClass, "Light@ GetLight(string)",                asMETHOD(World,GetLightByName),           asCALL_THISCALL);
+
   const char* cameraClass = "Camera";
   engine->RegisterObjectType(cameraClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(cameraClass, "void CenterOn(DynamicObject@)", asMETHOD(SceneCamera,CenterOnObject), asCALL_THISCALL);
@@ -393,8 +412,9 @@ void AngelScriptInitialize(void)
   
   const char* levelClass = "Level";
   engine->RegisterObjectType(levelClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(levelClass, "void           ConsoleWrite(string)",                  asMETHOD(Level,ConsoleWrite),        asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Data           GetDataEngine()",                       asMETHOD(Level,GetDataEngine),       asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "const World@   GetWorld() const",                      asMETHOD(Level,GetWorld),            asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "World@         GetWorld()",                            asMETHOD(Level,GetWorld),            asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Camera@        GetCamera()",                           asMETHOD(Level,GetCamera),           asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Character@     GetCharacter(string)",                  asMETHODPR(Level,GetCharacter,(const std::string&),ObjectCharacter*), asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Character@     GetPlayer()",                           asMETHOD(Level,GetPlayer),           asCALL_THISCALL);  
@@ -431,8 +451,11 @@ void AngelScriptInitialize(void)
   
   const char* partyClass = "Party";
   engine->RegisterObjectType(partyClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(partyClass, "void Join(Character@)",  asMETHODPR(Party,Join,(InstanceDynamicObject*),void), asCALL_THISCALL);
-  engine->RegisterObjectMethod(partyClass, "void Leave(Character@)", asMETHODPR(Party,Join,(InstanceDynamicObject*),void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(partyClass, "void Join(Character@)",     asMETHODPR(Party,Join,(InstanceDynamicObject*),void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(partyClass, "void Leave(Character@)",    asMETHODPR(Party,Join,(InstanceDynamicObject*),void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(partyClass, "void Export(string) const", asMETHOD(Party,Export), asCALL_THISCALL);
+  engine->RegisterGlobalFunction("Party@ ImportParty(string)", asFUNCTION(Party::Import), asCALL_CDECL);
+  engine->RegisterObjectMethod(levelClass, "void SetEntryZone(Party@, string)", asMETHODPR(Level,SetEntryZone,(Party&, const std::string&),void), asCALL_THISCALL);
 
   const char* gametaskClass = "Game";
   engine->RegisterObjectType(gametaskClass, 0, asOBJ_REF | asOBJ_NOCOUNT);

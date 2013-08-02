@@ -3,6 +3,7 @@
 
 # include <panda3d/cmath.h>
 # include <QWidget>
+# include <QWheelEvent>
 # include <panda3d/pandaFramework.h>
 # include <panda3d/pandaSystem.h>
 # include <iostream>
@@ -27,9 +28,11 @@ public:
     // PERSONAL ADDITION
     virtual void     mousePressEvent(QMouseEvent* e)   { MousePressed(e); }
     virtual void     mouseReleaseEvent(QMouseEvent* e) { MouseRelease(e); }
+    virtual void     wheelEvent(QWheelEvent* e)        { Scroll(e->delta()); }
 signals:
     void MousePressed(QMouseEvent*);
     void MouseRelease(QMouseEvent*);
+    void Scroll(int);
     // END PERSONNAL ADDITION
 
 signals:
@@ -38,6 +41,7 @@ signals:
 private:
     void             UpdateSize(void);
     static void      CallbackMouse(const Event* event, void* ptr);
+    static void      CallbackWheel(const Event* event, void* ptr);
 
     WindowFramework* _window;
     QSize            _size;

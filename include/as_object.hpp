@@ -2,50 +2,19 @@
 # define AS_OBJECT_HPP
 
 # include "scriptengine.hpp"
+# include <memory>
 
 namespace AngelScript
 {
-  class Object;
-  struct ContextLock
-  {
-  public:
-    ContextLock(asIScriptContext* context, asIScriptModule* module, AngelScript::Object* object)
-    {
-      old_context     = current_context;
-      old_module      = current_module;
-      current_context = context;
-      current_module  = module;
-      old_object      = current_object;
-      current_object  = object;
-    }
-
-    ~ContextLock(void)
-    {
-      current_context = old_context;
-      current_module  = old_module;
-      current_object  = old_object;
-    }
-
-    static asIScriptContext* Context(void)       { return (current_context); }
-    static asIScriptModule*  Module(void)        { return (current_module);  }
-    static Object*           CurrentObject(void) { return (current_object);  }
-
-  private:
-    asIScriptContext*        old_context;
-    asIScriptModule*         old_module;
-    static asIScriptContext* current_context;
-    static asIScriptModule*  current_module;
-    AngelScript::Object*        old_object;
-    static AngelScript::Object* current_object;
-  };
-
   struct Exception : public std::exception
   {
   public:
     enum Code
     {
       UndeclaredFunction,
-      UnloadableFunction
+      UnloadableFunction,
+      AngelScriptException,
+      InternalError
     };
 
     Exception(Code code, const std::string& target = "")
@@ -54,8 +23,16 @@ namespace AngelScript
       {
       case UndeclaredFunction:
         message = "The function '" + target + "' hasn't been decalred.";
+        break ;
       case UnloadableFunction:
         message = "The function '" + target + "' couldn't be loaded.";
+        break ;
+      case InternalError:
+        message = "An internal error has occured when executing function " + target;
+        break ;
+      case AngelScriptException:
+        message = "An exception has been thrown inside the function " + target;
+        break ;
       }
     }
 
@@ -129,12 +106,35 @@ namespace AngelScript
   public:
     Object(const std::string& filepath);
     Object(asIScriptContext* context, const std::string& filepath);
+    Object(asIScriptContext* context, asIScriptModule* module);
     ~Object();
+
+    std::weak_ptr<Object> GetPtr(void) { return (shared_ptr); }
   protected:
     void Initialize(void);    
   public:
     void asDefineMethod(const std::string& name, const std::string& declaration);
+    void asUndefineMethod(const std::string& name);
+    bool IsDefined(const std::string& name) const
+    {
+      if (!module)
+        return (false);
+      return (functions.find(name) != functions.end());
+    }
+    
+    asIScriptContext* GetContext(void) { return (context); }
+    asIScriptModule*  GetModule(void)  { return (module);  }
 
+    void OutputMethods(std::ostream& out)
+    {
+      auto it  = functions.begin();
+      auto end = functions.end();
+
+      for (; it != end ; ++it)
+      {
+        out << "  " << it->first << ' ' << it->second.signature << ' ' << it->second.function << endl;
+      }
+    }
 
     struct ReturnType
     {
@@ -158,11 +158,48 @@ namespace AngelScript
 
     ReturnType Call(const std::string& name, unsigned int argc = 0, ...);
   private:
-    const std::string filepath;
-    asIScriptContext* context;
-    asIScriptModule*  module;
-    Functions         functions;
+    const std::string       filepath;
+    asIScriptContext*       context;
+    asIScriptModule*        module;
+    bool                    required_module, required_context;
+    Functions               functions;
+    std::shared_ptr<Object> shared_ptr;
   };
+
+  struct ContextLock
+  {
+    typedef std::weak_ptr<AngelScript::Object> ObjectPtr;
+  public:
+    ContextLock(asIScriptContext* context, asIScriptModule* module, AngelScript::Object* object)
+    {
+      old_context     = current_context;
+      old_module      = current_module;
+      current_context = context;
+      current_module  = module;
+      old_object      = current_object;
+      current_object  = object->GetPtr();
+    }
+
+    ~ContextLock(void)
+    {
+      current_context = old_context;
+      current_module  = old_module;
+      current_object  = old_object;
+    }
+
+    static asIScriptContext* Context(void)       { return (current_context); }
+    static asIScriptModule*  Module(void)        { return (current_module);  }
+    static Object*           CurrentObject(void) { return ((current_object.expired()) ? 0 : &(*(current_object.lock()))); }
+
+  private:
+    asIScriptContext*           old_context;
+    asIScriptModule*            old_module;
+    static asIScriptContext*    current_context;
+    static asIScriptModule*     current_module;
+    ObjectPtr                   old_object;
+    static ObjectPtr            current_object;
+  };
+
 }
 
 #endif

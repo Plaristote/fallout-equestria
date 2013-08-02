@@ -132,6 +132,12 @@ static void TestArcs(UnitTest& tester)
 
 #include <level/objectnode.hpp>
 
+class MyWaypointModifier : public WaypointModifier
+{
+public:
+  NodePath GetNodePath(void) const { return ((NodePath())); }
+};
+
 void TestWaypointModifiers(UnitTest& tester)
 {
   tester.AddTest("Pathfinding", "Waypoint modifiers", [](void) -> string
@@ -144,7 +150,7 @@ void TestWaypointModifiers(UnitTest& tester)
     second_waypoint.Connect(&third_waypoint);
     first_waypoint.LoadArcs() ; second_waypoint.LoadArcs() ; third_waypoint.LoadArcs();
 
-    WaypointModifier wpm1, wpm2;
+    MyWaypointModifier wpm1, wpm2;
     unsigned int     successor_count;
 
     wpm1.SetOccupiedWaypoint(&first_waypoint);

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui widgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,10 +13,8 @@ TEMPLATE = app
 
 QMAKE_CXXFLAGS += -std=c++0x
 
-unix:LIBS += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3direct
+LIBS      += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3direct
 unix:LIBS += -lX11
-
-win:LIBS += libp3framework libpanda libpandafx libpandaexpress libp3dtoolconfig libp3dtool libp3direct
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -47,7 +45,9 @@ SOURCES += main.cpp\
     dialogsavemap.cpp \
     selectableresource.cpp \
     charsheeteditor.cpp \
-    formkeyvalue.cpp
+    formkeyvalue.cpp \
+    maptreewidget.cpp \
+    citysplashdialog.cpp
 
 HEADERS  += mainwindow.h \
     qpandawidget.h \
@@ -77,7 +77,9 @@ HEADERS  += mainwindow.h \
     dialogsavemap.h \
     selectableresource.h \
     charsheeteditor.h \
-    formkeyvalue.h
+    formkeyvalue.h \
+    maptreewidget.h \
+    citysplashdialog.h
 
 FORMS    += mainwindow.ui \
     dialognewscript.ui \
@@ -94,4 +96,5 @@ FORMS    += mainwindow.ui \
     dialogsavemap.ui \
     selectableresource.ui \
     charsheeteditor.ui \
-    formkeyvalue.ui
+    formkeyvalue.ui \
+    citysplashdialog.ui

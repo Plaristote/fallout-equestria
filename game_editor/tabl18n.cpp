@@ -22,7 +22,7 @@ void TabL18n::LoadAllLanguages()
 {
     QDir        dir("data/l18n");
     QStringList fileList = dir.entryList();
-    QRegExp     regexp("\.json$");
+    QRegExp     regexp("\\.json$");
 
     foreach (QString string, fileList)
     {

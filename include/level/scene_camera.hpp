@@ -7,8 +7,7 @@
 # include <panda3d/collisionRay.h>
 # include <panda3d/collisionHandlerQueue.h>
 # include <panda3d/collisionTraverser.h>
-
-# include "observatory.hpp"
+# include "is_game_editor.h"
 
 enum
 {
@@ -19,7 +18,9 @@ enum
   MotionRight  = 8
 };
 
+# ifndef GAME_EDITOR
 class InstanceDynamicObject;
+# endif
 
 class SceneCamera
 {
@@ -46,8 +47,10 @@ public:
   void            FollowNodePath(NodePath np);
   void            StopFollowingNodePath(void);
   
+# ifndef GAME_EDITOR
   void            CenterOnObject(InstanceDynamicObject*);
   void            FollowObject(InstanceDynamicObject*);
+# endif
   
   NodePath        GetNodePath(void) const { return (_camera); }
   

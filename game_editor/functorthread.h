@@ -3,7 +3,6 @@
 
 # include <QThread>
 # include <QMutex>
-# include <functional>
 
 class FunctorThread : public QThread
 {

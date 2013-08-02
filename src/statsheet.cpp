@@ -8,15 +8,24 @@ using namespace std;
 /*
  * StatModel
  */
-StatModel::StatModel(Data statsheet) : _statsheet(statsheet)
+StatModel::StatModel(Data statsheet) : AngelScript::Object("scripts/ai/special.as"), _statsheet(statsheet)
 {
-  _script_context = 0;
-  LoadFunctions();
+  asDefineMethod("AvailableTraits", "StringList AvailableTraits(Data)");
+  asDefineMethod("ActivateTraits",  "bool ActivateTraits(Data, string, bool)");
+  asDefineMethod("AddExperience",   "void AddExperience(Data, int)");
+  asDefineMethod("AddSpecialPoint", "bool AddSpecialPoint(Data, string, int)");
+  asDefineMethod("XpNextLevel",     "int  XpNextLevel(Data)");
+  asDefineMethod("LevelUp",         "void LevelUp(Data)");
+  asDefineMethod("IsReady",         "bool IsReady(Data)");
+  asDefineMethod("UpdateAllValues", "void UpdateAllValues(Data)");
+  asDefineMethod("AddPerk",         "bool AddPerk(Data, string)");
+  asDefineMethod("AvailableSkills", "StringList AvailableSkills(Data, bool)");
+  asDefineMethod("AvailableSpells", "StringList AvailableSpells(Data, bool)");
+  asDefineMethod("SelectRandomEncounter", "string SelectRandomEncounter(Data)");
 }
 
 StatModel::~StatModel(void)
 {
-  if (_script_context) _script_context->Release();
 }
 
 void StatModel::Backup(void)
@@ -62,68 +71,6 @@ void StatModel::RestoreBackup(void)
   UpdateAllValues();
 }
 
-Scriptable::Scriptable(void) : _script_context(0), _script_module(0)
-{
-}
-
-Scriptable::~Scriptable(void)
-{
-  if (_script_module)
-    Script::ModuleManager::Release(_script_module);
-}
-
-void Scriptable::LoadScript(string module_name, string filepath, asIScriptContext* context)
-{
-  asIScriptEngine* engine = Script::Engine::Get();
-
-  if (_script_module)
-    Script::ModuleManager::Release(_script_module);
-  if (context == 0)
-    _script_context = (engine          ? engine->CreateContext() : 0);
-  else
-    _script_context = context;
-  _script_module    = (_script_context ? Script::ModuleManager::Require(module_name, filepath) : 0);
-  std::for_each(_script_func_ptrs.begin(), _script_func_ptrs.end(), [](ScriptFuncPtr& func_ptr)
-  { *func_ptr.first = 0; });
-}
-
-void Scriptable::ReloadFunction(asIScriptFunction** pointer)
-{
-  *pointer = 0;
-  if (_script_context && _script_module)
-  {
-    ScriptFuncPtrs::iterator cur, end;
-
-    for (cur = _script_func_ptrs.begin(), end = _script_func_ptrs.end() ; cur != end ; ++cur)
-    {
-      if (cur->first == pointer)
-      {
-	*pointer = _script_module->GetFunctionByDecl(cur->second.c_str());
-	break ;
-      }
-    }
-  }
-}
-
-void StatModel::LoadFunctions(void)
-{
-  _selectRandomEncounter = _scriptUpdateAllValues = _scriptAvailableTraits = _scriptActivateTraits = _scriptAddExperience = _scriptAddSpecialPoint = _scriptIsReady = _scriptLevelUp = _scriptXpNextLevel = _scriptAddPerk = 0;
-  _script_func_ptrs.clear();
-  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAvailableTraits, "StringList AvailableTraits(Data)"));
-  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptActivateTraits,  "bool ActivateTraits(Data, string, bool)"));
-  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAddExperience,   "void AddExperience(Data, int)"));
-  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAddSpecialPoint, "bool AddSpecialPoint(Data, string, int)"));
-  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptXpNextLevel,     "int  XpNextLevel(Data)"));
-  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptLevelUp,         "void LevelUp(Data)"));
-  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptIsReady,         "bool IsReady(Data)"));
-  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptUpdateAllValues, "void UpdateAllValues(Data)"));
-  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptAddPerk,         "bool AddPerk(Data, string)"));
-  _script_func_ptrs.push_back(ScriptFuncPtr(&_selectRandomEncounter, "string SelectRandomEncounter(Data)"));
-  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptUsableSkills,    "StringList AvailableSkills(Data, bool)"));
-  _script_func_ptrs.push_back(ScriptFuncPtr(&_scriptUsableSpells,    "StringList AvailableSpells(Data, bool)"));
-  LoadScript("special", "scripts/ai/special.as");
-}
-
 void           StatModel::AddKill(const string& race)
 {
   if (_statsheet["Kills"][race].Nil())
@@ -136,16 +83,13 @@ bool           StatModel::AddPerk(const string& perk)
 {
   bool         success = true;
   
-  ReloadFunction(&_scriptAddPerk);
-  if (_scriptAddPerk)
+  if (IsDefined("AddPerk"))
   {
     string tmp = perk;
+    AngelScript::Type<string*> param_perk(&tmp);
+    AngelScript::Type<Data*>   param_stats(&_statsheet);
 
-    _script_context->Prepare(_scriptAddPerk);
-    _script_context->SetArgObject(0, &_statsheet);
-    _script_context->SetArgObject(1, &tmp);
-    _script_context->Execute();
-    success = _script_context->GetReturnByte() != 0;
+    success = Call("AddPerk", 2, &param_stats, &param_perk);
   }
   else
   {
@@ -174,12 +118,11 @@ unsigned short StatModel::GetLevel(void) const
 
 void           StatModel::LevelUp(void)
 {
-  ReloadFunction(&_scriptLevelUp);
-  if (_scriptLevelUp)
+  if (IsDefined("LevelUp"))
   {
-    _script_context->Prepare(_scriptLevelUp);
-    _script_context->SetArgObject(0, &_statsheet);
-    _script_context->Execute();
+    AngelScript::Type<Data*> param_stats(&_statsheet);
+    
+    Call("LevelUp", 1, &param_stats);
   }
   else
     _statsheet["Variables"]["Level"] = GetLevel() + 1;
@@ -188,31 +131,25 @@ void           StatModel::LevelUp(void)
 
 bool           StatModel::IsReady(void)
 {
-  bool         is_ready = true;
-
-  ReloadFunction(&_scriptIsReady);
-  if (_scriptIsReady)
+  if (IsDefined("IsReady"))
   {
-    _script_context->Prepare(_scriptIsReady);
-    _script_context->SetArgObject(0, &_statsheet);
-    _script_context->Execute();
-    is_ready = _script_context->GetReturnByte() != 0;
+    AngelScript::Type<Data*> param_stats(&_statsheet);
+
+    return (Call("IsReady", 1, &param_stats));
   }
-  return (is_ready);
+  return (true);
 }
 
 list<string>   StatModel::GetUsableSkills(bool on_self_only)
 {
   list<string> ret;
 
-  ReloadFunction(&_scriptUsableSkills);
-  if (_scriptUsableSkills)
+  if (IsDefined("AvailableSkills"))
   {
-    _script_context->Prepare(_scriptUsableSkills);
-    _script_context->SetArgObject(0, &_statsheet);
-    _script_context->SetArgByte(1, on_self_only);
-    _script_context->Execute();
-    ret = *((list<string>*)_script_context->GetReturnObject());
+    AngelScript::Type<Data*> param_stats(&_statsheet);
+    AngelScript::Type<bool>  param_self_only(on_self_only);
+
+    ret = *(list<string>*)(Call("AvailableSkills", 2, &param_stats, &param_self_only));
   }
   else // Fallback
   {
@@ -237,14 +174,12 @@ list<string>   StatModel::GetUsableSpells(bool on_self_only)
 {
   list<string> ret;
 
-  ReloadFunction(&_scriptUsableSpells);
-  if (_scriptUsableSpells)
+  if (IsDefined("AvailableSpells"))
   {
-    _script_context->Prepare(_scriptUsableSpells);
-    _script_context->SetArgObject(0, &_statsheet);
-    _script_context->SetArgByte(1, on_self_only);
-    _script_context->Execute();
-    ret = *((list<string>*)_script_context->GetReturnObject());
+    AngelScript::Type<Data*> param_stats(&_statsheet);
+    AngelScript::Type<bool>  param_self_only(on_self_only);
+
+    ret = *(list<string>*)(Call("AvailableSpells", 2, &param_stats, &param_self_only));
   }
   return (ret);
 }
@@ -253,13 +188,11 @@ list<string>   StatModel::GetAvailableTraits(void)
 {
   list<string> ret;
 
-  ReloadFunction(&_scriptAvailableTraits);
-  if (_scriptAvailableTraits)
+  if (IsDefined("AvailableTraits"))
   {
-    _script_context->Prepare(_scriptAvailableTraits);
-    _script_context->SetArgObject(0, &_statsheet);
-    _script_context->Execute();
-    ret = *((list<string>*)_script_context->GetReturnObject());
+    AngelScript::Type<Data*> param_stats(&_statsheet);
+
+    ret = *(list<string>*)(Call("AvailableTraits", 1, &param_stats));
   }
   return (ret);
 }
@@ -278,48 +211,36 @@ void           StatModel::ToggleSkillAffinity(const string& skill)
 
 void           StatModel::ToggleTrait(const string& trait)
 {
-  Data         dtrait    = _statsheet["Traits"][trait];
-  bool         is_active = (!dtrait.Nil()) && dtrait == 1;
-
-  ReloadFunction(&_scriptActivateTraits);
-  if (_scriptActivateTraits)
+  if (IsDefined("ActivateTraits"))
   {
-    string tmp = trait;
-    
-    _script_context->Prepare(_scriptActivateTraits);
-    _script_context->SetArgObject(0, &_statsheet);
-    _script_context->SetArgObject(1, &tmp);
-    _script_context->SetArgByte(2, !is_active);
-    _script_context->Execute();
-    if (_script_context->GetReturnByte())
+    Data   dtrait = _statsheet["Traits"][trait];
+    string tmp    = trait;
+    AngelScript::Type<Data*>   param_stats(&_statsheet);
+    AngelScript::Type<string*> param_name(&tmp);
+    AngelScript::Type<bool>    param_active(!((!dtrait.Nil()) && dtrait == 1));
+
+    if ((bool)(Call("ActivateTraits", 3, &param_stats, &param_name, &param_active)) == true)
       UpdateAllValues();
   }
 }
 
 void           StatModel::SetExperience(unsigned short e)
 {
+  AngelScript::Type<Data*> param_stats(&_statsheet);
   unsigned int   currentXp = _statsheet["Variables"]["Experience"];
   unsigned short nextLevel = 0;
 
   _statsheet["Variables"]["Experience"] = e;
-  ReloadFunction(&_scriptAddExperience);
-  if (_scriptAddExperience)
+  if (IsDefined("AddExperience"))
   {
-    _script_context->Prepare(_scriptAddExperience);
-    _script_context->SetArgObject(0, &_statsheet);
-    _script_context->SetArgDWord(1, e - currentXp);
-    _script_context->Execute();
+    AngelScript::Type<int> param_xp(e - currentXp);
+
+    Call("AddExperience", 2, &param_stats, &param_xp);
   }
   else
     _statsheet["Variables"]["Experience"] = currentXp + e;
-  ReloadFunction(&_scriptXpNextLevel);
-  if (_scriptXpNextLevel)
-  {
-    _script_context->Prepare(_scriptXpNextLevel);
-    _script_context->SetArgObject(0, &_statsheet);
-    _script_context->Execute();
-    nextLevel = _script_context->GetReturnDWord();
-  }
+  if (IsDefined("XpNextLevel"))
+    nextLevel = (int)Call("XpNextLevel", 1, &param_stats);
   if (nextLevel && e >= nextLevel)
     LevelUp();
 }
@@ -334,17 +255,14 @@ void           StatModel::SetSpecial(const std::string& stat, short value)
   short  currentValue = _statsheet["Special"][stat];
   bool   sendSignal   = true;
 
-  ReloadFunction(&_scriptAddSpecialPoint);
-  if (_scriptAddSpecialPoint)
+  if (IsDefined("AddSpecialPoint"))
   {
-    string stat_      = stat;
+    string                     stat_ = stat;
+    AngelScript::Type<Data*>   param_stats(&_statsheet);
+    AngelScript::Type<string*> param_stat(&stat_);
+    AngelScript::Type<int>     param_value(value - currentValue);
 
-    _script_context->Prepare(_scriptAddSpecialPoint);
-    _script_context->SetArgObject(0, &_statsheet);
-    _script_context->SetArgObject(1, &stat_);
-    _script_context->SetArgDWord(2, (value - currentValue));
-    _script_context->Execute();
-    sendSignal = _script_context->GetReturnByte() != 0;
+    sendSignal = Call("AddSpecialPoint", 2, &param_stats, &param_stat, &param_value);
   }
   else
     _statsheet["Special"][stat] = value;
@@ -382,22 +300,21 @@ list<string>  StatModel::GetPerks(void) const
 
 bool          StatModel::UpdateAllValues(void)
 {
-  ReloadFunction(&_scriptUpdateAllValues);
-  if (_scriptUpdateAllValues)
+  if (IsDefined("UpdateAllValues"))
   {
-    _script_context->Prepare(_scriptUpdateAllValues);
-    _script_context->SetArgObject(0, &_statsheet);
-    _script_context->Execute();
-    
+    AngelScript::Type<Data*> param_stats(&_statsheet);
+
+    Call("UpdateAllValues", 1, &param_stats);
+
     std::for_each(_statsheet["Special"].begin(), _statsheet["Special"].end(), [this](Data value)
     { SpecialChanged.Emit(value.Key(), value); });
-    
+
     std::for_each(_statsheet["Statistics"].begin(), _statsheet["Statistics"].end(), [this](Data value)
     { StatisticChanged.Emit(value.Key(), value); });
 
     std::for_each(_statsheet["Skills"].begin(), _statsheet["Skills"].end(), [this](Data value)
     { SkillChanged.Emit(value.Key(), value); });
-    
+
     MaxHpChanged.Emit(_statsheet["Statistics"]["Hit Points"]);
     PerksChanged.Emit();
 
@@ -408,21 +325,21 @@ bool          StatModel::UpdateAllValues(void)
 
 unsigned short StatModel::GetXpNextLevel(void)
 {
-  ReloadFunction(&_scriptXpNextLevel);
-  if (_scriptXpNextLevel)
+  if (IsDefined("XpNextLevel"))
   {
-    _script_context->Prepare(_scriptXpNextLevel);
-    _script_context->SetArgObject(0, &_statsheet);
-    _script_context->Execute();
-    return (_script_context->GetReturnDWord());
+    AngelScript::Type<Data*> param_stats(&_statsheet);
+    
+    return ((int)(Call("XpNextLevel", 1, &param_stats)));
   }
   return (0);
 }
 
 int           StatModel::Action(const std::string& action, const std::string& fmt, ...)
 {
-  string             func_name   = "action_" + action;
-  asIScriptFunction* action_func = _script_module->GetFunctionByName(func_name.c_str());
+  asIScriptContext* _script_context = GetContext();
+  asIScriptModule*  _script_module  = GetModule();
+  string             func_name      = "action_" + action;
+  asIScriptFunction* action_func    = _script_module->GetFunctionByName(func_name.c_str());
   
   if (action_func)
   {
@@ -507,16 +424,31 @@ vector<string> StatModel::GetStatKeys(Data stats) const
 
 string StatModel::SelectRandomEncounter(void)
 {
-  ReloadFunction(&_selectRandomEncounter);
-  if (_selectRandomEncounter)
+  if (IsDefined("SelectRandomEncounter"))
   {
-    _script_context->Prepare(_selectRandomEncounter);
-    _script_context->SetArgObject(1, &_statsheet);
-    _script_context->Execute();
+    AngelScript::Type<Data*> param_stats(&_statsheet);
+    
+    Call("SelectRandomEncounter", 1, &param_stats);
   }
   else
     AlertUi::NewAlert.Emit("Missing special.as function `string SelectRandomEncounter(Data)`");
   return ("");
+}
+
+int StatModel::GetReputation(const std::string& faction) const
+{
+  return (_statsheet["Reputation"][faction]);
+}
+
+void StatModel::AddReputation(const std::string& faction, int amount)
+{
+  Data reputation         = _statsheet["Reputation"][faction];
+  int  current_reputation = 0;
+
+  if (reputation.NotNil())
+    current_reputation    = reputation;
+  current_reputation     += amount;
+  reputation              = current_reputation;
 }
 
 /*
@@ -638,6 +570,13 @@ void StatController::AddExperience(unsigned int exp)
     _view->SetIdValue("current-xp", exp);
 }
 
+void StatController::AddReputation(const std::string& faction, int amount)
+{
+  _model.AddReputation(faction, amount);
+  if (_view)
+    _view->SetReputation(faction, _model.GetReputation(faction));
+}
+
 void StatController::UpSpecial(const std::string& stat)
 {
   SetSpecial(stat, _model.GetSpecial(stat) + 1);
@@ -740,6 +679,9 @@ void StatController::SetView(StatView* view)
 
   for_each(_model.GetAll()["Kills"].begin(), _model.GetAll()["Kills"].end(), [this](Data data)
   { _view->SetFieldValue("Kills", data.Key(), data.Value()); });
+
+  for_each(_model.GetAll()["Reputation"].begin(), _model.GetAll()["Reputation"].end(), [this](Data data)
+  { _view->SetReputation(data.Key(), data); });
 
   _view->SetInformation("Name",   _model.GetName());
   _view->SetInformation("Age",    _model.GetAge());
@@ -904,8 +846,8 @@ list<string> StatModel::GetAvailablePerks(void)
       {
 	Data           requirements = perk["Requirements"];
 	bool           do_add       = true;
-	Data::my_iterator it           = requirements.begin();
-	Data::my_iterator end          = requirements.end();
+	Data::iterator it           = requirements.begin();
+	Data::iterator end          = requirements.end();
 	
 	for (; it != end ; ++it)
 	{
@@ -1002,6 +944,17 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
     SetEditMode(Display);
     Translate();
   }
+}
+
+void StatViewRocket::SetReputation(const std::string& faction, int reputation)
+{
+  std::string reputation_level;
+
+  if (reputation < 0)
+    reputation_level = "bad";
+  else
+    reputation_level = "good";
+  SetFieldValue("Reputation", faction, reputation_level);
 }
 
 void StatViewRocket::SetPartyMembers(const std::vector<std::string>& members)
@@ -1284,6 +1237,21 @@ void StatViewRocket::SetFieldValue(const std::string& category, const std::strin
         rml << "<datagrid>";
         rml << "<col width='80%'><span class='kills-key' i18n='" << key << "'>" << i18n::T(key) << "</span></col>";
         rml << "<col width='20%'><span class='kills-value' id='" << strId << "'>" << value << "</span></col>";
+        rml << "</datagrid>";
+        element->SetInnerRML(old_rml + rml.str().c_str());
+      }
+    }
+    else if (category == "Reputation")
+    {
+      stringstream rml;
+      Core::String old_rml;
+
+      if ((element = _root->GetElementById("panel-reputation")))
+      {
+        element->GetInnerRML(old_rml);
+        rml << "<datagrid>";
+        rml << "<col width='80%'><span class='reputation-key' i18n='" << key << "'>" << i18n::T(key) << "</span></col>";
+        rml << "<col width='20%'><span class='reputation-value' id='" << strId << "'>" << i18n::T(value) << "</span></col>";
         rml << "</datagrid>";
         element->SetInnerRML(old_rml + rml.str().c_str());
       }

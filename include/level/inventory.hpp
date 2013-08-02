@@ -5,6 +5,7 @@
 # include "scriptengine.hpp"
 # include "level/world.h"
 # include "animatedobject.hpp"
+# include "as_object.hpp"
 
 class ObjectCharacter;
 class InstanceDynamicObject;
@@ -43,6 +44,7 @@ public:
   DynamicObject*    CreateDynamicObject(World* world) const;
   EquipedModel*     CreateEquipedModel(World* world);
 
+  bool              CanUse(ObjectCharacter*, InstanceDynamicObject* target, unsigned int use_type);
   bool              CanWeild(ObjectCharacter*, std::string slot, unsigned char mode = 0);
   bool              CanWeild(ObjectCharacter*, EquipedMode);
   void              SetEquiped(ObjectCharacter*, bool set);
@@ -52,7 +54,7 @@ public:
 
 private:
   template<class C>
-  const std::string ExecuteHook(asIScriptFunction* hook, ObjectCharacter* user, C* target, unsigned char actionIt);
+  const std::string ExecuteHook(const std::string& hook, ObjectCharacter* user, C* target, unsigned char actionIt);
   
   DataTree           _dataTree;
   
@@ -61,28 +63,12 @@ private:
   asIScriptContext*  _script_context;
   asIScriptModule*   _script_module;
   
-  struct ActionHooks
-  {
-    ActionHooks() : Use(0), UseOnCharacter(0), UseOnDoor(0), UseOnOthers(0), UseAsWeapon(0), HitChances(0) {}
+  typedef std::vector<AngelScript::Object> ActionsHooks;
 
-    asIScriptFunction* Use;
-    asIScriptFunction* UseOnCharacter;
-    asIScriptFunction* UseOnDoor;
-    asIScriptFunction* UseOnOthers;
-    asIScriptFunction* UseAsWeapon;
-    asIScriptFunction* HitChances;
-  };
-  typedef std::vector<ActionHooks> ActionsHooks;
-  
-  ActionsHooks       _actionHooks;
+  AngelScript::Object _object;  
+  ActionsHooks        _actionHooks;
 
-  asIScriptFunction* _hookUseOnCharacter;
-  asIScriptFunction* _hookUseOnDoor;
-  asIScriptFunction* _hookUseOnOthers;
-  asIScriptFunction* _hookUseAsWeapon;
- 
   asIScriptFunction* _hookCanWeild, *_hookSetEquiped;
-  asIScriptFunction* _hookCanWeildMouth, *_hookCanWeildMagic, *_hookCanWeildBattleSaddle;
 };
 
 class Inventory

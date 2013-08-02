@@ -63,22 +63,20 @@ Circle solar_circle;
 
 #include "options.hpp"
 #include <mousecursor.hpp>
+#include <panda_lock.hpp>
 Level* Level::CurrentLevel = 0;
 #include <panda3d/cullFaceAttrib.h>
-Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
-  _camera(window, window->get_camera_group()), _timeManager(tm), _chatter_manager(window), _levelUi(window, gameUi)
+Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
+  _camera(window, window->get_camera_group()), _timeManager(tm), _main_script(name), _chatter_manager(window), _levelUi(window, gameUi)
 {
-  LoadingScreen* loadingScreen = new LoadingScreen(window, gameUi.GetContext());
-
-  loadingScreen->FadeIn();
   CurrentLevel = this;
   _state       = Normal;
   _mouseState  = MouseAction;
   _persistent  = true;
+  _level_name  = name;
 
   obs.Connect(_levelUi.InterfaceOpened, *this, &Level::SetInterrupted);
 
-  loadingScreen->AppendText("-> Loading textual content");
   _items = DataTree::Factory::JSON("data/objects.json");
 
   _floor_lastWp = 0;
@@ -95,7 +93,6 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   MouseInit();
   _timer.Restart();
 
-  loadingScreen->AppendText("-> Loading World...");
   // WORLD LOADING
   _world = new World(window);  
   try
@@ -105,10 +102,9 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   }
   catch (unsigned int&)
   {
-    loadingScreen->AppendText("/!\\ Failed to load world file");
     std::cout << "Failed to load file" << std::endl;
   }
-  
+
   if (_world->sunlight_enabled)
     InitSun();
 
@@ -116,23 +112,22 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
   _world->GetWaypointLimits(0, upperRight, upperLeft, bottomLeft);
   _camera.SetLimits(bottomLeft.get_x() - 50, bottomLeft.get_y() - 50, upperRight.get_x() - 50, upperRight.get_y() - 50);  
 
+  ForEach(_world->entryZones, [this](EntryZone& zone)
+  {
+    LevelZone* lvl_zone = new LevelZone(this, zone);
+
+    cout << "Registering Zone '" << zone.name << '\'' << endl;
+    _zones.push_back(lvl_zone);
+  });
   ForEach(_world->exitZones, [this](ExitZone& zone)
   {
-    LevelExitZone* exitZone = new LevelExitZone(this, zone.destinations);
-    
+    LevelExitZone* exitZone = new LevelExitZone(this, zone, zone.destinations);
+
     cout << "Registering ExitZone '" << zone.name << '\'' << endl;
-    exitZone->SetName(zone.name);
-    ForEach(zone.waypoints, [exitZone](Waypoint* wp)
-    {
-      LevelExitZone* ez= exitZone; //MSVC2010: Captured variables lambda stuffs (compiler bug, I think) 
-      ForEach(wp->arcs, [ez](Waypoint::Arc& arc)
-      {
-	arc.observer = ez;
-      });
-    });
     exitZone->ExitZone.Connect      (*this, &Level::CallbackExitZone);
     exitZone->GoToNextZone.Connect  (*this, &Level::CallbackGoToZone);
     exitZone->SelectNextZone.Connect(*this, &Level::CallbackSelectNextZone);
+    _zones.push_back(exitZone);
   });
   _exitingZone = false;
 
@@ -141,7 +136,7 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 
   _world->SetWaypointsVisible(false);
 
-  loadingScreen->AppendText("Loading interface");
+  //loadingScreen->AppendText("Loading interface");
   obs.Connect(InstanceDynamicObject::ActionUse,         *this, &Level::CallbackActionUse);
   obs.Connect(InstanceDynamicObject::ActionTalkTo,      *this, &Level::CallbackActionTalkTo);
   obs.Connect(InstanceDynamicObject::ActionUseObjectOn, *this, &Level::CallbackActionUseObjectOn);
@@ -149,8 +144,8 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
 
   _task_metabolism = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 0, 1);
   _task_metabolism->Interval.Connect(*this, &Level::RunMetabolism);  
-  
-  
+
+
   /*
    * DIVIDE AND CONQUER WAYPOINTS
    */
@@ -216,14 +211,25 @@ Level::Level(WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, Tim
    */
 
   //window->get_render().set_shader_auto();
-  loadingScreen->AppendText("-- Done --");
-  loadingScreen->FadeOut();
-  loadingScreen->Destroy();
-  delete loadingScreen;
+}
+
+LevelZone* Level::GetZoneByName(const std::string& name)
+{
+  auto it  = _zones.begin();
+  auto end = _zones.end();
+
+  while (it != end)
+  {
+    if ((*it)->GetName() == name)
+      return (*it);
+    ++it;
+  }
+  return (0);
 }
 
 void Level::RefreshCharactersVisibility(void)
 {
+  cout << "RefreshCharactersVisibility" << endl;
   for_each(_characters.begin(), _characters.end(), [this](ObjectCharacter* character)
   {
     std::list<ObjectCharacter*> fov = GetPlayer()->GetNearbyEnemies();
@@ -268,7 +274,7 @@ void Level::InsertCharacter(ObjectCharacter* character)
 void Level::InsertDynamicObject(DynamicObject& object)
 {
   InstanceDynamicObject* instance = 0;
-  
+
   switch (object.type)
   {
     case DynamicObject::Character:
@@ -443,6 +449,12 @@ void Level::InitPlayer(void)
     task->lastS += 1;
     task->Interval.Connect(*(GetPlayer()), &ObjectCharacter::CheckFieldOfView);    
   }
+  
+  //
+  // Initializing Main Script
+  //
+  if (_main_script.IsDefined("Initialize"))
+    _main_script.Call("Initialize");
 }
 
 void Level::InsertParty(PlayerParty& party)
@@ -457,12 +469,18 @@ void Level::InsertParty(PlayerParty& party)
   for (; it != end ; ++it)
   {
     DynamicObject*   object    = _world->InsertDynamicObject(**it);
-    ObjectCharacter* character = new ObjectCharacter(this, object);
 
-    _characters.insert(_characters.begin(), character);
-    // Replace the Party DynamicObject pointer to the new one
-    delete *it;
-    *it = object;
+    if (object)
+    {
+      ObjectCharacter* character = new ObjectCharacter(this, object);
+
+      if (character->GetStatistics().NotNil())
+        character->SetActionPoints(character->GetStatistics()["Statistics"]["Action Points"]);
+      _characters.insert(_characters.begin(), character);
+      // Replace the Party DynamicObject pointer to the new one
+      delete *it;
+      *it = object;
+    }
   }
   party.SetHasLocalObjects(false);
   SetupCamera();
@@ -560,6 +578,8 @@ void Level::SetPlayerInventory(Inventory* inventory)
 
 Level::~Level()
 {
+  if (_main_script.IsDefined("Finalize"))
+    _main_script.Call("Finalize");
   MouseCursor::Get()->SetHint("");
   _window->get_render().set_light_off(_sunLightAmbientNode);
   _window->get_render().set_light_off(_sunLightNode);
@@ -573,9 +593,11 @@ Level::~Level()
   _timeManager.ClearTasks(TASK_LVL_CITY);
   obs.DisconnectAll();
   obs_player.DisconnectAll();
+  ForEach(_zones,       [](LevelZone* zone)            { delete zone;       });
   ForEach(_projectiles, [](Projectile* projectile)     { delete projectile; });
   ForEach(_objects,     [](InstanceDynamicObject* obj) { delete obj;        });
   ForEach(_exitZones,   [](LevelExitZone* zone)        { delete zone;       });
+  ForEach(_parties,     [](Party* party)               { delete party;      });
   CurrentLevel = 0;
   for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
   {
@@ -645,6 +667,8 @@ ObjectCharacter* Level::GetCharacter(const DynamicObject* object)
 
 ObjectCharacter* Level::GetPlayer(void)
 {
+  if (_characters.size() == 0)
+    return (0);
   return (_characters.front());
 }
 
@@ -889,7 +913,8 @@ AsyncTask::DoneStatus Level::do_task(void)
   else
     _mouse.SetMouseState('i');
 
-  if (_light_iterator != _world->lights.end() && _world->lights.size() > 0)
+  // TODO discard this when it has become certain it will never be useful again
+  /*if (_light_iterator != _world->lights.end() && _world->lights.size() > 0)
   {
     if (_light_iterator->zoneSize < 50)
     {
@@ -901,7 +926,7 @@ AsyncTask::DoneStatus Level::do_task(void)
     ++_light_iterator;
   }
   else
-    _light_iterator = _world->lights.begin();
+    _light_iterator = _world->lights.begin();*/
 
   // TEST Transparent Ball of Wrath
   if (!(_player_halo.is_empty()))
@@ -960,6 +985,15 @@ AsyncTask::DoneStatus Level::do_task(void)
       break ;
     case Interrupted:
       break ;
+  }
+  ForEach(_characters, [elapsedTime](ObjectCharacter* character) { character->RunEffects(elapsedTime); });
+  ForEach(_zones,      []           (LevelZone* zone)            { zone->Refresh();                    });
+  
+  if (_main_script.IsDefined("Run"))
+  {
+    AngelScript::Type<float> param_time(elapsedTime);
+
+    _main_script.Call("Run", 1, &param_time);
   }
 
   CheckCurrentFloor(elapsedTime);

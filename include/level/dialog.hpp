@@ -103,6 +103,8 @@ private:
   void             SetCurrentNode(const std::string& nodeName);
   void             OpenBarter(Rocket::Core::Event& event);
 
+  std::string      SolveStringVariables(const std::string&);
+
   AngelScript::Object _script;
   DialogModel         _model;
   ObjectCharacter*    _character;

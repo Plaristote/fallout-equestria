@@ -3,8 +3,22 @@
 
 using namespace std;
 
+string str_strip(const string&);
+
 void TestsString(UnitTest& tester)
 {
+  //
+  // Testing Strip
+  //
+  tester.AddTest("strip", "Test #1", []() -> string
+  {
+    string ret = str_strip("        coucou monsieur        ");
+
+    if (ret != "coucou monsieur")
+      return ("Param: '       coucou monsieur        ', Ret: '" + ret + "', Expected: 'coucou monsieur'");
+    return ("");
+  });
+
   //
   // Testing Humanize
   //
