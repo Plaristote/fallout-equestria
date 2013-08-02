@@ -1041,7 +1041,7 @@ void Level::SetMouseState(MouseState state)
   {
     DestroyCombatPath();
     _mouseState = state;
-    ToggleCharacterOutline(_state == Level::State::Fight && _mouseState == MouseTarget && *_itCharacter == GetPlayer());
+    ToggleCharacterOutline(_state == Level::Fight && _mouseState == MouseTarget && *_itCharacter == GetPlayer());
   }
   switch (state)
   {

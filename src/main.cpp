@@ -235,6 +235,11 @@ int main(int argc, char *argv[])
     framework.set_window_title("Fallout Equestria");
     cout << "[FoE] Opening Window" << endl;
     window = framework.open_window();
+	if (window == 0)
+	{
+		cout << "[FoE] Panda3D failed to create a display. Aborting now." << endl;
+		return (-1);
+	}
     cout << "[FoE] Enabling keyboard" << endl;
     //window->enable_keyboard();
     //window->get_render().set_shader_auto();
@@ -251,7 +256,7 @@ int main(int argc, char *argv[])
       cout << "[FoE] Applying changes" << endl;
       window->get_graphics_window()->request_properties(props);
     }
-
+	window->get_mouse();
     cout << "[FoE] Loading configuration" << endl;
     OptionsManager::Initialize(); // Loads and handle conf.json file
     {

@@ -688,8 +688,8 @@ public:
     pt_particle_rend->set_point_size  (2.0);
     pt_particle_rend->set_start_color (LColor(1, 1, 0, 1));
     pt_particle_rend->set_end_color   (LColor(1, 1, 0, 1));
-    pt_particle_rend->set_blend_type  (PointParticleRenderer::PointParticleBlendType::PP_BLEND_LIFE);
-    pt_particle_rend->set_blend_method(BaseParticleRenderer::ParticleRendererBlendMethod::PP_BLEND_LINEAR);
+    pt_particle_rend->set_blend_type  (PointParticleRenderer::PP_BLEND_LIFE);
+    pt_particle_rend->set_blend_method(BaseParticleRenderer::PP_BLEND_LINEAR);
     
     // Particle System
     PT(ParticleSystem) particle_sys = new ParticleSystem();
