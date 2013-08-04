@@ -40,7 +40,7 @@ CitySplash::CitySplash(Data data, WindowFramework* w, Rocket::Core::Context* c) 
 
           ToggleEventListener(true, zone_name, "click", *listener);
           listener->EventReceived.Connect(*this, &CitySplash::ZonePicked);
-          zone_listeners.insert(ZoneListeners::value_type(zone.Key(), listener));
+          zone_listeners.insert(CitySplash::ZoneListeners::value_type(zone.Key(), listener));
         }
       }
     });

@@ -67,6 +67,7 @@ void SceneCamera::RefreshCameraHeight(void)
 
 SceneCamera::SceneCamera(WindowFramework* window, NodePath camera) : _window(window), _graphicWindow(window->get_graphics_window()), _camera(camera)
 {
+  cout << "- Initializing camera..." << endl;
   _scrollEnabled = true;
   RefreshCameraHeight();
 
@@ -83,6 +84,7 @@ SceneCamera::SceneCamera(WindowFramework* window, NodePath camera) : _window(win
   
   _followingNodePath = false;
   _centeringCamera   = false;
+  cout << "-> Done." << endl;
 }
 
 void SceneCamera::SwapCameraView(void)

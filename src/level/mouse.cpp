@@ -10,6 +10,7 @@ using namespace std;
 
 Mouse::Mouse(WindowFramework* window) : _window(window)
 {
+  cout << "- Initializing mouse..." << endl;
   MouseWatcher::init_type();
   _lastMousePos.set_x(0);
   _lastMousePos.set_y(0);
@@ -21,7 +22,9 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
   _pickerNode->set_from_collide_mask(CollideMask(/*ColMask::Waypoint | */ColMask::DynObject));
   _pickerNode->set_into_collide_mask(0);
   _pickerRay    = new CollisionRay();
+  cout << "Debug#1" << endl;
   _pickerNode->add_solid(_pickerRay);
+  cout << "Debug#2" << endl;
   _collisionHandlerQueue = new CollisionHandlerQueue();
   _collisionTraverser.add_collider(_pickerPath, _collisionHandlerQueue);
 
@@ -39,6 +42,7 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
     cerr << "Failed to register wheel_down event" << endl;
 
   SetMouseState('a');
+  cout << "-> Done." << endl;
 }
 
 Mouse::~Mouse()

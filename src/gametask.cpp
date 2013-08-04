@@ -825,9 +825,10 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
       Level*   level = 0;
 
       level = new Level(params.name, _window, _gameUi, packet, _timeManager);
+	  cout << "Level Loaded" << endl;
       SetLevel(level);
       if (params.isSaveFile)
-	level->Load(packet);
+        level->Load(packet);
       file.close();
     }
     catch (const char* error)

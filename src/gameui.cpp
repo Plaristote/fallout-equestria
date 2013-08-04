@@ -23,35 +23,41 @@ GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
 
   string fonts_name[] = { "", "Fallout", "", "", "", "" };
 
+  _rocket = RocketRegion::make("interface", window->get_graphics_output());
+  _rocket->set_active(true);
+  Core::Initialise();
   for (unsigned int i=0; i<GET_ARRAY_SIZE(fonts); i++)
   {
     string path = string(PATH_FONTS) + "/" + fonts[i];
-
+	
+	cout << "[UI] Loading font '" << fonts_name[i] << "' " << path << endl;
     if (fonts_name[i] == "")
       Core::FontDatabase::LoadFontFace(path.c_str());
     else
       Core::FontDatabase::LoadFontFace(path.c_str(), fonts_name[i].c_str(), Core::Font::STYLE_NORMAL, Rocket::Core::Font::WEIGHT_NORMAL);
   }
+  cout << "[UI] Fonts loaded" << endl;
 
-  _rocket = RocketRegion::make("interface", window->get_graphics_output());
-  _rocket->set_active(true);
-  
-#ifndef _WIN32
   Rocket::Controls::Initialise();
-#endif
 
   _ih      = new RocketInputHandler();
+  cout << "[UI] Binding mouse and Rocket" << endl;
   window->get_mouse().attach_new_node(_ih);
+  cout << "[UI] Set rocket input handler" << endl;
   _rocket->set_input_handler(_ih);
-  
+  cout << "[UI] Input handler initialized" << endl;
+
   _console = new GameConsole(window, _rocket->get_context());
   _console->Hide();
+  cout << "[UI] GameConsole ready" << endl;
   
   _options = new GameOptions(window, _rocket->get_context());
   _options->Hide();
+  cout << "[UI] GameOptions ready" << endl;
 
   _window->enable_keyboard();
   framework.define_key("tab", "ConsoleHandle", GameConsole::Toggle, (void*)_console);  
+  cout << "[UI] Keyboard shortcut initialized" << endl;
 }
 
 GeneralUi::~GeneralUi(void)
@@ -65,6 +71,7 @@ GeneralUi::~GeneralUi(void)
  */
 LevelUi::LevelUi(WindowFramework* window, GameUi& gameUi) : _gameUi(gameUi)
 {
+  cout << "- Initializing Level Ui" << endl;
   _mainBar = new GameMainBar(window, _gameUi.GetRocketRegion()->get_context());
 
   _obs.Connect(_mainBar->MenuButtonClicked.EventReceived,      _gameUi,             &GameUi::OpenMenu);
@@ -74,6 +81,7 @@ LevelUi::LevelUi(WindowFramework* window, GameUi& gameUi) : _gameUi(gameUi)
   _obs.Connect(_gameUi.GetInventory().VisibilityToggled, InterfaceOpened, &Sync::Signal<void (bool)>::Emit);
   _obs.Connect(_gameUi.GetMenu().VisibilityToggled,      InterfaceOpened, &Sync::Signal<void (bool)>::Emit);
   _obs.Connect(_gameUi.GetPers().VisibilityToggled,      InterfaceOpened, &Sync::Signal<void (bool)>::Emit);
+  cout << "-> Done." << endl;
 }
 
 LevelUi::~LevelUi(void)
@@ -274,7 +282,6 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
       language_select->SetInnerRML(rml.str().c_str());
     }
 
-#ifndef _WIN32
     {
       Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("language-select"));
       
@@ -310,7 +317,6 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
 	}
       }
     }
-#endif
     
     {
       typedef std::pair<std::string, Controls::ElementFormControlInput*> RadioButton;
@@ -407,7 +413,6 @@ void GameOptions::ToggleFullscreen(Rocket::Core::Event& event)
 
 void GameOptions::SetQuality(Rocket::Core::Event&)
 {
-#ifndef _WIN32
   Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("graphics-quality"));
   int                                 it_select = select->GetSelection();
   Controls::SelectOption*             option    = select->GetOption(it_select);
@@ -420,12 +425,10 @@ void GameOptions::SetQuality(Rocket::Core::Event&)
     opts["graphics-quality"] = str;
     OptionsManager::Refresh();
   }
-#endif
 }
 
 void GameOptions::SetResolution(Rocket::Core::Event&)
 {
-#ifndef _WIN32
   Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("screen-select"));
   int                                 it_select = select->GetSelection();
   Controls::SelectOption*             option    = select->GetOption(it_select);
@@ -449,12 +452,10 @@ void GameOptions::SetResolution(Rocket::Core::Event&)
       OptionsManager::Refresh();
     }
   }
-#endif
 }
 
 void GameOptions::SetLanguage(Core::Event& event)
 {
-#ifndef _WIN32
   Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("language-select"));
   int                                 it_select = select->GetSelection();
   Controls::SelectOption*             option    = select->GetOption(it_select);
@@ -467,7 +468,6 @@ void GameOptions::SetLanguage(Core::Event& event)
     opts["language"] = str.CString();
     OptionsManager::Refresh();    
   }
-#endif
 }
 
 /*
@@ -499,6 +499,7 @@ void ArrayToJson(std::vector<T> array, std::string output)
 GameConsole* GameConsole::GConsole= 0;
 GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
+  cout << "Loading GameConsole" << endl;
   //
   // Load Script context
   //

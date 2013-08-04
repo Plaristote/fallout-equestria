@@ -69,6 +69,7 @@ Level* Level::CurrentLevel = 0;
 Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
   _camera(window, window->get_camera_group()), _timeManager(tm), _main_script(name), _chatter_manager(window), _levelUi(window, gameUi)
 {
+  cout << "Level Loading Step #1" << endl;
   CurrentLevel = this;
   _state       = Normal;
   _mouseState  = MouseAction;
@@ -77,6 +78,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
 
   obs.Connect(_levelUi.InterfaceOpened, *this, &Level::SetInterrupted);
 
+  cout << "Level Loading Step #2" << endl;
   _items = DataTree::Factory::JSON("data/objects.json");
 
   _floor_lastWp = 0;
@@ -88,12 +90,15 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   _currentUiLoot        = 0;
   _mouseActionBlocked   = false;
 
+  cout << "Level Loading Step #3" << endl;
   _graphicWindow = _window->get_graphics_window();
 
+  cout << "Level Loading Step #4" << endl;
   MouseInit();
   _timer.Restart();
 
   // WORLD LOADING
+  cout << "Level Loading Step #5" << endl;
   _world = new World(window);  
   try
   {
@@ -105,13 +110,16 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
     std::cout << "Failed to load file" << std::endl;
   }
 
+  cout << "Level Loading Step #6" << endl;
   if (_world->sunlight_enabled)
     InitSun();
 
   LPoint3 upperLeft, upperRight, bottomLeft;
+  cout << "Level Loading Step #7" << endl;
   _world->GetWaypointLimits(0, upperRight, upperLeft, bottomLeft);
   _camera.SetLimits(bottomLeft.get_x() - 50, bottomLeft.get_y() - 50, upperRight.get_x() - 50, upperRight.get_y() - 50);  
 
+  cout << "Level Loading Step #8" << endl;
   ForEach(_world->entryZones, [this](EntryZone& zone)
   {
     LevelZone* lvl_zone = new LevelZone(this, zone);
@@ -578,8 +586,16 @@ void Level::SetPlayerInventory(Inventory* inventory)
 
 Level::~Level()
 {
-  if (_main_script.IsDefined("Finalize"))
-    _main_script.Call("Finalize");
+  cout << "- Destroying Level" << endl;
+  try
+  {
+    if (_main_script.IsDefined("Finalize"))
+      _main_script.Call("Finalize");
+  }
+  catch (const AngelScript::Exception& exception)
+  {
+	AlertUi::NewAlert.Emit(std::string("Script crashed during Level destruction: ") + exception.what());
+  }
   MouseCursor::Get()->SetHint("");
   _window->get_render().set_light_off(_sunLightAmbientNode);
   _window->get_render().set_light_off(_sunLightNode);
@@ -606,7 +622,7 @@ Level::~Level()
   }
   if (_world) delete _world;
   if (_items) delete _items;
-  CurrentLevel = 0;
+  cout << "-> Done." << endl;
 }
 
 bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
