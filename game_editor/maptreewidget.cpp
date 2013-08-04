@@ -274,6 +274,7 @@ void MapTreeWidget::DelItem(QString name)
 void MapTreeWidget::ProbeWorld(const std::string& parent_name, QTreeWidgetItem* parent)
 {
   ItemType                        type;
+
   std::function<void(MapObject&)> functor = [this, parent_name, parent, &type](MapObject& object)
   {
     if (object.parent == parent_name)
@@ -287,7 +288,7 @@ void MapTreeWidget::ProbeWorld(const std::string& parent_name, QTreeWidgetItem* 
         new_item = new QTreeWidgetItem(this);
       new_item->setText(0, QString::fromStdString(name));
       SetItemIcon(new_item, type);
-      map.insert(QString::fromStdString(name), new_item);
+      InsertPair(QString::fromStdString(name), new_item);
       ProbeWorld(name, new_item);
     }
   };
@@ -309,7 +310,7 @@ void MapTreeWidget::ProbeWorld(const std::string& parent_name, QTreeWidgetItem* 
           new_item = new QTreeWidgetItem(this);
       new_item->setText(0, light.name.c_str());
       SetItemIcon(new_item, ItemLight);
-      map.insert(QString::fromStdString(light.name), new_item);
+      InsertPair(QString::fromStdString(light.name), new_item);
     }
   });
 }

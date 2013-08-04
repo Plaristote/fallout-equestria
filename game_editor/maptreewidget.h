@@ -5,10 +5,10 @@
 #include <QTreeWidget>
 #include <QMap>
 
-class World;
-class MapObject;
-class DynamicObject;
-class WorldLight;
+struct World;
+struct MapObject;
+struct DynamicObject;
+struct WorldLight;
 
 class MapTreeWidget : public QTreeWidget
 {
@@ -51,7 +51,12 @@ private:
     void             ProbeWorld(const std::string& parent_name, QTreeWidgetItem* item);
     void             SetItemIcon(QTreeWidgetItem*, ItemType t);
     void             ReparentTo(QTreeWidgetItem* to_reparent, QTreeWidgetItem* parent);
+    void             InsertPair(const QString& key, QTreeWidgetItem* value)
+    {
+      map.insert(key, value);
+    }
 
+public:
     QMap<QString, QTreeWidgetItem*> map;
 };
 

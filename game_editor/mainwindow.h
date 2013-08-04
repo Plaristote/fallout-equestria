@@ -3,14 +3,14 @@
 
 #include <panda3d/cmath.h>
 #include <QMainWindow>
-#include <qpandaapplication.h>
+#include "qpandaapplication.h"
 #include <QTreeWidgetItem>
-#include <dialognewscript.h>
+#include "dialognewscript.h"
 #include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QTextStream>
-#include <qangelscriptedit.h>
+#include "qangelscriptedit.h"
 #include <QDir>
 #include "datatree.hpp"
 #include <QListWidgetItem>
@@ -48,6 +48,9 @@ public:
     bool CloseAllScript(void);
 
     void ShowWaypointZone(void);
+
+    // WORKAROUND(S) FOR SHITTY MSVC C++11 SUPPORT:
+    void CallbackUpdateProgressBar(const std::string&, float);
 signals:
     void Closed(void);
     void SigDisplayError(QString title, QString message);

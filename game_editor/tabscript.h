@@ -3,7 +3,7 @@
 
 # include <panda3d/cmath.h>
 # include <QObject>
-# include <qangelscriptedit.h>
+# include "qangelscriptedit.h"
 # include <QTreeWidgetItem>
 # include <QDir>
 # include <QMessageBox>

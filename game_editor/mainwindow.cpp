@@ -483,6 +483,14 @@ void MainWindow::ShowWaypointZone(void)
   }
 }
 
+#ifdef _WIN32
+# define MIN min
+# define MAX max
+#else
+# define MIN std::min
+# define MAX std::max
+#endif
+
 void MainWindow::PandaButtonRelease(QMouseEvent*)
 {
     waypointHovered      = 0;
@@ -499,12 +507,13 @@ void MainWindow::PandaButtonRelease(QMouseEvent*)
       }
       else if (ui->waypointZoneSelector->isChecked())
       {
-        LPoint3 pos = my_task.CollidingAt(mapobjectSelected);
+        LPoint3 pos   = my_task.CollidingAt(mapobjectSelected);
+        float   min_x = MIN(pos.get_x(), wp_select_x);
+        float   min_y = MIN(pos.get_y(), wp_select_y);
+        float   max_x = MAX(pos.get_x(), wp_select_x);
+        float   max_y = MAX(pos.get_y(), wp_select_y);
 
-        SelectWaypointZone(std::min(pos.get_x(), wp_select_x),
-                           std::min(pos.get_y(), wp_select_y),
-                           std::max(pos.get_x(), wp_select_x),
-                           std::max(pos.get_y(), wp_select_y));
+        SelectWaypointZone(min_x, min_y, max_x, max_y);
       }
     }
     if (mapobjectHovered)
@@ -1423,14 +1432,15 @@ void MainWindow::LoadMap(const QString& path)
         dialogSaveMap.SetEnabledSunlight(world->sunlight_enabled);
 
         ui->entryZoneList->clear();
-        ForEach(world->entryZones, [this](EntryZone& zone) { ui->entryZoneList->addItem(zone.name.c_str()); });
+        Ui::MainWindow* _ui = ui;
+        ForEach(world->entryZones, [_ui](EntryZone& zone) { _ui->entryZoneList->addItem(zone.name.c_str()); });
 
         ui->exitZoneList->clear();
-        ForEach(world->exitZones,  [this](ExitZone& zone)  { ui->exitZoneList->addItem(zone.name.c_str());  });
+        ForEach(world->exitZones,  [_ui](ExitZone& zone)  { _ui->exitZoneList->addItem(zone.name.c_str());  });
 
         ui->lightsSelect->clear();
         ui->lightFrame->setEnabled(false);
-        ForEach(world->lights,     [this](WorldLight& l)   { ui->lightsSelect->addItem(l.name.c_str());     });
+        ForEach(world->lights,     [_ui](WorldLight& l)   { _ui->lightsSelect->addItem(l.name.c_str());     });
 
         for (int i = 0 ; i < ui->listMap->count() ; ++i)
         {
@@ -1767,6 +1777,13 @@ void MainWindow::DisplayError(QString title, QString message)
   QMessageBox::warning(this, title, message);
 }
 
+void MainWindow::CallbackUpdateProgressBar(const std::string& label, float percentage)
+{
+  QString format = QString::fromStdString(label) + "%p%";
+
+  SigUpdateProgressBar(format, percentage);
+}
+
 void MainWindow::SaveMap()
 {
   if (world)
@@ -1785,13 +1802,10 @@ void MainWindow::SaveMap()
       if (world)
       {
         Utils::Packet packet;
+        MainWindow*   self = this;
 
-        world->Serialize(packet, [this, &thread](const std::string& label, float percentage)
-        {
-          QString format = QString::fromStdString(label) + "%p%";
-
-          SigUpdateProgressBar(format, percentage);
-        });
+        world->Serialize(packet, [self](const std::string& label, float percentage)
+        { self->CallbackUpdateProgressBar(label, percentage); });
         packet.PrintContent();
         file.write(packet.raw(), packet.size());
         file.close();

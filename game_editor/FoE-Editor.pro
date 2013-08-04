@@ -8,13 +8,21 @@ QT       += core gui widgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = FoE-Editor
+TARGET   = FoE-Editor
 TEMPLATE = app
 
-QMAKE_CXXFLAGS += -std=c++0x
+unix:QMAKE_CXXFLAGS += -std=c++0x
 
-LIBS      += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3direct
-unix:LIBS += -lX11
+win32:LIBS +=  ../3rd_parties/lib/libp3framework.lib
+                ../3rd_parties/lib/libpanda.lib
+                ../3rd_parties/lib/libpandafx.lib
+                ../3rd_parties/lib/libpandaexpress.lib
+                ../3rd_parties/lib/libp3dtoolconfig.lib
+                ../3rd_parties/lib/libp3dtool.lib
+                ../3rd_parties/lib/libp3direct.lib
+unix:LIBS   += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3direct -lX11
+
+INCLUDEPATH += ../3rd_parties/include
 
 SOURCES += main.cpp\
         mainwindow.cpp \

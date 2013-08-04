@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <algorithm>
 #include <iostream>
+#include <functional>
 
 CitySplashDialog::CitySplashDialog(QWidget *parent) :
     QDialog(parent),
