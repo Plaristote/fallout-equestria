@@ -85,7 +85,7 @@ void MusicManager::PlayNext(void)
   unsigned short max      = category.Count();
   unsigned short selected;
 
-  if (category.Nil()) return ;
+  if (max == 0) return ;
   selected = rand() % max;
   cout << "Random select it = " << selected << " (max being " << max << ")" << endl;
   Play(_current_category, category[selected].Key());
@@ -101,18 +101,21 @@ void MusicManager::Run(void)
     float elapsed_time  = _timer.GetElapsedTime();
     bool  not_playing;
     bool  volume_change;
+	bool  is_valid;
 
 #ifdef AUDIO_BACKEND_PANDA3D
     not_playing   = _current_music->status()     != AudioSound::PLAYING;
     volume_change = _current_music->get_volume() != _volume_goal;
+	is_valid      = _audio_manager->is_valid();
 #endif
 #ifdef AUDIO_BACKEND_SFML
     not_playing   = _current_music->getStatus()  != sf::SoundSource::Status::Playing;
     volume_change = _current_music->getVolume()  != _volume_goal;
+	is_valid      = true;
 #endif
     if (volume_change)
       FadeVolume(elapsed_time);
-    if (not_playing)
+    if (not_playing && is_valid)
     {
       PlayNext();
       cout << "Playing Next" << endl;
