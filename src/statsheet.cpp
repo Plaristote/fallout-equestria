@@ -262,12 +262,17 @@ void           StatModel::SetSpecial(const std::string& stat, short value)
     AngelScript::Type<string*> param_stat(&stat_);
     AngelScript::Type<int>     param_value(value - currentValue);
 
-    sendSignal = Call("AddSpecialPoint", 2, &param_stats, &param_stat, &param_value);
+    sendSignal = Call("AddSpecialPoint", 3, &param_stats, &param_stat, &param_value);
   }
   else
+  {
+    cout << "No AddSpecialPoint function" << endl;
+    sendSignal = (short)_statsheet["Special"][stat] != value;
     _statsheet["Special"][stat] = value;
+  }
   if (sendSignal)
   {
+    cout << "Sending signal " << _statsheet["Special"][stat].Value() << endl;
     SpecialChanged.Emit(stat, _statsheet["Special"][stat]);
     UpdateAllValues();
   }
