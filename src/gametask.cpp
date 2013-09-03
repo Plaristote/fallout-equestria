@@ -794,7 +794,8 @@ void   GameTask::SetPlayerInventory(void)
     _playerInventory->LoadInventory(save);
     _gameUi.GetInventory().SetInventory(*_playerInventory);
   }
-  _level->SetPlayerInventory(_playerInventory);
+  if (_level)
+    _level->SetPlayerInventory(_playerInventory);
 }
 
 class LoadingTask : public Sync::MyThread
@@ -848,11 +849,11 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
       _level->InsertParty(*_playerParty);
     if (_level->GetPlayer() != 0)
     {
+      SetPlayerInventory();
       _level->InitPlayer();
       _level->GetPlayer()->SetStatistics(_charSheet, _playerStats);
       if (params.entry_zone == "")
         _level->FetchParty(*_playerParty);
-      SetPlayerInventory();
       if (params.entry_zone != "")
         _level->SetEntryZone(*_playerParty, params.entry_zone);
       SetLevel(_level);

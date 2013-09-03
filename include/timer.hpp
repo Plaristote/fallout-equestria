@@ -111,7 +111,7 @@ public:
   void            AddElapsedSeconds(float s);
   void            AddElapsedTime(unsigned short s, unsigned short m = 0, unsigned short h = 0, unsigned short d = 0, unsigned short mo = 0, unsigned short y = 0);
   
-  Task*           AddTask(unsigned char level, bool loop, unsigned short s, unsigned short m = 0, unsigned short h = 0, unsigned short d = 0, unsigned short mo = 0, unsigned short y = 0);
+  Task*           AddTask(unsigned char level, bool loop, unsigned int s, unsigned short m = 0, unsigned short h = 0, unsigned short d = 0, unsigned short mo = 0, unsigned short y = 0);
   void            DelTask(Task* task);  
   void            ExecuteTasks(void);
 private:

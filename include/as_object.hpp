@@ -168,7 +168,8 @@ namespace AngelScript
 
   struct ContextLock
   {
-    typedef std::weak_ptr<AngelScript::Object> ObjectPtr;
+    //typedef std::weak_ptr<AngelScript::Object> ObjectPtr;
+    typedef AngelScript::Object* ObjectPtr;
   public:
     ContextLock(asIScriptContext* context, asIScriptModule* module, AngelScript::Object* object)
     {
@@ -177,7 +178,8 @@ namespace AngelScript
       current_context = context;
       current_module  = module;
       old_object      = current_object;
-      current_object  = object->GetPtr();
+      //current_object  = object->GetPtr();
+      current_object  = object;
     }
 
     ~ContextLock(void)
@@ -189,7 +191,8 @@ namespace AngelScript
 
     static asIScriptContext* Context(void)       { return (current_context); }
     static asIScriptModule*  Module(void)        { return (current_module);  }
-    static Object*           CurrentObject(void) { return ((current_object.expired()) ? 0 : &(*(current_object.lock()))); }
+//    static Object*           CurrentObject(void) { return ((current_object.expired()) ? 0 : &(*(current_object.lock()))); }
+    static Object*           CurrentObject(void) { return (current_object); }
 
   private:
     asIScriptContext*           old_context;

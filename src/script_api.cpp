@@ -30,6 +30,114 @@ void ScriptApiDeclareFunction(const std::string& name, const std::string& decl)
     object->asDefineMethod(name, decl);
 }
 
+void ScriptApiScheduleTask(unsigned int waiting_time, const std::string& function, unsigned int timespan)
+{
+  AngelScript::Object*   object       = AngelScript::ContextLock::CurrentObject();
+
+  if (object)
+  {
+    TimeManager&         time_manager = GameTask::CurrentGameTask->GetTimeManager();
+    TimeManager::Task*   task         = time_manager.AddTask(TASK_LVL_CITY, false, waiting_time);
+
+    std::function<void (void)> finalizer = [task](void)
+    {
+      GameTask::CurrentGameTask->GetTimeManager().DelTask(task);
+    };
+
+    std::function<void (void)> callback = [object, function](void)
+    {
+      try
+      {
+        object->Call(function);
+      }
+      catch (const AngelScript::Exception& exception)
+      {
+        const std::string message = "A script crashed: ";
+
+        AlertUi::NewAlert.Emit(message + exception.what());
+      }
+    };
+
+    task->Interval.Connect([finalizer, callback, timespan](void)
+    {
+      TimeManager&         time_manager = GameTask::CurrentGameTask->GetTimeManager();
+      TimeManager::Task*   task;
+
+      if (timespan == 60 * 60)
+        task = time_manager.AddTask(TASK_LVL_CITY, true, 0, 0, 1);
+      else
+	task = time_manager.AddTask(TASK_LVL_CITY, true, 0, 0, 0, 1);
+      task->Interval.Connect(callback);
+      Executor::ExecuteLater(finalizer);
+      callback();
+    });
+  }
+}
+
+void ScriptApiHourlyTask(const std::string& function, unsigned short minute, unsigned short seconds)
+{
+  if (GameTask::CurrentGameTask != 0)
+  {
+    TimeManager&   time_manager   = GameTask::CurrentGameTask->GetTimeManager();
+    unsigned short current_second = time_manager.GetSecond();
+    unsigned short current_minute = time_manager.GetMinute();
+    unsigned short waiting_time   = 0;
+
+    if (current_second > seconds)
+    {
+      waiting_time   += (60 - current_second) + seconds;
+      current_minute += 1;
+    }
+    else
+      waiting_time += (seconds - current_second);
+    
+    if (current_minute > minute)
+      waiting_time += (60 - current_minute + minute) * 60;
+    else if (current_minute < minute)
+      waiting_time += (minute - current_minute) * 60;
+
+    ScriptApiScheduleTask(waiting_time, function, 60 * 60);
+  }
+}
+
+void ScriptApiDailyTask(const std::string& function, unsigned short hour, unsigned short minute, unsigned short seconds)
+{
+  if (GameTask::CurrentGameTask != 0)
+  {
+    TimeManager&   time_manager   = GameTask::CurrentGameTask->GetTimeManager();
+    unsigned short current_second = time_manager.GetSecond();
+    unsigned short current_minute = time_manager.GetMinute();
+    unsigned short current_hour   = time_manager.GetHour();
+    unsigned int   waiting_time   = 0;
+
+    if (current_second > seconds)
+    {
+      waiting_time   += (60 - current_second) + seconds;
+      current_minute += 1;
+    }
+    else if (current_second < seconds)
+      waiting_time += (seconds - current_second);
+
+    if (current_minute > minute)
+    {
+      waiting_time += (60 - current_minute + minute) * 60;
+      current_hour += 1;
+    }
+    else if (current_minute < minute)
+      waiting_time += (minute - current_minute) * 60;
+
+    cout << waiting_time << "  current " << current_hour << " hour " << hour << endl;
+    if (current_hour > hour)
+      waiting_time += ((24 - current_hour) + hour) * (60 * 60);
+    else if (current_hour < hour)
+      waiting_time += (hour - current_hour) * (60 * 60);
+    cout << waiting_time << endl;
+
+    ScriptApiScheduleTask(waiting_time, function, 60 * 60 * 24);  
+  }
+  
+}
+
 void ScriptApiPushTask(const std::string& function, unsigned short seconds)
 {
   std::cout << "ScriptApiPushTask" << std::endl;
@@ -38,7 +146,7 @@ void ScriptApiPushTask(const std::string& function, unsigned short seconds)
     std::cout << "CurrentGameTask Ok" << std::endl;
     TimeManager&         time_manager = GameTask::CurrentGameTask->GetTimeManager();
     TimeManager::Task*   task         = time_manager.AddTask(TASK_LVL_CITY, false, seconds);
-    AngelScript::Object* object     = AngelScript::ContextLock::CurrentObject();
+    AngelScript::Object* object       = AngelScript::ContextLock::CurrentObject();
 
     task->Interval.Connect([task, object, function](void)
     {
@@ -232,6 +340,8 @@ void AngelScriptInitialize(void)
 
   engine->RegisterGlobalFunction("void ApiDefineFunction(string, string)", asFUNCTION(ScriptApiDeclareFunction), asCALL_CDECL);
   engine->RegisterGlobalFunction("void PushLevelTask(string, int)", asFUNCTION(ScriptApiPushTask), asCALL_CDECL);
+  engine->RegisterGlobalFunction("void PushHourlyTask(string, int, int)", asFUNCTION(ScriptApiHourlyTask), asCALL_CDECL);
+  engine->RegisterGlobalFunction("void PushDailyTask(string, int, int, int)", asFUNCTION(ScriptApiDailyTask), asCALL_CDECL);
 
   Script::StdList<string>::Register(engine, "StringList", "string");
 

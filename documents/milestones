@@ -139,10 +139,11 @@ x --> Factorize Actions code. Every part of the process (temporizing, animating,
 x --> Main script for levels
 x ----> General hooks running at every level start, end and each loop turn
 x ----> Exposing waypoint observers to scripts
+x ----> Hooks to create daily or hourly tasks
 x --> Zone effects
   --> Advanced Light Management
 x ----> Script interface for light management
-  ----> Hour-based light switch (for lighting cities at night)
+x ----> Hour-based light switch (for lighting cities at night)
   ----> Combinable light effects
   ------> Blinking
   ------> Fading

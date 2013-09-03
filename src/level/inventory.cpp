@@ -490,7 +490,7 @@ bool Inventory::IncludesObject(InventoryObject* obj) const
 
 int              Inventory::GetObjectIterator(InventoryObject* object) const
 {
-  auto it = _content.begin();
+  auto it  = _content.begin();
   auto end = _content.end();
 
   for (int i = 0 ; it != end ; ++it, ++i)

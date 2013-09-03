@@ -770,7 +770,8 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
     doc->Show();
   }
   _inventoryView.ObjectSelected.Connect(*this, &GameInventory::SetSelectedObject);
-  _selectedObject = 0;  
+  _selectedObject = 0;
+  _inventory      = 0;
 }
 
 GameInventory::~GameInventory()
@@ -849,6 +850,7 @@ void GameInventory::SetEquipedItem(unsigned short slot, InventoryObject* item)
   std::stringstream elem_id;
 
   elem_id << "eq" << (slot + 1) << "-equiped";
+  if (_inventory)
   {
     Rocket::Core::Element* element = _root->GetElementById(elem_id.str().c_str());
 
@@ -870,6 +872,8 @@ void GameInventory::SetEquipedItem(unsigned short slot, InventoryObject* item)
       element->SetInnerRML(rml.str().c_str());
     }
   }
+  else
+    cout << "GameInventory: no inventory set" << endl;
 }
 
 void GameInventory::SetInventory(Inventory& inventory)

@@ -31,10 +31,49 @@ void TimeManager::AddElapsedTime(unsigned short s, unsigned short m, unsigned sh
   CorrectValues();
 }
 
-TimeManager::Task* TimeManager::AddTask(unsigned char level, bool loop, unsigned short s, unsigned short m, unsigned short h, unsigned short d, unsigned short mo, unsigned short y)
+void TimeCorrectValue(unsigned int& s, unsigned short& m, unsigned short& h, unsigned short& d, unsigned short& mo, unsigned short& y)
+{
+  if (s > 59)
+  {
+    m += (s / 60);
+    s  = s % 60;
+  }
+  if (m > 59)
+  {
+    h += (m / 60);
+    m  = m % 60;
+  }
+  if (h > 23)
+  {
+    d += (h / 24);
+    h = h % 24;
+  }
+  if (mo > 12)
+  {
+    y += (mo / 12);
+    mo = mo % 12;
+    if (mo == 0)
+    { mo = 1; }
+  }
+  while (d > 30)
+  {
+    d -= 30;
+    mo += 1;
+    if (mo > 12)
+    {
+      mo = 1;
+      y += 1;
+    }
+  }
+}
+
+TimeManager::Task* TimeManager::AddTask(unsigned char level, bool loop, unsigned int s, unsigned short m, unsigned short h, unsigned short d, unsigned short mo, unsigned short y)
 {
   Task* task = new Task;
 
+  //cout << "Seconds: " << s << endl;
+  TimeCorrectValue(s, m, h, d, mo, y);  
+  //cout << "Scheduled task for " << h << ':' << m << ':' << s << endl;
   task->level  = level;
   task->loop   = loop;
   task->it     = 0;
@@ -50,6 +89,9 @@ TimeManager::Task* TimeManager::AddTask(unsigned char level, bool loop, unsigned
   task->lastH  = hour   + h;
   task->lastM  = minute + m;
   task->lastS  = second + s;
+  unsigned int tmp_s = task->lastS;
+  TimeCorrectValue(tmp_s, task->lastM, task->lastH, task->lastD, task->lastMo, task->lastY);
+  task->lastS = tmp_s;
   tasks.push_back(task);
   return (task);
 }
