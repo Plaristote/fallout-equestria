@@ -1,21 +1,23 @@
 {
-  "TestSuccessPerk": {
+  "Ninja": {
     "Requirements": {
       "Special/STR": {
         "Comp":  ">=",
         "Value": 3
       }
-    }
+    },
+    "Description": "You're a freaking ninja"
   },
-  "TestFailurePerk": {
+  "Wizardry": {
     "Requirements": {
       "Special/STR": {
         "Comp":  ">",
-        "Value": 3
+        "Value": 20
       }
     }
   },
-  "OtherPerkForFun": {
+  "One Legged": {
+    "Description": "Instead of picking a perk you cut of three of your legs. Genius."
   }
 }
 

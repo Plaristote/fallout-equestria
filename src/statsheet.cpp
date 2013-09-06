@@ -712,7 +712,14 @@ void StatController::SetView(StatView* view)
   _viewObservers.Connect(_view->MakeBackup,          *this, &StatController::MakeBackup);
 
   _view->SetTraits(_model.GetAvailableTraits());
-  
+  _viewObservers.Connect(_view->UpdatePerkDescription, [this](const std::string& perk_name)
+  {
+    Data perk = _model.GetPerk(perk_name);
+
+    if (perk.NotNil())
+      _view->SetPerkDescription(perk["Icon"].Value(), perk["Description"].Value());
+  });
+
   Data affinities = _model.GetSkillAffinities();
   for_each(affinities.begin(), affinities.end(), [this](Data affinity)
   { if (affinity == 1) _view->SetSkillAffinity(affinity.Key(), true); });
@@ -837,6 +844,21 @@ Data DataGetFromPath(Data data, const std::string& path)
   return (DataGetFromPathRec(data, array));
 }
 
+Data         StatModel::GetPerk(const std::string& perk_name)
+{
+  DataTree*    file = DataTree::Factory::JSON("data/perks.json");
+  Data         result;
+
+  if (file)
+  {
+    Data       perks(file);
+
+    result = perks[perk_name];
+    delete file;
+  }
+  return (result);
+}
+
 list<string> StatModel::GetAvailablePerks(void)
 {
   list<string> perks;
@@ -905,6 +927,8 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
   if (_root)
   {
     _i18n = i18n::GetStatistics();
+    
+    _perks_dialog.PerkSelected.Connect(UpdatePerkDescription, &Sync::Signal<void (const std::string&)>::Emit);
 
     ToggleEventListener(true, "continue", "click", DoneButton);
     ToggleEventListener(true, "cancel",   "click", CancelButton);
@@ -1480,6 +1504,11 @@ void StatViewRocket::SetAvailablePerks(list<string> perks)
     _perks_dialog.Hide();
 }
 
+void StatViewRocket::SetPerkDescription(const string& icon, const string& description)
+{
+  _perks_dialog.SetPerkDescription(icon, description);
+}
+
 /*
  * PerksDialog
  */
@@ -1497,7 +1526,7 @@ StatViewRocket::PerksDialog::PerksDialog(WindowFramework* w, Core::Context* c) :
     Translate();
   }
   else
-    cerr << "[PerksDialog][Missing RML Template]" << endl;
+    cerr << "[StatViewRocket][PerksPicker] Missing RML Template" << endl;
 }
 
 StatViewRocket::PerksDialog::~PerksDialog()
@@ -1519,12 +1548,12 @@ void StatViewRocket::PerksDialog::SetSelectedPerk(Core::Event& event)
   string         data_perk = variant->Get<Core::String>().CString();
   
   _selected_perk = data_perk;
-  PerkSelected.Emit(data_perk);
+  PerkSelected.Emit(humanize(data_perk));
 }
 
 void StatViewRocket::PerksDialog::CallbackChoosePerk(Core::Event&)
 {
-  PerkChoosen.Emit(_selected_perk);
+  PerkChoosen.Emit(humanize(_selected_perk));
 }
 
 void StatViewRocket::PerksDialog::CallbackDblClickPerk(Core::Event& event)
@@ -1578,10 +1607,12 @@ void StatViewRocket::PerksDialog::SetAvailablePerks(list<string> perks)
   }
 }
 
-void StatViewRocket::PerksDialog::SetPerkDescription(string description)
+void StatViewRocket::PerksDialog::SetPerkDescription(const string& icon, const string& description)
 {
+  cout << "Set Perk Description" << endl;
   if (_root)
   {
+    cout << "Has root" << endl;
     Core::Element* element = _root->GetElementById("perks-description");
     
     if (element)

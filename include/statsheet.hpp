@@ -33,6 +33,7 @@ public:
   unsigned int   GetKills(const std::string& race) const { return (_statsheet["Kills"][race]); }
 
   bool           AddPerk(const std::string& perk);
+  Data           GetPerk(const std::string& perk);
   void           ToggleTrait(const std::string& trait);
   void           ToggleSkillAffinity(const std::string& skill);
   bool           HasTrait(const std::string& trait)         const { return (_statsheet["Traits"][trait]     == 1); }
@@ -116,6 +117,7 @@ public:
   virtual void SetTraits(std::list<std::string>)                                                            = 0;
   virtual void SetTraitActive(const std::string&, bool)                                                     = 0;
   virtual void SetPerks(std::list<std::string>)                                                             = 0;
+  virtual void SetPerkDescription(const std::string& icon, const std::string& description)                  = 0;
   virtual void SetAvailablePerks(std::list<std::string> perks)                                              = 0;
   virtual void SetSkillAffinity(const std::string& skill, bool)                                             = 0;
   virtual void SetReputation(const std::string& faction, int)                                               = 0;
@@ -127,7 +129,8 @@ public:
   Sync::Signal<void (const std::string&)>                     PerkToggled;
   Sync::Signal<void (const std::string&)>                     ToggleSkillAffinity;
   Sync::Signal<void>                                          Accepted, Canceled, MakeBackup;
-
+  Sync::Signal<void (const std::string&)>                     UpdatePerkDescription;
+  
   void         SetNumPerks(unsigned short n_perks)             { _n_perks = n_perks; }
 
 protected:
@@ -202,7 +205,7 @@ class StatViewRocket : public UiBase, public StatView
     ~PerksDialog();
     
     void SetAvailablePerks(std::list<std::string> perks);
-    void SetPerkDescription(std::string description);
+    void SetPerkDescription(const std::string& icon, const std::string& description);
 
     Sync::Signal<void (const std::string&)> PerkSelected;
     Sync::Signal<void (const std::string&)> PerkChoosen;
@@ -248,6 +251,7 @@ public:
   void SetTraitActive(const std::string&, bool);
   void SetSkillAffinity(const std::string& skill, bool);
   void SetPerks(std::list<std::string>);
+  void SetPerkDescription(const std::string& icon, const std::string& description);
   void SetAvailablePerks(std::list<std::string>);
   void SetReputation(const std::string&, int);
 

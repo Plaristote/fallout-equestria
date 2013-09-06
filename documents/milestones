@@ -133,6 +133,7 @@ x --> City splashscreen, allowing to pick between several entry zones
 
   -> Statistics
   --> Traits interface for the Edit and Show modes of the Statistic interface
+x --> Perks description
 
   -> Level
 x --> Factorize Actions code. Every part of the process (temporizing, animating, executing) must be contiguous.
@@ -141,15 +142,11 @@ x ----> General hooks running at every level start, end and each loop turn
 x ----> Exposing waypoint observers to scripts
 x ----> Hooks to create daily or hourly tasks
 x --> Zone effects
-  --> Advanced Light Management
+x --> Advanced Light Management
 x ----> Script interface for light management
 x ----> Hour-based light switch (for lighting cities at night)
-  ----> Combinable light effects
-  ------> Blinking
-  ------> Fading
 x --> Dialogs
 x ---> Allow inclusion of the return value of a script function in dialog's text
-  --> In-game cinematics
 ~ --> Projectiles and gunshot effects
 x --> Party Create/Import/Export via scripts
   --> Fixing last pathfinding issue (arc withdrawal)
