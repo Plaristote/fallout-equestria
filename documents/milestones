@@ -134,6 +134,7 @@ x --> City splashscreen, allowing to pick between several entry zones
   -> Statistics
   --> Traits interface for the Edit and Show modes of the Statistic interface
 x --> Perks description
+x --> Skill affinities
 
   -> Level
 x --> Factorize Actions code. Every part of the process (temporizing, animating, executing) must be contiguous.

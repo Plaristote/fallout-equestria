@@ -389,8 +389,12 @@ void           StatModel::SetSkill(const std::string& stat, short value)
   short          v_skill_points = skill_points;
   Data           skill          = _statsheet["Skills"][stat];
   short          current_value  = skill;
+  bool           affinity       = HasSkillAffinity(stat);
 
   v_skill_points += (current_value - value);
+  if (affinity)
+    value += (value - current_value);
+  cout << (value - current_value) << endl;
   if (!(_statsheet_backup.Nil()))
   {
     if ((short)_statsheet_backup["Skills"][stat] > value)
@@ -604,16 +608,12 @@ void StatController::SetStatistic(const std::string& stat, short value)
 
 void StatController::UpSkill(const std::string& stat)
 {
-  bool affinity = _model.HasSkillAffinity(stat);
-
-  SetSkill(stat, _model.GetSkill(stat) + (affinity ? 2 : 1));
+  SetSkill(stat, _model.GetSkill(stat) + 1);
 }
 
 void StatController::DownSkill(const std::string& stat)
 {
-  bool affinity = _model.HasSkillAffinity(stat);
-
-  SetSkill(stat, _model.GetSkill(stat) - (affinity ? 2 : 1));
+  SetSkill(stat, _model.GetSkill(stat) - 1);
 }
 
 void StatController::SetSkill(const std::string& stat, short value)
