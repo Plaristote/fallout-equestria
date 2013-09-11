@@ -394,7 +394,6 @@ void           StatModel::SetSkill(const std::string& stat, short value)
   v_skill_points += (current_value - value);
   if (affinity)
     value += (value - current_value);
-  cout << (value - current_value) << endl;
   if (!(_statsheet_backup.Nil()))
   {
     if ((short)_statsheet_backup["Skills"][stat] > value)

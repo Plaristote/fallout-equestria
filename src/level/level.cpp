@@ -1327,15 +1327,20 @@ void Level::ActionDropObject(ObjectCharacter* user, InventoryObject* object)
   waypoint = user->GetOccupiedWaypoint();
   if (waypoint)
   {
-    ObjectItem* item;
+    DynamicObject* graphics = object->CreateDynamicObject(_world);
+    
+    if (graphics)
+    {
+      ObjectItem*    item;
 
-    user->GetInventory().DelObject(object);
-    item     = new ObjectItem(this, object->CreateDynamicObject(_world), object);
-    _world->DynamicObjectChangeFloor(*item->GetDynamicObject(), waypoint->floor);
-    item->SetOccupiedWaypoint(waypoint);
-    _world->DynamicObjectSetWaypoint(*(item->GetDynamicObject()), *waypoint);
-    item->GetDynamicObject()->nodePath.set_pos(waypoint->nodePath.get_pos());
-    _objects.push_back(item);
+      user->GetInventory().DelObject(object);
+      item     = new ObjectItem(this, graphics, object);
+      _world->DynamicObjectChangeFloor(*item->GetDynamicObject(), waypoint->floor);
+      item->SetOccupiedWaypoint(waypoint);
+      _world->DynamicObjectSetWaypoint(*(item->GetDynamicObject()), *waypoint);
+      item->GetDynamicObject()->nodePath.set_pos(waypoint->nodePath.get_pos());
+      _objects.push_back(item);
+    }
   }
   else
     cerr << "User has no waypoint, thus the object can't be dropped" << endl;

@@ -40,5 +40,5 @@ add_executable(testing ${sourceFiles})
 
 if (UNIX)
  target_link_libraries(testing -L/usr/lib/panda3d p3framework panda pandafx pandaphysics pandaexpress p3dtoolconfig p3dtool p3direct pandaegg                                                                      p3rocket RocketCore RocketControls
-                                                  angelscript pthread sfml-audio)
+                                                  angelscript pthread)
 endif()

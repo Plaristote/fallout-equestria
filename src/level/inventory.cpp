@@ -80,13 +80,6 @@ void InventoryObject::SetEquiped(ObjectCharacter* character, bool set)
   _equiped = set;
 }
 
-// TODO Implement this here contraption as a wrapper for all parameters to AngelScript::Object
-/*template<typename TYPE>
-AngelScript::IType* as_wrap(TYPE var)
-{
-  return (new AngelScript::Type<TYPE>(var));
-}*/
-
 bool InventoryObject::CanWeild(ObjectCharacter* character, std::string slot, unsigned char mode)
 {
   if (_object.IsDefined("CanWeild"))
@@ -211,9 +204,14 @@ DynamicObject* InventoryObject::CreateDynamicObject(World* world) const
   Data           self = *this;
 
   object               = world->AddDynamicObject("item" + Key(), DynamicObject::Item, self["model"], self["texture"]);
-  object->interactions = Interactions::Use;
-  object->waypoint     = 0;
-  object->type         = DynamicObject::Item;
+  if (object)
+  {
+    object->interactions = Interactions::Use;
+    object->waypoint     = 0;
+    object->type         = DynamicObject::Item;
+  }
+  else
+    AlertUi::NewAlert.Emit("Could not load graphical assets for item " + Key());
   return (object);
 }
 
