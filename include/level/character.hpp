@@ -93,6 +93,7 @@ public:
 
   void                Run(float elapsedTime);
   void                RunEffects(float elapsedTime);
+  void                SetRunning(bool running) { _running = running; }
   void                LookAt(LVecBase3);
   void                LookAt(InstanceDynamicObject*);
   void                GoTo(unsigned int id);
@@ -201,6 +202,7 @@ private:
   const WorldDiplomacy::Faction* _faction;
   unsigned int                   _self_enemyMask;
   unsigned short                 _actionPoints;
+  bool                           _running;
   short                          _hitPoints, _armorClass, _tmpArmorClass;
   unsigned char                  _flags;
   bool                           _fading_off, _fading_in, _rotating;

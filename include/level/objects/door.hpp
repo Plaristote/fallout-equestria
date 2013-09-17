@@ -34,7 +34,9 @@ public:
   {
     ObserveWaypoints(false);
   }
-  
+
+  bool     HasOccupiedWaypoint(void) const { return (false); }
+
   void     ProcessCollisions(void);
 
   string   GetKeyName() const { return (_object->key); }

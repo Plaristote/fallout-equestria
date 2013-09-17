@@ -978,6 +978,8 @@ AsyncTask::DoneStatus Level::do_task(void)
 
   std::function<void (InstanceDynamicObject*)> run_object = [elapsedTime](InstanceDynamicObject* obj)
   {
+    if (obj->Get<ObjectItem>() != 0)
+      return ;
     obj->Run(elapsedTime);
     obj->UnprocessCollisions();
     obj->ProcessCollisions();

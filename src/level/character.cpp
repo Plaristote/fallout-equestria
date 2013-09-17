@@ -29,6 +29,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   Data   items = _level->GetItems();  
   string defEquiped[2];
 
+  _running            = true;
   _rotating           = false;
   _fading_in          = _fading_off = false;
   _flags              = 0;
@@ -195,7 +196,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   /*for_each(anims.begin(), anims.end(), [this](string anim)
   { LoadAnimation(anim); });*/
   for (unsigned int i = 0; i<GET_ARRAY_SIZE(anims); i++)
-	  LoadAnimation(anims[i]);
+    LoadAnimation(anims[i]);
 
   // Others
   CharacterDied.Connect(*this, &ObjectCharacter::RunDeath);
@@ -843,7 +844,7 @@ void                ObjectCharacter::TruncatePath(unsigned short max_size)
 void                ObjectCharacter::StartRunAnimation(void)
 {
   ReachedDestination.Connect(*this, &ObjectCharacter::StopRunAnimation);
-  PlayAnimation("run", true);
+  PlayAnimation(_running ? "run" : "walk", true);
 }
 
 void                ObjectCharacter::StopRunAnimation(InstanceDynamicObject*)
@@ -859,6 +860,8 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
 {
   Waypoint* wp = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
 
+  cout << '[' << this << "] RunMovementNext" << endl;
+  
   if (wp != _waypointOccupied && _level->GetState() == Level::Fight)
     SetActionPoints(_actionPoints - 1);
   
@@ -934,17 +937,21 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
 {
   Timer             profile;
   PStatCollector    collector("Level:Characters:Movement"); collector.start();
-  Waypoint&         next = *(_path.begin());
-  // TODO: Speed walking / running / combat
-  float             combat_speed = OptionsManager::Get()["combat-speed"];
-  float             max_speed = (_level->GetState() == Level::Fight && combat_speed > 0 ? combat_speed : 20.f) * elapsedTime;
+  Waypoint&         next      = *(_path.begin());
+  LPoint3           pos       = _object->nodePath.get_pos();
+  LPoint3           objective = next.nodePath.get_pos();
+  float             max_speed;
   LPoint3           distance;
   float             max_distance;    
   LPoint3           speed, axis_speed, dest;
-  LPoint3           pos = _object->nodePath.get_pos();
   int               dirX, dirY, dirZ;
-  LPoint3           objective = next.nodePath.get_pos();
 
+  if (_level->GetState() == Level::Fight)
+    max_speed = OptionsManager::Get()["combat-speed"];
+  else
+    max_speed = _running ? 20.f : 8.f;
+  max_speed  *= elapsedTime;  
+  
   //
   LPoint3 wp_size = NodePathSize(next.nodePath);
 

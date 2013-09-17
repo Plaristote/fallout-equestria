@@ -101,6 +101,7 @@ void        WaypointModifier::SetOccupiedWaypoint(Waypoint* wp)
     for (; it != end ; ++it)
       np.set_light_off((*it)->light->as_node());
   }
+  cout << "SET OCCUPIED WAYPOINT FOR " << this << ": " << wp << endl;
   _waypointOccupied = wp;
   if (wp)
   {

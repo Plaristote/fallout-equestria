@@ -692,9 +692,9 @@ list<Waypoint*> Waypoint::GetSuccessors(Waypoint* parent)
       Arc& arc = *it;
 
       if (parent == arc.to)
-    continue ;
+        continue ;
       if (arc.observer && arc.observer->CanGoThrough(gPathfindingUnitType) == false)
-    continue ;
+        continue ;
       successors.push_back(arc.to);
   }
   return (successors);
