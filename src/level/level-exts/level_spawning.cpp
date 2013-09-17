@@ -23,17 +23,20 @@ void Level::SpawnEnemies(const std::string& type, unsigned short quantity, unsig
       string         str_texture  = data["texture"].Value();
 
       object = _world->AddDynamicObject(type, DynamicObject::Character, str_model, str_texture);
-      object->strModel  = str_model;
-      object->strTexture= str_texture;
-      object->charsheet = data["charsheet"].Value();
-      object->dialog    = data["dialog"].Value();
-      object->script    = data["script"].Value();
-      InsertCharacter(new ObjectCharacter(this, object));
-      spawn_party.Join(object);
+      if (object)
+      {
+        object->strModel  = str_model;
+        object->strTexture= str_texture;
+        object->charsheet = data["charsheet"].Value();
+        object->dialog    = data["dialog"].Value();
+        object->script    = data["script"].Value();
+        InsertCharacter(new ObjectCharacter(this, object));
+        spawn_party.Join(object);
 
-      ObjectCharacter* tmp = (*_characters.rbegin());
-      tmp->PlayAnimation("Run");
-      tmp->SetAsEnemy(GetPlayer(), true); // TODO remove that when enemies flag loading is fixed      
+        ObjectCharacter* tmp = (*_characters.rbegin());
+        tmp->PlayAnimation("Run");
+        tmp->SetAsEnemy(GetPlayer(), true); // TODO remove that when enemies flag loading is fixed      
+      }
     }
   }
   SetEntryZone(spawn_party, entry_zone.str());
