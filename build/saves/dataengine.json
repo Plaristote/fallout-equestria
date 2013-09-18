@@ -2,14 +2,7 @@
 "shielding spell": {
   "graphics": {
     "model": "sphere.obj",
-    "scale": 5,
-    "color": {
-      "red": 50,
-      "green": 50,
-      "blue": 200,
-      "alpha": 0.5
-    }
-
+    "scale": 3
   }
 ,
   "duration": 30,
@@ -22,21 +15,21 @@
 }
 ,
 "system": {
-  "current-level": ""
+  "current-level": 0
 }
 ,
 "worldmap": {
-  "pos-x": 242,
-  "pos-y": 149
+  "pos-x": 98,
+  "pos-y": 108
 }
 ,
 "time": {
-  "seconds": 17,
-  "minutes": 53,
-  "hours": 12,
-  "days": 16,
-  "month": 10,
-  "year": 2473
+  "seconds": 54,
+  "minutes": 48,
+  "hours": 16,
+  "days": 22,
+  "month": 8,
+  "year": 2472
 }
 ,
 "Factions": {
@@ -45,30 +38,18 @@
   }
 ,
   "Test Town": {
-    "Enemies": {
-      "Timberwolves": 1,
-      "Test Town": 1
-    }
-
-  }
-,
-  "Timberwolves": {
-    "Enemies": {
-      "": {
-        "PlayerParty": 1
-      }
-,
-      "Test Town": 1
-    }
-
-  }
-,
-  "Pawnee": {
     "Enemies": ""
   }
 
 }
 ,
+"player": {
+  "inventory": {
+    "hooves": { "script": { "file": "objectsUnarmed.as" }, "hidden": 1 },
+    "buck":   { "icon": "buck.png", "script": { "file": "objectsUnarmed.as" }, "hidden": 1 },
+    "Key":    { "icon": "key.png", "texture": "lpip.png", "model": "horse.obj", "scale": 1, "weight": 5, "script": { "file": "objectsItems.as" } }
+  }
+},
 "Pipbuck": {
   "Apps": {
     "clock": {
@@ -94,10 +75,13 @@
         "run_focused": "main"
       }
 
+
     }
+
 
   }
 ,
+
   "Files": {
     "firstfile": {
       "type": "text",
@@ -184,230 +168,21 @@ Newly refreshed and woken up, not to mention fearing for my skin, I ran to my ba
 }
 ,
 "bestiary": {
-  "critters": {
+  "timberwolf": {
+    "model": "pony.egg",
     "charsheet": "timberwolf",
     "script": "timberwolf",
-    "model": "lpip.egg",
-    "texture": "lpip.png"
-  }
-
-}
-,
-"random-encounters": {
-  "timberwolves": {
-    "critters": 10
-  }
-
-}
-,
-"special-encounters": [
-"special-test"
-]
-,
-"player": {
-  "inventory": {
-    "hooves": {
-      "script": {
-        "file": "objectsUnarmed.as"
-      }
-,
-      "hidden": 1,
-      "actions": {
-        "hooves": {
-          "ap-cost": 3,
-          "combat": 1,
-          "range": 10,
-          "damage": 5,
-          "hookWeapon": "HoovesHit",
-          "targeted": 1
-        }
-
-      }
-,
-      "weight": 0,
-      "interactions": {
-        "use": 1
-      }
-,
-      "mode-mouth": 1,
-      "mode-magic": 1,
-      "Name": "hooves",
-      "quantity": 1
-    }
-,
-    "buck": {
-      "icon": "buck.png",
-      "script": {
-        "file": "objectsUnarmed.as"
-      }
-,
-      "hidden": 1,
-      "actions": {
-        "buck": {
-          "ap-cost": 4,
-          "combat": 1,
-          "range": 15,
-          "damage": 10,
-          "hookWeapon": "BuckHit",
-          "targeted": 1
-        }
-
-      }
-,
-      "model": "",
-      "texture": "",
-      "scale": 0,
-      "weight": 0,
-      "mode-mouth": 1,
-      "mode-magic": 1,
-      "mode-battlesaddle": 0,
-      "interactions": {
-        "use": 1
-      }
-,
-      "Name": "buck",
-      "quantity": 1
-    },
-    "Key": {
-      "equiped-save": [
-        {
-          "target": "equiped",
-          "slot": 0,
-          "mode": 0
-        }
-      ],
-      "icon": "key.png",
-      "texture": "lpip.png",
-      "model": "horse.obj",
-      "scale": 1,
-      "weight": 5,
-      "script": {
-        "file": "objectsItems.as"
-      },
-      "actions": {
-        "use on": {
-          "ap-cost": 2,
-          "hookDoors": "UseKeyOnDoor",
-          "range": 999,
-          "combat": 0,
-          "targeted": 1,
-          "damage": 999,
-          "damage-max": 999
-        }
-      },
-      "mode-mouth": 1,
-      "mode-magic": 1,
-      "mode-battlesaddle": 0,
-      "interactions": {
-        "use": 1
-      },
-      "Name": "Key",
-      "quantity": 5
-    },
-    "Shotgun": {
-      "script": {
-        "file": "shotgun.as"
-      },
-      "icon": "shotgun.png",
-      "model": "Shotgun.obj",
-      "texture": "shotgun.tga",
-      "scale": 0.07,
-      "offset": {
-        "x": -1.25,
-        "y": -1.25,
-        "z": 0.5
-      },
-      "rotation": {
-        "x": -90,
-        "y": 0,
-        "z": 0
-      },
-      "weight": 15,
-      "mode-mouth": 0,
-      "mode-magic": 1,
-      "mode-battlesaddle": 1,
-      "ammo": {
-        "types": [ "ammoCaliber22" ],
-        "current": "ammoCaliber22",
-        "amount":  0,
-        "maximum": 2
-      },
-      "actions": {
-        "Shoot": {
-          "ap-cost": 5,
-          "range": 50,
-          "combat": 1,
-          "targeted": 1,
-          "damage": 15,
-          "damage-max": 20,
-          "type": "Small Guns",
-          "hookHitChances": "ShootSuccessChance",
-          "hookWeapon": "Shoot"
-        },
-        "Reload": {
-          "ap-cost": 2,
-          "range": 0,
-          "combat": 0,
-          "targeted": 0,
-          "damage": 0,
-          "damage-max": 0,
-          "hookUse": "ReloadWeapon"
-        }
-      },
-      "Name": "Shotgun",
-      "quantity": 1
-    },
-    "ammoCaliber22": {
-      "script": {
-        "file": ""
-      }
-    ,
-      "icon": "22caliber.png",
-      "model": "",
-      "texture": "",
-      "scale": 0,
-      "weight": 0,
-      "mode-mouth": 0,
-      "mode-magic": 0,
-      "mode-battlesaddle": 0,
-      "Name": "Caliber 22.",
-      "quantity": 3
-    }
+    "texture": "characters/lpip.png"
   }
 },
-"my_quests": {
-  "Sterling's Quest": {
-    "description": "Sterling wants you to bring back a key",
-    "script": "sterling",
-    "objectives": {
-      "Give me the key": {
-        "description": "Find the key and give it to Sterling",
-        "conditions": {
-          "InventoryContains": {
-            "target": "Sterling",
-            "object_type": "key",
-            "object_quantity": 1
-          }
-
-        }
-
-      }
-
-    }
-
+"random-encounters": {
+  "timberwolves": {
+    "timberwolf": 10
   }
 
 }
 ,
-"Quests": "",
-"dialogs": {
-  "Sterling": ""
-}
-,
-"poisoning": "",
-"variables": {
-  "Sterling": ""
-}
+"special-encounters": [ "special-test" ]
 
 
 }

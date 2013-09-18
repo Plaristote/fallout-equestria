@@ -865,7 +865,7 @@
 
   }
 , {
-    "visibility": 2,
+    "visibility": 1,
     "map-encounters": [
 "random-desert-1"    
 ]
@@ -991,18 +991,7 @@
 
   }
 , {
-    "visibility": 1,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
-    "type-encounters": [
-"timberwolves"    
-]
-
-  }
-, {
-    "visibility": 2,
+    "visibility": 0,
     "map-encounters": [
 "random-desert-1"    
 ]
@@ -1024,103 +1013,18 @@
 
   }
 , {
-    "visibility": 2
+    "visibility": 1,
+    "map-encounters": [
+"random-desert-1"    
+]
+,
+    "type-encounters": [
+"timberwolves"    
+]
+
   }
 , {
     "visibility": 2
-  }
-, {
-    "visibility": 2
-  }
-, {
-    "visibility": 1
-  }
-, {
-    "visibility": 1
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 1
-  }
-, {
-    "visibility": 1
-  }
-, {
-    "visibility": 1
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 1
   }
 , {
     "visibility": 2
@@ -1132,12 +1036,6 @@
     "visibility": 1
   }
 , {
-    "visibility": 2
-  }
-, {
-    "visibility": 2
-  }
-, {
     "visibility": 1
   }
 , {
@@ -1210,10 +1108,13 @@
     "visibility": 0
   }
 , {
-    "visibility": 0
+    "visibility": 1
   }
 , {
-    "visibility": 0
+    "visibility": 1
+  }
+, {
+    "visibility": 1
   }
 , {
     "visibility": 0
@@ -1234,6 +1135,105 @@
     "visibility": 2
   }
 , {
+    "visibility": 2
+  }
+, {
+    "visibility": 1
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
     "visibility": 1
   }
 , {
@@ -1333,13 +1333,13 @@
     "visibility": 0
   }
 , {
-    "visibility": 1
+    "visibility": 0
   }
 , {
-    "visibility": 1
+    "visibility": 0
   }
 , {
-    "visibility": 1
+    "visibility": 0
   }
 , {
     "visibility": 0

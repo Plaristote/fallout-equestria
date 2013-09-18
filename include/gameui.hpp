@@ -149,7 +149,6 @@ public:
   }
 
   RocketListener         ConsoleKeyUp;
-  RocketListener         ExecuteEvent;
 
 private:
   void KeyUp(Rocket::Core::Event&);

@@ -121,6 +121,7 @@ public:
   virtual void SetAvailablePerks(std::list<std::string> perks)                                              = 0;
   virtual void SetSkillAffinity(const std::string& skill, bool)                                             = 0;
   virtual void SetReputation(const std::string& faction, int)                                               = 0;
+  virtual void SetDetails(const std::string& icon, const std::string& title, const std::string& text)       = 0;
 
   Sync::Signal<void (const std::string&, const std::string&)> StatUpped, StatDowned; 
   Sync::Signal<void (const std::string&, const std::string&)> InformationChanged;
@@ -130,7 +131,8 @@ public:
   Sync::Signal<void (const std::string&)>                     ToggleSkillAffinity;
   Sync::Signal<void>                                          Accepted, Canceled, MakeBackup;
   Sync::Signal<void (const std::string&)>                     UpdatePerkDescription;
-  
+  Sync::Signal<void (const std::string&, const std::string&)> UpdateDetails;
+
   void         SetNumPerks(unsigned short n_perks)             { _n_perks = n_perks; }
 
 protected:
@@ -184,10 +186,11 @@ private:
   void      InformationChanged(const std::string&, const std::string&);
   void      AgeChanged(unsigned char);
   void      PerkAdded(const std::string&);
+  void      UpdateDetails(const std::string& type, const std::string& name);
 
   void      ViewStatUpped(const std::string&, const std::string&);
   void      ViewStatDowned(const std::string&, const std::string&);
-  
+
   void      AcceptChanges(void);
   void      CancelChanges(void);
   void      MakeBackup(void);
@@ -254,13 +257,14 @@ public:
   void SetPerkDescription(const std::string& icon, const std::string& description);
   void SetAvailablePerks(std::list<std::string>);
   void SetReputation(const std::string&, int);
+  void SetDetails(const std::string& icon, const std::string& title, const std::string& text);
 
 private:
   Data           _i18n;
   PerksDialog    _perks_dialog;
   RocketListener CancelButton;
   RocketListener DoneButton;
-  RocketListener EventSpecialClicked, EventSkillClicked, EventGeneralClicked, EventTraitClicked, EventDetails;
+  RocketListener EventSpecialClicked, EventSkillClicked, EventStatisticClicked, EventPerkClicked, EventGeneralClicked, EventTraitClicked, EventDetails;
   RocketListener ButtonUp, ButtonDown;
   RocketListener PartyMemberClicked;
   

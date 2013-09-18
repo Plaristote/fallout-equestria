@@ -438,8 +438,11 @@ tabset panels panel
 		      <panel id="panel-perks" class="console-bg">Nada</panel>
 		
 		      <tab id="tab-traits" class="tab-tab">Traits</tab>
-		      <panel id="panel-traits" class="console-bg">Rien</panel>
-		
+		      <panel id="panel-traits" class="console-bg">
+			<div id="panel-traits-create"></div>
+			<div id="panel-traits-default"></div>
+		      </panel>
+
 		      <tab id="tab-reputation" class="tab-tab">Reputation</tab>
 		      <panel class="console-bg">Nothing</panel>
 		
@@ -457,7 +460,11 @@ tabset panels panel
 		      
 	 </div>
     <p id="char-botom-side" >
-    	<p id="placeholder" class="paper">placeholder</p>
+      <p id="placeholder" class="paper">
+        <div id="details-icon" style="float:right;"></div>
+        <div id="details-title"></div>
+        <div id="details-text"></div>
+      </p>
 		<button id="continue" i18n="Confirm" class="universal_button">Done</button>
 		<button id="cancel"   i18n="Close" class="universal_button">Cancel</button> 
     </p>

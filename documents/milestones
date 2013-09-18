@@ -99,7 +99,6 @@ x -> Levels
 x --> Quantity Picker for inventories
 x --> Stairs
 x --> Shader for casting shadows
-# --> Advanced Light Management
 x --> Scatter inserted parties in the spawning zones
 x --> Per-context configuration for camera behaviors
 x --> Using skills to interact
@@ -131,11 +130,11 @@ x --> Visibility and detection of cities
 x --> Dynamically generated places (like random encounter, without encounter)
 x --> City splashscreen, allowing to pick between several entry zones
 
-  -> Statistics
+x -> Statistics
 x --> Traits interface for the Edit and Show modes of the Statistic interface
 x --> Perks description
 x --> Skill affinities
-~ --> Display details about skill/trait/perk/statistic/special attribute when clicked
+x --> Display details about skill/trait/perk/statistic/special attribute when clicked
 
   -> Level
 x --> Factorize Actions code. Every part of the process (temporizing, animating, executing) must be contiguous.

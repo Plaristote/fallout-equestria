@@ -1,12 +1,12 @@
 {
-"test": {
+"random-desert-1": {
   "visible": 1,
   "pos_x": 94,
   "pos_y": 102,
   "radius": 20
 }
 ,
-"random-desert-1": {
+"random-desert-2": {
   "visible": 1,
   "pos_x": 161,
   "pos_y": 264,
@@ -18,13 +18,6 @@
   "pos_x": 242,
   "pos_y": 149,
   "visible": 1
-}
-,
-"special-test": {
-  "visible": 1,
-  "pos_x": 231.652,
-  "pos_y": 368.615,
-  "radius": 10,
 }
 
 

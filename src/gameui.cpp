@@ -550,9 +550,8 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
     if (_input)
     {
       cout << "[UI] Console is ready" << endl;
-      _input->AddEventListener("keyup",     &ConsoleKeyUp);
+      ToggleEventListener(true, "console_input", "keyup", ConsoleKeyUp);
       ConsoleKeyUp.EventReceived.Connect(*this, &GameConsole::KeyUp);
-      ExecuteEvent.EventReceived.Connect(*this, &GameConsole::Execute);
     }
     else
       cout << "[UI] No input for the console" << endl;
@@ -565,6 +564,7 @@ GameConsole::~GameConsole()
   if (_script_context)
     _script_context->Release();
   Script::Engine::ScriptError.Disconnect(_observerError);
+  ToggleEventListener(false, "console_input", "keyup", ConsoleKeyUp);
 }
 
 void GameConsole::Execute(Rocket::Core::Event&)

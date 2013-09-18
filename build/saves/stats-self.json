@@ -10,19 +10,19 @@
   "END": 3,
   "CHA": 9,
   "INT": 7,
-  "AGI": 12,
+  "AGI": 5,
   "LUC": 7
 }
 ,
 "Statistics": {
-  "Action Points": 10,
+  "Action Points": 3,
   "Armor Class": 5,
   "Bonus Damage": 0,
   "Carry Weight": 175,
   "Critical Chance": 7,
   "Damage Resistance": 5,
   "Healing Rate": 1,
-  "Hit Points": 33,
+  "Hit Points": 27,
   "Melee Damage": 1,
   "Perk Rate": 3,
   "Poison Resistance": 15,
@@ -43,7 +43,7 @@
   "Science": 39,
   "Sneak": 30,
   "Spellcasting": 46,
-  "Steal": 85,
+  "Steal": 5,
   "Barter": 38,
   "Outdoorspony": 55,
   "Speech": 43,
@@ -70,6 +70,10 @@
   "Gambling": 0
 }
 ,
+"Affinities": {
+  "Outdoorspony": 1,
+  "Unarmed": 1
+},
 "Statistics Modifiers": {
   "Action Points": "-2",
   "Armor Class": 0,
@@ -78,7 +82,7 @@
   "Critical Chance": 0,
   "Damage Resistance": 5,
   "Healing Rate": 0,
-  "Hit Points": 7,
+  "Hit Points": 0,
   "Melee Damage": 0,
   "Perk Rate": 0,
   "Poison Resistance": 0,
@@ -87,12 +91,12 @@
 }
 ,
 "Variables": {
-  "Hit Points": 7,
-  "Level": 2,
-  "Experience": 1301,
-  "Skill Points": 19,
+  "Hit Points": 27,
+  "Level": 1,
+  "Experience": 0,
+  "Skill Points": 10,
   "Special Points": 0,
-  "Perks": 4,
+  "Perks": 0,
   "Traits": 0
 }
 ,
@@ -100,12 +104,5 @@
   "Bloody Mess": 1,
   "Bruiser": 1
 }
-,
-"Affinities": "",
-"Kills": {
-  "Unicorn": 2,
-  "Timberwolf": 2
-}
-
 
 }

@@ -1,6 +1,27 @@
 #include <string>
+#include <list>
 
 using namespace std;
+
+list<string> split(const std::string& str, char c = ' ')
+{
+  list<string> ret;
+  short        last_sep = -1;
+  short        i;
+
+  for (i = 0 ; str[i] ; ++i)
+  {
+    if (str[i] == c)
+    {
+      if (i != 0 && str[i - 1] != c)
+        ret.push_back(str.substr(last_sep + 1, i - (last_sep + 1)));
+      last_sep = i;
+    }
+  }
+  if (last_sep != i && i > 0 && str[i - 1] != c)
+    ret.push_back(str.substr(last_sep + 1));
+  return (ret);
+}
 
 string str_strip(const string& str)
 {
