@@ -260,7 +260,7 @@ private:
   PerksDialog    _perks_dialog;
   RocketListener CancelButton;
   RocketListener DoneButton;
-  RocketListener EventSpecialClicked, EventSkillClicked, EventGeneralClicked, EventTraitClicked;
+  RocketListener EventSpecialClicked, EventSkillClicked, EventGeneralClicked, EventTraitClicked, EventDetails;
   RocketListener ButtonUp, ButtonDown;
   RocketListener PartyMemberClicked;
   
@@ -273,6 +273,7 @@ private:
   void           UpdateGender(Rocket::Core::Event&);
   void           UpdateAge(Rocket::Core::Event&);
   
+  void           DisplayDetails(Rocket::Core::Event&);
   void           TraitClicked(Rocket::Core::Event&);
   void           SpecialClicked(Rocket::Core::Event&);
   void           SkillClicked(Rocket::Core::Event&);

@@ -132,9 +132,10 @@ x --> Dynamically generated places (like random encounter, without encounter)
 x --> City splashscreen, allowing to pick between several entry zones
 
   -> Statistics
-  --> Traits interface for the Edit and Show modes of the Statistic interface
+x --> Traits interface for the Edit and Show modes of the Statistic interface
 x --> Perks description
 x --> Skill affinities
+~ --> Display details about skill/trait/perk/statistic/special attribute when clicked
 
   -> Level
 x --> Factorize Actions code. Every part of the process (temporizing, animating, executing) must be contiguous.
@@ -150,7 +151,7 @@ x --> Dialogs
 x ---> Allow inclusion of the return value of a script function in dialog's text
 ~ --> Projectiles and gunshot effects
 x --> Party Create/Import/Export via scripts
-  --> Fixing last pathfinding issue (arc withdrawal)
+x --> Fixing last pathfinding issue(s)
 
   -> GameTask
   --> Compression for save slots

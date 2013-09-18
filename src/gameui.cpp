@@ -522,12 +522,14 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
     DataTree* history_file = DataTree::Factory::JSON("data/history_console.json");
     if (history_file)
     {
-      Data   data_history(history_file);
-
-      ForEach(data_history["array"], [this](Data entry)
       {
-        _history.push_back(entry.Value());
-      });
+        Data   data_history(history_file);
+
+        ForEach(data_history["array"], [this](Data entry)
+        {
+          _history.push_back(entry.Value());
+        });
+      }
       delete history_file;
     }
     _history.push_back("LF();");

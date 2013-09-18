@@ -625,7 +625,7 @@ void StatController::AcceptChanges(void)
   if (!(_model.IsReady()))
   {
     cout << "[StatController] Thou art not ready" << endl;
-    // TODO popup a dialog saying that you're not ready
+    AlertUi::NewAlert.Emit("Your statistics are invalid.");
     return ;
   }
   cout << "[StatController] Thou art ready" << endl;
@@ -933,6 +933,7 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
     ToggleEventListener(true, "cancel",   "click", CancelButton);
     DoneButton.EventReceived.Connect  (*this, &StatViewRocket::Accept);
     CancelButton.EventReceived.Connect(*this, &StatViewRocket::Cancel);
+    EventDetails.EventReceived.Connect(*this, &StatViewRocket::DisplayDetails);
 
     // Perks Dialog
     _perks_dialog.PerkChoosen.Connect (PerkToggled, &Sync::Signal<void (const string&)>::Emit);
@@ -1123,28 +1124,47 @@ void StatViewRocket::SpecialClicked(Core::Event& event)
   }
 }
 
+void StatViewRocket::DisplayDetails(Core::Event& event)
+{
+  Core::Element* element   = _context->GetHoverElement();
+  Core::Variant* var_type  = element->GetAttribute("data-details-type");
+  Core::Variant* var_value = element->GetAttribute("data-details-name");
+
+  if (var_type && var_value)
+  {
+    string type  = var_type->Get<Core::String>().CString();
+    string value = var_value->Get<Core::String>().CString();
+
+    // TODO Implement the details displaying
+  }
+}
+
 void StatViewRocket::SkillClicked(Core::Event& event)
 {
   Core::Element* current = _context->GetHoverElement();
 
   while (current && current->GetClassNames() != "skill-datagrid")
-	  current = current->GetParentNode();  
-  if (_editMode == StatView::Create && current)
+    current = current->GetParentNode();
+  if (current)
   {
-    Core::Variant* var = current->GetAttribute("data-key");
-    Core::String   str = (var ? var->Get<Core::String>() : "");
-    
-    ToggleSkillAffinity.Emit(str.CString());
-  }
-  else if (_editMode == StatView::Update)
-  {
-    Core::Element* cursor = _root->GetElementById("edit-value-cursor");
-    
-    if (cursor && current)
+    DisplayDetails(event);
+    if (_editMode == StatView::Create)
     {
-      cursor->SetProperty("display", "block");
-      cursor->GetParentNode()->RemoveChild(cursor);
-      current->AppendChild(cursor);
+      Core::Variant* var = current->GetAttribute("data-key");
+      Core::String   str = (var ? var->Get<Core::String>() : "");
+
+      ToggleSkillAffinity.Emit(str.CString());
+    }
+    else if (_editMode == StatView::Update)
+    {
+      Core::Element* cursor = _root->GetElementById("edit-value-cursor");
+      
+      if (cursor)
+      {
+        cursor->SetProperty("display", "block");
+        cursor->GetParentNode()->RemoveChild(cursor);
+        current->AppendChild(cursor);
+      }
     }
   }
 }
@@ -1171,9 +1191,11 @@ void StatViewRocket::SetEditMode(EditMode mode)
   const char*    displayElems[] = { "cancel",   "experience", 0 };
   const char**   toShow;
   const char**   elemArrays[]   = { createElems, updateElems, displayElems, 0 };
-  Core::Element* cursor  = _root->GetElementById("edit-value-cursor");
-  Core::Element* special = _root->GetElementById("special");
-  Core::Element* skill   = _root->GetElementById("body");
+  Core::Element* cursor         = _root->GetElementById("edit-value-cursor");
+  Core::Element* special        = _root->GetElementById("special");
+  Core::Element* skill          = _root->GetElementById("body");
+  Core::Element* traits_create  = _root->GetElementById("panel-traits-create");
+  Core::Element* traits         = _root->GetElementById("panel-traits-default");
 
   Core::Element* name   = _root->GetElementById("char-name");
   Core::Element* age    = _root->GetElementById("char-age");
@@ -1195,13 +1217,19 @@ void StatViewRocket::SetEditMode(EditMode mode)
       if (age)     age->AddEventListener    ("click", &EventGeneralClicked);
       if (gender)  gender->AddEventListener ("click", &EventGeneralClicked);
       if (skill)   skill->AddEventListener  ("click", &EventSkillClicked);
+      if (traits_create) traits_create->SetProperty("display", "block");
+      if (traits)        traits->SetProperty       ("display", "none");
       toShow = createElems;
       break ;
     case Update:
       if (skill) skill->AddEventListener  ("click", &EventSkillClicked);
+      if (traits_create) traits_create->SetProperty("display", "none");
+      if (traits)        traits->SetProperty       ("display", "block");
       toShow = updateElems;
       break ;
     case Display:
+      if (traits_create) traits_create->SetProperty("display", "none");
+      if (traits)        traits->SetProperty       ("display", "block");
       toShow = displayElems;
       break ;
   }
@@ -1385,11 +1413,22 @@ void StatViewRocket::SetTraitActive(const string& trait, bool active)
 {
   if (_root)
   {
-    string         elem_id = "text-" + underscore(trait);
-    Core::Element* elem    = _root->GetElementById(elem_id.c_str());
-    
-    if (elem)
-      elem->SetProperty("color", (active ? "yellow" : "white"));
+    // Create Traits Interface
+    {
+      string         elem_id = "text-" + underscore(trait);
+      Core::Element* elem    = _root->GetElementById(elem_id.c_str());
+
+      if (elem)
+        elem->SetProperty("color", (active ? "yellow" : "white"));
+    }
+    // Display Traits Interface
+    {
+      string         elem_id = "display-trait-" + underscore(trait);
+      Core::Element* elem    = _root->GetElementById(elem_id.c_str());
+      
+      if (elem)
+        elem->SetProperty("display", active ? "block" : "none");
+    }
   }
 }
 
@@ -1397,27 +1436,38 @@ void StatViewRocket::SetTraits(list<string> traits)
 {
   if (_root)
   {
-    Core::Element* element = _root->GetElementById("panel-traits");
-    
-    if (element)
-    {
-      stringstream rml;
-      
-      for_each(traits.begin(), traits.end(), [this, &rml](const string trait)
+    Core::Element* create_element  = _root->GetElementById("panel-traits-create");
+    Core::Element* display_element = _root->GetElementById("panel-traits-default");
+
+    //if (create_element)
+    //{
+      stringstream create_rml, display_rml;
+
+      for_each(traits.begin(), traits.end(), [this, &create_rml, &display_rml](const string trait)
       {
-	rml << "<div class='traits-row'><button id='" << underscore(trait) << "' class='small_button'>&nbsp;</button>";
-	rml << "<span class='text-trait' id='text-" << underscore(trait) << "'>" << _i18n[trait].Value() << "</span><br /></div>";
+        string details = "data-details-type='traits' data-details-name='" + underscore(trait) + "'";
+        
+	create_rml  << "<div class='traits-row'><button id='" << underscore(trait) << "' class='small_button'>&nbsp;</button>";
+	create_rml  << "<span class='text-trait' id='text-" << underscore(trait) << "' " << details << " >" << _i18n[trait].Value() << "</span><br /></div>";
+        display_rml << "<span class='text-trait' id='display-trait-" << underscore(trait) << "' " << details << "  style='display:none;'>";
+        display_rml << _i18n[trait].Value() << "</span><br />";
       });
-      element->SetInnerRML(rml.str().c_str());
+      create_element->SetInnerRML(create_rml.str().c_str());
+      display_element->SetInnerRML(display_rml.str().c_str());
 
       _traits.clear();
       for_each(traits.begin(), traits.end(), [this](const string trait)
       {
-	string elem_id = underscore(trait);
-	ToggleEventListener(true, elem_id.c_str(), "click", EventTraitClicked);
-	_traits.push_back(_root->GetElementById(elem_id.c_str()));
+	string button_id = underscore(trait);
+        string display_text_id = "display-trait-" + button_id;
+        string text_id         = "trait-" + button_id;
+
+	ToggleEventListener(true, button_id,       "click", EventTraitClicked);
+        ToggleEventListener(true, display_text_id, "click", EventDetails);
+        ToggleEventListener(true, text_id,         "click", EventDetails);
+	_traits.push_back(_root->GetElementById(button_id.c_str()));
       });
-    }
+    //}
   }
 }
 
@@ -1434,32 +1484,33 @@ void StatViewRocket::SetCategoryFields(const std::string& category, const std::v
 
       for (unsigned int i = 0 ; i < keys.size() ; ++i)
       {
-	string underscored = underscore(keys[i]);
+        string underscored  = underscore(keys[i]);
+        string details_data = "data-details-type='" + underscore(category) + "' data-details-value='" + underscore(keys[i]) + '\'';
 
-	if (category == "Special")
-	{
-	  rml << "<p class='special-group' data-type='Special' data-key='" << keys[i] << "' style='top: " << topX << "px;'>\n";
-          rml << "  <p class='special-key'>" << keys[i] << "</p>\n";
-	  rml << "  <p class='special-value console-value' id='special-value-" << underscored << "'>0</p>\n";
-	  rml << "  <p class='special-commt console-value' id='special-commt-" << underscored << "'>Great</p>\n";
+        if (category == "Special")
+        {
+          rml << "<p class='special-group' data-type='Special' data-key='" << keys[i] << "' style='top: " << topX << "px;'>\n";
+          rml << "  <p class='special-key' " << details_data << ">" << keys[i] << "</p>\n";
+          rml << "  <p class='special-value console-value' id='special-value-" << underscored << "'>0</p>\n";
+          rml << "  <p class='special-commt console-value' id='special-commt-" << underscored << "'>Great</p>\n";
           rml << "</p>\n\n";
-	  topX += 40;
-	}
-	else if (category == "Statistics")
-	{
-	  rml << "<datagrid  class='statistics-datagrid'>\n";
-          rml << "  <col width='80%'><span class='statistics-key'>" << _i18n[keys[i]].Value() << "</span></col>\n";
+          topX += 40;
+        }
+        else if (category == "Statistics")
+        {
+          rml << "<datagrid  class='statistics-datagrid'>\n";
+          rml << "  <col width='80%'><span class='statistics-key' " << details_data << ">" << _i18n[keys[i]].Value() << "</span></col>\n";
           rml << "  <col width='15%'><span class='statistics-value' id='statistics-value-" << underscored << "'></span></col>\n";
           rml << "</datagrid>\n\n";
-	}
-	else if (category == "Skills")
-	{
-	  rml << "<datagrid id='skill-datagrid-" << underscored << "' class='skill-datagrid' data-type='Skills' data-key='" << keys[i] << "'>\n";
-          rml << "  <col width='70%'><span class='skill-key'>" << _i18n[keys[i]].Value() << "</span></col>\n";
+        }
+        else if (category == "Skills")
+        {
+          rml << "<datagrid id='skill-datagrid-" << underscored << "' class='skill-datagrid' data-type='Skills' data-key='" << keys[i] << "'>\n";
+          rml << "  <col width='70%'><span class='skill-key' " << details_data << ">" << _i18n[keys[i]].Value() << "</span></col>\n";
           rml << "  <col width='20%'><span class='skill-value' id='skills-value-" << underscored << "'>0</span></col>\n";
           rml << "  <col width='5%'><span>%</span></col>";
           rml << "</datagrid>\n\n";
-	}
+        }
       }
       element->SetInnerRML(rml.str().c_str());
     }
