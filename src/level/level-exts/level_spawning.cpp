@@ -4,11 +4,13 @@ using namespace std;
 
 void Level::SpawnEnemies(const std::string& type, unsigned short quantity, unsigned short n_spawn)
 {
+  cout << "[Level] spawning " << type << endl;
   Party          spawn_party;
   stringstream   entry_zone;
   Data           random_party = (*_dataEngine)["random-encounters"][type];
   unsigned short i            = 0; 
 
+  (*_dataEngine)["random-encounters"].Output();
   entry_zone << "spawn_" << n_spawn;
   for (unsigned short ii = 0 ; ii < random_party.Count() ; ++ii)
   {

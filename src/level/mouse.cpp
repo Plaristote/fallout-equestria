@@ -122,6 +122,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
     Timer timer;
     
     _hovering.hasWaypoint = false;
+    cout << "Looking for closest terrain (" << collisionHandlerQueue->get_num_entries() << ')' << endl;
     for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
     {
       CollisionEntry* entry      = collisionHandlerQueue->get_entry(i);
@@ -134,6 +135,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
       pos = entry->get_surface_point(world->floors[map_object->floor]);
       Timer timer2;
       _hovering.waypoint_ptr = world->waypoint_graph.GetClosest(pos);
+      cout << "Closest waypoint is " << _hovering.waypoint_ptr << endl;
       //timer2.Profile("Assessing closest waypoint");
       //_hovering.waypoint_ptr = world->GetWaypointClosest(pos, map_object->floor);
       if (_hovering.waypoint_ptr)

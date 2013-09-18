@@ -20,7 +20,7 @@ namespace DivideAndConquer
     {
       virtual const char* what(void) const throw() { return ("Empty branch in the graph's node tree"); }
     };
-    
+
   //private:
     struct Node
     {
@@ -28,24 +28,30 @@ namespace DivideAndConquer
       {
         std::for_each(nodes.begin(), nodes.end(), [](Node* children) { delete children; });
       }
-      
+
       virtual const std::vector<T*>& GetEntries(POS position_from, Heuristic heuristic) const
       {
         return (FindBestNode(position_from, heuristic)->GetEntries(position_from, heuristic));
       }
       
-      const Node*   FindBestNode(POS position_from, Heuristic heuristic) const
+      virtual const std::vector<T*>& GetEntries(POS position_from, Heuristic heuristic)
+      {
+        std::cout << "GetEntries not final node" << std::endl;
+        return (FindBestNode(position_from, heuristic)->GetEntries(position_from, heuristic));
+      }      
+
+      const Node*   FindBestNode(POS position_from, Heuristic heuristic, bool allow_null = false) const
       {
         auto        it                = nodes.begin(), end = nodes.end();
         const Node* best_candidate    = 0;
         float       best_score;
-        
+
         for (; it != end ; ++it)
         {
           const Node* candidate_node  = *it;
           float       candidate_score = heuristic(position_from, (*it)->position);
           
-          if (!best_candidate || candidate_score < best_score)
+          if ((!best_candidate || candidate_score < best_score) && (allow_null || !candidate_node->IsNull()))
           {
             best_candidate            = candidate_node;
             best_score                = candidate_score;
@@ -55,19 +61,19 @@ namespace DivideAndConquer
           throw new NodeException();
         return (best_candidate);
       }
-      
-      Node*   FindBestNode(POS position_from, Heuristic heuristic)
+
+      Node*   FindBestNode(POS position_from, Heuristic heuristic, bool allow_null = false)
       {
         auto        it                = nodes.begin(), end = nodes.end();
         Node*       best_candidate    = 0;
         float       best_score        = 0;
-        
+
         for (; it != end ; ++it)
         {
           Node*       candidate_node  = *it;
           float       candidate_score = heuristic(position_from, (*it)->position);
-          
-          if (!best_candidate || candidate_score < best_score)
+
+          if ((!best_candidate || candidate_score < best_score) && (allow_null || !candidate_node->IsNull()))
           {
             best_candidate            = candidate_node;
             best_score                = candidate_score;
@@ -96,7 +102,7 @@ namespace DivideAndConquer
         // Dispatching the entries in the closest nodes
         std::for_each(entries.begin(),   entries.end(),   [this, heuristic](T* item)
         {
-          Node* node = FindBestNode(item->GetPosition(), heuristic);
+          Node* node = FindBestNode(item->GetPosition(), heuristic, true);
           
           node->entries.push_back(item);
         });
@@ -119,6 +125,23 @@ namespace DivideAndConquer
           }
         }
       }
+
+      virtual bool IsNull(void) const
+      {
+        auto it      = nodes.begin();
+        auto end     = nodes.end();
+        bool is_null = true;
+
+        for (; it != end ; ++it)
+        {
+          if (!(*it)->IsNull())
+          {
+            is_null = false;
+            break ;
+          }
+        }
+        return (is_null); 
+      }
       
       POS                position;
       std::vector<Node*> nodes;
@@ -127,7 +150,14 @@ namespace DivideAndConquer
     
     struct FinalNode : public Node
     {
+      virtual bool  IsNull(void) const { return (this->entries.size() == 0); }
+      
       virtual const std::vector<T*>& GetEntries(POS position_from, Heuristic heuristic) const
+      {
+        return (this->entries);
+      }
+
+      virtual const std::vector<T*>& GetEntries(POS position_from, Heuristic heuristic) 
       {
         return (this->entries);
       }
@@ -145,21 +175,32 @@ namespace DivideAndConquer
     
     T*                 GetClosest(POS position)
     {
-      Node* node       = node_tree.FindBestNode(position, heuristic);
-      T*    best       = 0;
-      float best_score = 0;
-
-      std::for_each(node->entries.begin(), node->entries.end(), [this, &best, &best_score, position](T* entry)
+      try
       {
-        float score = heuristic(position, entry->GetPosition());
-        
-        if (!best || best_score > score)
+        if (!(node_tree.IsNull()))
         {
-          best       = entry;
-          best_score = score;
+          auto  entries    = node_tree.GetEntries(position, heuristic);
+          T*    best       = 0;
+          float best_score = 0;
+
+          std::for_each(entries.begin(), entries.end(), [this, &best, &best_score, position](T* entry)
+          {
+            float score = heuristic(position, entry->GetPosition());
+
+            if (!best || best_score > score)
+            {
+              best       = entry;
+              best_score = score;
+            }
+          });
+          return (best);
         }
-      });
-      return (best);
+      }
+      catch (NodeException* e)
+      {
+        std::cerr << "Catched NodeException: " << e->what() << std::endl;
+      }
+      return (0);
     }
 
   //private:
