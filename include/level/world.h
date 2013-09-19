@@ -163,7 +163,7 @@ struct MapObject
   void          SetFloor(unsigned char floor);
   void          ReparentTo(MapObject* object);
 
-  void          UnSerialize(WindowFramework* window, Utils::Packet& packet);
+  void          UnSerialize(World* world, Utils::Packet& packet);
   void          UnserializeWaypoints(World*, Utils::Packet& packet);
   void          Serialize(Utils::Packet& packet);
   static void   InitializeTree(World* world);

@@ -981,7 +981,7 @@ void MapObject::ReparentTo(MapObject* object)
     parent = "";
 }
 
-void MapObject::UnSerialize(WindowFramework* window, Utils::Packet& packet)
+void MapObject::UnSerialize(World* world, Utils::Packet& packet)
 {
   string name;
   float  posX,   posY,   posZ;
@@ -993,8 +993,10 @@ void MapObject::UnSerialize(WindowFramework* window, Utils::Packet& packet)
   packet >> floor;
   if (blob_revision >= 1)
     packet >> parent;
+  if (blob_revision >= 2)
+    UnserializeWaypoints(world, packet);
 
-  nodePath   = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + strModel);
+  nodePath   = world->window->load_model(world->window->get_panda_framework()->get_models(), MODEL_ROOT + strModel);
   if (nodePath.is_empty())
   {
     std::cerr << "[World][Unserialize] Could not load model " << strModel << " for object '" << name << '\'' << std::endl;
@@ -1091,56 +1093,62 @@ void MapObject::Serialize(Utils::Packet& packet)
 
 void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
 {
-    int  iType;
-    char iLocked;
-    int  iWaypoint;
+  int  iType;
+  char iLocked;
+  int  iWaypoint;
 
-    MapObject::UnSerialize(world->window, packet);
-    packet >> iType >> interactions;
-    type = (Type)iType;
+  MapObject::UnSerialize(world, packet);
+  cout << "ma bite #1" << endl;
+  packet >> iType >> interactions;
+  cout << "ma bite #2" << endl;
+  type = (Type)iType;
 
-    if      (type == Character)
-      packet >> script >> charsheet >> dialog;
-    else if (type == Door || type == Locker)
-      packet >> iLocked >> key;
-    else if (type == Item)
-      packet >> key;
-    locked = iLocked != 0;
+  if      (type == Character)
+    packet >> script >> charsheet >> dialog;
+  else if (type == Door || type == Locker)
+    packet >> iLocked >> key;
+  else if (type == Item)
+    packet >> key;
+  cout << "ma bite #3" << endl;
+  locked = iLocked != 0;
 
-    packet >> iWaypoint;
-    waypoint = world->GetWaypointFromId(iWaypoint);
-    
-    // Blocked Arcs
-    {
-        int size;
+  packet >> iWaypoint;
+  cout << "ma bite #4" << endl;
+  waypoint = world->GetWaypointFromId(iWaypoint);
+  
+  // Blocked Arcs
+  {
+      int size;
 
-        packet >> size;
-        for (int i = 0 ; i < size ; ++i)
-        {
-          int id1, id2;
+      packet >> size;
+      for (int i = 0 ; i < size ; ++i)
+      {
+        int id1, id2;
 
-          packet >> id1 >> id2;
-          auto it1 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id1, id2));
-          auto it2 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id2, id1));
-          if (it1 == lockedArcs.end() && it2 == lockedArcs.end())
-          {  lockedArcs.push_back(std::pair<int, int>(id1, id2)); }
-        }
-    }
+        packet >> id1 >> id2;
+        auto it1 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id1, id2));
+        auto it2 = find(lockedArcs.begin(), lockedArcs.end(), std::pair<int, int>(id2, id1));
+        if (it1 == lockedArcs.end() && it2 == lockedArcs.end())
+        {  lockedArcs.push_back(std::pair<int, int>(id1, id2)); }
+      }
+  }
+  cout << "ma bite #5" << endl;
 
-    // Inventory serialization
-    {
-        int size;
+  // Inventory serialization
+  {
+      int size;
 
-        packet >> size;
-        for (int i = 0 ; i < size ; ++i)
-        {
-            string jsonSrc;
-            int    quantity;
+      packet >> size;
+      for (int i = 0 ; i < size ; ++i)
+      {
+          string jsonSrc;
+          int    quantity;
 
-            packet >> jsonSrc >> quantity;
-            inventory.push_back(std::pair<std::string, int>(jsonSrc, quantity));
-        }
-    }
+          packet >> jsonSrc >> quantity;
+          inventory.push_back(std::pair<std::string, int>(jsonSrc, quantity));
+      }
+  }
+  cout << "ma bite #6" << endl;
 }
 
 void DynamicObject::Serialize(Utils::Packet& packet)
@@ -1354,8 +1362,7 @@ void           World::UnSerialize(Utils::Packet& packet)
       MapObject     object;
       unsigned char floor;
 
-      object.UnSerialize(window, packet);
-      if (blob_revision >= 2) { object.UnserializeWaypoints(this, packet); }
+      object.UnSerialize(this, packet);
       floor        = object.floor;
       object.floor = (floor == 0 ? 1 : 0); // This has to be done, or MapObjectChangeFloor won't execute
       MapObjectChangeFloor(object, floor);

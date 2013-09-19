@@ -152,8 +152,8 @@ x ---> Allow inclusion of the return value of a script function in dialog's text
 x --> Party Create/Import/Export via scripts
 x --> Fixing last pathfinding issue(s)
 
-  -> GameTask
-  --> Compression for save slots
+x -> GameTask
+x --> Compression for save slots
 
   -> Game Editor
 ~ --> Asynchronous Map Loading
