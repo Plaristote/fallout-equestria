@@ -84,7 +84,7 @@ namespace Utils
   {
     DirectoryCompressor() {}
   public:
-    static void Compress(const std::string& target, const std::string& path)
+    static void Compress(const std::string& target, const std::string& path, std::function<bool (const std::string&)> selector = [](const std::string&) { return (true); })
     {
       std::ofstream file_output;
       Directory     directory;
@@ -101,8 +101,10 @@ namespace Utils
       });
       output << file_count;
       // Files
-      std::for_each(directory.GetEntries().begin(), directory.GetEntries().end(), [&output, path](Dirent entry)
+      std::for_each(directory.GetEntries().begin(), directory.GetEntries().end(), [&output, path, selector](Dirent entry)
       {
+        if (selector(entry.d_name) == false)
+          return ;
         if (entry.d_type == DT_REG)
         {
           std::ifstream  input;

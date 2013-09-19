@@ -956,22 +956,27 @@ AsyncTask::DoneStatus Level::do_task(void)
   _camera.Run(elapsedTime);  
 
   //
-  // Level Mouse HInts
+  // Level Mouse Hints
   //
-  _mouse.ClosestWaypoint(_world, _currentFloor);
-  if (_mouse.Hovering().hasWaypoint)
+  if (_state != Interrupted && _levelUi.GetContext()->GetHoverElement() == _levelUi.GetContext()->GetRootElement())
   {
-    unsigned int waypoint_id = _mouse.Hovering().waypoint_ptr->id;
-    
-    if (_world->IsInExitZone(waypoint_id))
-      MouseCursor::Get()->SetHint("exit");
+    _mouse.ClosestWaypoint(_world, _currentFloor);
+    if (_mouse.Hovering().hasWaypoint)
+    {
+      unsigned int waypoint_id = _mouse.Hovering().waypoint_ptr->id;
+      
+      if (_world->IsInExitZone(waypoint_id))
+        MouseCursor::Get()->SetHint("exit");
+      else
+        MouseCursor::Get()->SetHint("");
+    }
     else
-      MouseCursor::Get()->SetHint("");
+      MouseCursor::Get()->SetHint("nowhere");
+    if (_mouseState == MouseTarget && _mouse.Hovering().hasDynObject)
+      MouseSuccessRateHint();
   }
   else
-    MouseCursor::Get()->SetHint("nowhere");
-  if (_mouseState == MouseTarget && _mouse.Hovering().hasDynObject)
-    MouseSuccessRateHint();
+    MouseCursor::Get()->SetHint("");
   //
   // End Level Mouse Hints
   //

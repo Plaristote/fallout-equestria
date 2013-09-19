@@ -621,7 +621,7 @@ bool GameTask::CopySave(const std::string& savepath, const std::string& slotPath
 
   data["time"].Duplicate(_dataEngine["time"]);
   data["system"].Duplicate(_dataEngine["system"]);
-  Utils::DirectoryCompressor::Compress(slotPath, savepath);
+  Utils::DirectoryCompressor::Compress(slotPath, savepath, [](const string& i) { return (i != "preview.png"); });
   Filesystem::FileCopy(savepath + "preview.png", slotPath + ".png");
   DataTree::Writers::JSON(data, slotPath + ".json");
   return (true);

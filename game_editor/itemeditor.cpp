@@ -54,7 +54,6 @@ ItemEditor::ItemEditor(QWidget *parent) :
     connect(ui->actionHasHookUse, SIGNAL(clicked()), this, SLOT(UpdateData()));
     connect(ui->actionHasHookWeapon, SIGNAL(clicked()), this, SLOT(UpdateData()));
     connect(ui->actionHookCharacters, SIGNAL(textEdited(QString)), this, SLOT(UpdateData()));
-    connect(ui->actionHookDoors, SIGNAL(textEdited()), this, SLOT(UpdateData()));
     connect(ui->actionHookOthers, SIGNAL(textEdited(QString)), this, SLOT(UpdateData()));
     connect(ui->actionHookUse, SIGNAL(textEdited(QString)), this, SLOT(UpdateData()));
     connect(ui->actionHookWeapon, SIGNAL(textEdited(QString)), this, SLOT(UpdateData()));
