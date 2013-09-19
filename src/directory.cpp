@@ -29,9 +29,11 @@ bool Filesystem::FileContent(const string& filepath, string& out)
 
 bool Filesystem::FileCopy(const string& from, const string& dest)
 {
-  ifstream stream_src(from.c_str());
-  ofstream stream_dest(dest.c_str());
+  ifstream stream_src;
+  ofstream stream_dest;
 
+  stream_src.open (from.c_str(), ios::binary);
+  stream_dest.open(dest.c_str(), ios::binary);
   if (stream_src.is_open() && stream_dest.is_open())
   {
     std::streamoff begin, end;
@@ -47,11 +49,23 @@ bool Filesystem::FileCopy(const string& from, const string& dest)
     stream_src.read(raw, size);
     stream_src.close();
     raw[size]   = 0;
-    stream_dest << raw;
+    stream_dest.write(raw, size);
     delete[] raw;
     return (true);
   }
   return (false);
+}
+
+std::size_t Filesystem::FileSize(const string& file)
+{
+  ifstream in(file.c_str(), ifstream::in | ifstream::binary);
+  
+  if (in.is_open())
+  {
+    in.seekg(0, ifstream::end);
+    return (in.tellg());
+  }
+  return (0);
 }
 
 #ifndef _WIN32 // UNIX

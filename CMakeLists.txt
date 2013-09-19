@@ -28,7 +28,7 @@ add_executable(game ${sourceFiles})
 if (UNIX)
   target_link_libraries(game -L/usr/lib/panda3d p3framework panda pandafx pandaphysics pandaexpress p3dtoolconfig p3dtool p3direct pandaegg
                                               p3rocket RocketCore RocketControls
-                                              angelscript pthread)
+                                              angelscript pthread z)
 else()
   target_link_libraries(game libp3framework libpanda libpandafx libpandaphysics libpandaexpress libp3dtoolconfig libp3dtool libp3direct libpandaegg libp3rocket RocketCore RocketControls angelscript)
 endif()

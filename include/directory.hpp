@@ -35,9 +35,10 @@ struct Dirent
 class Filesystem
 {
 public:
-  static bool FileContent(const std::string& filepath, std::string& out);
-  static bool FileCopy(const std::string& from, const std::string& dest);
-  static bool FileExists(const std::string& filepath);
+  static bool        FileContent(const std::string& filepath, std::string& out);
+  static bool        FileCopy(const std::string& from, const std::string& dest);
+  static bool        FileExists(const std::string& filepath);
+  static std::size_t FileSize(const std::string& filepath);
 
 private:
   Filesystem() {}

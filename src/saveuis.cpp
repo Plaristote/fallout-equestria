@@ -67,7 +67,7 @@ string UiLoad::LoadSlotRml(const string& prefix, unsigned short it)
   stringstream dataengine_path;
   stringstream rml;
 
-  dataengine_path << "saves/slot-" << it << "/dataengine.json";
+  dataengine_path << "saves/slots/slot-" << it << ".json";
   tree = DataTree::Factory::JSON(dataengine_path.str());
   rml << "<div class='" << prefix << "-slot' id='" << prefix << "-slot-" << it << "' data-slot='" << it << "'>\n";
   rml << "  <div class='load-slot-title'>Slot " << it << "</div>\n";
@@ -80,7 +80,7 @@ string UiLoad::LoadSlotRml(const string& prefix, unsigned short it)
 
     rml << "    <span class='load-slot-date'>" << time["year"].Value() << "/" << time["month"].Value() << "/" << time["days"].Value() << "</span>\n";
     rml << "    <span class='load-slot-time'> - " << time["hours"].Value() << ":" << time["minutes"].Value() << ":" << time["seconds"].Value() << "</span>\n";
-    rml << "    <span class='load-slot-place'> - " << (place == 0 ? "Worldmap" : place.Value()) << "</span>\n";
+    rml << "    <span class='load-slot-place'> - " << (place == 0 ? "Wasteland" : place.Value()) << "</span>\n";
   }
   else
     rml << "    Empty slot\n";
@@ -125,22 +125,8 @@ void UiLoad::LoadSlots(const string& savePath)
     dir.OpenDir(savePath);
     std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [this, &nSlots](const Dirent& entry)
     {
-      if (entry.d_type == DT_DIR)
-      {
-	std::string str("slot-");
-	bool        compare = true;
-
-	for (unsigned int i = 0 ; i < str.length() ; ++i)
-	{
-	  if (str[i] != entry.d_name[i])
-	  {
-	    compare = false;
-	    break ;
-	  }
-	}
-	if (compare)
-	  nSlots++;
-      }
+      if (string(entry.d_name).find(".png") == string::npos)
+        nSlots++;
     });
 
     std::stringstream rml;
@@ -189,17 +175,9 @@ void UiLoad::LoadGame(Rocket::Core::Event&)
   {
     Rocket::Core::Variant* varSlot = _selectedSlot->GetAttribute("data-slot");
     unsigned int           slot    = 0;
-    stringstream           dataengine_path;
-    DataTree*              tree;
 
     slot = varSlot->Get<unsigned int>();
-    dataengine_path << "saves/slot-" << slot << "/dataengine.json";
-    tree = DataTree::Factory::JSON(dataengine_path.str());
-    if (tree)
-    {
-      delete tree;
-      LoadSlot.Emit((unsigned char)slot);
-    }
+    LoadSlot.Emit((unsigned char)slot);
   }
 }
 
@@ -214,7 +192,7 @@ void UiLoad::ClickSlot(Rocket::Core::Event& event)
     stringstream           rml_preview;
 
     var_slot      = _selectedSlot->GetAttribute("data-slot");
-    rml_preview << "<img id='preview-picture' src='../saves/slot-" << var_slot->Get<unsigned int>() << "/preview.png' />";
+    rml_preview << "<img id='preview-picture' style='color:rgba(255, 0, 255, 0);' src='../saves/slots/slot-" << var_slot->Get<unsigned int>() << ".png' />";
     preview->SetInnerRML(rml_preview.str().c_str());
   }
 }
@@ -266,11 +244,14 @@ void UiSave::LoadSlots(const string& savePath)
   if (slotContainer)
   {
     Directory      dir;
-    unsigned short nSlots = 0;
+    unsigned short nSlots = 1;
 
-    dir.OpenDir(savePath);
+    dir.OpenDir(savePath + "slots");
     std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [this, &nSlots](const Dirent& entry)
-    { if (entry.d_type == DT_DIR && entry.d_name != std::string(".") && entry.d_name != std::string("..")) nSlots++; });
+    {
+      if (string(entry.d_name).find(".png") == string::npos)
+        nSlots++;
+    });
 
     std::stringstream rml;
     

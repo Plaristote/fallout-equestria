@@ -5,6 +5,7 @@
 #include <dices.hpp>
 #include <ui_dialog.hpp>
 #include <Boots/thread.hpp>
+#include <Boots/my_zlib.hpp>
 #include <panda_lock.hpp>
 #include <iostream>
 
@@ -615,58 +616,14 @@ void GameTask::ExitLevel(const std::string& savepath)
 
 bool GameTask::CopySave(const std::string& savepath, const std::string& slotPath)
 {
-  // Copy the savepath directory to the slotpath directory
-  Directory                          dir;
-  Directory::Entries::const_iterator it, end;
+  DataTree metadata;
+  Data     data(&metadata);
 
-  Directory::MakeDir(slotPath);
-  dir.OpenDir(savepath);
-  it  = dir.GetEntries().begin();
-  end = dir.GetEntries().end();
-  
-  for (; it != end ; ++it)
-  {
-    const Dirent& entry = *it;
-
-    if (entry.d_type == DT_REG)
-    {
-      // Copy file to the slot
-      std::string   ifilePath, ofilePath;
-      std::ifstream ifile;
-      std::ofstream ofile;
-
-      ifilePath = savepath + "/" + entry.d_name;
-      ofilePath = slotPath + "/" + entry.d_name;
-      ifile.open(ifilePath.c_str());
-      ofile.open(ofilePath.c_str());
-      if (ifile.is_open() && ofile.is_open())
-      {
-	long  begin, end;
-	long  size;
-	char* raw;
-
-	begin     = ifile.tellg();
-	ifile.seekg (0, std::ios::end);
-	end       = ifile.tellg();
-	ifile.seekg(0, std::ios::beg);
-	size      = end - begin;
-	raw       = new char[size + 1];
-	raw[size] = 0;
-	ifile.read(raw, size);
-	ifile.close();
-
-	ofile.write(raw, size);
-	ofile.close();
-
-	delete[] raw;
-      }
-      else
-      {
-	// Can't copy file...
-	return (false);
-      }
-    }
-  }
+  data["time"].Duplicate(_dataEngine["time"]);
+  data["system"].Duplicate(_dataEngine["system"]);
+  Utils::DirectoryCompressor::Compress(slotPath, savepath);
+  Filesystem::FileCopy(savepath + "preview.png", slotPath + ".png");
+  DataTree::Writers::JSON(data, slotPath + ".json");
   return (true);
 }
 
@@ -676,21 +633,11 @@ void GameTask::EraseSlot(unsigned char slot)
   string       dirname;
   Directory    dir;
   
-  stream << _savePath << "/slot-" << (int)slot;
+  stream << _savePath << "/slots/slot-" << (int)slot;
+  remove(stream.str().c_str());
+  remove((stream.str() + ".png").c_str());
+  remove((stream.str() + ".json").c_str());
   cout << "Clearing Slot: " << stream.str() << endl;
-  dirname = stream.str();
-  dir.OpenDir(dirname);
-  for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [dirname](const Dirent& entry)
-  {
-    string to_remove = entry.d_name;
-    cout << "- Remove file " << to_remove << endl;
-    to_remove = dirname + "/" + to_remove;
-    int ret = remove(to_remove.c_str());
-    if (ret != 0)
-      cout << "--> Failed to remove file " << to_remove << endl;
-    else
-      cout << "--> Success" << endl;
-  });
 }
 
 void GameTask::SaveToSlot(unsigned char slot)
@@ -700,7 +647,7 @@ void GameTask::SaveToSlot(unsigned char slot)
   {
     std::stringstream stream;
 
-    stream << _savePath << "/slot-" << (int)slot;
+    stream << _savePath << "/slots/slot-" << (int)slot;
     EraseSlot(slot);
     CopySave(_savePath, stream.str());
   }
@@ -728,10 +675,10 @@ void GameTask::LoadSlot(unsigned char slot)
     std::for_each(dir.GetEntries().begin(), dir.GetEntries().end(), [](const Dirent& entry)
     {
       if (entry.d_type == DT_REG)
-	  {
-		std::string dname = entry.d_name;
+      {
+        std::string dname = entry.d_name;
         remove(dname.c_str());
-	  }
+      }
     });
   }
   
@@ -739,8 +686,8 @@ void GameTask::LoadSlot(unsigned char slot)
   {
     std::stringstream stream;
 
-    stream << _savePath << "/slot-" << (unsigned int)slot;
-    CopySave(stream.str(), _savePath);
+    stream << _savePath << "/slots/slot-" << (unsigned int)slot;
+    Utils::DirectoryCompressor::Uncompress(stream.str(), _savePath);
   }
   
   if (_uiLoadGame) _uiLoadGame->Hide();
@@ -871,9 +818,6 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
       AlertUi::NewAlert.Emit("The characters couldn't be loaded properly.");
       _worldMap->Show();
     }
-
-    // TODO remove this when we're done with deploying creeps
-    //_level->SpawnEnemies("critters", 10, 1);
   }
   else
   {
