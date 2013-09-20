@@ -113,7 +113,7 @@ void QPandaWidget::CallbackWheel(const Event *event, void *ptr)
 
   if (data.get_in_window())
   {
-    QPointF      pos(data.get_x(), data.get_y());
+    QPoint       pos(data.get_x(), data.get_y());
     int          delta = 0;
 
     if (event->get_name() == "wheel_up")

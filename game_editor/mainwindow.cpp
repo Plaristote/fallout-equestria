@@ -141,8 +141,6 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     setWindowTitle("Fallout Equestria Editor");
     setWindowIcon(QIcon("icons/app-icon.png"));
 
-    splashScreen.open();
-
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(CurrentTabChanged(int)));
 
     connect(&splashScreen, SIGNAL(rejected()), app,  SLOT(Terminate()));
@@ -214,6 +212,7 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
 
 MainWindow::~MainWindow()
 {
+    AsyncTaskManager::get_global_ptr()->remove(&my_task);
     delete ui;
 }
 

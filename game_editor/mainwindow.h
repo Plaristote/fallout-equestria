@@ -180,7 +180,9 @@ private:
     TabDialog                tabDialog;
     TabL18n                  tabL18n;
 
+public:
     DialogSplashscreen       splashScreen;
+private:
 
     unsigned short           level_editor_lock;
     QString                  levelName;

@@ -276,12 +276,12 @@ void ItemEditor::SelectAction(QString key)
 
       std::cout << "Loading action " << key.toStdString() << " for item " << currentItem.Key() << std::endl;
 
-      ui->actionApCost->setValue(currentAction["ap-cost"]);
-      ui->actionCombat->setChecked(currentAction["combat"].Value() == "1");
+      ui->actionCombat->setChecked  (currentAction["combat"].Value() == "1");
       ui->actionTargeted->setChecked(currentAction["targeted"].Value() != "0");
-      ui->actionRange->setValue(currentAction["range"]);
-      ui->actionDamage->setValue(currentAction["damage"]);
-      ui->actionDamageMax->setValue(currentAction["damage-max"]);
+      ui->actionApCost->setValue    (currentAction["ap-cost"]    || 0);
+      ui->actionRange->setValue     (currentAction["range"]      || 0);
+      ui->actionDamage->setValue    (currentAction["damage"]     || 0);
+      ui->actionDamageMax->setValue (currentAction["damage-max"] || 0);
 
       ui->actionHasHookWeapon->setChecked(!(currentAction["hookWeapon"].Nil()));
       if (ui->actionHasHookWeapon->isChecked())
