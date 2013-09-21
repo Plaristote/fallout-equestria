@@ -19,29 +19,29 @@ InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* conte
     {
       // Positioning the interact_menu
       {
-	std::stringstream strTop, strLeft;
-	MouseData    pointer = _window->get_graphics_window()->get_pointer(0);
+        std::stringstream strTop, strLeft;
+        MouseData    pointer = _window->get_graphics_window()->get_pointer(0);
 
-	strTop  << (pointer.get_y());
-	strLeft << (pointer.get_x());
-	element->SetProperty("position", "absolute");
-	element->SetProperty("top",  strTop.str().c_str());
-	element->SetProperty("left", strLeft.str().c_str());
+        strTop  << (pointer.get_y());
+        strLeft << (pointer.get_x());
+        element->SetProperty("position", "absolute");
+        element->SetProperty("top",  strTop.str().c_str());
+        element->SetProperty("left", strLeft.str().c_str());
       }
 
       // Generating and setting the RML for the interact_menu
       {
-	std::stringstream rml;
-	
-	for_each(interactions.begin(), interactions.end(), [&rml](InstanceDynamicObject::Interaction& interaction)
-	{
-	  rml << "<div id='interaction-" << interaction.name << "'>";
-	  rml << "<button id='" << interaction.name << "' class='interact_button'>";
-	  rml << "<img src='../textures/buttons/" + interaction.name + "-normal.png' />";
-	  rml << "</button></div>";
-	});
+        std::stringstream rml;
+        
+        for_each(interactions.begin(), interactions.end(), [&rml](InstanceDynamicObject::Interaction& interaction)
+        {
+          rml << "<div id='interaction-" << interaction.name << "'>";
+          rml << "<button id='" << interaction.name << "' class='interact_button'>";
+          rml << "<img src='../textures/buttons/" + interaction.name + "-normal.png' />";
+          rml << "</button></div>";
+        });
 
-	element->SetInnerRML(rml.str().c_str());
+        element->SetInnerRML(rml.str().c_str());
       }
 
       int it = 0;
@@ -49,19 +49,19 @@ InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* conte
 
       for_each(interactions.begin(), interactions.end(), [this, &it](InstanceDynamicObject::Interaction& interaction)
       {
-	Rocket::Core::Element* button = _root->GetElementById(interaction.name.c_str());
+        Rocket::Core::Element* button = _root->GetElementById(interaction.name.c_str());
 
-	_buttons.push_back(button);
-	button->AddEventListener("click",     &_buttonListener);
-	button->AddEventListener("mouseover", &_buttonHover);
-	button->AddEventListener("mouseout",  &_buttonHover);
-	button->AddEventListener("mousedown", &_buttonClick);
-	button->AddEventListener("mouseup",   &_buttonClick);
-	_listeners[it] = &interaction;
-	_obs.Connect(_buttonListener.EventReceived, *this, &InteractMenu::ButtonClicked);
-	_obs.Connect(_buttonHover.EventReceived,    *this, &InteractMenu::ButtonHovered);
-	_obs.Connect(_buttonClick.EventReceived,    *this, &InteractMenu::MouseButton);
-	++it;
+        _buttons.push_back(button);
+        button->AddEventListener("click",     &_buttonListener);
+        button->AddEventListener("mouseover", &_buttonHover);
+        button->AddEventListener("mouseout",  &_buttonHover);
+        button->AddEventListener("mousedown", &_buttonClick);
+        button->AddEventListener("mouseup",   &_buttonClick);
+        _listeners[it] = &interaction;
+        _obs.Connect(_buttonListener.EventReceived, *this, &InteractMenu::ButtonClicked);
+        _obs.Connect(_buttonHover.EventReceived,    *this, &InteractMenu::ButtonHovered);
+        _obs.Connect(_buttonClick.EventReceived,    *this, &InteractMenu::MouseButton);
+        ++it;
       });
     }
   }
@@ -70,14 +70,17 @@ InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* conte
 
 void InteractMenu::ExecuteForButtonId(Rocket::Core::Event& event, std::function<bool (Rocket::Core::Event&, const std::string&, InstanceDynamicObject::Interaction*)> callback)
 {
-  string id         = event.GetCurrentElement()->GetId().CString();
-  string event_type = event.GetType().CString();
-
-  for (unsigned int i = 0 ; i < _listeners.size() ; ++i)
+  if (!_done)
   {
-    if (id == _listeners[i]->name && (callback(event, event_type, _listeners[i])))
-      break ;
-  }  
+    string id         = event.GetCurrentElement()->GetId().CString();
+    string event_type = event.GetType().CString();
+
+    for (unsigned int i = 0 ; i < _listeners.size() ; ++i)
+    {
+      if (id == _listeners[i]->name && (callback(event, event_type, _listeners[i])))
+        break ;
+    }
+  }
 }
 
 void InteractMenu::ButtonHovered(Rocket::Core::Event& event)

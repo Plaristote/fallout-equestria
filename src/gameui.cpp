@@ -865,8 +865,10 @@ void GameInventory::SetEquipedItem(unsigned short slot, InventoryObject* item)
         int item_count = _inventory->GetObjectIterator(item);
 
         rml << "<p id='" << item_count << "' class='equiped_image";
+#ifdef INVENTORY_USE_DRAGDROP
         if (!(item->IsHidden()))
           rml << " inventory-item-draggable";
+#endif
         if ((*item)["icon"].Value() != "")
           rml << "'><img src='../textures/itemIcons/" << (*item)["icon"].Value() << "' />";
         rml << "</p>";

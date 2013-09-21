@@ -3,6 +3,7 @@
 # include "world.h"
 #else
 # include "level/world.h"
+#include <dices.hpp>
 #endif
 #include <panda3d/collisionHandlerQueue.h>
 
@@ -856,6 +857,19 @@ std::pair<Waypoint::Arc, unsigned short>* Waypoint::GetWithdrawable(Waypoint* ot
 
     if (arc.to->id == other->id)
       return (&(*it));
+  }
+  return (0);
+}
+
+Waypoint* Waypoint::GetRandomWaypoint(void) const
+{
+  if (arcs_withdrawed.size() > 0)
+  {
+    ArcsWithdrawed::const_iterator it  = arcs_withdrawed.begin();
+    unsigned int                   i   = Dices::Throw(arcs_withdrawed.size() - 1);
+
+    std::advance(it, i);
+    return ((*it).first.to);
   }
   return (0);
 }

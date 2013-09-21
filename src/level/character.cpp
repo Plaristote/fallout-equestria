@@ -204,6 +204,23 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   GetNodePath().set_transparency(TransparencyAttrib::M_alpha);
 }
 
+void ObjectCharacter::SetActionPoints(unsigned short ap)
+{
+  if (_level->GetState() == Level::Fight)
+  {
+    _actionPoints = ap;
+    if (_statistics)
+      ActionPointChanged.Emit(_actionPoints, Data(_statistics)["Statistics"]["Action Points"]);
+  }
+}
+
+unsigned short ObjectCharacter::GetActionPoints(void) const
+{
+  if (_level->GetState() != Level::Fight)
+    return (Data(_statistics)["Statistics"]["Action Points"]);
+  return (_actionPoints);
+}
+
 void ObjectCharacter::SetInventory(Inventory* inventory)
 {
   if (inventory)
@@ -308,32 +325,46 @@ void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* contro
   }
 }
 
-void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& name)
+void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& name, InstanceDynamicObject* target)
 {
   if (_equiped[it].equiped)
   {
     InventoryObject& item           = *(_equiped[it].equiped);
-    Data             playerAnim     = item["actions"][_equiped[it].actionIt]["animations"]["player"][name];
+    Data             animation      = item["actions"][_equiped[it].actionIt]["animations"];
+    Data             playerAnim     = animation["player"][name];
     const string     playerAnimName = (playerAnim.Nil() ? ANIMATION_DEFAULT : playerAnim.Value());
 
-    if (_equiped[it].graphics)
-      _equiped[it].graphics->PlayAnimation(name);
-    PlayAnimation(playerAnimName);
-
-    if (_equiped[it].graphics)
+    //
+    // Character's animation
+    //
+    if (playerAnim.Nil())
     {
-      Projectile* projectile = new Projectile(_level->GetWorld(), _equiped[it].graphics->GetNodePath());
-
-      projectile->SetTimeout(0.5);
-      projectile->SetColor(255, 255, 0, 1);
-      _level->InsertProjectile(projectile);
+      switch (_equiped[it].mode)
+      {
+        case EquipedBattleSaddle:
+          PlayAnimation("saddle-" + playerAnimName);
+        case EquipedMagic:
+          PlayAnimation("magic-" + playerAnimName);
+        case EquipedMouth:
+          PlayAnimation("mouth-" + playerAnimName);
+          break ;
+      }
     }
+    else
+      PlayAnimation(playerAnim);
   }
 }
 
 InventoryObject* ObjectCharacter::GetEquipedItem(unsigned short it)
 {
   return (_equiped[it].equiped);
+}
+
+NodePath ObjectCharacter::GetEquipedItemNode(unsigned short it)
+{
+  if (_equiped[it].graphics)
+    return (_equiped[it].graphics->GetNodePath());
+  return (NodePath());
 }
 
 void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, EquipedMode mode)
@@ -860,8 +891,6 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
 {
   Waypoint* wp = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
 
-  cout << '[' << this << "] RunMovementNext" << endl;
-  
   if (wp != _waypointOccupied && _level->GetState() == Level::Fight)
     SetActionPoints(_actionPoints - 1);
   

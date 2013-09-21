@@ -119,13 +119,8 @@ public:
   const std::string   GetFactionName(void) const { return (_faction ? _faction->name : ""); }
   unsigned int        GetFaction(void) const     { return (_faction ? _faction->flag : 0);  }
 
-  unsigned short      GetActionPoints(void) const        { return (_actionPoints); }
-  void                SetActionPoints(unsigned short ap)
-  {
-    _actionPoints = ap;
-    if (_statistics)
-      ActionPointChanged.Emit(_actionPoints, Data(_statistics)["Statistics"]["Action Points"]);
-  }
+  unsigned short      GetActionPoints(void) const;
+  void                SetActionPoints(unsigned short ap);
   void                RestartActionPoints(void);
   
   short               GetHitPoints(void) const        { return (_hitPoints); }
@@ -144,10 +139,11 @@ public:
   void                DelFlag(unsigned char flag)       { if (HasFlag(flag)) { _flags -= flag; } }
   bool                HasFlag(unsigned char flag) const { return ((_flags & flag) != 0); }
 
-  void                PlayEquipedItemAnimation(unsigned short it, const std::string& name);
+  void                PlayEquipedItemAnimation(unsigned short it, const std::string& name, InstanceDynamicObject* target);
   void                RefreshEquipment(void);
   void                SetEquipedItem(unsigned short it, InventoryObject* object, EquipedMode mode = EquipedMouth);
   InventoryObject*    GetEquipedItem(unsigned short it);
+  NodePath            GetEquipedItemNode(unsigned short it);
   unsigned char       GetequipedAction(unsigned short it) const { return (_equiped[it].actionIt); }
   void                UnequipItem(unsigned short it);
   void                ItemNextUseType(unsigned short it);

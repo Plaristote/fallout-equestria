@@ -36,7 +36,6 @@ namespace DivideAndConquer
       
       virtual const std::vector<T*>& GetEntries(POS position_from, Heuristic heuristic)
       {
-        std::cout << "GetEntries not final node" << std::endl;
         return (FindBestNode(position_from, heuristic)->GetEntries(position_from, heuristic));
       }      
 

@@ -104,6 +104,7 @@ struct Waypoint
     void WithdrawArc(Waypoint* other);
     void UnwithdrawArc(Waypoint* other, ArcObserver* observer);
     std::pair<Arc, unsigned short>* GetWithdrawable(Waypoint* other);
+    Waypoint*                       GetRandomWaypoint(void) const;
 
     Waypoint(NodePath root);
     Waypoint(void) {}

@@ -41,19 +41,19 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts
     if (action_data["targeted"].Nil())
       action_data["targeted"] = 1;
     if (action["hookUse"].NotNil())
-      hooks.asDefineMethod("Use", "string " + action["hookUse"].Value() + "(Item@, Character@)");
+      hooks.asDefineMethod("Use",            "bool " + action["hookUse"].Value() + "(Item@, Character@)");
     if (action["hookCharacters"].NotNil())
-      hooks.asDefineMethod("UseOnCharacter", "string " + action["hookCharacters"].Value() + "(Item@, Character@, Character@");
+      hooks.asDefineMethod("UseOnCharacter", "bool " + action["hookCharacters"].Value() + "(Item@, Character@, Character@");
     if (action["hookDoors"].NotNil())
-      hooks.asDefineMethod("UseOnDoor", "string " + action["hookDoors"].Value() + "(Item@, Character@, Door@)");
+      hooks.asDefineMethod("UseOnDoor",      "bool " + action["hookDoors"].Value() + "(Item@, Character@, Door@)");
     if (action["hookOthers"].NotNil())
-      hooks.asDefineMethod("UseOnOthers", "string " + action["hookOthers"].Value() + "(Item@, Character@, DynamicObject@");
+      hooks.asDefineMethod("UseOnOthers",    "bool " + action["hookOthers"].Value() + "(Item@, Character@, DynamicObject@");
     if (action["hookWeapon"].NotNil())
-      hooks.asDefineMethod("UseAsWeapon", "string " + action["hookWeapon"].Value() + "(Item@, Character@, Character@)");
+      hooks.asDefineMethod("UseAsWeapon",    "bool " + action["hookWeapon"].Value() + "(Item@, Character@, Character@)");
     if (action["hookHitChances"].NotNil())
-      hooks.asDefineMethod("HitChances", "int " + action["hookHitChances"].Value() + "(Item@, Character@, Character@)");
+      hooks.asDefineMethod("HitChances",     "int " + action["hookHitChances"].Value() + "(Item@, Character@, Character@)");
     if (action["hookCanUse"].NotNil())
-      hooks.asDefineMethod("CanUse", "bool " + action["hookCanUse"].Value() + "(Item@, Character@, DynamicObject@)");
+      hooks.asDefineMethod("CanUse",         "bool " + action["hookCanUse"].Value() + "(Item@, Character@, DynamicObject@)");
     _actionHooks.push_back(hooks);
   });
 }
@@ -247,12 +247,12 @@ int               InventoryObject::HitSuccessRate(ObjectCharacter* user, ObjectC
   return (0);
 }
 
-const std::string InventoryObject::UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType)
+bool InventoryObject::UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType)
 {
   return (ExecuteHook("UseAsWeapon", user, target, useType));
 }
 
-const std::string InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType)
+bool InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType)
 {
   ObjectCharacter*     charTarget;
   Lockable*            lockTarget;
@@ -266,21 +266,20 @@ const std::string InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicO
     return (ExecuteHook("UseOnDoor", user, lockTarget, useType));
   if (hooks.IsDefined("UseOnOthers"))
     return (ExecuteHook("UseOnOthers", user, target, useType));
-  return ("That does nothing");
+  Level::CurrentLevel->ConsoleWrite(i18n::T("That does nothing"));
+  return (false);
 }
 
-const std::string InventoryObject::Use(ObjectCharacter* user, unsigned char useType)
+bool InventoryObject::Use(ObjectCharacter* user, unsigned char useType)
 {
   return (ExecuteHook("Use", user, (ObjectCharacter*)0, useType));
 }
 
 template<class C>
-const std::string InventoryObject::ExecuteHook(const std::string& hook, ObjectCharacter* user, C* target, unsigned char useType)
+bool InventoryObject::ExecuteHook(const std::string& hook, ObjectCharacter* user, C* target, unsigned char useType)
 {
   AngelScript::Object& handle = _actionHooks[useType];
 
-  cout << GetName() << " object has methods:" << endl;
-  handle.OutputMethods(cout);
   if (handle.IsDefined(hook))
   {
     AngelScript::Type<InventoryObject*> this_param(this);
@@ -288,11 +287,12 @@ const std::string InventoryObject::ExecuteHook(const std::string& hook, ObjectCh
     AngelScript::Type<C*>               target_param(target);
 
     if (target == nullptr)
-      return (*(std::string*)(handle.Call(hook, 2, &this_param, &user_param)));
-    return (*(std::string*)(handle.Call(hook, 3, &this_param, &user_param, &target_param)));
+      return ((bool)(handle.Call(hook, 2, &this_param, &user_param)));
+    return ((bool)(handle.Call(hook, 3, &this_param, &user_param, &target_param)));
   }
   cout << "Method " << hook << " undefined" << endl;
-  return ("That does nothing");
+  Level::CurrentLevel->ConsoleWrite(i18n::T("That does nothing"));
+  return (false);
 }
 
 /*
@@ -347,7 +347,8 @@ void Inventory::LoadInventory(Data items)
   {
     unsigned int     quantity;
 
-    quantity = (item["quantity"].Nil() ? 1 : (unsigned int)item["quantity"]);
+    quantity = item["quantity"].NotNil() ? (unsigned int)item["quantity"] : 1;
+    std::cout << "Loading " << quantity << ' ' << item["Name"].Value() << std::endl;
     for (unsigned short i = 0 ; i < quantity ; ++i)
     {
       InventoryObject* newObject    = new InventoryObject(item);
@@ -377,7 +378,7 @@ void Inventory::InitializeSlots(void)
     Data             slot = item["equiped"];
 
     if (slot.NotNil())
-    {  SetEquipedItem(slot["target"], slot["slot"], ptr, (unsigned short)slot["mode"]); }
+      SetEquipedItem(slot["target"], slot["slot"], ptr, (unsigned short)slot["mode"]);
   });
 }
 

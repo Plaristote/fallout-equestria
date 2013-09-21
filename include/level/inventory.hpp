@@ -36,9 +36,9 @@ public:
   ~InventoryObject();
 
   int               HitSuccessRate(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType);
-  const std::string UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType);
-  const std::string UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType);
-  const std::string Use(ObjectCharacter* user, unsigned char useType);
+  bool              UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType);
+  bool              UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType);
+  bool              Use(ObjectCharacter* user, unsigned char useType);
   const std::string GetName(void) const { return (this->Key());             }
   const std::string GetIcon(void) const { return ((*this)["icon"].Value()); }
   DynamicObject*    CreateDynamicObject(World* world) const;
@@ -54,7 +54,7 @@ public:
 
 private:
   template<class C>
-  const std::string ExecuteHook(const std::string& hook, ObjectCharacter* user, C* target, unsigned char actionIt);
+  bool              ExecuteHook(const std::string& hook, ObjectCharacter* user, C* target, unsigned char actionIt);
   
   DataTree           _dataTree;
   

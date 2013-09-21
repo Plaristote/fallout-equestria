@@ -167,13 +167,7 @@ void Level::ActionUseObject(ObjectCharacter* user, InventoryObject* object, unsi
     Script::Engine::ScriptError.Emit("<span class='console-error'>[ActionUseObject] Invalid action iterator</span>");
     return ;
   }
-  
-  std::cout << "ActionUseObject" << std::endl;
-
-  std::string result = object->Use(user, actionIt);  
-
-  if (result != "" && user == GetPlayer())
-    ConsoleWrite(result);
+  object->Use(user, actionIt);  
 }
 
 void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object, unsigned char actionIt)
@@ -193,17 +187,13 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
       use_cost = data_use_cost;
     user->LookAt(target);
     if (UseActionPoints(use_cost))
-    {
-      const string output = object->UseOn(user, target, actionIt);
-
-      ConsoleWrite(output);
-    }
+      object->UseOn(user, target, actionIt);
   };
-  animation_step = [this, user, actionIt, logic_step](InstanceDynamicObject*)
+  animation_step = [this, user, actionIt, logic_step, target](InstanceDynamicObject*)
   {
     user->AnimationEnded.DisconnectAll();
     user->AnimationEnded.Connect(logic_step);
-    user->PlayEquipedItemAnimation(actionIt, "use");
+    user->PlayEquipedItemAnimation(actionIt, "use", target);
   };
   user->GoTo(target, 0);
   user->ReachedDestination.Connect(animation_step);
@@ -281,26 +271,51 @@ void Level::ActionUseSkillOn(ObjectCharacter* user, InstanceDynamicObject* targe
 void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* item, unsigned char actionIt)
 {
   ActionCallback logic_step;
+  unsigned int   equipedIt = 0;
 
-  logic_step = [this, user, target, item, actionIt](InstanceDynamicObject*)
+  if (user->GetEquipedItem(0) == item)
+    equipedIt = 0;
+  else if (user->GetEquipedItem(1) == item)
+    equipedIt = 1;
+  logic_step = [this, user, target, item, actionIt, equipedIt](InstanceDynamicObject*)
   {
     XpFetcher xpFetcher(user, target);
-    string    output;
-    
+    bool      bullseye; // false -> miss
+
     user->SetAsEnemy(target, true);
-    output = (item->UseAsWeapon(user, target, actionIt));
+    bullseye = (item->UseAsWeapon(user, target, actionIt));
     MouseRightClicked();
-    ConsoleWrite(output);
     if (!(target->IsAlly(user)))
       target->SetEnemyDetected(user);
     if (xpFetcher.character_died)
       xpFetcher.Execute();
+
+    {
+      Data projectile_data = (*item)["actions"][actionIt]["animations"]["projectiles"]["attack"];
+
+      if (projectile_data.NotNil())
+      {
+        NodePath projectile_dest;
+        
+        if (bullseye)
+          projectile_dest = target->GetNodePath();
+        else
+          projectile_dest = target->GetOccupiedWaypoint()->GetRandomWaypoint()->nodePath;
+        {
+          Projectile* projectile = new Projectile(_world,
+                                                  user->GetEquipedItemNode(equipedIt),
+                                                  projectile_dest,
+                                                  projectile_data);
+
+          projectile->SetTimeout(projectile_data["timeout"] || 10);
+          projectile->SetColor(255, 255, 0, 1);
+          InsertProjectile(projectile);
+        }
+      }
+    }
   };
   if (user == target && target == GetPlayer())
-  {
-    ConsoleWrite("Stop hitting yourself !");
     return ;
-  }
   if (!(item->CanUse(user, target, actionIt)))
     return ;
 
@@ -312,15 +327,9 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
     ConsoleWrite("No line of sight");
   else
   {
-    unsigned int equipedIt            = 0;
-
     user->AnimationEnded.DisconnectAll();
     user->AnimationEnded.Connect(logic_step);
-    if (user->GetEquipedItem(0) == item)
-      equipedIt = 0;
-    else if (user->GetEquipedItem(1) == item)
-      equipedIt = 1;
-    user->PlayEquipedItemAnimation(equipedIt, "attack");
+    user->PlayEquipedItemAnimation(equipedIt, "attack", target);
   }
 }
 
