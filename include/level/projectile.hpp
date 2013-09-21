@@ -9,6 +9,7 @@
 # include <panda3d/particleSystem.h>
 # include "level/world.h"
 # include "datatree.hpp"
+#include <observatory.hpp>
 
 class ObjectCharacter;
 class InventoryObject;
@@ -29,6 +30,8 @@ public:
   void     SetColor(float red, float green, float blue, float alpha);
   void     SetAttenuation(float a, float b, float c);
   void     Run(float elapsed_time);
+  
+  Sync::Signal<void> HitsTarget;
 
 private:
   NodePath           node_path, light_node, enlightened, target;

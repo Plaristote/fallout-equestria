@@ -277,7 +277,37 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
     equipedIt = 0;
   else if (user->GetEquipedItem(1) == item)
     equipedIt = 1;
-  logic_step = [this, user, target, item, actionIt, equipedIt](InstanceDynamicObject*)
+
+  function<void (bool)>           target_animate  = [this, target, item, actionIt](bool is_kill)
+  {
+    // TODO Play the proper animation
+    target->PlayAnimation("use");
+  };
+
+  function<void (Data,bool,bool)> fire_projectile = [this, user, target, target_animate, equipedIt](Data projectile_data, bool bullseye, bool is_kill)
+  {
+    NodePath projectile_dest;
+    
+    if (bullseye)
+      projectile_dest = target->GetNodePath();
+    else
+      projectile_dest = target->GetOccupiedWaypoint()->GetRandomWaypoint()->nodePath;
+    {
+      Projectile* projectile = new Projectile(_world,
+                                              user->GetEquipedItemNode(equipedIt),
+                                              projectile_dest,
+                                              projectile_data);
+
+      projectile->SetTimeout(projectile_data["timeout"] || 10);
+      projectile->SetColor(255, 255, 0, 1);
+      projectile->HitsTarget.Connect([target_animate, is_kill](void) { target_animate(is_kill); });
+      if (projectile->HasReachedDestination())
+        projectile->HitsTarget.Emit();
+      InsertProjectile(projectile);
+    }
+  };
+
+  logic_step = [this, user, target, item, actionIt, equipedIt, fire_projectile, target_animate](InstanceDynamicObject*)
   {
     XpFetcher xpFetcher(user, target);
     bool      bullseye; // false -> miss
@@ -294,24 +324,9 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
       Data projectile_data = (*item)["actions"][actionIt]["animations"]["projectiles"]["attack"];
 
       if (projectile_data.NotNil())
-      {
-        NodePath projectile_dest;
-        
-        if (bullseye)
-          projectile_dest = target->GetNodePath();
-        else
-          projectile_dest = target->GetOccupiedWaypoint()->GetRandomWaypoint()->nodePath;
-        {
-          Projectile* projectile = new Projectile(_world,
-                                                  user->GetEquipedItemNode(equipedIt),
-                                                  projectile_dest,
-                                                  projectile_data);
-
-          projectile->SetTimeout(projectile_data["timeout"] || 10);
-          projectile->SetColor(255, 255, 0, 1);
-          InsertProjectile(projectile);
-        }
-      }
+        fire_projectile(projectile_data, bullseye, xpFetcher.character_died);
+      else if (bullseye)
+        target_animate(xpFetcher.character_died);
     }
   };
   if (user == target && target == GetPlayer())

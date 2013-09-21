@@ -29,7 +29,6 @@ Projectile::Projectile(World* world, NodePath parent, NodePath target, Data data
              light_data["green"] || 255,
              light_data["blue"]  || 255, 1);
   }
-  cout << "PROJECTILE CREATED" << endl;
 }
 
 Projectile::~Projectile(void)
@@ -37,7 +36,6 @@ Projectile::~Projectile(void)
   enlightened.set_light_off(light_node);
   enlightened.clear_light(light_node);
   light_node.remove_node();
-  cout << "PROJECTILE REMOVED" << endl;
 }
 
 void Projectile::SetTimeout(float timeout)
@@ -59,7 +57,7 @@ void Projectile::SetColor(float red, float green, float blue, float alpha)
 
 bool Projectile::HasReachedDestination(void) const
 {
-  return (node_path.get_pos() == target.get_pos(node_path.get_parent()));
+  return (!is_moving || (node_path.get_pos() == target.get_pos(node_path.get_parent())));
 }
 
 bool Projectile::HasExpired(void) const
@@ -71,7 +69,7 @@ bool Projectile::HasExpired(void) const
 
 void Projectile::Run(float elapsed_time)
 {
-  if (!is_moving || HasReachedDestination())
+  if (HasReachedDestination())
   {
     float factor;
 
@@ -96,7 +94,10 @@ void Projectile::Run(float elapsed_time)
     LPoint3f movement;
 
     if (max_distance <= speed)
+    {
       node_path.set_pos(objective);
+      HitsTarget.Emit();
+    }
     else
     {
       movement.set_x(-(speed * (distance.get_x() / max_distance)));
