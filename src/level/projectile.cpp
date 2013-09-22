@@ -11,6 +11,7 @@ Projectile::Projectile(World* world, NodePath parent, NodePath target, Data data
   {
     node_path.detach_node();
     node_path     = world->window->load_model(parent, data["model"].Value());
+    node_path.look_at(target);
   }
   if (data["speed"].NotNil())
   {
@@ -36,6 +37,7 @@ Projectile::~Projectile(void)
   enlightened.set_light_off(light_node);
   enlightened.clear_light(light_node);
   light_node.remove_node();
+  node_path.remove_node();
 }
 
 void Projectile::SetTimeout(float timeout)
@@ -96,6 +98,7 @@ void Projectile::Run(float elapsed_time)
     if (max_distance <= speed)
     {
       node_path.set_pos(objective);
+      node_path.hide();
       HitsTarget.Emit();
     }
     else

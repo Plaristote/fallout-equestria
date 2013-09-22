@@ -929,21 +929,6 @@ AsyncTask::DoneStatus Level::do_task(void)
   else
     _mouse.SetMouseState('i');
 
-  // TODO discard this when it has become certain it will never be useful again
-  /*if (_light_iterator != _world->lights.end() && _world->lights.size() > 0)
-  {
-    if (_light_iterator->zoneSize < 50)
-    {
-      Timer timer;
-
-      _world->CompileLight(&(*_light_iterator), ColMask::DynObject);
-      cout << "CompileLight: " << timer.GetElapsedTime() << std::endl;
-    }
-    ++_light_iterator;
-  }
-  else
-    _light_iterator = _world->lights.begin();*/
-
   // TEST Transparent Ball of Wrath
   if (!(_player_halo.is_empty()))
   {
@@ -990,13 +975,18 @@ AsyncTask::DoneStatus Level::do_task(void)
   switch (_state)
   {
     case Fight:
-      RunProjectiles(elapsedTime);
       ForEach(_objects, run_object);
-      _currentCharacter = _itCharacter; // Keep a character from askin NextTurn several times
-      if (_itCharacter != _characters.end())
-        run_object(*_itCharacter);
-      if (_mouse.Hovering().hasWaypoint && _mouse.Hovering().waypoint != _last_combat_path && _mouseState == MouseAction)
-        DisplayCombatPath();
+      // If projectiles are moving, run them. Otherwise, run the current character
+      if (_projectiles.size() > 0)
+        RunProjectiles(elapsedTime);
+      else
+      {
+        _currentCharacter = _itCharacter; // Keep a character from askin NextTurn several times
+        if (_itCharacter != _characters.end())
+          run_object(*_itCharacter);
+        if (_mouse.Hovering().hasWaypoint && _mouse.Hovering().waypoint != _last_combat_path && _mouseState == MouseAction)
+          DisplayCombatPath();
+      }
       break ;
     case Normal:
       RunProjectiles(elapsedTime);

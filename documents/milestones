@@ -136,7 +136,7 @@ x --> Perks description
 x --> Skill affinities
 x --> Display details about skill/trait/perk/statistic/special attribute when clicked
 
-  -> Level
+x -> Level
 x --> Factorize Actions code. Every part of the process (temporizing, animating, executing) must be contiguous.
 x --> Main script for levels
 x ----> General hooks running at every level start, end and each loop turn
@@ -148,7 +148,7 @@ x ----> Script interface for light management
 x ----> Hour-based light switch (for lighting cities at night)
 x --> Dialogs
 x ---> Allow inclusion of the return value of a script function in dialog's text
-~ --> Projectiles and gunshot effects
+x --> Projectiles effects
 x --> Party Create/Import/Export via scripts
 x --> Fixing last pathfinding issue(s)
 
