@@ -32,7 +32,9 @@ std::string underscore(const std::string&);
 #  define PT(PTTYPE) PointerTo< PTTYPE >
 # endif
 
-# if PANDA_MAJOR_VERSION > 1 || PANDA_MINOR_VERSION > 8
+# include <panda3d/pandaVersion.h>
+
+# if PANDA_MAJOR_VERSION >= 1 || PANDA_MINOR_VERSION >= 8
 #  define INVENTORY_USE_DRAGDROP
 # endif
 
