@@ -17,6 +17,24 @@ string UseKeyOnDoor(Item@ item, Character@ user, Door@ door)
   return ("The door won't open");
 }
 
+int UnarmedSuccessChance(Item@ item, Character@ user, Character@ target)
+{
+  Data  user_stats   = user.GetStatistics();
+  Data  target_stats = target.GetStatistics();
+  int   perception   = user_stats["Special"]["PER"].AsInt();
+  int   skill        = user_stats["Skills"]["Unarmed"].AsInt();
+  int   armor_class  = target_stats["Statistics"]["Armor Class"].AsInt();
+  float distance     = user.GetDistance(target.AsObject());
+  int   hit_chances;
+
+  hit_chances = skill - 30 + (perception - 2) * 16 - (distance / 2) - armor_class;
+  if (hit_chances < 5)
+    hit_chances = 5;
+  else if (hit_chances > 95)
+    hit_chances = 95;
+  return (hit_chances);
+}
+
 int ShootSuccessChance(Item@ item, Character@ user, Character@ target)
 {
   Data   item_data   = item.AsData();
@@ -43,6 +61,8 @@ int ShootSuccessChance(Item@ item, Character@ user, Character@ target)
     //Cout("Hit Chances: " + hit_chances);
     if (hit_chances > 95)
       hit_chances = 95;
+    if (hit_chances < 0)
+      hit_chances = 0;
     return (hit_chances);
   }
 }
@@ -72,7 +92,7 @@ int DamageCalculation(Item@ item, Character@ user, Character@ target, int critic
   return (damage);
 }
 
-string Shoot(Item@ item, Character@ user, Character@ target)
+bool Shoot(Item@ item, Character@ user, Character@ target)
 {
   int  ap        = user.GetActionPoints();
   Data item_data = item.AsData();
@@ -88,7 +108,10 @@ string Shoot(Item@ item, Character@ user, Character@ target)
     int   roll     = Random() % 100;
 
     if (distance > range)
-      return ("Out of range");
+    {
+      level.ConsoleWrite("Out of range");
+      return (false);
+    }
     user.SetActionPoints(ap - ap_cost);
     SetAmmoAmount(item_data, ammo - 1);
     level.PlaySound("shoot/shotgun");
@@ -102,14 +125,20 @@ string Shoot(Item@ item, Character@ user, Character@ target)
       target.SetHitPoints(target.GetHitPoints() - damage);
       if (is_critical)
       {
-        return ("You critically hit " + target.GetName() + " for " + damage + " Hit Points.");
+        level.ConsoleWrite("You critically hit " + target.GetName() + " for " + damage + " Hit Points.");
+        return (true);
       }
       else
-        return ("You hit " + target.GetName() + " for " + damage + " Hit Points.");
+      {
+        level.ConsoleWrite("You hit " + target.GetName() + " for " + damage + " Hit Points.");
+        return (true);
+      }
     }
-    return ("You missed");
+    level.ConsoleWrite("You missed");
+    return (false);
   }
-  return ("Not enough action points");
+  level.ConsoleWrite("Not enough action points");
+  return (false);
 }
 
 string GetAmmoType(Data item)
@@ -134,7 +163,7 @@ void SetAmmoAmount(Data item, int amount)
   item["ammo"]["amount"] = amount;
 }
 
-string ReloadWeapon(Item@ item, Character@ user)
+bool ReloadWeapon(Item@ item, Character@ user)
 {
   Inventory@ inventory   = user.GetInventory();
   Data       itemData    = item.AsData();
@@ -145,9 +174,15 @@ string ReloadWeapon(Item@ item, Character@ user)
   Item@      nextAmmunition;
 
   if (ammountAmmo == maximumAmmo)
-    return (item.GetName() + " is already fully loaded.");
+  {
+    level.ConsoleWrite(item.GetName() + " is already fully loaded.");
+    return (false);
+  }
   if (user.GetActionPoints() < ap_cost)
-    return ("Not enough action points");
+  {
+    level.ConsoleWrite("Not enough action points");
+    return (false);
+  }
   @nextAmmunition = inventory.GetObject(currentAmmo);
   // If no ammunition of that type left, and barrel is empty, check other types of ammo
   if (@nextAmmunition == null && ammountAmmo == 0)
@@ -180,7 +215,8 @@ string ReloadWeapon(Item@ item, Character@ user)
   if (@nextAmmunition == null)
   {
     level.PlaySound("out-of-ammo");
-    return ("Out of ammo");
+    level.ConsoleWrite("Out of ammo");
+    return (false);
   }
 
   while (@nextAmmunition != null && ammountAmmo < maximumAmmo)
@@ -195,5 +231,5 @@ string ReloadWeapon(Item@ item, Character@ user)
     level.ConsoleWrite(item.GetName() + " now loaded with " + ammountAmmo + "/" + maximumAmmo + " rounds.");
   level.PlaySound("reload/pistol");
   user.SetActionPoints(user.GetActionPoints() - ap_cost);
-  return ("");
+  return (true);
 }

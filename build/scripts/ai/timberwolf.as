@@ -8,7 +8,7 @@ bool shieldCasted = false;
 
 void main(Character@ self, float elaspedTime)
 {
-  if (!(self.IsMoving()) && myTimer.GetElapsedTime() > 2.5)
+  /*if (!(self.IsMoving()) && myTimer.GetElapsedTime() > 2.5)
   {
     if (initWaypoint == 0)
       initWaypoint = self.GetCurrentWaypoint();
@@ -25,7 +25,7 @@ void main(Character@ self, float elaspedTime)
     }
 
     myTimer.Restart();
-  }
+  }*/
 }
 
 Character@ currentTarget = null;
@@ -68,8 +68,11 @@ void GoToTarget(Character@ self, DynamicObject@ target, int min_dist = 1)
 
 void combat(Character@ self)
 {
-  if (self.IsMoving())
+  if (self.IsMoving() || self.IsInterrupted())
+  {
+    Cout("Interrupted");
     return ;
+  }
 
   if (@currentTarget == null || !(currentTarget.IsAlive()))
     @currentTarget = @SelectTarget(self);
@@ -135,6 +138,7 @@ void combat(Character@ self)
 
       if (@bestEquipedItem != null)
       {
+        Cout("Taking action");
         actionPointsCost = bestEquipedItem.AsData()["actions"][bestAction]["ap-cost"].AsInt();
         if (actionPoints >= actionPointsCost)
           level.ActionUseWeaponOn(self, currentTarget, bestEquipedItem, bestAction);
@@ -142,7 +146,10 @@ void combat(Character@ self)
           level.NextTurn();
       }
       else
+      {
+        Cout("Go to target");
         GoToTarget(self, currentTarget.AsObject());
+      }
     }
     else
       GoToTarget(self, currentTarget.AsObject());

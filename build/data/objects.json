@@ -11,7 +11,8 @@
       "combat": 1,
       "range": 10,
       "damage": 5,
-      "hookWeapon": "HoovesHit"
+      "hookWeapon": "HoovesHit",
+      "hookHitChances": "UnarmedSuccessChance"
     }
 
   }
@@ -31,7 +32,8 @@
       "combat": 1,
       "range": 15,
       "damage": 10,
-      "hookWeapon": "BuckHit"
+      "hookWeapon": "BuckHit",
+      "hookHitChances": "UnarmedSuccessChance"
     }
 
   }
@@ -107,10 +109,14 @@
         "y": 90,
         "z": 90
       },
+  "ammo": {
+    "types": [ "ammoCaliber22" ],
+    "maximum": 2
+  },
   "weight": 15,
   "mode-mouth": 0,
   "mode-magic": 1,
-  "mode-battlesaddle": 1,
+  "mode-battlesaddle": 1,  
   "actions": {
     "Shoot": {
       "ap-cost": 5,
@@ -131,7 +137,8 @@
       "combat": 0,
       "targeted": 0,
       "damage": 0,
-      "damage-max": 0
+      "damage-max": 0,
+      "hookUse": "ReloadWeapon"
     }
 
   }

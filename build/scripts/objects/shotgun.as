@@ -19,7 +19,7 @@ bool CanWeild(Item@ item, Character@ user, string slot, int mode)
   return (false);
 }
 
-string ShotgunShoot(Item@ item, Character@ user, Character@ target)
+bool ShotgunShoot(Item@ item, Character@ user, Character@ target)
 {
   return (Shoot(item, user, target));
 }

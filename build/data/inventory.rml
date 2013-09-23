@@ -30,7 +30,7 @@
       	height:         	90%;
       	margin: 				2% 0px;
       	overflow-y:     	auto;
-      	#drag: clone;
+      	//drag: clone;
       }
 		#rest{
 			width: 70%; 
