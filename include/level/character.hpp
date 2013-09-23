@@ -89,7 +89,8 @@ public:
 
   void                SetInventory(Inventory* inventory);
 
-  void                ProcessCollisions() { if (_hitPoints > 0) InstanceDynamicObject::ProcessCollisions(); }
+  void                ProcessCollisions(void)         { if (_hitPoints > 0) InstanceDynamicObject::ProcessCollisions();     }
+  bool                HasOccupiedWaypoint(void) const { return (_hitPoints > 0 && WaypointModifier::HasOccupiedWaypoint()); }
 
   void                Run(float elapsedTime);
   void                RunEffects(float elapsedTime);
