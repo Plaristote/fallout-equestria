@@ -37,7 +37,7 @@ public:
 protected:
   typedef std::map<std::string, AnimControl*> MapAnims;
 
-  void                      LoadAnimation(const std::string& name);
+  bool                      LoadAnimation(const std::string& name);
   void                      TaskAnimation(void);
   void                      PlayIdleAnimation(void);
 

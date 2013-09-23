@@ -52,47 +52,47 @@ void InventoryView::UpdateView(void)
 
       // Look for groupable objects
       {
-	Inventory::Content::iterator groupIt     = content.begin();
-	Inventory::Content::iterator groupEnd    = content.end();
-	bool                         hideIfFound = true;
+        Inventory::Content::iterator groupIt     = content.begin();
+        Inventory::Content::iterator groupEnd    = content.end();
+        bool                         hideIfFound = true;
 
-	for (; groupIt != groupEnd ; ++groupIt)
-	{
-	  if (groupIt == it)
-	  {
-	    hideIfFound = false;
-	    continue ;
-	  }
-	  if ((*groupIt)->IsGroupableWith(*it))
-	  {
-	    if ((*groupIt)->IsEquiped())
-	      continue ;
-	    if (hideIfFound)
-	    {
-	      notVisible = true;
-	      break ;
-	    }
-	    quantity++;
-	  }
-	}
+        for (; groupIt != groupEnd ; ++groupIt)
+        {
+          if (groupIt == it)
+          {
+            hideIfFound = false;
+            continue ;
+          }
+          if ((*groupIt)->IsGroupableWith(*it))
+          {
+            if ((*groupIt)->IsEquiped())
+              continue ;
+            if (hideIfFound)
+            {
+              notVisible = true;
+              break ;
+            }
+            quantity++;
+          }
+        }
       }
 
       if (!notVisible)
       {
-	stream << "<span class='inventory-item-icon";
+        stream << "<span class='inventory-item-icon";
 #ifdef INVENTORY_USE_DRAGDROP
-	stream << " inventory-item-draggable";
+        stream << " inventory-item-draggable";
 #endif
-	stream << "' id='" << count << "'>";
+        stream << "' id='" << count << "'>";
         stream << "<img src='../textures/itemIcons/";
-	if (item["icon"].Value() != "")
-	  stream << item["icon"].Value();
-	else
-	  stream << "default.png";
-	stream << "' />";
-	if (quantity > 1)
-	  stream << "<span class='inventory-item-quantity'>x" << quantity << "</span>";
-	stream << "</span>";
+        if (item["icon"].Value() != "")
+          stream << item["icon"].Value();
+        else
+          stream << "default.png";
+        stream << "' />";
+        if (quantity > 1)
+          stream << "<span class='inventory-item-quantity'>x" << quantity << "</span>";
+        stream << "</span>";
         rml += stream.str();
         cout << stream.str() << endl;
       }

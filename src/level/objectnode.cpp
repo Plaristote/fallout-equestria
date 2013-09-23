@@ -81,7 +81,7 @@ AnimatedObject::AnimatedObject(WindowFramework* window) : _window(window)
   AnimationEnd.Connect(*this, &AnimatedObject::PlayIdleAnimation);
 }
 
-void                     AnimatedObject::LoadAnimation(const std::string& name)
+bool                     AnimatedObject::LoadAnimation(const std::string& name)
 {
   NodePath root = GetNodePath();
   NodePath np   = _window->load_model(root, ANIMATION_PATH(_modelName, name));
@@ -90,16 +90,18 @@ void                     AnimatedObject::LoadAnimation(const std::string& name)
   if (np.get_error_type() != NodePath::ET_ok)
   {
     std::cout << "Can't load anim " << name << " for " << _modelName << std::endl;
-    return ;
+    return (false);
   }
   auto_bind(root.node(), _anims, 0xf);
   np.detach_node();
   controlName = _anims.get_anim_name(_anims.get_num_anims() - 1);
   _mapAnims.insert(_mapAnims.end(), pair<string, AnimControl*>(name, _anims.find_anim(controlName)));
+  return (true);
 }
 
 void                     AnimatedObject::PlayAnimation(const std::string& name, bool loop)
 {
+  cout << this << " - PlayAnimation('" << name << "')" << endl;
   MapAnims::iterator     it   = _mapAnims.find(name);
   AnimControl*           anim = (it != _mapAnims.end() ? it->second : 0);
 
@@ -112,12 +114,12 @@ void                     AnimatedObject::PlayAnimation(const std::string& name, 
     _anim     = anim;
     _animLoop = loop;
   }
+  else if (LoadAnimation(name))
+    PlayAnimation(name, loop);
   else if (!loop && name != ANIMATION_DEFAULT)
     PlayAnimation(ANIMATION_DEFAULT, loop);
   else
-  {
     AnimationEnd.Emit();
-  }
 }
 
 void                      AnimatedObject::TaskAnimation(void)
@@ -128,6 +130,7 @@ void                      AnimatedObject::TaskAnimation(void)
       _anim->play();
     else
     {
+      cout << this << " - Animation ended naturally" << endl;
       AnimationEnd.Emit();
       ResetAnimation();
       _anim = 0;
@@ -137,6 +140,7 @@ void                      AnimatedObject::TaskAnimation(void)
 
 void                      AnimatedObject::PlayIdleAnimation(void)
 {
+  cout << this << " - PlayIdleAnimation" << endl;
   MapAnims::iterator     it   = _mapAnims.find("idle");
   AnimControl*           anim = (it != _mapAnims.end() ? it->second : 0);
 

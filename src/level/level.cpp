@@ -769,7 +769,10 @@ void Level::StopFight(void)
 void Level::NextTurn(void)
 {
   if (_state != Fight || _currentCharacter != _itCharacter)
+  {
+    cout << "cannot go to next turn" << endl;
     return ;
+  }
   if (*_itCharacter == GetPlayer())
     StopFight();
   if (_itCharacter != _characters.end())

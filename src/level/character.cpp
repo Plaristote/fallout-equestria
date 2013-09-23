@@ -227,15 +227,15 @@ void ObjectCharacter::SetInventory(Inventory* inventory)
   {
     if (_inventory) delete _inventory;
     _inventory = inventory;
-    _inventory->ContentChanged.Connect(*this, &ObjectCharacter::RefreshEquipment);
-    _inventory->EquipedItem.Connect([this](const string& target, unsigned short int slot, InventoryObject* object)
+    _obs_handler.Connect(_inventory->ContentChanged, *this, &ObjectCharacter::RefreshEquipment);
+    _obs_handler.Connect(_inventory->EquipedItem,    [this](const string& target, unsigned short int slot, InventoryObject* object)
     {
       if (target == "equiped")
       {
         SetEquipedItem(slot, object, (EquipedMode)_inventory->GetEquipedMode(target, slot));
       }
     });
-    _inventory->UnequipedItem.Connect([this](const string& target, unsigned short int slot, InventoryObject* object)
+    _obs_handler.Connect(_inventory->UnequipedItem, [this](const string& target, unsigned short int slot, InventoryObject* object)
     {
       if (target == "unequiped")
       {
@@ -337,7 +337,7 @@ void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& 
     //
     // Character's animation
     //
-    if (playerAnim.Nil())
+    if (playerAnim.NotNil())
     {
       switch (_equiped[it].mode)
       {
@@ -351,7 +351,7 @@ void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& 
       }
     }
     else
-      PlayAnimation(playerAnim);
+      PlayAnimation(playerAnimName);
   }
 }
 

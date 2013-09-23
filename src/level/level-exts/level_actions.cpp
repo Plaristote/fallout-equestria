@@ -300,7 +300,8 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
 
       projectile->SetTimeout(projectile_data["timeout"] || 10);
       projectile->SetColor(255, 255, 0, 1);
-      projectile->HitsTarget.Connect([target_animate, is_kill](void) { target_animate(is_kill); });
+      if (bullseye)
+        projectile->HitsTarget.Connect([target_animate, is_kill](void) { target_animate(is_kill); });
       if (projectile->HasReachedDestination())
         projectile->HitsTarget.Emit();
       InsertProjectile(projectile);
