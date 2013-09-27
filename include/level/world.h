@@ -44,6 +44,7 @@
 
 float   my_sqrt(const float x);
 LPoint3 NodePathSize(NodePath np);
+void    SetCollideMaskOnSingleNodepath(NodePath np, unsigned short collide_mask);
 
 namespace ColMask
 {
@@ -69,17 +70,17 @@ struct Waypoint
       virtual bool CanGoThrough(unsigned char type) = 0;
       virtual void GoingThrough(void*)              = 0;
     };
-    
+
     struct Arc
     {
         Arc(NodePath from, Waypoint* to);
         Arc(const Arc&);
-	~Arc();
+    ~Arc();
 
         bool operator==(Waypoint* other) { return (to == other); }
         void UpdateDirection(void);
         void Destroy(void);
-        
+
         void SetVisible(bool);
 
         PT(CollisionSegment) csegment;
@@ -100,7 +101,7 @@ struct Waypoint
     ArcsWithdrawed         arcs_withdrawed;
     NodePath               nodePath;
     std::list<WorldLight*> lights;
-    
+
     void WithdrawArc(Waypoint* other);
     void UnwithdrawArc(Waypoint* other, ArcObserver* observer);
     std::pair<Arc, unsigned short>* GetWithdrawable(Waypoint* other);
@@ -123,7 +124,7 @@ struct Waypoint
     void                 UpdateArcDirection(Waypoint*);
     void                 SetSelected(bool);
     bool                 IsSelected(void) const { return (selected); }
-    
+
     void                 SetArcsVisible(bool);
 
     // Pathfinding features
@@ -138,7 +139,7 @@ struct Waypoint
     void                 LoadArcs(void);
     void                 Unserialize(Utils::Packet& packet);
     void                 UnserializeLoadArcs(World*);
-    void                 Serialize(Utils::Packet& packet);
+    void                 Serialize(World*, Utils::Packet& packet);
 
 private:
     friend struct World;
@@ -151,7 +152,7 @@ struct MapObject
 {
   typedef std::vector<Waypoint*> Waypoints;
 
-  NodePath      nodePath;
+  NodePath      nodePath, render;
   PT(Texture)   texture;
   unsigned char floor;
   Waypoints     waypoints;
@@ -190,7 +191,7 @@ struct DynamicObject : public MapObject
         Shelf,
         Locker,
         Character,
-	Item
+    Item
     };
 
     Waypoint* waypoint;
@@ -268,9 +269,9 @@ struct WorldLight
   {
     Initialize();
   }
-  
+
   WorldLight(NodePath parent) : parent(parent), parent_i(0) {}
-  
+
   void   SetEnabled(bool);
   void   Destroy(void);
 
@@ -282,7 +283,7 @@ struct WorldLight
   void   SetColor(float r, float g, float b, float a)
   {
     LColor color(r, g, b, a);
-    
+
     light->set_color(color);
   }
 
@@ -307,7 +308,7 @@ struct WorldLight
     }
     return (LVecBase3f(0, 0, 0));
   }
-  
+
   void   SetAttenuation(float a, float b, float c)
   {
     switch (type)
@@ -351,7 +352,7 @@ struct WorldLight
     ReparentTo((MapObject*)object);
     parent_type = Type_DynamicObject;
   }
-  
+
   void ReparentTo(MapObject* object)
   {
     parent_type = Type_MapObject;
@@ -367,7 +368,7 @@ struct WorldLight
   {
       return (parent_i);
   }
-  
+
   std::string name;
   NodePath    nodePath;
   Type        type;
@@ -403,7 +404,7 @@ struct World
 
     WindowFramework* window;
 
-    NodePath         floors_node;    
+    NodePath         floors_node;
     Floors           floors;
 
     NodePath         rootWaypoints;
@@ -414,7 +415,7 @@ struct World
 
     NodePath         rootDynamicObjects;
     DynamicObjects   dynamicObjects;
-    
+
     NodePath         rootLights;
     WorldLights      lights;
     bool             sunlight_enabled;
@@ -423,13 +424,13 @@ struct World
     bool             do_compile_doors;
     bool             do_compile_waypoints;
 #endif
-    
+
     ExitZones        exitZones;
     EntryZones       entryZones;
 
     World(WindowFramework* window);
     ~World(void);
-    
+
     void      FloorResize(int);
 
     Waypoint*      AddWayPoint(float x, float y, float z);
@@ -473,21 +474,26 @@ struct World
     }
 
     template<class OBJTYPE>
-    OBJTYPE*       GetObjectFromNodePath(NodePath path, std::list<OBJTYPE>& list)
+    OBJTYPE*       GetObjectFromNodePath(NodePath path, std::list<OBJTYPE>& list, const std::string& parent = "")
     {
-        typename std::list<OBJTYPE>::iterator it  = list.begin();
-        typename std::list<OBJTYPE>::iterator end = list.end();
+      typename std::list<OBJTYPE>::iterator it  = list.begin();
+      typename std::list<OBJTYPE>::iterator end = list.end();
 
-	if (path.is_empty())
-	  return (0);
-        for (; it != end ; ++it)
-        {
-	  if ((*it).nodePath.is_empty())
-	    continue ;
-          if ((*it).nodePath.is_ancestor_of(path))
-            return (&(*it));
-        }
+      if (path.is_empty())
         return (0);
+      for (; it != end ; ++it)
+      {
+        if (parent == "" || parent == it->parent)
+        {
+          if ((!(*it).nodePath.is_empty() && (*it).nodePath.is_ancestor_of(path)))
+          {
+            OBJTYPE* children = GetObjectFromNodePath(path, list, it->nodePath.get_name());
+
+            return (children ? children : &(*it));
+          }
+        }
+      }
+      return (0);
     }
 
     void           ObjectChangeFloor(MapObject&, unsigned char floor, unsigned short type);
@@ -510,23 +516,23 @@ struct World
 
     void           ReparentObject(MapObject* object, MapObject*     new_parent);
     void           ReparentObject(MapObject* object, const std::string& name);
-    
+
     void           AddExitZone(const std::string&);
     void           DeleteExitZone(const std::string&);
     ExitZone*      GetExitZoneByName(const std::string&);
     bool           IsInExitZone(unsigned int id) const;
-    
+
     void           AddEntryZone(const std::string&);
     void           DeleteEntryZone(const std::string&);
     EntryZone*     GetEntryZoneByName(const std::string&);
-    
+
     void           AddLight(WorldLight::Type, const std::string&);
     void           AddLight(WorldLight::Type, const std::string&, MapObject* parent);
     void           AddLight(WorldLight::Type, const std::string&, DynamicObject* parent);
     void           DeleteLight(const std::string&);
     WorldLight*    GetLightByName(const std::string&);
     void           CompileLight(WorldLight*, unsigned char = ColMask::Object | ColMask::DynObject);
-    
+
     typedef std::function<void (const std::string&, float)> ProgressCallback;
 
     void           UnSerialize(Utils::Packet& packet);
@@ -538,9 +544,9 @@ struct World
 
     void           CompileWaypoints(ProgressCallback);
     void           CompileDoors(ProgressCallback);
-    
+
     static NodePath model_sphere;
-    
+
     DivideAndConquer::Graph<Waypoint, LPoint3f> waypoint_graph;
 };
 

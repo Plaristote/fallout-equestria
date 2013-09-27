@@ -1010,6 +1010,7 @@ void MainWindow::MapObjectSelect()
     mapobjectSelected = mapobjectHovered;
     if (mapobjectSelected)
     {
+      ui->treeWidget->SetItemFocused(mapobjectSelected);
       ui->waypointVisible->setChecked(!(mapobjectSelected->waypoints_root.is_hidden()));
       ui->objectFloor->setValue(mapobjectSelected->floor);
       ui->objectScaleX->setValue(mapobjectSelected->nodePath.get_scale().get_x());
@@ -1178,7 +1179,7 @@ void MainWindow::UpdateSelection()
     str  = QString::number(waypointsSelection.size());
     str += " waypoints selected";
     ui->waypointSelection->setText(str);
-    enabled = waypointsSelection.size() > 1;
+    enabled = waypointsSelection.size() > 0;
     ui->waypointEditor->setEnabled(enabled);
 
     waypointSelX = waypointSelY = waypointSelZ = 0;

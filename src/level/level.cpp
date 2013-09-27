@@ -162,10 +162,11 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   for_each(_world->waypoints.begin(), _world->waypoints.end(), [&entries](Waypoint& wp) { entries.push_back(&wp); });
   _world->waypoint_graph.SetHeuristic([](LPoint3f position1, LPoint3f position2) -> float
   {
-    float   dist_x = position1.get_x() - position2.get_x();
-    float   dist_y = position1.get_y() - position2.get_y();
-    
-    return (ABS(SQRT(dist_x * dist_x + dist_y * dist_y)));
+    float xd = position2.get_x() - position1.get_x();
+    float yd = position2.get_y() - position1.get_y();
+    float zd = position2.get_z() - position1.get_z();
+
+    return (SQRT(xd * xd + yd * yd + zd * zd));
   });
   _world->waypoint_graph.Initialize(entries, [](const std::vector<Waypoint*>& entries) -> std::vector<LPoint3f>
   {
@@ -201,7 +202,8 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
       block_size.set_y(distance(min_pos.get_y(), max_pos.get_y()));
       block_size.set_z(distance(min_pos.get_z(), max_pos.get_z()));
 
-      unsigned short block_count = 100;
+      unsigned short block_count = ceil(entries.size() / 200.f);
+      cout << "divide and conquer will use " << block_count << " blocks" << endl;
       for (unsigned short i = 0 ; i < block_count ; ++i)
       {
         LPoint3f block_position;
@@ -431,19 +433,12 @@ void Level::InitPlayer(void)
     node        = _player_halo.node();
     node->set_attrib(atr2);
     node->set_attrib(ColorBlendAttrib::make(ColorBlendAttrib::M_add));
-    for_each(_world->floors.begin(), _world->floors.end(), [node, atr1](NodePath floor)
+    for_each(_world->objects.begin(), _world->objects.end(), [node, atr1](MapObject& object)
     {
-      NodePath map_objects = floor.get_child(0);
-    
-      for (unsigned short i = 0 ; i < map_objects.get_num_children() ; ++i)
-      {
-        NodePath child = map_objects.get_child(i);
+      std::string name = object.nodePath.get_name();
 
-        if (child.get_name() == "Terrain")
-          continue ;
-        if (child.node() != node && (child.get_name().substr(0, 6) != "Ground"))
-          child.set_attrib(atr1);
-      }
+      if (name.substr(1, 3) == "all" && (name[0] == 'W' || name[0] == 'w'))
+        object.nodePath.set_attrib(atr1);
     });
   }
 

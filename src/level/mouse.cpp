@@ -83,6 +83,19 @@ void Mouse::SetMouseState(char i)
     MouseCursor::Get()->SetCursorTexture(texture);
 }
 
+std::string NodePathFullName(NodePath nodepath, NodePath root)
+{
+  NodePath    cur  = nodepath.get_parent();
+  std::string name = nodepath.get_name();
+
+  while (cur != root)
+  {
+    name = cur.get_name() + '/' + name;
+    cur = cur.get_parent();
+  }
+  return (name);
+}
+
 void Mouse::ClosestWaypoint(World* world, short currentFloor)
 {
   if (_mouseWatcher->has_mouse())
@@ -109,7 +122,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
     pickerNode        = new CollisionNode("mouseRay2");
     pickerPath        = _camera.attach_new_node(pickerNode);
     pickerRay         = new CollisionRay();
-    pickerNode->set_from_collide_mask(CollideMask(ColMask::Object));
+    pickerNode->set_from_collide_mask(CollideMask(ColMask::WpPlane));
     pickerNode->set_into_collide_mask(0);
     pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
     pickerNode->add_solid(pickerRay);
@@ -119,8 +132,9 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
 
     collisionHandlerQueue->sort_entries();
 
-    Timer timer;
-    
+    world->rootWaypoints.show();
+    if (_hovering.waypoint_ptr && _hovering.hasWaypoint)
+      _hovering.waypoint_ptr->SetSelected(false);
     _hovering.hasWaypoint = false;
     for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
     {
@@ -128,18 +142,19 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
       NodePath        np         = entry->get_into_node_path();
       MapObject*      map_object = world->GetMapObjectFromNodePath(np);
       LPoint3         pos;
+      static LPoint3  spheresize = NodePathSize(World::model_sphere);
 
       if (!map_object)
         continue ;
-      pos = entry->get_surface_point(world->floors[map_object->floor]);
-      Timer timer2;
+      pos = entry->get_surface_point(world->window->get_render()) - spheresize;
       _hovering.waypoint_ptr = world->waypoint_graph.GetClosest(pos);
       if (_hovering.waypoint_ptr)
+      {
         _hovering.SetWaypoint(_hovering.waypoint_ptr->nodePath);
+        _hovering.waypoint_ptr->SetSelected(true);
+      }
       break ;
     }
-    
-    //timer.Profile("Waypoint Picking");
 
     //pickerPath.detach_node(); // TODO find out why hasDynObject stops working after this...
                                 //      this leak has to go away

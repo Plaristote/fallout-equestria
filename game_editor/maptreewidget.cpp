@@ -2,6 +2,9 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include "world.h"
+#include <QTreeWidgetItemIterator>
+
+using namespace std;
 
 MapTreeWidget::MapTreeWidget(QWidget *parent) : QTreeWidget(parent)
 {
@@ -34,6 +37,21 @@ void MapTreeWidget::ItemFocused()
     case ItemUnknown:
       break ;
     }
+  }
+}
+
+void MapTreeWidget::SetItemFocused(MapObject* object)
+{
+  QTreeWidgetItemIterator it(this);
+
+  while (*it)
+  {
+    if ((*it)->text(0).toStdString() == object->nodePath.get_name())
+    {
+      this->setCurrentItem(*it);
+      break ;
+    }
+    ++it;
   }
 }
 
@@ -320,5 +338,12 @@ void MapTreeWidget::SetWorld(World* world)
   this->world = world;
   this->clear();
   map.clear();
+  std::for_each(world->objects.begin(), world->objects.end(), [this, world](MapObject& object)
+  {
+    if ((world->GetMapObjectFromName(object.parent)) == 0)
+    {
+      object.parent = "";
+    }
+  });
   ProbeWorld("", 0);
 }

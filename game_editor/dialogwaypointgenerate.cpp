@@ -41,12 +41,18 @@ void WaypointGenerator::Generating(WaypointGrid& waypoints)
   {
     for (unsigned int y = 0 ; y < sizey ; ++y)
     {
-      float posx = initPosX + (spacingx * x);
-      float posy = initPosY + (spacingy * y);
-      float posz = initPosZ;
-      waypoints[x][y] = world->AddWayPoint(posx, posy, posz);
-      waypoints[x][y]->nodePath.reparent_to(object->waypoints_root);
-      object->waypoints.push_back(waypoints[x][y]);
+      NodePath render = world->window->get_render();
+      float    posx   = initPosX + (spacingx * x);
+      float    posy   = initPosY + (spacingy * y);
+      float    posz   = initPosZ;
+      Waypoint* wp    = world->AddWayPoint(posx, posy, posz);
+
+      waypoints[x][y] = wp;
+      wp->nodePath.reparent_to(object->waypoints_root);
+      object->waypoints.push_back(wp);
+      wp->nodePath.set_pos  (render, object->nodePath.get_pos(render) + wp->nodePath.get_pos());
+      wp->nodePath.set_hpr  (render, wp->nodePath.get_hpr());
+      wp->nodePath.set_scale(render, wp->nodePath.get_scale());
       UpdateProgress("Waypoint Generation (2/4): %p%", ++step / (sizex * sizey) * 100);
     }
   }

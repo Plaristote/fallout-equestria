@@ -99,17 +99,6 @@ void Level::SetCurrentFloor(unsigned char floor)
   if (_world->floors.size() > floor)
     FloorFade(false, _world->floors[floor]);
   
-  /*World::Waypoints::const_iterator cur, end;
-  
-  for (cur = _world->waypoints.begin(), end = _world->waypoints.end() ; cur != end ; ++cur)
-  {
-    if (cur->floor == floor)
-    {
-      _camera.SlideToHeight(cur->nodePath.get_pos().get_z());
-      break ;
-    }
-  }*/
-  
   LPoint3 upperLeft(0, 0, 0), upperRight(0, 0, 0), bottomLeft(0, 0, 0);
   _world->GetWaypointLimits(floor, upperRight, upperLeft, bottomLeft);
   //_camera.SetLimits(bottomLeft.get_x(), bottomLeft.get_y(), upperRight.get_x(), upperRight.get_y());

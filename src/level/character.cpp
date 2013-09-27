@@ -11,19 +11,6 @@
 
 using namespace std;
 
-void SetCollideMaskOnSingleNodepath(NodePath np, unsigned short collide_mask)
-{
-  NodePathCollection col = np.get_children();
-
-  np.set_collide_mask(CollideMask(collide_mask));
-  for (int n = 0 ; n < col.size() ; ++n)
-  {
-    NodePath cnp = col.get_path(n);
-
-    cnp.set_collide_mask(CollideMask(0));
-  }
-}
-
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
 {
   Data   items = _level->GetItems();  

@@ -40,6 +40,7 @@ public slots:
     void             DelObject(MapObject*);
     void             DelLight(WorldLight*);
     void             DelItem(QString);
+    void             SetItemFocused(MapObject*);
 
 protected:
     virtual bool dropMimeData(QTreeWidgetItem *parent, int index, const QMimeData *data, Qt::DropAction action);

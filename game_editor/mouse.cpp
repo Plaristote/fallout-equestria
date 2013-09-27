@@ -52,8 +52,6 @@ void Mouse::GetWaypointHoveredAt(LPoint2f cursorPos, NodePath wp_base)
 
 void Mouse::GetHoveredAt(LPoint2f cursorPos)
 {
-  NodePath wp_base = NodePathGetChild(_window->get_render(), "waypoints");
-
   _pickerNode->set_from_collide_mask(CollideMask(ColMask::DynObject | ColMask::Object));
   _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
   _collisionTraverser.traverse(_window->get_render());
