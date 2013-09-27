@@ -55,6 +55,21 @@ void MapTreeWidget::SetItemFocused(MapObject* object)
   }
 }
 
+void MapTreeWidget::Rename(QString old_name, QString new_name)
+{
+  QTreeWidgetItemIterator it(this);
+
+  while (*it)
+  {
+    if ((*it)->text(0) == old_name)
+    {
+      (*it)->setText(0, new_name);
+      break ;
+    }
+    ++it;
+  }
+}
+
 MapTreeWidget::ItemType MapTreeWidget::GetType(QTreeWidgetItem* item) const
 {
   if (item != 0)

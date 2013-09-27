@@ -227,6 +227,50 @@ void MainWindow::CurrentTabChanged(int ntab)
     _app.SetPandaEnabled(ntab == PANDA_TAB); // The first tab is the only one using Panda3D
 }
 
+void MainWindow::Copy(Utils::Packet& packet)
+{
+  if (mapobjectSelected)
+  {
+    std::function<void (std::list<MapObject*>&, const std::string&)> get_children;
+    std::list<MapObject*>                                            objects;
+
+    objects.push_back(mapobjectSelected);
+    // Recursively look for each children of the current object and
+    // duplicate them as well.
+    get_children = [this, get_children](std::list<MapObject*>& objects, const std::string& parent)
+    {
+      auto                  it  = world->objects.begin();
+      auto                  end = world->objects.end();
+
+      for (; it != end ; ++it)
+      {
+         if (it->parent == parent)
+         {
+           objects.push_back(&(*it));
+           get_children(objects, it->nodePath.get_name());
+         }
+      }
+    };
+    get_children(objects, mapobjectSelected->nodePath.get_name());
+    // Now we record the amount of objects serialized, and we serialize them.
+    // The waypoints must not be part of the copy/paste, thus we temporarily remove them
+    // from the duplicated object when serializing.
+    packet << objects.size();
+    std::for_each(objects.begin(), objects.end(), [&packet](MapObject* object)
+    {
+      MapObject::Waypoints waypoints = object->waypoints;
+
+      object->waypoints.clear();
+      object->Serialize(packet);
+      object->waypoints = waypoints;
+    });
+  }
+}
+
+void MainWindow::Paste(Utils::Packet& packet)
+{
+}
+
 void MainWindow::AddCharsheet()
 {
   QString name = QInputDialog::getText(this, "New statistic sheet", "Name");
@@ -816,7 +860,10 @@ void MainWindow::DynamicObjectSelect()
 void MainWindow::DynamicObjectNameChanged(QString name)
 {
     if (dynamicObjectSelected)
+    {
+      ui->treeWidget->Rename(QString::fromStdString(dynamicObjectSelected->nodePath.get_name()), name);
       dynamicObjectSelected->nodePath.set_name(name.toStdString());
+    }
 }
 
 void MainWindow::DynamicObjectUpdateX()
@@ -1002,7 +1049,10 @@ void MainWindow::MapObjectFloor()
 void MainWindow::MapObjectNameChanged(QString name)
 {
     if (mapobjectSelected)
+    {
+      ui->treeWidget->Rename(QString::fromStdString(mapobjectSelected->nodePath.get_name()), name);
       mapobjectSelected->nodePath.set_name(name.toStdString());
+    }
 }
 
 void MainWindow::MapObjectSelect()

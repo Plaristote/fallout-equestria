@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets
+QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,16 +13,16 @@ TEMPLATE = app
 
 unix:QMAKE_CXXFLAGS += -std=c++0x
 
-win32:LIBS +=  ../3rd_parties/lib/libp3framework.lib
-                ../3rd_parties/lib/libpanda.lib
-                ../3rd_parties/lib/libpandafx.lib
-                ../3rd_parties/lib/libpandaexpress.lib
-                ../3rd_parties/lib/libp3dtoolconfig.lib
-                ../3rd_parties/lib/libp3dtool.lib
+win32:LIBS +=  ../3rd_parties/lib/libp3framework.lib \
+                ../3rd_parties/lib/libpanda.lib \
+                ../3rd_parties/lib/libpandafx.lib \
+                ../3rd_parties/lib/libpandaexpress.lib \
+                ../3rd_parties/lib/libp3dtoolconfig.lib \
+                ../3rd_parties/lib/libp3dtool.lib \
                 ../3rd_parties/lib/libp3direct.lib
-unix:LIBS   += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3direct -lX11
+unix:LIBS   += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3direct -lX11 -lpython2.7
 
-INCLUDEPATH += ../3rd_parties/include
+INCLUDEPATH += ../3rd_parties/include /usr/include/python2.7
 
 SOURCES += main.cpp\
         mainwindow.cpp \

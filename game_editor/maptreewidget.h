@@ -41,6 +41,7 @@ public slots:
     void             DelLight(WorldLight*);
     void             DelItem(QString);
     void             SetItemFocused(MapObject*);
+    void             Rename(QString old_name, QString new_name);
 
 protected:
     virtual bool dropMimeData(QTreeWidgetItem *parent, int index, const QMimeData *data, Qt::DropAction action);
