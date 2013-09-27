@@ -37,12 +37,11 @@ ItemEditor::ItemEditor(QWidget *parent) :
     connect(ui->itemTexture, SIGNAL(textEdited(QString)), this, SLOT(UpdateData()));
     connect(ui->itemScale,  SIGNAL(valueChanged(double)), this, SLOT(UpdateData()));
     connect(ui->itemScript, SIGNAL(textEdited(QString)), this, SLOT(UpdateData()));
-    connect(ui->itemModeBattleSaddle, SIGNAL(clicked()), this, SLOT(UpdateData()));
-    connect(ui->itemModeMagic, SIGNAL(clicked()), this, SLOT(UpdateData()));
-    connect(ui->itemModeMouth, SIGNAL(clicked()), this, SLOT(UpdateData()));
-    connect(ui->scriptBattleSaddleWeild, SIGNAL(textEdited(QString)), SLOT(UpdateData()));
-    connect(ui->scriptMagicWeild, SIGNAL(textEdited(QString)), SLOT(UpdateData()));
-    connect(ui->scriptMouthWeild, SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->itemAmmoMaximum, SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->itemAmmo, SIGNAL(valueChanged(int)), SLOT(UpdateData()));
+    connect(ui->actionHookCanUse, SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->actionHookHitChances, SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->actionSkill, SIGNAL(textEdited(QString)), SLOT(UpdateData()));
     connect(ui->actionApCost, SIGNAL(valueChanged(int)), this, SLOT(UpdateData()));
     connect(ui->actionCombat, SIGNAL(clicked()), this, SLOT(UpdateData()));
     connect(ui->actionTargeted, SIGNAL(clicked()), this, SLOT(UpdateData()));
@@ -153,35 +152,18 @@ void ItemEditor::UpdateData(void)
     Data    item     = Data(dataTree)[itemName.toStdString()];
 
     // Generalties
-    item["icon"]           = ui->itemIcon->text().toStdString();
-    item["model"]          = ui->itemModel->text().toStdString();
-    item["texture"]        = ui->itemTexture->text().toStdString();
-    item["scale"]          = ui->itemScale->value();
-    item["weight"]         = ui->itemWeight->value();
-    item["script"]["file"] = ui->itemScript->text().toStdString();
+    item["icon"]            = ui->itemIcon->text().toStdString();
+    item["model"]           = ui->itemModel->text().toStdString();
+    item["texture"]         = ui->itemTexture->text().toStdString();
+    item["scale"]           = ui->itemScale->value();
+    item["weight"]          = ui->itemWeight->value();
+    item["ammo"]["maximum"] = ui->itemAmmoMaximum->value();
+    item["script"]["file"]  = ui->itemScript->text().toStdString();
 
     if (ui->itemHidden->isChecked())
       item["hidden"].Remove();
     else
       item["hidden"] = "1";
-
-    // Weild Types
-    auto weildFunctor = [](Data item, QCheckBox* checkbox, QLineEdit* lineEdit, const std::string& mode, const std::string& hook)
-    {
-      if (checkbox->isChecked())
-      {
-        item[mode] = "1";
-        if (lineEdit->text().length() > 0)
-          item["script"][hook] = lineEdit->text().toStdString();
-        else
-          item["script"][hook].Remove();
-      }
-      else
-        item[mode] = "0";
-    };
-    weildFunctor(item, ui->itemModeMouth,        ui->scriptMouthWeild,        "mode-mouth",        "hookWeildMouth");
-    weildFunctor(item, ui->itemModeMagic,        ui->scriptMagicWeild,        "mode-magic",        "hookWeildMagic");
-    weildFunctor(item, ui->itemModeBattleSaddle, ui->scriptBattleSaddleWeild, "mode-battlesaddle", "hookWeildBattleSaddle");
 
     // Actions
     QString actionName = ui->actionList->currentText();
@@ -190,12 +172,15 @@ void ItemEditor::UpdateData(void)
     {
       Data action = item["actions"][actionName.toStdString()];
 
-      action["ap-cost"]    = ui->actionApCost->value();
-      action["range"]      = ui->actionRange->value();
-      action["combat"]     = (ui->actionCombat->isChecked()   ? "1" : "0");
-      action["targeted"]   = (ui->actionTargeted->isChecked() ? "1" : "0");
-      action["damage"]     = ui->actionDamage->value();
-      action["damage-max"] = ui->actionDamageMax->value();
+      action["type"]           = ui->actionSkill->text().toStdString();
+      action["ap-cost"]        = ui->actionApCost->value();
+      action["range"]          = ui->actionRange->value();
+      action["combat"]         = (ui->actionCombat->isChecked()   ? "1" : "0");
+      action["targeted"]       = (ui->actionTargeted->isChecked() ? "1" : "0");
+      action["damage"]         = ui->actionDamage->value();
+      action["damage-max"]     = ui->actionDamageMax->value();
+      action["hookCanUse"]     = ui->actionHookCanUse->text().toStdString();
+      action["hookHitChances"] = ui->actionHookHitChances->text().toStdString();
 
       auto hookFunctor = [](Data action, QCheckBox* checkbox, QLineEdit* edit, const std::string& hook)
       {
@@ -238,13 +223,8 @@ void ItemEditor::SelectItem(QString key)
 
         ui->itemHidden->setChecked((item["hidden"].Value() != "1"));
 
-        ui->itemModeMouth->setChecked(item["mode-mouth"].Nil() || item["mode-mouth"].Value() == "1");
-        ui->itemModeMagic->setChecked(item["mode-magic"].Nil() || item["mode-magic"].Value() == "1");
-        ui->itemModeBattleSaddle->setChecked(item["mode-battlesaddle"].Value() == "1");
-
-        ui->scriptMouthWeild->setText(item["script"]["hookWeildMouth"].Value().c_str());
-        ui->scriptMagicWeild->setText(item["script"]["hookWeildMagic"].Value().c_str());
-        ui->scriptBattleSaddleWeild->setText(item["script"]["hookWeildBattleSaddle"].Value().c_str());
+        ui->itemAmmoMaximum->setValue(item["ammo"]["maximum"]);
+        //ui->itemAmmo->setText();
 
         ui->actionList->clear();
         Data::iterator actionIt  = item["actions"].begin();
@@ -282,6 +262,15 @@ void ItemEditor::SelectAction(QString key)
       ui->actionRange->setValue     (currentAction["range"]      || 0);
       ui->actionDamage->setValue    (currentAction["damage"]     || 0);
       ui->actionDamageMax->setValue (currentAction["damage-max"] || 0);
+      ui->actionSkill->setText(currentAction["type"].Value().c_str());
+      ui->actionHookCanUse->setText(currentAction["hookCanUse"].Value().c_str());
+      ui->actionHookHitChances->setText(currentAction["hookHitChances"].Value().c_str());
+
+      ui->actionHasHookUse->setChecked(!(currentAction["hookUse"].Nil()));
+      if (ui->actionHasHookUse->isChecked())
+        ui->actionHookUse->setText(currentAction["hookUse"].Value().c_str());
+      else
+        ui->actionHookUse->clear();
 
       ui->actionHasHookWeapon->setChecked(!(currentAction["hookWeapon"].Nil()));
       if (ui->actionHasHookWeapon->isChecked())
