@@ -66,6 +66,7 @@ void Mouse::GetHoveredAt(LPoint2f cursorPos)
     case ColMask::DynObject:
         emit UnitHovered(into);
         break ;
+    case (ColMask::Object | ColMask::WpPlane):
     case ColMask::Object:
         emit ObjectHovered(into);
         break ;
