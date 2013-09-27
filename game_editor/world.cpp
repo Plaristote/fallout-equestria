@@ -291,7 +291,10 @@ void World::DeleteMapObject(MapObject* ptr)
       while (it != objects.end())
       {
         if (it->parent == ptr->nodePath.get_name())
-          it = objects.erase(it);
+        {
+          DeleteMapObject(&(*it));
+          it = objects.begin();
+        }
         else
           ++it;
       }
@@ -1526,63 +1529,7 @@ void           World::UnSerialize(Utils::Packet& packet)
   /*
    * Solving branching relations between MapObjects
    */
-  {
-    std::function<void (NodePath, std::string)> set_relations = [this, &set_relations](NodePath parent, std::string solving_for)
-    {
-      // Solving for MapObjects
-      {
-        auto it  = objects.begin();
-        auto end = objects.end();
-
-        for (; it != end ; ++it)
-        {
-          if (it->nodePath == parent)
-            continue ;
-          std::cout << "Solving for: '" << solving_for << "'. Current item: '" << it->nodePath.get_name() << '\'' << std::endl;
-          if (it->parent == solving_for)
-          {
-            if (solving_for != "" && !parent.is_empty())
-              it->nodePath.reparent_to(parent);
-            else
-            {
-              if (floors.size() <= it->floor)
-                FloorResize(it->floor + 1);
-              it->nodePath.reparent_to(floors[it->floor]);
-            }
-          }
-        }
-      }
-
-      // Solving for DynamicObjects
-      {
-        auto it  = dynamicObjects.begin();
-        auto end = dynamicObjects.end();
-
-        for (; it != end ; ++it)
-        {
-          if (it->nodePath == parent)
-            continue ;
-          if (it->parent == solving_for)
-          {
-            if (solving_for != "")
-              it->nodePath.reparent_to(parent);
-            else
-            {
-              if (floors.size() <= it->floor)
-                FloorResize(it->floor + 1);
-              it->nodePath.reparent_to(floors[it->floor]);
-            }
-          }
-        }
-      }
-    };
-
-    std::for_each(objects.begin(), objects.end(), [this, &set_relations](MapObject& object)
-    { set_relations(object.nodePath, object.nodePath.get_name()); });
-    std::for_each(dynamicObjects.begin(), dynamicObjects.end(), [this, &set_relations](DynamicObject& object)
-    { set_relations(object.nodePath, object.nodePath.get_name()); });
-    set_relations(floors_node, "");
-  }
+  UpdateMapTree();
 
   // Setting waypoint positions
   {
@@ -1607,6 +1554,65 @@ void           World::UnSerialize(Utils::Packet& packet)
 #else
   for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light, ColMask::Object | ColMask::DynObject); });
 #endif
+}
+
+void           World::UpdateMapTree(void)
+{
+      std::function<void (NodePath, std::string)> set_relations = [this, &set_relations](NodePath parent, std::string solving_for)
+      {
+        // Solving for MapObjects
+        {
+          auto it  = objects.begin();
+          auto end = objects.end();
+
+          for (; it != end ; ++it)
+          {
+            if (it->nodePath == parent)
+              continue ;
+            std::cout << "Solving for: '" << solving_for << "'. Current item: '" << it->nodePath.get_name() << '\'' << std::endl;
+            if (it->parent == solving_for)
+            {
+              if (solving_for != "" && !parent.is_empty())
+                it->nodePath.reparent_to(parent);
+              else
+              {
+                if (floors.size() <= it->floor)
+                  FloorResize(it->floor + 1);
+                it->nodePath.reparent_to(floors[it->floor]);
+              }
+            }
+          }
+        }
+
+        // Solving for DynamicObjects
+        {
+          auto it  = dynamicObjects.begin();
+          auto end = dynamicObjects.end();
+
+          for (; it != end ; ++it)
+          {
+            if (it->nodePath == parent)
+              continue ;
+            if (it->parent == solving_for)
+            {
+              if (solving_for != "")
+                it->nodePath.reparent_to(parent);
+              else
+              {
+                if (floors.size() <= it->floor)
+                  FloorResize(it->floor + 1);
+                it->nodePath.reparent_to(floors[it->floor]);
+              }
+            }
+          }
+        }
+      };
+
+      std::for_each(objects.begin(), objects.end(), [this, &set_relations](MapObject& object)
+      { set_relations(object.nodePath, object.nodePath.get_name()); });
+      std::for_each(dynamicObjects.begin(), dynamicObjects.end(), [this, &set_relations](DynamicObject& object)
+      { set_relations(object.nodePath, object.nodePath.get_name()); });
+      set_relations(floors_node, "");
 }
 
 #ifndef GAME_EDITOR

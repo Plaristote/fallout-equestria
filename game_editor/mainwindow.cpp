@@ -98,6 +98,7 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     QIcon iconDisconnect("icons/disconnect.png");
     QIcon waypointGenerate("icons/waypoint-generate.png");
 
+    clipboard         = 0;
     level_editor_lock = 0;
     world             = 0;
     objectFile        = 0;
@@ -206,6 +207,9 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
 
     connect(ui->freeCamera, SIGNAL(toggled(bool)), this, SLOT(SetFreeCamera(bool)));
 
+    connect(ui->copy,  SIGNAL(clicked()), this, SLOT(CopyClicked()));
+    connect(ui->paste, SIGNAL(clicked()), this, SLOT(PasteClicked()));
+
     ui->treeWidget->header()->hide();
     ui->scriptList->header()->hide();
 }
@@ -227,6 +231,24 @@ void MainWindow::CurrentTabChanged(int ntab)
     _app.SetPandaEnabled(ntab == PANDA_TAB); // The first tab is the only one using Panda3D
 }
 
+void MainWindow::CopyClicked()
+{
+  if (clipboard)
+    delete clipboard;
+  clipboard = new Utils::Packet;
+  Copy(*clipboard);
+}
+
+void MainWindow::PasteClicked()
+{
+  if (clipboard)
+  {
+    Utils::Packet dup(clipboard->raw(), clipboard->size());
+
+    Paste(dup);
+  }
+}
+
 void MainWindow::Copy(Utils::Packet& packet)
 {
   if (mapobjectSelected)
@@ -237,7 +259,7 @@ void MainWindow::Copy(Utils::Packet& packet)
     objects.push_back(mapobjectSelected);
     // Recursively look for each children of the current object and
     // duplicate them as well.
-    get_children = [this, get_children](std::list<MapObject*>& objects, const std::string& parent)
+    get_children = [this, &get_children](std::list<MapObject*>& objects, const std::string& parent)
     {
       auto                  it  = world->objects.begin();
       auto                  end = world->objects.end();
@@ -255,7 +277,7 @@ void MainWindow::Copy(Utils::Packet& packet)
     // Now we record the amount of objects serialized, and we serialize them.
     // The waypoints must not be part of the copy/paste, thus we temporarily remove them
     // from the duplicated object when serializing.
-    packet << objects.size();
+    packet << (int)objects.size();
     std::for_each(objects.begin(), objects.end(), [&packet](MapObject* object)
     {
       MapObject::Waypoints waypoints = object->waypoints;
@@ -269,6 +291,45 @@ void MainWindow::Copy(Utils::Packet& packet)
 
 void MainWindow::Paste(Utils::Packet& packet)
 {
+   int                   object_count;
+   QMap<QString,QString> name_map;
+
+   packet >> object_count;
+   for (int i = 0 ; i < object_count ; ++i)
+   {
+       MapObject object;
+
+       object.UnSerialize(world, packet);
+       object.nodePath.set_collide_mask(CollideMask(ColMask::Object));
+
+       QString old_name = QString::fromStdString(object.nodePath.get_name());
+       QString name;
+       unsigned short ii = 0;
+
+       // Change the object's name,
+       // Change the object's parent name if relevant
+       do
+       {
+         ++ii;
+         name = old_name + '#' + QString::number(ii);
+         cout << "Attempting name " << name.toStdString() << endl;
+       } while ((world->GetMapObjectFromName(name.toStdString()) != 0) ||
+                (world->GetDynamicObjectFromName(name.toStdString()) != 0) ||
+                (world->GetLightByName(name.toStdString()) != 0));
+       object.nodePath.set_name(name.toStdString());
+       name_map.insert(old_name, name);
+
+       {
+         auto parent_it = name_map.find(QString::fromStdString(object.parent));
+
+         if (parent_it != name_map.end())
+           object.parent = parent_it->toStdString();
+       }
+
+       world->objects.push_back(object);
+   }
+   world->UpdateMapTree();
+   ui->treeWidget->SetWorld(world);
 }
 
 void MainWindow::AddCharsheet()
@@ -815,8 +876,9 @@ void MainWindow::DynamicObjectDelete()
 
       dynamicObjectHovered  = 0;
       DynamicObjectSelect();
-      ui->treeWidget->DelObject(toDel);
+      //ui->treeWidget->DelObject(toDel);
       world->DeleteDynamicObject(toDel);
+      ui->treeWidget->SetWorld(world);
     }
 }
 
@@ -1012,8 +1074,9 @@ void MainWindow::MapObjectDelete()
 
       mapobjectHovered  = 0;
       MapObjectSelect();
-      ui->treeWidget->DelObject(toDel);
+      //ui->treeWidget->DelObject(toDel);
       world->DeleteMapObject(toDel);
+      ui->treeWidget->SetWorld(world);
     }
 }
 
@@ -1758,9 +1821,10 @@ void MainWindow::LightDelete(void)
         int index = ui->lightsSelect->currentIndex();
 
         world->DeleteLight(lightSelected->name);
-        ui->treeWidget->DelLight(lightSelected);
+        //ui->treeWidget->DelLight(lightSelected);
         lightSelected = 0;
         ui->lightsSelect->removeItem(index);
+        ui->treeWidget->SetWorld(world);
     }
 }
 

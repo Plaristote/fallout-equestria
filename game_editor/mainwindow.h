@@ -76,6 +76,8 @@ private slots:
     void DisplayError(QString title, QString message);
     void SetFreeCamera(bool);
     void UpdateCameraZoom(int);
+    void CopyClicked(void);
+    void PasteClicked(void);
 
     // CHARSHEETS
     void AddCharsheet(void);
@@ -220,6 +222,7 @@ private:
     DataTree*                objectFile;
 
     WaypointGenerator*       wp_generator;
+    Utils::Packet*           clipboard;
 };
 
 #endif // MAINWINDOW_H

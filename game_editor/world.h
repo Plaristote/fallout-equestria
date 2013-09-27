@@ -542,6 +542,7 @@ struct World
     void           Serialize(Utils::Packet& packet, std::function<void (const std::string&, float)> progress_callback);
 #endif
 
+    void           UpdateMapTree(void);
     void           CompileWaypoints(ProgressCallback);
     void           CompileDoors(ProgressCallback);
 

@@ -166,7 +166,7 @@ x --> Generate waypoints for MapObject
 x --> Zone selector for waypoints
 x --> Arcs preview when selecting a waypoint
 ~ --> Waypoint display must not slow down the game editor anymore
-  --> Copy/Paste
+x --> Copy/Paste
 x --> Interface to edit cities' splashscreens
 
 x -> General

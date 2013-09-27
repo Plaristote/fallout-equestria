@@ -41,21 +41,48 @@
         <string>Level Designer</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="1" column="1" rowspan="9">
-         <widget class="QPandaWidget" name="widget" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <layout class="QGridLayout" name="gridLayout"/>
+        <item row="3" column="2">
+         <widget class="QWidget" name="widget_2" native="true">
+          <layout class="QGridLayout" name="gridLayout_16">
+           <item row="1" column="0">
+            <widget class="QPushButton" name="mapMoveLeft">
+             <property name="text">
+              <string>←</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="mapMoveBottom">
+             <property name="text">
+              <string>↓</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="mapMoveRight">
+             <property name="text">
+              <string>→</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="mapMoveTop">
+             <property name="text">
+              <string>↑</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QCheckBox" name="freeCamera">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="text">
+              <string>Free Camera</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
         <item row="1" column="2">
@@ -104,6 +131,20 @@
                  </column>
                 </widget>
                </item>
+               <item>
+                <widget class="QPushButton" name="copy">
+                 <property name="text">
+                  <string>Copy</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="paste">
+                 <property name="text">
+                  <string>Paste</string>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </widget>
              <widget class="QWidget" name="terrain">
@@ -127,8 +168,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>261</width>
-                    <height>263</height>
+                    <width>258</width>
+                    <height>254</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -291,8 +332,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>165</width>
-                    <height>92</height>
+                    <width>157</width>
+                    <height>89</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -343,8 +384,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>165</width>
-                    <height>215</height>
+                    <width>162</width>
+                    <height>210</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -420,8 +461,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>285</width>
-                    <height>298</height>
+                    <width>282</width>
+                    <height>287</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -618,8 +659,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>285</width>
-                    <height>324</height>
+                    <width>282</width>
+                    <height>313</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -816,8 +857,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>361</width>
-                    <height>363</height>
+                    <width>358</width>
+                    <height>351</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -1107,30 +1148,7 @@
           </layout>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QWidget" name="widget_3" native="true">
-          <layout class="QHBoxLayout" name="horizontalLayout">
-           <item>
-            <widget class="QPushButton" name="mapNew">
-             <property name="text">
-              <string>New Map</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="saveMap">
-             <property name="text">
-              <string>Save Map</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QComboBox" name="listMap"/>
-        </item>
-        <item row="0" column="3" rowspan="6">
+        <item row="0" column="3" rowspan="7">
          <widget class="QProgressBar" name="progressBar">
           <property name="enabled">
            <bool>true</bool>
@@ -1152,49 +1170,45 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="2">
-         <widget class="QWidget" name="widget_2" native="true">
-          <layout class="QGridLayout" name="gridLayout_16">
-           <item row="1" column="0">
-            <widget class="QPushButton" name="mapMoveLeft">
+        <item row="0" column="2">
+         <widget class="QWidget" name="widget_3" native="true">
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QPushButton" name="mapNew">
              <property name="text">
-              <string>←</string>
+              <string>New Map</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="1">
-            <widget class="QPushButton" name="mapMoveBottom">
+           <item>
+            <widget class="QPushButton" name="saveMap">
              <property name="text">
-              <string>↓</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QPushButton" name="mapMoveRight">
-             <property name="text">
-              <string>→</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QPushButton" name="mapMoveTop">
-             <property name="text">
-              <string>↑</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <widget class="QCheckBox" name="freeCamera">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="text">
-              <string>Free Camera</string>
+              <string>Save Map</string>
              </property>
             </widget>
            </item>
           </layout>
          </widget>
+        </item>
+        <item row="1" column="1" rowspan="10">
+         <widget class="QPandaWidget" name="widget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <layout class="QGridLayout" name="gridLayout"/>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="listMap"/>
         </item>
        </layout>
       </widget>
