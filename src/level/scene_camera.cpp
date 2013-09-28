@@ -12,27 +12,7 @@ using namespace std;
 //HAIL MICROSOFT
 LPoint3f cameraAngles[] = {
   LPoint3f(-40, -40, 0),
-  LPoint3f(0, -60, 0),
-/*  LPoint3f(40, -40, 0),
-  LPoint3f(40 - 180, -40, 0),
-  LPoint3f(-180, -60, 0),
-  LPoint3f(-40 - 180, -40, 0),*/
-};
-bool scrollSwapAngles[] = {
-  true,
-  false,
-/*  false,
-  true,
-  false,
-  false,*/
-};
-bool scrollSwapAxis[] = {
-  false,
-  false,
-/*  false,
-  true,
-  true,
-  true,*/
+  LPoint3f(0, -60, 0)
 };
 
 
@@ -92,23 +72,8 @@ void SceneCamera::SwapCameraView(void)
   if (++_currentCameraAngle >= GET_ARRAY_SIZE(cameraAngles))
     _currentCameraAngle = 0;
   _objectiveHpr = cameraAngles[_currentCameraAngle];
-
   _centeringCamera = true;
-  
   _objectivePos.set_z(_camera.get_z());
-
-//   if (_currentCameraAngle == 0)
-//   {
-//     _objectivePos.set_y(_camera.get_y() + 40 - 65);
-//     _objectivePos.set_x(_camera.get_x() + 0  - 60);
-//     _objectivePos.set_z(_camera.get_z());
-//   }
-//   else if (_currentCameraAngle == 1)
-//   {
-//     _objectivePos.set_y(_camera.get_y() + 65 - 40);
-//     _objectivePos.set_x(_camera.get_x() + 60 - 0);
-//     _objectivePos.set_z(_camera.get_z());
-//   }
 }
 
 void SceneCamera::Run(float elapsedTime)
@@ -221,7 +186,7 @@ void SceneCamera::RunScroll(float elapsedTime)
     _camera.set_pos(_camera.get_pos() + movement);
   }
   
-  if (_maxPosX != 0 || _minPosX != 0 || _maxPosY != 0 || _minPosY != 0)
+  if ((_maxPosX != 0 || _minPosX != 0 || _maxPosY != 0 || _minPosY != 0) && (!_followingNodePath && !_centeringCamera))
   {
     if      (_camera.get_x() > _maxPosX) { _camera.set_x(_maxPosX); }
     else if (_camera.get_x() < _minPosX) { _camera.set_x(_minPosX); }
