@@ -120,7 +120,7 @@ button.francis:active
 .universal_button:active
 {
   //background-image:     hud.png 204px 88px 373px 115px;
-  background-image: revelation-mod/menu_button.png 0xp 49px 247px 96px;
+  background-image: revelation-mod/menu_button.png 0px 49px 247px 96px;
 }
 
 /*####### BUTTON_MENU ######*/

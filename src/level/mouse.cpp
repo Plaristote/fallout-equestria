@@ -132,7 +132,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
 
     collisionHandlerQueue->sort_entries();
 
-    world->rootWaypoints.show();
+    //world->rootWaypoints.show();
     if (_hovering.waypoint_ptr && _hovering.hasWaypoint)
       _hovering.waypoint_ptr->SetSelected(false);
     _hovering.hasWaypoint = false;
