@@ -597,6 +597,8 @@ void MainWindow::ShowWaypointZone(void)
 
 void MainWindow::PandaButtonRelease(QMouseEvent*)
 {
+    bool selected_waypoint = false;
+
     waypointHovered      = 0;
     mapobjectHovered     = 0;
     dynamicObjectHovered = 0;
@@ -607,7 +609,10 @@ void MainWindow::PandaButtonRelease(QMouseEvent*)
       {
         my_task.mouse->GetWaypointHoveredAt(my_task.mouse->GetPosition(), mapobjectSelected->waypoints_root);
         if (waypointHovered)
+        {
           WaypointSelect(waypointHovered);
+          selected_waypoint = true;
+        }
       }
       else if (ui->waypointZoneSelector->isChecked())
       {
@@ -618,12 +623,16 @@ void MainWindow::PandaButtonRelease(QMouseEvent*)
         float   max_y = MAX(pos.get_y(), wp_select_y);
 
         SelectWaypointZone(min_x, min_y, max_x, max_y);
+        selected_waypoint = true;
       }
     }
-    if (mapobjectHovered)
-      MapObjectSelect();
-    if (dynamicObjectHovered)
-      DynamicObjectSelect();
+    if (!selected_waypoint)
+    {
+      if (mapobjectHovered)
+        MapObjectSelect();
+      if (dynamicObjectHovered)
+        DynamicObjectSelect();
+    }
 }
 
 #define MAP_TABS_OBJECTS            2

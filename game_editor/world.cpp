@@ -53,7 +53,6 @@ World::World(WindowFramework* window)
   rootLights           = window->get_render().attach_new_node("lights");
   sunlight_enabled     = false;
 #ifdef GAME_EDITOR
-  lightSymbols         = window->get_render().attach_new_node("lightSymbols");
   do_compile_doors     = true;
   do_compile_waypoints = true;
 #endif
@@ -456,9 +455,6 @@ EntryZone* World::GetEntryZoneByName(const std::string& name)
 void World::AddLight(WorldLight::Type type, const std::string& name)
 {
   lights.push_back(WorldLight(type, WorldLight::Type_None, rootLights, name));
-#ifdef GAME_EDITOR
-  lights.rbegin()->symbol.reparent_to(rootLights);
-#endif
 }
 
 void World::AddLight(WorldLight::Type type, const std::string& name, MapObject* parent)
@@ -568,10 +564,6 @@ void WorldLight::ReparentTo(World* world)
   parent_type = Type_None;
   parent_i    = 0;
   nodePath.reparent_to(world->rootLights);
-#ifdef GAME_EDITOR
-  //symbol.reparent_to(world->lightSymbols);
-  nodePath.reparent_to(world->rootLights);
-#endif
 }
 
 void WorldLight::SetEnabled(bool set_enabled)
@@ -792,7 +784,7 @@ void Waypoint::Arc::UpdateDirection(void)
     NodePath  other  = to->nodePath;
     NodePath  parent = nodePath.get_parent();
     LVecBase3 rot    = parent.get_hpr();
-    LVector3  dir    = parent.get_relative_vector(other, other.get_pos() - parent.get_pos());
+    LVector3  dir    = parent.get_relative_vector(other, other.get_pos() - parent.get_pos(other.get_parent()));
 
     nodePath.set_scale(1 / parent.get_scale().get_x());
     nodePath.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
@@ -1079,16 +1071,10 @@ void MapObject::UnserializeWaypoints(World* world, Utils::Packet& packet)
     {
       wp->floor = floor;
       waypoints.push_back(wp);
-#ifdef GAME_EDITOR
+/*#ifdef GAME_EDITOR
       if (!(wp->nodePath.is_empty()))
-      {
-        NodePath render = world->window->get_render();
-
         wp->nodePath.reparent_to(waypoints_root);
-        wp->nodePath.set_scale(render, wp->nodePath.get_scale());
-        wp->nodePath.set_pos  (render, wp->nodePath.get_pos());
-      }
-#endif
+#endif*/
     }
   });
 }
@@ -1293,7 +1279,11 @@ void WorldLight::Initialize(void)
   }
 #ifdef GAME_EDITOR
   if (!(World::model_sphere.is_empty()))
+  {
     World::model_sphere.instance_to(symbol);
+    symbol.reparent_to(nodePath);
+    symbol.set_scale(10, 10, 10);
+  }
   else
     cout << "The horror ! Model spehre is unavailable" << endl;
 #endif
@@ -1348,7 +1338,7 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
   }
 #ifdef GAME_EDITOR
   if (!(symbol.is_empty()))
-    symbol.reparent_to(world->lightSymbols);
+    symbol.reparent_to(nodePath);
 #endif
 }
 
@@ -1535,14 +1525,15 @@ void           World::UnSerialize(Utils::Packet& packet)
   {
     std::for_each(objects.begin(), objects.end(), [this](MapObject& object)
     {
-      auto it  = object.waypoints.begin();
-      auto end = object.waypoints.end();
+      NodePath render = window->get_render();
+      auto     it     = object.waypoints.begin();
+      auto     end    = object.waypoints.end();
 
       for (; it != end ; ++it)
       {
         Waypoint* wp = *it;
 
-        wp->nodePath.set_pos(wp->nodePath.get_pos() + object.nodePath.get_pos(window->get_render()));
+        //wp->nodePath.set_pos(render, wp->nodePath.get_pos());
       }
     });
   }
