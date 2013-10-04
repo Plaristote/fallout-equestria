@@ -14,6 +14,12 @@
 
 # ifdef _WIN32
 #  include <winsock2.h>
+#  define Factory RocketFactory
+#  include <Rocket/Core/Factory.h>
+#  include <Rocket/Core/FontEffect.h>
+#  include <Rocket/Core/ElementDocument.h>
+#  include <Rocket/Core/Decorator.h>
+#  undef  Factory
 # endif
 
 # include <panda3d/cmath.h>

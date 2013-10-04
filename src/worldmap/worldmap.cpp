@@ -3,14 +3,10 @@
 #include "executor.hpp"
 #include <dices.hpp>
 
-#ifdef _WIN32
-# define ROCKET_FACTORY Rocket::Core::RFactory
-#else
-# define ROCKET_FACTORY Rocket::Core::Factory
-#endif
-
 using namespace std;
 using namespace Rocket;
+
+bool RocketFactoryInstanceElementText(Core::Element* elem, Core::String innerRml);
 
 WorldMap* WorldMap::CurrentWorldMap = 0;
 
@@ -185,7 +181,7 @@ void WorldMap::AddCityToList(Data cityData)
     rml << "</div>";
     innerRml = innerRml + Rocket::Core::String(rml.str().c_str());
 
-    if ((ROCKET_FACTORY::InstanceElementText(elem, innerRml)))
+    if ((RocketFactoryInstanceElementText(elem, innerRml)))
       ToggleEventListener(true, "city-" + cityData.Key(), "click", CityButtonClicked);
   }
   cout << "SHOWING CITY " << city.name << " ???" << endl;
@@ -209,7 +205,7 @@ void WorldMap::AddCityToList(Data cityData)
     rml << "<img src='worldmap-city.png' style='width:" << radius << "px;height:" << radius << "px;' />";
     rml << "</div>";
 
-    if ((ROCKET_FACTORY::InstanceElementText(elem, Core::String(rml.str().c_str()))))
+    if ((RocketFactoryInstanceElementText(elem, Core::String(rml.str().c_str()))))
       ToggleEventListener(true, elem_id.str(), "click", MapClickedEvent);
   }
 }

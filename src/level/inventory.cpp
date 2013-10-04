@@ -32,7 +32,7 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts
     }
   }
 
-  ForEach(data["actions"], [this](Data action)
+  std::for_each(data["actions"].begin(), data["actions"].end(), [this](Data action)
   {
     AngelScript::Object hooks(_object.GetContext(), _object.GetModule());
     Data                action_data = (*this)["actions"][action.Key()];
