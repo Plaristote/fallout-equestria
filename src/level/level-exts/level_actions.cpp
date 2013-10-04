@@ -287,6 +287,7 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
   function<void (Data,bool,bool)> fire_projectile = [this, user, target, target_animate, equipedIt](Data projectile_data, bool bullseye, bool is_kill)
   {
     NodePath projectile_dest;
+	auto     _target_animate = target_animate; // MSVC Workaround
     
     if (bullseye)
       projectile_dest = target->GetNodePath();
@@ -301,7 +302,7 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
       projectile->SetTimeout(projectile_data["timeout"] || 10);
       projectile->SetColor(255, 255, 0, 1);
       if (bullseye)
-        projectile->HitsTarget.Connect([target_animate, is_kill](void) { target_animate(is_kill); });
+        projectile->HitsTarget.Connect([_target_animate, is_kill](void) { _target_animate(is_kill); });
       if (projectile->HasReachedDestination())
         projectile->HitsTarget.Emit();
       InsertProjectile(projectile);

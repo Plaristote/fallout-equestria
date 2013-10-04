@@ -1077,7 +1077,7 @@ void MapObject::UnserializeWaypoints(World* world, Utils::Packet& packet)
 
     if (wp)
     {
-      wp->floor = floor;
+      wp->floor = this->floor;
       waypoints.push_back(wp);
 #ifdef GAME_EDITOR
       if (!(wp->nodePath.is_empty()))

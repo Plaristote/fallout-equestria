@@ -34,7 +34,7 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts
 
   std::for_each(data["actions"].begin(), data["actions"].end(), [this](Data action)
   {
-    AngelScript::Object hooks(_object.GetContext(), _object.GetModule());
+    AngelScript::Object hooks(this->_object.GetContext(), this->_object.GetModule());
     Data                action_data = (*this)["actions"][action.Key()];
 
     action_data.Duplicate(action);
