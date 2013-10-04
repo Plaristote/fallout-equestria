@@ -627,7 +627,7 @@ bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
   AstarPathfinding<Waypoint>::State state;
 
   astar.SetStartAndGoalStates(from, to);
-  while ((state = astar.SearchStep()) == AstarPathfinding<Waypoint>::Searching && max_iterations++ < 50);
+  while ((state = astar.SearchStep()) == AstarPathfinding<Waypoint>::Searching && max_iterations++ < 250);
 
   if (state == AstarPathfinding<Waypoint>::Succeeded)
   {

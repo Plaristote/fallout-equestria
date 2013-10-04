@@ -792,7 +792,7 @@ void Waypoint::Arc::UpdateDirection(void)
     NodePath  other  = to->nodePath;
     NodePath  parent = nodePath.get_parent();
     LVecBase3 rot    = parent.get_hpr();
-    LVector3  dir    = parent.get_relative_vector(other, other.get_pos() - parent.get_pos());
+    LVector3  dir    = parent.get_relative_vector(other, other.get_pos() - parent.get_pos(other.get_parent()));
 
     nodePath.set_scale(1 / parent.get_scale().get_x());
     nodePath.set_hpr(-rot.get_x(), -rot.get_y(), -rot.get_z());
@@ -972,7 +972,7 @@ void Waypoint::UnserializeLoadArcs(World* world)
   tmpArcs.clear();
 }
 
-void Waypoint::Serialize(World* world, Utils::Packet &packet)
+void Waypoint::Serialize(World*, Utils::Packet &packet)
 {
   LPoint3f         pos = nodePath.get_pos(/*world->window->get_render()*/);
   int              id  = this->id;
@@ -1081,13 +1081,7 @@ void MapObject::UnserializeWaypoints(World* world, Utils::Packet& packet)
       waypoints.push_back(wp);
 #ifdef GAME_EDITOR
       if (!(wp->nodePath.is_empty()))
-      {
-        NodePath render = world->window->get_render();
-
         wp->nodePath.reparent_to(waypoints_root);
-        wp->nodePath.set_scale(render, wp->nodePath.get_scale());
-        wp->nodePath.set_pos  (render, wp->nodePath.get_pos());
-      }
 #endif
     }
   });
@@ -1535,14 +1529,15 @@ void           World::UnSerialize(Utils::Packet& packet)
   {
     std::for_each(objects.begin(), objects.end(), [this](MapObject& object)
     {
-      auto it  = object.waypoints.begin();
-      auto end = object.waypoints.end();
+      NodePath render = window->get_render();
+      auto     it     = object.waypoints.begin();
+      auto     end    = object.waypoints.end();
 
       for (; it != end ; ++it)
       {
         Waypoint* wp = *it;
 
-        wp->nodePath.set_pos(wp->nodePath.get_pos() + object.nodePath.get_pos(window->get_render()));
+        wp->nodePath.set_pos(render, wp->nodePath.get_pos() + object.nodePath.get_pos(render));
       }
     });
   }
@@ -1615,11 +1610,7 @@ void           World::UpdateMapTree(void)
       set_relations(floors_node, "");
 }
 
-#ifndef GAME_EDITOR
-void           World::Serialize(Utils::Packet& packet)
-#else
 void           World::Serialize(Utils::Packet& packet, std::function<void (const std::string&, float)> progress_callback)
-#endif
 {
   // Compile Step
 # ifdef GAME_EDITOR
@@ -1660,9 +1651,7 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
         (*it).id = ++id;
         ++it;
       }
-#ifdef GAME_EDITOR
       progress_callback("Serializing Waypoints: ", (float)id / waypoints.size() * 100.f);
-#endif
     }
     size = waypoints.size();
     packet << size;
@@ -1685,10 +1674,10 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
     packet << ((int)objects.size());
     for (it = objects.begin() ; it != end ; ++it) { (*it).Serialize(packet); }
   }
-# ifdef GAME_EDITOR
+#ifdef GAME_EDITOR
   if (do_compile_doors)
     CompileDoors(progress_callback);
-# endif
+#endif
 
   // DynamicObjects
   {

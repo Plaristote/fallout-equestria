@@ -76,7 +76,7 @@ x --> i18n/Rocket interfaces dynamic translator
 x --> Option Manager and user interface
 x --> Creating New Games
 
-Milestone III [Started December 2012]
+Milestone III [Started December 2012, Finished July 2013]
 x -> Game Editor
 x --> Worldmap Editor
 x --> Character sheet Editor
@@ -122,9 +122,8 @@ x --> Configurable graphism quality
 x --> Configurable camera behavior
 x --> Stabilizing
 x --> 32/64bit cross-compatibility
-~ --> Preparing a Windows building environment to get Windows nightly builds
 
-Milestone IV [Started July 2013]
+Milestone IV [Started July 2013, Finished September 2013]
 x -> WorldMap
 x --> Visibility and detection of cities
 x --> Dynamically generated places (like random encounter, without encounter)
@@ -155,8 +154,7 @@ x --> Fixing last pathfinding issue(s)
 x -> GameTask
 x --> Compression for save slots
 
-  -> Game Editor
-~ --> Asynchronous Map Loading
+x -> Game Editor
 x --> Re-organize the MapObjects as a hierarchy (a MapObject must be able to contain others)
 x --> Tree view for the object hierarchy
 x --> Focusing camera on selected objects
@@ -165,10 +163,17 @@ x --> Free camera
 x --> Generate waypoints for MapObject
 x --> Zone selector for waypoints
 x --> Arcs preview when selecting a waypoint
-~ --> Waypoint display must not slow down the game editor anymore
+x --> Waypoint display must not slow down the game editor anymore
 x --> Copy/Paste
 x --> Interface to edit cities' splashscreens
 
 x -> General
 x --> Porting every AngelScript usage to the new AngelScript::Object tool
 x --> Any object accessible through AngelScript::ContextLock must be handled with a smart pointer
+
+Alpha1 [Started October 2013]
+  -> General
+~ --> Preparing a Windows building environment to get Windows nightly builds
+  --> Preparing Debian packages
+  --> Fixing waypoint not being properly placed at loading
+  --> Fixing dialog interface being so ugly
