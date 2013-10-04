@@ -74,6 +74,12 @@ public:
   }
 
   template<typename T>
+  T operator||(const T& var)
+  {
+    return (Nil() ? var : (T)(*this));
+  }
+
+  template<typename T>
   bool operator==(const T& var) const
   {
     if (!_data) return (false);

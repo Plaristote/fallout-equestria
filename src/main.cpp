@@ -195,12 +195,14 @@ int main(int argc, char *argv[])
     ConfigPage*      config = load_prc_file("config.prc");
 
     cout << "[FoE] Loading configuration" << endl;
+#if PSTAT_ENABLED
     if (!(PStatClient::connect("localhost", 5185))) // Initialize client for profiling collector
       cout << "[FoE] Can't connect to PStat client" << endl;
+#endif
     cout << "[FoE] Opening Panda3D Framework" << endl;
     framework.open_framework(argc, argv);
     cout << "[FoE] Setting window's title" << endl;
-    framework.set_window_title("Fallout Equestria");
+    //framework.set_window_title("Fallout Equestria");
     cout << "[FoE] Opening Window" << endl;
     window = framework.open_window();
 	if (window == 0)
