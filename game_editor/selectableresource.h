@@ -18,33 +18,19 @@ public:
     void DelResource(const QString& name);
     void SelectResource(std::function<void (QString)> callback);
 
-    static SelectableResource& MapsResource(void)
-    {
-      static SelectableResource* ptr = new SelectableResource;
-
-      return (*ptr);
+#define ADD_SELECTABLE_RESOURCE(name) \
+    static SelectableResource& name(void) \
+    { \
+      static SelectableResource* ptr = new SelectableResource; \
+      \
+      return (*ptr); \
     }
 
-    static SelectableResource& Charsheets(void)
-    {
-      static SelectableResource* ptr = new SelectableResource;
-
-      return (*ptr);
-    }
-
-    static SelectableResource& AIs(void)
-    {
-      static SelectableResource* ptr = new SelectableResource;
-
-      return (*ptr);
-    }
-
-    static SelectableResource& Encounters(void)
-    {
-      static SelectableResource* ptr = new SelectableResource;
-
-      return (*ptr);
-    }
+    ADD_SELECTABLE_RESOURCE(MapsResource)
+    ADD_SELECTABLE_RESOURCE(Charsheets)
+    ADD_SELECTABLE_RESOURCE(AIs)
+    ADD_SELECTABLE_RESOURCE(Encounters)
+    ADD_SELECTABLE_RESOURCE(Dialogs)
 
 private slots:
     void SearchList(void);

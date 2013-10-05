@@ -27,6 +27,7 @@ DialogObject::DialogObject(QWidget *parent) :
 
     connect(ui->toolSelectCharsheet, SIGNAL(clicked()), this, SLOT(SelectCharsheet()));
     connect(ui->toolSelectScript,    SIGNAL(clicked()), this, SLOT(SelectScript()));
+    connect(ui->toolSelectDialog,    SIGNAL(clicked()), this, SLOT(SelectDialog()));
 
     connect(ui->modelPick,   SIGNAL(clicked()), this, SLOT(SelectModel()));
     connect(ui->texturePick, SIGNAL(clicked()), this, SLOT(SelectTexture()));
@@ -63,6 +64,7 @@ void DialogObject::SetCurrentObject(DynamicObject* object)
         break ;
     case DynamicObject::Door:
         ui->type->setCurrentIndex(3);
+        ui->passageway->setEnabled(true);
         break ;
     case DynamicObject::Item:
         ui->type->setCurrentIndex(4);
@@ -123,6 +125,8 @@ void DialogObject::UpdateType(QString str)
     ui->toolSelectScript->setEnabled   (str == objectTypes[0]);
     ui->tabInventory->setEnabled       (str == objectTypes[0] || str == objectTypes[1] || str == objectTypes[2]);
     ui->tabDoor->setEnabled            (str == objectTypes[2] || str == objectTypes[3]);
+    ui->lock->setEnabled               (str == objectTypes[1] || str == objectTypes[2] || str == objectTypes[3]);
+    ui->passageway->setEnabled         (str == objectTypes[3]);
 }
 
 void DialogObject::Apply()
@@ -252,6 +256,14 @@ void DialogObject::SelectScript()
   SelectableResource::AIs().SelectResource([this](QString name)
   {
     ui->script->setText(name);
+  });
+}
+
+void DialogObject::SelectDialog()
+{
+  SelectableResource::Dialogs().SelectResource([this](QString name)
+  {
+    ui->dialog->setText(name);
   });
 }
 

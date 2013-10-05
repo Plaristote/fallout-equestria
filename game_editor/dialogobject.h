@@ -39,6 +39,7 @@ private slots:
 
     void SelectCharsheet(void);
     void SelectScript(void);
+    void SelectDialog(void);
     void SelectModel(void);
     void SelectTexture(void);
 
