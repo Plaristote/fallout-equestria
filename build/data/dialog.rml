@@ -3,32 +3,10 @@
 		<title>Main Menu</title>
 		<link type="text/template" href="tpl_dialog.rml" />
 		<style>
-	        body
-		{
-		  width: 100%;
-		  height: 60%;
-                  bottom: 0px;
-		}
-
-                #npcLine
-                {
-                  width: 80%;
-                  height: 20%;
-                  overflow-x: scroll;
-                }
-
-                #answers
-                {
-                  width:  80%;
-                  height: 80%;
-                  overflow-x: auto;
-                }
-
-#sidebar
+body
 {
-  position: absolute;
-  width:    20%;
-  right:    0px;
+  width: 100%;
+  height: 100%;
 }
 
 button.dialog-answer
@@ -70,22 +48,111 @@ button.dialog-answer:active,
 {
 }
 
-		</style>
+#dialog-top
+{
+  position: absolute;
+  height: 50%;
+  width:  100%;
+  top: 0px;
+  background-decorator: image;
+  background-image: ui_dialog/dialog-top.png;
+}
+
+#dialog-bottom
+{
+  position: absolute;
+  height: 50%;
+  width:  100%;
+  bottom: 0px;
+}
+
+#dialog-left
+{
+  position: absolute;
+  height: 100%;
+  width:  15%;
+  left: 0px;
+  background-decorator: image;
+  background-image: ui_dialog/left.png;
+}
+
+#dialog-right
+{
+  position: absolute;
+  height: 100%;
+  width:  15%;
+  right: 0px;
+  background-decorator: image;
+  background-image: ui_dialog/right.png;
+}
+
+#dialog-center
+{
+  position: absolute;
+  left: 15%;
+  width: 70%;
+  height: 100%;
+  background-decorator: image;
+  background-image: ui_dialog/center.png;
+}
+
+#answers-container
+{
+  padding-top:  10%;
+  padding-left: 10%;
+  height:       60%;
+  width:        80%;
+}
+
+#answers
+{
+  height:       100%;
+  width:        100%;
+  overflow:     auto;
+}
+
+#npc-line-box
+{
+  position:     absolute;
+  padding-left: 29%;
+  bottom:       5%;
+  height:       8%;
+  width:        50%;
+}
+
+#npcLine
+{
+  height:       100%;
+  width:        100%;
+  overflow:     auto;
+}
+
+</style>
 	</head>
-  <body id="body" template="tplmainbar">
-    <p>
-
+  <body id="body">
+  
+  <div id="dialog-top">
+    <div id="npc-line-box">
       <p id="npcLine">
-        Foo line from a npc.
       </p>
-
-      <p id="answers">
-      </p>
-
-      <div id="sidebar">
-        <button id="button-open-barter" i18n="Barter" class="universal_button">Barter</button>
+    </div>
+  </div>
+  
+  <div id="dialog-bottom">
+    <div id="dialog-left" class="">
+    </div>
+    
+    <div id="dialog-center" class="">
+      <div id="answers-container">
+        <p id="answers">
+        </p>
       </div>
+    </div>
+    
+    <div id="dialog-right" class="">
+      <button id="button-open-barter" i18n="Barter" class="universal_button">Barter</button>
+    </div>
+  </div>
 
-    </p>
   </body>
 </rml>
