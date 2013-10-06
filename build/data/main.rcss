@@ -60,7 +60,7 @@ button.simple-button
   height: 35;
   background-decorator: image;
   background-image: button.png;
-}francis
+}
 
 button.simple-button:active
 {
@@ -616,20 +616,6 @@ scrollbarhorizontal sliderarrowinc
   background-left-image:         invader.tga repeat-truncate   0px  30px  30px  90px;
   background-right-image:        invader.tga repeat-truncate 202px  30px 231px  90px;
   background-center-image:       invader.tga repeat-truncate  30px  30px 201px  90px;
-}
-
-.dialog-bg
-{
-  background-decorator:          tiled-box;
-  background-top-left-image:     revelation-mod/dialog_menu.png    0px    0px   40px   40px;
-  background-top-right-image:    revelation-mod/dialog_menu.png 1020px    0px 1092px   40px;
-  background-top-image:          revelation-mod/dialog_menu.png   40px    0px 1020px   40px;
-  background-bottom-left-image:  revelation-mod/dialog_menu.png    0px  250px  220px  416px;
-  background-bottom-right-image: revelation-mod/dialog_menu.png  950px  250px 1092px  416px;
-  background-bottom-image:       revelation-mod/dialog_menu.png  220px  250px  950px  416px;
-  background-left-image:         revelation-mod/dialog_menu.png    0px   40px   40px  250px;
-  background-right-image:        revelation-mod/dialog_menu.png 1020px   40px 1092px  250px;
-  background-center-image:       revelation-mod/dialog_menu.png   40px   40px 1020px  250px;
 }
 
 .console-value

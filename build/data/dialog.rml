@@ -120,11 +120,24 @@ button.dialog-answer:active,
   width:        50%;
 }
 
-#npcLine
+#npc-line
 {
   height:       100%;
   width:        100%;
-  overflow:     auto;
+  overflow-y:   auto;
+  font-family:  JH_Fallout;
+  font-size:    10px;
+}
+
+.sidebar-button
+{
+  padding-top: 20%;
+  height:  30%;
+  align: center;
+  text-align: center;
+  color: yellow;
+  font-family: Fallout;
+  font-size: 21px;
 }
 
 </style>
@@ -133,8 +146,10 @@ button.dialog-answer:active,
   
   <div id="dialog-top">
     <div id="npc-line-box">
-      <p id="npcLine">
-      </p>
+      <div id="npc-line">
+        <p id="npcLine">
+        </p>
+      </div>
     </div>
   </div>
   
@@ -150,7 +165,14 @@ button.dialog-answer:active,
     </div>
     
     <div id="dialog-right" class="">
-      <button id="button-open-barter" i18n="Barter" class="universal_button">Barter</button>
+      <div class="sidebar-button">
+        <span i18n="Barter">Barter</span><br />
+        <button id="button-open-barter" class="simple-button"></button>
+      </div>
+      
+      <div class="sidebar-button">
+        <span i18n="Tell-me-about">Tell me about</span><br />
+        <button id="button-ask-about" class="simple-button"></button>
     </div>
   </div>
 

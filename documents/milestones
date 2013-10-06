@@ -176,4 +176,4 @@ Alpha1 [Started October 2013]
 ~ --> Preparing a Windows building environment to get Windows nightly builds
   --> Preparing Debian packages
   --> Fixing waypoint not being properly placed at loading
-  --> Fixing dialog interface being so ugly
+x --> Fixing dialog interface being so ugly

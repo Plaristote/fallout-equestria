@@ -5,87 +5,112 @@
     <style>
       #body
       {
-        width:  600px;
-        height: 70%;
-        margin: auto;
-        margin-top: 10px;
+        position: absolute;
+        height:   50%;
+        bottom:   0px;
+        width:    100%;
       }
 
-      #window
-      {
-        width: 600px; height: 100%;
-      }
+#dialog-left
+{
+  position: absolute;
+  height: 100%;
+  width:  15%;
+  left: 0px;
+  background-decorator: image;
+  background-image: ui_dialog/left.png;
+}
 
-      #body-inventory-items
-      {
-        width:          90%;
-        height:         80%;
-        //margin-left:    10px;
-        //margin-right:   10px;
-        margin-top:     10px;
-        margin-bottom:  10px;
-      }
+#dialog-right
+{
+  position: absolute;
+  height: 100%;
+  width:  15%;
+  right: 0px;
+  background-decorator: image;
+  background-image: ui_dialog/right.png;
+}
+
+#dialog-center
+{
+  position: absolute;
+  left: 15%;
+  width: 70%;
+  height: 100%;
+}      
+
+#inventory-items
+{
+  width:          90%;
+  height:         80%;
+  margin-left:    20px;
+  margin-right:   20px;
+  margin-top:     20px;
+  margin-bottom:  20px;
+}
 
       #self-inventory
       {
         position: absolute;
-        //drag:  clone;
-        width: 20%;
+        width: 15%;
         left:  10%;
         height: 80%;
         overflow-y: auto;
-        margin-right: 100px;
+        margin-right: 15%;
+        top: 5%;
       }
 
       #stack-player
       {
         position: absolute;
-        width: 20%;
+        width: 15%;
         left: 30%;
         height: 70%;
-        top: 5%;
+        top: 10%;
         overflow-y: auto;
-        margin-right: 50px;
+        margin-right: 15%;
       }
 
       #stack-other
       {
         position: absolute;
-        width: 20%;
+        width: 15%;
         right: 30%;
         height: 70%;
-        top: 5%;
+        top: 10%;
         overflow-y: auto;
-        margin-left: 50px;
+        margin-left: 15%;
       }
 
+      .barter-value
+      {
+        position:    absolute;
+        top:         5%;
+        height:      10%;
+        width:       20%;
+        font-family: JH_Fallout;      
+      }
+      
       #value-other
       {
-        position: absolute;
-        top:      0px;
-        height:   10%;
-        width:    20%;
-        right:    30%;
+        right:       30%;
+        text-align:  right;
       }
 
       #value-player
       {
-        position: absolute;
-        top:      0px;
-        height:   10%;
-        width:    20%;
-        left:     30%;
+        left:        30%;
+        text-align:  left;
       }
 
       #other-inventory
       {
         position: absolute;
-        //drag:  clone;
-        width: 20%;
+        width: 15%;
         right: 10%;
         height: 80%;
         overflow-y: auto;
-        margin-left: 100px;
+        margin-left: 15%;
       }
 
       #buttons
@@ -95,6 +120,17 @@
         right:          5px;
       }
 
+.sidebar-button
+{
+  padding-top: 20%;
+  height:  30%;
+  align: center;
+  text-align: center;
+  color: yellow;
+  font-family: Fallout;
+  font-size: 21px;
+}
+      
       .inventory-item-icon
       {}
 
@@ -102,28 +138,36 @@
       {
         drag: clone;
       }
+      
      </style>
   </head>
   <body id="body">
-  <div id="window">
-  <p>
-    <div id="inventory-items">
-      <p id="self-inventory"  class="console-bg">
-      </p>
-      <span id="value-player">0 caps</span>
-      <span id="value-other">0 caps</span>
-      <p id="stack-player"    class="console-bg">
-      </p>
-      <p id="stack-other"     class="console-bg">
-      </p>
-       <p id="other-inventory" class="console-bg">
-      </p>
-   </div>
-    <div id="buttons">
-      <button id="button_done" i18n="Barter" class="universal_button">Barter</button>
-      <button id="button_quit" i18n="Quit" class="universal_button">Quit</button>
+    <div id="dialog-left"></div>
+
+    <div id="dialog-center" class="window-background">
+      <div id="inventory-items">
+        <p id="self-inventory"  class="console-bg">
+        </p>
+        <span class="barter-value" id="value-player">0 caps</span>
+        <span class="barter-value" id="value-other">0 caps</span>
+        <p id="stack-player"    class="console-bg">
+        </p>
+        <p id="stack-other"     class="console-bg">
+        </p>
+        <p id="other-inventory" class="console-bg">
+        </p>
     </div>
-  </p>
-  </div>
+    </div>
+
+    <div id="dialog-right">
+      <div class="sidebar-button">
+        <span i18n="Barter">Barter</span><br />
+        <button id="button_done" class="simple-button"></button>
+      </div>
+      <div class="sidebar-button">
+        <span i18n="Quit">Quit</span><br />
+        <button id="button_quit" class="simple-button"></button>
+      </div>
+    </div>
   </body>
 </rml>
