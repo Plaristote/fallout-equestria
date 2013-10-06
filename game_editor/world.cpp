@@ -53,6 +53,7 @@ World::World(WindowFramework* window)
   rootLights           = window->get_render().attach_new_node("lights");
   sunlight_enabled     = false;
 #ifdef GAME_EDITOR
+  lightSymbols         = window->get_render().attach_new_node("lightSymbols");
   do_compile_doors     = true;
   do_compile_waypoints = true;
 #endif
@@ -455,6 +456,9 @@ EntryZone* World::GetEntryZoneByName(const std::string& name)
 void World::AddLight(WorldLight::Type type, const std::string& name)
 {
   lights.push_back(WorldLight(type, WorldLight::Type_None, rootLights, name));
+#ifdef GAME_EDITOR
+  lights.rbegin()->symbol.reparent_to(rootLights);
+#endif
 }
 
 void World::AddLight(WorldLight::Type type, const std::string& name, MapObject* parent)
@@ -564,6 +568,10 @@ void WorldLight::ReparentTo(World* world)
   parent_type = Type_None;
   parent_i    = 0;
   nodePath.reparent_to(world->rootLights);
+#ifdef GAME_EDITOR
+  //symbol.reparent_to(world->lightSymbols);
+  nodePath.reparent_to(world->rootLights);
+#endif
 }
 
 void WorldLight::SetEnabled(bool set_enabled)
@@ -964,7 +972,7 @@ void Waypoint::UnserializeLoadArcs(World* world)
   tmpArcs.clear();
 }
 
-void Waypoint::Serialize(World* world, Utils::Packet &packet)
+void Waypoint::Serialize(World*, Utils::Packet &packet)
 {
   LPoint3f         pos = nodePath.get_pos(/*world->window->get_render()*/);
   int              id  = this->id;
@@ -1071,10 +1079,10 @@ void MapObject::UnserializeWaypoints(World* world, Utils::Packet& packet)
     {
       wp->floor = floor;
       waypoints.push_back(wp);
-/*#ifdef GAME_EDITOR
+#ifdef GAME_EDITOR
       if (!(wp->nodePath.is_empty()))
         wp->nodePath.reparent_to(waypoints_root);
-#endif*/
+#endif
     }
   });
 }
@@ -1279,11 +1287,7 @@ void WorldLight::Initialize(void)
   }
 #ifdef GAME_EDITOR
   if (!(World::model_sphere.is_empty()))
-  {
     World::model_sphere.instance_to(symbol);
-    symbol.reparent_to(nodePath);
-    symbol.set_scale(10, 10, 10);
-  }
   else
     cout << "The horror ! Model spehre is unavailable" << endl;
 #endif
@@ -1338,7 +1342,7 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
   }
 #ifdef GAME_EDITOR
   if (!(symbol.is_empty()))
-    symbol.reparent_to(nodePath);
+    symbol.reparent_to(world->lightSymbols);
 #endif
 }
 
@@ -1533,7 +1537,7 @@ void           World::UnSerialize(Utils::Packet& packet)
       {
         Waypoint* wp = *it;
 
-        //wp->nodePath.set_pos(render, wp->nodePath.get_pos());
+        wp->nodePath.set_pos(render, wp->nodePath.get_pos() + object.nodePath.get_pos(render));
       }
     });
   }
@@ -1606,11 +1610,7 @@ void           World::UpdateMapTree(void)
       set_relations(floors_node, "");
 }
 
-#ifndef GAME_EDITOR
-void           World::Serialize(Utils::Packet& packet)
-#else
 void           World::Serialize(Utils::Packet& packet, std::function<void (const std::string&, float)> progress_callback)
-#endif
 {
   // Compile Step
 # ifdef GAME_EDITOR
@@ -1651,9 +1651,7 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
         (*it).id = ++id;
         ++it;
       }
-#ifdef GAME_EDITOR
       progress_callback("Serializing Waypoints: ", (float)id / waypoints.size() * 100.f);
-#endif
     }
     size = waypoints.size();
     packet << size;
@@ -1676,10 +1674,10 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
     packet << ((int)objects.size());
     for (it = objects.begin() ; it != end ; ++it) { (*it).Serialize(packet); }
   }
-# ifdef GAME_EDITOR
+#ifdef GAME_EDITOR
   if (do_compile_doors)
     CompileDoors(progress_callback);
-# endif
+#endif
 
   // DynamicObjects
   {

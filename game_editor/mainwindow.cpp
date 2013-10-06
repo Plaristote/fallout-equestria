@@ -212,12 +212,25 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
 
     ui->treeWidget->header()->hide();
     ui->scriptList->header()->hide();
+
+    connect(ui->waypointPicker,       SIGNAL(clicked(bool)), this, SLOT(TerrainPickerPicked(bool)));
+    connect(ui->waypointZoneSelector, SIGNAL(clicked(bool)), this, SLOT(TerrainSelectorPicked(bool)));
 }
 
 MainWindow::~MainWindow()
 {
     AsyncTaskManager::get_global_ptr()->remove(&my_task);
     delete ui;
+}
+
+void MainWindow::TerrainPickerPicked(bool set)
+{
+  ui->waypointZoneSelector->setChecked(!set);
+}
+
+void MainWindow::TerrainSelectorPicked(bool set)
+{
+  ui->waypointPicker->setChecked(!set);
 }
 
 void MainWindow::SetFreeCamera(bool value)

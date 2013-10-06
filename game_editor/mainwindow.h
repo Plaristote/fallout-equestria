@@ -107,6 +107,8 @@ private slots:
     void UpdateSelection(void);
     void WaypointDiscardSelection(void);
     void WaypointSyncTerrain(void);
+    void TerrainPickerPicked(bool);
+    void TerrainSelectorPicked(bool);
 
     // ENTRY/EXIT ZONES
     void EntryZoneAdd(void);

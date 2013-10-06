@@ -9,7 +9,7 @@ using namespace std;
 
 WaypointGenerator::WaypointGenerator(World* world, MapObject* object, LPoint4 margin, LPoint2 spacing) : world(world), object(object)
 {
-  LPoint3f size = NodePathSize(object->nodePath);
+  LPoint3f size = NodePathSize(object->render);
 
   spacingx = spacing.get_x();
   spacingy = spacing.get_y();
@@ -106,9 +106,9 @@ bool WaypointGenerator::LevelWaypoint(Waypoint* waypoint)
     segment->set_point_a(wp.get_x(), wp.get_y(), wp.get_z());
     segment->set_point_b(wp.get_x(), wp.get_y(), wp.get_z() - (100000.f));
 
-    cout << "Looking for collisions" << endl;
+    //cout << "Looking for collisions" << endl;
     col_traverser.add_collider(np, col_queue);
-    col_traverser.traverse(object->nodePath);
+    col_traverser.traverse(object->render);
     if (col_queue->get_num_entries())
     {
       LPoint3 np_size = NodePathSize(wp);
@@ -120,9 +120,9 @@ bool WaypointGenerator::LevelWaypoint(Waypoint* waypoint)
       cout << min_pos.get_x() << ", " << min_pos.get_y() << ", " << min_pos.get_z() << endl;
     }
     np.remove_node();
-    if (new_height != wp.get_z())
+    if (new_height != wp.get_z(object->nodePath))
     {
-      wp.set_z(new_height);
+      wp.set_z(object->nodePath, new_height);
       return (true);
     }
     return (false);

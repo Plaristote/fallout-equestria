@@ -536,11 +536,7 @@ struct World
     typedef std::function<void (const std::string&, float)> ProgressCallback;
 
     void           UnSerialize(Utils::Packet& packet);
-#ifndef GAME_EDITOR
-    void           Serialize(Utils::Packet& packet);
-#else
-    void           Serialize(Utils::Packet& packet, std::function<void (const std::string&, float)> progress_callback);
-#endif
+    void           Serialize(Utils::Packet& packet, std::function<void (const std::string&, float)> progress_callback = [](const std::string&, float){});
 
     void           UpdateMapTree(void);
     void           CompileWaypoints(ProgressCallback);
