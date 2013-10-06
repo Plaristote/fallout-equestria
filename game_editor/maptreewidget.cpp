@@ -88,6 +88,7 @@ MapTreeWidget::ItemType MapTreeWidget::GetType(QTreeWidgetItem* item) const
 
 void MapTreeWidget::ReparentTo(QTreeWidgetItem* current, QTreeWidgetItem* parent)
 {
+  if (current == parent) return ;
   ItemType         parent_type = GetType(parent);
   QTreeWidgetItem* clone       = 0;
 
