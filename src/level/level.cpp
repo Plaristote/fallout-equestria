@@ -650,6 +650,22 @@ InstanceDynamicObject* Level::GetObject(const string& name)
   return (0);
 }
 
+Level::CharacterList Level::FindCharacters(function<bool (ObjectCharacter*)> selector) const
+{
+  CharacterList              list;
+  Characters::const_iterator it  = _characters.begin();
+  Characters::const_iterator end = _characters.end();
+
+  for (; it != end ; ++it)
+  {
+    ObjectCharacter* character = *it;
+    
+    if (selector(character))
+      list.push_back(character);
+  }
+  return (list);
+}
+
 ObjectCharacter* Level::GetCharacter(const string& name)
 {
   Characters::const_iterator it  = _characters.begin();

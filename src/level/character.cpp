@@ -973,7 +973,7 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
   _losPath.set_hpr(0, 0, 0);
   _losRay->set_point_a(rpos.get_x(), rpos.get_y(), rpos.get_z() + 4.f);
   _losRay->set_point_b(other.get_x(), other.get_y(), other.get_z() + 4.f);
-  _losTraverser.traverse(_level->GetWorld()->window->get_render());
+  _losTraverser.traverse(_level->GetWorld()->floors_node);
   
   //if (object == _level->GetPlayer())
   //_losPath.show();
@@ -1058,10 +1058,14 @@ void     ObjectCharacter::CheckFieldOfView(void)
     return ;
   Timer profile;
   cout << "Checking Field of View for " << GetName() << endl;
-  PStatCollector     collector("Level:Characters:FieldOfView");
-  short              perception = (GetStatController() != 0) ? GetStatController()->Model().GetSpecial("PER") : 5;
-  CollisionTraverser fovTraverser;
-  float              fovRadius  = 20 + (perception * 5);
+  PStatCollector       collector("Level:Characters:FieldOfView");
+  short                perception          = (GetStatController() != 0) ? GetStatController()->Model().GetSpecial("PER") : 5;
+  float                fovRadius           = 20 + (perception * 5);
+  NodePath             self_node           = GetNodePath();
+  Level::CharacterList detected_characters = _level->FindCharacters([this, fovRadius](ObjectCharacter* character) -> bool
+  {
+    return (character != this && character->GetDistance(this) < fovRadius);
+  });
   
   collector.start();
   _fovNeedsUpdate = false;
@@ -1082,47 +1086,38 @@ void     ObjectCharacter::CheckFieldOfView(void)
     _fovAllies.clear();
   }
 
-  _fovSphere->set_radius(fovRadius);
-  _fovTraverser.traverse(_level->GetWorld()->window->get_render());
-
-  for (unsigned short i = 0 ; i < _fovHandlerQueue->get_num_entries() ; ++i)
+  for (unsigned int it = 0 ; it < detected_characters.size() ; ++it)
   {
-    CollisionEntry*        entry  = _fovHandlerQueue->get_entry(i);
-    NodePath               node   = entry->get_into_node_path();
-    InstanceDynamicObject* object = _level->FindObjectFromNode(node);
+    ObjectCharacter* character = detected_characters[it];
 
-    if (object && object != this)
+    if (character)
     {
-      ObjectCharacter* character = object->Get<ObjectCharacter>();
-
-      if (character)
+      if (!(character->IsAlive()))
+        continue ;
+      if      (IsAlly(character))
+        _fovAllies.push_back(character);
+      else if (IsEnemy(character) && HasLineOfSight(character))
       {
-	if (!(character->IsAlive()))
-	  continue ;
-	if      (IsAlly(character))
-	  _fovAllies.push_back(character);
-	else if (IsEnemy(character) && HasLineOfSight(character))
-	{
-          bool                     detected = true;
+        bool                     detected = true;
 
-          if (character->HasFlag(1))
-          {
-            short sneak      = character->GetStatController()->Model().GetSkill("Sneak");
-            short value      = sneak - (perception * 3);
+        if (character->HasFlag(1))
+        {
+          short sneak      = character->GetStatController()->Model().GetSkill("Sneak");
+          short value      = sneak - (perception * 3);
 
-            if (!(Dices::Throw(100) >= (value > 95 ? 95 : value)))
-              detected = false;
-          }
-          if (detected)
-            SetEnemyDetected(character);
-          else
-            cout << "[FOV] " << character->GetName() << " remains undetected" << endl;
-	}
+          if (!(Dices::Throw(100) >= (value > 95 ? 95 : value)))
+            detected = false;
+        }
+        if (detected)
+          SetEnemyDetected(character);
         else
-          cout << "[FOV] " << character->GetName() << " is out of my line of sight" << endl;
+          cout << "[FOV] " << character->GetName() << " remains undetected" << endl;
       }
+      else
+        cout << "[FOV] " << character->GetName() << " is out of my line of sight" << endl;
     }
   }
+
   if (_fovEnemies.size() > 0 && _level->GetState() != Level::Fight)
     _level->StartFight(this);
   if (this == _level->GetPlayer())

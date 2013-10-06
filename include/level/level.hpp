@@ -34,10 +34,14 @@
 # include "main_script.hpp"
 # include "script_zone.hpp"
 
+# include <functional>
+
 class Level
 {
   friend class Party;
 public:
+  typedef std::vector<ObjectCharacter*> CharacterList;
+  
   static Level* CurrentLevel;
   
   Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& data, TimeManager& tm);
@@ -80,6 +84,7 @@ public:
   SceneCamera&           GetCamera(void)      { return (_camera); }
   ObjectCharacter*       GetCharacter(const std::string& name);
   ObjectCharacter*       GetCharacter(const DynamicObject*);
+  CharacterList          FindCharacters(std::function<bool (ObjectCharacter*)> = [](ObjectCharacter*) { return (true); }) const;
   ObjectCharacter*       GetPlayer(void);
   LevelZone*             GetZoneByName(const std::string& name);
   void                   UnprocessAllCollisions(void);
