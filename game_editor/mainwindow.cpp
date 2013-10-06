@@ -368,7 +368,8 @@ void MainWindow::CreateMap(void)
 
     if (world)
       delete world;
-    world     = new World(_window);
+    world               = new World(_window);
+    levelName           = name;
     save_map_use_thread = false;
     SaveMap();
     save_map_use_thread = true;
