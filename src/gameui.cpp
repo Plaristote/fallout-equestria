@@ -617,36 +617,31 @@ void GameConsole::Output(const std::string str)
 void GameConsole::KeyUp(Rocket::Core::Event& event)
 {
   cout << "Some event" << endl;
-	if (event == "keyup") {
-		Rocket::Controls::ElementFormControl* control = reinterpret_cast<Rocket::Controls::ElementFormControl*>(_input);
-		int keyId= event.GetParameter<int>("key_identifier", 0);
+  if (event == "keyup") {
+          Rocket::Controls::ElementFormControl* control = reinterpret_cast<Rocket::Controls::ElementFormControl*>(_input);
+          int keyId= event.GetParameter<int>("key_identifier", 0);
 
-		if (keyId == Core::Input::KI_RETURN) {
-			Execute(event);
-		};
+          if (keyId == Core::Input::KI_RETURN) {
+                  Execute(event);
+          };
 
-		if (!_history.empty()) {
-			if (keyId == Core::Input::KI_DOWN) {
-				if (_histIter!=_history.begin()) {
-					_histIter--;
-					control->SetValue( _histIter->c_str() );
-				};
-			};
-			if (keyId == Core::Input::KI_UP) {
-				if (_histIter!=_history.end()) {
-					control->SetValue( _histIter->c_str() );
-					_histIter++;
-				} else {
-					control->SetValue("");
-				};
-			};
-		};
-	}
-
-	/*else if (event == "textinput") {
-		Rocket::Core::word defWord;
-		Rocket::Core::word valueKey = event.GetParameter<Rocket::Core::word>("data", defWord);
-	}*/
+          if (!_history.empty()) {
+                  if (keyId == Core::Input::KI_DOWN) {
+                          if (_histIter!=_history.begin()) {
+                                  _histIter--;
+                                  control->SetValue( _histIter->c_str() );
+                          };
+                  }; 
+                  if (keyId == Core::Input::KI_UP) {
+                          if (_histIter!=_history.end()) {
+                                  control->SetValue( _histIter->c_str() );
+                                  _histIter++;
+                          } else {
+                                  control->SetValue("");
+                          };
+                  };
+          };
+  }
 }
 
 //List all the functions registered inside AngelScript

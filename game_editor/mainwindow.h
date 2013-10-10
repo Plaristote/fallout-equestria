@@ -141,6 +141,8 @@ private slots:
     void MapObjectScaleX(void);
     void MapObjectScaleY(void);
     void MapObjectScaleZ(void);
+    void MapObjectColliderUpdatePos(void);
+    void MapObjectColliderUpdateType(void);
     void MapObjectFloor(void);
     void MapObjectFocus(MapObject*);
     void MapObjectGenerateWaypoints(void);

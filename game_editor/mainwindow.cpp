@@ -789,6 +789,17 @@ void MainWindow::PandaInitialized()
      connect(ui->objectName, SIGNAL(textChanged(QString)), this, SLOT(MapObjectNameChanged(QString)));
      connect(ui->objectFloor, SIGNAL(valueChanged(int)), this, SLOT(MapObjectFloor()));
 
+     connect(ui->collider_type,    SIGNAL(currentIndexChanged(int)), this, SLOT(MapObjectColliderUpdateType()));
+     connect(ui->collider_pos_x,   SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
+     connect(ui->collider_pos_y,   SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
+     connect(ui->collider_pos_z,   SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
+     connect(ui->collider_hpr_x,   SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
+     connect(ui->collider_hpr_y,   SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
+     connect(ui->collider_hpr_z,   SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
+     connect(ui->collider_scale_x, SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
+     connect(ui->collider_scale_y, SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
+     connect(ui->collider_scale_z, SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
+
 // DYNAMICOBJECTS
      dynamicObjectSelected = 0;
      dynamicObjectHovered  = 0;
@@ -1143,27 +1154,73 @@ void MainWindow::MapObjectNameChanged(QString name)
 
 void MainWindow::MapObjectSelect()
 {
-    mapobjectSelected = mapobjectHovered;
-    if (mapobjectSelected)
+    if (mapobjectSelected && !mapobjectSelected->collision_node.is_empty())
+      mapobjectSelected->collision_node.hide();
+    mapobjectSelected = 0;
+    if (mapobjectHovered)
     {
-      ui->treeWidget->SetItemFocused(mapobjectSelected);
-      ui->waypointVisible->setChecked(!(mapobjectSelected->waypoints_root.is_hidden()));
-      ui->objectFloor->setValue(mapobjectSelected->floor);
-      ui->objectScaleX->setValue(mapobjectSelected->nodePath.get_scale().get_x());
-      ui->objectScaleY->setValue(mapobjectSelected->nodePath.get_scale().get_y());
-      ui->objectScaleZ->setValue(mapobjectSelected->nodePath.get_scale().get_z());
-      ui->objectPosX->setValue(mapobjectSelected->nodePath.get_x());
-      ui->objectPosY->setValue(mapobjectSelected->nodePath.get_y());
-      ui->objectPosZ->setValue(mapobjectSelected->nodePath.get_z());
-      ui->objectRotationX->setValue(mapobjectSelected->nodePath.get_hpr().get_x());
-      ui->objectRotationY->setValue(mapobjectSelected->nodePath.get_hpr().get_y());
-      ui->objectRotationZ->setValue(mapobjectSelected->nodePath.get_hpr().get_z());
-      ui->objectName->setText(QString::fromStdString(mapobjectSelected->nodePath.get_name()));
+      ui->treeWidget->SetItemFocused(mapobjectHovered);
+      ui->waypointVisible->setChecked(!(mapobjectHovered->waypoints_root.is_hidden()));
+      ui->objectFloor->setValue(mapobjectHovered->floor);
+      ui->objectScaleX->setValue(mapobjectHovered->nodePath.get_scale().get_x());
+      ui->objectScaleY->setValue(mapobjectHovered->nodePath.get_scale().get_y());
+      ui->objectScaleZ->setValue(mapobjectHovered->nodePath.get_scale().get_z());
+      ui->objectPosX->setValue(mapobjectHovered->nodePath.get_x());
+      ui->objectPosY->setValue(mapobjectHovered->nodePath.get_y());
+      ui->objectPosZ->setValue(mapobjectHovered->nodePath.get_z());
+      ui->objectRotationX->setValue(mapobjectHovered->nodePath.get_hpr().get_x());
+      ui->objectRotationY->setValue(mapobjectHovered->nodePath.get_hpr().get_y());
+      ui->objectRotationZ->setValue(mapobjectHovered->nodePath.get_hpr().get_z());
+      ui->objectName->setText(QString::fromStdString(mapobjectHovered->nodePath.get_name()));
       ui->objectEditor->setEnabled(true);
       ui->objectName->setEnabled(true);
+
+      ui->collider_type->setCurrentIndex((int)mapobjectHovered->collider);
+      ui->collider_position->setEnabled(mapobjectHovered->collider != MapObject::NONE && mapobjectHovered->collider != MapObject::MODEL);
+      ui->collider_pos_x->setValue(mapobjectHovered->collision_node.get_pos().get_x());
+      ui->collider_pos_y->setValue(mapobjectHovered->collision_node.get_pos().get_y());
+      ui->collider_pos_z->setValue(mapobjectHovered->collision_node.get_pos().get_z());
+      ui->collider_hpr_x->setValue(mapobjectHovered->collision_node.get_hpr().get_x());
+      ui->collider_hpr_y->setValue(mapobjectHovered->collision_node.get_hpr().get_y());
+      ui->collider_hpr_z->setValue(mapobjectHovered->collision_node.get_hpr().get_z());
+      ui->collider_scale_x->setValue(mapobjectHovered->collision_node.get_scale().get_x());
+      ui->collider_scale_y->setValue(mapobjectHovered->collision_node.get_scale().get_y());
+      ui->collider_scale_z->setValue(mapobjectHovered->collision_node.get_scale().get_z());
+      ui->collider_group->setEnabled(true);
+      ui->collider_type->setEnabled(true);
+      mapobjectHovered->collision_node.show();
     }
     else
       ui->objectEditor->setEnabled(false);
+    mapobjectSelected = mapobjectHovered;
+}
+
+void MainWindow::MapObjectColliderUpdatePos()
+{
+  if (mapobjectSelected && mapobjectSelected->collider != MapObject::MODEL && mapobjectSelected->collider != MapObject::NONE)
+  {
+    LPoint3f position(ui->collider_pos_x->value(),   ui->collider_pos_y->value(),   ui->collider_pos_z->value());
+    LPoint3f hpr     (ui->collider_hpr_x->value(),   ui->collider_hpr_y->value(),   ui->collider_hpr_z->value());
+    LPoint3f scale   (ui->collider_scale_x->value(), ui->collider_scale_y->value(), ui->collider_scale_z->value());
+
+    mapobjectSelected->collision_node.set_pos(position);
+    mapobjectSelected->collision_node.set_hpr(hpr);
+    mapobjectSelected->collision_node.set_scale(scale);
+  }
+}
+
+void MainWindow::MapObjectColliderUpdateType()
+{
+  if (mapobjectSelected)
+  {
+    if (mapobjectSelected->collider != MapObject::NONE && mapobjectSelected->collider != MapObject::MODEL)
+      mapobjectSelected->collision_node.remove_node();
+    mapobjectSelected->collider = (MapObject::Collider)ui->collider_type->currentIndex();
+    ui->collider_position->setEnabled(mapobjectSelected->collider != MapObject::NONE && mapobjectSelected->collider != MapObject::MODEL);
+    mapobjectSelected->InitializeCollider(mapobjectSelected->collider, LPoint3f(0, 0, 0), LPoint3f(1, 1, 1), LPoint3f(0, 0, 0));
+    MapObjectColliderUpdatePos();
+    mapobjectSelected->collision_node.show();
+  }
 }
 
 void MainWindow::MapObjectUpdateX()

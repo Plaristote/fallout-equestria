@@ -72,7 +72,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 
   // Line of sight tools
   _losNode      = new CollisionNode("losRay");
-  _losNode->set_from_collide_mask(CollideMask(ColMask::Object | ColMask::FovTarget));
+  _losNode->set_from_collide_mask(CollideMask(ColMask::FovBlocker | ColMask::FovTarget));
   _losNode->set_into_collide_mask(0);
   _losPath      = _window->get_render().attach_new_node(_losNode);
 //  _losPath      = object->nodePath.attach_new_node(_losNode);
@@ -969,14 +969,25 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
   LVecBase3 rot   = root.get_hpr();
   LVector3  rpos  = root.get_pos();
   LVector3  dir   = root.get_relative_vector(other, other.get_pos() - rpos);
+  
+  /*{
+    auto it  = _level->GetWorld()->objects.begin();
+    auto end = _level->GetWorld()->objects.end();
+    
+    for (; it != end ; ++it)
+    {
+      if (!(it->collision_node.is_empty()))
+        it->collision_node.set_collide_mask(CollideMask(ColMask::FovBlocker));
+    }
+  }*/
 
   _losPath.set_hpr(0, 0, 0);
   _losRay->set_point_a(rpos.get_x(), rpos.get_y(), rpos.get_z() + 4.f);
   _losRay->set_point_b(other.get_x(), other.get_y(), other.get_z() + 4.f);
   _losTraverser.traverse(_level->GetWorld()->floors_node);
   
-  //if (object == _level->GetPlayer())
-  //_losPath.show();
+  if (object == _level->GetPlayer())
+    _losPath.show();
   _losHandlerQueue->sort_entries();
 
   for (int i = 0 ; i < _losHandlerQueue->get_num_entries() ; ++i)
@@ -984,7 +995,8 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
     CollisionEntry* entry = _losHandlerQueue->get_entry(i);
     NodePath        node  = entry->get_into_node_path();
 
-    if ((node.get_collide_mask() & CollideMask(ColMask::Object)).get_word())
+    cout << "HasLineOfSight Collision" << endl;
+    if ((node.get_collide_mask() & CollideMask(ColMask::FovBlocker)).get_word())
       ret = false;
     else if (other.is_ancestor_of(node))
       ret = true;

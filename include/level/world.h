@@ -56,7 +56,8 @@ namespace ColMask
       DynObject  = 4,
       Object     = 8,
       FovTarget  = 16,
-      WpPlane    = 32
+      WpPlane    = 32,
+      FovBlocker = 64
   };
 }
 
@@ -152,7 +153,15 @@ struct MapObject
 {
   typedef std::vector<Waypoint*> Waypoints;
 
-  NodePath      nodePath, render;
+  enum Collider
+  {
+    NONE,
+    MODEL,
+    BOX,
+    SPHERE
+  };
+
+  NodePath      nodePath, render, collision_node;
   PT(Texture)   texture;
   unsigned char floor;
   Waypoints     waypoints;
@@ -161,6 +170,7 @@ struct MapObject
   std::string   strModel;
   std::string   strTexture;
   std::string   parent;
+  Collider      collider;
 
   void          SetFloor(unsigned char floor);
   void          ReparentTo(MapObject* object);
@@ -169,6 +179,7 @@ struct MapObject
   void          UnserializeWaypoints(World*, Utils::Packet& packet);
   void          Serialize(Utils::Packet& packet);
   static void   InitializeTree(World* world);
+  void          InitializeCollider(Collider type, LPoint3f position, LPoint3f scale, LPoint3f hpr);
 };
 
 namespace Interactions

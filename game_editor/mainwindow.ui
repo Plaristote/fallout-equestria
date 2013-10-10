@@ -462,7 +462,7 @@
                     <x>0</x>
                     <y>0</y>
                     <width>282</width>
-                    <height>287</height>
+                    <height>490</height>
                    </rect>
                   </property>
                   <attribute name="label">
@@ -514,11 +514,14 @@
                       <item row="6" column="0">
                        <widget class="QDoubleSpinBox" name="objectScaleX">
                         <property name="minimum">
-                         <double>-99.000000000000000</double>
+                         <double>0.000000000000000</double>
+                        </property>
+                        <property name="maximum">
+                         <double>999.990000000000009</double>
                         </property>
                        </widget>
                       </item>
-                      <item row="8" column="0" colspan="3">
+                      <item row="9" column="0" colspan="3">
                        <widget class="QPushButton" name="objectEdit">
                         <property name="text">
                          <string>Edit Object</string>
@@ -535,16 +538,6 @@
                         </property>
                        </widget>
                       </item>
-                      <item row="2" column="1">
-                       <widget class="QDoubleSpinBox" name="objectPosY">
-                        <property name="minimum">
-                         <double>-9999.000000000000000</double>
-                        </property>
-                        <property name="maximum">
-                         <double>9999.000000000000000</double>
-                        </property>
-                       </widget>
-                      </item>
                       <item row="0" column="0" colspan="3">
                        <widget class="QLineEdit" name="objectName">
                         <property name="enabled">
@@ -555,6 +548,16 @@
                           <horstretch>0</horstretch>
                           <verstretch>0</verstretch>
                          </sizepolicy>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="2" column="1">
+                       <widget class="QDoubleSpinBox" name="objectPosY">
+                        <property name="minimum">
+                         <double>-9999.000000000000000</double>
+                        </property>
+                        <property name="maximum">
+                         <double>9999.000000000000000</double>
                         </property>
                        </widget>
                       </item>
@@ -595,14 +598,20 @@
                       <item row="6" column="1">
                        <widget class="QDoubleSpinBox" name="objectScaleY">
                         <property name="minimum">
-                         <double>-99.000000000000000</double>
+                         <double>0.000000000000000</double>
+                        </property>
+                        <property name="maximum">
+                         <double>999.990000000000009</double>
                         </property>
                        </widget>
                       </item>
                       <item row="6" column="2">
                        <widget class="QDoubleSpinBox" name="objectScaleZ">
                         <property name="minimum">
-                         <double>-99.000000000000000</double>
+                         <double>0.000000000000000</double>
+                        </property>
+                        <property name="maximum">
+                         <double>999.990000000000009</double>
                         </property>
                        </widget>
                       </item>
@@ -616,7 +625,7 @@
                         </property>
                        </widget>
                       </item>
-                      <item row="9" column="0" colspan="3">
+                      <item row="10" column="0" colspan="3">
                        <widget class="QPushButton" name="objectRemove">
                         <property name="text">
                          <string>Remove Object</string>
@@ -635,6 +644,153 @@
                       </item>
                       <item row="7" column="1" colspan="2">
                        <widget class="QSpinBox" name="objectFloor"/>
+                      </item>
+                      <item row="8" column="0" colspan="3">
+                       <widget class="QGroupBox" name="collider_group">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
+                        <property name="title">
+                         <string>Collider</string>
+                        </property>
+                        <layout class="QGridLayout" name="gridLayout_9">
+                         <item row="0" column="0">
+                          <widget class="QComboBox" name="collider_type">
+                           <item>
+                            <property name="text">
+                             <string>None</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Model</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Box</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Sphere</string>
+                            </property>
+                           </item>
+                          </widget>
+                         </item>
+                         <item row="1" column="0">
+                          <widget class="QWidget" name="collider_position" native="true">
+                           <property name="enabled">
+                            <bool>false</bool>
+                           </property>
+                           <layout class="QGridLayout" name="gridLayout_19">
+                            <item row="0" column="0">
+                             <widget class="QLabel" name="label">
+                              <property name="text">
+                               <string>Position</string>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="4" column="0">
+                             <widget class="QLabel" name="label_9">
+                              <property name="text">
+                               <string>Scale</string>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="2" column="0">
+                             <widget class="QLabel" name="label_17">
+                              <property name="text">
+                               <string>Rotation</string>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="1" column="0">
+                             <widget class="QDoubleSpinBox" name="collider_pos_x">
+                              <property name="minimum">
+                               <double>-999.000000000000000</double>
+                              </property>
+                              <property name="maximum">
+                               <double>999.990000000000009</double>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="1" column="2">
+                             <widget class="QDoubleSpinBox" name="collider_pos_z">
+                              <property name="minimum">
+                               <double>-999.000000000000000</double>
+                              </property>
+                              <property name="maximum">
+                               <double>999.990000000000009</double>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="1" column="1">
+                             <widget class="QDoubleSpinBox" name="collider_pos_y">
+                              <property name="minimum">
+                               <double>-999.000000000000000</double>
+                              </property>
+                              <property name="maximum">
+                               <double>999.990000000000009</double>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="3" column="0">
+                             <widget class="QDoubleSpinBox" name="collider_hpr_x">
+                              <property name="minimum">
+                               <double>-360.000000000000000</double>
+                              </property>
+                              <property name="maximum">
+                               <double>360.000000000000000</double>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="3" column="1">
+                             <widget class="QDoubleSpinBox" name="collider_hpr_y">
+                              <property name="minimum">
+                               <double>-360.000000000000000</double>
+                              </property>
+                              <property name="maximum">
+                               <double>360.000000000000000</double>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="3" column="2">
+                             <widget class="QDoubleSpinBox" name="collider_hpr_z">
+                              <property name="minimum">
+                               <double>-360.000000000000000</double>
+                              </property>
+                              <property name="maximum">
+                               <double>360.000000000000000</double>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="5" column="0">
+                             <widget class="QDoubleSpinBox" name="collider_scale_x">
+                              <property name="maximum">
+                               <double>999.990000000000009</double>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="5" column="1">
+                             <widget class="QDoubleSpinBox" name="collider_scale_y">
+                              <property name="maximum">
+                               <double>999.990000000000009</double>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="5" column="2">
+                             <widget class="QDoubleSpinBox" name="collider_scale_z">
+                              <property name="maximum">
+                               <double>999.990000000000009</double>
+                              </property>
+                             </widget>
+                            </item>
+                           </layout>
+                          </widget>
+                         </item>
+                        </layout>
+                       </widget>
                       </item>
                      </layout>
                     </widget>
