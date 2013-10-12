@@ -1603,6 +1603,7 @@ void           World::UnSerialize(Utils::Packet& packet)
    */
   UpdateMapTree();
 
+#ifndef GAME_EDITOR
   // Setting waypoint positions
   {
     std::for_each(objects.begin(), objects.end(), [this](MapObject& object)
@@ -1614,11 +1615,16 @@ void           World::UnSerialize(Utils::Packet& packet)
       for (; it != end ; ++it)
       {
         Waypoint* wp = *it;
+        LPoint3f  abs_pos;
 
-        wp->nodePath.set_pos(render, wp->nodePath.get_pos() + object.nodePath.get_pos(render));
+        wp->nodePath.reparent_to(object.nodePath);
+        abs_pos = wp->nodePath.get_pos(render);
+        wp->nodePath.reparent_to(rootWaypoints);
+        wp->nodePath.set_pos(render, abs_pos);
       }
     });
   }
+#endif
 
     cout << "Compiling lights" << endl;
   // Post-loading stuff
