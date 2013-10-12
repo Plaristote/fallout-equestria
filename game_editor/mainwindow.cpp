@@ -1154,7 +1154,7 @@ void MainWindow::MapObjectNameChanged(QString name)
 
 void MainWindow::MapObjectSelect()
 {
-    if (mapobjectSelected && !mapobjectSelected->collision_node.is_empty())
+    if (mapobjectSelected && mapobjectSelected->collider != MapObject::MODEL && mapobjectSelected->collider != MapObject::NONE)
       mapobjectSelected->collision_node.hide();
     mapobjectSelected = 0;
     if (mapobjectHovered)
@@ -1218,6 +1218,13 @@ void MainWindow::MapObjectColliderUpdateType()
     mapobjectSelected->collider = (MapObject::Collider)ui->collider_type->currentIndex();
     ui->collider_position->setEnabled(mapobjectSelected->collider != MapObject::NONE && mapobjectSelected->collider != MapObject::MODEL);
     mapobjectSelected->InitializeCollider(mapobjectSelected->collider, LPoint3f(0, 0, 0), LPoint3f(1, 1, 1), LPoint3f(0, 0, 0));
+    {
+      LPoint3f scale = NodePathSize(mapobjectSelected->render) / 2;
+
+      ui->collider_scale_x->setValue(scale.get_x());
+      ui->collider_scale_y->setValue(scale.get_y());
+      ui->collider_scale_z->setValue(scale.get_z());
+    }
     MapObjectColliderUpdatePos();
     mapobjectSelected->collision_node.show();
   }

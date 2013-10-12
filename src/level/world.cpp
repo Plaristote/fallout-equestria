@@ -1491,6 +1491,9 @@ void           World::UnSerialize(Utils::Packet& packet)
         if (object.collider == MapObject::MODEL)
           flag |= ColMask::FovBlocker;
         object.nodePath.set_collide_mask(CollideMask(flag));
+        // If the collision_node isn't the render node, we need to reset FovBlocker on collision_node:
+        if (object.collider != MapObject::MODEL)
+          object.collision_node.set_collide_mask(CollideMask(ColMask::FovBlocker));
       }
       objects.push_back(object);
     }
