@@ -540,17 +540,14 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
   //
   // Load Interface
   //
-  Core::ElementDocument* doc     = context->LoadDocument("data/console.rml");
-
-  _root = doc;
-  _input = doc->GetElementById("console_input");
-  if (doc)
+  _root  = context->LoadDocument("data/console.rml");
+  _input = _root->GetElementById("console_input");
+  if (_root)
   {
-    doc->Show();
     if (_input)
     {
       cout << "[UI] Console is ready" << endl;
-      ToggleEventListener(true, "console_input", "keyup", ConsoleKeyUp);
+      _input->AddEventListener("keyup", &ConsoleKeyUp);
       ConsoleKeyUp.EventReceived.Connect(*this, &GameConsole::KeyUp);
     }
     else

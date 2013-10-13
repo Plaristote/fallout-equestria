@@ -954,68 +954,62 @@ void                ObjectCharacter::LookAt(InstanceDynamicObject* object)
   LookAt(pos);
 }
 
+bool                ObjectCharacter::HasLineOfSight_CheckModel(NodePath node)
+{
+  MapObject*                map_object    = _level->GetWorld()->GetMapObjectFromCollisionNode(node);
+  
+  if (map_object)
+  {
+    CollisionTraverser        model_traverser;
+    PT(CollisionHandlerQueue) handler_queue = new CollisionHandlerQueue();
+
+    model_traverser.add_collider(_losPath, handler_queue);
+    model_traverser.traverse(map_object->render);
+    if (handler_queue->get_num_entries() > 0)
+      return (false);
+  }
+  return (true);
+}
 
 bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* object)
 {
-  PStatCollector collector("Level:Characters:LineOfSight");
+  bool        ret   = true;
 
-  if (object == this)
-    return (true);
-  Timer profiler;
-  collector.start();
-  NodePath  root  = _object->nodePath;
-  NodePath  other = object->GetNodePath();
-  bool      ret   = true;
-  LVecBase3 rot   = root.get_hpr();
-  LVector3  rpos  = root.get_pos();
-  LVector3  dir   = root.get_relative_vector(other, other.get_pos() - rpos);
-
-  _losPath.set_hpr(0, 0, 0);
-  _losRay->set_point_a(rpos.get_x(), rpos.get_y(), rpos.get_z() + 4.f);
-  _losRay->set_point_b(other.get_x(), other.get_y(), other.get_z() + 4.f);
-  _losTraverser.traverse(_level->GetWorld()->floors_node);
-  
-  if (object == _level->GetPlayer())
-    _losPath.show();
-  _losHandlerQueue->sort_entries();
-
-  for (int i = 0 ; i < _losHandlerQueue->get_num_entries() ; ++i)
+  if (object != this)
   {
-    CollisionEntry* entry = _losHandlerQueue->get_entry(i);
-    NodePath        node  = entry->get_into_node_path();
+    Timer     profiler;
+    NodePath  root  = _object->nodePath;
+    NodePath  other = object->GetNodePath();
+    LVecBase3 rot   = root.get_hpr();
+    LVector3  rpos  = root.get_pos();
+    LVector3  dir   = root.get_relative_vector(other, other.get_pos() - rpos);
 
-    if (node.get_collide_mask().get_word() & ColMask::FovBlocker)
+    _losPath.set_hpr(0, 0, 0);
+    _losRay->set_point_a(rpos.get_x(), rpos.get_y(), rpos.get_z() + 4.f);
+    _losRay->set_point_b(other.get_x(), other.get_y(), other.get_z() + 4.f);
+    _losTraverser.traverse(_level->GetWorld()->floors_node);
+    _losHandlerQueue->sort_entries();
+    for (int i = 0 ; i < _losHandlerQueue->get_num_entries() ; ++i)
     {
-      if (node.get_collide_mask().get_word() & ColMask::CheckCollisionOnModel)
-      {
-        MapObject*                map_object    = _level->GetWorld()->GetMapObjectFromCollisionNode(node);
-        
-        if (map_object)
-        {
-          CollisionTraverser        model_traverser;
-          PT(CollisionHandlerQueue) handler_queue = new CollisionHandlerQueue();
+      CollisionEntry* entry = _losHandlerQueue->get_entry(i);
+      NodePath        node  = entry->get_into_node_path();
+      unsigned int    mask  = node.get_collide_mask().get_word();
 
-          model_traverser.add_collider(_losPath, handler_queue);
-          model_traverser.traverse(map_object->render);
-          if (handler_queue->get_num_entries() > 0)
-            ret = false;
-          else
-            continue ;
-        }
-        else
+      if (mask & ColMask::FovBlocker)
+      {
+        if (mask & ColMask::CheckCollisionOnModel && ((ret = HasLineOfSight_CheckModel(node)) == true))
           continue ;
+        else
+          ret = false;
       }
+      else if (other.is_ancestor_of(node))
+        ret = true;
       else
-        ret = false;
+        continue ;
+      break ;
     }
-    else if (other.is_ancestor_of(node))
-      ret = true;
-    else
-      continue ;
-    break ;
+    profiler.Profile("HasLineOfSight");
   }
-  collector.stop();
-  profiler.Profile("HasLineOfSight");
   return (ret);
 }
 

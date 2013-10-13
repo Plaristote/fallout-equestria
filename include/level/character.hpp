@@ -184,7 +184,8 @@ private:
   void                StopRunAnimation(InstanceDynamicObject*);
   
   void                RequestCharacter(ObjectCharacter*, ObjectCharacter*, const std::string& func);
-  
+
+  bool                HasLineOfSight_CheckModel(NodePath);  
   void                CallbackActionUse(InstanceDynamicObject* object);
   void                DebugPathfinding(void);
   
