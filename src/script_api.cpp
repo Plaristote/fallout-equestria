@@ -426,7 +426,8 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectType(itemClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(inventoryClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
 
-  engine->RegisterObjectMethod(inventoryClass, "void  DelObject(Item@)", asMETHOD(Inventory,DelObject), asCALL_THISCALL);
+  engine->RegisterObjectMethod(inventoryClass, "void  AddObject(string)",  asMETHODPR(Inventory,AddObject, (const string&), InventoryObject*), asCALL_THISCALL);
+  engine->RegisterObjectMethod(inventoryClass, "void  DelObject(Item@)",   asMETHOD(Inventory,DelObject), asCALL_THISCALL);
   engine->RegisterObjectMethod(inventoryClass, "Item@ GetObject(string)",  asMETHODPR(Inventory,GetObject, (const string&), InventoryObject*), asCALL_THISCALL);
 
   engine->RegisterObjectMethod(itemClass, "string GetName()", asMETHOD(InventoryObject,GetName), asCALL_THISCALL);

@@ -755,7 +755,7 @@ void UiBarter::SwapObjects(InventoryObject* object)
   if (SwapFunctor(object, _stack_other, _inventory_other))   return ;
   if (SwapFunctor(object, _inventory_other, _stack_other))   return ;
 }
-
+#include "level/level.hpp"
 void UiBarter::MakeDeal(Rocket::Core::Event& event)
 {
   cout << "Make deal" << endl;
@@ -776,6 +776,7 @@ void UiBarter::MakeDeal(Rocket::Core::Event& event)
   if (success)
   {
     cout << "Successfull barter is successfull" << endl;
+    Level::CurrentLevel->PlaySound("pipbuck/barter+");
     DropInventory(_stack_player, _inventory_other);
     DropInventory(_stack_other,  _inventory_player);
     Update();

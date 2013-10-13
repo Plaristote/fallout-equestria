@@ -1153,7 +1153,7 @@ void MainWindow::MapObjectNameChanged(QString name)
 
 void MainWindow::MapObjectSelect()
 {
-    if (mapobjectSelected && mapobjectSelected->collider != MapObject::MODEL && mapobjectSelected->collider != MapObject::NONE)
+    if (mapobjectSelected && mapobjectSelected->collider != MapObject::NONE)
       mapobjectSelected->collision_node.hide();
     mapobjectSelected = 0;
     if (mapobjectHovered)
@@ -1175,7 +1175,7 @@ void MainWindow::MapObjectSelect()
       ui->objectName->setEnabled(true);
 
       ui->collider_type->setCurrentIndex((int)mapobjectHovered->collider);
-      ui->collider_position->setEnabled(mapobjectHovered->collider != MapObject::NONE && mapobjectHovered->collider != MapObject::MODEL);
+      ui->collider_position->setEnabled(mapobjectHovered->collider != MapObject::NONE);
       ui->collider_pos_x->setValue(mapobjectHovered->collision_node.get_pos().get_x());
       ui->collider_pos_y->setValue(mapobjectHovered->collision_node.get_pos().get_y());
       ui->collider_pos_z->setValue(mapobjectHovered->collision_node.get_pos().get_z());
@@ -1196,7 +1196,7 @@ void MainWindow::MapObjectSelect()
 
 void MainWindow::MapObjectColliderUpdatePos()
 {
-  if (mapobjectSelected && mapobjectSelected->collider != MapObject::MODEL && mapobjectSelected->collider != MapObject::NONE)
+  if (mapobjectSelected && mapobjectSelected->collider != MapObject::NONE)
   {
     LPoint3f position(ui->collider_pos_x->value(),   ui->collider_pos_y->value(),   ui->collider_pos_z->value());
     LPoint3f hpr     (ui->collider_hpr_x->value(),   ui->collider_hpr_y->value(),   ui->collider_hpr_z->value());
@@ -1212,10 +1212,10 @@ void MainWindow::MapObjectColliderUpdateType()
 {
   if (mapobjectSelected)
   {
-    if (mapobjectSelected->collider != MapObject::NONE && mapobjectSelected->collider != MapObject::MODEL)
+    if (mapobjectSelected->collider != MapObject::NONE)
       mapobjectSelected->collision_node.remove_node();
     mapobjectSelected->collider = (MapObject::Collider)ui->collider_type->currentIndex();
-    ui->collider_position->setEnabled(mapobjectSelected->collider != MapObject::NONE && mapobjectSelected->collider != MapObject::MODEL);
+    ui->collider_position->setEnabled(mapobjectSelected->collider != MapObject::NONE);
     mapobjectSelected->InitializeCollider(mapobjectSelected->collider, LPoint3f(0, 0, 0), LPoint3f(1, 1, 1), LPoint3f(0, 0, 0));
     {
       LPoint3f scale = NodePathSize(mapobjectSelected->render) / 2;

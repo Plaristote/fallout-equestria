@@ -453,6 +453,20 @@ void Inventory::SaveInventory(Data items)
   }
 }
 
+InventoryObject* Inventory::AddObject(const string& name)
+{
+  Data items = Level::CurrentLevel->GetItems();
+  
+  if (items[name].NotNil())
+  {
+    InventoryObject* object = new InventoryObject(items[name]);
+
+    AddObject(object);
+    return (object);
+  }
+  return (0);
+}
+
 void Inventory::AddObject(InventoryObject* toAdd)
 {
   Data weight = (*toAdd)["weight"];

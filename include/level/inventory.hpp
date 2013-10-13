@@ -120,6 +120,7 @@ public:
   //
   // Content
   //
+  InventoryObject*   AddObject(const std::string&);
   void               AddObject(InventoryObject*);
   void               DelObject(InventoryObject*);
   bool               IncludesObject(InventoryObject*) const;

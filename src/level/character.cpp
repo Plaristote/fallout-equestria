@@ -969,17 +969,6 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
   LVecBase3 rot   = root.get_hpr();
   LVector3  rpos  = root.get_pos();
   LVector3  dir   = root.get_relative_vector(other, other.get_pos() - rpos);
-  
-  /*{
-    auto it  = _level->GetWorld()->objects.begin();
-    auto end = _level->GetWorld()->objects.end();
-    
-    for (; it != end ; ++it)
-    {
-      if (!(it->collision_node.is_empty()))
-        it->collision_node.set_collide_mask(CollideMask(ColMask::FovBlocker));
-    }
-  }*/
 
   _losPath.set_hpr(0, 0, 0);
   _losRay->set_point_a(rpos.get_x(), rpos.get_y(), rpos.get_z() + 4.f);
@@ -995,9 +984,30 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
     CollisionEntry* entry = _losHandlerQueue->get_entry(i);
     NodePath        node  = entry->get_into_node_path();
 
-    cout << "HasLineOfSight Collision" << endl;
-    if ((node.get_collide_mask() & CollideMask(ColMask::FovBlocker)).get_word())
-      ret = false;
+    if (node.get_collide_mask().get_word() & ColMask::FovBlocker)
+    {
+      if (node.get_collide_mask().get_word() & ColMask::CheckCollisionOnModel)
+      {
+        MapObject*                map_object    = _level->GetWorld()->GetMapObjectFromCollisionNode(node);
+        
+        if (map_object)
+        {
+          CollisionTraverser        model_traverser;
+          PT(CollisionHandlerQueue) handler_queue = new CollisionHandlerQueue();
+
+          model_traverser.add_collider(_losPath, handler_queue);
+          model_traverser.traverse(map_object->render);
+          if (handler_queue->get_num_entries() > 0)
+            ret = false;
+          else
+            continue ;
+        }
+        else
+          continue ;
+      }
+      else
+        ret = false;
+    }
     else if (other.is_ancestor_of(node))
       ret = true;
     else
