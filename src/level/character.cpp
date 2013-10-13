@@ -379,8 +379,9 @@ void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, E
 
   if (!item)
   {
-    // TODO Equip default item ?
-    return ;
+    if (_equiped[it].default_ == 0)
+      return ;
+    item = _equiped[it].default_;
   }
 
   _equiped[it].graphics = item->CreateEquipedModel(_level->GetWorld());

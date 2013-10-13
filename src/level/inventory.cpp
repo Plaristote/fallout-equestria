@@ -40,19 +40,19 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts
     action_data.Duplicate(action);
     if (action_data["targeted"].Nil())
       action_data["targeted"] = 1;
-    if (action["hookUse"].NotNil())
+    if (action["hookUse"].NotNil()        && action["hookUse"].Value() != "")
       hooks.asDefineMethod("Use",            "bool " + action["hookUse"].Value() + "(Item@, Character@)");
-    if (action["hookCharacters"].NotNil())
+    if (action["hookCharacters"].NotNil() && action["hookCharacters"].Value() != "")
       hooks.asDefineMethod("UseOnCharacter", "bool " + action["hookCharacters"].Value() + "(Item@, Character@, Character@");
-    if (action["hookDoors"].NotNil())
+    if (action["hookDoors"].NotNil()      && action["hookDoors"].Value() != "")
       hooks.asDefineMethod("UseOnDoor",      "bool " + action["hookDoors"].Value() + "(Item@, Character@, Door@)");
-    if (action["hookOthers"].NotNil())
+    if (action["hookOthers"].NotNil()     && action["hookOthers"].Value() != "")
       hooks.asDefineMethod("UseOnOthers",    "bool " + action["hookOthers"].Value() + "(Item@, Character@, DynamicObject@");
-    if (action["hookWeapon"].NotNil())
+    if (action["hookWeapon"].NotNil()     && action["hookWeapon"].Value() != "")
       hooks.asDefineMethod("UseAsWeapon",    "bool " + action["hookWeapon"].Value() + "(Item@, Character@, Character@)");
-    if (action["hookHitChances"].NotNil())
+    if (action["hookHitChances"].NotNil() && action["hookHitChances"].Value() != "")
       hooks.asDefineMethod("HitChances",     "int " + action["hookHitChances"].Value() + "(Item@, Character@, Character@)");
-    if (action["hookCanUse"].NotNil())
+    if (action["hookCanUse"].NotNil()     && action["hookCanUse"].Value() != "")
       hooks.asDefineMethod("CanUse",         "bool " + action["hookCanUse"].Value() + "(Item@, Character@, DynamicObject@)");
     _actionHooks.push_back(hooks);
   });
@@ -484,11 +484,16 @@ void Inventory::DelObject(InventoryObject* toDel)
 
   if (it != _content.end())
   {
-    Data weight = (*toDel)["weight"];
+    Data weight  = (*toDel)["weight"];
+    Data equiped = (*toDel)["equiped"];
 
     if (!(weight.Nil()))
       _currentWeight -= (unsigned short)((*toDel)["weight"]);
-    (*toDel)["equiped"].Remove();
+    if (equiped.NotNil())
+    {
+      SetEquipedItem(equiped["target"], equiped["slot"], 0, 0);
+      (*toDel)["equiped"].Remove();
+    }
     _content.erase(it);
     ContentChanged.Emit();
   }
