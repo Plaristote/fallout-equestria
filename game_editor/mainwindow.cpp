@@ -215,6 +215,7 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
 
     connect(ui->waypointPicker,       SIGNAL(clicked(bool)), this, SLOT(TerrainPickerPicked(bool)));
     connect(ui->waypointZoneSelector, SIGNAL(clicked(bool)), this, SLOT(TerrainSelectorPicked(bool)));
+    connect(ui->itemEditor, SIGNAL(ItemListChanged(QStringList)), &dialogObject, SLOT(SetObjectList(QStringList)));
 }
 
 MainWindow::~MainWindow()
@@ -738,8 +739,6 @@ void MainWindow::PandaInitialized()
     connect(ui->mapMoveRight,  SIGNAL(clicked()), this, SLOT(CameraMoveRight()));
 
     window->enable_keyboard();
-
-     connect(ui->itemEditor, SIGNAL(ItemListChanged(QStringList)), &dialogObject, SLOT(SetObjectList(QStringList)));
 
 // WAYPOINTS
      connect(ui->waypointVisible,    SIGNAL(toggled(bool)),        this, SLOT(WaypointVisible()));
