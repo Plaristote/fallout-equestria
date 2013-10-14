@@ -69,12 +69,12 @@ struct PandaTask : public AsyncTask
 
 PandaTask my_task;
 
-QString strScriptCategories[5] = {
-    "Dialogues", "Quests", "Artificial Intelligence", "Items", "Buffs"
+QString strScriptCategories[N_SCRIPT_CAT] = {
+    "Artificial Intelligence", "Buffs", "Dialogues", "Levels", "Objects", "Pipbuck Apps", "Quests"
 };
 
-QString pathScriptCategories[5] = {
-    "dialogs", "quests", "ai", "objects", "buffs"
+QString pathScriptCategories[N_SCRIPT_CAT] = {
+    "ai", "buffs", "dialogs", "level", "objects", "pipbuck", "quests"
 };
 
 MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(parent), _app(*app), ui(new Ui::MainWindow), tabScript(this, ui), tabDialog(this, ui), tabL18n(this, ui), splashScreen(this), wizardObject(this), dialogObject(this)
@@ -150,7 +150,7 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(ui->widget, SIGNAL(Initialized()), this, SLOT(PandaInitialized()));
     connect(this,       SIGNAL(Closed()),      app,  SLOT(Terminate()));
 
-    for (short i = 0 ; i < 5 ; ++i)
+    for (short i = 0 ; i < N_SCRIPT_CAT ; ++i)
     {
         tabScript.scriptCategories[i].setText(0, strScriptCategories[i]);
         ui->scriptList->addTopLevelItem(&(tabScript.scriptCategories[i]));
@@ -390,6 +390,16 @@ void MainWindow::CreateMap(void)
     ui->listMap->addItem(name);
     SelectableResource::MapsResource().AddResource(name);
     LoadMap(name);
+    LevelListUpdated();
+}
+
+void MainWindow::LevelListUpdated()
+{
+  QStringList level_list;
+
+  for (unsigned short i = 0 ; i < ui->listMap->count() ; ++i)
+    level_list << ui->listMap->itemText(i);
+  tabScript.dialogNewScript.UpdateLevelList(level_list);
 }
 
 void MainWindow::LoadProject()
@@ -447,6 +457,7 @@ void MainWindow::LoadProject()
     }
     else
         splashScreen.open();
+    LevelListUpdated();
 }
 
 void MainWindow::LoadAllStatsheets()

@@ -10,6 +10,8 @@
 # include <QInputDialog>
 # include "dialognewscript.h"
 
+# define N_SCRIPT_CAT 7
+
 namespace Ui
 {
   class MainWindow;
@@ -26,6 +28,7 @@ public:
 
     void LoadAllScript(void);
 
+    DialogNewScript          dialogNewScript;
 signals:
     
 private slots:
@@ -44,9 +47,8 @@ private:
     typedef QMultiMap<QString, QAngelScriptEdit*> ScriptFiles;
 
     Ui::MainWindow*          ui;
-    DialogNewScript          dialogNewScript;
 
-    QTreeWidgetItem          scriptCategories[5];
+    QTreeWidgetItem          scriptCategories[N_SCRIPT_CAT];
     ScriptFiles              files;
     QAngelScriptEdit*        currentEditor;
     QList<QAngelScriptEdit*> currentEditorHistory;

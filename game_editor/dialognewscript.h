@@ -17,8 +17,11 @@ public:
 
     int     GetType(void)     const;
     QString GetName(void)     const;
-    QString GetTemplate(void) const;
     void    Clear(void);
+    void    UpdateLevelList(QStringList levels);
+
+private slots:
+    void    UpdatedType(void);
 
 private:
     Ui::DialogNewScript *ui;

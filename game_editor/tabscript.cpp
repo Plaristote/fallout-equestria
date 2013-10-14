@@ -3,7 +3,6 @@
 #include <QTextStream>
 #include "selectableresource.h"
 
-#define N_SCRIPT_CAT 5
 extern QString strScriptCategories[N_SCRIPT_CAT];
 extern QString pathScriptCategories[N_SCRIPT_CAT];
 
@@ -40,71 +39,71 @@ void TabScript::FilterScript(QString string)
 
 void TabScript::LoadAllScript(void)
 {
-    for (short i = 0 ; i < N_SCRIPT_CAT ; ++i)
+  for (short i = 0 ; i < N_SCRIPT_CAT ; ++i)
+  {
+    QDir        dir("scripts/" + pathScriptCategories[i]);
+    QStringList fileList = dir.entryList();
+
+    foreach (QString string, fileList)
     {
-        QDir        dir("scripts/" + pathScriptCategories[i]);
-        QStringList fileList = dir.entryList();
+      QRegExp regexp("\\.as$");
+      if (!(string.contains(regexp)))
+        continue ;
 
-        foreach (QString string, fileList)
-        {
-            QRegExp regexp("\\.as$");
-            if (!(string.contains(regexp)))
-              continue ;
+      QString name     = string.replace(regexp, "");
+      QString filepath = dir.path() + "/" + string + ".as";
+      QTreeWidgetItem* item = new QTreeWidgetItem(&scriptCategories[i]);
 
-            QString name     = string.replace(regexp, "");
-            QString filepath = dir.path() + "/" + string + ".as";
-            QTreeWidgetItem* item = new QTreeWidgetItem(&scriptCategories[i]);
-
-            item->setText(0, name);
-            files.insert(filepath, 0);
-            if (strScriptCategories[i] == "Artificial Intelligence")
-              SelectableResource::AIs().AddResource(name);
-            else if (strScriptCategories[i] == "Dialogues")
-              SelectableResource::Dialogs().AddResource(name);
-        }
+      item->setText(0, name);
+      files.insert(filepath, 0);
+      if (strScriptCategories[i] == "Artificial Intelligence")
+        SelectableResource::AIs().AddResource(name);
+      else if (strScriptCategories[i] == "Dialogues")
+        SelectableResource::Dialogs().AddResource(name);
     }
+  }
 }
 
 void TabScript::RemoveScript()
 {
-    if (currentEditor)
+  if (currentEditor)
+  {
+    int     ret;
+    QString message = "Are you sure you want to definitly remove '" + currentEditor->GetFilename() + "' ?";
+
+    ret = QMessageBox::warning((QWidget*)parent(), "Remove file", message, QMessageBox::Yes, QMessageBox::No);
+    if (ret == QMessageBox::Yes)
     {
-        int     ret;
-        QString message = "Are you sure you want to definitly remove '" + currentEditor->GetFilename() + "' ?";
+      QFile file(currentEditor->GetFilename());
 
-        ret = QMessageBox::warning((QWidget*)parent(), "Remove file", message, QMessageBox::Yes, QMessageBox::No);
-        if (ret == QMessageBox::Yes)
+      if (file.remove())
+      {
+        for (short i = 0 ; i < N_SCRIPT_CAT ; ++i)
         {
-            QFile file(currentEditor->GetFilename());
+          short count = scriptCategories[i].childCount();
 
-            if (file.remove())
+          for (short ii = 0 ; ii < count ; ++ii)
+          {
+            QTreeWidgetItem* item = scriptCategories[i].child(ii);
+            QString          name = "scripts/" + pathScriptCategories[i] + "/"    + item->text(0) + ".as";
+
+            if (name == currentEditor->GetFilename())
             {
-                for (short i = 0 ; i < N_SCRIPT_CAT ; ++i)
-                {
-                    short count = scriptCategories[i].childCount();
-
-                    for (short ii = 0 ; i < count ; ++ii)
-                    {
-                        QTreeWidgetItem* item = scriptCategories[i].child(ii);
-                        QString          name = "scripts/" + pathScriptCategories[i] + "/"    + item->text(0) + ".as";
-
-                        if (name == currentEditor->GetFilename())
-                        {
-                            if (strScriptCategories[i] == "Artificial Intelligence")
-                              SelectableResource::AIs().AddResource(item->text(0));
-                            else if (strScriptCategories[i] == "Dialogues")
-                              SelectableResource::Dialogs().AddResource(item->text(0));
-                            scriptCategories[i].removeChild(item);
-                            break ;
-                        }
-                    }
-                }
-                CloseScript(true);
+               if (strScriptCategories[i] == "Artificial Intelligence")
+                 SelectableResource::AIs().AddResource(item->text(0));
+               else if (strScriptCategories[i] == "Dialogues")
+                 SelectableResource::Dialogs().AddResource(item->text(0));
+               scriptCategories[i].removeChild(item);
+               break ;
             }
-            else
-              QMessageBox::warning((QWidget*)parent(), "Fatal Error", "Can't remove file");
+          }
         }
+        CloseScript(true);
+      }
+      else
+        QMessageBox::warning((QWidget*)parent(), "Fatal Error", "Can't remove file");
     }
+  }
 }
 
 void TabScript::NewScript(void)
