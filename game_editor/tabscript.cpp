@@ -60,6 +60,8 @@ void TabScript::LoadAllScript(void)
         SelectableResource::AIs().AddResource(name);
       else if (strScriptCategories[i] == "Dialogues")
         SelectableResource::Dialogs().AddResource(name);
+      else if (strScriptCategories[i] == "Objects")
+        SelectableResource::ObjectScript().AddResource(name);
     }
   }
 }
@@ -90,9 +92,11 @@ void TabScript::RemoveScript()
             if (name == currentEditor->GetFilename())
             {
                if (strScriptCategories[i] == "Artificial Intelligence")
-                 SelectableResource::AIs().AddResource(item->text(0));
+                 SelectableResource::AIs().DelResource(item->text(0));
                else if (strScriptCategories[i] == "Dialogues")
-                 SelectableResource::Dialogs().AddResource(item->text(0));
+                 SelectableResource::Dialogs().DelResource(item->text(0));
+               else if (strScriptCategories[i] == "Objects")
+                 SelectableResource::ObjectScript().DelResource(item->text(0));
                scriptCategories[i].removeChild(item);
                break ;
             }
@@ -133,6 +137,8 @@ void TabScript::NewScript(void)
           SelectableResource::AIs().AddResource(name);
         else if (strScriptCategories[type] == "Dialogues")
           SelectableResource::Dialogs().AddResource(name);
+        else if (strScriptCategories[type] == "Objects")
+          SelectableResource::ObjectScript().AddResource(name);
     }
 }
 

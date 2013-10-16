@@ -31,6 +31,7 @@ public:
     ADD_SELECTABLE_RESOURCE(AIs)
     ADD_SELECTABLE_RESOURCE(Encounters)
     ADD_SELECTABLE_RESOURCE(Dialogs)
+    ADD_SELECTABLE_RESOURCE(ObjectScript)
 
 private slots:
     void SearchList(void);

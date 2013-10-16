@@ -33,6 +33,10 @@ private slots:
     void ActionAdd(void);
     void ActionDelete(void);
 
+    void SelectScript(void);
+    void SelectModel(void);
+    void SelectTexture(void);
+
 private:
     Ui::ItemEditor *ui;
 

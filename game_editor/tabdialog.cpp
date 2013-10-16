@@ -1,5 +1,6 @@
 #include "tabdialog.h"
 #include "ui_mainwindow.h"
+#include <iostream>
 
 extern QString pathScriptCategories[];
 
@@ -10,27 +11,27 @@ TabDialog::TabDialog(QObject *parent, Ui::MainWindow* ui) : QObject(parent), ui(
 
 void TabDialog::LoadAllDialogs()
 {
-    QDir        dir("data/" + pathScriptCategories[0]);
-    QStringList fileList = dir.entryList();
-	bool		loaded= false;
+  QDir        dir("data/dialogs");
+  QStringList fileList = dir.entryList();
+  bool        loaded   = false;
 
-    foreach (QString string, fileList)
-    {
-        QRegExp regexp("\\.json$");
-        if (!(string.contains(regexp)))
-          continue ;
+  foreach (QString string, fileList)
+  {
+    QRegExp regexp("\\.json$");
+    if (!(string.contains(regexp)))
+      continue ;
 
-        QString name     = string.replace(regexp, "");
-        QString filepath = dir.path() + "/" + string + ".json";
+    QString name     = string.replace(regexp, "");
+    QString filepath = dir.path() + "/" + string + ".json";
 
-		ui->dialogList->addItem(name);
-        dialogs.insert(filepath, 0);
+    ui->dialogList->addItem(name);
+    dialogs.insert(filepath, 0);
 
-		if (!loaded) {
-			LoadDialog(filepath);
-			ui->dialogList->setCurrentIndex( ui->dialogList->count()-1 );
-		};
-    }
+    if (!loaded) {
+      LoadDialog(filepath);
+      ui->dialogList->setCurrentIndex( ui->dialogList->count()-1 );
+    };
+  }
 }
 
 void TabDialog::NewDialog()

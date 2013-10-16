@@ -2,6 +2,9 @@
 #include "ui_itemeditor.h"
 #include <QDir>
 #include <QInputDialog>
+#include <QFileDialog>
+#include <QMessageBox>
+#include "selectableresource.h"
 
 ItemEditor::ItemEditor(QWidget *parent) :
     QWidget(parent),
@@ -31,31 +34,34 @@ ItemEditor::ItemEditor(QWidget *parent) :
     connect(ui->itemList, SIGNAL(currentTextChanged(QString)), this, SLOT(SelectItem(QString)));
     connect(ui->actionList, SIGNAL(currentIndexChanged(QString)), this, SLOT(SelectAction(QString)));
 
-    connect(ui->itemHidden, SIGNAL(clicked()), this, SLOT(UpdateData()));
-    connect(ui->itemIcon,   SIGNAL(textEdited(QString)), this, SLOT(UpdateData()));
-    connect(ui->itemModel,  SIGNAL(textEdited(QString)), this, SLOT(UpdateData()));
-    connect(ui->itemTexture, SIGNAL(textEdited(QString)), this, SLOT(UpdateData()));
-    connect(ui->itemScale,  SIGNAL(valueChanged(double)), this, SLOT(UpdateData()));
-    connect(ui->itemScript, SIGNAL(textEdited(QString)), this, SLOT(UpdateData()));
-    connect(ui->itemAmmoMaximum, SIGNAL(textEdited(QString)), SLOT(UpdateData()));
-    connect(ui->itemAmmo, SIGNAL(valueChanged(int)), SLOT(UpdateData()));
-    connect(ui->actionHookCanUse, SIGNAL(textEdited(QString)), SLOT(UpdateData()));
-    connect(ui->actionHookHitChances, SIGNAL(textEdited(QString)), SLOT(UpdateData()));
-    connect(ui->actionSkill, SIGNAL(textEdited(QString)), SLOT(UpdateData()));
-    connect(ui->actionApCost, SIGNAL(valueChanged(int)), this, SLOT(UpdateData()));
-    connect(ui->actionCombat, SIGNAL(clicked()), this, SLOT(UpdateData()));
-    connect(ui->actionTargeted, SIGNAL(clicked()), this, SLOT(UpdateData()));
-    connect(ui->actionDamage, SIGNAL(valueChanged(int)), this, SLOT(UpdateData()));
-    connect(ui->actionDamageMax, SIGNAL(valueChanged(int)), this, SLOT(UpdateData()));
-    connect(ui->actionHasHookCharacters, SIGNAL(clicked()), this, SLOT(UpdateData()));
-    connect(ui->actionHasHookDoors, SIGNAL(clicked()), this, SLOT(UpdateData()));
-    connect(ui->actionHasHookOthers, SIGNAL(clicked()), this, SLOT(UpdateData()));
-    connect(ui->actionHasHookUse, SIGNAL(clicked()), this, SLOT(UpdateData()));
-    connect(ui->actionHasHookWeapon, SIGNAL(clicked()), this, SLOT(UpdateData()));
-    connect(ui->actionHookCharacters, SIGNAL(textEdited(QString)), this, SLOT(UpdateData()));
-    connect(ui->actionHookOthers, SIGNAL(textEdited(QString)), this, SLOT(UpdateData()));
-    connect(ui->actionHookUse, SIGNAL(textEdited(QString)), this, SLOT(UpdateData()));
-    connect(ui->actionHookWeapon, SIGNAL(textEdited(QString)), this, SLOT(UpdateData()));
+    connect(ui->itemHidden,              SIGNAL(clicked()),           SLOT(UpdateData()));
+    connect(ui->itemIcon,                SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->itemModel,               SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->itemTexture,             SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->itemScale,               SIGNAL(valueChanged(double)),SLOT(UpdateData()));
+    connect(ui->itemScript,              SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->itemAmmoMaximum,         SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->itemAmmo,                SIGNAL(valueChanged(int)),   SLOT(UpdateData()));
+    connect(ui->actionHookCanUse,        SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->actionHookHitChances,    SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->actionSkill,             SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->actionApCost,            SIGNAL(valueChanged(int)),   SLOT(UpdateData()));
+    connect(ui->actionCombat,            SIGNAL(clicked()),           SLOT(UpdateData()));
+    connect(ui->actionTargeted,          SIGNAL(clicked()),           SLOT(UpdateData()));
+    connect(ui->actionDamage,            SIGNAL(valueChanged(int)),   SLOT(UpdateData()));
+    connect(ui->actionDamageMax,         SIGNAL(valueChanged(int)),   SLOT(UpdateData()));
+    connect(ui->actionHasHookCharacters, SIGNAL(clicked()),           SLOT(UpdateData()));
+    connect(ui->actionHasHookDoors,      SIGNAL(clicked()),           SLOT(UpdateData()));
+    connect(ui->actionHasHookOthers,     SIGNAL(clicked()),           SLOT(UpdateData()));
+    connect(ui->actionHasHookUse,        SIGNAL(clicked()),           SLOT(UpdateData()));
+    connect(ui->actionHasHookWeapon,     SIGNAL(clicked()),           SLOT(UpdateData()));
+    connect(ui->actionHookCharacters,    SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->actionHookOthers,        SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->actionHookUse,           SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->actionHookWeapon,        SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->selectScript,            SIGNAL(clicked()),           SLOT(SelectScript()));
+    connect(ui->selectModel,             SIGNAL(clicked()),           SLOT(SelectModel()));
+    connect(ui->selectTexture,           SIGNAL(clicked()),           SLOT(SelectTexture()));
 }
 
 ItemEditor::~ItemEditor()
@@ -63,6 +69,60 @@ ItemEditor::~ItemEditor()
     delete ui;
     if (dataTree)
       delete dataTree;
+}
+
+void ItemEditor::SelectModel(void)
+{
+  QString filter    = "Panda3D Models (*.egg *.bam *.egg.pz *.bam.pz *.obj)";
+  QString base_path = QDir::currentPath() + "/models/";
+  QString path      = QFileDialog::getOpenFileName(this, "Select a model", base_path, filter);
+  QFileInfo info(path);
+  QString   relative_path;
+
+  if (!(info.exists()))
+    return ;
+  if (!(path.startsWith(base_path))) // Needs to be moved
+  {
+    if (!(QFile::copy(path, base_path + info.fileName())))
+    {
+      QMessageBox::warning(this, "Error", "Couldn't copy file to the project directory.");
+      return ;
+    }
+    path = base_path + info.fileName();
+  }
+  relative_path = path.remove(0, base_path.length());
+  ui->itemModel->setText(relative_path);
+}
+
+void ItemEditor::SelectTexture(void)
+{
+  QString   filter    = "Images (*.png *.jpg *.bmp)";
+  QString   base_path = QDir::currentPath() + "/textures/";
+  QString   path = QFileDialog::getOpenFileName(this, "Select a texture", base_path, filter);
+  QFileInfo info(path);
+  QString   relative_path;
+
+  if (!(info.exists()))
+    return ;
+  if (!(path.startsWith(base_path))) // Needs to be moved
+  {
+    if (!(QFile::copy(path, base_path + info.fileName())))
+    {
+      QMessageBox::warning(this, "Error", "Couldn't copy file to the project directory.");
+      return ;
+    }
+    path = base_path + info.fileName();
+  }
+  relative_path = path.remove(0, base_path.length());
+  ui->itemTexture->setText(relative_path);
+}
+
+void ItemEditor::SelectScript(void)
+{
+  SelectableResource::ObjectScript().SelectResource([this](QString name)
+  {
+    ui->itemScript->setText(name + ".as");
+  });
 }
 
 QStringList ItemEditor::GetItemList() const

@@ -3,43 +3,41 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
-DialogEditor::DialogEditor(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::DialogEditor)
+DialogEditor::DialogEditor(QWidget *parent) : QWidget(parent), ui(new Ui::DialogEditor)
 {
-    QIcon iconDelete("icons/delete.png");
-    QIcon iconAdd("icons/add.png");
-    QIcon iconUp("icons/up.png");
-    QIcon iconDown("icons/down.png");
+  QIcon iconDelete("icons/delete.png");
+  QIcon iconAdd("icons/add.png");
+  QIcon iconUp("icons/up.png");
+  QIcon iconDown("icons/down.png");
 
-    tree = nullptr;
-    ui->setupUi(this);
+  tree = nullptr;
+  ui->setupUi(this);
 
-    ui->nodeRemove->setIcon(iconDelete);
-    ui->nodeNew->setIcon(iconAdd);
-    ui->successorAdd->setIcon(iconAdd);
-    ui->successorRemove->setIcon(iconDelete);
-    ui->successorUp->setIcon(iconUp);
-    ui->successorDown->setIcon(iconDown);
+  ui->nodeRemove->setIcon(iconDelete);
+  ui->nodeNew->setIcon(iconAdd);
+  ui->successorAdd->setIcon(iconAdd);
+  ui->successorRemove->setIcon(iconDelete);
+  ui->successorUp->setIcon(iconUp);
+  ui->successorDown->setIcon(iconDown);
 
-	//Make the first column of the successor list non-editable
-	ui->successorList->setItemDelegateForColumn(0, new NoEditDelegate(this));
+  //Make the first column of the successor list non-editable
+  ui->successorList->setItemDelegateForColumn(0, new NoEditDelegate(this));
 
-    connect(ui->nodeRemove,      SIGNAL(clicked()), this, SLOT(DeleteNode()));
-    connect(ui->nodeNew,         SIGNAL(clicked()), this, SLOT(NewNode()));
-    connect(ui->successorAdd,    SIGNAL(clicked()), this, SLOT(NewSuccessor()));
-    connect(ui->successorRemove, SIGNAL(clicked()), this, SLOT(DeleteSuccessor()));
-    connect(ui->successorDown,   SIGNAL(clicked()), this, SLOT(MoveDown()));
-    connect(ui->successorUp,     SIGNAL(clicked()), this, SLOT(MoveUp()));
-    connect(ui->nodeList,        SIGNAL(currentTextChanged(QString)), this, SLOT(SwapNode(QString)));
-    connect(ui->successorList,   SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(SuccessorChanged(QTreeWidgetItem*,int)));
-	connect(ui->successorList,   SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(DoubleclickSuccessor(QTreeWidgetItem*,int)));
-    connect(ui->successorList,   SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(ChangedCurrentSuccessor()));
-	connect(ui->npcLine,         SIGNAL(textEdited(QString)), this, SLOT(NpcLineChanging()));
-    connect(ui->npcLine,         SIGNAL(editingFinished()), this, SLOT(NpcLineChanged()));
-	connect(ui->localePreview,   SIGNAL(textChanged()), this, SLOT(NpcLineLocaleChanged()));
+  connect(ui->nodeRemove,      SIGNAL(clicked()), this, SLOT(DeleteNode()));
+  connect(ui->nodeNew,         SIGNAL(clicked()), this, SLOT(NewNode()));
+  connect(ui->successorAdd,    SIGNAL(clicked()), this, SLOT(NewSuccessor()));
+  connect(ui->successorRemove, SIGNAL(clicked()), this, SLOT(DeleteSuccessor()));
+  connect(ui->successorDown,   SIGNAL(clicked()), this, SLOT(MoveDown()));
+  connect(ui->successorUp,     SIGNAL(clicked()), this, SLOT(MoveUp()));
+  connect(ui->nodeList,        SIGNAL(currentTextChanged(QString)), this, SLOT(SwapNode(QString)));
+  connect(ui->successorList,   SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(SuccessorChanged(QTreeWidgetItem*,int)));
+  connect(ui->successorList,   SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(DoubleclickSuccessor(QTreeWidgetItem*,int)));
+  connect(ui->successorList,   SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(ChangedCurrentSuccessor()));
+  connect(ui->npcLine,         SIGNAL(textEdited(QString)), this, SLOT(NpcLineChanging()));
+  connect(ui->npcLine,         SIGNAL(editingFinished()), this, SLOT(NpcLineChanged()));
+  connect(ui->localePreview,   SIGNAL(textChanged()), this, SLOT(NpcLineLocaleChanged()));
 
-	nodeDoc= ui->localePreview->document();
+  nodeDoc= ui->localePreview->document();
 }
 
 
