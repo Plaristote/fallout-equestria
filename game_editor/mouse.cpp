@@ -12,9 +12,14 @@ Mouse::Mouse(WindowFramework* window, QObject *parent) : QObject(parent), _windo
   _pickerPath   = _camera.attach_new_node(_pickerNode);
   _pickerNode->set_from_collide_mask(CollideMask(ColMask::DynObject | ColMask::Object));
   _pickerRay    = new CollisionRay();
+#ifndef _WIN32
   _pickerNode->add_solid(_pickerRay);
+#endif
+  cout << "MouseDebug#9" << endl;
   _collisionHandlerQueue = new CollisionHandlerQueue();
+  cout << "MouseDebug#10" << endl;
   _collisionTraverser.add_collider(_pickerPath, _collisionHandlerQueue);
+  cout << "MouseDebug#11" << endl;
 }
 
 LPoint2f Mouse::GetPosition(void) const

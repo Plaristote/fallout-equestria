@@ -742,6 +742,7 @@ void MainWindow::PandaInitialized()
     my_task.window  = window;
     my_task.camera  = new SceneCamera(window, window->get_camera_group());
     my_task.mouse   = new Mouse(window);
+    cout << "Debug#5" << endl;
 
     connect(ui->widget, SIGNAL(MousePressed(QMouseEvent*)), this, SLOT(PandaButtonPressed(QMouseEvent*)));
     connect(ui->widget, SIGNAL(MouseRelease(QMouseEvent*)), this, SLOT(PandaButtonRelease(QMouseEvent*)));
@@ -753,6 +754,7 @@ void MainWindow::PandaInitialized()
     connect(ui->mapMoveRight,  SIGNAL(clicked()), this, SLOT(CameraMoveRight()));
 
     window->enable_keyboard();
+    cout << "Debug#6" << endl;
 
 // WAYPOINTS
      connect(ui->waypointVisible,    SIGNAL(toggled(bool)),        this, SLOT(WaypointVisible()));
@@ -1437,11 +1439,15 @@ void MainWindow::WaypointSelDelete()
 
 void MainWindow::WaypointSelect(Waypoint* waypoint)
 {
+    std::cout << "SubDebug#1" << std::endl;
     std::list<Waypoint*>::iterator it = std::find(waypointsSelection.begin(), waypointsSelection.end(), waypoint);
+    std::cout << "SubDebug#2" << std::endl;
 
     if (it != waypointsSelection.end())
     {
+        std::cout << "SubDebug#2.1" << std::endl;
       (*it)->SetSelected(false);
+        std::cout << "SubDebug#3" << std::endl;
       waypointsSelection.erase(it);
       if (waypoint == waypointSelected)
       {
@@ -1453,7 +1459,9 @@ void MainWindow::WaypointSelect(Waypoint* waypoint)
     }
     else
     {
+        std::cout << "SubDebug#2.2" << std::endl;
       waypoint->SetSelected(true);
+      std::cout << "SubDebug#3" << std::endl;
       waypointSelected = waypoint;
       waypointsSelection.push_back(waypoint);
     }
@@ -1597,8 +1605,9 @@ void MainWindow::WaypointSyncTerrain(void)
 
 void MainWindow::MapFocused(void)
 {
-    LoadMap(ui->listMap->currentText());
+    cout << "MapFocused" << endl;
     disconnect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(MapFocused()));
+    LoadMap(ui->listMap->currentText());
 }
 
 void MainWindow::LoadMap(const QString& path)
@@ -1608,9 +1617,12 @@ void MainWindow::LoadMap(const QString& path)
       connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(MapFocused()));
       return ;
     }
+    cout << "Coucou" << endl;
     if (my_task.camera == 0 || (world != 0 && levelName == path))
       return ;
+    cout << "Coucou tu" << endl;
     my_task.camera->SetPosition(0, 0, 75);
+    cout << "Coucou tu veux" << endl;
     levelName             = path;
     mapobjectSelected     = 0;
     mapobjectHovered      = 0;
@@ -1620,10 +1632,12 @@ void MainWindow::LoadMap(const QString& path)
 
     FunctorThread&  thread   = *FunctorThread::Create([this](void)
     {
+        cout << "Coucou tu veux voir" << endl;
       std::string   fullpath = (QDir::currentPath() + "/maps/" + levelName + ".blob").toStdString();
       std::ifstream file;
 
       file.open(fullpath.c_str(),ios::binary);
+      cout << "Coucou tu veux voir ma bite ?" << endl;
       if (file.is_open())
       {
         try
@@ -1664,19 +1678,26 @@ void MainWindow::LoadMap(const QString& path)
       std::cout << "Post loading map" << std::endl;
       if (world)
       {
+        std::cout << "Debug#1" << std::endl;
         ui->treeWidget->SetWorld(world);
+        std::cout << "Debug#2" << std::endl;
         dialogSaveMap.SetEnabledSunlight(world->sunlight_enabled);
+        std::cout << "Debug#3" << std::endl;
 
         ui->entryZoneList->clear();
+        std::cout << "Debug#4" << std::endl;
         Ui::MainWindow* _ui = ui;
         ForEach(world->entryZones, [_ui](EntryZone& zone) { _ui->entryZoneList->addItem(zone.name.c_str()); });
+        std::cout << "Debug#5" << std::endl;
 
         ui->exitZoneList->clear();
         ForEach(world->exitZones,  [_ui](ExitZone& zone)  { _ui->exitZoneList->addItem(zone.name.c_str());  });
+        std::cout << "Debug#6" << std::endl;
 
         ui->lightsSelect->clear();
         ui->lightFrame->setEnabled(false);
         ForEach(world->lights,     [_ui](WorldLight& l)   { _ui->lightsSelect->addItem(l.name.c_str());     });
+        std::cout << "Debug#7" << std::endl;
 
         for (int i = 0 ; i < ui->listMap->count() ; ++i)
         {
@@ -1686,6 +1707,7 @@ void MainWindow::LoadMap(const QString& path)
             break ;
           }
         }
+        std::cout << "Debug#8" << std::endl;
 
         dialogObject.SetWorld(world);
         std::cout << "Finished Loading Map" << std::endl;

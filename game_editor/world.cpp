@@ -634,11 +634,14 @@ Waypoint::Waypoint(NodePath root)
 void                Waypoint::SetSelected(bool selected)
 {
   this->selected = selected;
-  if (selected)
-    nodePath.set_color(0, 1.0, 0, 0.5);
-  else
-    nodePath.set_color(0, 0, 0, 0.5);
-  SetArcsVisible(selected);
+  if (!nodePath.is_empty())
+  {
+    if (selected)
+      nodePath.set_color(0, 1.0, 0, 0.5);
+    else
+      nodePath.set_color(0, 0, 0, 0.5);
+    SetArcsVisible(selected);
+  }
 }
 
 bool                Waypoint::operator==(const Waypoint& other) const
@@ -792,7 +795,9 @@ void Waypoint::Arc::SetVisible(bool set)
     node     = new CollisionNode("waypointArc");
     node->set_into_collide_mask(CollideMask(0));
     node->set_from_collide_mask(CollideMask(0));
+# ifndef _WIN32
     node->add_solid(csegment);
+# endif
     csegment->set_point_a(0, 0, 0);
     nodePath = from.attach_new_node(node);
     nodePath.set_pos(0, 0, 0);
@@ -1052,7 +1057,7 @@ void MapObject::UnSerialize(World* world, Utils::Packet& packet)
   nodePath   = world->window->get_render().attach_new_node(name);
   render     = world->window->load_model(world->window->get_panda_framework()->get_models(), MODEL_ROOT + strModel);
   render.reparent_to(nodePath);
-  if (nodePath.is_empty())
+  if (render.is_empty())
   {
     std::cerr << "[World][Unserialize] Could not load model " << strModel << " for object '" << name << '\'' << std::endl;
   }
@@ -1122,7 +1127,7 @@ void MapObject::UnserializeWaypoints(World* world, Utils::Packet& packet)
 
     if (wp)
     {
-      wp->floor = floor;
+      wp->floor = this->floor;
       waypoints.push_back(wp);
 #ifdef GAME_EDITOR
       if (!(wp->nodePath.is_empty()))
@@ -1166,7 +1171,9 @@ void MapObject::InitializeCollider(Collider type, LPoint3f position, LPoint3f sc
       PT(CollisionBox)  box      = new CollisionBox(LPoint3f(0, 0, 0), 1, 1, 1);
 
       node_ptr = new CollisionNode("collision_node");
+#ifndef _WIN32
       node_ptr->add_solid(box);
+#endif
       break ;
     }
   case SPHERE:
@@ -1174,7 +1181,9 @@ void MapObject::InitializeCollider(Collider type, LPoint3f position, LPoint3f sc
       PT(CollisionSphere) sphere = new CollisionSphere(LPoint3(0, 0, 0), 1);
 
       node_ptr = new CollisionNode("collision_node");
+#ifndef _WIN32
       node_ptr->add_solid(sphere);
+#endif
       break ;
     }
   }
