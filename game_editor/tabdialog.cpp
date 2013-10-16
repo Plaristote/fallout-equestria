@@ -13,7 +13,6 @@ void TabDialog::LoadAllDialogs()
 {
   QDir        dir("data/dialogs");
   QStringList fileList = dir.entryList();
-  bool        loaded   = false;
 
   foreach (QString string, fileList)
   {
@@ -26,11 +25,6 @@ void TabDialog::LoadAllDialogs()
 
     ui->dialogList->addItem(name);
     dialogs.insert(filepath, 0);
-
-    if (!loaded) {
-      LoadDialog(filepath);
-      ui->dialogList->setCurrentIndex( ui->dialogList->count()-1 );
-    };
   }
 }
 
@@ -67,8 +61,8 @@ void TabDialog::NewDialog()
 
 void TabDialog::LoadDialog(QString filepath)
 {
-    DialogFiles::Iterator it  = dialogs.begin();
-    DialogFiles::Iterator end = dialogs.end();
+    DialogFiles::Iterator it      = dialogs.begin();
+    DialogFiles::Iterator end     = dialogs.end();
 
 	RequestLocale();
 
@@ -87,7 +81,7 @@ void TabDialog::LoadDialog(QString filepath)
               if (*it == 0)
               {
                 QMessageBox::warning((QWidget*)parent(), "Fatal Error", "Corrupted dialog file. That's what you get for sticking your dirty hands on it");
-                return ;
+                break ;
               }
             }
             ui->dialogEditor->LoadDialog(*it,locale);
@@ -99,7 +93,7 @@ void TabDialog::LoadDialog(QString filepath)
 void TabDialog::SwapDialog(QString name)
 {
 	if (name!="") {
-		QString filepath = "data/" + pathScriptCategories[0] + "/" + name + ".json";
+        QString filepath = "data/dialogs/" + name + ".json";
 
 		LoadDialog(filepath);
 	};

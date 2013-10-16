@@ -40,7 +40,6 @@ DialogEditor::DialogEditor(QWidget *parent) : QWidget(parent), ui(new Ui::Dialog
   nodeDoc= ui->localePreview->document();
 }
 
-
 DialogEditor::~DialogEditor()
 {
     delete ui;

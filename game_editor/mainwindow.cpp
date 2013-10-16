@@ -217,6 +217,8 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(ui->waypointZoneSelector, SIGNAL(clicked(bool)),                               SLOT(TerrainSelectorPicked(bool)));
     connect(ui->displayColliders,     SIGNAL(clicked()),                                   SLOT(UpdateColliderDisplay()));
     connect(ui->itemEditor,           SIGNAL(ItemListChanged(QStringList)), &dialogObject, SLOT(SetObjectList(QStringList)));
+
+    connect(ui->dialogList, SIGNAL(currentIndexChanged(QString)), &tabDialog, SLOT(LoadDialog(QString)));
 }
 
 MainWindow::~MainWindow()
