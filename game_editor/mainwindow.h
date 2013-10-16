@@ -146,6 +146,7 @@ private slots:
     void MapObjectFloor(void);
     void MapObjectFocus(MapObject*);
     void MapObjectGenerateWaypoints(void);
+    void UpdateColliderDisplay(void);
 
     // DYNAMICOBJECTS
     void DynamicObjectVisible(void);

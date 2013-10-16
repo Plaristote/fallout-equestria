@@ -213,9 +213,10 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     ui->treeWidget->header()->hide();
     ui->scriptList->header()->hide();
 
-    connect(ui->waypointPicker,       SIGNAL(clicked(bool)), this, SLOT(TerrainPickerPicked(bool)));
-    connect(ui->waypointZoneSelector, SIGNAL(clicked(bool)), this, SLOT(TerrainSelectorPicked(bool)));
-    connect(ui->itemEditor, SIGNAL(ItemListChanged(QStringList)), &dialogObject, SLOT(SetObjectList(QStringList)));
+    connect(ui->waypointPicker,       SIGNAL(clicked(bool)),                               SLOT(TerrainPickerPicked(bool)));
+    connect(ui->waypointZoneSelector, SIGNAL(clicked(bool)),                               SLOT(TerrainSelectorPicked(bool)));
+    connect(ui->displayColliders,     SIGNAL(clicked()),                                   SLOT(UpdateColliderDisplay()));
+    connect(ui->itemEditor,           SIGNAL(ItemListChanged(QStringList)), &dialogObject, SLOT(SetObjectList(QStringList)));
 }
 
 MainWindow::~MainWindow()
@@ -1162,6 +1163,17 @@ void MainWindow::MapObjectNameChanged(QString name)
     }
 }
 
+void MainWindow::UpdateColliderDisplay(void)
+{
+  if (mapobjectSelected && !mapobjectSelected->collision_node.is_empty())
+  {
+    if (ui->displayColliders->isChecked())
+      mapobjectSelected->collision_node.show();
+    else
+      mapobjectSelected->collision_node.hide();
+  }
+}
+
 void MainWindow::MapObjectSelect()
 {
     if (mapobjectSelected && mapobjectSelected->collider != MapObject::NONE)
@@ -1198,7 +1210,8 @@ void MainWindow::MapObjectSelect()
       ui->collider_scale_z->setValue(mapobjectHovered->collision_node.get_scale().get_z());
       ui->collider_group->setEnabled(true);
       ui->collider_type->setEnabled(true);
-      mapobjectHovered->collision_node.show();
+      if (ui->displayColliders->isChecked())
+        mapobjectHovered->collision_node.show();
     }
     else
       ui->objectEditor->setEnabled(false);
@@ -1217,6 +1230,8 @@ void MainWindow::MapObjectColliderUpdatePos()
     mapobjectSelected->collision_node.set_hpr(hpr);
     mapobjectSelected->collision_node.set_scale(scale);
   }
+  ui->displayColliders->setChecked(true);
+  UpdateColliderDisplay();
 }
 
 void MainWindow::MapObjectColliderUpdateType()
@@ -1230,7 +1245,14 @@ void MainWindow::MapObjectColliderUpdateType()
     mapobjectSelected->InitializeCollider(mapobjectSelected->collider, LPoint3f(0, 0, 0), LPoint3f(1, 1, 1), LPoint3f(0, 0, 0));
     {
       LPoint3f scale = NodePathSize(mapobjectSelected->render) / 2;
+      LPoint3f min_point, max_point;
 
+      mapobjectSelected->render.calc_tight_bounds(min_point, max_point);
+      ui->collider_pos_x->setValue((std::abs(max_point.get_x()) - std::abs(min_point.get_x())) / 2 * (max_point.get_x() < 0 ? -1 : 1));
+      ui->collider_pos_y->setValue((std::abs(max_point.get_y()) - std::abs(min_point.get_y())) / 2 * (max_point.get_y() < 0 ? -1 : 1));
+      ui->collider_pos_z->setValue((std::abs(max_point.get_z()) - std::abs(min_point.get_z())) / 2 * (max_point.get_z() < 0 ? -1 : 1));
+      std::cout << "MinPoint = " << min_point.get_x() << ',' << min_point.get_y() << ',' << min_point.get_z() << std::endl;
+      std::cout << "MaxPoint = " << max_point.get_x() << ',' << max_point.get_y() << ',' << max_point.get_z() << std::endl;
       ui->collider_scale_x->setValue(scale.get_x());
       ui->collider_scale_y->setValue(scale.get_y());
       ui->collider_scale_z->setValue(scale.get_z());
@@ -1238,6 +1260,8 @@ void MainWindow::MapObjectColliderUpdateType()
     MapObjectColliderUpdatePos();
     mapobjectSelected->collision_node.show();
   }
+  ui->displayColliders->setChecked(true);
+  UpdateColliderDisplay();
 }
 
 void MainWindow::MapObjectUpdateX()

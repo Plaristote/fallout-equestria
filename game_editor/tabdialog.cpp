@@ -132,25 +132,3 @@ void TabDialog::RemoveDialog()
         }
     }
 }
-
-/*void TabDialog::FilterDialog(QString string)
-{
-    QRegExp regexp(string);
-
-    short count = ui->dialogList->count();
-
-    for (short i = 0 ; i < count ; ++i)
-    {
-        QListWidgetItem* item = ui->dialogList->item(i);
-
-        if (string == "")
-          item->setHidden(false);
-        else
-        {
-            if (item->text().contains(regexp))
-                item->setHidden(false);
-            else
-                item->setHidden(true);
-        }
-    }
-}*/
