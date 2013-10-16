@@ -779,7 +779,7 @@ GameInventory::~GameInventory()
 
 void GameInventory::CallbackDropEvent(Rocket::Core::Event& event)
 {
-  Rocket::Core::Element* drag_element = static_cast<Rocket::Core::Element*>(event.GetParameter< void* >("drag_element", NULL));
+  Rocket::Core::Element* drag_element = *static_cast<Rocket::Core::Element**>(event.GetParameter< void* >("drag_element", NULL));
   Rocket::Core::Element* target       = event.GetTargetElement();
   Rocket::Core::Element* from         = drag_element;
 
