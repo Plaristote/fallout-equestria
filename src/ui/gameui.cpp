@@ -541,9 +541,9 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
   // Load Interface
   //
   _root  = context->LoadDocument("data/console.rml");
-  _input = _root->GetElementById("console_input");
   if (_root)
   {
+    _input = _root->GetElementById("console_input");
     if (_input)
     {
       cout << "[UI] Console is ready" << endl;
