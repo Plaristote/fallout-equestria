@@ -97,14 +97,14 @@
           <item>
            <widget class="QPushButton" name="successorDown">
             <property name="text">
-             <string>Move UP</string>
+             <string>Move Down</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="successorUp">
             <property name="text">
-             <string>Move DOWN</string>
+             <string>Move Up</string>
             </property>
            </widget>
           </item>

@@ -34,7 +34,7 @@ void TabDialog::NewDialog()
 
     if (str != "")
     {
-        QString   filepath = "data/" + pathScriptCategories[0] + "/" + str + ".json";
+        QString   filepath = "data/dialogs/" + str + ".json";
         QFileInfo fileinfo(filepath);
 
         if (fileinfo.exists())

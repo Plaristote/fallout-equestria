@@ -38,6 +38,21 @@ DialogObject::~DialogObject()
     delete ui;
 }
 
+void DialogObject::SetWaypointSelection(std::list<Waypoint*> waypoints)
+{
+    auto    it  = waypoints.begin();
+    auto    end = waypoints.end();
+    QString str;
+
+    for (; it != end ; ++it)
+    {
+      if (str.size() > 0)
+        str += ',';
+      str += QString::number((*it)->id);
+    }
+    ui->doorWaypointsLine->setText(str);
+}
+
 void DialogObject::SetObjectList(QStringList list)
 {
     ui->itemList->clear();

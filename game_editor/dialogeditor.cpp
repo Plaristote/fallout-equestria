@@ -394,7 +394,10 @@ void DialogEditor::DeleteNode(void)
 void DialogEditor::SaveData(bool save_I18n)
 {
 	//Save the dialogue file!
-    DataTree::Writers::JSON(tree, tree->GetSourceFile());
+    if (!(DataTree::Writers::JSON(tree, tree->GetSourceFile())))
+    {
+        QMessageBox::warning(this, "Warning", "Couldn't save changes to dialog in file '" + QString::fromStdString(tree->GetSourceFile()) + "'");
+    }
 	//Save the internationalization! (if we have to)
 	if (save_I18n) {
 		DataTree::Writers::JSON(locale, locale->GetSourceFile());
@@ -456,37 +459,39 @@ void DialogEditor::DeleteSuccessor(void)
 
 void DialogEditor::MoveUp(void)
 {
-	QMessageBox::warning(this, "Error", "Lazy programmer detected (C)");
-    /*QTreeWidgetItem* item = ui->successorList->currentItem();
+    QTreeWidgetItem* item = ui->successorList->currentItem();
     int              row  = ui->successorList->currentIndex().row();
 
     if (item && row > 0)
     {
-        Data data(tree);
+        Data    data(tree);
+        QString key = item->text(0);
 
+        key.remove(0, 1);
         ui->successorList->takeTopLevelItem(row);
         ui->successorList->insertTopLevelItem(row - 1, item);
         ui->successorList->setCurrentItem(item);
-		data[ui->nodeList->currentItem()->text().toStdString()][item->text(0).toStdString()].MoveUp();
+        data[ui->nodeList->currentItem()->text().toStdString()][key.toStdString()].MoveUp();
         SaveData();
-    }*/
+    }
 }
 
 void DialogEditor::MoveDown(void)
 {
-	QMessageBox::warning(this, "Error", "Lazy programmer detected (D)");
-    /*QTreeWidgetItem* item = ui->successorList->currentItem();
+    QTreeWidgetItem* item = ui->successorList->currentItem();
     QTreeWidgetItem* below = ui->successorList->itemBelow(item);
 
     if (item && below)
     {
-        Data data(tree);
+        Data    data(tree);
+        QString key = item->text(0);
+        int     row = ui->successorList->currentIndex().row();
 
-        int row = ui->successorList->currentIndex().row();
+        key.remove(0, 1);
         ui->successorList->takeTopLevelItem(row);
         ui->successorList->insertTopLevelItem(row + 1, item);
         ui->successorList->setCurrentItem(item);
-        data[ui->nodeList->currentItem()->text().toStdString()][item->text(0).toStdString()].MoveDown();
+        data[ui->nodeList->currentItem()->text().toStdString()][key.toStdString()].MoveDown();
         SaveData();
-    }*/
+    }
 }

@@ -28,6 +28,47 @@ static void WriteFile(ofstream& stream, const Data data, unsigned char indent)
     (*it).Output(indent + 2);
 }
 
+void Data::MoveUp()
+{
+  if (_data->father)
+  {
+    list<DataBranch*>& entries  = _data->father->children;
+    auto               it       = entries.begin();
+    auto               previous = it;
+
+    for (; it != entries.end() ; ++it)
+    {
+      if (*it == _data)
+        break ;
+      previous = it;
+    }
+    entries.insert(previous, _data);
+    entries.erase(it);
+    Parent().Output();
+  }
+}
+
+void Data::MoveDown()
+{
+  if (_data->father)
+  {
+    list<DataBranch*>& entries  = _data->father->children;
+    auto               it       = entries.begin();
+    auto               next     = it;
+
+    while (it != entries.end())
+    {
+      ++next;
+      if (*it == _data)
+        break ;
+      ++it;
+    }
+    entries.insert(++next, _data);
+    entries.erase(it);
+    Parent().Output();
+  }
+}
+
 bool DataTree::Save(const string& path)
 {
   ofstream file;

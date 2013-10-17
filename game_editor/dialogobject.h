@@ -24,6 +24,10 @@ public:
 
     void SetCurrentObject(DynamicObject* object);
     void SetWorld(World* world) { this->world = world; }
+    void SetWaypointSelection(std::list<Waypoint*>);
+
+signals:
+    void RequireWaypointSelection(void);
 
 public slots:
     void SetObjectList(QStringList);
