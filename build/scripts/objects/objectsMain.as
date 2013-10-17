@@ -1,8 +1,11 @@
 
-string UseKeyOnDoor(Item@ item, Character@ user, Door@ door)
+bool UseKeyOnDoor(Item@ item, Character@ user, Door@ door)
 {
   if (door.IsOpen() && door.IsLocked() == false)
-    return ("Close the door first");
+  {
+    level.ConsoleWrite("Close the door first");
+    return (false);
+  }
   if (door.GetKeyName() == item.GetName())
   {
     bool   current_state = door.IsLocked();
@@ -10,11 +13,13 @@ string UseKeyOnDoor(Item@ item, Character@ user, Door@ door)
 
     door.Unlock();
     if (door.IsLocked() != current_state)
-      return (user.GetName() + postStr);
+      level.ConsoleWrite(user.GetName() + postStr);
     else
-      return ("FATAL ERROR UseKeyOnDoor");
+      level.ConsoleWrite("FATAL ERROR UseKeyOnDoor");
+    return (true);
   }
-  return ("The door won't open");
+  level.ConsoleWrite("The door won't open");
+  return (true);
 }
 
 int UnarmedSuccessChance(Item@ item, Character@ user, Character@ target)

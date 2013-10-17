@@ -1267,9 +1267,9 @@ void Level::PlayerLoot(Inventory* inventory)
 
 void Level::PlayerEquipObject(unsigned short it, InventoryObject* object)
 {
-  bool canWeildMouth        = object->CanWeild(GetPlayer(), EquipedMouth);
-  bool canWeildMagic        = object->CanWeild(GetPlayer(), EquipedMagic);
-  bool canWeildBattleSaddle = object->CanWeild(GetPlayer(), EquipedBattleSaddle);
+  bool canWeildMouth        = object->CanWeild(GetPlayer(), "equiped", EquipedMouth);
+  bool canWeildMagic        = object->CanWeild(GetPlayer(), "equiped", EquipedMagic);
+  bool canWeildBattleSaddle = object->CanWeild(GetPlayer(), "equiped", EquipedBattleSaddle);
   int  canWeildTotal        = (canWeildMouth ? 1 : 0) + (canWeildMagic ? 1 : 0) + (canWeildBattleSaddle ? 1 : 0);
 
   if (canWeildTotal >= 2)

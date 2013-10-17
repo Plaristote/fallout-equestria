@@ -94,14 +94,6 @@ bool InventoryObject::CanWeild(ObjectCharacter* character, std::string slot, uns
   return (false);
 }
 
-/*
- * DEPRECATED Needs to disapear asap
- */
-bool InventoryObject::CanWeild(ObjectCharacter* character, EquipedMode mode)
-{
-  return (CanWeild(character, "equiped", mode));
-}
-
 InventoryObject::EquipedModel* InventoryObject::CreateEquipedModel(World* world)
 {
   if ((*this)["model"].Value() != "")

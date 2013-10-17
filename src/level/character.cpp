@@ -695,7 +695,7 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
     }
   }
   else
-    cout << "Character doesn't have a waypointOccupied" << endl;
+    cout << "Character " << GetName() << " doesn't have a waypointOccupied" << endl;
   ProcessCollisions();
   collector.stop();
 }

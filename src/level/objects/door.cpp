@@ -4,13 +4,18 @@
 
 void ObjectDoor::ProcessCollisions(void)
 {
-  cout << "Door Process Collisions" << endl;
+  if (_waypointOccupied->arcs.begin()->observer == 0)
+    ObserveWaypoints(true);
 }
 
 void ObjectDoor::ObserveWaypoints(bool doObserver)
 {
   _waypointDisconnected = _object->lockedArcs;
-  std::cout << "Observe Waypoints " << _waypointDisconnected.size() << std::endl;
+  std::cout << "Observe Waypoints " << _waypointDisconnected.size() << " (" << doObserver << ')' << std::endl;
+  std::for_each(_waypointOccupied->arcs.begin(), _waypointOccupied->arcs.end(), [this, doObserver](Waypoint::Arc& arc)
+  {
+    arc.observer = (doObserver ? this : 0);
+  });
   std::for_each(_waypointDisconnected.begin(), _waypointDisconnected.end(), [this, doObserver](std::pair<int, int> waypoints)
   {
     Waypoint*        waypoint = _level->GetWorld()->GetWaypointFromId(waypoints.first);
@@ -22,11 +27,11 @@ void ObjectDoor::ObserveWaypoints(bool doObserver)
 
       if (arc1)
       {
-	arc1->observer = (doObserver ? this : 0);
-	arc2           = arc1->to->GetArcTo(waypoints.first);
+        arc1->observer = (doObserver ? this : 0);
+        arc2           = arc1->to->GetArcTo(waypoints.first);
       }
       if (arc2)
-	arc2->observer = (doObserver ? this : 0);
+        arc2->observer = (doObserver ? this : 0);
     }
   });
 }
@@ -36,7 +41,7 @@ InstanceDynamicObject::GoToData ObjectDoor::GetGoToData(InstanceDynamicObject* c
   Waypoint* waypoint = character->GetOccupiedWaypoint();
   GoToData  ret;
 
-  ret.nearest      = 0;
+  ret.nearest      = _waypointOccupied;
   ret.max_distance = -1;
   ret.min_distance = 0;
   if (waypoint)
@@ -51,20 +56,20 @@ InstanceDynamicObject::GoToData ObjectDoor::GetGoToData(InstanceDynamicObject* c
 
       if (waypoint1 && (_level->FindPath(path, *waypoint, *waypoint1)))
       {
-	if (ret.max_distance > (int)path.size() || ret.max_distance == -1)
-	{
-	  ret.nearest      = waypoint1;
-	  ret.max_distance = path.size();
-	}
+        if (ret.max_distance > (int)path.size() || ret.max_distance == -1)
+        {
+          ret.nearest      = waypoint1;
+          ret.max_distance = path.size();
+        }
       }
 
       if (waypoint2 && (_level->FindPath(path, *waypoint, *waypoint2)))
       {
-	if (ret.max_distance > (int)path.size() || ret.max_distance == -1)
-	{
-	  ret.nearest      = waypoint2;
-	  ret.max_distance = path.size();
-	}
+        if (ret.max_distance > (int)path.size() || ret.max_distance == -1)
+        {
+          ret.nearest      = waypoint2;
+          ret.max_distance = path.size();
+        }
       }
     });
     character->ProcessCollisions();
@@ -78,9 +83,7 @@ InstanceDynamicObject::GoToData ObjectDoor::GetGoToData(InstanceDynamicObject* c
 bool ObjectDoor::CanGoThrough(unsigned char id)
 {
   if (_closed)
-  {
     return (id != 0);
-  }
   return (true);
 }
 
