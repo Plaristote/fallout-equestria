@@ -182,17 +182,16 @@ void Mouse::Run(void)
       for (int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; ++i)
       {
         CollisionEntry* entry = _collisionHandlerQueue->get_entry(i);
+        NodePath        into  = entry->get_into_node_path();
 
-        NodePath into          = entry->get_into_node_path();
-
+        if (into.is_hidden())
+          continue ;
         switch (into.get_collide_mask().get_word())
         {
           case ColMask::DynObject:
-            if (!(_hovering.hasDynObject))
-            {
-              _hovering.SetDynObject(into);
-            }
-            break ;
+          if (!(_hovering.hasDynObject))
+            _hovering.SetDynObject(into);
+          break ;
         }
       }
     }

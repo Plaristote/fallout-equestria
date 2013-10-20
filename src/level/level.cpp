@@ -912,7 +912,7 @@ void Level::RunDaylight(void)
 void Level::MouseSuccessRateHint(void)
 {
   InstanceDynamicObject* dynObject = FindObjectFromNode(_mouse.Hovering().dynObject);
-
+  
   if (dynObject)
   {
     ObjectCharacter*     player    = GetPlayer();
