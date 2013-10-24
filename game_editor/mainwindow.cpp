@@ -1371,6 +1371,8 @@ void MainWindow::WaypointConnect()
         if (it == subIt)
           continue ;
         (*it)->Connect(*subIt);
+        (*it)->SetSelected(false);
+        (*it)->SetSelected(true);
       }
     }
 }
@@ -1390,6 +1392,8 @@ void MainWindow::WaypointDisconnect()
         if (it == subIt)
           continue ;
         (*it)->Disconnect(*subIt);
+        (*it)->SetSelected(false);
+        (*it)->SetSelected(true);
       }
     }
 }
