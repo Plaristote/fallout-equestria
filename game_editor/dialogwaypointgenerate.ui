@@ -25,16 +25,6 @@
     </widget>
    </item>
    <item row="5" column="0" colspan="5">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0" colspan="5">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -46,6 +36,16 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item row="6" column="0" colspan="5">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
    </item>
    <item row="3" column="1">
     <widget class="QDoubleSpinBox" name="spacing_x">
@@ -152,6 +152,30 @@
      </property>
     </widget>
    </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_9">
+     <property name="text">
+      <string>&lt;b&gt;Model's origin&lt;/b&gt;</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1" colspan="2">
+    <widget class="QCheckBox" name="originCenter">
+     <property name="text">
+      <string>Center</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="3" colspan="2">
+    <widget class="QCheckBox" name="originCorner">
+     <property name="text">
+      <string>Corner</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>
@@ -185,6 +209,38 @@
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>originCenter</sender>
+   <signal>clicked()</signal>
+   <receiver>originCorner</receiver>
+   <slot>toggle()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>197</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>380</x>
+     <y>102</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>originCorner</sender>
+   <signal>clicked()</signal>
+   <receiver>originCenter</receiver>
+   <slot>toggle()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>380</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>197</x>
+     <y>102</y>
     </hint>
    </hints>
   </connection>

@@ -41,7 +41,7 @@
         <string>Level Designer</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="3" column="2">
+        <item row="4" column="2">
          <widget class="QWidget" name="widget_2" native="true">
           <layout class="QGridLayout" name="gridLayout_16">
            <item row="1" column="0">
@@ -85,7 +85,7 @@
           </layout>
          </widget>
         </item>
-        <item row="1" column="2">
+        <item row="2" column="2">
          <widget class="QWidget" name="widget_4" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -460,7 +460,7 @@
                   <property name="geometry">
                    <rect>
                     <x>0</x>
-                    <y>-174</y>
+                    <y>0</y>
                     <width>282</width>
                     <height>515</height>
                    </rect>
@@ -1311,28 +1311,6 @@
           </layout>
          </widget>
         </item>
-        <item row="0" column="3" rowspan="7">
-         <widget class="QProgressBar" name="progressBar">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="value">
-           <number>100</number>
-          </property>
-          <property name="textVisible">
-           <bool>true</bool>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="invertedAppearance">
-           <bool>false</bool>
-          </property>
-          <property name="format">
-           <string>%p%</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="2">
          <widget class="QWidget" name="widget_3" native="true">
           <layout class="QHBoxLayout" name="horizontalLayout">
@@ -1353,7 +1331,7 @@
           </layout>
          </widget>
         </item>
-        <item row="1" column="1" rowspan="10">
+        <item row="2" column="1" rowspan="10">
          <widget class="QPandaWidget" name="widget" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -1372,6 +1350,28 @@
         </item>
         <item row="0" column="1">
          <widget class="QComboBox" name="listMap"/>
+        </item>
+        <item row="1" column="1" colspan="2">
+         <widget class="QProgressBar" name="progressBar">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="value">
+           <number>100</number>
+          </property>
+          <property name="textVisible">
+           <bool>true</bool>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="invertedAppearance">
+           <bool>false</bool>
+          </property>
+          <property name="format">
+           <string>%p%</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

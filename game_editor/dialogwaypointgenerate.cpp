@@ -7,17 +7,27 @@
 
 using namespace std;
 
-WaypointGenerator::WaypointGenerator(World* world, MapObject* object, LPoint4 margin, LPoint2 spacing) : world(world), object(object)
+WaypointGenerator::WaypointGenerator(World* world, MapObject* object, LPoint4 margin, LPoint2 spacing, bool corner_origin) : world(world), object(object)
 {
   LPoint3f size = NodePathSize(object->render);
 
   spacingx = spacing.get_x();
   spacingy = spacing.get_y();
-  initPosX = margin.get_x() - (size.get_x() / 2);
-  initPosY = margin.get_y() - (size.get_y() / 2);
-  initPosZ = size.get_z() + 50.f;
   sizex    = (size.get_x() - (margin.get_x() + margin.get_z())) / spacingx + 1;
   sizey    = (size.get_y() - (margin.get_y() + margin.get_w())) / spacingy + 1;
+  if (corner_origin)
+  {
+    initPosX = -(margin.get_x() - size.get_x());
+    initPosY = -(margin.get_y() - size.get_y());
+    spacingx = -spacingx;
+    spacingy = -spacingy;
+  }
+  else
+  {
+    initPosX = margin.get_x() - (size.get_x() / 2);
+    initPosY = margin.get_y() - (size.get_y() / 2);
+  }
+  initPosZ = size.get_z() + 50.f;
 }
 
 void WaypointGenerator::ClearObject(void)
@@ -116,8 +126,8 @@ bool WaypointGenerator::LevelWaypoint(Waypoint* waypoint)
       col_queue->sort_entries();
       min_pos    = col_queue->get_entry(0)->get_surface_point(object->nodePath);
       new_height = min_pos.get_z() + (np_size.get_y() / 2);
-      cout << "found a collision" << endl;
-      cout << min_pos.get_x() << ", " << min_pos.get_y() << ", " << min_pos.get_z() << endl;
+//      cout << "found a collision" << endl;
+//      cout << min_pos.get_x() << ", " << min_pos.get_y() << ", " << min_pos.get_z() << endl;
     }
     np.remove_node();
     if (new_height != wp.get_z(object->nodePath))
@@ -131,8 +141,8 @@ bool WaypointGenerator::LevelWaypoint(Waypoint* waypoint)
 
 void WaypointGenerator::Leveling(void)
 {
-  float step  = 0;
-  float steps = object->waypoints.size();
+  float          step           = 0;
+  float          steps          = object->waypoints.size();
 
   for (unsigned int it = 0 ; it < object->waypoints.size() ; ++it)
   {
@@ -140,7 +150,8 @@ void WaypointGenerator::Leveling(void)
     Waypoint*    wp       = object->waypoints[it];
     NodePath     np       = wp->nodePath;
 
-    while (LevelWaypoint(wp) == false && attempts < 20)
+    cout << "Leveling waypoint " << it << '/' << object->waypoints.size() << endl;
+    while (LevelWaypoint(wp) == false && attempts < 3)
     {
       if (attempts % 2)
         np.set_x(np.get_x() + 0.01);
@@ -148,7 +159,7 @@ void WaypointGenerator::Leveling(void)
         np.set_y(np.get_y() + 0.01);
       ++attempts;
     }
-    if (attempts == 20)
+    if (attempts == 3)
     {
       it--;
       world->DeleteWayPoint(wp);
@@ -205,4 +216,9 @@ LPoint2 DialogWaypointGenerate::GetSpacing(void) const
 {
   return (LPoint2(ui->spacing_x->value(),
                   ui->spacing_y->value()));
+}
+
+bool DialogWaypointGenerate::IsOriginCorner(void) const
+{
+  return (ui->originCorner->isChecked());
 }

@@ -20,9 +20,9 @@ win32:LIBS +=  ../3rd_parties/lib/libp3framework.lib \
                 ../3rd_parties/lib/libp3dtoolconfig.lib \
                 ../3rd_parties/lib/libp3dtool.lib \
                 ../3rd_parties/lib/libp3direct.lib
-unix:LIBS   += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3direct -lX11 -lpython2.7
+unix:LIBS   += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3direct -lX11
 
-INCLUDEPATH += ../3rd_parties/include /usr/include/python2.7
+INCLUDEPATH += ../3rd_parties/include
 
 SOURCES += main.cpp\
         mainwindow.cpp \

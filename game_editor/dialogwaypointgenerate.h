@@ -19,7 +19,7 @@ class WaypointGenerator : public QObject
 
   typedef std::vector<std::vector<Waypoint*> > WaypointGrid;
 public:
-  WaypointGenerator(World* world, MapObject* object, LPoint4 margin, LPoint2 spacing);
+  WaypointGenerator(World* world, MapObject* object, LPoint4 margin, LPoint2 spacing, bool corner_origin);
 
   void Run(void);
 
@@ -55,6 +55,7 @@ public:
 
     LPoint4 GetMargin(void) const;
     LPoint2 GetSpacing(void) const;
+    bool    IsOriginCorner(void) const;
 
 signals:
     void Generate(void);

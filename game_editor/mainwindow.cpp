@@ -1141,7 +1141,8 @@ void MainWindow::MapObjectGenerateWaypoints(void)
     wp_generator = new WaypointGenerator(world,
                                          mapobjectSelected,
                                          waypointGenerate.GetMargin(),
-                                         waypointGenerate.GetSpacing());
+                                         waypointGenerate.GetSpacing(),
+                                         waypointGenerate.IsOriginCorner());
     connect(wp_generator, SIGNAL(Started()),                     this,            SLOT(DisableLevelEditor()),             Qt::QueuedConnection);
     connect(wp_generator, SIGNAL(Started()),                     ui->progressBar, SLOT(show()),                           Qt::QueuedConnection);
     connect(wp_generator, SIGNAL(UpdateProgress(QString,float)), this,            SLOT(UpdateProgressBar(QString,float)), Qt::QueuedConnection);
@@ -1201,6 +1202,8 @@ void MainWindow::MapObjectSelect()
       ui->objectEditor->setEnabled(true);
       ui->objectName->setEnabled(true);
 
+      bool display_colliders = ui->displayColliders->isChecked();
+
       ui->collider_type->setCurrentIndex((int)mapobjectHovered->collider);
       ui->collider_position->setEnabled(mapobjectHovered->collider != MapObject::NONE);
       ui->collider_pos_x->setValue(mapobjectHovered->collision_node.get_pos().get_x());
@@ -1214,6 +1217,7 @@ void MainWindow::MapObjectSelect()
       ui->collider_scale_z->setValue(mapobjectHovered->collision_node.get_scale().get_z());
       ui->collider_group->setEnabled(true);
       ui->collider_type->setEnabled(true);
+      ui->displayColliders->setChecked(display_colliders);
       if (ui->displayColliders->isChecked())
         mapobjectHovered->collision_node.show();
     }
