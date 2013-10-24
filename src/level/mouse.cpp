@@ -110,11 +110,8 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
     static bool               updated               = false;
     static LPoint2f           last_update;
 
-    //std::cout << "Difference -> " << ABS(cursorPos.get_x() - last_update.get_x()) << std::endl;
     if (ABS(cursorPos.get_x() - last_update.get_x()) > 0.05 || ABS(cursorPos.get_y() - last_update.get_y()) > 0.05)
       updated         = false;
-//    if (cursorPos != _lastMousePos)
-  //    updated         = false;
     if (!(updated == false))
       return ;
     last_update       = cursorPos;
@@ -132,7 +129,6 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
 
     collisionHandlerQueue->sort_entries();
 
-    //world->rootWaypoints.show();
     if (_hovering.waypoint_ptr && _hovering.hasWaypoint)
       _hovering.waypoint_ptr->SetSelected(false);
     _hovering.hasWaypoint = false;

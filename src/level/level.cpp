@@ -95,7 +95,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   {
     LevelExitZone* exitZone = new LevelExitZone(this, zone, zone.destinations);
 
-    cout << "Registering ExitZone '" << zone.name << '\'' << endl;
+    cout << "Registering ExitZone '" << zone.name << " with " << zone.waypoints.size() << " waypoints." << endl;
     exitZone->ExitZone.Connect      (*this, &Level::CallbackExitZone);
     exitZone->GoToNextZone.Connect  (*this, &Level::CallbackGoToZone);
     exitZone->SelectNextZone.Connect(*this, &Level::CallbackSelectNextZone);
@@ -167,7 +167,6 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
       block_size.set_z(distance(min_pos.get_z(), max_pos.get_z()));
 
       unsigned short block_count = ceil(entries.size() / 200.f);
-      cout << "divide and conquer will use " << block_count << " blocks" << endl;
       for (unsigned short i = 0 ; i < block_count ; ++i)
       {
         LPoint3f block_position;

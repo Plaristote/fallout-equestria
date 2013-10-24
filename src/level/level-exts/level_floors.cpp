@@ -82,8 +82,7 @@ bool Level::IsInsideBuilding(unsigned char& floor)
     }
   }
 
-  pickerPath.show();
-  //pickerPath.detach_node();
+  pickerPath.detach_node();
   return (isInsideBuilding);
 }
 

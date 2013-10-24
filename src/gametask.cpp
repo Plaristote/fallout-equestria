@@ -788,6 +788,7 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     std::cerr << "?? File not found !!" << std::endl;
   if (_level)
   {
+    _worldMap->Hide();
     cout << "Level finishing the loading" << endl;
     MusicManager::Get()->Play(params.name);
     _levelName = params.name;
