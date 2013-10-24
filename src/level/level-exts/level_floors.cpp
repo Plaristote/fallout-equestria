@@ -44,22 +44,24 @@ void Level::FloorFade(bool in, NodePath floor)
 
 bool Level::IsInsideBuilding(unsigned char& floor)
 {
-  bool                      isInsideBuilding = false;
+  bool                      isInsideBuilding      = false;
   PT(CollisionRay)          pickerRay;
   PT(CollisionNode)         pickerNode;
   NodePath                  pickerPath;
   CollisionTraverser        collisionTraverser;
   PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
+  NodePath                  character_node        = GetPlayer()->GetNodePath();
   
   pickerNode   = new CollisionNode("isInsideBuildingRay");
   pickerPath   = _window->get_render().attach_new_node(pickerNode);
   pickerRay    = new CollisionRay();
   pickerNode->add_solid(pickerRay);
-  
-  pickerPath.set_pos(GetPlayer()->GetNodePath().get_pos());
+  pickerNode->set_from_collide_mask(CollideMask(ColMask::Object));
+
+  pickerPath.set_pos(character_node.get_pos());
   pickerRay->set_origin(0, 0, 0);
   pickerRay->set_direction(0, 0, 10);
-  
+
   collisionTraverser.add_collider(pickerPath, collisionHandlerQueue);
   collisionTraverser.traverse(_window->get_render());
   
@@ -79,8 +81,9 @@ bool Level::IsInsideBuilding(unsigned char& floor)
       break ;
     }
   }
-  
-  pickerPath.detach_node();
+
+  pickerPath.show();
+  //pickerPath.detach_node();
   return (isInsideBuilding);
 }
 
@@ -99,8 +102,8 @@ void Level::SetCurrentFloor(unsigned char floor)
   if (_world->floors.size() > floor)
     FloorFade(false, _world->floors[floor]);
   
-  LPoint3 upperLeft(0, 0, 0), upperRight(0, 0, 0), bottomLeft(0, 0, 0);
-  _world->GetWaypointLimits(floor, upperRight, upperLeft, bottomLeft);
+  //LPoint3 upperLeft(0, 0, 0), upperRight(0, 0, 0), bottomLeft(0, 0, 0);
+  //_world->GetWaypointLimits(floor, upperRight, upperLeft, bottomLeft);
   //_camera.SetLimits(bottomLeft.get_x(), bottomLeft.get_y(), upperRight.get_x(), upperRight.get_y());
   _currentFloor = floor;
 }
@@ -108,12 +111,12 @@ void Level::SetCurrentFloor(unsigned char floor)
 void Level::CheckCurrentFloor(float elapsedTime)
 {
   ObjectCharacter* player = GetPlayer();
-  
+
   if (player)
   {
     Waypoint*      wp;
 
-    wp = player->GetDynamicObject()->waypoint;
+    wp = player->GetOccupiedWaypoint();
     if (!wp)
     {
       cout << "[Level] Player doesn't have an occupied waypoint. Something went wrong somewhere" << endl;

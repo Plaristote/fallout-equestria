@@ -24,42 +24,6 @@ Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseObje
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSkillOn;
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
-class Circle
-{
-public:
-  void     SetPosition(float x, float y) { this->cx = x; this->cy = y; }
-  void     SetRadius(float radius) { this->radius = radius; }
-
-  LPoint3f GetPosition(void) const
-  {
-    return (LPoint3f(cx, cy, 0));
-  }
-  
-  LPoint2f PointAtAngle(float angle)
-  {
-    LPoint2f ret;
-
-    ret.set_x(cx + radius * cos(angle));
-    ret.set_y(cy + radius * sin(angle));
-    return (ret);
-  }
-
-  void    SetFromWorld(World* world)
-  {
-    LPoint3 upper_left, bottom_left, upper_right;
-
-    world->GetWaypointLimits(0, upper_right, upper_left, bottom_left);
-    
-    cx     = (bottom_left.get_x() + upper_right.get_x()) / 2;
-    cy     = (bottom_left.get_y() + upper_right.get_y()) / 2;
-    radius = upper_right.get_x() - cx;
-  }
-
-private:
-  float cx, cy, radius;
-};
-
-Circle solar_circle;
 
 #include "options.hpp"
 #include <mousecursor.hpp>
@@ -352,7 +316,7 @@ void Level::InitSun(void)
 
   _task_daylight   = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
   _task_daylight->Interval.Connect(*this, &Level::RunDaylight);
-  solar_circle.SetFromWorld(_world);
+  _solar_circle.SetFromWorld(_world);
   RunDaylight();
 }
 
@@ -538,8 +502,6 @@ void Level::StripParty(PlayerParty& party)
     Characters::iterator cend   = _characters.end();
 
     cout << "Stripping character: " << (*it)->nodePath.get_name() << endl;
-    //NodePath np;
-    //(**it).nodePath = np; // Nullify the nodepath first, for some reason.
     *backup = **it;
     while (cit != cend)
     {
@@ -900,13 +862,13 @@ void Level::RunDaylight(void)
   // Angle va de 0/180 de 8h/20h à 20h/8h
   float    step  = (current_hour) % 12 + (current_minute / 60.f);
   float    angle = ((180.f / 120.f) / 12.f) * step;
-  LPoint2f pos   = solar_circle.PointAtAngle(angle);
+  LPoint2f pos   = _solar_circle.PointAtAngle(angle);
 
   //cout << "Sun Step: " << step << endl;
   //cout << "Sun Position is (" << pos.get_x() << "," << pos.get_y() << ')' << endl;
   _sunLightNode.set_z(pos.get_x());
   _sunLightNode.set_y(pos.get_y());
-  _sunLightNode.look_at(solar_circle.GetPosition());
+  _sunLightNode.look_at(_solar_circle.GetPosition());
 }
 
 void Level::MouseSuccessRateHint(void)
@@ -1372,59 +1334,6 @@ bool Level::UseActionPoints(unsigned short ap)
     }
   }
   return (true);
-}
-
-/*
- * Exit Zone Stuff
- */
-void Level::CallbackExitZone(void)
-{
-  if (_currentUis[UiItNextZone])
-    _currentUis[UiItNextZone]->Destroy();
-  _exitingZone   = true;
-}
-
-void Level::CallbackGoToZone(const string& nextZone)
-{
-  LevelExitZone* zone = reinterpret_cast<LevelExitZone*>(GetPlayer()->GetOccupiedWaypoint()->arcs.front().observer);  
-  
-  if (_currentUis[UiItNextZone])
-    _currentUis[UiItNextZone]->Destroy();
-  _exitingZone       = true;
-  _exitingZoneTo     = nextZone;
-  if (zone)
-    _exitingZoneName = zone->GetName();
-}
-
-void Level::CallbackSelectNextZone(const vector<string>& nextZoneChoices)
-{
-  if (!((_currentUis[UiItNextZone] && _currentUis[UiItNextZone]->IsVisible())))
-  {
-    UiNextZone* uiNextZone = new UiNextZone(_window, _levelUi.GetContext(), nextZoneChoices);
-
-    if (_currentUis[UiItNextZone])
-      delete _currentUis[UiItNextZone];
-    _camera.SetEnabledScroll(false);
-    SetInterrupted(true);
-    _currentUis[UiItNextZone] = uiNextZone;
-    uiNextZone->Cancel.Connect          (*this, &Level::CallbackCancelSelectZone);
-    uiNextZone->NextZoneSelected.Connect(*this, &Level::CallbackGoToZone);
-  }
-}
-
-void Level::CallbackCancelSelectZone()
-{
-  CloseRunningUi<UiItNextZone>();
-}
-
-const string& Level::GetNextZone(void) const
-{
-  return (_exitingZoneTo);
-}
-
-const string& Level::GetExitZone(void) const
-{
-  return (_exitingZoneName);
 }
 
 bool Level::IsWaypointOccupied(unsigned int id) const

@@ -101,51 +101,6 @@ LPoint3 NodePathSize(NodePath);
 
 void Earthscultor2Bam(Data heightmap, const std::string& out)
 {
-  // Experimental code for cutting maps in parts. Didn't work. Unsuccessfull texturing. No performance improvements.
-  /*NodePath     result = new PandaNode("EarthScultor Heightmap");
-  LPoint3f     size_part;
-  bool         size_set = false;
-  LPoint2      map_it(0, 0);
-  unsigned int dimensions;
-
-  dimensions = sqrt(heightmap.Count());
-  for_each(heightmap.begin(), heightmap.end(), [&result, &size_part, &size_set, &map_it, dimensions](Data map_part)
-  {
-    NodePath       terrain;
-    GeoMipTerrain* mip_terrain = new GeoMipTerrain("Terrain");
-
-    mip_terrain->set_heightfield(map_part["heightmap"].Value());
-    mip_terrain->set_block_size(map_part["block_size"]);
-    mip_terrain->set_factor(map_part["factor"]);
-    mip_terrain->set_min_level(map_part["min_level"]);
-
-    mip_terrain->get_root().set_sz(map_part["max_height"]);
-
-    mip_terrain->generate();
-    terrain = mip_terrain->get_root();
-    terrain.reparent_to(result);
-
-    if (!size_set)
-    {
-      size_part = NodePathSize(terrain);
-      size_set  = true;
-      terrain.set_pos(LPoint3(0, 0, 0));
-      std::cout << "Map part size: (" << size_part.get_x() << ',' << size_part.get_y() << ',' << size_part.get_z() << ')' << std::endl;
-    }
-    else
-    {
-      terrain.set_x((map_it.get_x() * size_part.get_x()));
-      terrain.set_y((map_it.get_y() * size_part.get_y()));
-    }
-    map_it.set_x(map_it.get_x() + 1);
-    if (map_it.get_x() == dimensions)
-    {
-      map_it.set_x(0);
-      map_it.set_y(map_it.get_y() + 1);
-    }
-  });
-  result.write_bam_file(out);*/
-
   NodePath terrain;
 
   GeoMipTerrain* mip_terrain = new GeoMipTerrain("Terrain");

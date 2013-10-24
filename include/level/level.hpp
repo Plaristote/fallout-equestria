@@ -29,6 +29,7 @@
 # include "inventory_ui.hpp"
 
 # include "world.h"
+# include "sun.hpp"
 # include "projectile.hpp"
 # include "soundmanager.hpp"
 # include "main_script.hpp"
@@ -298,6 +299,7 @@ private:
 
   unsigned char     _currentFloor;
   Waypoint*         _floor_lastWp;
+  Circle            _solar_circle;
   
   bool              IsInsideBuilding(unsigned char& floor);
   void              CheckCurrentFloor(float elapsedTime);
