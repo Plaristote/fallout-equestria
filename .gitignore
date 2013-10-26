@@ -10,3 +10,4 @@ stats/**/*
 build/game
 *.swp
 *.swo
+history_console.json
