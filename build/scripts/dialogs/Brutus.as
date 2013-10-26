@@ -1,0 +1,5 @@
+
+string HookInit()
+{
+  return ("entrypoint");
+}

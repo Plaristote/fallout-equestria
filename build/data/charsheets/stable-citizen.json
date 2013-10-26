@@ -1,0 +1,102 @@
+{
+"Name": "Stable Citizen",
+"Age": 16,
+"Gender": "Mare",
+"Race": "Unicorn",
+"Faction": "Stable",
+"Special": {
+  "STR": 3,
+  "PER": 5,
+  "END": 3,
+  "CHA": 8,
+  "INT": 8,
+  "AGI": 5,
+  "LUC": 6
+}
+,
+"Statistics": {
+  "Action Points": 5,
+  "Armor Class": 5,
+  "Bonus Damage": 0,
+  "Carry Weight": 100,
+  "Critical Chance": 6,
+  "Damage Resistance": 0,
+  "Healing Rate": 1,
+  "Hit Points": 24,
+  "Melee Damage": 1,
+  "Perk Rate": 3,
+  "Poison Resistance": 15,
+  "Radiation Resistance": 4,
+  "Skill Rate": 21
+}
+,
+"Skills": {
+  "Small Guns": 40,
+  "Big Guns": 15,
+  "Energy Guns": 15,
+  "Explosives": 70,
+  "Unarmed": 80,
+  "Lockpick": 70,
+  "Melee Weapons": 95,
+  "Medicine": 80,
+  "Repair": 28,
+  "Science": 41,
+  "Sneak": 30,
+  "Spellcasting": 47,
+  "Steal": 5,
+  "Barter": 36,
+  "Outdoorspony": 60,
+  "Speech": 41,
+  "Gambling": 38
+}
+,
+"Skill Points": {
+  "Small Guns": 0,
+  "Big Guns": 0,
+  "Energy Guns": 0,
+  "Explosives": 0,
+  "Unarmed": 0,
+  "Lockpick": 0,
+  "Melee Weapons": 0,
+  "Medicine": 0,
+  "Repair": 0,
+  "Science": 0,
+  "Sneak": 0,
+  "Spellcasting": 0,
+  "Steal": 0,
+  "Barter": 0,
+  "Outdoorspony": 0,
+  "Speech": 0,
+  "Gambling": 0
+}
+,
+"Statistics Modifiers": {
+  "Action Points": 0,
+  "Armor Class": 0,
+  "Bonus Damage": 0,
+  "Carry Weight": 0,
+  "Critical Chance": 0,
+  "Damage Resistance": 0,
+  "Healing Rate": 0,
+  "Hit Points": 0,
+  "Melee Damage": 0,
+  "Perk Rate": 0,
+  "Poison Resistance": 0,
+  "Radiation Resistance": 0,
+  "Skill Rate": 0
+}
+,
+"Variables": {
+  "Hit Points": 26,
+  "Affinities": 2,
+  "Level": 1,
+  "Experience": 0,
+  "Skill Points": 0,
+  "Special Points": 1,
+  "Perks": 0,
+  "Traits": 2
+}
+,
+"Traits": ""
+
+}

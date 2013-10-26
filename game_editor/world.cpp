@@ -11,7 +11,7 @@
 
 using namespace std;
 
-unsigned int          blob_revision = 5;
+unsigned int          blob_revision = 6;
 
 unsigned char         gPathfindingUnitType = 0;
 void*                 gPathfindingData     = 0;
@@ -998,9 +998,9 @@ void Waypoint::UnserializeLoadArcs(World* world)
   tmpArcs.clear();
 }
 
-void Waypoint::Serialize(World*, Utils::Packet &packet)
+void Waypoint::Serialize(World* world, Utils::Packet &packet)
 {
-  LPoint3f         pos = nodePath.get_pos(/*world->window->get_render()*/);
+  LPoint3f         pos = nodePath.get_pos(world->window->get_render());
   int              id  = this->id;
   float            posx, posy, posz;
   vector<int>      arcs;
@@ -1467,7 +1467,6 @@ void WorldLight::Serialize(Utils::Packet& packet)
  */
 void           World::UnSerialize(Utils::Packet& packet)
 {
-  cout << "Blob revision was " << blob_revision << endl;
   if (blob_revision >= 1)
     packet >> blob_revision;
   cout << "Blob revision is  " << blob_revision << endl;
@@ -1485,7 +1484,6 @@ void           World::UnSerialize(Utils::Packet& packet)
 
       model_sphere.instance_to(sphere);
       waypoint.Unserialize(packet);
-      //waypoint.nodePath.remove_node();
       if (!sphere.is_empty())
         sphere.reparent_to(rootWaypoints);
       waypoints.push_back(waypoint);
@@ -1633,24 +1631,17 @@ void           World::UnSerialize(Utils::Packet& packet)
    */
   UpdateMapTree();
 
-#ifndef GAME_EDITOR
-  // Setting waypoint positions
+#ifdef GAME_EDITOR
+  if (blob_revision >= 6)
   {
     std::for_each(objects.begin(), objects.end(), [this](MapObject& object)
     {
-      NodePath render = window->get_render();
-      auto     it     = object.waypoints.begin();
-      auto     end    = object.waypoints.end();
+      unsigned int i = 0;
 
-      for (; it != end ; ++it)
+      for (; i < object.waypoints.size() ; ++i)
       {
-        Waypoint* wp = *it;
-        LPoint3f  abs_pos;
-
-        wp->nodePath.reparent_to(object.nodePath);
-        abs_pos = wp->nodePath.get_pos(render);
-        wp->nodePath.reparent_to(rootWaypoints);
-        wp->nodePath.set_pos(render, abs_pos);
+        Waypoint* wp = object.waypoints[i];
+        wp->nodePath.set_pos(window->get_render(), wp->nodePath.get_pos());
       }
     });
   }
@@ -1667,61 +1658,61 @@ void           World::UnSerialize(Utils::Packet& packet)
 
 void           World::UpdateMapTree(void)
 {
-      std::function<void (NodePath, std::string)> set_relations = [this, &set_relations](NodePath parent, std::string solving_for)
+  std::function<void (NodePath, std::string)> set_relations = [this, &set_relations](NodePath parent, std::string solving_for)
+  {
+    // Solving for MapObjects
+    {
+      auto it  = objects.begin();
+      auto end = objects.end();
+
+      for (; it != end ; ++it)
       {
-        // Solving for MapObjects
+        if (it->nodePath == parent)
+          continue ;
+        std::cout << "Solving for: '" << solving_for << "'. Current item: '" << it->nodePath.get_name() << '\'' << std::endl;
+        if (it->parent == solving_for)
         {
-          auto it  = objects.begin();
-          auto end = objects.end();
-
-          for (; it != end ; ++it)
+          if (solving_for != "" && !parent.is_empty())
+            it->nodePath.reparent_to(parent);
+          else
           {
-            if (it->nodePath == parent)
-              continue ;
-            std::cout << "Solving for: '" << solving_for << "'. Current item: '" << it->nodePath.get_name() << '\'' << std::endl;
-            if (it->parent == solving_for)
-            {
-              if (solving_for != "" && !parent.is_empty())
-                it->nodePath.reparent_to(parent);
-              else
-              {
-                if (floors.size() <= it->floor)
-                  FloorResize(it->floor + 1);
-                it->nodePath.reparent_to(floors[it->floor]);
-              }
-            }
+            if (floors.size() <= it->floor)
+              FloorResize(it->floor + 1);
+            it->nodePath.reparent_to(floors[it->floor]);
           }
         }
+      }
+    }
 
-        // Solving for DynamicObjects
+    // Solving for DynamicObjects
+    {
+      auto it  = dynamicObjects.begin();
+      auto end = dynamicObjects.end();
+
+      for (; it != end ; ++it)
+      {
+        if (it->nodePath == parent)
+          continue ;
+        if (it->parent == solving_for)
         {
-          auto it  = dynamicObjects.begin();
-          auto end = dynamicObjects.end();
-
-          for (; it != end ; ++it)
+          if (solving_for != "")
+            it->nodePath.reparent_to(parent);
+          else
           {
-            if (it->nodePath == parent)
-              continue ;
-            if (it->parent == solving_for)
-            {
-              if (solving_for != "")
-                it->nodePath.reparent_to(parent);
-              else
-              {
-                if (floors.size() <= it->floor)
-                  FloorResize(it->floor + 1);
-                it->nodePath.reparent_to(floors[it->floor]);
-              }
-            }
+            if (floors.size() <= it->floor)
+              FloorResize(it->floor + 1);
+            it->nodePath.reparent_to(floors[it->floor]);
           }
         }
-      };
+      }
+    }
+  };
 
-      std::for_each(objects.begin(), objects.end(), [this, &set_relations](MapObject& object)
-      { set_relations(object.nodePath, object.nodePath.get_name()); });
-      std::for_each(dynamicObjects.begin(), dynamicObjects.end(), [this, &set_relations](DynamicObject& object)
-      { set_relations(object.nodePath, object.nodePath.get_name()); });
-      set_relations(floors_node, "");
+  std::for_each(objects.begin(), objects.end(), [this, &set_relations](MapObject& object)
+  { set_relations(object.nodePath, object.nodePath.get_name()); });
+  std::for_each(dynamicObjects.begin(), dynamicObjects.end(), [this, &set_relations](DynamicObject& object)
+  { set_relations(object.nodePath, object.nodePath.get_name()); });
+  set_relations(floors_node, "");
 }
 
 void           World::Serialize(Utils::Packet& packet, std::function<void (const std::string&, float)> progress_callback)
@@ -1747,7 +1738,7 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
   }
 # endif
 
-  packet << (unsigned int)5; // #blob revision
+  packet << (unsigned int)6; // #blob revision
 
   // Waypoints
   {

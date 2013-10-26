@@ -640,6 +640,14 @@ unsigned short      ObjectCharacter::GetPathDistance(Waypoint* waypoint)
   return (path.size());
 }
 
+void                ObjectCharacter::GoTo(LPoint3f position)
+{
+  Waypoint* waypoint = _level->GetWorld()->waypoint_graph.GetClosest(position);
+  
+  if (waypoint)
+    GoTo(waypoint);
+}
+
 void                ObjectCharacter::GoTo(unsigned int id)
 {
   Waypoint*         wp = _level->GetWorld()->GetWaypointFromId(id);

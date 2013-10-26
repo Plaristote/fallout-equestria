@@ -4,6 +4,8 @@
 #include <panda3d/texturePool.h>
 #include <panda3d/directionalLight.h>
 
+#define PSTAT_ENABLED
+
 PandaFramework       framework;
 PT(AsyncTaskManager) taskMgr     = AsyncTaskManager::get_global_ptr();
 PT(ClockObject)      globalClock = ClockObject::get_global_clock();
@@ -150,7 +152,7 @@ int main(int argc, char *argv[])
     ConfigPage*      config = load_prc_file("config.prc");
 
     cout << "[FoE] Loading configuration" << endl;
-#if PSTAT_ENABLED
+#ifdef PSTAT_ENABLED
     if (!(PStatClient::connect("localhost", 5185))) // Initialize client for profiling collector
       cout << "[FoE] Can't connect to PStat client" << endl;
 #endif

@@ -313,6 +313,11 @@ namespace asUtils
 
     RocketAsManager::self.AddEventListener(self, listener);
   }
+  
+  void GoTo(int x, int y, int z, ObjectCharacter* character)
+  {
+    character->GoTo(LPoint3f(x, y, z));
+  }
 }
 
 struct asConsoleOutput
@@ -452,6 +457,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "void SetRunning(const bool)",              asMETHOD(ObjectCharacter,SetRunning), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "string GetName()",                         asMETHOD(ObjectCharacter,GetName), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool HasLineOfSight(DynamicObject@)",      asMETHOD(ObjectCharacter,HasLineOfSight), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "void GoTo(int, int, int)",                 asFUNCTION(asUtils::GoTo), asCALL_CDECL_OBJLAST);
   engine->RegisterObjectMethod(charClass, "void GoTo(int)",                           asMETHODPR(ObjectCharacter,GoTo, (unsigned int), void), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void GoTo(DynamicObject@, int)",           asMETHODPR(ObjectCharacter,GoTo, (InstanceDynamicObject*, int), void), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void GoToRandomWaypoint()",                asMETHOD(ObjectCharacter,GoToRandomWaypoint), asCALL_THISCALL);

@@ -1,0 +1,7 @@
+{
+  "heightmap": "../documents/3D/heightmap-bunker.png",
+  "block_size": 32,
+  "factor": 400,
+  "min_level": 3,
+  "max_height": 65
+}

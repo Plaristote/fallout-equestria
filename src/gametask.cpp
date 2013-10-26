@@ -789,12 +789,14 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
   if (_level)
   {
     _worldMap->Hide();
-    cout << "Level finishing the loading" << endl;
+    cout << "Level loaded." << endl;
     MusicManager::Get()->Play(params.name);
     _levelName = params.name;
     _level->SetDataEngine(&_dataEngine);
     if (params.entry_zone != "")
       _level->InsertParty(*_playerParty);
+    else
+      cout << "No entry zone" << endl;
     if (_level->GetPlayer() != 0)
     {
       SetPlayerInventory();

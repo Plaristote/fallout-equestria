@@ -44,6 +44,7 @@ void Level::FloorFade(bool in, NodePath floor)
 
 bool Level::IsInsideBuilding(unsigned char& floor)
 {
+  Timer profile;
   bool                      isInsideBuilding      = false;
   PT(CollisionRay)          pickerRay;
   PT(CollisionNode)         pickerNode;
@@ -56,14 +57,13 @@ bool Level::IsInsideBuilding(unsigned char& floor)
   pickerPath   = _window->get_render().attach_new_node(pickerNode);
   pickerRay    = new CollisionRay();
   pickerNode->add_solid(pickerRay);
-  pickerNode->set_from_collide_mask(CollideMask(ColMask::Object));
+  pickerNode->set_from_collide_mask(CollideMask(ColMask::FovBlocker));
 
   pickerPath.set_pos(character_node.get_pos());
-  pickerRay->set_origin(0, 0, 0);
-  pickerRay->set_direction(0, 0, 10);
+  pickerRay->set_direction(_camera.GetNodePath().get_pos() - character_node.get_pos());
 
   collisionTraverser.add_collider(pickerPath, collisionHandlerQueue);
-  collisionTraverser.traverse(_window->get_render());
+  collisionTraverser.traverse(_world->floors_node);
   
   collisionHandlerQueue->sort_entries();
   
@@ -71,10 +71,12 @@ bool Level::IsInsideBuilding(unsigned char& floor)
   {
     CollisionEntry* entry  = collisionHandlerQueue->get_entry(i);
     MapObject*      object = GetWorld()->GetMapObjectFromNodePath(entry->get_into_node_path());
-    
+
     if (!object)
       object = GetWorld()->GetDynamicObjectFromNodePath(entry->get_into_node_path());
-    if (object && object != GetPlayer()->GetDynamicObject())
+    if (object)
+      std::cout << "DETECTED COLLISION WITH " << object->nodePath.get_name() << " IN FLOOR " << (int)object->floor << std::endl;
+    if (object && object->floor >= floor)
     {
       isInsideBuilding = true;
       floor            = object->floor;
@@ -83,15 +85,16 @@ bool Level::IsInsideBuilding(unsigned char& floor)
   }
 
   pickerPath.detach_node();
+  profile.Profile("[Level::IsInsideBuilding]");
   return (isInsideBuilding);
 }
 
 void Level::SetCurrentFloor(unsigned char floor)
 {
   bool          showLowerFloors  = true;
-  unsigned char floorAbove       = 0;
+  unsigned char floorAbove       = floor + 1;
   bool          isInsideBuilding = IsInsideBuilding(floorAbove);
-  
+
   for (unsigned int it = 0 ; it < floor ; ++it)
     FloorFade(showLowerFloors, _world->floors[it]);
   

@@ -100,6 +100,7 @@ public:
   void                GoTo(unsigned int id);
   void                GoTo(Waypoint* waypoint);
   void                GoTo(InstanceDynamicObject* object, int max_distance = 0);
+  void                GoTo(LPoint3f position);
   void                GoToRandomWaypoint(void);
   void                TruncatePath(unsigned short max_length);
   std::list<Waypoint> GetPath(Waypoint* waypoint);

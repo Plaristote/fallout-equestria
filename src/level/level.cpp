@@ -319,6 +319,11 @@ void Level::InitSun(void)
   RunDaylight();
 }
 
+bool StartsWith(const std::string& str, const std::string& starts_with)
+{
+  return (str.substr(0, starts_with.size()) == starts_with);
+}
+
 void Level::InitPlayer(void)
 {
   if (!(GetPlayer()->GetStatistics().Nil()))
@@ -399,9 +404,16 @@ void Level::InitPlayer(void)
     for_each(_world->objects.begin(), _world->objects.end(), [node, atr1](MapObject& object)
     {
       std::string name = object.nodePath.get_name();
+      std::string patterns[] = { "Wall", "wall", "Ceiling", "ceiling" };
 
-      if (name.substr(1, 3) == "all" && (name[0] == 'W' || name[0] == 'w'))
-        object.nodePath.set_attrib(atr1);
+      for (unsigned short i = 0 ; i < 4 ; ++i)
+      {
+        if (StartsWith(name, patterns[i]))
+        {
+          object.nodePath.set_attrib(atr1);
+          break ;
+        }
+      }
     });
   }
 

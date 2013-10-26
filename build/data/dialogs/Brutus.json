@@ -1,0 +1,61 @@
+{
+"entrypoint": {
+  "npcLine": 10058,
+  "10059": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "give-change"
+  }
+,
+  "10060": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "start-fight"
+  }
+,
+  "10064": {
+    "HookAvailable": "NotVisible",
+    "HookExecute": "",
+    "DefaultAnswer": "end-conversation"
+  }
+
+}
+,
+"give-change": {
+  "npcLine": 10061,
+  "10067": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+,
+  "10066": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+
+}
+,
+"start-fight": {
+  "npcLine": 10062,
+  "10065": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+
+}
+,
+"end-conversation": {
+  "npcLine": 10063,
+  "10065": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+
+}
+
+
+}
