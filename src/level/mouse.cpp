@@ -152,8 +152,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
       break ;
     }
 
-    //pickerPath.detach_node(); // TODO find out why hasDynObject stops working after this...
-                                //      this leak has to go away
+    pickerPath.detach_node();
     collector.stop();
   }
 }

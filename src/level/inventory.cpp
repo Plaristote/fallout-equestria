@@ -293,7 +293,7 @@ bool InventoryObject::ExecuteHook(const std::string& hook, ObjectCharacter* user
 // WARNING TODO: Implement the new equiping system for this LoadInventory overload.
 void Inventory::LoadInventory(DynamicObject* object)
 {
-  ForEach(object->inventory, [this](std::pair<std::string, int> data)
+  std::for_each(object->inventory.begin(), object->inventory.end(), [this](std::pair<std::string, int> data)
   {
     Data      objectTree = Level::CurrentLevel->GetItems();
     DataTree  objectTmp;
@@ -302,20 +302,21 @@ void Inventory::LoadInventory(DynamicObject* object)
       Data      data_(dataTree);
       Data*     objectBuilder = new Data(dataTree);
 
+      data.second = data.second > 9999 ? 1 : data.second; // Do not let object quantity go above 9999
       if (!data_["type"].Nil())
       {
-	Data      object(&objectTmp);
+        Data      object(&objectTmp);
 
-	object.Duplicate(objectTree[data_["type"].Value()]);
-	if (!(data_["ammo"].Nil()))
-	{
-	  if (!(data_["ammo"]["ammount"].Nil()))
-	    object["ammo"]["ammount"] = data_["ammo"]["ammount"];
-	  if (!(data_["ammo"]["current"].Nil()))
-	    object["ammo"]["current"] = data_["ammo"]["current"];
-	}
-	delete objectBuilder;
-	objectBuilder = new Data(object);
+        object.Duplicate(objectTree[data_["type"].Value()]);
+        if (!(data_["ammo"].Nil()))
+        {
+          if (!(data_["ammo"]["ammount"].Nil()))
+            object["ammo"]["ammount"] = data_["ammo"]["ammount"];
+          if (!(data_["ammo"]["current"].Nil()))
+            object["ammo"]["current"] = data_["ammo"]["current"];
+        }
+        delete objectBuilder;
+        objectBuilder = new Data(object);
       }
       else
 	objectBuilder->SetKey(data_["Name"]);

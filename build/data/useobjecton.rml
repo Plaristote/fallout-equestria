@@ -23,7 +23,6 @@
 
       #inventory
       {
-        drag:         clone;
         overflow-y:   auto;
         margin-right: 10px;
         height:       90%;

@@ -304,7 +304,7 @@ tabset panels panel
         <button id="edit-value-cursor-plus" class="console-bg">+</button>
         <button id="edit-value-cursor-less" class="console-bg">-</button>
     </p>
-      <div id="stat-cols"class="  place-next-to" >
+      <div id="stat-cols" class="  place-next-to" >
         
 			<div id="stat-left-col" class="  place-next-to ">
 		      <p id="special" class="  place-beneath">
