@@ -50,8 +50,8 @@ Buff::Buff(Utils::Packet& packet, TimeManager& tm, function<StatController* (con
   _target_stats = get_controller(_target_name);
   _looping      = _buff["loop"].Value() == "1";
   _task         = _tm.AddTask(TASK_LVL_WORLDMAP, _looping, 0);
-  packet >> _task->lastS >> _task->lastM >> _task->lastH >> _task->lastD >> _task->lastMo >> _task->lastY;
-  packet >> _task->timeS >> _task->timeM >> _task->timeH >> _task->timeD >> _task->timeMo >> _task->timeY;
+  _task->next_run.Serialize(packet);
+  _task->length.Serialize(packet);
   _task->Interval.Connect(*this, &Buff::Refresh);
 }
 
@@ -61,8 +61,8 @@ void Buff::Save(Utils::Packet& packet)
 
   DataTree::Writers::StringJSON(_buff, json);
   packet << _target_name << json;
-  packet << _task->lastS << _task->lastM << _task->lastH << _task->lastD << _task->lastMo << _task->lastY;
-  packet << _task->timeS << _task->timeM << _task->timeH << _task->timeD << _task->timeMo << _task->timeY;
+  _task->next_run.Unserialize(packet);
+  _task->length.Unserialize(packet);
 }
 
 void Buff::InitScripts(void)

@@ -34,10 +34,6 @@ void Level::SpawnEnemies(const std::string& type, unsigned short quantity, unsig
         object->script    = data["script"].Value();
         InsertCharacter(new ObjectCharacter(this, object));
         spawn_party.Join(object);
-
-        ObjectCharacter* tmp = (*_characters.rbegin());
-        tmp->PlayAnimation("Run");
-        tmp->SetAsEnemy(GetPlayer(), true); // TODO remove that when enemies flag loading is fixed      
       }
     }
   }

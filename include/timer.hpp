@@ -4,6 +4,7 @@
 # include <panda3d/pandaFramework.h>
 # include <panda3d/pandaSystem.h>
 # include "observatory.hpp"
+#include "Boots/datetime.hpp"
 
 # define TASK_LVL_WORLDMAP 1
 # define TASK_LVL_CITY     2
@@ -38,10 +39,7 @@ public:
   {
     bool           loop;
     unsigned short it;
-
-    unsigned short lastY, lastMo, lastD, lastH, lastM, lastS;
-    unsigned short timeY, timeMo, timeD, timeH, timeM, timeS;
-    
+    DateTime       next_run, length;
     unsigned char  level;
 
     void NextStep(void);
@@ -62,7 +60,6 @@ public:
 
   TimeManager(void)
   {
-    year = month = day = hour = minute = second = 0;
     fseconds = 0.f;
   }
 
@@ -98,15 +95,15 @@ public:
   
   void            SetTime(unsigned short s, unsigned short m, unsigned short h, unsigned short d, unsigned short mo, unsigned short y)
   {
-    year = y; month = mo; day = d; hour = h; minute = m; second = s;
+    current_time = DateTime(y, mo, d, h, m, s);
   }
 
-  unsigned short  GetYear(void)   const { return (year);   }
-  unsigned short  GetMonth(void)  const { return (month);  }
-  unsigned short  GetDay(void)    const { return (day);    }
-  unsigned short  GetHour(void)   const { return (hour);   }
-  unsigned short  GetMinute(void) const { return (minute); }
-  unsigned short  GetSecond(void) const { return (second); }
+  unsigned short  GetYear(void)   const { return (current_time.GetYear());   }
+  unsigned short  GetMonth(void)  const { return (current_time.GetMonth());  }
+  unsigned short  GetDay(void)    const { return (current_time.GetDay());    }
+  unsigned short  GetHour(void)   const { return (current_time.GetHour());   }
+  unsigned short  GetMinute(void) const { return (current_time.GetMinute()); }
+  unsigned short  GetSecond(void) const { return (current_time.GetSecond()); }
 
   void            AddElapsedSeconds(float s);
   void            AddElapsedTime(unsigned short s, unsigned short m = 0, unsigned short h = 0, unsigned short d = 0, unsigned short mo = 0, unsigned short y = 0);
@@ -118,7 +115,7 @@ private:
   void            CorrectValues(void);
 
   float           fseconds;
-  unsigned short  year, month, day, hour, minute, second;
+  DateTime        current_time;
   Tasks           tasks;
   Tasks::iterator safeIt;
 };

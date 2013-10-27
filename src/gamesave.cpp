@@ -181,18 +181,8 @@ void CharacterBuff::Load(Level* level, ObjectCharacter* character, Utils::Packet
   DataTree*          buff;
 
   _task = _timeManager.AddTask(TASK_LVL_CITY, false, 0);
-  packet.operator>> <unsigned short>(_task->lastS);
-  packet.operator>> <unsigned short>(_task->lastM);
-  packet.operator>> <unsigned short>(_task->lastH);
-  packet.operator>> <unsigned short>(_task->lastD);
-  packet.operator>> <unsigned short>(_task->lastMo);
-  packet.operator>> <unsigned short>(_task->lastY);
-  packet.operator>> <unsigned short>(_task->timeS);
-  packet.operator>> <unsigned short>(_task->timeM);
-  packet.operator>> <unsigned short>(_task->timeH);
-  packet.operator>> <unsigned short>(_task->timeD);
-  packet.operator>> <unsigned short>(_task->timeMo);
-  packet.operator>> <unsigned short>(_task->timeY);
+  _task->next_run.Unserialize(packet);
+  _task->length.Unserialize(packet);
   packet >> json;
   buff  = DataTree::Factory::StringJSON(json);
   Initialize(level, character, buff);
@@ -207,7 +197,7 @@ void CharacterBuff::Save(Utils::Packet& packet)
   safeDataCopy.Duplicate(_buff);
   DataTree::Writers::StringJSON(safeDataCopy, json);*/
   DataTree::Writers::StringJSON(_buff, json);
-  packet << _task->lastS << _task->lastM << _task->lastH << _task->lastD << _task->lastMo << _task->lastY;
-  packet << _task->timeS << _task->timeM << _task->timeH << _task->timeD << _task->timeMo << _task->timeY;
+  _task->next_run.Serialize(packet);
+  _task->length.Serialize(packet);
   packet << json;
 }

@@ -32,68 +32,6 @@ using namespace std;
 #include <soundmanager.hpp>
 #include <dices.hpp>
 
-template<typename TYPE>
-struct RecursiveChecker
-{
-  typedef std::queue<RecursiveChecker>     Queue;
-  typedef std::function<bool (TYPE, TYPE)> CompFunc;
-  
-  RecursiveChecker(TYPE first, TYPE second, CompFunc comp) : first(first), second(second), comp(comp)
-  {
-  }
-  
-  bool Execute(std::queue<RecursiveChecker> checkers)
-  {
-    if (first == second)
-    {
-      checkers.pop();
-      if (!(checkers.empty()))
-        return (checkers.front().Execute(checkers));
-      return (true);
-    }
-    return (comp(first, second));
-  }
-
-  TYPE                             first, second;
-  std::function<bool (TYPE, TYPE)> comp;
-};
-
-class DateTime
-{
-public:
-  
-  bool operator>(const DateTime& time)
-  {
-    RecursiveChecker<int>::CompFunc comp([](int a, int b) { return (a < b); });
-
-    return (recursive_compare(comp, time));
-  }
-  
-  bool operator<(const DateTime& time)
-  {
-    RecursiveChecker<int>::CompFunc comp([](int a, int b) { return (a > b); });
-
-    return (recursive_compare(comp, time));
-  }
-  
-private:
-  bool recursive_compare(RecursiveChecker<int>::CompFunc comp, const DateTime& time)
-  {
-    RecursiveChecker<int>::Queue    checkers;
-
-    checkers.push(RecursiveChecker<int>(year,   time.year,   comp));
-    checkers.push(RecursiveChecker<int>(month,  time.month,  comp));
-    checkers.push(RecursiveChecker<int>(day,    time.day,    comp));
-    checkers.push(RecursiveChecker<int>(hour,   time.hour,   comp));
-    checkers.push(RecursiveChecker<int>(minute, time.minute, comp));
-    checkers.push(RecursiveChecker<int>(second, time.second, comp));    
-    return (checkers.front().Execute(checkers));
-  }
-  
-  unsigned short year;
-  unsigned char  month, day, hour, minute, second;
-};
-
 void AngelScriptInitialize(void);
 int  compile_statsheet(std::string);
 
@@ -132,6 +70,8 @@ int compile_heightmap(const std::string& sourcefile, const std::string& out)
   }
   return (-1);
 }
+
+#include "Boots/datetime.hpp"
 
 #ifndef UNIT_TESTER
 int main(int argc, char *argv[])

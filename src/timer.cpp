@@ -15,83 +15,27 @@ void TimeManager::AddElapsedSeconds(float s)
   fseconds += s;
   if (fseconds >= 1.f)
   {
-    AddElapsedTime(1);
-    fseconds -= 1.f;
+    float floored = std::floor(fseconds);
+    
+    AddElapsedTime(floored);
+    fseconds -= floored;
   }
 }
 
 void TimeManager::AddElapsedTime(unsigned short s, unsigned short m, unsigned short h, unsigned short d, unsigned short mo, unsigned short y)
 {
-  second += s;
-  minute += m;
-  hour   += h;
-  day    += d;
-  month  += mo;
-  year   += y;
-  CorrectValues();
-}
-
-void TimeCorrectValue(unsigned int& s, unsigned short& m, unsigned short& h, unsigned short& d, unsigned short& mo, unsigned short& y)
-{
-  if (s > 59)
-  {
-    m += (s / 60);
-    s  = s % 60;
-  }
-  if (m > 59)
-  {
-    h += (m / 60);
-    m  = m % 60;
-  }
-  if (h > 23)
-  {
-    d += (h / 24);
-    h = h % 24;
-  }
-  if (mo > 12)
-  {
-    y += (mo / 12);
-    mo = mo % 12;
-    if (mo == 0)
-    { mo = 1; }
-  }
-  while (d > 30)
-  {
-    d -= 30;
-    mo += 1;
-    if (mo > 12)
-    {
-      mo = 1;
-      y += 1;
-    }
-  }
+  current_time = current_time + DateTime(y, mo, d, h, m, s);
 }
 
 TimeManager::Task* TimeManager::AddTask(unsigned char level, bool loop, unsigned int s, unsigned short m, unsigned short h, unsigned short d, unsigned short mo, unsigned short y)
 {
   Task* task = new Task;
 
-  //cout << "Seconds: " << s << endl;
-  TimeCorrectValue(s, m, h, d, mo, y);  
-  //cout << "Scheduled task for " << h << ':' << m << ':' << s << endl;
-  task->level  = level;
-  task->loop   = loop;
-  task->it     = 0;
-  task->timeY  = y;
-  task->timeMo = mo;
-  task->timeD  = d;
-  task->timeH  = h;
-  task->timeM  = m;
-  task->timeS  = s;
-  task->lastY  = year   + y;
-  task->lastMo = month  + mo;
-  task->lastD  = day    + d;
-  task->lastH  = hour   + h;
-  task->lastM  = minute + m;
-  task->lastS  = second + s;
-  unsigned int tmp_s = task->lastS;
-  TimeCorrectValue(tmp_s, task->lastM, task->lastH, task->lastD, task->lastMo, task->lastY);
-  task->lastS = tmp_s;
+  task->level    = level;
+  task->loop     = loop;
+  task->it       = 0;
+  task->length   = DateTime(y, mo, d, h, m, s);
+  task->next_run = current_time + task->length;
   tasks.push_back(task);
   return (task);
 }
@@ -114,72 +58,26 @@ void TimeManager::ExecuteTasks(void)
   Tasks::iterator it  = tasks.begin();
   Tasks::iterator end = tasks.end();
 
-  /*if (it != end)
-  {
-    Task& ftask = **tasks.rbegin();
-    cout << "FTime" << endl;
-    cout << year << "/" << month << "/" << day << " ";
-    cout << hour << ":" << minute  << ":" << second << endl;
-    cout << "FTask" << endl;
-    cout << ftask.lastY << "/" << ftask.lastMo << "/" << ftask.lastD << " ";
-    cout << ftask.lastH << ":" << ftask.lastM  << ":" << ftask.lastS << endl << endl;
-  }*/
-  // TODO Write that shit again while not drunk.
   while (it != end)
   {
     Task&          task = **it;
 
-    bool dostuff = true;
-    if (year < task.lastY)
-      dostuff = false;
-    else
-    {
-      if (year == task.lastY && month < task.lastMo)
-	dostuff = false;
-      else
-      {
-        if (year == task.lastY && month == task.lastMo && day < task.lastD)
-          dostuff = false;
-        else
-        {
-          if (year == task.lastY && month == task.lastMo && day == task.lastD && hour < task.lastH)
-            dostuff = false;
-          else
-          {
-            if (year == task.lastY && month == task.lastMo && day == task.lastD && hour == task.lastH && minute < task.lastM)
-              dostuff = false;
-            else
-            {
-              if (year == task.lastY && month == task.lastMo && day == task.lastD && hour == task.lastH && minute == task.lastM && second < task.lastS)
-                dostuff = false;
-            }
-          }
-        }
-      }
-    }
-    if (dostuff)
+    if (task.next_run <= current_time)
     {
       safeIt = it;
-      //cout << "[" << &task << "] Executing Callbacks" << endl;
       task.Interval.Emit();
-      //cout << "[" << &task << "] Executed Callbacks" << endl;
       task.IntervalIt.Emit(++task.it);
       if (safeIt != it)
       {
-	//cout << "[" << &task << "] Task has been deleted" << endl;
-	it = safeIt;
-	continue ;
+        it = safeIt;
+        continue ;
       }
       if (!(task.loop))
       {
-	//cout << "[" << &task << "] Task isn't looping" << endl;
-	it = tasks.erase(it);
-	continue ;
+        it = tasks.erase(it);
+        continue ;
       }
       task.NextStep();
-      //cout << "[" << &task << "] Next step will be at: ";
-      //cout << task.lastY << "/" << task.lastMo << "/" << task.lastD << " ";
-      //cout << task.lastH << ":" << task.lastM  << ":" << task.lastS << endl;
     }
     else
       ++it;
@@ -187,97 +85,29 @@ void TimeManager::ExecuteTasks(void)
   //profiler.Profile("Timer");
 }
 
-void TimeManager::CorrectValues(void)
-{
-  if (second > 59)
-  {
-    minute += (second / 60);
-    second  = second % 60;
-  }
-  if (minute > 59)
-  {
-    hour += (minute / 60);
-    minute= minute % 60;
-  }
-  if (hour > 23)
-  {
-    day += (hour / 24);
-    hour = hour % 24;
-  }
-  if (month > 12)
-  {
-    year += (month / 12);
-    month = month % 12;
-    if (month == 0)
-    { month = 1; }
-  }
-  while (day > GetDaysPerMonth(month, year))
-  {
-    day -= GetDaysPerMonth(month, year);
-    month += 1;
-    if (month > 12)
-    {
-      month = 1;
-      year += 1;
-    }
-  }
-}
-
 /*
  * TimeManager::Task
  */
 void TimeManager::Task::NextStep(void)
 {
-  lastY  += timeY;
-  lastMo += timeMo;
-  lastD  += timeD;
-  lastH  += timeH;
-  lastM  += timeM;
-  lastS  += timeS;
-
-  if (lastS > 59)
-  {
-    lastM += (lastS / 60);
-    lastS  = lastS % 60;
-  }
-  if (lastM > 59)
-  {
-    lastH+= (lastM / 60);
-    lastM = lastM % 60;
-  }
-  if (lastH > 23)
-  {
-    lastD += (lastH / 24);
-    lastH = lastH % 24;
-  }
-  if (lastMo > 12)
-  {
-    lastY += (lastMo / 13);
-    lastMo = lastMo % 13;
-  }
-  while (lastD > TimeManager::GetDaysPerMonth(lastMo))
-  {
-    lastMo += 1;
-    lastD -= TimeManager::GetDaysPerMonth(lastMo);
-    if (lastMo > 12)
-    {
-      lastMo = 1;
-      lastY  += 1;
-    }
-  }
+  next_run = next_run + length;
 }
 
 void TimeManager::Task::Serialize(Utils::Packet& packet)
 {
   char looping = loop;
 
-  packet << lastY << lastMo << lastD << lastH << lastM << lastS << level << it << looping;
+  next_run.Serialize(packet);
+  length.Serialize(packet);
+  packet << level << it << looping;
 }
 
 void TimeManager::Task::Unserialize(Utils::Packet& packet)
 {
   char looping;
-  
-  packet >> lastY >> lastMo >> lastD >> lastH >> lastM >> lastS >> level >> it >> looping;
+
+  next_run.Unserialize(packet);
+  length.Unserialize(packet);
+  packet >> level >> it >> looping;
   loop = looping != 0;
 }

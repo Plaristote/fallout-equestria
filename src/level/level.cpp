@@ -238,7 +238,7 @@ void Level::InsertCharacter(ObjectCharacter* character)
   static unsigned short task_it = 0;
   TimeManager::Task*    task    = _timeManager.AddTask(TASK_LVL_CITY, true, 3);
 
-  task->lastS += (task_it % 2);
+  task->next_run = task->next_run + (task_it % 2);
   task->Interval.Connect(*character, &ObjectCharacter::CheckFieldOfView);
   ++task_it;
   _characters.push_back(character);
@@ -423,8 +423,8 @@ void Level::InitPlayer(void)
   {
     TimeManager::Task*    task    = _timeManager.AddTask(TASK_LVL_CITY, true, 1);
 
-    task->loop   = true;
-    task->lastS += 1;
+    task->loop     = true;
+    task->next_run = task->next_run + 1;
     task->Interval.Connect(*(GetPlayer()), &ObjectCharacter::CheckFieldOfView);    
   }
   
@@ -853,12 +853,13 @@ void Level::RunDaylight(void)
     LVecBase4f(0.4, 0.4, 0.6, 1)  // 20h00
   };
   
-  int   current_hour    = _task_daylight->lastH + _task_daylight->timeH;
-  int   current_minute  = _task_daylight->lastM + _task_daylight->timeM;
-  int   current_second  = _task_daylight->lastS + _task_daylight->timeS;
-  int   it              = current_hour / 4;
-  float total_seconds   = 60 * 60 * 4;
-  float elapsed_seconds = current_second + (current_minute * 60) + ((current_hour - (it * 4)) * 60 * 60);
+  DateTime current_time    = _task_daylight->next_run + _task_daylight->length;
+  int      current_hour    = current_time.GetHour();
+  int      current_minute  = current_time.GetMinute();
+  int      current_second  = current_time.GetSecond();
+  int      it              = current_hour / 4;
+  float    total_seconds   = 60 * 60 * 4;
+  float    elapsed_seconds = current_second + (current_minute * 60) + ((current_hour - (it * 4)) * 60 * 60);
 
   LVecBase4f to_set(0, 0, 0, 0);
   LVecBase4f dif = (it == 5 ? color_steps[0] : color_steps[it + 1]) - color_steps[it];
