@@ -290,7 +290,6 @@ bool InventoryObject::ExecuteHook(const std::string& hook, ObjectCharacter* user
 /*
  * Inventory
  */
-// WARNING TODO: Implement the new equiping system for this LoadInventory overload.
 void Inventory::LoadInventory(DynamicObject* object)
 {
   std::for_each(object->inventory.begin(), object->inventory.end(), [this](std::pair<std::string, int> data)
@@ -583,7 +582,7 @@ const Inventory::Slot& Inventory::GetConstItemSlot(const std::string& type_slot,
   auto it = std::find(_slots.begin(), _slots.end(), type_slot);
 
   if (it == _slots.end())
-    throw 0; // TODO find some kind of exception for that
+    throw std::domain_error("Item slot not found");
   return ((*it)[slot]);
 }
 
@@ -593,7 +592,7 @@ InventoryObject*       Inventory::GetEquipedItem(const std::string& type_slot, u
   {
     return (GetConstItemSlot(type_slot, slot).object);
   }
-  catch (...)
+  catch (const std::domain_error&)
   {
     return (0);
   }

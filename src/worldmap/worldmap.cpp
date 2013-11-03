@@ -517,11 +517,6 @@ void WorldMap::MapTileGenerator(Data map)
   _tsize_x = tsize_x;
   _tsize_y = tsize_y;
 
-  // TODO Find out why this is broken.
-  // WARNING Don't try to find out why this is broken. It'll drive you crazy. CRAZY.
-  //_root = _context->LoadDocument("data/worldmap.rml");
-  _root = 0;
-  if (!_root)
   {
     LoadingScreen loadingScreen(_window, _context);
 
@@ -643,6 +638,7 @@ void WorldMap::MapTileGenerator(Data map)
 	pos_x = 0;
       }
     }
+    unlink("data/worldmap.rml");
   }
 }
 

@@ -31,12 +31,14 @@ public:
     
 signals:
 	void RequestLocale(void);
-    
+    void RequestScript(QString name, QRegExp prototype);
+
 private slots:
     void NewDialog(void);
     void LoadDialog(QString filepath);
     void SwapDialog(QString);
     void RemoveDialog(void);
+    void MakeScriptRequest(QRegExp prototype);
     
 private:
     typedef QMultiMap<QString, DataTree*>         DialogFiles;

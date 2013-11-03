@@ -32,7 +32,7 @@ void           QPandaApplication::PandaRefresh(void)
 
 int            QPandaApplication::exec(void)
 {
-    _timer.start();
+    //_timer.start();
     return (QApplication::exec());
 }
 

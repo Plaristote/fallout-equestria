@@ -414,7 +414,7 @@ void UiLoot::SwapObjects(InventoryObject* object)
         looted.DelObject(booty);
       }
       else
-        ; // TODO Emit some kind of cannot carry signal ?
+        CannotCarry.Emit(object_name);
     }
     _viewController.Update();
     if (_quantity_picker)

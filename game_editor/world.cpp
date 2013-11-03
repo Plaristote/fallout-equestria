@@ -1246,9 +1246,7 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
   int  iWaypoint;
 
   MapObject::UnSerialize(world, packet);
-  cout << "ma bite #1" << endl;
   packet >> iType >> interactions;
-  cout << "ma bite #2" << endl;
   type = (Type)iType;
 
   if      (type == Character)
@@ -1257,11 +1255,9 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
     packet >> iLocked >> key;
   else if (type == Item)
     packet >> key;
-  cout << "ma bite #3" << endl;
   locked = iLocked != 0;
 
   packet >> iWaypoint;
-  cout << "ma bite #4" << endl;
   waypoint = world->GetWaypointFromId(iWaypoint);
 
   // Blocked Arcs
@@ -1280,7 +1276,6 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
         {  lockedArcs.push_back(std::pair<int, int>(id1, id2)); }
       }
   }
-  cout << "ma bite #5" << endl;
 
   // Inventory serialization
   {
@@ -1296,7 +1291,6 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
           inventory.push_back(std::pair<std::string, int>(jsonSrc, quantity));
       }
   }
-  cout << "ma bite #6" << endl;
 }
 
 void DynamicObject::Serialize(Utils::Packet& packet)

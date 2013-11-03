@@ -116,7 +116,6 @@ bool WaypointGenerator::LevelWaypoint(Waypoint* waypoint)
     segment->set_point_a(wp.get_x(), wp.get_y(), wp.get_z());
     segment->set_point_b(wp.get_x(), wp.get_y(), wp.get_z() - (100000.f));
 
-    //cout << "Looking for collisions" << endl;
     col_traverser.add_collider(np, col_queue);
     col_traverser.traverse(object->render);
     if (col_queue->get_num_entries())
@@ -126,8 +125,6 @@ bool WaypointGenerator::LevelWaypoint(Waypoint* waypoint)
       col_queue->sort_entries();
       min_pos    = col_queue->get_entry(0)->get_surface_point(object->nodePath);
       new_height = min_pos.get_z() + (np_size.get_y() / 2);
-//      cout << "found a collision" << endl;
-//      cout << min_pos.get_x() << ", " << min_pos.get_y() << ", " << min_pos.get_z() << endl;
     }
     np.remove_node();
     if (new_height != wp.get_z(object->nodePath))
@@ -150,7 +147,6 @@ void WaypointGenerator::Leveling(void)
     Waypoint*    wp       = object->waypoints[it];
     NodePath     np       = wp->nodePath;
 
-    cout << "Leveling waypoint " << it << '/' << object->waypoints.size() << endl;
     while (LevelWaypoint(wp) == false && attempts < 3)
     {
       if (attempts % 2)

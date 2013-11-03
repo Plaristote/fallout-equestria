@@ -314,8 +314,6 @@ void ItemEditor::SelectAction(QString key)
 
       ui->actionWidget->setEnabled(true);
 
-      std::cout << "Loading action " << key.toStdString() << " for item " << currentItem.Key() << std::endl;
-
       ui->actionCombat->setChecked  (currentAction["combat"].Value() == "1");
       ui->actionTargeted->setChecked(currentAction["targeted"].Value() != "0");
       ui->actionApCost->setValue    (currentAction["ap-cost"]    || 0);

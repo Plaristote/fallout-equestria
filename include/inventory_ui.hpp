@@ -165,10 +165,11 @@ public:
   ~UiLoot();
 
   void Destroy(void);
-  
+
   void SetScriptObject(ObjectCharacter* user, InstanceDynamicObject* target, asIScriptContext* context, const std::string& filepath);
-  
-  Sync::Signal<void> Done;
+
+  Sync::Signal<void>                      Done;
+  Sync::Signal<void (const std::string&)> CannotCarry;
 
 private:
   bool CanSwap(InventoryObject*);

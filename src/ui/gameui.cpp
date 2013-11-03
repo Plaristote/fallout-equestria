@@ -696,23 +696,6 @@ GameConsole& GameConsole::Get() {
 /*
  * GameInventory
  */
-void GameInventory::ListenEquipModes(bool activate)
-{
-  std::string equip_types[] = { "hoof", "battlesaddle", "magic" };
-
-  for (unsigned short slot = 1 ; slot < 3 ; ++slot)
-  {
-    for (unsigned short i = 0 ; i < 3 ; ++i)
-    {
-      std::stringstream id;
-
-      id << "eq" << slot << '-' << equip_types[i];
-      cout << ">> Listen to equip mode " << id.str() << endl;
-      ToggleEventListener(activate, id.str(), "click", ButtonEquipMode);
-    }
-  }
-}
-
 void GameInventory::ListenDropables(bool activate)
 {
   Core::ElementList elements;
@@ -752,13 +735,11 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
     
     ToggleEventListener(true, "button_use",       "click", ButtonUseClicked);
     ToggleEventListener(true, "button_drop",      "click", ButtonDropClicked);
-    ListenEquipModes(true);
     ListenDropables(true);
     ToggleEventListener(true, "body-inventory-items", "dragdrop", DropEvent);
 
     ButtonUseClicked.EventReceived.Connect   (*this, &GameInventory::CallbackButtonUse);
     ButtonDropClicked.EventReceived.Connect  (*this, &GameInventory::CallbackButtonDrop);
-    ButtonEquipMode.EventReceived.Connect    (*this, &GameInventory::CallbackSwapEquipMode);
     DropEvent.EventReceived.Connect          (*this, &GameInventory::CallbackDropEvent);
 
     Translate();
@@ -773,7 +754,6 @@ GameInventory::~GameInventory()
 {
   ToggleEventListener(false, "button_use",       "click", ButtonUseClicked);
   ToggleEventListener(false, "button_drop",      "click", ButtonDropClicked);
-  ListenEquipModes(false);
   ListenDropables(false);
 }
 
@@ -824,20 +804,6 @@ void GameInventory::CallbackDropEvent(Rocket::Core::Event& event)
       }
     }
   }
-}
-
-void GameInventory::CallbackSwapEquipMode(Rocket::Core::Event& event)
-{
-  Rocket::Core::Element* element    = event.GetCurrentElement();
-  std::string            id         = element->GetId().CString();
-  unsigned short         slot       = id[2] - '0' - 1;
-  std::string            equip_type = id.substr(4);
-  EquipedMode            equip_mode = EquipedMouth;
-  
-  if (equip_type == "hoof")              { equip_mode = EquipedMouth;        }
-  else if (equip_type == "battlesaddle") { equip_mode = EquipedBattleSaddle; }
-  else if (equip_type == "magic")        { equip_mode = EquipedMagic;        }
-  SwapEquipMode.Emit(slot, equip_mode);
 }
 
 void GameInventory::SetEquipedItem(unsigned short slot, InventoryObject* item)

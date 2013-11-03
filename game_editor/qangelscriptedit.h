@@ -97,6 +97,7 @@ public:
 
     int                     CloseDocument(void);
     const QString&          GetFilename(void) const { return (_filename); }
+    void                    GoTo(QRegExp text);
 
 signals:
     

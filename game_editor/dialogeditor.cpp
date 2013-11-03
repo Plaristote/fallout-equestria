@@ -71,7 +71,6 @@ void DialogEditor::DoubleclickSuccessor(QTreeWidgetItem* item,int column)
 			} else {
 				//If it doesn't exist, and it isn't a blank string, we ask for it to be created
 				if ( !target.empty() ) {
-					//std::cout<< "MAEK TEH " << target << std::endl;;
 					 QMessageBox msgBox;
 					 msgBox.setText(  QString::fromStdString("The node '" + target + "' does not exist")  );
 					 msgBox.setInformativeText("Do you wish to create it?");
@@ -84,13 +83,9 @@ void DialogEditor::DoubleclickSuccessor(QTreeWidgetItem* item,int column)
 				};
 			};
 		} else if (clickedOn == "HookExec") {
-			//TODO: Jump to the hook in the script editor
-			QMessageBox::warning(this, "Error", "Lazy programmer detected (A)");
-
+            MakeScriptDisplayRequest("string[ ]+" + item->text(1));
 		} else if (clickedOn == "HookShow") {
-			//TODO: Jump to the hook in the script editor
-			QMessageBox::warning(this, "Error", "Lazy programmer detected (B)");
-
+            MakeScriptDisplayRequest("bool[ ]+" + item->text(1));
 		} else if (clickedOn.startsWith("#")) {
 			//Open a successor renaming dialogue!
 			QString oldname= clickedOn.remove(0,1);
@@ -106,6 +101,13 @@ void DialogEditor::DoubleclickSuccessor(QTreeWidgetItem* item,int column)
 		};
 	};
 };
+
+void DialogEditor::MakeScriptDisplayRequest(QString prototype)
+{
+    QRegExp regexp(prototype + "\\(");
+
+    RequestScriptDisplay(regexp);
+}
 
 //A graphical notice, to make it obvious the preview document is stale
 void DialogEditor::NpcLineChanging()

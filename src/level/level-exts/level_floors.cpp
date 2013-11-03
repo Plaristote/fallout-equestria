@@ -74,8 +74,6 @@ bool Level::IsInsideBuilding(unsigned char& floor)
 
     if (!object)
       object = GetWorld()->GetDynamicObjectFromNodePath(entry->get_into_node_path());
-    if (object)
-      std::cout << "DETECTED COLLISION WITH " << object->nodePath.get_name() << " IN FLOOR " << (int)object->floor << std::endl;
     if (object && object->floor >= floor)
     {
       isInsideBuilding = true;

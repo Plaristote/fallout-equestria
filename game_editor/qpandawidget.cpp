@@ -71,7 +71,6 @@ void QPandaWidget::resizeEvent(QResizeEvent* event)
 
 void QPandaWidget::showEvent(QShowEvent* event)
 {
-    cout << "coucou tu veux voir ma bite ?" << endl;
 #ifndef WIN32
     if (_window == 0)
     {

@@ -142,6 +142,16 @@ void TabScript::NewScript(void)
     }
 }
 
+void TabScript::GoTo(QString filepath, QRegExp regexp)
+{
+  LoadScript(filepath);
+  if (currentEditor)
+  {
+    ui->tabWidget->setCurrentWidget(ui->tabScriptEditor);
+    currentEditor->GoTo(regexp);
+  }
+}
+
 void TabScript::LoadScript(QString filepath)
 {
     QFile                 file(filepath);

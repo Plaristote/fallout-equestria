@@ -38,6 +38,7 @@ public:
 
 signals:
 	void UpdateLocale(void);
+    void RequestScriptDisplay(QRegExp text);
 
 private slots:
     void NewNode(void);
@@ -55,6 +56,8 @@ private slots:
     void SuccessorChanged(QTreeWidgetItem*, int);
 
 private:
+    void                    MakeScriptDisplayRequest(QString prototype);
+
     Ui::DialogEditor*		ui;
 
     DataTree*				tree;

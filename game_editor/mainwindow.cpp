@@ -169,7 +169,8 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(ui->scriptDelete,   SIGNAL(clicked()), &tabScript, SLOT(RemoveScript()));
     connect(ui->scriptSearch,   SIGNAL(cursorPositionChanged(int,int)), this, SLOT(FilterInit()));
 
-	connect(&tabDialog, SIGNAL(RequestLocale()), this, SLOT(SetDefaultLocalization()) );
+    connect(&tabDialog, SIGNAL(RequestLocale()),                this,       SLOT(SetDefaultLocalization()));
+    connect(&tabDialog, SIGNAL(RequestScript(QString,QRegExp)), &tabScript, SLOT(GoTo(QString,QRegExp)));
 
     connect(ui->dialogDelete, SIGNAL(clicked()), &tabDialog, SLOT(RemoveDialog()));
     connect(ui->dialogNew,    SIGNAL(clicked()), &tabDialog, SLOT(NewDialog()));
@@ -329,7 +330,6 @@ void MainWindow::Paste(Utils::Packet& packet)
        {
          ++ii;
          name = old_name + '#' + QString::number(ii);
-         cout << "Attempting name " << name.toStdString() << endl;
        } while ((world->GetMapObjectFromName(name.toStdString()) != 0) ||
                 (world->GetDynamicObjectFromName(name.toStdString()) != 0) ||
                 (world->GetLightByName(name.toStdString()) != 0));
@@ -700,12 +700,10 @@ void MainWindow::MapObjectFocus(MapObject* mapobject)
 
 void MainWindow::DynamicObjectFocus(DynamicObject* dynamic_object)
 {
-    cout << "DynamicObjectFocus" << endl;
   if (dynamic_object)
   {
     LPoint3f relative_pos = dynamic_object->nodePath.get_pos(_window->get_render());
 
-    cout << "-> Non zero pointre" << endl;
     dynamicObjectHovered = dynamic_object;
     DynamicObjectSelect();
     ui->map_tabs->setCurrentIndex(MAP_TABS_OBJECTS);
@@ -742,7 +740,6 @@ void MainWindow::PandaInitialized()
     my_task.window  = window;
     my_task.camera  = new SceneCamera(window, window->get_camera_group());
     my_task.mouse   = new Mouse(window);
-    cout << "Debug#5" << endl;
 
     connect(ui->widget, SIGNAL(MousePressed(QMouseEvent*)), this, SLOT(PandaButtonPressed(QMouseEvent*)));
     connect(ui->widget, SIGNAL(MouseRelease(QMouseEvent*)), this, SLOT(PandaButtonRelease(QMouseEvent*)));
@@ -754,7 +751,6 @@ void MainWindow::PandaInitialized()
     connect(ui->mapMoveRight,  SIGNAL(clicked()), this, SLOT(CameraMoveRight()));
 
     window->enable_keyboard();
-    cout << "Debug#6" << endl;
 
 // WAYPOINTS
      connect(ui->waypointVisible,    SIGNAL(toggled(bool)),        this, SLOT(WaypointVisible()));
@@ -1092,7 +1088,6 @@ void MainWindow::DynamicObjectVisible()
 
 void MainWindow::MapObjectWizard()
 {
-    std::cout << "MAP OBJECT WIZARD" << std::endl;
     wizardMapObject = true;
     wizardObject.open();
 }
@@ -1613,9 +1608,11 @@ void MainWindow::WaypointSyncTerrain(void)
 
 void MainWindow::MapFocused(void)
 {
-    cout << "MapFocused" << endl;
-    disconnect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(MapFocused()));
-    LoadMap(ui->listMap->currentText());
+    if (ui->tabWidget->currentIndex() != PANDA_TAB)
+    {
+      disconnect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(MapFocused()));
+      LoadMap(ui->listMap->currentText());
+    }
 }
 
 void MainWindow::LoadMap(const QString& path)
@@ -1625,12 +1622,9 @@ void MainWindow::LoadMap(const QString& path)
       connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(MapFocused()));
       return ;
     }
-    cout << "Coucou" << endl;
     if (my_task.camera == 0 || (world != 0 && levelName == path))
       return ;
-    cout << "Coucou tu" << endl;
     my_task.camera->SetPosition(0, 0, 75);
-    cout << "Coucou tu veux" << endl;
     levelName             = path;
     mapobjectSelected     = 0;
     mapobjectHovered      = 0;
@@ -1640,12 +1634,10 @@ void MainWindow::LoadMap(const QString& path)
 
     FunctorThread&  thread   = *FunctorThread::Create([this](void)
     {
-        cout << "Coucou tu veux voir" << endl;
       std::string   fullpath = (QDir::currentPath() + "/maps/" + levelName + ".blob").toStdString();
       std::ifstream file;
 
       file.open(fullpath.c_str(),ios::binary);
-      cout << "Coucou tu veux voir ma bite ?" << endl;
       if (file.is_open())
       {
         try
@@ -1686,26 +1678,19 @@ void MainWindow::LoadMap(const QString& path)
       std::cout << "Post loading map" << std::endl;
       if (world)
       {
-        std::cout << "Debug#1" << std::endl;
         ui->treeWidget->SetWorld(world);
-        std::cout << "Debug#2" << std::endl;
         dialogSaveMap.SetEnabledSunlight(world->sunlight_enabled);
-        std::cout << "Debug#3" << std::endl;
 
         ui->entryZoneList->clear();
-        std::cout << "Debug#4" << std::endl;
         Ui::MainWindow* _ui = ui;
         ForEach(world->entryZones, [_ui](EntryZone& zone) { _ui->entryZoneList->addItem(zone.name.c_str()); });
-        std::cout << "Debug#5" << std::endl;
 
         ui->exitZoneList->clear();
         ForEach(world->exitZones,  [_ui](ExitZone& zone)  { _ui->exitZoneList->addItem(zone.name.c_str());  });
-        std::cout << "Debug#6" << std::endl;
 
         ui->lightsSelect->clear();
         ui->lightFrame->setEnabled(false);
         ForEach(world->lights,     [_ui](WorldLight& l)   { _ui->lightsSelect->addItem(l.name.c_str());     });
-        std::cout << "Debug#7" << std::endl;
 
         for (int i = 0 ; i < ui->listMap->count() ; ++i)
         {
@@ -1715,7 +1700,6 @@ void MainWindow::LoadMap(const QString& path)
             break ;
           }
         }
-        std::cout << "Debug#8" << std::endl;
 
         dialogObject.SetWorld(world);
         std::cout << "Finished Loading Map" << std::endl;

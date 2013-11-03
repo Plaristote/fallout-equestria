@@ -98,7 +98,6 @@ public:
 
   Sync::Signal<void (const std::string& slot, unsigned short, InventoryObject*)> EquipItem;
   Sync::Signal<void (const std::string& slot, unsigned short)>                   UnequipItem;
-  Sync::Signal<void (unsigned short, EquipedMode)>         SwapEquipMode;
   Sync::Signal<void (InventoryObject*)>                    UseObject;
   Sync::Signal<void (InventoryObject*)>                    DropObject;
   Sync::Signal<void (InventoryObject*, InventoryObject*)>  CombineObjects;
@@ -108,14 +107,12 @@ public:
 private:
   void                     UpdateInventoryCapacity(void);
   void                     SetSelectedObject(InventoryObject*);
-  void                     ListenEquipModes(bool);
   void                     ListenDropables(bool);
   
   RocketListener           DropEvent;
-  RocketListener           ButtonUseClicked, ButtonDropClicked, ButtonEquipMode;
+  RocketListener           ButtonUseClicked, ButtonDropClicked;
   void                     CallbackButtonUse(Rocket::Core::Event&)      { if (_selectedObject) UseObject.Emit (_selectedObject);    }
   void                     CallbackButtonDrop(Rocket::Core::Event&)     { if (_selectedObject) DropObject.Emit(_selectedObject);    }
-  void                     CallbackSwapEquipMode(Rocket::Core::Event&);
   void                     CallbackDropEvent(Rocket::Core::Event&);
 
   Inventory*               _inventory;

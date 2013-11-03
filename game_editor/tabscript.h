@@ -29,8 +29,10 @@ public:
     void LoadAllScript(void);
 
     DialogNewScript          dialogNewScript;
-signals:
-    
+
+public slots:
+    void GoTo(QString file, QRegExp regexp);
+
 private slots:
     void NewScript(void);
     void LoadScript(QString filepath);

@@ -369,14 +369,8 @@ void Level::InitPlayer(void)
       GetPlayer()->UnequipItem(slot);
   });
 
-  //obs.Connect(_levelUi.GetInventory().EquipItem,   *this,        &Level::PlayerEquipObject);
-  //obs.Connect(_levelUi.GetInventory().UnequipItem, *GetPlayer(), &ObjectCharacter::UnequipItem);
   obs.Connect(_levelUi.GetInventory().DropObject,  *this,        &Level::PlayerDropObject);
   obs.Connect(_levelUi.GetInventory().UseObject,   *this,        &Level::PlayerUseObject);
-  obs.Connect(_levelUi.GetInventory().SwapEquipMode, [this](unsigned short slot, EquipedMode mode) // TODO rewrite this for new inventory system
-  {
-    GetPlayer()->SetEquipedItem(slot, GetPlayer()->GetEquipedItem(slot), mode);
-  });
 
   for (unsigned short it = 0 ; it < 2 ; ++it) // For every equiped item slot
   {

@@ -26,6 +26,7 @@ void TabDialog::LoadAllDialogs()
     ui->dialogList->addItem(name);
     dialogs.insert(filepath, 0);
   }
+  connect(ui->dialogEditor, SIGNAL(RequestScriptDisplay(QRegExp)), SLOT(MakeScriptRequest(QRegExp)));
 }
 
 void TabDialog::NewDialog()
@@ -125,4 +126,9 @@ void TabDialog::RemoveDialog()
               QMessageBox::warning((QWidget*)parent(), "Fatal Error", "Can't remove file");
         }
     }
+}
+
+void TabDialog::MakeScriptRequest(QRegExp prototype)
+{
+  RequestScript("scripts/dialogs/" + ui->dialogList->currentText() + ".as", prototype);
 }

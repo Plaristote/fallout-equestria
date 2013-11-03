@@ -35,3 +35,14 @@ void QAngelScriptEdit::TextLoad(QString filepath, QString text)
     _lastSavedState = text;
     this->setPlainText(text);
 }
+
+void QAngelScriptEdit::GoTo(QRegExp text)
+{
+    QString     content  = this->toPlainText();
+    int         position = content.indexOf(text);
+    QTextCursor cursor   = this->textCursor();
+
+    cursor.setPosition(position);
+    this->setTextCursor(cursor);
+    this->ensureCursorVisible();
+}
