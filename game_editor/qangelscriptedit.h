@@ -5,6 +5,7 @@
 
 # include <QSyntaxHighlighter>
 # include <QVector>
+# include <QShortcut>
 
 class QAngelScriptHighlighter : public QSyntaxHighlighter
 {
@@ -94,6 +95,7 @@ class QAngelScriptEdit : public QTextEdit
     Q_OBJECT
 public:
     explicit QAngelScriptEdit(QWidget *parent = 0);
+    ~QAngelScriptEdit(void);
 
     bool                    HasChanged(void) const;
     int                     CloseDocument(void);
@@ -111,6 +113,7 @@ private:
     QAngelScriptHighlighter _highlighter;
     QString                 _lastSavedState;
     QString                 _filename;
+    QShortcut*              _save_shortcut;
 };
 
 #endif // QANGELSCRIPTEDIT_H

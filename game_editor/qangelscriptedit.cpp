@@ -10,8 +10,12 @@ QAngelScriptEdit::QAngelScriptEdit(QWidget *parent) : QTextEdit(parent), _highli
     font.setFixedPitch(true);
     font.setPointSize(10);
     setFont(font);
+    _save_shortcut = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SIGNAL(RequestSave()));
+}
 
-    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SIGNAL(RequestSave()));
+QAngelScriptEdit::~QAngelScriptEdit()
+{
+    delete _save_shortcut;
 }
 
 bool QAngelScriptEdit::HasChanged() const
