@@ -64,6 +64,7 @@ void TabScript::LoadAllScript(void)
         SelectableResource::ObjectScript().AddResource(name);
     }
   }
+  UpdateFilename();
 }
 
 void TabScript::RemoveScript()
@@ -173,6 +174,8 @@ void TabScript::LoadScript(QString filepath)
             {
                 ui->scriptBaseEdit->hide();
                 currentEditor = new QAngelScriptEdit(ui->editContainer);
+                connect(currentEditor, SIGNAL(RequestSave()), this, SLOT(SaveScript()));
+                connect(currentEditor, SIGNAL(textChanged()), this, SLOT(RefreshSaveButton()));
                 *it           = currentEditor;
                 ui->editContainer->layout()->addWidget(currentEditor);
 
@@ -213,6 +216,17 @@ void TabScript::SwapScript(QTreeWidgetItem* first)
         }
         UpdateFilename();
     }
+}
+
+void TabScript::RefreshSaveButton(void)
+{
+  ui->scriptSave->setEnabled(currentEditor && currentEditor->HasChanged());
+}
+
+void TabScript::RefreshHistoryButtons(void)
+{
+  ui->scriptPrevious->setEnabled(currentEditor && (currentEditorHistory.size()     != 0));
+  ui->scriptNext->setEnabled    (currentEditor && (currentEditorHistoryNext.size() != 0));
 }
 
 void TabScript::CloseScript(bool forced)
@@ -301,13 +315,19 @@ void TabScript::UpdateFilename()
         {
             if (*it == currentEditor)
             {
-                ui->labelFilename->setText(it.key());
+                QString name = it.key();
+
+                if (currentEditor->HasChanged())
+                  name += " (has unsaved changes)";
+                ui->labelFilename->setText(name);
                 break ;
             }
         }
     }
     else
         ui->labelFilename->setText("");
+    RefreshSaveButton();
+    RefreshHistoryButtons();
 }
 
 void TabScript::SaveScript()
@@ -326,6 +346,7 @@ void TabScript::SaveScript()
                 if (file.open(QIODevice::WriteOnly))
                 {
                     currentEditor->TextSaved();
+                    UpdateFilename();
                     file.write(currentEditor->toPlainText().toStdString().c_str());
                     file.close();
                 }

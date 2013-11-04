@@ -16,10 +16,13 @@ DialogSplashscreen::DialogSplashscreen(QWidget *parent) :
     for (int i = 0 ; i < nRecents ; ++i)
     {
         QString toPrint;
+        QDir    directory;
 
         settings.setArrayIndex(i);
         toPrint = settings.value("path").toString();
-        ui->history->addItem(toPrint);
+        directory.setPath(toPrint);
+        if (directory.exists())
+          ui->history->addItem(toPrint);
     }
     settings.endArray();
     connect(ui->folderPicker, SIGNAL(clicked()),            this, SLOT(PickFolder()));
@@ -67,6 +70,8 @@ void DialogSplashscreen::Accepted()
     int         nRecents = settings.beginReadArray("RecentProjects");
     QString     path     = ui->path->text();
 
+    if (path == "")
+      return ;
     recents << path;
     for (int i = 0 ; i < nRecents ; ++i)
     {

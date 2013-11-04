@@ -1259,13 +1259,13 @@ void Level::PlayerEquipObject(unsigned short it, InventoryObject* object)
     ui->EquipModeSelected.Connect([this, it, object](unsigned char mode)
     {
       _currentUis[UiItEquipMode]->Destroy();
-      GetPlayer()->SetEquipedItem(it, object, (EquipedMode)mode);
+      GetPlayer()->GetInventory().SetEquipedItem("equiped", it, object, (EquipedMode)mode);
     });
   }
   else if (canWeildTotal)
   {
-    GetPlayer()->SetEquipedItem(it, object, (canWeildMouth ? EquipedMouth :
-                                            (canWeildMagic ? EquipedMagic : EquipedBattleSaddle)));
+    GetPlayer()->GetInventory().SetEquipedItem("equiped", it, object, (canWeildMouth ? EquipedMouth :
+                                                                      (canWeildMagic ? EquipedMagic : EquipedBattleSaddle)));
   }
   else
     ConsoleWrite("You can't equip " + object->GetName());

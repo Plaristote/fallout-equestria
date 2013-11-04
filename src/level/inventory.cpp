@@ -2,10 +2,15 @@
 #include "level/level.hpp"
 #include <level/objects/locker.hpp>
 #include <algorithm>
+#define USE_DEBUG_OUTPUT
+
+using namespace std;
 
 InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts/objects/" + data["script"]["file"].Value())
 {
+#ifdef USE_DEBUG_OUTPUT
   std::cout << "LOADING OBJECT " << data.Key() << " WITH SCRIPT " << "scripts/objects/" << data["script"]["file"].Value() << endl;
+#endif
   
   // Duplicate the DataBranch into the InventoryObject
   Duplicate(data);
@@ -34,25 +39,26 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts
 
   std::for_each(data["actions"].begin(), data["actions"].end(), [this](Data action)
   {
-    AngelScript::Object hooks(this->_object.GetContext(), this->_object.GetModule());
-    Data                action_data = (*this)["actions"][action.Key()];
+    AngelScript::Object     hooks(this->_object.GetContext(), this->_object.GetModule());
+    Data                    action_data  = (*this)["actions"][action.Key()];
+    function<bool (string)> sanity_check = [&action](string name) -> bool { return (action[name].NotNil() && action[name].Value() != ""); };
 
     action_data.Duplicate(action);
     if (action_data["targeted"].Nil())
       action_data["targeted"] = 1;
-    if (action["hookUse"].NotNil()        && action["hookUse"].Value() != "")
+    if (sanity_check("hookUse"))
       hooks.asDefineMethod("Use",            "bool " + action["hookUse"].Value() + "(Item@, Character@)");
-    if (action["hookCharacters"].NotNil() && action["hookCharacters"].Value() != "")
-      hooks.asDefineMethod("UseOnCharacter", "bool " + action["hookCharacters"].Value() + "(Item@, Character@, Character@");
-    if (action["hookDoors"].NotNil()      && action["hookDoors"].Value() != "")
+    if (sanity_check("hookCharacters"))
+      hooks.asDefineMethod("UseOnCharacter", "bool " + action["hookCharacters"].Value() + "(Item@, Character@, Character@)");
+    if (sanity_check("hookDoors"))
       hooks.asDefineMethod("UseOnDoor",      "bool " + action["hookDoors"].Value() + "(Item@, Character@, Door@)");
-    if (action["hookOthers"].NotNil()     && action["hookOthers"].Value() != "")
-      hooks.asDefineMethod("UseOnOthers",    "bool " + action["hookOthers"].Value() + "(Item@, Character@, DynamicObject@");
-    if (action["hookWeapon"].NotNil()     && action["hookWeapon"].Value() != "")
+    if (sanity_check("hookOthers"))
+      hooks.asDefineMethod("UseOnOthers",    "bool " + action["hookOthers"].Value() + "(Item@, Character@, DynamicObject@)");
+    if (sanity_check("hookWeapon"))
       hooks.asDefineMethod("UseAsWeapon",    "bool " + action["hookWeapon"].Value() + "(Item@, Character@, Character@)");
-    if (action["hookHitChances"].NotNil() && action["hookHitChances"].Value() != "")
+    if (sanity_check("hookHitChances"))
       hooks.asDefineMethod("HitChances",     "int " + action["hookHitChances"].Value() + "(Item@, Character@, Character@)");
-    if (action["hookCanUse"].NotNil()     && action["hookCanUse"].Value() != "")
+    if (sanity_check("hookCanUse"))
       hooks.asDefineMethod("CanUse",         "bool " + action["hookCanUse"].Value() + "(Item@, Character@, DynamicObject@)");
     _actionHooks.push_back(hooks);
   });
@@ -211,8 +217,6 @@ bool              InventoryObject::CanUse(ObjectCharacter* user, InstanceDynamic
 {
   AngelScript::Object& hooks = _actionHooks[use_type];
 
-  cout << "Object " << GetName() << " for action " << use_type << " has methods:" << endl;
-  hooks.OutputMethods(cout);
   if (hooks.IsDefined("CanUse"))
   {
     AngelScript::Type<InventoryObject*>       this_param(this);
@@ -259,6 +263,9 @@ bool InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target
   if (hooks.IsDefined("UseOnOthers"))
     return (ExecuteHook("UseOnOthers", user, target, useType));
   Level::CurrentLevel->ConsoleWrite(i18n::T("That does nothing"));
+#ifdef USE_DEBUG_OUTPUT
+  Level::CurrentLevel->ConsoleWrite(i18n::T("InventoryObject didn't find any hook for this interaction."));
+#endif
   return (false);
 }
 
@@ -340,7 +347,9 @@ void Inventory::LoadInventory(Data items)
     unsigned int     quantity;
 
     quantity = item["quantity"].NotNil() ? (unsigned int)item["quantity"] : 1;
-    std::cout << "Loading " << quantity << ' ' << item["Name"].Value() << std::endl;
+#ifdef USE_DEBUG_OUTPUT
+    cout << "Loading " << quantity << ' ' << item["Name"].Value() << endl;
+#endif
     for (unsigned short i = 0 ; i < quantity ; ++i)
     {
       InventoryObject* newObject    = new InventoryObject(item);
@@ -571,8 +580,6 @@ Inventory::Slot& Inventory::GetItemSlot(const std::string& type_slot, unsigned i
   {
     Inventory::Slot& obj = (*it)[slot];
 
-    if (obj.object)
-      std::cout << "Lick My Balls" << std::endl;
     return (obj);
   }
 }

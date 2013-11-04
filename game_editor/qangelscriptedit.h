@@ -95,12 +95,14 @@ class QAngelScriptEdit : public QTextEdit
 public:
     explicit QAngelScriptEdit(QWidget *parent = 0);
 
+    bool                    HasChanged(void) const;
     int                     CloseDocument(void);
     const QString&          GetFilename(void) const { return (_filename); }
     void                    GoTo(QRegExp text);
 
 signals:
-    
+    void                    RequestSave(void);
+
 public slots:
     void                    TextLoad(QString, QString);
     void                    TextSaved(void);

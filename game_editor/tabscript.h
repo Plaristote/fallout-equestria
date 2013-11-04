@@ -26,7 +26,7 @@ class TabScript : public QObject
 public:
     explicit TabScript(QObject *parent, Ui::MainWindow* ui);
 
-    void LoadAllScript(void);
+    void                     LoadAllScript(void);
 
     DialogNewScript          dialogNewScript;
 
@@ -43,7 +43,13 @@ private slots:
     void RemoveScript(void);
     void FilterScript(QString);
     void SwapScript(QTreeWidgetItem*);
+
+    // TODO Rename this method. It nows update the whole contextual interface.
     void UpdateFilename(void);
+    // Dis/enable the save button based on whether the current editor can be saved
+    void                     RefreshSaveButton(void);
+    // Dis/enable previous and next buttons
+    void                     RefreshHistoryButtons(void);
 
 private:
     typedef QMultiMap<QString, QAngelScriptEdit*> ScriptFiles;

@@ -1,5 +1,6 @@
 #include "qangelscriptedit.h"
 #include <QMessageBox>
+#include <QShortcut>
 
 QAngelScriptEdit::QAngelScriptEdit(QWidget *parent) : QTextEdit(parent), _highlighter(this->document())
 {
@@ -9,11 +10,18 @@ QAngelScriptEdit::QAngelScriptEdit(QWidget *parent) : QTextEdit(parent), _highli
     font.setFixedPitch(true);
     font.setPointSize(10);
     setFont(font);
+
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SIGNAL(RequestSave()));
+}
+
+bool QAngelScriptEdit::HasChanged() const
+{
+    return (this->toPlainText() != _lastSavedState);
 }
 
 int QAngelScriptEdit::CloseDocument()
 {
-    if (this->toPlainText() != _lastSavedState)
+    if (HasChanged())
     {
       int ret;
       QString warningMsg = "Do you want to save the changes on '" + _filename + "'";
