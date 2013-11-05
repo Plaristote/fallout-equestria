@@ -25,6 +25,7 @@ signals:
 private slots:
     void SaveData(void);
     void UpdateData(void);
+    void SearchItem(QString);
     void SelectItem(QString);
     void SelectAction(QString);
 

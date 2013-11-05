@@ -31,7 +31,8 @@ ItemEditor::ItemEditor(QWidget *parent) :
     connect(ui->actionDelete, SIGNAL(clicked()), this, SLOT(ActionDelete()));
     connect(ui->itemSave, SIGNAL(clicked()), this, SLOT(SaveData()));
 
-    connect(ui->itemList, SIGNAL(currentTextChanged(QString)), this, SLOT(SelectItem(QString)));
+    connect(ui->itemSearch, SIGNAL(textChanged(QString)),         this, SLOT(SearchItem(QString)));
+    connect(ui->itemList,   SIGNAL(currentTextChanged(QString)),  this, SLOT(SelectItem(QString)));
     connect(ui->actionList, SIGNAL(currentIndexChanged(QString)), this, SLOT(SelectAction(QString)));
 
     connect(ui->itemHidden,              SIGNAL(clicked()),           SLOT(UpdateData()));
@@ -69,6 +70,27 @@ ItemEditor::~ItemEditor()
     delete ui;
     if (dataTree)
       delete dataTree;
+}
+
+void ItemEditor::SearchItem(QString str)
+{
+  QRegExp regexp(str);
+
+  for (short i = 0 ; i < ui->itemList->count() ; ++i)
+  {
+    QListWidgetItem* item = ui->itemList->item(i);
+    QString          text = item->text();
+
+    if (str == "")
+      item->setHidden(false);
+    else
+    {
+      if (text.contains(regexp))
+        item->setHidden(false);
+      else
+        item->setHidden(true);
+    }
+  }
 }
 
 void ItemEditor::SelectModel(void)
@@ -287,11 +309,14 @@ void ItemEditor::SelectItem(QString key)
         //ui->itemAmmo->setText();
 
         ui->actionList->clear();
-        Data::iterator actionIt  = item["actions"].begin();
-        Data::iterator actionEnd = item["actions"].end();
+        if (!(item["actions"].Nil()))
+        {
+          Data::iterator actionIt  = item["actions"].begin();
+          Data::iterator actionEnd = item["actions"].end();
 
-        for (; actionIt != actionEnd ; ++actionIt)
-          ui->actionList->addItem((*actionIt).Key().c_str());
+          for (; actionIt != actionEnd ; ++actionIt)
+            ui->actionList->addItem((*actionIt).Key().c_str());
+        }
 
         ui->itemScript->setText(item["script"]["file"].Value().c_str());
     }

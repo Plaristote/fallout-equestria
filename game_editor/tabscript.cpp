@@ -146,11 +146,13 @@ void TabScript::NewScript(void)
 void TabScript::GoTo(QString filepath, QRegExp regexp)
 {
   LoadScript(filepath);
-  if (currentEditor)
+  if (currentEditor && currentEditor->GetFilename() == filepath)
   {
     ui->tabWidget->setCurrentWidget(ui->tabScriptEditor);
     currentEditor->GoTo(regexp);
   }
+  else
+    QMessageBox::warning((QWidget*)parent(), "I'm afraid I cannot let you do that, Steve.", filepath + " does not exists.");
 }
 
 void TabScript::LoadScript(QString filepath)
