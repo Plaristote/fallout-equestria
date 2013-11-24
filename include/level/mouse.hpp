@@ -14,10 +14,10 @@ struct Waypoint;
 
 struct MouseHovering
 {
-  MouseHovering(void) : hasWaypoint(false), hasDynObject(false) {}
+  MouseHovering(void) : hasWaypoint(false), hasDynObject(false), waypoint_ptr(0) {}
   
   void Reset(void)
-  { hasWaypoint = hasDynObject = false; }
+  { hasWaypoint = hasDynObject = false; waypoint_ptr = 0; }
   
   void SetWaypoint(NodePath np)
   {

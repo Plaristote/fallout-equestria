@@ -1,4 +1,5 @@
 #include "level/level.hpp"
+#include <boost/concept_check.hpp>
 
 #define AP_COST_USE             2
 
@@ -21,8 +22,6 @@ void Level::CallbackActionBarter(ObjectCharacter* character)
   UiBarter* ui_barter;
   
   CloseRunningUi<UiItBarter>();
-  if (_currentUis[UiItBarter])
-    delete _currentUis[UiItBarter];
   ui_barter = new UiBarter(_window, _levelUi.GetContext(), GetPlayer(), character);
   ui_barter->BarterEnded.Connect(*this, &Level::CloseRunningUi<UiItBarter>);
   ui_barter->Show();
@@ -50,16 +49,19 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
     ObjectCharacter* talkTo = object->Get<ObjectCharacter>();
     if (talkTo)
       talkTo->LookAt(GetPlayer());
-    
-    _currentRunningDialog = new DialogController(_window, _levelUi.GetContext(), talkTo, i18n::GetDialogs());
-    _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningUi<UiItRunningDialog>);
-    _currentRunningDialog->DialogEnded.Connect(_levelUi.GetMainBar(), &UiBase::Show);
-    _currentRunningDialog->StartBarter.Connect(*this, &Level::CallbackActionBarter);
-    _mouseActionBlocked = true;
-    _camera.SetEnabledScroll(false);
-    _levelUi.GetMainBar().Hide();
-    _currentUis[UiItRunningDialog] = _currentRunningDialog;
-    SetInterrupted(true);
+
+    {
+      DialogController* controller = new DialogController(_window, _levelUi.GetContext(), talkTo, i18n::GetDialogs());
+
+      controller->DialogEnded.Connect(*this, &Level::CloseRunningUi<UiItRunningDialog>);
+      controller->DialogEnded.Connect(_levelUi.GetMainBar(), &UiBase::Show);
+      controller->StartBarter.Connect(*this, &Level::CallbackActionBarter);
+      _mouseActionBlocked = true;
+      _camera.SetEnabledScroll(false);
+      _levelUi.GetMainBar().Hide();
+      _currentUis[UiItRunningDialog] = controller;
+      SetInterrupted(true);
+    }
   }
   else
   {
@@ -73,27 +75,26 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 
 void Level::CallbackActionUseObjectOn(InstanceDynamicObject* target)
 {
+  UiUseObjectOn* ui = new UiUseObjectOn(_window, _levelUi.GetContext(), GetPlayer()->GetInventory());
+  
   CloseRunningUi<UiItInteractMenu>();
-  if (_currentUis[UiItUseObjectOn])
-    delete _currentUis[UiItUseObjectOn];
+  CloseRunningUi<UiItUseObjectOn>();
   std::cout << "CallbackActionUseObjectOn" << std::endl;
-  _currentUseObjectOn = new UiUseObjectOn(_window, _levelUi.GetContext(), GetPlayer()->GetInventory());
-  _currentUseObjectOn->ActionCanceled.Connect(*this, &Level::CloseRunningUi<UiItUseObjectOn>);
-  _currentUseObjectOn->ObjectSelected.Connect([this, target](InventoryObject* object)
+  ui->ActionCanceled.Connect(*this, &Level::CloseRunningUi<UiItUseObjectOn>);
+  ui->ObjectSelected.Connect([this, target](InventoryObject* object)
   {
     ActionUseObjectOn(GetPlayer(), target, object, 0);
   });
-  _mouseActionBlocked = true;
+  _currentUis[UiItUseObjectOn] = ui;
+  _mouseActionBlocked          = true;
   _camera.SetEnabledScroll(false);
   SetInterrupted(true);
-  _currentUis[UiItUseObjectOn] = _currentUseObjectOn;
 }
 
 void Level::CallbackActionUseSkillOn(InstanceDynamicObject* target)
 {
   CloseRunningUi<UiItInteractMenu>();
-  if (_currentUis[UiItUseSkillOn])
-    delete _currentUis[UiItUseSkillOn];
+  CloseRunningUi<UiItUseSkillOn>();
   {
     UiUseSkillOn* ui_use_skill_on = new UiUseSkillOn(_window, _levelUi.GetContext(), GetPlayer(), target);
 
@@ -108,6 +109,11 @@ void Level::CallbackActionUseSkillOn(InstanceDynamicObject* target)
     _currentUis[UiItUseSkillOn] = ui_use_skill_on;
     SetInterrupted(true);
   }
+}
+
+void Level::CallbackActionUseSpellOn(InstanceDynamicObject* target)
+{
+  CloseRunningUi<UiItInteractMenu>();
 }
 
 void Level::CallbackActionTargetUse(unsigned short it)

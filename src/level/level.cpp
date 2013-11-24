@@ -22,6 +22,7 @@ using namespace std;
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUse;
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseObjectOn;
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSkillOn;
+Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSpellOn;
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
 
@@ -49,9 +50,6 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
 
   for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
     _currentUis[i] = 0;
-  _currentRunningDialog = 0;
-  _currentUseObjectOn   = 0;
-  _currentUiLoot        = 0;
   _mouseActionBlocked   = false;
 
   cout << "Level Loading Step #3" << endl;
@@ -341,7 +339,7 @@ void Level::InitPlayer(void)
     interactions.push_back(ObjectCharacter::Interaction("use_skill",  GetPlayer(), &(GetPlayer()->ActionUseSkillOn)));
   }
   _levelUi.GetMainBar().OpenSkilldex.Connect([this]() { ObjectCharacter::ActionUseSkillOn.Emit(GetPlayer()); });
-  //_levelUi.GetMainBar().OpenSpelldex.Connect([this]() { ObjectCharacter::ActionUseSpellOn.Emit(GetPlayer()); });
+  _levelUi.GetMainBar().OpenSpelldex.Connect([this]() { ObjectCharacter::ActionUseSpellOn.Emit(GetPlayer()); });
 
   obs_player.Connect(GetPlayer()->HitPointsChanged,         _levelUi.GetMainBar(),   &GameMainBar::SetCurrentHp);
   obs_player.Connect(GetPlayer()->ActionPointChanged,       _levelUi.GetMainBar(),   &GameMainBar::SetCurrentAP);
@@ -1147,8 +1145,7 @@ void Level::MouseLeftClicked(void)
 	  CloseRunningUi<UiItInteractMenu>();
 	if (object && object->GetInteractions().size() != 0)
 	{
-	  if (_currentUis[UiItInteractMenu])
-	    delete _currentUis[UiItInteractMenu];
+          CloseRunningUi<UiItInteractMenu>();
 	  _currentUis[UiItInteractMenu] = new InteractMenu(_window, _levelUi.GetContext(), *object);
 	  _camera.SetEnabledScroll(false);
 	}
@@ -1225,8 +1222,12 @@ void Level::PlayerLootWithScript(Inventory* inventory, InstanceDynamicObject* ta
   UiBase* old_ptr = _currentUis[UiItLoot];
 
   PlayerLoot(inventory);
-  if (old_ptr == _currentUis[UiItLoot] || _currentUis[UiItLoot] == 0) return ; // If PlayerLoot failed, silent return is advised
-  _currentUiLoot->SetScriptObject(GetPlayer(), target, context, filepath);
+  if (!(old_ptr == _currentUis[UiItLoot] || _currentUis[UiItLoot] == 0))
+  {
+    UiLoot* ui_loot = (UiLoot*)(_currentUis[UiItLoot]);
+
+    ui_loot->SetScriptObject(GetPlayer(), target, context, filepath);
+  }
 }
 
 void Level::PlayerLoot(Inventory* inventory)
@@ -1237,15 +1238,15 @@ void Level::PlayerLoot(Inventory* inventory)
     return ;
   }
   CloseRunningUi<UiItInteractMenu>();
-  if (_currentUis[UiItLoot])
-    delete _currentUis[UiItLoot];
-  _currentUiLoot = new UiLoot(_window, _levelUi.GetContext(), GetPlayer()->GetInventory(), *inventory);
-  _currentUiLoot->Done.Connect(*_currentUiLoot, &UiLoot::Destroy);
-  _currentUiLoot->Done.Connect(*this, &Level::CloseRunningUi<UiItLoot>);
-  _mouseActionBlocked = true;
-  _camera.SetEnabledScroll(false);
-  SetInterrupted(true);
-  _currentUis[UiItLoot] = _currentUiLoot;
+  {
+    UiLoot* ui_loot = new UiLoot(_window, _levelUi.GetContext(), GetPlayer()->GetInventory(), *inventory);
+
+    ui_loot->Done.Connect(*this, &Level::CloseRunningUi<UiItLoot>);
+    _mouseActionBlocked = true;
+    _camera.SetEnabledScroll(false);
+    SetInterrupted(true);
+    _currentUis[UiItLoot] = ui_loot;
+  }
 }
 
 void Level::PlayerEquipObject(unsigned short it, InventoryObject* object)
@@ -1267,8 +1268,7 @@ void Level::PlayerEquipObject(unsigned short it, InventoryObject* object)
       ui->AddOption(EquipedBattleSaddle, "Battlesaddle");
     ui->Initialize();
 
-    if (_currentUis[UiItEquipMode])
-      delete _currentUis[UiItEquipMode];
+    CloseRunningUi<UiItEquipMode>();
     _currentUis[UiItEquipMode] = ui;
     ui->Closed.Connect(*this, &Level::CloseRunningUi<UiItEquipMode>);
     ui->EquipModeSelected.Connect([this, it, object](unsigned char mode)

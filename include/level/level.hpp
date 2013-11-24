@@ -34,6 +34,7 @@
 # include "soundmanager.hpp"
 # include "main_script.hpp"
 # include "script_zone.hpp"
+#include <executor.hpp>
 
 # include <functional>
 
@@ -120,6 +121,7 @@ public:
   void                   CallbackActionTalkTo(InstanceDynamicObject* object);
   void                   CallbackActionUseObjectOn(InstanceDynamicObject* object);
   void                   CallbackActionUseSkillOn(InstanceDynamicObject* object);
+  void                   CallbackActionUseSpellOn(InstanceDynamicObject* object);
   void                   CallbackActionTargetUse(unsigned short it);
 
   void                   ActionUse(ObjectCharacter* user, InstanceDynamicObject* target);
@@ -239,6 +241,7 @@ private:
     UiItRunningDialog,
     UiItUseObjectOn,
     UiItUseSkillOn,
+    UiItUseSpellOn,
     UiItLoot,
     UiItEquipMode,
     UiItNextZone,
@@ -249,11 +252,12 @@ private:
   template<UiIterator it> void CloseRunningUi(void)
   {
     if (_currentUis[it])
-      _currentUis[it]->Destroy();
-    for (short i = 0 ; i < UiTotalIt ; ++i)
     {
-      if (_currentUis[it] != 0 && _currentUis[it]->IsVisible())
-        return ;
+      UiBase* ui      = _currentUis[it];
+
+      _currentUis[it] = 0;
+      ui->Destroy();
+      Executor::ExecuteLater([ui]() { delete ui; });
     }
     _mouseActionBlocked = false;
     _camera.SetEnabledScroll(true);
@@ -262,9 +266,6 @@ private:
 
   LevelUi           _levelUi;
   UiBase*           _currentUis[UiTotalIt];
-  DialogController* _currentRunningDialog;
-  UiUseObjectOn*    _currentUseObjectOn;
-  UiLoot*           _currentUiLoot;
   bool              _mouseActionBlocked;
 
   DataEngine*       _dataEngine;
