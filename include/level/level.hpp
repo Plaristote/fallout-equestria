@@ -138,7 +138,7 @@ public:
   void                   PlayerEquipObject(unsigned short it, InventoryObject* object);
   void                   PlayerEquipObject(const std::string& target, unsigned int slot, InventoryObject* object);
 
-  Sync::Signal<void (Inventory&)> SignalShelfOpened;
+  Sync::Signal<void (Waypoint*)>  WaypointPicked;
 
   // Fight Management
   void                   StartFight(ObjectCharacter* starter);
@@ -151,7 +151,8 @@ public:
   {
     MouseAction,
     MouseInteraction,
-    MouseTarget
+    MouseTarget,
+    MouseWaypointPicker
   };
 
   void               SetMouseState(MouseState);

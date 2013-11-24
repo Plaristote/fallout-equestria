@@ -1072,6 +1072,7 @@ void Level::SetMouseState(MouseState state)
   }
   switch (state)
   {
+    case MouseWaypointPicker:
     case MouseAction:
       _mouse.SetMouseState('a');
       break ;
@@ -1191,6 +1192,20 @@ void Level::MouseLeftClicked(void)
 	    ActionUseObjectOn(player, dynObject, item, actionIt);
 	}
       }
+      break ;
+    case MouseWaypointPicker:
+      {
+        std::cout << "Mouse Waypoint Picker" << std::endl;
+        _mouse.ClosestWaypoint(_world, _currentFloor);
+        if (hovering.hasWaypoint)
+        {
+          Waypoint* toGo = _world->GetWaypointFromNodePath(hovering.waypoint);
+
+          if (toGo)
+            WaypointPicked.Emit(toGo);
+        }
+      }
+      break ;
   }
 }
 
