@@ -128,6 +128,7 @@ public:
   void                   ActionUseObject(ObjectCharacter* user, InventoryObject* object, unsigned char actionIt);
   void                   ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object, unsigned char actionIt);
   void                   ActionUseSkillOn(ObjectCharacter* user, InstanceDynamicObject* target, const std::string& skill);
+  void                   ActionUseSpellOn(ObjectCharacter* user, InstanceDynamicObject* target, const std::string& skill);
   void                   ActionDropObject(ObjectCharacter* user, InventoryObject* object);
   void                   ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* object, unsigned char actionIt);
 
@@ -140,7 +141,8 @@ public:
   void                   PlayerEquipObject(unsigned short it, InventoryObject* object);
   void                   PlayerEquipObject(const std::string& target, unsigned int slot, InventoryObject* object);
 
-  Sync::Signal<void (Waypoint*)>  WaypointPicked;
+  Sync::Signal<void (Waypoint*)>              WaypointPicked;
+  Sync::Signal<void (InstanceDynamicObject*)> TargetPicked;
 
   // Fight Management
   void                   StartFight(ObjectCharacter* starter);

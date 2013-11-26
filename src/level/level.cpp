@@ -111,6 +111,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   obs.Connect(InstanceDynamicObject::ActionTalkTo,      *this, &Level::CallbackActionTalkTo);
   obs.Connect(InstanceDynamicObject::ActionUseObjectOn, *this, &Level::CallbackActionUseObjectOn);
   obs.Connect(InstanceDynamicObject::ActionUseSkillOn,  *this, &Level::CallbackActionUseSkillOn);
+  obs.Connect(InstanceDynamicObject::ActionUseSpellOn,  *this, &Level::CallbackActionUseSpellOn);
 
   _task_metabolism = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 0, 1);
   _task_metabolism->Interval.Connect(*this, &Level::RunMetabolism);  
@@ -337,9 +338,10 @@ void Level::InitPlayer(void)
     interactions.clear();
     interactions.push_back(ObjectCharacter::Interaction("use_object", GetPlayer(), &(GetPlayer()->ActionUseObjectOn)));
     interactions.push_back(ObjectCharacter::Interaction("use_skill",  GetPlayer(), &(GetPlayer()->ActionUseSkillOn)));
+    interactions.push_back(ObjectCharacter::Interaction("use_magic",  GetPlayer(), &(GetPlayer()->ActionUseSpellOn)));
   }
   _levelUi.GetMainBar().OpenSkilldex.Connect([this]() { ObjectCharacter::ActionUseSkillOn.Emit(GetPlayer()); });
-  _levelUi.GetMainBar().OpenSpelldex.Connect([this]() { ObjectCharacter::ActionUseSpellOn.Emit(GetPlayer()); });
+  _levelUi.GetMainBar().OpenSpelldex.Connect([this]() { ObjectCharacter::ActionUseSpellOn.Emit(0);           });
 
   obs_player.Connect(GetPlayer()->HitPointsChanged,         _levelUi.GetMainBar(),   &GameMainBar::SetCurrentHp);
   obs_player.Connect(GetPlayer()->ActionPointChanged,       _levelUi.GetMainBar(),   &GameMainBar::SetCurrentAP);
@@ -1064,10 +1066,23 @@ void Level::SetMouseState(MouseState state)
 {
   if (state != _mouseState)
   {
+    // Cleanup if needed
+    switch (_mouseState)
+    {
+      case MouseTarget:
+        TargetPicked.DisconnectAll();
+        break ;
+      case MouseWaypointPicker:
+        WaypointPicked.DisconnectAll();
+        break ;
+      default:
+        break ;
+    }
     DestroyCombatPath();
     _mouseState = state;
     ToggleCharacterOutline(_state == Level::Fight && _mouseState == MouseTarget && *_itCharacter == GetPlayer());
   }
+  // Set mouse cursor
   switch (state)
   {
     case MouseWaypointPicker:
@@ -1139,55 +1154,27 @@ void Level::MouseLeftClicked(void)
     case MouseInteraction:
       if (hovering.hasDynObject)
       {
-	InstanceDynamicObject* object = FindObjectFromNode(hovering.dynObject);
+        InstanceDynamicObject* object = FindObjectFromNode(hovering.dynObject);
 
-	if (_currentUis[UiItInteractMenu] && _currentUis[UiItInteractMenu]->IsVisible())
-	  CloseRunningUi<UiItInteractMenu>();
-	if (object && object->GetInteractions().size() != 0)
-	{
+        if (_currentUis[UiItInteractMenu] && _currentUis[UiItInteractMenu]->IsVisible())
           CloseRunningUi<UiItInteractMenu>();
-	  _currentUis[UiItInteractMenu] = new InteractMenu(_window, _levelUi.GetContext(), *object);
-	  _camera.SetEnabledScroll(false);
-	}
-	else
-	{
-	  if (!object)
-	    cout << "Object does not exist" << endl;
-	  else if (object->GetInteractions().size() == 0)
-	    cout << "Object has no interactions" << endl;
-	  else
-	    cout << "This is impossible" << endl;
-	}
+        if (object && object->GetInteractions().size() != 0)
+        {
+          CloseRunningUi<UiItInteractMenu>();
+          _currentUis[UiItInteractMenu] = new InteractMenu(_window, _levelUi.GetContext(), *object);
+          _camera.SetEnabledScroll(false);
+        }
       }
       break ;
     case MouseTarget:
       std::cout << "Mouse Target" << std::endl;
       if (hovering.hasDynObject)
       {
-	InstanceDynamicObject* dynObject = FindObjectFromNode(hovering.dynObject);
-	
-	std::cout << "HasDynObject" << std::endl;
-	if (dynObject)
-	{
-	  ObjectCharacter*     player    = GetPlayer();
-	  InventoryObject*     item      = player->active_object;
-	  unsigned char        actionIt  = player->active_object_it;
+        InstanceDynamicObject* dynObject = FindObjectFromNode(hovering.dynObject);
 
-          std::cout << "DEBUG COMBAT CRASH" << std::endl;
-          std::cout << "Player name:     " << player->GetName() << std::endl;
-          std::cout << "Active Object:   " << player->active_object->GetName() << std::endl;
-          std::cout << "Action Iterator: " << actionIt << std::endl;
-	  if ((*item)["actions"][actionIt]["combat"] == "1")
-	  {
-	    ObjectCharacter*   target = dynObject->Get<ObjectCharacter>();
-
-	    if (!target)
-	      return ;
-	    ActionUseWeaponOn(player, target, item, actionIt);
-	  }
-	  else
-	    ActionUseObjectOn(player, dynObject, item, actionIt);
-	}
+        std::cout << "HasDynObject" << std::endl;
+        if (dynObject)
+          TargetPicked.Emit(dynObject);
       }
       break ;
     case MouseWaypointPicker:

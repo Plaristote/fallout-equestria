@@ -1,13 +1,14 @@
 #include "qpandaapplication.h"
 
-PandaFramework QPandaApplication::_framework;
-bool           QPandaApplication::_continue;
-bool           QPandaApplication::_panda_enabled;
-QTimer         QPandaApplication::_timer;
+PandaFramework* QPandaApplication::_framework;
+bool            QPandaApplication::_continue;
+bool            QPandaApplication::_panda_enabled;
+QTimer          QPandaApplication::_timer;
 
 QPandaApplication::QPandaApplication(int argc, char **argv) : QApplication(argc, argv)
 {
-  _framework.open_framework(argc, argv);
+  framework.open_framework(argc, argv);
+  _framework     = &framework;
   _continue      = true;
   _panda_enabled = false;
   _timer.setInterval(25);
@@ -16,7 +17,7 @@ QPandaApplication::QPandaApplication(int argc, char **argv) : QApplication(argc,
 
 QPandaApplication::~QPandaApplication()
 {
-  _framework.close_framework();
+  framework.close_framework();
 }
 
 void           QPandaApplication::PandaRefresh(void)
@@ -25,7 +26,7 @@ void           QPandaApplication::PandaRefresh(void)
   {
     Thread* current_thread = Thread::get_current_thread();
 
-    _framework.do_frame(current_thread);
+    framework.do_frame(current_thread);
     _timer.start();
   }
 }

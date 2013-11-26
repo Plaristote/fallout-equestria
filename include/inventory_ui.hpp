@@ -112,20 +112,33 @@ private:
   InventoryViewController                      _viewController;
 };
 
+#include <map>
 class UiUseSkillOn : public UiBase
 {
 public:
   UiUseSkillOn(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* player, InstanceDynamicObject* target);
-  ~UiUseSkillOn();
+  virtual ~UiUseSkillOn();
   
   void Destroy(void);
   
   Sync::Signal<void ()>                   Closed;
   Sync::Signal<void (const std::string&)> SkillPicked;
+protected:
+  UiUseSkillOn(WindowFramework* window, Rocket::Core::Context* context);
+
+  void                   SetSkillList(const std::map<std::string, short>& list);
+  void                   Initialize(void);
 private:
   RocketListener         EventCloseClicked, EventSkillPicked;
   std::string            skill_picked;
   std::list<std::string> skill_list;
+};
+
+class UiUseSpellOn : public UiUseSkillOn
+{
+public:
+  UiUseSpellOn(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* player, InstanceDynamicObject* target);
+private:
 };
 
 class UiBarter : public UiBase, public InventoryViewController
