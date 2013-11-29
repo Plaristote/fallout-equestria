@@ -12,16 +12,17 @@ Mouse::Mouse(WindowFramework* window, QObject *parent) : QObject(parent), _windo
   _pickerPath   = _camera.attach_new_node(_pickerNode);
   _pickerNode->set_from_collide_mask(CollideMask(ColMask::DynObject | ColMask::Object));
   _pickerRay    = new CollisionRay();
-#ifndef _WIN32
   _pickerNode->add_solid(_pickerRay);
-#endif
   _collisionHandlerQueue = new CollisionHandlerQueue();
   _collisionTraverser.add_collider(_pickerPath, _collisionHandlerQueue);
 }
 
 LPoint2f Mouse::GetPosition(void) const
 {
-  return (_mouseWatcher->get_mouse());
+  MouseData pointer = _window->get_graphics_window()->get_pointer(0);
+  LPoint2f  cursorPos(pointer.get_x(), pointer.get_y());
+
+  return (cursorPos);
 }
 
 NodePath NodePathGetChild(NodePath np, const std::string& name)
@@ -79,10 +80,8 @@ void Mouse::GetHoveredAt(LPoint2f cursorPos)
 
 void Mouse::Run(void)
 {
-  if (_mouseWatcher->has_mouse())
-  {
-    LPoint2f cursorPos = _mouseWatcher->get_mouse();
+  MouseData pointer = _window->get_graphics_window()->get_pointer(0);
+  LPoint2f  cursorPos(pointer.get_x(), pointer.get_y());
 
-    GetHoveredAt(cursorPos);
-  }
+  GetHoveredAt(cursorPos);
 }

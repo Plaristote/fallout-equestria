@@ -1442,15 +1442,11 @@ void MainWindow::WaypointSelDelete()
 
 void MainWindow::WaypointSelect(Waypoint* waypoint)
 {
-    std::cout << "SubDebug#1" << std::endl;
     std::list<Waypoint*>::iterator it = std::find(waypointsSelection.begin(), waypointsSelection.end(), waypoint);
-    std::cout << "SubDebug#2" << std::endl;
 
     if (it != waypointsSelection.end())
     {
-        std::cout << "SubDebug#2.1" << std::endl;
       (*it)->SetSelected(false);
-        std::cout << "SubDebug#3" << std::endl;
       waypointsSelection.erase(it);
       if (waypoint == waypointSelected)
       {
@@ -1462,9 +1458,7 @@ void MainWindow::WaypointSelect(Waypoint* waypoint)
     }
     else
     {
-        std::cout << "SubDebug#2.2" << std::endl;
       waypoint->SetSelected(true);
-      std::cout << "SubDebug#3" << std::endl;
       waypointSelected = waypoint;
       waypointsSelection.push_back(waypoint);
     }

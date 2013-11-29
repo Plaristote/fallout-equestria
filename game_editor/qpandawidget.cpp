@@ -26,18 +26,6 @@ QPandaWidget::QPandaWidget(QWidget *parent) : QWidget(parent), _initialized(fals
     events.add_hook("mouse3-up",  QPandaWidget::CallbackMouse, this);
     events.add_hook("wheel_up",   QPandaWidget::CallbackWheel, this);
     events.add_hook("wheel_down", QPandaWidget::CallbackWheel, this);
-
-	//WTF to the power of a million
-#ifdef WIN32
-	if (_window == 0) {
-        WindowProperties wp;
-
-        QPandaApplication::Framework().get_default_window_props(wp);
-        wp.set_foreground(false);
-        wp.set_parent_window((size_t)this->winId());
-        _window = QPandaApplication::Framework().open_window(wp, 0);
-	}
-#endif
 }
 
 QPandaWidget::~QPandaWidget()
@@ -71,7 +59,6 @@ void QPandaWidget::resizeEvent(QResizeEvent* event)
 
 void QPandaWidget::showEvent(QShowEvent* event)
 {
-#ifndef WIN32
     if (_window == 0)
     {
         WindowProperties wp;
@@ -84,7 +71,6 @@ void QPandaWidget::showEvent(QShowEvent* event)
         wp.set_parent_window((size_t)this->winId());
         _window = QPandaApplication::Framework().open_window(wp, 0);
     }
-#endif
     if (_window != 0)
     {
         UpdateSize();

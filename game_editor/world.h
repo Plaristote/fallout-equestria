@@ -35,8 +35,13 @@
 # ifdef GAME_EDITOR
 #  define WAYPOINT_DEBUG
 #  include <QDir>
-#  define MODEL_ROOT QDir::currentPath().toStdString() + "/models/"
-#  define TEXT_ROOT  QDir::currentPath().toStdString() + "/textures/"
+#  ifdef _WIN32
+#   define MODEL_ROOT Filename::from_os_specific(QDir::currentPath().toStdString() + "/models/")
+#   define TEXT_ROOT  Filename::from_os_specific(QDir::currentPath().toStdString() + "/textures/")
+#  else
+#   define MODEL_ROOT QDir::currentPath().toStdString() + "/models/"
+#   define TEXT_ROOT  QDir::currentPath().toStdString() + "/textures/"
+#  endif
 # else
 #  define MODEL_ROOT "models/"
 #  define TEXT_ROOT  "textures/"

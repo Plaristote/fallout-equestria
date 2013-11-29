@@ -16,7 +16,7 @@ public:
 
     int                    exec(void);
 
-    static PandaFramework& Framework(void) { return (_framework); }
+    static PandaFramework& Framework(void) { return (*_framework); }
     static void            Close(void);
 
     static void            SetPandaEnabled(bool enabled);
@@ -28,10 +28,10 @@ public slots:
     void                   DisablePanda(void) { SetPandaEnabled(false); }
 
 private:
-    static bool           _continue;
-    static PandaFramework _framework;
-    static QTimer         _timer;
-    static bool           _panda_enabled;
+    static bool            _continue;
+    static PandaFramework* _framework;
+    static QTimer          _timer;
+    static bool            _panda_enabled;
 };
 
 #endif // QPANDAAPPLICATION_H

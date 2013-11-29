@@ -179,7 +179,6 @@ void SceneCamera::RunScroll(float elapsedTime)
     return ;
   MouseData     pointer      = _graphicWindow->get_pointer(0);
   unsigned char cameraMotion = MotionNone;
-  LPoint3       cameraPos    = _camera.get_pos();
 
   float    _mouseBorderMargin   = 40;
   float    cameraSpeedX         = _cameraMovementSpeed;
