@@ -1,4 +1,5 @@
 #include "level/level.hpp"
+#include <boost/concept_check.hpp>
 
 #define AP_COST_USE             2
 
@@ -21,8 +22,6 @@ void Level::CallbackActionBarter(ObjectCharacter* character)
   UiBarter* ui_barter;
   
   CloseRunningUi<UiItBarter>();
-  if (_currentUis[UiItBarter])
-    delete _currentUis[UiItBarter];
   ui_barter = new UiBarter(_window, _levelUi.GetContext(), GetPlayer(), character);
   ui_barter->BarterEnded.Connect(*this, &Level::CloseRunningUi<UiItBarter>);
   ui_barter->Show();
@@ -50,16 +49,19 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
     ObjectCharacter* talkTo = object->Get<ObjectCharacter>();
     if (talkTo)
       talkTo->LookAt(GetPlayer());
-    
-    _currentRunningDialog = new DialogController(_window, _levelUi.GetContext(), talkTo, i18n::GetDialogs());
-    _currentRunningDialog->DialogEnded.Connect(*this, &Level::CloseRunningUi<UiItRunningDialog>);
-    _currentRunningDialog->DialogEnded.Connect(_levelUi.GetMainBar(), &UiBase::Show);
-    _currentRunningDialog->StartBarter.Connect(*this, &Level::CallbackActionBarter);
-    _mouseActionBlocked = true;
-    _camera.SetEnabledScroll(false);
-    _levelUi.GetMainBar().Hide();
-    _currentUis[UiItRunningDialog] = _currentRunningDialog;
-    SetInterrupted(true);
+
+    {
+      DialogController* controller = new DialogController(_window, _levelUi.GetContext(), talkTo, i18n::GetDialogs());
+
+      controller->DialogEnded.Connect(*this, &Level::CloseRunningUi<UiItRunningDialog>);
+      controller->DialogEnded.Connect(_levelUi.GetMainBar(), &UiBase::Show);
+      controller->StartBarter.Connect(*this, &Level::CallbackActionBarter);
+      _mouseActionBlocked = true;
+      _camera.SetEnabledScroll(false);
+      _levelUi.GetMainBar().Hide();
+      _currentUis[UiItRunningDialog] = controller;
+      SetInterrupted(true);
+    }
   }
   else
   {
@@ -73,27 +75,26 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 
 void Level::CallbackActionUseObjectOn(InstanceDynamicObject* target)
 {
+  UiUseObjectOn* ui = new UiUseObjectOn(_window, _levelUi.GetContext(), GetPlayer()->GetInventory());
+  
   CloseRunningUi<UiItInteractMenu>();
-  if (_currentUis[UiItUseObjectOn])
-    delete _currentUis[UiItUseObjectOn];
+  CloseRunningUi<UiItUseObjectOn>();
   std::cout << "CallbackActionUseObjectOn" << std::endl;
-  _currentUseObjectOn = new UiUseObjectOn(_window, _levelUi.GetContext(), GetPlayer()->GetInventory());
-  _currentUseObjectOn->ActionCanceled.Connect(*this, &Level::CloseRunningUi<UiItUseObjectOn>);
-  _currentUseObjectOn->ObjectSelected.Connect([this, target](InventoryObject* object)
+  ui->ActionCanceled.Connect(*this, &Level::CloseRunningUi<UiItUseObjectOn>);
+  ui->ObjectSelected.Connect([this, target](InventoryObject* object)
   {
     ActionUseObjectOn(GetPlayer(), target, object, 0);
   });
-  _mouseActionBlocked = true;
+  _currentUis[UiItUseObjectOn] = ui;
+  _mouseActionBlocked          = true;
   _camera.SetEnabledScroll(false);
   SetInterrupted(true);
-  _currentUis[UiItUseObjectOn] = _currentUseObjectOn;
 }
 
 void Level::CallbackActionUseSkillOn(InstanceDynamicObject* target)
 {
   CloseRunningUi<UiItInteractMenu>();
-  if (_currentUis[UiItUseSkillOn])
-    delete _currentUis[UiItUseSkillOn];
+  CloseRunningUi<UiItUseSkillOn>();
   {
     UiUseSkillOn* ui_use_skill_on = new UiUseSkillOn(_window, _levelUi.GetContext(), GetPlayer(), target);
 
@@ -110,25 +111,57 @@ void Level::CallbackActionUseSkillOn(InstanceDynamicObject* target)
   }
 }
 
+void Level::CallbackActionUseSpellOn(InstanceDynamicObject* target)
+{
+  CloseRunningUi<UiItInteractMenu>();
+  CloseRunningUi<UiItUseSpellOn>();
+  {
+    UiUseSpellOn* ui_use_spell_on = new UiUseSpellOn(_window, _levelUi.GetContext(), GetPlayer(), target);
+
+    _currentUis[UiItUseSpellOn]   = ui_use_spell_on;
+    _mouseActionBlocked           = true;
+    _camera.SetEnabledScroll(false);
+    SetInterrupted(true);
+    ui_use_spell_on->Show();
+    ui_use_spell_on->Closed.Connect(*this, &Level::CloseRunningUi<UiItUseSpellOn>);
+    ui_use_spell_on->SkillPicked.Connect([this, target](const std::string& skill)
+    {
+      ActionUseSpellOn(GetPlayer(), target, skill);
+    });
+  }
+}
+
 void Level::CallbackActionTargetUse(unsigned short it)
 {
-  ObjectCharacter* player   = GetPlayer();
-  InventoryObject* object   = player->GetEquipedItem(it);
-  unsigned char    actionIt = player->GetequipedAction(it);
+  ObjectCharacter* player    = GetPlayer();
+  InventoryObject* item      = player->GetEquipedItem(it);
+  unsigned char    action_it = player->GetequipedAction(it);
   
   std::cout << "ActionTargetUse" << std::endl;
-  if (object)
+  if (item)
   {
-    player->active_object    = object;
-    player->active_object_it = actionIt;
-    if ((*object)["actions"][actionIt]["targeted"] == "1")
+    Data action = (*item)["actions"][action_it];
+
+    player->active_object    = item;
+    player->active_object_it = action_it;
+    if (action["targeted"].Value() == "1")
     {
-      if ((*object)["actions"][actionIt]["combat"].Value() == "1" && _state != Fight)
+      if (action["combat"].Value() == "1" && _state != Fight)
         StartFight(player);
       SetMouseState(MouseTarget);
+      TargetPicked.Connect([this, item, action, action_it](InstanceDynamicObject* object)
+      {
+        cout << "TargetPicked Callback Called" << endl;
+        ObjectCharacter* character = object->Get<ObjectCharacter>();
+        
+        if (character != 0 && action["combat"].Value() == "1")
+          ActionUseWeaponOn(GetPlayer(), character, item, action_it);
+        else
+          ActionUseObjectOn(GetPlayer(), object,    item, action_it);
+      });
     }
     else
-      ActionUseObject(player, object, actionIt);
+      ActionUseObject(player, item, action_it);
   }
 }
 
@@ -241,6 +274,88 @@ struct XpFetcher
   Sync::ObserverId observerId;
   bool             character_died;
 };
+
+struct ActionPicking
+{
+  bool operator==(const std::string& name) const { return (this->name == name); }
+  std::string                                       name;
+  std::function<void (std::function<void (void*)>)> Pick;
+};
+
+std::vector<ActionPicking> pick_handlers;
+
+void Level::ActionUseSpellOn(ObjectCharacter* user, InstanceDynamicObject* target, const std::string& skill)
+{
+  if (pick_handlers.size() == 0)
+  {
+    ActionPicking teleport_handler;
+    
+    teleport_handler.name = "waypoints";
+    teleport_handler.Pick = [this](std::function<void (void*)> callback)
+    {
+      SetMouseState(Level::MouseWaypointPicker);
+      WaypointPicked.Connect([callback](Waypoint* waypoint)
+      {
+        callback(waypoint);
+      });
+    };
+    pick_handlers.push_back(teleport_handler);
+    
+    teleport_handler.name = "characters";
+    teleport_handler.Pick = [this](std::function<void (void*)> callback)
+    {
+      SetMouseState(Level::MouseTarget);
+      TargetPicked.Connect([callback](InstanceDynamicObject* object)
+      {
+        if (object->Get<ObjectCharacter>() != 0)
+          callback(object);
+      });
+    };
+    pick_handlers.push_back(teleport_handler);
+    
+    teleport_handler.name = "self";
+    teleport_handler.Pick = [this](std::function<void (void*)> callback)
+    {
+      callback(GetPlayer());
+    };
+    pick_handlers.push_back(teleport_handler);
+  }
+  
+  Data     spell       = GetDataEngine()["spells"][skill];
+  string   target_type = spell["targets"].Value();
+
+  cout << "ActionUseSpellOn " << skill << endl;
+  if (!target)
+  {
+    auto   handler     = find(pick_handlers.begin(), pick_handlers.end(), target_type);
+
+    if (handler != pick_handlers.end())
+      handler->Pick([this, user, skill](void* item) { ActionUseSpellOn(user, (InstanceDynamicObject*)item, skill); });
+  }
+  else
+  {
+    try
+    {
+      AngelScript::Object                   object("scripts/buffs/" + spell["script"]["file"].Value());
+      AngelScript::Type<ObjectCharacter*>   param1(user);
+      AngelScript::Type<void*>              param2(target);
+
+      object.asDefineMethod("use_spell", spell["script"]["method"].Value());
+      if (target_type == "waypoints")
+      {
+        AngelScript::Type<int>              param_waypoint(((Waypoint*)(target))->id);
+
+        object.Call("use_spell", 2, &param1, &param_waypoint);
+      }
+      else
+        object.Call("use_spell", 2, &param1, &param2);
+    }
+    catch (AngelScript::Exception& e)
+    {
+      AlertUi::NewAlert.Emit(string("Spell script couldn't be executed: ") + e.what());
+    }
+  }
+}
 
 void Level::ActionUseSkillOn(ObjectCharacter* user, InstanceDynamicObject* target, const std::string& skill)
 {

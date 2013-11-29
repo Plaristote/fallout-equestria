@@ -672,6 +672,20 @@ void                ObjectCharacter::DebugPathfinding(void)
   });
 }
 
+void                ObjectCharacter::TeleportTo(Waypoint* waypoint)
+{
+  if (waypoint)
+  {
+    LPoint3  wp_size  = NodePathSize(waypoint->nodePath);
+    LPoint3f position = waypoint->nodePath.get_pos();
+    float    z        = (position.get_z() - wp_size.get_z()) + 0.25;
+
+    position.set_z(z + (_idle_size.get_z() / 2));
+    GetNodePath().set_pos(position);
+    SetOccupiedWaypoint(waypoint);
+  }
+}
+
 void                ObjectCharacter::GoTo(Waypoint* waypoint)
 {
   PStatCollector collector("Level:Characters:Pathfinding");

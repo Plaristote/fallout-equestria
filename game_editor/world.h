@@ -195,7 +195,8 @@ namespace Interactions
       Use       = 1,
       UseSkill  = 2,
       UseObject = 4,
-      TalkTo    = 8
+      TalkTo    = 8,
+      UseSpell  = 16
   };
 }
 

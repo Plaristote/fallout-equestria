@@ -50,6 +50,8 @@ InstanceDynamicObject::InstanceDynamicObject(Level* level, DynamicObject* object
     _interactions.push_back(Interaction("use_object", this, &ActionUseObjectOn));
   if (object->interactions & Interactions::UseSkill)
     _interactions.push_back(Interaction("use_skill",  this, &ActionUseSkillOn));
+  if (object->interactions & Interactions::UseSpell)
+    _interactions.push_back(Interaction("use_magic",  this, &ActionUseSpellOn));
   
   AnimationEnd.Connect(*this, &InstanceDynamicObject::CallbackAnimationEnded);
 }

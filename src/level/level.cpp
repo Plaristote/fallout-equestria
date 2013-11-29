@@ -22,6 +22,7 @@ using namespace std;
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUse;
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseObjectOn;
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSkillOn;
+Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSpellOn;
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
 
@@ -49,9 +50,6 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
 
   for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
     _currentUis[i] = 0;
-  _currentRunningDialog = 0;
-  _currentUseObjectOn   = 0;
-  _currentUiLoot        = 0;
   _mouseActionBlocked   = false;
 
   cout << "Level Loading Step #3" << endl;
@@ -113,6 +111,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   obs.Connect(InstanceDynamicObject::ActionTalkTo,      *this, &Level::CallbackActionTalkTo);
   obs.Connect(InstanceDynamicObject::ActionUseObjectOn, *this, &Level::CallbackActionUseObjectOn);
   obs.Connect(InstanceDynamicObject::ActionUseSkillOn,  *this, &Level::CallbackActionUseSkillOn);
+  obs.Connect(InstanceDynamicObject::ActionUseSpellOn,  *this, &Level::CallbackActionUseSpellOn);
 
   _task_metabolism = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 0, 1);
   _task_metabolism->Interval.Connect(*this, &Level::RunMetabolism);  
@@ -339,9 +338,10 @@ void Level::InitPlayer(void)
     interactions.clear();
     interactions.push_back(ObjectCharacter::Interaction("use_object", GetPlayer(), &(GetPlayer()->ActionUseObjectOn)));
     interactions.push_back(ObjectCharacter::Interaction("use_skill",  GetPlayer(), &(GetPlayer()->ActionUseSkillOn)));
+    interactions.push_back(ObjectCharacter::Interaction("use_magic",  GetPlayer(), &(GetPlayer()->ActionUseSpellOn)));
   }
   _levelUi.GetMainBar().OpenSkilldex.Connect([this]() { ObjectCharacter::ActionUseSkillOn.Emit(GetPlayer()); });
-  //_levelUi.GetMainBar().OpenSpelldex.Connect([this]() { ObjectCharacter::ActionUseSpellOn.Emit(GetPlayer()); });
+  _levelUi.GetMainBar().OpenSpelldex.Connect([this]() { ObjectCharacter::ActionUseSpellOn.Emit(0);           });
 
   obs_player.Connect(GetPlayer()->HitPointsChanged,         _levelUi.GetMainBar(),   &GameMainBar::SetCurrentHp);
   obs_player.Connect(GetPlayer()->ActionPointChanged,       _levelUi.GetMainBar(),   &GameMainBar::SetCurrentAP);
@@ -1066,12 +1066,26 @@ void Level::SetMouseState(MouseState state)
 {
   if (state != _mouseState)
   {
+    // Cleanup if needed
+    switch (_mouseState)
+    {
+      case MouseTarget:
+        TargetPicked.DisconnectAll();
+        break ;
+      case MouseWaypointPicker:
+        WaypointPicked.DisconnectAll();
+        break ;
+      default:
+        break ;
+    }
     DestroyCombatPath();
     _mouseState = state;
     ToggleCharacterOutline(_state == Level::Fight && _mouseState == MouseTarget && *_itCharacter == GetPlayer());
   }
+  // Set mouse cursor
   switch (state)
   {
+    case MouseWaypointPicker:
     case MouseAction:
       _mouse.SetMouseState('a');
       break ;
@@ -1140,57 +1154,42 @@ void Level::MouseLeftClicked(void)
     case MouseInteraction:
       if (hovering.hasDynObject)
       {
-	InstanceDynamicObject* object = FindObjectFromNode(hovering.dynObject);
+        InstanceDynamicObject* object = FindObjectFromNode(hovering.dynObject);
 
-	if (_currentUis[UiItInteractMenu] && _currentUis[UiItInteractMenu]->IsVisible())
-	  CloseRunningUi<UiItInteractMenu>();
-	if (object && object->GetInteractions().size() != 0)
-	{
-	  if (_currentUis[UiItInteractMenu])
-	    delete _currentUis[UiItInteractMenu];
-	  _currentUis[UiItInteractMenu] = new InteractMenu(_window, _levelUi.GetContext(), *object);
-	  _camera.SetEnabledScroll(false);
-	}
-	else
-	{
-	  if (!object)
-	    cout << "Object does not exist" << endl;
-	  else if (object->GetInteractions().size() == 0)
-	    cout << "Object has no interactions" << endl;
-	  else
-	    cout << "This is impossible" << endl;
-	}
+        if (_currentUis[UiItInteractMenu] && _currentUis[UiItInteractMenu]->IsVisible())
+          CloseRunningUi<UiItInteractMenu>();
+        if (object && object->GetInteractions().size() != 0)
+        {
+          CloseRunningUi<UiItInteractMenu>();
+          _currentUis[UiItInteractMenu] = new InteractMenu(_window, _levelUi.GetContext(), *object);
+          _camera.SetEnabledScroll(false);
+        }
       }
       break ;
     case MouseTarget:
       std::cout << "Mouse Target" << std::endl;
       if (hovering.hasDynObject)
       {
-	InstanceDynamicObject* dynObject = FindObjectFromNode(hovering.dynObject);
-	
-	std::cout << "HasDynObject" << std::endl;
-	if (dynObject)
-	{
-	  ObjectCharacter*     player    = GetPlayer();
-	  InventoryObject*     item      = player->active_object;
-	  unsigned char        actionIt  = player->active_object_it;
+        InstanceDynamicObject* dynObject = FindObjectFromNode(hovering.dynObject);
 
-          std::cout << "DEBUG COMBAT CRASH" << std::endl;
-          std::cout << "Player name:     " << player->GetName() << std::endl;
-          std::cout << "Active Object:   " << player->active_object->GetName() << std::endl;
-          std::cout << "Action Iterator: " << actionIt << std::endl;
-	  if ((*item)["actions"][actionIt]["combat"] == "1")
-	  {
-	    ObjectCharacter*   target = dynObject->Get<ObjectCharacter>();
-
-	    if (!target)
-	      return ;
-	    ActionUseWeaponOn(player, target, item, actionIt);
-	  }
-	  else
-	    ActionUseObjectOn(player, dynObject, item, actionIt);
-	}
+        std::cout << "HasDynObject" << std::endl;
+        if (dynObject)
+          TargetPicked.Emit(dynObject);
       }
+      break ;
+    case MouseWaypointPicker:
+      {
+        std::cout << "Mouse Waypoint Picker" << std::endl;
+        _mouse.ClosestWaypoint(_world, _currentFloor);
+        if (hovering.hasWaypoint)
+        {
+          Waypoint* toGo = _world->GetWaypointFromNodePath(hovering.waypoint);
+
+          if (toGo)
+            WaypointPicked.Emit(toGo);
+        }
+      }
+      break ;
   }
 }
 
@@ -1210,8 +1209,12 @@ void Level::PlayerLootWithScript(Inventory* inventory, InstanceDynamicObject* ta
   UiBase* old_ptr = _currentUis[UiItLoot];
 
   PlayerLoot(inventory);
-  if (old_ptr == _currentUis[UiItLoot] || _currentUis[UiItLoot] == 0) return ; // If PlayerLoot failed, silent return is advised
-  _currentUiLoot->SetScriptObject(GetPlayer(), target, context, filepath);
+  if (!(old_ptr == _currentUis[UiItLoot] || _currentUis[UiItLoot] == 0))
+  {
+    UiLoot* ui_loot = (UiLoot*)(_currentUis[UiItLoot]);
+
+    ui_loot->SetScriptObject(GetPlayer(), target, context, filepath);
+  }
 }
 
 void Level::PlayerLoot(Inventory* inventory)
@@ -1222,15 +1225,15 @@ void Level::PlayerLoot(Inventory* inventory)
     return ;
   }
   CloseRunningUi<UiItInteractMenu>();
-  if (_currentUis[UiItLoot])
-    delete _currentUis[UiItLoot];
-  _currentUiLoot = new UiLoot(_window, _levelUi.GetContext(), GetPlayer()->GetInventory(), *inventory);
-  _currentUiLoot->Done.Connect(*_currentUiLoot, &UiLoot::Destroy);
-  _currentUiLoot->Done.Connect(*this, &Level::CloseRunningUi<UiItLoot>);
-  _mouseActionBlocked = true;
-  _camera.SetEnabledScroll(false);
-  SetInterrupted(true);
-  _currentUis[UiItLoot] = _currentUiLoot;
+  {
+    UiLoot* ui_loot = new UiLoot(_window, _levelUi.GetContext(), GetPlayer()->GetInventory(), *inventory);
+
+    ui_loot->Done.Connect(*this, &Level::CloseRunningUi<UiItLoot>);
+    _mouseActionBlocked = true;
+    _camera.SetEnabledScroll(false);
+    SetInterrupted(true);
+    _currentUis[UiItLoot] = ui_loot;
+  }
 }
 
 void Level::PlayerEquipObject(unsigned short it, InventoryObject* object)
@@ -1252,8 +1255,7 @@ void Level::PlayerEquipObject(unsigned short it, InventoryObject* object)
       ui->AddOption(EquipedBattleSaddle, "Battlesaddle");
     ui->Initialize();
 
-    if (_currentUis[UiItEquipMode])
-      delete _currentUis[UiItEquipMode];
+    CloseRunningUi<UiItEquipMode>();
     _currentUis[UiItEquipMode] = ui;
     ui->Closed.Connect(*this, &Level::CloseRunningUi<UiItEquipMode>);
     ui->EquipModeSelected.Connect([this, it, object](unsigned char mode)

@@ -34,6 +34,7 @@
 # include "soundmanager.hpp"
 # include "main_script.hpp"
 # include "script_zone.hpp"
+#include <executor.hpp>
 
 # include <functional>
 
@@ -120,12 +121,14 @@ public:
   void                   CallbackActionTalkTo(InstanceDynamicObject* object);
   void                   CallbackActionUseObjectOn(InstanceDynamicObject* object);
   void                   CallbackActionUseSkillOn(InstanceDynamicObject* object);
+  void                   CallbackActionUseSpellOn(InstanceDynamicObject* object);
   void                   CallbackActionTargetUse(unsigned short it);
 
   void                   ActionUse(ObjectCharacter* user, InstanceDynamicObject* target);
   void                   ActionUseObject(ObjectCharacter* user, InventoryObject* object, unsigned char actionIt);
   void                   ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object, unsigned char actionIt);
   void                   ActionUseSkillOn(ObjectCharacter* user, InstanceDynamicObject* target, const std::string& skill);
+  void                   ActionUseSpellOn(ObjectCharacter* user, InstanceDynamicObject* target, const std::string& skill);
   void                   ActionDropObject(ObjectCharacter* user, InventoryObject* object);
   void                   ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* object, unsigned char actionIt);
 
@@ -138,7 +141,8 @@ public:
   void                   PlayerEquipObject(unsigned short it, InventoryObject* object);
   void                   PlayerEquipObject(const std::string& target, unsigned int slot, InventoryObject* object);
 
-  Sync::Signal<void (Inventory&)> SignalShelfOpened;
+  Sync::Signal<void (Waypoint*)>              WaypointPicked;
+  Sync::Signal<void (InstanceDynamicObject*)> TargetPicked;
 
   // Fight Management
   void                   StartFight(ObjectCharacter* starter);
@@ -151,7 +155,8 @@ public:
   {
     MouseAction,
     MouseInteraction,
-    MouseTarget
+    MouseTarget,
+    MouseWaypointPicker
   };
 
   void               SetMouseState(MouseState);
@@ -238,6 +243,7 @@ private:
     UiItRunningDialog,
     UiItUseObjectOn,
     UiItUseSkillOn,
+    UiItUseSpellOn,
     UiItLoot,
     UiItEquipMode,
     UiItNextZone,
@@ -248,11 +254,12 @@ private:
   template<UiIterator it> void CloseRunningUi(void)
   {
     if (_currentUis[it])
-      _currentUis[it]->Destroy();
-    for (short i = 0 ; i < UiTotalIt ; ++i)
     {
-      if (_currentUis[it] != 0 && _currentUis[it]->IsVisible())
-        return ;
+      UiBase* ui      = _currentUis[it];
+
+      _currentUis[it] = 0;
+      ui->Destroy();
+      Executor::ExecuteLater([ui]() { delete ui; });
     }
     _mouseActionBlocked = false;
     _camera.SetEnabledScroll(true);
@@ -261,9 +268,6 @@ private:
 
   LevelUi           _levelUi;
   UiBase*           _currentUis[UiTotalIt];
-  DialogController* _currentRunningDialog;
-  UiUseObjectOn*    _currentUseObjectOn;
-  UiLoot*           _currentUiLoot;
   bool              _mouseActionBlocked;
 
   DataEngine*       _dataEngine;

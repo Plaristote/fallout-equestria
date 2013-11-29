@@ -97,6 +97,7 @@ public:
   void                SetRunning(bool running) { _running = running; }
   void                LookAt(LVecBase3);
   void                LookAt(InstanceDynamicObject*);
+  void                TeleportTo(Waypoint* waypoint);
   void                GoTo(unsigned int id);
   void                GoTo(Waypoint* waypoint);
   void                GoTo(InstanceDynamicObject* object, int max_distance = 0);

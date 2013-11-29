@@ -79,6 +79,7 @@ public:
   static Sync::Signal<void (InstanceDynamicObject*)> ActionUse;
   static Sync::Signal<void (InstanceDynamicObject*)> ActionUseObjectOn;
   static Sync::Signal<void (InstanceDynamicObject*)> ActionUseSkillOn;
+  static Sync::Signal<void (InstanceDynamicObject*)> ActionUseSpellOn;
   static Sync::Signal<void (InstanceDynamicObject*)> ActionTalkTo;
 
   struct Interaction
