@@ -5,8 +5,8 @@
 #include <ui_dialog.hpp>
 #include <panda_lock.hpp>
 
-extern PandaFramework framework;
-PandaLock*            PandaLock::instance = 0;
+extern PandaFramework* framework;
+PandaLock*             PandaLock::instance = 0;
 
 static AsyncTask::DoneStatus main_menu_task(GenericAsyncTask* task, void* main_menu)
 {
@@ -128,7 +128,7 @@ AsyncTask::DoneStatus MainMenu::do_task()
   if (!quitGamePlz)
     _mouseCursor.Update();
   else
-    framework.close_framework();
+    framework->close_framework();
   SoundManager::GarbageCollectAll();
   Executor::Run(); // Executor does not have any specific application. It just executes lambdas collected here and there.
   fps++;

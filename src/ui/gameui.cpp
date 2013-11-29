@@ -4,7 +4,7 @@
 using namespace std;
 using namespace Rocket;
 
-extern PandaFramework framework;
+extern PandaFramework* framework;
 
 /*
  * GeneralUi
@@ -56,13 +56,13 @@ GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
   cout << "[UI] GameOptions ready" << endl;
 
   _window->enable_keyboard();
-  framework.define_key("tab", "ConsoleHandle", GameConsole::Toggle, (void*)_console);  
+  framework->define_key("tab", "ConsoleHandle", GameConsole::Toggle, (void*)_console);  
   cout << "[UI] Keyboard shortcut initialized" << endl;
 }
 
 GeneralUi::~GeneralUi(void)
 {
-  //framework.define_key("tab", "ConsoleHandle", 0, 0);
+  //framework->define_key("tab", "ConsoleHandle", 0, 0);
   delete _console;
 }
 
@@ -168,7 +168,7 @@ void LoadingScreen::AppendText(const std::string& str)
 void LoadingScreen::Refresh(void)
 {
   Wait();
-  framework.get_graphics_engine()->render_frame();
+  framework->get_graphics_engine()->render_frame();
   Post();
 }
 
@@ -226,13 +226,13 @@ void OptionsManager::Refresh(void)
       unsigned int     screen_width  = screen["x"];
       unsigned int     screen_height = screen["y"];
       bool             fullscreen    = screen["fullscreen"] == 1;
-      WindowProperties props         = framework.get_window(0)->get_graphics_window()->get_properties();
+      WindowProperties props         = framework->get_window(0)->get_graphics_window()->get_properties();
 
       props.set_cursor_hidden(hide_cursor);
       props.set_fullscreen(fullscreen);
       props.set_size(screen_width, screen_height);
       props.set_icon_filename("data/icon.ico");
-      framework.get_window(0)->get_graphics_window()->request_properties(props);
+      framework->get_window(0)->get_graphics_window()->request_properties(props);
     }
 
     // Saving changes
@@ -253,7 +253,7 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
 
     {
       stringstream        rml;
-      GraphicsPipe*       pipe   = framework.get_default_pipe();
+      GraphicsPipe*       pipe   = framework->get_default_pipe();
       DisplayInformation* di     = pipe->get_display_information();
       int                 di_tot = di->get_total_display_modes();
       
@@ -438,7 +438,7 @@ void GameOptions::SetResolution(Rocket::Core::Event&)
     stringstream        str_it;
     int                 it;
     Core::String        str    = option->GetValue();
-    GraphicsPipe*       pipe   = framework.get_default_pipe();
+    GraphicsPipe*       pipe   = framework->get_default_pipe();
     DisplayInformation* di     = pipe->get_display_information();
     
     str_it << str.CString();

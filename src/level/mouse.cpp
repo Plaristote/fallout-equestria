@@ -14,17 +14,15 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
   MouseWatcher::init_type();
   _lastMousePos.set_x(0);
   _lastMousePos.set_y(0);
-  _camera       = window->get_camera_group();
+  _camera                = window->get_camera_group();
   _hovering.Reset();
-  _mouseWatcher = dynamic_cast<MouseWatcher*>(window->get_mouse().node());
-  _pickerNode   = new CollisionNode("mouseRay");
-  _pickerPath   = _camera.attach_new_node(_pickerNode);
+  _mouseWatcher          = dynamic_cast<MouseWatcher*>(window->get_mouse().node());
+  _pickerNode            = new CollisionNode("mouseRay");
+  _pickerPath            = _camera.attach_new_node(_pickerNode);
   _pickerNode->set_from_collide_mask(CollideMask(/*ColMask::Waypoint | */ColMask::DynObject));
   _pickerNode->set_into_collide_mask(0);
-  _pickerRay    = new CollisionRay();
-  cout << "Debug#1" << endl;
+  _pickerRay             = new CollisionRay();
   _pickerNode->add_solid(_pickerRay);
-  cout << "Debug#2" << endl;
   _collisionHandlerQueue = new CollisionHandlerQueue();
   _collisionTraverser.add_collider(_pickerPath, _collisionHandlerQueue);
 
@@ -96,9 +94,17 @@ std::string NodePathFullName(NodePath nodepath, NodePath root)
   return (name);
 }
 
+LPoint2f Mouse::GetPosition(void) const
+{
+  MouseData  pointer = _window->get_graphics_window()->get_pointer(0);
+  LPoint2f   cursorPos(pointer.get_x(), pointer.get_y());
+
+  return (cursorPos);
+}
+
 void Mouse::ClosestWaypoint(World* world, short currentFloor)
 {
-  if (_mouseWatcher->has_mouse())
+  //if (_mouseWatcher->has_mouse())
   {
     PStatCollector collector("Level:Mouse:FindWaypoint"); collector.start();
     PT(CollisionRay)          pickerRay;
@@ -106,7 +112,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
     NodePath                  pickerPath;
     CollisionTraverser        collisionTraverser;
     PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
-    LPoint2f                  cursorPos             = _mouseWatcher->get_mouse();
+    LPoint2f                  cursorPos             = GetPosition();
     static bool               updated               = false;
     static LPoint2f           last_update;
 
@@ -159,12 +165,13 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
 
 void Mouse::Run(void)
 {
+  MouseData      pointer = _window->get_graphics_window()->get_pointer(0);
   PStatCollector collector("Level:Mouse:Run");
 
   collector.start();
-  if (_mouseWatcher->has_mouse())
+  //if (pointer.get_in_window())
   {
-    LPoint2f cursorPos   = _mouseWatcher->get_mouse();
+    LPoint2f cursorPos(pointer.get_x(), pointer.get_y());
 
     if (cursorPos != _lastMousePos)
     {

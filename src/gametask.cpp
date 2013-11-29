@@ -13,7 +13,7 @@ using namespace std;
 
 GameTask* GameTask::CurrentGameTask = 0;
 
-extern PandaFramework framework;
+extern PandaFramework* framework;
 
 Buff::~Buff()
 {
@@ -439,14 +439,12 @@ bool GameTask::SaveGame(const std::string& savepath)
 
   if (_level != 0)
   {
-    cout << "debug#3" << endl;
     _window->get_render().set_transparency(TransparencyAttrib::M_alpha, 1);
     MyRocket::SetVisibility(_gameUi.GetContext(), false);
-    framework.get_graphics_engine()->render_frame();
+    framework->get_graphics_engine()->render_frame();
     _window->get_graphics_window()->get_screenshot()->write(savepath + "/preview.png");
     MyRocket::SetVisibility(_gameUi.GetContext(), true);
   }
-  cout << "debug#4" << endl;
 
   return (success);
 }

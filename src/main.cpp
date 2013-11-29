@@ -4,11 +4,11 @@
 #include <panda3d/texturePool.h>
 #include <panda3d/directionalLight.h>
 
-#define PSTAT_ENABLED
+//#define PSTAT_ENABLED
 
-PandaFramework       framework;
-PT(AsyncTaskManager) taskMgr     = AsyncTaskManager::get_global_ptr();
-PT(ClockObject)      globalClock = ClockObject::get_global_clock();
+PandaFramework*      framework   = NULL;
+PT(AsyncTaskManager) taskMgr;
+PT(ClockObject)      globalClock;
 
 # include "mainmenu.hpp"
 # include "options.hpp"
@@ -76,6 +76,12 @@ int compile_heightmap(const std::string& sourcefile, const std::string& out)
 #ifndef UNIT_TESTER
 int main(int argc, char *argv[])
 {
+  PandaFramework panda_framework;
+
+  framework   = &panda_framework;
+  taskMgr     = AsyncTaskManager::get_global_ptr();
+  globalClock = ClockObject::get_global_clock();
+
   Dices::Initialize();          // Randomness initialization
   Script::Engine::Initialize(); // Script Engine initialization (obviously)
   AngelScriptInitialize();      // Registering script API (see script_api.cpp)
@@ -97,11 +103,11 @@ int main(int argc, char *argv[])
       cout << "[FoE] Can't connect to PStat client" << endl;
 #endif
     cout << "[FoE] Opening Panda3D Framework" << endl;
-    framework.open_framework(argc, argv);
+    panda_framework.open_framework(argc, argv);
     cout << "[FoE] Setting window's title" << endl;
-    //framework.set_window_title("Fallout Equestria");
+    panda_framework.set_window_title("Fallout Equestria");
     cout << "[FoE] Opening Window" << endl;
-    window = framework.open_window();
+    window = panda_framework.open_window();
 	if (window == 0)
 	{
 		cout << "[FoE] Panda3D failed to create a display. Aborting now." << endl;
@@ -130,7 +136,7 @@ int main(int argc, char *argv[])
       MainMenu       mainMenu(window); // MainMenu will take over as a Panda3D async_task.
 
       cout << "[FoE] Starting Main Loop" << std::endl;
-      framework.main_loop();
+      panda_framework.main_loop();
     }
     unload_prc_file(config);
     cout << "[FoE] Properly wrapping up." << endl;
