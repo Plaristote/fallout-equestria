@@ -25,6 +25,17 @@ LPoint2f Mouse::GetPosition(void) const
   return (cursorPos);
 }
 
+LPoint2f Mouse::GetPositionRatio(void) const
+{
+  int      size_x   = _window->get_graphics_window()->get_x_size();
+  int      size_y   = _window->get_graphics_window()->get_y_size();
+  LPoint2f position = GetPosition();
+
+  position.set_x( ((position.get_x() / size_x) - 0.5) * 2);
+  position.set_y(-(((position.get_y() / size_y) - 0.5) * 2));
+  return (position);
+}
+
 NodePath NodePathGetChild(NodePath np, const std::string& name)
 {
   for (int i = 0 ; i < np.get_num_children() ; ++i)
@@ -80,8 +91,8 @@ void Mouse::GetHoveredAt(LPoint2f cursorPos)
 
 void Mouse::Run(void)
 {
-  MouseData pointer = _window->get_graphics_window()->get_pointer(0);
-  LPoint2f  cursorPos(pointer.get_x(), pointer.get_y());
+  MouseData pointer   = _window->get_graphics_window()->get_pointer(0);
+  LPoint2f  cursorPos = GetPositionRatio();
 
   GetHoveredAt(cursorPos);
 }

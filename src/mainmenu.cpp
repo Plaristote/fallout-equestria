@@ -15,6 +15,7 @@ static AsyncTask::DoneStatus main_menu_task(GenericAsyncTask* task, void* main_m
 
 MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window), _mouseCursor(window, _generalUi.GetRocketRegion()->get_context()), _view(window, _generalUi.GetRocketRegion()->get_context())
 {
+  cout << "[MainMenu] Initializing" << endl;
   _new_game_task = 0;
   _uiLoad        = 0;
   _levelTask     = 0;
@@ -39,6 +40,7 @@ MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window
 
   MusicManager::Initialize();
   MusicManager::Get()->Play("mainmenu");
+  cout << "[MainMenu] Finished initialization" << endl;
 }
 
 MainMenu::~MainMenu()
@@ -183,8 +185,8 @@ void MainMenu::QuitGame(Rocket::Core::Event&)
  */
 MainMenu::View::View(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
+  cout << "[MainMenu][View] Initializing" << endl;
   _root = context->LoadDocument("data/startmenu.rml");
-
   if (_root)
   {
     std::string                      idz[]                 = { "button-continue", "button-new-game", "button-load-game", "button-options", "button-quit" };
@@ -205,4 +207,5 @@ MainMenu::View::View(WindowFramework* window, Rocket::Core::Context* context) : 
     }
     Translate();
   }
+  cout << "[MainMenu][View] Finished initialization" << endl;
 }

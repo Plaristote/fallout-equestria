@@ -1,5 +1,4 @@
 #include "level/level.hpp"
-#include <boost/concept_check.hpp>
 
 #define AP_COST_USE             2
 

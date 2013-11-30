@@ -289,7 +289,7 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
       {
 	Controls::SelectOption* option = select->GetOption(i);
 	
-	if (option)
+    if (option)
 	{
 	  if (current_language.Value() == option->GetValue().CString())
 	  {
@@ -307,7 +307,7 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
       {
 	Controls::SelectOption* option = select->GetOption(i);
 
-	if (option)
+    if (option)
 	{
 	  if (current_language.Value() == option->GetValue().CString())
 	  {

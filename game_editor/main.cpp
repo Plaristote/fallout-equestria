@@ -12,6 +12,7 @@
 
 int main(int argc, char *argv[])
 {
+    qDebug("Fallout Equestria Game Editor");
     QCoreApplication::setOrganizationName("Shinygami");
     QCoreApplication::setOrganizationDomain("plaristote.franceserv.fr");
     QCoreApplication::setApplicationName("Fallout Equestria Editor");

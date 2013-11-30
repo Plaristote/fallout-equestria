@@ -17,6 +17,7 @@ public:
 
     void                      Run(void);
     LPoint2f                  GetPosition(void) const;
+    LPoint2f                  GetPositionRatio(void) const;
     void                      GetHoveredAt(LPoint2f);
     void                      GetWaypointHoveredAt(LPoint2f, NodePath);
 
