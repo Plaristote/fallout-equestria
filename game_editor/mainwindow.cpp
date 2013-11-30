@@ -631,12 +631,12 @@ void MainWindow::PandaButtonRelease(QMouseEvent*)
     waypointHovered      = 0;
     mapobjectHovered     = 0;
     dynamicObjectHovered = 0;
-    my_task.mouse->GetHoveredAt(my_task.mouse->GetPosition());
+    my_task.mouse->GetHoveredAt(my_task.mouse->GetPositionRatio());
     if (mapobjectSelected && !(mapobjectSelected->waypoints_root.is_hidden()))
     {
       if (ui->waypointPicker->isChecked())
       {
-        my_task.mouse->GetWaypointHoveredAt(my_task.mouse->GetPosition(), mapobjectSelected->waypoints_root);
+        my_task.mouse->GetWaypointHoveredAt(my_task.mouse->GetPositionRatio(), mapobjectSelected->waypoints_root);
         if (waypointHovered)
         {
           WaypointSelect(waypointHovered);

@@ -102,6 +102,17 @@ LPoint2f Mouse::GetPosition(void) const
   return (cursorPos);
 }
 
+LPoint2f Mouse::GetPositionRatio(void) const
+{
+  int      size_x   = _window->get_graphics_window()->get_x_size();
+  int      size_y   = _window->get_graphics_window()->get_y_size();
+  LPoint2f position = GetPosition();
+
+  position.set_x( ((position.get_x() / size_x) - 0.5) * 2);
+  position.set_y(-(((position.get_y() / size_y) - 0.5) * 2));
+  return (position);
+}
+
 void Mouse::ClosestWaypoint(World* world, short currentFloor)
 {
   //if (_mouseWatcher->has_mouse())
@@ -112,7 +123,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
     NodePath                  pickerPath;
     CollisionTraverser        collisionTraverser;
     PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
-    LPoint2f                  cursorPos             = GetPosition();
+    LPoint2f                  cursorPos             = GetPositionRatio();
     static bool               updated               = false;
     static LPoint2f           last_update;
 
@@ -120,6 +131,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
       updated         = false;
     if (!(updated == false))
       return ;
+    cout << "MousePos: " << cursorPos.get_x() << ", " << cursorPos.get_y() << endl;
     last_update       = cursorPos;
     updated           = true;
     pickerNode        = new CollisionNode("mouseRay2");
@@ -158,20 +170,20 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
       break ;
     }
 
-    pickerPath.detach_node();
+    // Detaching seems to be causing some memory issues.
+    //pickerPath.detach_node();
     collector.stop();
   }
 }
 
 void Mouse::Run(void)
 {
-  MouseData      pointer = _window->get_graphics_window()->get_pointer(0);
   PStatCollector collector("Level:Mouse:Run");
 
   collector.start();
   //if (pointer.get_in_window())
   {
-    LPoint2f cursorPos(pointer.get_x(), pointer.get_y());
+      LPoint2f cursorPos = GetPositionRatio();
 
     if (cursorPos != _lastMousePos)
     {

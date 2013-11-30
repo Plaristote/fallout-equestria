@@ -30,5 +30,5 @@ if (UNIX)
                                               p3rocket RocketCore RocketControls
                                               angelscript pthread z)
 else()
-  target_link_libraries(game libp3framework libpanda libpandafx libpandaphysics libpandaexpress libp3dtoolconfig libp3dtool libp3direct libpandaegg libp3rocket RocketCore RocketControls angelscript)
+  target_link_libraries(game libp3framework libpanda libpandafx libpandaphysics libpandaexpress libp3dtoolconfig libp3dtool libp3direct libpandaegg libp3rocket RocketCore RocketControls angelscript zlibstatic)
 endif()

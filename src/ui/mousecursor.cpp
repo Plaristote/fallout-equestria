@@ -6,6 +6,7 @@ MouseCursor* MouseCursor::_static = 0;
 
 MouseCursor::MouseCursor(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
+  cout << "[MouseCursor] Initializing" << endl;
   _root   = context->CreateDocument();
   if (_root)
   {
@@ -19,6 +20,7 @@ MouseCursor::MouseCursor(WindowFramework* window, Rocket::Core::Context* context
   }
   Show();
   _static = this;
+  cout << "[MouseCursor] Finished initialization" << endl;
 }
 
 void MouseCursor::SetHint(const std::string& key)
