@@ -904,6 +904,7 @@ void Level::MouseSuccessRateHint(void)
 
 AsyncTask::DoneStatus Level::do_task(void)
 {
+  cout << "Level do_task #1" << endl;
   float elapsedTime = _timer.GetElapsedTime();
 
   if (_levelUi.GetContext()->GetHoverElement() == _levelUi.GetContext()->GetRootElement())
@@ -994,6 +995,7 @@ AsyncTask::DoneStatus Level::do_task(void)
   _particle_manager.do_particles(ClockObject::get_global_clock()->get_dt());
   _mouse.Run();
   _timer.Restart();
+  cout << "Level do_task #End" << endl;
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);
 }
 

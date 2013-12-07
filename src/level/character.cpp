@@ -71,7 +71,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _object->nodePath.set_collide_mask(ColMask::DynObject);
 
   // Line of sight tools
-  _losNode      = new CollisionNode("losRay");
+  _losNode      = new_CollisionNode("losRay");
   _losNode->set_from_collide_mask(CollideMask(ColMask::FovBlocker | ColMask::FovTarget));
   _losNode->set_into_collide_mask(0);
   _losPath      = _window->get_render().attach_new_node(_losNode);
@@ -87,7 +87,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 
   // Fov tools
   _fovNeedsUpdate   = true;
-  _fovTargetNode    = new CollisionNode("fovTargetSphere");
+  _fovTargetNode    = new_CollisionNode("fovTargetSphere");
   _fovTargetNode->set_from_collide_mask(CollideMask(0));
   _fovTargetNode->set_into_collide_mask(CollideMask(ColMask::FovTarget));
   _fovTargetSphere  = new CollisionSphere(0, 0, 0, 2.5f);
@@ -95,7 +95,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _fovTargetNode->add_solid(_fovTargetSphere);
   //_fovTargetNp.show();
   
-  _fovNode   = new CollisionNode("fovSphere");
+  _fovNode   = new_CollisionNode("fovSphere");
   _fovNode->set_from_collide_mask(CollideMask(ColMask::FovTarget));
   _fovNode->set_into_collide_mask(CollideMask(0));
   _fovNp     = _object->nodePath.attach_new_node(_fovNode);

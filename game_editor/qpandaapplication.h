@@ -14,8 +14,6 @@ public:
     QPandaApplication(int argc, char **argv);
     ~QPandaApplication();
 
-    int                    exec(void);
-
     static PandaFramework& Framework(void) { return (*_framework); }
     static void            Close(void);
 

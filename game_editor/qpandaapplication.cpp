@@ -32,12 +32,6 @@ void           QPandaApplication::PandaRefresh(void)
   }
 }
 
-int            QPandaApplication::exec(void)
-{
-    //_timer.start();
-    return (QApplication::exec());
-}
-
 void           QPandaApplication::Close(void)
 {
     _continue = false;

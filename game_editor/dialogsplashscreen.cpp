@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QSettings>
 #include <QFileDialog>
+#include "qpandaapplication.h"
 
 DialogSplashscreen::DialogSplashscreen(QWidget *parent) :
     QDialog(parent),
@@ -29,11 +30,17 @@ DialogSplashscreen::DialogSplashscreen(QWidget *parent) :
     connect(ui->path,         SIGNAL(textChanged(QString)), this, SLOT(FolderChanged(QString)));
     connect(ui->history,      SIGNAL(currentTextChanged(QString)), this, SLOT(PickHistory(QString)));
     connect(ui->buttonBox,    SIGNAL(accepted()),           this, SLOT(Accepted()));
+    connect(ui->buttonBox,    SIGNAL(rejected()),           this, SLOT(Abort()));
 }
 
 DialogSplashscreen::~DialogSplashscreen()
 {
     delete ui;
+}
+
+void DialogSplashscreen::Abort()
+{
+    QPandaApplication::Close();
 }
 
 void DialogSplashscreen::FolderChanged(QString path)

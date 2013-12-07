@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 project(FalloutEquestria)
 
@@ -30,5 +30,7 @@ if (UNIX)
                                               p3rocket RocketCore RocketControls
                                               angelscript pthread z)
 else()
-  target_link_libraries(game libp3framework libpanda libpandafx libpandaphysics libpandaexpress libp3dtoolconfig libp3dtool libp3direct libpandaegg libp3rocket RocketCore RocketControls angelscript zlibstatic)
+  target_link_libraries(game libp3framework libpanda libpandafx libpandaphysics libpandaexpress libp3dtoolconfig libp3dtool libp3direct libpandaegg libp3rocket
+                        RocketCore RocketControls
+                        angelscript zlibstatic)
 endif()

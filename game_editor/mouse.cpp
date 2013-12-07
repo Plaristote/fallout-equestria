@@ -8,7 +8,7 @@ Mouse::Mouse(WindowFramework* window, QObject *parent) : QObject(parent), _windo
   MouseWatcher::init_type();
   _camera       = window->get_camera_group();
   _mouseWatcher = dynamic_cast<MouseWatcher*>(window->get_mouse().node());
-  _pickerNode   = new CollisionNode("mouseRay");
+  _pickerNode   = new_CollisionNode("mouseRay");
   _pickerPath   = _camera.attach_new_node(_pickerNode);
   _pickerNode->set_from_collide_mask(CollideMask(ColMask::DynObject | ColMask::Object));
   _pickerRay    = new CollisionRay();
