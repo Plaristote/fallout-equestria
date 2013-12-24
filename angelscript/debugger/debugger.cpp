@@ -5,6 +5,8 @@
 
 using namespace std;
 
+BEGIN_AS_NAMESPACE
+
 CDebugger::CDebugger()
 {
 	m_action = CONTINUE;
@@ -103,6 +105,12 @@ string CDebugger::ToString(void *value, asUINT typeId, bool expandMembers, asISc
 
 void CDebugger::LineCallback(asIScriptContext *ctx)
 {
+	// By default we ignore callbacks when the context is not active.
+	// An application might override this to for example disconnect the
+	// debugger as the execution finished.
+	if( ctx->GetState() != asEXECUTION_ACTIVE )
+		return;
+
 	if( m_action == CONTINUE )
 	{
 		if( !CheckBreakPoint(ctx) )
@@ -151,7 +159,7 @@ bool CDebugger::CheckBreakPoint(asIScriptContext *ctx)
 	int lineNbr = ctx->GetLineNumber(0, 0, &tmp);
 
 	// Consider just filename, not the full path
-	string file = tmp;
+	string file = tmp ? tmp : "";
 	size_t r = file.find_last_of("\\/");
 	if( r != string::npos )
 		file = file.substr(r+1);
@@ -466,7 +474,7 @@ void CDebugger::PrintValue(const std::string &expr, asIScriptContext *ctx)
 		// Look for global variables
 		if( !ptr )
 		{
-			asIScriptModule *mod = ctx->GetEngine()->GetModule(func->GetModuleName(), asGM_ONLY_IF_EXISTS);
+			asIScriptModule *mod = func->GetModule();
 			if( mod )
 			{
 				for( asUINT n = 0; n < mod->GetGlobalVarCount(); n++ )
@@ -541,7 +549,7 @@ void CDebugger::ListGlobalVariables(asIScriptContext *ctx)
 	asIScriptFunction *func = ctx->GetFunction();
 	if( !func ) return;
 
-	asIScriptModule *mod = ctx->GetEngine()->GetModule(func->GetModuleName(), asGM_ONLY_IF_EXISTS);
+	asIScriptModule *mod = func->GetModule();
 	if( !mod ) return;
 
 	stringstream s;
@@ -643,3 +651,5 @@ void CDebugger::Output(const string &str)
 	// By default we just output to stdout
 	cout << str;
 }
+
+END_AS_NAMESPACE

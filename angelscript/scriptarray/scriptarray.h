@@ -25,6 +25,7 @@ struct SArrayCache;
 class CScriptArray
 {
 public:
+	CScriptArray(asIObjectType *ot, void *initBuf); // Called from script when initialized with list
 	CScriptArray(asUINT length, asIObjectType *ot);
 	CScriptArray(asUINT length, void *defVal, asIObjectType *ot);
 	CScriptArray(const CScriptArray &other);
@@ -81,7 +82,7 @@ protected:
 	int               elementSize;
 	int               subTypeId;
 
-	bool  Less(const void *a, const void *b, bool asc, asIScriptContext *ctx);
+	bool  Less(const void *a, const void *b, bool asc, asIScriptContext *ctx, SArrayCache *cache);
 	void *GetArrayItemPointer(int index);
 	void *GetDataPointer(void *buffer);
 	void  Copy(void *dst, void *src);
