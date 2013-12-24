@@ -64,6 +64,7 @@ GeneralUi::~GeneralUi(void)
 {
   //framework->define_key("tab", "ConsoleHandle", 0, 0);
   delete _console;
+  delete _options;
 }
 
 /*
