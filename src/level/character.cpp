@@ -672,6 +672,11 @@ void                ObjectCharacter::DebugPathfinding(void)
   });
 }
 
+void                ObjectCharacter::TeleportTo(unsigned int id)
+{
+  TeleportTo(_level->GetWorld()->GetWaypointFromId(id));
+}
+
 void                ObjectCharacter::TeleportTo(Waypoint* waypoint)
 {
   if (waypoint)
@@ -707,7 +712,6 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
     {
       if (_level->GetPlayer() == this)
         _level->ConsoleWrite(i18n::T("No path."));
-      cout << "No path" << endl;
     }
     else
     {

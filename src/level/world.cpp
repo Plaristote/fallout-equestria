@@ -1649,7 +1649,7 @@ void           World::UpdateMapTree(void)
       {
         if (it->nodePath == parent)
           continue ;
-        std::cout << "Solving for: '" << solving_for << "'. Current item: '" << it->nodePath.get_name() << '\'' << std::endl;
+        //std::cout << "Solving for: '" << solving_for << "'. Current item: '" << it->nodePath.get_name() << '\'' << std::endl;
         if (it->parent == solving_for)
         {
           if (solving_for != "" && !parent.is_empty())

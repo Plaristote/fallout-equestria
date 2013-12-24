@@ -285,6 +285,8 @@ void Level::InsertDynamicObject(DynamicObject& object)
     _objects.push_back(instance);
 }
 
+PT(DirectionalLight) static_sunlight;
+
 void Level::InitSun(void)
 {
   NodePath     sun_root             = _world->floors_node;
@@ -297,7 +299,10 @@ void Level::InitSun(void)
     shadow_caster_buffer *= 2;
     film_size            += 128;
   }
-  _sunLight            = new DirectionalLight("sun_light");
+  if (static_sunlight.is_null())
+    static_sunlight = new DirectionalLight("sun_light");
+  _sunLight = static_sunlight;
+  //_sunLight            = new DirectionalLight("sun_light");
   _sunLight->set_shadow_caster(true, shadow_caster_buffer, shadow_caster_buffer);
   _sunLight->get_lens()->set_near_far(10.f, 1200.f);
   _sunLight->get_lens()->set_film_size(film_size);
@@ -426,7 +431,10 @@ void Level::InitPlayer(void)
   // Initializing Main Script
   //
   if (_main_script.IsDefined("Initialize"))
+    {
     _main_script.Call("Initialize");
+    exit(0);
+    }
 }
 
 void Level::InsertParty(PlayerParty& party)
@@ -865,7 +873,7 @@ void Level::RunDaylight(void)
   _sunLightAmbient->set_color(to_set / 3);
   //cout << "Sunlight color [" << _timeManager.GetHour() << "]->[" << it << "]: " << to_set.get_x() << "," << to_set.get_y() << "," << to_set.get_z() << endl;
 
-  // Angle va de 0/180 de 8h/20h à 20h/8h
+  // Angle va de 0/180 de 8h/20h   20h/8h
   float    step  = (current_hour) % 12 + (current_minute / 60.f);
   float    angle = ((180.f / 120.f) / 12.f) * step;
   LPoint2f pos   = _solar_circle.PointAtAngle(angle);
@@ -904,7 +912,6 @@ void Level::MouseSuccessRateHint(void)
 
 AsyncTask::DoneStatus Level::do_task(void)
 {
-  cout << "Level do_task #1" << endl;
   float elapsedTime = _timer.GetElapsedTime();
 
   if (_levelUi.GetContext()->GetHoverElement() == _levelUi.GetContext()->GetRootElement())
@@ -995,7 +1002,6 @@ AsyncTask::DoneStatus Level::do_task(void)
   _particle_manager.do_particles(ClockObject::get_global_clock()->get_dt());
   _mouse.Run();
   _timer.Restart();
-  cout << "Level do_task #End" << endl;
   return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);
 }
 

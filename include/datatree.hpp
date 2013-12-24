@@ -158,11 +158,6 @@ namespace Yaml
   class Parser;
 }
 
-namespace ShinyLang
-{
-  class Parser;
-}
-
 namespace Json
 {
   class Parser;
@@ -174,7 +169,6 @@ class DataTree : public DataBranch
 {
   friend class Data;
   friend class Yaml::Parser;
-  friend class ShinyLang::Parser;
   friend class Json::Parser;
 public:
   DataTree() : DataBranch() { root = true; }
@@ -186,8 +180,6 @@ public:
   {
     /*! \brief Loads a DataTree from a Yaml file */
     static DataTree* Yaml(const std::string& filename);
-    /*! \brief Loads a DataTree from a ShinyLang file */
-    static DataTree* ShinyLang(const std::string& filename);
     /*! \brief Loads a DataTree from a JSON file */
     static DataTree* JSON(const std::string& filename);
     /*! \brief Loads a DataTree from a JSON string */

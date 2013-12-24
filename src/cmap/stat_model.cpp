@@ -5,17 +5,17 @@ using namespace std;
 
 StatModel::StatModel(Data statsheet) : AngelScript::Object("scripts/ai/special.as"), _statsheet(statsheet)
 {
-  asDefineMethod("AvailableTraits", "StringList AvailableTraits(Data)");
-  asDefineMethod("ActivateTraits",  "bool ActivateTraits(Data, string, bool)");
-  asDefineMethod("AddExperience",   "void AddExperience(Data, int)");
-  asDefineMethod("AddSpecialPoint", "bool AddSpecialPoint(Data, string, int)");
-  asDefineMethod("XpNextLevel",     "int  XpNextLevel(Data)");
-  asDefineMethod("LevelUp",         "void LevelUp(Data)");
-  asDefineMethod("IsReady",         "bool IsReady(Data)");
-  asDefineMethod("UpdateAllValues", "void UpdateAllValues(Data)");
-  asDefineMethod("AddPerk",         "bool AddPerk(Data, string)");
-  asDefineMethod("AvailableSkills", "StringList AvailableSkills(Data, bool)");
-  asDefineMethod("AvailableSpells", "StringList AvailableSpells(Data, bool)");
+  asDefineMethod("AvailableTraits",       "StringList AvailableTraits(Data)");
+  asDefineMethod("ActivateTraits",        "bool ActivateTraits(Data, string, bool)");
+  asDefineMethod("AddExperience",         "void AddExperience(Data, int)");
+  asDefineMethod("AddSpecialPoint",       "bool AddSpecialPoint(Data, string, int)");
+  asDefineMethod("XpNextLevel",           "int  XpNextLevel(Data)");
+  asDefineMethod("LevelUp",               "void LevelUp(Data)");
+  asDefineMethod("IsReady",               "bool IsReady(Data)");
+  asDefineMethod("UpdateAllValues",       "void UpdateAllValues(Data)");
+  asDefineMethod("AddPerk",               "bool AddPerk(Data, string)");
+  asDefineMethod("AvailableSkills",       "StringList AvailableSkills(Data, bool)");
+  asDefineMethod("AvailableSpells",       "StringList AvailableSpells(Data, bool)");
   asDefineMethod("SelectRandomEncounter", "string SelectRandomEncounter(Data)");
 }
 

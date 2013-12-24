@@ -23,9 +23,13 @@ file(GLOB_RECURSE sourceFiles
      src/*.cpp
      angelscript/*.cpp)
 
-add_executable(game ${sourceFiles})
+if(UNIX)
+  add_executable(game ${sourceFiles})
+else()
+  add_executable(game ${sourceFiles} ressource.rc)
+endif()
 
-if (UNIX)
+if(UNIX)
   target_link_libraries(game -L/usr/lib/panda3d p3framework panda pandafx pandaphysics pandaexpress p3dtoolconfig p3dtool p3direct pandaegg
                                               p3rocket RocketCore RocketControls
                                               angelscript pthread z)
