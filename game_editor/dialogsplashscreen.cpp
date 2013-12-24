@@ -1,9 +1,9 @@
+#include "qpandaapplication.h"
 #include "dialogsplashscreen.h"
 #include "ui_dialogsplashscreen.h"
 #include <QDir>
 #include <QSettings>
 #include <QFileDialog>
-#include "qpandaapplication.h"
 
 DialogSplashscreen::DialogSplashscreen(QWidget *parent) :
     QDialog(parent),
