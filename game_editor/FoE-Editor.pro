@@ -4,6 +4,8 @@
 #
 #-------------------------------------------------
 
+win32:RC_FILE=ressource.rc
+
 QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -13,13 +15,17 @@ TEMPLATE = app
 
 unix:QMAKE_CXXFLAGS += -std=c++0x
 
+win32:QMAKE_CFLAGS_RELEASE  = -O2 -MD -zi
+win32:QMAKE_LFLAGS_RELEASE  = /INCREMENTAL:NO /DEBUG
+
 win32:LIBS +=  ../3rd_parties/lib/libp3framework.lib \
                 ../3rd_parties/lib/libpanda.lib \
                 ../3rd_parties/lib/libpandafx.lib \
                 ../3rd_parties/lib/libpandaexpress.lib \
                 ../3rd_parties/lib/libp3dtoolconfig.lib \
                 ../3rd_parties/lib/libp3dtool.lib \
-                ../3rd_parties/lib/libp3direct.lib
+                ../3rd_parties/lib/libp3direct.lib \
+                ../3rd_parties/lib/python27.lib
 unix:LIBS   += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3direct -lX11
 
 INCLUDEPATH += ../3rd_parties/include
