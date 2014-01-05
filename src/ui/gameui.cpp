@@ -51,6 +51,7 @@ GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
   _console->Hide();
   cout << "[UI] GameConsole ready" << endl;
   
+  cout << "Game Options creating" << endl;
   _options = new GameOptions(window, _rocket->get_context());
   _options->Hide();
   cout << "[UI] GameOptions ready" << endl;
@@ -242,7 +243,11 @@ void OptionsManager::Refresh(void)
 
 GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBase(window, context)
 {
+#ifndef _WIN32
   _root = context->LoadDocument("data/options.rml");
+#else
+  _root = 0;
+#endif
   if (_root)
   {
     Core::Element* fullscreen_box   = _root->GetElementById("fullscreen");
@@ -717,17 +722,13 @@ void GameInventory::ListenDropables(bool activate)
 
 GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
-  Rocket::Core::ElementDocument* doc     = context->LoadDocument("data/inventory.rml");
-
-  _root = doc;
-  if (doc)
+  if ((_root = context->LoadDocument("data/inventory.rml")) != 0)
   {
-    Core::Element*         itemListContainer = doc->GetElementById("body-inventory-items");
+    Core::Element*         itemListContainer = _root->GetElementById("body-inventory-items");
 
-    Core::ElementDocument* parentItems = doc;
     for (unsigned short i = 0 ; i < 200 ; ++i)
     {
-      Rocket::Core::Element* item = parentItems->CreateElement("invitem");
+      Rocket::Core::Element* item = _root->CreateElement("invitem");
 
       item->SetInnerRML("<img src=\"item.png\" class='inventory-item' />");
       itemListContainer->AppendChild(item);
@@ -743,7 +744,7 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
     DropEvent.EventReceived.Connect          (*this, &GameInventory::CallbackDropEvent);
 
     Translate();
-    doc->Show();
+    _root->Show();
   }
   _inventoryView.ObjectSelected.Connect(*this, &GameInventory::SetSelectedObject);
   _selectedObject = 0;

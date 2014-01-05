@@ -707,7 +707,6 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
     {
       if (_level->GetPlayer() == this)
         _level->ConsoleWrite(i18n::T("No path."));
-      cout << "No path" << endl;
     }
     else
     {

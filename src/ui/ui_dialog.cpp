@@ -69,5 +69,7 @@ void UiDialog::AddChoice(const string& name, std::function<void (Rocket::Core::E
 void UiDialog::PickedChoice(Rocket::Core::Event&)
 {
   Hide();
+#ifndef _WIN32 // WINBUG001: There's what appears to be double deletion at this point...
   Executor::ExecuteLater([this](void) { delete this; });
+#endif
 }
