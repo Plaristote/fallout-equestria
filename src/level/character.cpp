@@ -672,6 +672,11 @@ void                ObjectCharacter::DebugPathfinding(void)
   });
 }
 
+void                ObjectCharacter::TeleportTo(unsigned int id)
+{
+  TeleportTo(_level->GetWorld()->GetWaypointFromId(id));
+}
+
 void                ObjectCharacter::TeleportTo(Waypoint* waypoint)
 {
   if (waypoint)
