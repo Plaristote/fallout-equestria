@@ -22,6 +22,7 @@ private slots:
     void PickHistory(QString);
     void FolderChanged(QString);
     void Accepted(void);
+    void Abort(void);
 
 private:
     Ui::DialogSplashscreen *ui;

@@ -53,7 +53,7 @@ bool Level::IsInsideBuilding(unsigned char& floor)
   PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
   NodePath                  character_node        = GetPlayer()->GetNodePath();
   
-  pickerNode   = new CollisionNode("isInsideBuildingRay");
+  pickerNode   = new_CollisionNode("isInsideBuildingRay");
   pickerPath   = _window->get_render().attach_new_node(pickerNode);
   pickerRay    = new CollisionRay();
   pickerNode->add_solid(pickerRay);

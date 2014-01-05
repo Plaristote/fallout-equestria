@@ -196,7 +196,6 @@ Waypoint* World::GetWaypointFromId(unsigned int id)
       cout << "/!\\ RETARD ALERT ! Wrong waypoint (" << wp.id << ", looking for " << id << ')' << endl;
     return (&waypoints[id - 1]);
   }
-  cout  << "Wp size -> " << waypoints.size() << ", looking for " << id << endl;
   return (0);
 }
 #else
@@ -323,11 +322,11 @@ MapObject* World::GetMapObjectFromCollisionNode(NodePath path)
 {
   auto it  = objects.begin();
   auto end = objects.end();
-  
+
   for (; it != end ; ++it)
   {
     MapObject& object = *it;
-    
+
     if (!(object.collision_node.is_empty()) && object.collision_node.is_ancestor_of(path))
       return (&object);
   }
@@ -521,7 +520,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
                                light->nodePath.get_y(),
                                light->nodePath.get_z(),
                                light->zoneSize);
-  PT(CollisionNode)         colNode       = new CollisionNode("compileLightSphere");
+  PT(CollisionNode)         colNode       = new_CollisionNode("compileLightSphere");
   NodePath                  colNp         = rootLights.attach_new_node(colNode);
   PT(CollisionHandlerQueue) handlerQueue  = new CollisionHandlerQueue();
   CollisionTraverser        traverser;
@@ -792,12 +791,10 @@ void Waypoint::Arc::SetVisible(bool set)
   if (set && nodePath.is_empty())
   {
     csegment = new CollisionSegment();
-    node     = new CollisionNode("waypointArc");
+    node     = new_CollisionNode("waypointArc");
     node->set_into_collide_mask(CollideMask(0));
     node->set_from_collide_mask(CollideMask(0));
-# ifndef _WIN32
     node->add_solid(csegment);
-# endif
     csegment->set_point_a(0, 0, 0);
     nodePath = from.attach_new_node(node);
     nodePath.set_pos(0, 0, 0);
@@ -1090,7 +1087,7 @@ void MapObject::UnSerialize(World* world, Utils::Packet& packet)
     else if (_collider == MODEL)
     {
       LPoint3f scale = NodePathSize(render) / 2;
-      
+
       scaleX = scale.get_x();
       scaleY = scale.get_y();
       scaleZ = scale.get_z();
@@ -1100,7 +1097,7 @@ void MapObject::UnSerialize(World* world, Utils::Packet& packet)
   else
   {
     LPoint3f scale = NodePathSize(render) / 2;
-    
+
     collider = MODEL;
     InitializeCollider(collider, LPoint3f(), scale, LPoint3f());
   }
@@ -1158,7 +1155,8 @@ void MapObject::InitializeTree(World *world)
 
 void MapObject::InitializeCollider(Collider type, LPoint3f position, LPoint3f scale, LPoint3f hpr)
 {
-  PT(CollisionNode) node_ptr;
+  PT(CollisionNode)  node_ptr;
+  PT(CollisionSolid) solid_ptr;
 
   collider = type;
   switch (type)
@@ -1167,30 +1165,18 @@ void MapObject::InitializeCollider(Collider type, LPoint3f position, LPoint3f sc
     return ;
   case MODEL:
   case BOX:
-    {
-      PT(CollisionBox)  box      = new CollisionBox(LPoint3f(0, 0, 0), 1, 1, 1);
-
-      node_ptr = new CollisionNode("collision_node");
-#ifndef _WIN32
-      node_ptr->add_solid(box);
-#endif
+      solid_ptr = new CollisionBox(LPoint3f(0, 0, 0), 1, 1, 1);
       break ;
-    }
   case SPHERE:
-    {
-      PT(CollisionSphere) sphere = new CollisionSphere(LPoint3(0, 0, 0), 1);
-
-      node_ptr = new CollisionNode("collision_node");
-#ifndef _WIN32
-      node_ptr->add_solid(sphere);
-#endif
+      solid_ptr = new CollisionSphere(LPoint3(0, 0, 0), 1);
       break ;
-    }
   }
+  node_ptr       = new_CollisionNode("collision_node");
   collision_node = nodePath.attach_new_node(node_ptr);
   collision_node.set_pos(position);
   collision_node.set_scale(scale);
   collision_node.set_hpr(hpr);
+  node_ptr->add_solid(solid_ptr);
 }
 
 void MapObject::Serialize(Utils::Packet& packet)
@@ -1246,9 +1232,7 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
   int  iWaypoint;
 
   MapObject::UnSerialize(world, packet);
-  cout << "ma bite #1" << endl;
   packet >> iType >> interactions;
-  cout << "ma bite #2" << endl;
   type = (Type)iType;
 
   if      (type == Character)
@@ -1257,11 +1241,9 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
     packet >> iLocked >> key;
   else if (type == Item)
     packet >> key;
-  cout << "ma bite #3" << endl;
   locked = iLocked != 0;
 
   packet >> iWaypoint;
-  cout << "ma bite #4" << endl;
   waypoint = world->GetWaypointFromId(iWaypoint);
 
   // Blocked Arcs
@@ -1280,7 +1262,6 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
         {  lockedArcs.push_back(std::pair<int, int>(id1, id2)); }
       }
   }
-  cout << "ma bite #5" << endl;
 
   // Inventory serialization
   {
@@ -1296,7 +1277,6 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
           inventory.push_back(std::pair<std::string, int>(jsonSrc, quantity));
       }
   }
-  cout << "ma bite #6" << endl;
 }
 
 void DynamicObject::Serialize(Utils::Packet& packet)
@@ -1669,7 +1649,7 @@ void           World::UpdateMapTree(void)
       {
         if (it->nodePath == parent)
           continue ;
-        std::cout << "Solving for: '" << solving_for << "'. Current item: '" << it->nodePath.get_name() << '\'' << std::endl;
+        //std::cout << "Solving for: '" << solving_for << "'. Current item: '" << it->nodePath.get_name() << '\'' << std::endl;
         if (it->parent == solving_for)
         {
           if (solving_for != "" && !parent.is_empty())
@@ -1884,7 +1864,7 @@ void           World::CompileWaypoints(ProgressCallback progress_callback)
             LPoint3           tmp    = other.get_pos() - parent.get_pos();
             LPoint3           dir    = parent.get_relative_vector(other, tmp);
 
-            PT(CollisionNode) cnode  = new CollisionNode("compileWaypointsNode");
+            PT(CollisionNode) cnode  = new_CollisionNode("compileWaypointsNode");
             //cnode->set_into_collide_mask(ColMask::Object);
             cnode->set_from_collide_mask(CollideMask(ColMask::Object));
             np = (*it).nodePath.attach_new_node(cnode);
@@ -1934,7 +1914,7 @@ void World::CompileDoors(ProgressCallback progress_callback)
       PT(CollisionTube) ctube  = new CollisionTube(LPoint3(0, 0, 0),
                                                     parent.get_relative_vector(other, other.get_pos() - parent.get_pos()),
                                                     2.f);
-      PT(CollisionNode) cnode  = new CollisionNode("compileWaypointsNode");
+      PT(CollisionNode) cnode  = new_CollisionNode("compileWaypointsNode");
       cnode->set_into_collide_mask(CollideMask(ColMask::DynObject));
       cnode->set_from_collide_mask(CollideMask(ColMask::None));
       cnode->add_solid(ctube);

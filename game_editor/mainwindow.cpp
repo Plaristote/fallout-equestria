@@ -43,11 +43,11 @@ struct PandaTask : public AsyncTask
   {
     NodePath                  camera                  = window->get_camera_group();
     PT(CollisionRay)          picker_ray              = new CollisionRay();
-    PT(CollisionNode)         picker_node             = new CollisionNode("mouse_ray");
+    PT(CollisionNode)         picker_node             = new_CollisionNode("mouse_ray");
     NodePath                  picker_path             = camera.attach_new_node(picker_node);
     CollisionTraverser        traverser;
     PT(CollisionHandlerQueue) collision_handler_queue = new CollisionHandlerQueue();
-    LPoint2f                  cursor_pos              = mouse->GetPosition();
+    LPoint2f                  cursor_pos              = mouse->GetPositionRatio();
 
     picker_ray->set_from_lens(window->get_camera(0), cursor_pos.get_x(), cursor_pos.get_y());
     picker_node->add_solid(picker_ray);
@@ -581,7 +581,7 @@ void MainWindow::ShowWaypointZone(void)
 
     LPoint3                   position       = my_task.CollidingAt(mapobjectSelected);
     PT(CollisionSphere)       collision_box  = new CollisionSphere(position, 50);
-    PT(CollisionNode)         collision_node = new CollisionNode("waypoint_box");
+    PT(CollisionNode)         collision_node = new_CollisionNode("waypoint_box");
     NodePath                  collision_path = mapobjectSelected->nodePath.attach_new_node(collision_node);
     CollisionTraverser        traverser;
     PT(CollisionHandlerQueue) collision_handler_queue = new CollisionHandlerQueue();
@@ -733,13 +733,12 @@ void MainWindow::PandaInitialized()
     waypointHovered = 0;
     WindowFramework* window = ui->widget->Window();
 
-    _window = window;
-
-    my_task.panda_widget = ui->widget;
-    my_task.main_window  = this;
-    my_task.window  = window;
-    my_task.camera  = new SceneCamera(window, window->get_camera_group());
-    my_task.mouse   = new Mouse(window);
+    _window                 = window;
+    my_task.panda_widget    = ui->widget;
+    my_task.main_window     = this;
+    my_task.window          = window;
+    my_task.camera          = new SceneCamera(window, window->get_camera_group());
+    my_task.mouse           = new Mouse(window);
 
     connect(ui->widget, SIGNAL(MousePressed(QMouseEvent*)), this, SLOT(PandaButtonPressed(QMouseEvent*)));
     connect(ui->widget, SIGNAL(MouseRelease(QMouseEvent*)), this, SLOT(PandaButtonRelease(QMouseEvent*)));
@@ -749,8 +748,6 @@ void MainWindow::PandaInitialized()
     connect(ui->mapMoveBottom, SIGNAL(clicked()), this, SLOT(CameraMoveBottom()));
     connect(ui->mapMoveTop,    SIGNAL(clicked()), this, SLOT(CameraMoveTop()));
     connect(ui->mapMoveRight,  SIGNAL(clicked()), this, SLOT(CameraMoveRight()));
-
-    window->enable_keyboard();
 
 // WAYPOINTS
      connect(ui->waypointVisible,    SIGNAL(toggled(bool)),        this, SLOT(WaypointVisible()));
@@ -860,9 +857,10 @@ void MainWindow::PandaInitialized()
      connect(my_task.mouse,      SIGNAL(ObjectHovered(NodePath)),   this, SLOT(MapObjectHovered(NodePath)));
      connect(my_task.mouse,      SIGNAL(UnitHovered(NodePath)),     this, SLOT(DynamicObjectHovered(NodePath)));
 
-     waypointSelected = 0;
-     waypointHovered  = 0;
+    waypointSelected = 0;
+    waypointHovered  = 0;
 
+    window->enable_keyboard();
     my_task.timer.start();
     AsyncTaskManager::get_global_ptr()->add(&my_task);
 
@@ -1546,7 +1544,7 @@ void MainWindow::WaypointSyncTerrain(void)
       CollisionTraverser col_traverser;
       PT(CollisionHandlerQueue) col_queue = new CollisionHandlerQueue;
 
-      PT(CollisionNode) cnode = new CollisionNode("waypointSyncTerrainNode");
+      PT(CollisionNode) cnode = new_CollisionNode("waypointSyncTerrainNode");
       cnode->set_from_collide_mask(CollideMask(ColMask::Object));
 
       PT(CollisionSegment) segment = new CollisionSegment;

@@ -42,6 +42,12 @@
 #  define TEXT_ROOT  "textures/"
 # endif
 
+# ifdef _WIN32 // Workaround for broken CollisionNode stuff on Windows
+#  define new_CollisionNode(str) CollisionNode::Factory(str);
+# else
+#  define new_CollisionNode(str) new CollisionNode(str);
+# endif
+
 float   my_sqrt(const float x);
 LPoint3 NodePathSize(NodePath np);
 void    SetCollideMaskOnSingleNodepath(NodePath np, unsigned short collide_mask);

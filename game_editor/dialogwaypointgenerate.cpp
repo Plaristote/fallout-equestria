@@ -107,7 +107,7 @@ bool WaypointGenerator::LevelWaypoint(Waypoint* waypoint)
   {
     CollisionTraverser        col_traverser;
     PT(CollisionHandlerQueue) col_queue = new CollisionHandlerQueue;
-    PT(CollisionNode)         cnode     = new CollisionNode("waypoint");
+    PT(CollisionNode)         cnode     = new_CollisionNode("waypoint");
     PT(CollisionSegment)      segment   = new CollisionSegment;
 
     cnode->set_from_collide_mask(CollideMask(ColMask::Object));

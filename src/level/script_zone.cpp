@@ -4,7 +4,7 @@
 
 using namespace std;
 
-ScriptZone* ScriptZone::Factory(const std::string& zone_name, const std::string& callback)
+ScriptZone* ScriptZone::Factory(const std::string& zone_name)
 {
   if (Level::CurrentLevel != 0)
   {
@@ -14,21 +14,18 @@ ScriptZone* ScriptZone::Factory(const std::string& zone_name, const std::string&
 
     if (context && module && zone)
     {
-      ScriptZone* script = new ScriptZone(*zone, context, module, callback);
+      ScriptZone* script = new ScriptZone(*zone, context, module);
 
-      if (script->IsDefined("Callback"))
-        return (script);
-      delete script;
+      return (script);
     }
   }
   return (0);
 }
 
-ScriptZone::ScriptZone(LevelZone& zone, asIScriptContext* context, asIScriptModule* module, const std::string& callback) :
+ScriptZone::ScriptZone(LevelZone& zone, asIScriptContext* context, asIScriptModule* module) :
   AngelScript::Object(context, module), zone(zone)
 {
-  effect_enable = true;
-  asDefineMethod("Callback", callback);
+  effect_enabled = true;
   signals.Connect(zone.Entered, [this](InstanceDynamicObject* object)
   {
     if (IsDefined("Callback"))
@@ -67,18 +64,23 @@ void ScriptZone::SetEffect(const std::string& effect, int time)
     catch (const AngelScript::Exception&)
     {
     }
-    if (effect_enable == true)
+    if (effect_enabled == true)
       SetEffect(effect, time);
   };
 
   asDefineMethod("Effect", "void " + effect + "(Zone@)");
-  effect_enable = true;
+  effect_enabled = true;
   zone.AddEffect(apply_effect, time);
 }
 
 void ScriptZone::DisableEffect(void)
 {
-  effect_enable = false;
+  effect_enabled = false;
+}
+
+void ScriptZone::SetEnterCallback(const string &signature)
+{
+  asDefineMethod("Callback", signature);
 }
 
 void ScriptZone::SetExitCallback(const std::string& signature)

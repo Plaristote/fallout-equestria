@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 project(FalloutEquestria)
 
@@ -23,12 +23,18 @@ file(GLOB_RECURSE sourceFiles
      src/*.cpp
      angelscript/*.cpp)
 
-add_executable(game ${sourceFiles})
+if(UNIX)
+  add_executable(game ${sourceFiles})
+else()
+  add_executable(game ${sourceFiles} ressource.rc)
+endif()
 
-if (UNIX)
+if(UNIX)
   target_link_libraries(game -L/usr/lib/panda3d p3framework panda pandafx pandaphysics pandaexpress p3dtoolconfig p3dtool p3direct pandaegg
                                               p3rocket RocketCore RocketControls
                                               angelscript pthread z)
 else()
-  target_link_libraries(game libp3framework libpanda libpandafx libpandaphysics libpandaexpress libp3dtoolconfig libp3dtool libp3direct libpandaegg libp3rocket RocketCore RocketControls angelscript zlibstatic)
+  target_link_libraries(game libp3framework libpanda libpandafx libpandaphysics libpandaexpress libp3dtoolconfig libp3dtool libp3direct libpandaegg libp3rocket
+                        RocketCore RocketControls
+                        angelscript zlibstatic)
 endif()
