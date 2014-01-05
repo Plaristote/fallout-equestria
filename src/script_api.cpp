@@ -501,14 +501,15 @@ void AngelScriptInitialize(void)
 
   const char* zoneClass = "Zone";
   engine->RegisterObjectType(zoneClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(zoneClass, "void SetEnabled(bool)",         asMETHOD(ScriptZone,SetEnabled), asCALL_THISCALL);
-  engine->RegisterObjectMethod(zoneClass, "void SetEffect(string, int)",   asMETHOD(ScriptZone,SetEffect), asCALL_THISCALL);
-  engine->RegisterObjectMethod(zoneClass, "void DisableEffect()",          asMETHOD(ScriptZone,DisableEffect), asCALL_THISCALL);
-  engine->RegisterObjectMethod(zoneClass, "bool IsEnabled() const",        asMETHOD(ScriptZone,IsEnabled), asCALL_THISCALL);
-  engine->RegisterObjectMethod(zoneClass, "bool IsInside(DynamicObject@)", asMETHOD(ScriptZone,IsInside), asCALL_THISCALL);
-  engine->RegisterObjectMethod(zoneClass, "void Delete()",                 asMETHOD(ScriptZone,Delete), asCALL_THISCALL);
-  engine->RegisterObjectMethod(zoneClass, "void SetExitCallback(string)",  asMETHOD(ScriptZone,SetExitCallback), asCALL_THISCALL);
-  engine->RegisterGlobalFunction("Zone@ Zone_Factory(string, string)", asFUNCTION(ScriptZone::Factory), asCALL_CDECL);
+  engine->RegisterObjectMethod(zoneClass, "void SetEnabled(bool)",            asMETHOD(ScriptZone,SetEnabled), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void SetEffect(string, int)",      asMETHOD(ScriptZone,SetEffect), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void DisableEffect()",             asMETHOD(ScriptZone,DisableEffect), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "bool IsEnabled() const",           asMETHOD(ScriptZone,IsEnabled), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "bool IsInside(DynamicObject@)",    asMETHOD(ScriptZone,IsInside), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void Delete()",                    asMETHOD(ScriptZone,Delete), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void SetEnterCallback(string)",    asMETHOD(ScriptZone,SetEnterCallback), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void SetExitCallback(string)",     asMETHOD(ScriptZone,SetExitCallback), asCALL_THISCALL);
+  engine->RegisterGlobalFunction("Zone@ Zone_Factory(string)", asFUNCTION(ScriptZone::Factory), asCALL_CDECL);
 
   const char* worldLight = "Light";
   engine->RegisterObjectType(worldLight, 0, asOBJ_REF | asOBJ_NOCOUNT);
@@ -538,6 +539,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(levelClass, "Character@     GetCharacter(string)",                  asMETHODPR(Level,GetCharacter,(const std::string&),ObjectCharacter*), asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Character@     GetPlayer()",                           asMETHOD(Level,GetPlayer),           asCALL_THISCALL);  
   engine->RegisterObjectMethod(levelClass, "DynamicObject@ GetObject(string)",                     asMETHOD(Level,GetObject),           asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "void           SendToZone(Character@, string)",        asMETHODPR(Level,SetEntryZone,(ObjectCharacter*,const std::string&),void),        asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           ActionUseWeaponOn(Character@, Character@, Item@, int)",     asMETHOD(Level,ActionUseWeaponOn), asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           ActionUseObjectOn(Character@, DynamicObject@, Item@, int)", asMETHOD(Level,ActionUseObjectOn), asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           ActionUseSkillOn(Character@, DynamicObject@, string)",      asMETHOD(Level,ActionUseSkillOn),  asCALL_THISCALL);
