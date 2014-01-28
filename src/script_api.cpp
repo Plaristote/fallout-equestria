@@ -11,9 +11,6 @@
 
 #include "worldmap/worldmap.hpp"
 
-asIScriptContext* as_current_context;
-asIScriptModule*  as_current_module;
-
 /*
  * Script Interface for Tasks
  */
@@ -187,8 +184,8 @@ public:
     else
       cout << "RocketAsListener constructed with null RmlElement" << endl;
     _callback = "void " + func_name + "(Data, RmlElement@, string)";
-    _context  = as_current_context;
-    _module   = as_current_module;
+    _context  = AngelScript::ContextLock::Context();
+    _module   = AngelScript::ContextLock::Module();
   }
 
   ~RocketAsListener()

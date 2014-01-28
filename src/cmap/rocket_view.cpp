@@ -323,7 +323,7 @@ void StatViewRocket::SetEditMode(EditMode mode)
   const char*    createElems[]  = { "continue", "cancel", "special-points-title", 0 };
   const char*    updateElems[]  = { "continue", "cancel", "experience", "skill-points-title", 0 };
   const char*    displayElems[] = { "cancel",   "experience", 0 };
-  const char**   toShow;
+  const char**   toShow         = 0;
   const char**   elemArrays[]   = { createElems, updateElems, displayElems, 0 };
   Core::Element* cursor         = _root->GetElementById("edit-value-cursor");
   Core::Element* special        = _root->GetElementById("special");

@@ -4,6 +4,7 @@
 # include "rocket_extension.hpp"
 # include "scriptengine.hpp"
 # include "dataengine.hpp"
+# include "as_object.hpp"
 
 class Pipbuck : public UiBase
 {
@@ -38,8 +39,7 @@ private:
   typedef std::list<App*> AppList;
   
   DataEngine&       _data_engine;
-  asIScriptContext* _context;
-  asIScriptModule*  _module;
+  AngelScript::Object _object;
   AppList           _running_apps;
   App*              _running_app;
   bool              _asked_unfocus;
@@ -61,7 +61,11 @@ class PipbuckAppScript : public Pipbuck::App
 {
 public:
   PipbuckAppScript(Data script);
-  ~PipbuckAppScript() {}
+  ~PipbuckAppScript()
+  {
+    if (_object)
+      delete _object;
+  }
   
   const std::string GetAppId(void) const { return (_data.Key()); }
 
@@ -74,9 +78,8 @@ public:
   void Focused(Rocket::Core::Element*, DataEngine&);
 
 private:
-  asIScriptContext* _context;
-  asIScriptModule*  _module;
-  Data              _data;
+  Data                 _data;
+  AngelScript::Object* _object;
 };
 
 # include "timer.hpp"

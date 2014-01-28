@@ -7,15 +7,16 @@ using namespace std;
 extern asIScriptContext* as_current_context;
 extern asIScriptModule*  as_current_module;
 
-Pipbuck::Pipbuck(WindowFramework* w, Rocket::Core::Context* c, DataEngine& data): UiBase(w, c), _data_engine(data)
+Pipbuck::Pipbuck(WindowFramework* w, Rocket::Core::Context* c, DataEngine& data): UiBase(w, c), _data_engine(data), _object("scripts/ai/general_pony.as")
 {
   _root          = c->LoadDocument("data/pipbuck.rml");
   _asked_unfocus = false;
-  _module        = Script::ModuleManager::Require("pipbuck", "scripts/ai/general_pony.as");
   EventStartApp.EventReceived.Connect   (*this, &Pipbuck::StartApp);
   EventQuitApp.EventReceived.Connect    (*this, &Pipbuck::QuitApp);
   EventHome.EventReceived.Connect       (*this, &Pipbuck::GoHome);
   EventHidePipbuck.EventReceived.Connect(*this, &UiBase::FireHide);
+
+  _object.asDefineMethod("GetAvailableApps", "StringList GetAvailableApps(Data)");
 
   if (_root)
   {
@@ -226,35 +227,27 @@ void Pipbuck::ReloadApps(void)
   stringstream           rml;
 
   // Get App List from scripts
-  if (_module)
+  if (_object.IsDefined("GetAvailableApps"))
   {
-    asIScriptContext*  context = Script::Engine::Get()->CreateContext();
-    asIScriptFunction* func    = _module->GetFunctionByDecl("StringList GetAvailableApps(Data)");
+    AngelScript::Type<Data*> param(&_data_engine);
 
-    if (func)
-    {
-      context->Prepare(func);
-      context->SetArgObject(0, &_data_engine);
-      context->Execute();
-      apps = *(reinterpret_cast<list<string>*>(context->GetReturnObject()));
-      func->Release();
-    }
-    else
-      cout << "pipbuck.as: missing function StringList GetAvailableApps(Data)" << endl;
-    //context->Release();
+    apps = *(list<string>*)(_object.Call("GetAvailableApps", 1, &param));
   }
   else
-    cout << "pipbuck.as: isn't loaded" << endl;
+    cout << "pipbuck.as: missing function StringList GetAvailableApps(Data)" << endl;
+
   unsigned int iterator = 0;
   rml << "<div id='app_list'>";
   if (apps.empty())
     rml << i18n::T("You don't have any application right now");
+  cout << "[Pipbuck] Adding applications" << endl;
   for_each(apps.begin(), apps.end(), [&rml, &iterator, apps_data](const string& app)
   {
     Data app_data = apps_data[app];
 
+    cout << "-> Adding application " << app << endl;
     rml << "<button class='app_button' id='app_button_" << iterator << "' data-app='" << app << "'>";
-    rml << "<img class='app_icon' src='../textures/" << app_data["icon"].Value() << "' />";
+    rml << "<img class='app_icon' src='../textures/pipbuck/" << app_data["icon"].Value() << "' />";
     rml << "</button>";
     ++iterator;
   });
@@ -637,74 +630,82 @@ void PipbuckClockApp::RunAsMainTask(Rocket::Core::Element* root, DataEngine& de)
 PipbuckAppScript::PipbuckAppScript(Data script)
 {
   _data.Duplicate(script);
-  _context = Script::Engine::Get()->CreateContext();
-  _module  = Script::ModuleManager::Require(_data["src"].Value(), "scripts/pipbuck/" + _data["src"].Value());
+  _object = new AngelScript::Object((const std::string&)("scripts/pipbuck/" + _data["src"].Value()));
 }
 
 void PipbuckAppScript::Exited(DataEngine& de)
 {
-  const string       function_name = "void " + _data["hooks"]["exit"].Value() + "(Data)";
-  asIScriptFunction* function      = _module->GetFunctionByDecl(function_name.c_str());
-  
-  if (function)
+  const string             function_name = _data["hooks"]["exit"].Value();
+  AngelScript::Type<Data*> param(&de);
+
+  if (!(_object->IsDefined(function_name)))
   {
-    as_current_context = _context;
-    as_current_module  = _module;
-     _context->Prepare(function);
-    _context->SetArgObject(0, &de);
-    _context->Execute();
+    const string     function_decl = "void " + _data["hooks"]["exit"].Value() + "(Data)";
+
+    _object->asDefineMethod(function_name, function_decl);
+    if (!(_object->IsDefined(function_name)))
+    {
+      cout << "App missing exit hook (prototype is '" << function_name << "')" << endl;
+      return ;
+    }
   }
+  _object->Call(function_name, 1, &param);
 }
 
 void PipbuckAppScript::Focused(Rocket::Core::Element* root, DataEngine& de)
 {
-  cout << "Application Focused" << endl;
-  const string       function_name = "void " + _data["hooks"]["focused"].Value() + "(RmlElement@, Data)";
-  asIScriptFunction* function      = _module->GetFunctionByDecl(function_name.c_str());
-  
-  if (function)
+  const string                              function_name = _data["hooks"]["focused"].Value();
+  AngelScript::Type<Rocket::Core::Element*> param1(root);
+  AngelScript::Type<Data*>                  param2(&de);
+
+  if (!(_object->IsDefined(function_name)))
   {
-    as_current_context = _context;
-    as_current_module  = _module;
-    _context->Prepare(function);
-    _context->SetArgObject(0, root);
-    _context->SetArgObject(1, &de);
-    _context->Execute();
+    const string function_decl = "void" + function_name + "(RmlElement@, Data)";
+
+    _object->asDefineMethod(function_name, function_decl);
+    if (!(_object->IsDefined(function_name)))
+    {
+      cout << "App missing focused hook (prototype is '" << function_name << "')" << endl;
+      return ;
+    }
   }
-  else
-    cout << "App missing focused hook (prototype is '" << function_name << "')" << endl;
+  _object->Call(function_name, 2, &param1, &param2);
 }
 
 void PipbuckAppScript::Unfocused(DataEngine& de)
 {
-  const string       function_name = "void " + _data["hooks"]["unfocused"].Value() + "(Data)";
-  asIScriptFunction* function      = _module->GetFunctionByDecl(function_name.c_str());
-  
-  if (function)
+  const string             function_name = _data["hooks"]["unfocused"].Value();
+  AngelScript::Type<Data*> param(&de);
+
+  if (!(_object->IsDefined(function_name)))
   {
-    as_current_context = _context;
-    as_current_module  = _module;
-    _context->Prepare(function);
-    _context->SetArgObject(0, &de);
-    _context->Execute();
+    const string     function_decl = "void " + function_name + "(Data)";
+
+    _object->asDefineMethod(function_name, function_decl);
+    if (!(_object->IsDefined(function_name)))
+    {
+      cout << "App missing exit unfocused (prototype is '" << function_name << "')" << endl;
+      return ;
+    }
   }
+  _object->Call(function_name, 1, &param);
 }
 
 void PipbuckAppScript::RunAsBackgroundTask(DataEngine& de)
 {
-  const string       function_name = "int " + _data["hooks"]["run_background"].Value() + "(Data)";
-  asIScriptFunction* function      = _module->GetFunctionByDecl(function_name.c_str());
-  int                ret_value     = 0;
+  const string             function_name = _data["hooks"]["run_background"].Value();
+  AngelScript::Type<Data*> param(&de);
+  int                      ret_value;
 
-  if (function)
+  if (!(_object->IsDefined(function_name)))
   {
-    as_current_context = _context;
-    as_current_module  = _module;
-    _context->Prepare(function);
-    _context->SetArgObject(0, &de);
-    _context->Execute();
-    ret_value = _context->GetReturnDWord();
+    const string     function_decl = "int " + function_name + "(Data)";
+
+    _object->asDefineMethod(function_name, function_decl);
+    if (!(_object->IsDefined(function_name)))
+      return ;
   }
+  ret_value = _object->Call(function_name, 1, &param);
   switch (ret_value)
   {
     case 0:
@@ -721,20 +722,20 @@ void PipbuckAppScript::RunAsBackgroundTask(DataEngine& de)
 
 void PipbuckAppScript::RunAsMainTask(Rocket::Core::Element* root, DataEngine& de)
 {
-  const string       function_name = "int " + _data["hooks"]["run_focused"].Value() + "(RmlElement@, Data)";
-  asIScriptFunction* function      = _module->GetFunctionByDecl(function_name.c_str());
-  int                ret_value     = 0;
-  
-  if (function)
+  const string                              function_name = _data["hooks"]["run_focused"].Value();
+  AngelScript::Type<Rocket::Core::Element*> param1(root);
+  AngelScript::Type<Data*>                  param2(&de);
+  int                                       ret_value;
+
+  if (!(_object->IsDefined(function_name)))
   {
-    as_current_context = _context;
-    as_current_module  = _module;
-    _context->Prepare(function);
-    _context->SetArgObject(0, root);
-    _context->SetArgObject(1, &de);
-    _context->Execute();
-    ret_value = _context->GetReturnDWord();
+    const string     function_decl = "int " + function_name + "(RmlElement@, Data)";
+
+    _object->asDefineMethod(function_name, function_decl);
+    if (!(_object->IsDefined(function_name)))
+      return ;
   }
+  ret_value = _object->Call(function_name, 2, &param1, &param2);
   switch (ret_value)
   {
     case 0:
@@ -751,24 +752,19 @@ void PipbuckAppScript::RunAsMainTask(Rocket::Core::Element* root, DataEngine& de
 
 bool PipbuckAppScript::Started(DataEngine& de)
 {
-  bool               ret_value     = false;
+  const string             function_name = _data["hooks"]["start"].Value();
+  AngelScript::Type<Data*> param(&de);
 
-  if (_context && _module)
+  if (!(_object->IsDefined(function_name)))
   {
-    const string       function_name = "bool " + _data["hooks"]["start"].Value() + "(Data)";
-    asIScriptFunction* function      = _module->GetFunctionByDecl(function_name.c_str());
+    const string           function_decl = "bool " + function_name + "(Data)";
 
-    if (function)
+    _object->asDefineMethod(function_name, function_decl);
+    if (!(_object->IsDefined(function_name)))
     {
-      as_current_context = _context;
-      as_current_module  = _module;
-      _context->Prepare(function);
-      _context->SetArgObject(0, &de);
-      _context->Execute();
-      ret_value = _context->GetReturnByte() != 0;
-    }
-    else
       cout << "App missing start hook (prototype is configured to be: '" << function_name << "'" << endl;
+      return (false);
+    }
   }
-  return (ret_value);
+  return (_object->Call(function_name, 1, &param));
 }

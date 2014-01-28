@@ -115,9 +115,10 @@ namespace Script
     
     static void Register(asIScriptEngine* engine, const std::string& arrayName, const std::string& typeName)
     {
-      const std::string type    = arrayName;
-      const std::string itType  = arrayName + "Iterator";
-      const std::string ritType = arrayName + "RIterator";
+      const std::string className = (typeName[typeName.length() - 1] == '@') ? typeName.substr(0, typeName.length() - 1) : typeName;
+      const std::string type      = arrayName;
+      const std::string itType    = arrayName + "Iterator";
+      const std::string ritType   = arrayName + "RIterator";
 
       engine->RegisterObjectType(type.c_str(), sizeof(StdList), asOBJ_VALUE | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_DESTRUCTOR);
       engine->RegisterObjectBehaviour(type.c_str(), asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(StdList<T>::Constructor), asCALL_CDECL_OBJLAST);
@@ -146,14 +147,14 @@ namespace Script
       engine->RegisterObjectMethod(itType.c_str(), "void opPostInc()", asMETHOD(StdList<T>::asIterator,Increment), asCALL_THISCALL);
       engine->RegisterObjectMethod(itType.c_str(), "void opPostDec()", asMETHOD(StdList<T>::asIterator,Decrement), asCALL_THISCALL);
       engine->RegisterObjectMethod(itType.c_str(), ("bool opEquals(" + itType + ")").c_str(),  asMETHOD(StdList<T>::asIterator,Equal),     asCALL_THISCALL);
-      engine->RegisterObjectMethod(typeName.c_str(), (typeName + " opAssign(" + itType + ")").c_str(), asFUNCTION(StdList<T>::asIterator::Assign), asCALL_CDECL_OBJFIRST);
+      engine->RegisterObjectMethod(className.c_str(), (typeName + " opAssign(" + itType + ")").c_str(), asFUNCTION(StdList<T>::asIterator::Assign), asCALL_CDECL_OBJFIRST);
 
       engine->RegisterObjectMethod(ritType.c_str(), ("const " + ritType + " &opAssign(const " + ritType + " &in)").c_str(), asMETHODPR(StdList<T>::asRIterator,operator=, (const StdList<T>::asRIterator&), const StdList<T>::asRIterator&), asCALL_THISCALL);
       engine->RegisterObjectMethod(ritType.c_str(), (typeName + " Value()").c_str(), asMETHOD(StdList<T>::asRIterator,Value), asCALL_THISCALL);
       engine->RegisterObjectMethod(ritType.c_str(), "void opPostInc()", asMETHOD(StdList<T>::asRIterator,Increment), asCALL_THISCALL);
       engine->RegisterObjectMethod(ritType.c_str(), "void opPostDec()", asMETHOD(StdList<T>::asRIterator,Decrement), asCALL_THISCALL);
       engine->RegisterObjectMethod(ritType.c_str(), ("bool opEquals(" + ritType + ")").c_str(),  asMETHOD(StdList<T>::asRIterator,Equal),     asCALL_THISCALL);      
-      engine->RegisterObjectMethod(typeName.c_str(), (typeName + " opAssign(" + ritType + ")").c_str(), asFUNCTION(StdList<T>::asRIterator::Assign), asCALL_CDECL_OBJFIRST);
+      engine->RegisterObjectMethod(className.c_str(), (typeName + " opAssign(" + ritType + ")").c_str(), asFUNCTION(StdList<T>::asRIterator::Assign), asCALL_CDECL_OBJFIRST);
     }
 
     static void Constructor(void* memory) { new(memory) StdList();            }
