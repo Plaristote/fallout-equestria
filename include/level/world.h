@@ -48,9 +48,11 @@
 #  define new_CollisionNode(str) new CollisionNode(str);
 # endif
 
-float   my_sqrt(const float x);
-LPoint3 NodePathSize(NodePath np);
-void    SetCollideMaskOnSingleNodepath(NodePath np, unsigned short collide_mask);
+// Following c functions are implemented in level/world/misc.cpp
+float    my_sqrt(const float x);
+LPoint3  NodePathSize(NodePath np);
+void     SetCollideMaskOnSingleNodepath(NodePath np, unsigned short collide_mask);
+LPoint3f operator*(LPoint3f,LPoint3f);
 
 namespace ColMask
 {
