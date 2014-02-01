@@ -118,7 +118,7 @@ void Party::UnSerialize(Utils::Packet& packet)
       packet >> json_src >> quantity;
       object->inventory.push_back(pair<string, int>(json_src, quantity));
     }
-    object->nodePath = NodePath(name);
+    object->nodePath.set_name(name);
     object->type = (DynamicObject::Type)type;
     _objects.push_back(object);
   }
