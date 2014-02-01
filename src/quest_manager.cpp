@@ -32,7 +32,7 @@ void QuestManager::AddQuest(Data data)
   quest->data = _data_engine["Quests"][data.Key()];
   quest->QuestCompleted.Connect(*this, &QuestManager::QuestCompleted);
   _quests.push_back(quest);
-  //GameTask::CurrentGameTask->PlaySound("pipbuck/newquest");
+  GameTask::CurrentGameTask->PlaySound("pipbuck/newquest");
   if (_level)
     quest->Initialize(_level);
   QuestsUpdated.Emit();
@@ -46,7 +46,7 @@ void QuestManager::QuestCompleted(Quest* quest)
   {
     data["complete"] = 1;
     _stats_controller->AddExperience(data["reward"]);
-    //GameTask::CurrentGameTask->PlaySound("pipbuck/questdone");
+    GameTask::CurrentGameTask->PlaySound("pipbuck/questdone");
   }
 }
 

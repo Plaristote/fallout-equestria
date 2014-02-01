@@ -6,7 +6,6 @@
 # include <panda3d/pandaFramework.h>
 # include <panda3d/pandaSystem.h>
 # include <panda3d/texturePool.h>
-# include <panda3d/nodePathCollection.h>
 # include <panda3d/collisionSphere.h>
 # include <panda3d/collisionSegment.h>
 # include <panda3d/collisionTube.h>
@@ -14,21 +13,10 @@
 # include <panda3d/collisionHandlerQueue.h>
 # include <panda3d/collisionTraverser.h>
 
-# include <panda3d/pointLight.h>
-# include <panda3d/directionalLight.h>
-# include <panda3d/ambientLight.h>
-# include <panda3d/spotlight.h>
-
 # include <algorithm>
 # include "serializer.hpp"
 
 # include "divide_and_conquer.hpp"
-
-# ifndef TRUE_SQRT
-#  define SQRT my_sqrt
-# else
-#  define SQRT sqrt
-# endif
 
 # include "is_game_editor.h"
 
@@ -49,364 +37,19 @@
 # endif
 
 // Following c functions are implemented in level/world/misc.cpp
-float    my_sqrt(const float x);
 LPoint3  NodePathSize(NodePath np);
 void     SetCollideMaskOnSingleNodepath(NodePath np, unsigned short collide_mask);
 LPoint3f operator*(LPoint3f,LPoint3f);
 
-namespace ColMask
-{
-  enum
-  {
-      None                  = 0,
-      Waypoint              = 1,
-      DynObject             = 2,
-      Object                = 4,
-      FovTarget             = 8,
-      WpPlane               = 16,
-      FovBlocker            = 32,
-      CheckCollisionOnModel = 64
-  };
-}
 
-struct World;
-struct WorldLight;
+#include "world/colmask.hpp"
+#include "world/interactions.hpp"
 
-struct Waypoint
-{
-    struct ArcObserver
-    {
-      virtual bool CanGoThrough(unsigned char type) = 0;
-      virtual void GoingThrough(void*)              = 0;
-    };
-
-    struct Arc
-    {
-        Arc(NodePath from, Waypoint* to);
-        Arc(const Arc&);
-    ~Arc();
-
-        bool operator==(Waypoint* other) { return (to == other); }
-        void UpdateDirection(void);
-        void Destroy(void);
-
-        void SetVisible(bool);
-
-        PT(CollisionSegment) csegment;
-        PT(CollisionNode)    node;
-        NodePath             nodePath;
-        NodePath             from;
-        Waypoint*            to;
-
-        ArcObserver*         observer;
-    };
-
-    typedef std::list<Arc> Arcs;
-    typedef std::vector<std::pair<Arc, unsigned short> > ArcsWithdrawed;
-
-    unsigned int           id;
-    unsigned char          floor;
-    Arcs                   arcs;
-    ArcsWithdrawed         arcs_withdrawed;
-    NodePath               nodePath;
-    std::list<WorldLight*> lights;
-
-    void WithdrawArc(Waypoint* other);
-    void UnwithdrawArc(Waypoint* other, ArcObserver* observer);
-    std::pair<Arc, unsigned short>* GetWithdrawable(Waypoint* other);
-    Waypoint*                       GetRandomWaypoint(void) const;
-
-    Waypoint(NodePath root);
-    Waypoint(void) {}
-
-    bool                 operator==(const Waypoint& other) const;
-    bool                 operator==(const Waypoint* other) const;
-    bool                 operator==(unsigned int id)       const { return (this->id == id); }
-    bool                 operator<(const Waypoint& other)  const { return (id < other.id); }
-    bool                 operator>(const Waypoint& other)  const { return (id > other.id); }
-    Arcs::iterator       ConnectUnsafe(Waypoint* other);
-    Arcs::iterator       Connect(Waypoint* other);
-    Arcs::iterator       Disconnect(Waypoint* other);
-    void                 DisconnectAll(void);
-    Arc*                 GetArcTo(unsigned int id);
-    void                 PositionChanged(void);
-    void                 UpdateArcDirection(Waypoint*);
-    void                 SetSelected(bool);
-    bool                 IsSelected(void) const { return (selected); }
-
-    void                 SetArcsVisible(bool);
-
-    // Pathfinding features
-    float                GoalDistanceEstimate(const Waypoint& goal) const { return (GetDistanceEstimate(goal)); }
-    float                GetDistanceEstimate(const Waypoint& other) const;
-    std::list<Waypoint*> GetSuccessors(Waypoint* parent);
-    float                GetCost(Waypoint&) { return (1.f); }
-    // Divide and conquer
-    LPoint3f             GetPosition(void) const { return (nodePath.get_pos()); }
-
-    // Loading
-    void                 LoadArcs(void);
-    void                 Unserialize(Utils::Packet& packet);
-    void                 UnserializeLoadArcs(World*);
-    void                 Serialize(World*, Utils::Packet& packet);
-
-private:
-    friend struct World;
-    bool                 selected;
-    // unserialize tmp
-    std::vector<int>     tmpArcs;
-};
-
-struct MapObject
-{
-  typedef std::vector<Waypoint*> Waypoints;
-
-  enum Collider
-  {
-    NONE,
-    MODEL,
-    BOX,
-    SPHERE
-  };
-
-  NodePath      nodePath, render, collision_node;
-  PT(Texture)   texture;
-  unsigned char floor;
-  Waypoints     waypoints;
-  NodePath      waypoints_root;
-
-  std::string   strModel;
-  std::string   strTexture;
-  std::string   parent;
-  Collider      collider;
-
-  void          SetFloor(unsigned char floor);
-  void          ReparentTo(MapObject* object);
-
-  void          UnSerialize(World* world, Utils::Packet& packet);
-  void          UnserializeWaypoints(World*, Utils::Packet& packet);
-  void          Serialize(Utils::Packet& packet);
-  static void   InitializeTree(World* world);
-  void          InitializeCollider(Collider type, LPoint3f position, LPoint3f scale, LPoint3f hpr);
-};
-
-namespace Interactions
-{
-  enum
-  {
-      None      = 0,
-      Use       = 1,
-      UseSkill  = 2,
-      UseObject = 4,
-      TalkTo    = 8,
-      UseSpell  = 16
-  };
-}
-
-struct DynamicObject : public MapObject
-{
-    enum Type
-    {
-        Door,
-        Shelf,
-        Locker,
-        Character,
-    Item
-    };
-
-    Waypoint* waypoint;
-    Type      type;
-
-    // All
-    std::string          script;
-
-    // Door / Locker
-    bool                            locked;
-    std::string                     key; // Also used to store item names for DynamicObject::Item
-    std::list<std::pair<int, int> > lockedArcs;
-
-    // Shelf / Character
-    std::list<std::pair<std::string, int> > inventory;
-
-    // Character
-    std::string          charsheet;
-
-    // Interactions
-    char                 interactions;
-    std::string          dialog;
-
-    void UnSerialize(World*, Utils::Packet& packet);
-    void Serialize(Utils::Packet& packet);
-};
-
-struct Zone
-{
-  bool operator==(const std::string& comp) { return (name == comp); }
-
-  bool Contains(unsigned int id) const
-  {
-    auto      it = waypoints.begin(), end = waypoints.end();
-
-    for (; it != end ; ++it)
-    {
-      if ((*it)->id == id)
-        return (true);
-    }
-    return (false);
-  }
-
-  bool Contains(Waypoint* wp) const { return (Contains(wp->id)); }
-
-  std::string          name;
-  std::list<Waypoint*> waypoints;
-};
-
-struct ExitZone : public Zone
-{
-  std::list<std::string> destinations;
-};
-
-typedef Zone EntryZone;
-
-struct WorldLight
-{
-  enum Type
-  {
-    Point,
-    Directional,
-    Ambient,
-    Spot
-  };
-
-  enum ParentType
-  {
-    Type_None,
-    Type_MapObject,
-    Type_DynamicObject
-  };
-
-  WorldLight(Type type, ParentType ptype, NodePath parent, const std::string& name) : name(name), type(type), parent_type(ptype), parent(parent), parent_i(0)
-  {
-    Initialize();
-  }
-
-  WorldLight(NodePath parent) : parent(parent), parent_i(0) {}
-
-  void   SetEnabled(bool);
-  void   Destroy(void);
-
-  LColor GetColor(void) const
-  {
-    return (light->get_color());
-  }
-
-  void   SetColor(float r, float g, float b, float a)
-  {
-    LColor color(r, g, b, a);
-
-    light->set_color(color);
-  }
-
-  LVecBase3f GetAttenuation(void) const
-  {
-    switch (type)
-    {
-      case Point:
-      {
-        PT(PointLight) point_light = reinterpret_cast<PointLight*>(light.p());
-
-        return (point_light->get_attenuation());
-      }
-      case Spot:
-      {
-        PT(Spotlight) spot_light = reinterpret_cast<Spotlight*>(light.p());
-
-        return (spot_light->get_attenuation());
-      }
-      default:
-          break;
-    }
-    return (LVecBase3f(0, 0, 0));
-  }
-
-  void   SetAttenuation(float a, float b, float c)
-  {
-    switch (type)
-    {
-      case Point:
-      {
-        PT(PointLight) point_light = reinterpret_cast<PointLight*>(light.p());
-
-        point_light->set_attenuation(LVecBase3(a, b, c));
-        break ;
-      }
-      case Spot:
-      {
-        PT(Spotlight) spot_light = reinterpret_cast<Spotlight*>(light.p());
-
-        spot_light->set_attenuation(LVecBase3(a, b, c));
-        break ;
-      }
-      default:
-        break ;
-    }
-  }
-
-  void   SetPosition(LPoint3 position)
-  {
-      nodePath.set_pos(position);
-#ifdef GAME_EDITOR
-      symbol.set_pos(position);
-#endif
-  }
-
-  bool operator==(const std::string& comp) { return (name == comp); }
-
-  void UnSerialize(World*, Utils::Packet& packet);
-  void Serialize(Utils::Packet& packet);
-
-  void ReparentTo(World* world);
-
-  void ReparentTo(DynamicObject* object)
-  {
-    ReparentTo((MapObject*)object);
-    parent_type = Type_DynamicObject;
-  }
-
-  void ReparentTo(MapObject* object)
-  {
-    parent_type = Type_MapObject;
-    parent      = object->nodePath;
-    parent_i    = object;
-    nodePath.reparent_to(parent);
-#ifdef GAME_EDITOR
-    symbol.reparent_to(parent);
-#endif
-  }
-
-  MapObject*  Parent(void) const
-  {
-      return (parent_i);
-  }
-
-  std::string name;
-  NodePath    nodePath;
-  Type        type;
-  ParentType  parent_type;
-  PT(Light)   light;
-  Lens*       lens;
-  float       zoneSize;
-  bool        enabled;
-
-  std::list<NodePath> enlightened;
-#ifdef GAME_EDITOR
-  NodePath    symbol;
-#endif
-private:
-  void Initialize(void);
-  NodePath    parent;
-  MapObject*  parent_i;
-};
+#include "world/waypoint.hpp"
+#include "world/map_object.hpp"
+#include "world/dynamic_object.hpp"
+#include "world/light.hpp"
+#include "world/zone.hpp"
 
 struct World
 {
@@ -563,7 +206,8 @@ struct World
     void           CompileWaypoints(ProgressCallback);
     void           CompileDoors(ProgressCallback);
 
-    static NodePath model_sphere;
+    NodePath       debug_pathfinding;
+    NodePath       model_sphere;
 
     DivideAndConquer::Graph<Waypoint, LPoint3f> waypoint_graph;
 };

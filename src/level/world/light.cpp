@@ -2,6 +2,9 @@
 #ifdef GAME_EDITOR
 # include "world.h"
 #else
+# include "level/world/light.hpp"
+# include "level/world/map_object.hpp"
+# include "level/world/dynamic_object.hpp"
 # include "level/world.h"
 #endif
 
@@ -66,6 +69,24 @@ void WorldLight::ReparentTo(World* world)
   nodePath.reparent_to(world->rootLights);
 #endif
 }
+
+void WorldLight::ReparentTo(DynamicObject* object)
+{
+  ReparentTo((MapObject*)object);
+  parent_type = Type_DynamicObject;
+}
+
+void WorldLight::ReparentTo(MapObject* object)
+{
+  parent_type = Type_MapObject;
+  parent      = object->nodePath;
+  parent_i    = object;
+  nodePath.reparent_to(parent);
+#ifdef GAME_EDITOR
+  symbol.reparent_to(parent);
+#endif
+}
+
 
 void WorldLight::SetEnabled(bool set_enabled)
 {

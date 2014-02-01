@@ -11,10 +11,17 @@
 
 using namespace std;
 
+// WTF workaround for the Invalid read/write of size 4
+NodePath c_attach_new_node(NodePath parameter, const string& str)
+{
+  return (parameter.attach_new_node(str));
+}
+
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
 {
-  Data   items = _level->GetItems();  
-  string defEquiped[2];
+  Data     items      = _level->GetItems();  
+  string   defEquiped[2];
+  NodePath body_node  = object->nodePath.find("**/+Character");
 
   _running            = true;
   _rotating           = false;
@@ -22,9 +29,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   _flags              = 0;
   _goToData.objective = 0;  
   _inventory          = new Inventory;
-  
-  NodePath bodyNP = object->nodePath.find("**/+Character");
-  _character      = dynamic_cast<Character*>(bodyNP.node());
+  _character          = dynamic_cast<Character*>(body_node.node());
 
   if (_character && _character->get_bundle(0))
   {
@@ -32,7 +37,8 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 
     //HAIL MICROSOFT
     string listJoints[] = { "Horn", "Mouth", "BattleSaddle" };
-    for (unsigned int i = 0; i<GET_ARRAY_SIZE(listJoints); i++) {
+    for (unsigned int i = 0; i<GET_ARRAY_SIZE(listJoints); i++)
+    {
       for (unsigned short it = 0 ; it < 2 ; ++it)
       {
         stringstream       jointName;
@@ -48,7 +54,8 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 
         if (joint)
         {
-          tmp     = bodyNP.attach_new_node(npName.str());
+          tmp = c_attach_new_node(body_node, npName.str());
+//          tmp     = bodyNP.attach_new_node(npName.str());
           bodyBundle->control_joint(jointName.str(), tmp.node());
 
           if (listJoints[i] == "Horn")
@@ -60,9 +67,11 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
         }
         else
           cout << "/!\\ Joint " << jointName.str() << " doesn't exist for Character " << _object->nodePath.get_name() << endl;
+
       }
     }
   }
+
 
   _type         = ObjectTypes::Character;
   _actionPoints = 0;
@@ -180,8 +189,6 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   
   // Animations (HAIL MICROSOFT)
   string anims[] = { "idle", "walk", "run", "use" };
-  /*for_each(anims.begin(), anims.end(), [this](string anim)
-  { LoadAnimation(anim); });*/
   for (unsigned int i = 0; i<GET_ARRAY_SIZE(anims); i++)
     LoadAnimation(anims[i]);
 
@@ -598,12 +605,12 @@ int                 ObjectCharacter::GetNearestWaypoint(InstanceDynamicObject* o
 
 float               ObjectCharacter::GetDistance(InstanceDynamicObject* object)
 {
-    LPoint3 pos_1  = _object->nodePath.get_pos();
-    LPoint3 pos_2  = object->GetDynamicObject()->nodePath.get_pos();
-    float   dist_x = pos_1.get_x() - pos_2.get_x();
-    float   dist_y = pos_1.get_y() - pos_2.get_y();
+  LPoint3 pos_1  = _object->nodePath.get_pos();
+  LPoint3 pos_2  = object->GetDynamicObject()->nodePath.get_pos();
+  float   dist_x = pos_1.get_x() - pos_2.get_x();
+  float   dist_y = pos_1.get_y() - pos_2.get_y();
 
-    return (SQRT(dist_x * dist_x + dist_y * dist_y));
+  return (SQRT(dist_x * dist_x + dist_y * dist_y));
 }
 
 unsigned short      ObjectCharacter::GetPathDistance(InstanceDynamicObject* object)

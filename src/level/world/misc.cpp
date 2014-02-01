@@ -4,6 +4,7 @@
 #else
 # include "level/world.h"
 #endif
+#include <panda3d/nodePathCollection.h>
 
 float my_sqrt(const float x)
 {

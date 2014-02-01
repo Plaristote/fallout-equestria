@@ -156,7 +156,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
       NodePath        np         = entry->get_into_node_path();
       MapObject*      map_object = world->GetMapObjectFromNodePath(np);
       LPoint3         pos;
-      static LPoint3  spheresize = NodePathSize(World::model_sphere);
+      static LPoint3  spheresize = NodePathSize(world->model_sphere);
 
       if (!map_object)
         continue ;

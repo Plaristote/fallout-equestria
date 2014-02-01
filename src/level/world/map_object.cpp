@@ -2,8 +2,10 @@
 #ifdef GAME_EDITOR
 # include "world.h"
 #else
+# include "level/world/map_object.hpp"
 # include "level/world.h"
 #endif
+#include "serializer.hpp"
 
 using namespace std;
 

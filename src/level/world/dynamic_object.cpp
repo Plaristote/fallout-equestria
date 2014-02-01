@@ -2,6 +2,7 @@
 #ifdef GAME_EDITOR
 # include "world.h"
 #else
+# include "level/world/dynamic_object.hpp"
 # include "level/world.h"
 #endif
 

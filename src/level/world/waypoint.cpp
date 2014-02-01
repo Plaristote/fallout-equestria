@@ -2,6 +2,7 @@
 #ifdef GAME_EDITOR
 # include "world.h"
 #else
+# include "level/world/waypoint.hpp"
 # include "level/world.h"
 # include <dices.hpp>
 #endif

@@ -106,13 +106,3 @@ void ObjectDoor::CallbackActionUse(InstanceDynamicObject* object)
     _level->ConsoleWrite(i18n::T("It's locked"));
 }
 
-
-
-
-
-
-
-
-
-
-

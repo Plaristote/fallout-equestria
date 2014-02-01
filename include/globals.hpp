@@ -33,6 +33,13 @@
 std::string humanize(const std::string&);
 std::string underscore(const std::string&);
 
+# ifndef TRUE_SQRT
+#  define SQRT my_sqrt
+float my_sqrt(const float x);
+# else
+#  define SQRT sqrt
+# endif
+
 // Twilidoc cannot see Panda3D's PT macro.
 # ifndef PT
 #  define PT(PTTYPE) PointerTo< PTTYPE >

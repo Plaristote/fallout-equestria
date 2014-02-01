@@ -34,10 +34,10 @@ void Level::Load(Utils::Packet& packet)
 
 void Level::SaveUpdateWorld(void)
 {
-  /*
-   * This is saving the inventories in the DynamicObject structure, thus they will be saved
-   * in the World part of the save file. This information consequently needs to be processed before everything else.
-   */
+  //
+  // This is saving the inventories in the DynamicObject structure, thus they will be saved
+  // in the World part of the save file. This information consequently needs to be processed before everything else.
+  //
   for_each(_characters.begin(), _characters.end(), [this](ObjectCharacter* character)
   {
     Inventory& inventory = character->GetInventory();
@@ -192,10 +192,7 @@ void CharacterBuff::Load(Level* level, ObjectCharacter* character, Utils::Packet
 void CharacterBuff::Save(Utils::Packet& packet)
 {
   string json;
-  /*Data   safeDataCopy;
 
-  safeDataCopy.Duplicate(_buff);
-  DataTree::Writers::StringJSON(safeDataCopy, json);*/
   DataTree::Writers::StringJSON(_buff, json);
   _task->next_run.Serialize(packet);
   _task->length.Serialize(packet);

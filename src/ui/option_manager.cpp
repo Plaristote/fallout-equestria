@@ -304,4 +304,3 @@ void GameOptions::SetLanguage(Core::Event& event)
   }
 }
 
-
