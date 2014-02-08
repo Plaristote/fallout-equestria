@@ -103,7 +103,6 @@ struct World
     Waypoint*      GetWaypointClosest(LPoint3, unsigned char floor);
     void           SetWaypointsVisible(bool v);
     void           GetWaypointLimits(short currentFloor, LPoint3& upperRight, LPoint3& upperLeft, LPoint3& bottomLeft) const;
-    LPlane         GetWaypointPlane(short currentFloor) const;
 
     template<class OBJTYPE>
     void           DeleteObject(MapObject* ptr, std::list<OBJTYPE>& list)

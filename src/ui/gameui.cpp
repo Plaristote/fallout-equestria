@@ -6,6 +6,8 @@ using namespace Rocket;
 
 extern PandaFramework* framework;
 
+NodePath c_attach_new_node(NodePath, PandaNode*);
+
 /*
  * GeneralUi
  */
@@ -40,9 +42,9 @@ GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
 
   Rocket::Controls::Initialise();
 
-  _ih      = new RocketInputHandler();
+  _ih = new RocketInputHandler();
   cout << "[UI] Binding mouse and Rocket" << endl;
-  window->get_mouse().attach_new_node(_ih);
+  c_attach_new_node(window->get_mouse(), _ih);
   cout << "[UI] Set rocket input handler" << endl;
   _rocket->set_input_handler(_ih);
   cout << "[UI] Input handler initialized" << endl;

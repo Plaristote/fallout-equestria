@@ -12,38 +12,45 @@ using namespace std;
 
 unsigned int          blob_revision = 6;
 
+NodePath c_attach_new_node(NodePath, const string&);
+NodePath c_attach_new_node(NodePath p1, PandaNode* p2)
+{
+  return (p1);
+  //return (p1.attach_new_node(p2));
+}
+
 World::World(WindowFramework* window)
-{/*
+{
   this->window         = window;
   model_sphere         = window->load_model(window->get_panda_framework()->get_models(), std::string(MODEL_ROOT) + "misc/sphere.egg.pz");
-  floors_node          = window->get_render().attach_new_node("floors");
-  rootWaypoints        = window->get_render().attach_new_node("waypoints");
-  rootMapObjects       = window->get_render().attach_new_node("mapobjects");
-  rootDynamicObjects   = window->get_render().attach_new_node("dynamicobjects");
-  rootLights           = window->get_render().attach_new_node("lights");
+  floors_node          = c_attach_new_node(window->get_render(), "floors");
+  rootWaypoints        = c_attach_new_node(window->get_render(), "waypoints");
+  rootMapObjects       = c_attach_new_node(window->get_render(), "mapobjects");
+  rootDynamicObjects   = c_attach_new_node(window->get_render(), "dynamicobjects");
+  rootLights           = c_attach_new_node(window->get_render(), "lights");
   sunlight_enabled     = false;
 #ifdef GAME_EDITOR
   lightSymbols         = window->get_render().attach_new_node("lightSymbols");
   do_compile_doors     = true;
   do_compile_waypoints = true;
 #endif
-  debug_pathfinding    = window->get_render().attach_new_node("debug_pathfinding");
+  debug_pathfinding    = c_attach_new_node(window->get_render(), "debug_pathfinding");
   //rootWaypoints.set_collide_mask(ColMask::Waypoint);
-*/}
+}
 
 World::~World()
-{/*
+{
   ForEach(waypoints,      [](Waypoint& wp)      { wp.nodePath.remove_node(); });
   ForEach(objects,        [](MapObject& mo)     { mo.nodePath.remove_node(); });
   ForEach(dynamicObjects, [](DynamicObject& dy) { dy.nodePath.remove_node(); });
   ForEach(lights,         [](WorldLight& wl)    { wl.Destroy();              });
   debug_pathfinding.remove_node();
   floors_node.remove_node();
-*/}
+}
 
 Waypoint* World::AddWayPoint(float x, float y, float z)
-{/*
-  NodePath nodePath = rootWaypoints.attach_new_node("waypoint");
+{
+  NodePath  nodePath = c_attach_new_node(rootWaypoints, "waypoint");
   Waypoint  waypoint(nodePath);
   Waypoint* ptr;
 
@@ -53,10 +60,10 @@ Waypoint* World::AddWayPoint(float x, float y, float z)
   nodePath.reparent_to(rootWaypoints);
   ptr = &(*(--(waypoints.end())));
   return (ptr);
-*/}
+}
 
 void World::DeleteWayPoint(Waypoint* toDel)
-{/*
+{
   {
     Waypoints::iterator it = find(waypoints.begin(), waypoints.end(), toDel);
 
@@ -74,10 +81,10 @@ void World::DeleteWayPoint(Waypoint* toDel)
     if (it != object.waypoints.end())
       object.waypoints.erase(it);
   });
-*/}
+}
 
 void   World::GetWaypointLimits(short currentFloor, LPoint3& upperRight, LPoint3& upperLeft, LPoint3& bottomLeft) const
-{/*
+{
   Waypoints::const_iterator it  = waypoints.begin();
   Waypoints::const_iterator end = waypoints.end();
 
@@ -106,18 +113,10 @@ void   World::GetWaypointLimits(short currentFloor, LPoint3& upperRight, LPoint3
   }
   upperRight.set_z(bottomLeft.get_z());
   upperLeft.set_z(bottomLeft.get_z());
-*/}
-
-LPlane World::GetWaypointPlane(short currentFloor) const
-{/*
-  LPoint3 upperRight(0, 0, 0), upperLeft(0, 0, 0), bottomLeft(0, 0, 0);
-
-  GetWaypointLimits(currentFloor, upperRight, upperLeft, bottomLeft);
-  return (LPlane(upperRight, upperLeft, bottomLeft));
-*/}
+}
 
 Waypoint* World::GetWaypointClosest(LPoint3 pos_1, unsigned char floor)
-{/*
+{
   Waypoints::iterator it        = waypoints.begin();
   Waypoints::iterator end       = waypoints.end();
   Waypoint*           best      = 0;
@@ -138,10 +137,10 @@ Waypoint* World::GetWaypointClosest(LPoint3 pos_1, unsigned char floor)
     }
   }
   return (best);
-*/}
+}
 
 Waypoint* World::GetWaypointFromNodePath(NodePath path)
-{/*
+{
   Waypoints::iterator it  = waypoints.begin();
   Waypoints::iterator end = waypoints.end();
 
@@ -151,11 +150,11 @@ Waypoint* World::GetWaypointFromNodePath(NodePath path)
     return (&(*it));
   }
   return (0);
-*/}
+}
 
 #ifndef GAME_EDITOR
 Waypoint* World::GetWaypointFromId(unsigned int id)
-{/*
+{
   if (waypoints.size() >= id && id > 0)
   {
     Waypoint& wp = waypoints[id - 1];
@@ -165,20 +164,20 @@ Waypoint* World::GetWaypointFromId(unsigned int id)
     return (&waypoints[id - 1]);
   }
   return (0);
-*/}
+}
 #else
 Waypoint* World::GetWaypointFromId(unsigned int id)
-{/*
+{
   Waypoints::iterator it = std::find(waypoints.begin(), waypoints.end(), id);
 
   if (it != waypoints.end())
     return (&(*it));
   return (0);
-*/}
+}
 #endif
 
 void World::FloorResize(int newSize)
-{/*
+{
   int currentSize = floors.size();
 
   floors.resize(newSize);
@@ -187,22 +186,22 @@ void World::FloorResize(int newSize)
     std::stringstream stream;
 
     stream << "floor-" << it;
-    floors[it] = floors_node.attach_new_node(stream.str());
-    floors[it].attach_new_node("mapobjects");
-    floors[it].attach_new_node("dynamicobjects");
-    floors[it].attach_new_node("lights");
+    floors[it] = c_attach_new_node(floors_node, stream.str());
+    c_attach_new_node(floors[it], "mapobjects");
+    c_attach_new_node(floors[it], "dynamicobjects");
+    c_attach_new_node(floors[it], "lights");
     floors[it].show();
   }
-*/}
+}
 
 MapObject* World::AddMapObject(const string &name, const string &model, const string &texture, float x, float y, float z)
-{/*
+{
   MapObject object;
   string    model2 = model;
 
   object.strModel   = model;
   object.strTexture = texture;
-  object.nodePath   = window->get_render().attach_new_node(name);
+  object.nodePath   = c_attach_new_node(window->get_render(), name);
   object.render     = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model2);
   object.render.reparent_to(object.nodePath);
   if (texture != "")
@@ -213,7 +212,7 @@ MapObject* World::AddMapObject(const string &name, const string &model, const st
   }
   object.render.set_name(name);
   object.nodePath.set_pos(x, y, z);
-  object.waypoints_root = object.nodePath.attach_new_node("waypoints");
+  object.waypoints_root = c_attach_new_node(object.nodePath, "waypoints");
   MapObjectChangeFloor(object, 0);
   {
     LPoint3f scale = NodePathSize(object.render) / 2;
@@ -224,30 +223,30 @@ MapObject* World::AddMapObject(const string &name, const string &model, const st
   }
   objects.push_back(object);
   return (&(*(--(objects.end()))));
-*/}
+}
 
 void World::ObjectChangeFloor(MapObject& object, unsigned char floor, unsigned short type)
-{/*
+{
   if (floor != object.floor)
   {
     if (floors.size() <= floor) FloorResize(floor + 1);
     object.nodePath.reparent_to(floors[floor].get_child(type));
     object.floor = floor;
   }
-*/}
+}
 
 void World::MapObjectChangeFloor(MapObject& object, unsigned char floor)
-{/*
+{
   ObjectChangeFloor(object, floor, 0);
-*/}
+}
 
 void World::DynamicObjectChangeFloor(DynamicObject& object, unsigned char floor)
-{/*
+{
   ObjectChangeFloor(object, floor, 1);
-*/}
+}
 
 void World::DeleteMapObject(MapObject* ptr)
-{/*
+{
   if (ptr)
   {
     // Children waypoints removal
@@ -274,20 +273,20 @@ void World::DeleteMapObject(MapObject* ptr)
     }
     DeleteObject(ptr, objects);
   }
-*/}
+}
 
 MapObject* World::GetMapObjectFromName(const string &name)
-{/*
+{
   return (GetObjectFromName(name, objects));
-*/}
+}
 
 MapObject* World::GetMapObjectFromNodePath(NodePath path)
-{/*
+{
   return (GetObjectFromNodePath(path, objects));
-*/}
+}
 
 MapObject* World::GetMapObjectFromCollisionNode(NodePath path)
-{/*
+{
   auto it  = objects.begin();
   auto end = objects.end();
 
@@ -299,10 +298,10 @@ MapObject* World::GetMapObjectFromCollisionNode(NodePath path)
       return (&object);
   }
   return (0);
-*/}
+}
 
 void World::ReparentObject(MapObject *object, MapObject *new_parent)
-{/*
+{
   if (new_parent)
     object->ReparentTo(new_parent);
   else
@@ -310,10 +309,10 @@ void World::ReparentObject(MapObject *object, MapObject *new_parent)
     object->parent = "";
     object->nodePath.reparent_to(floors_node);
   }
-*/}
+}
 
 void World::ReparentObject(MapObject* object, const std::string& name)
-{/*
+{
   MapObject*     map_object = GetMapObjectFromName(name);
   DynamicObject* dyn_object = (map_object == 0 ? GetDynamicObjectFromName(name) : 0);
 
@@ -321,11 +320,11 @@ void World::ReparentObject(MapObject* object, const std::string& name)
     ReparentObject(object, map_object);
   else if (dyn_object)
     ReparentObject(object, dyn_object);
-*/}
+}
 
 // DYNAMIC OBJECTS
 DynamicObject* World::InsertDynamicObject(DynamicObject& object)
-{/*
+{
   object.waypoint = 0;
   object.nodePath = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + object.strModel);
   if (object.nodePath.is_empty())
@@ -342,10 +341,10 @@ DynamicObject* World::InsertDynamicObject(DynamicObject& object)
   object.nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
   dynamicObjects.insert(dynamicObjects.begin(), object);
   return (&(*dynamicObjects.begin()));
-*/}
+}
 
 DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type type, const string &model, const string &texture)
-{/*
+{
   DynamicObject  object;
   DynamicObject* ptr;
 
@@ -357,51 +356,51 @@ DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type t
   if (ptr && !(ptr->nodePath.is_empty()))
     ptr->nodePath.set_name(name);
   return (ptr);
-*/}
+}
 
 void World::DeleteDynamicObject(DynamicObject* ptr)
-{/*
+{
   DeleteObject(ptr, dynamicObjects);
-*/}
+}
 
 DynamicObject* World::GetDynamicObjectFromName(const string &name)
-{/*
+{
   return (GetObjectFromName(name, dynamicObjects));
-*/}
+}
 
 DynamicObject* World::GetDynamicObjectFromNodePath(NodePath path)
-{/*
+{
   return (GetObjectFromNodePath(path, dynamicObjects));
-*/}
+}
 
 // EXIT ZONES
 void World::AddExitZone(const std::string& name)
-{/*
+{
   ExitZone exitZone;
 
   exitZone.name = name;
   exitZones.push_back(exitZone);
-*/}
+}
 
 void World::DeleteExitZone(const std::string& name)
-{/*
+{
   ExitZones::iterator it = std::find(exitZones.begin(), exitZones.end(), name);
 
   if (it != exitZones.end())
     exitZones.erase(it);
-*/}
+}
 
 ExitZone* World::GetExitZoneByName(const std::string& name)
-{/*
+{
   ExitZones::iterator it = std::find(exitZones.begin(), exitZones.end(), name);
 
   if (it != exitZones.end())
     return (&(*it));
   return (0);
-*/}
+}
 
 bool      World::IsInExitZone(unsigned int id) const
-{/*
+{
   auto it = exitZones.begin(), end = exitZones.end();
 
   for (; it != end ; ++it)
@@ -412,57 +411,57 @@ bool      World::IsInExitZone(unsigned int id) const
       return (true);
   }
   return (false);
-*/}
+}
 
 // ENTRY ZONES
 void World::AddEntryZone(const std::string& name)
-{/*
+{
   EntryZone entryZone;
 
   entryZone.name = name;
   entryZones.push_back(entryZone);
-*/}
+}
 
 void World::DeleteEntryZone(const std::string& name)
-{/*
+{
   EntryZones::iterator it = std::find(entryZones.begin(), entryZones.end(), name);
 
   if (it != entryZones.end())
     entryZones.erase(it);
-*/}
+}
 
 EntryZone* World::GetEntryZoneByName(const std::string& name)
-{/*
+{
   EntryZones::iterator it = std::find(entryZones.begin(), entryZones.end(), name);
 
   if (it != entryZones.end())
     return (&(*it));
   return (0);
-*/}
+}
 
 // Lights
 void World::AddLight(WorldLight::Type type, const std::string& name)
-{/*
+{
   lights.push_back(WorldLight(type, WorldLight::Type_None, rootLights, name));
 #ifdef GAME_EDITOR
   lights.rbegin()->symbol.reparent_to(rootLights);
 #endif
-*/}
+}
 
 void World::AddLight(WorldLight::Type type, const std::string& name, MapObject* parent)
-{/*
+{
   AddLight(type, name);
   lights.rbegin()->ReparentTo(parent);
-*/}
+}
 
 void World::AddLight(WorldLight::Type type, const std::string& name, DynamicObject* parent)
-{/*
+{
   AddLight(type, name);
   lights.rbegin()->ReparentTo(parent);
-*/}
+}
 
 void World::DeleteLight(const std::string& name)
-{/*
+{
   WorldLights::iterator it = std::find(lights.begin(), lights.end(), name);
 
   if (it != lights.end())
@@ -470,26 +469,26 @@ void World::DeleteLight(const std::string& name)
     it->nodePath.detach_node();
     lights.erase(it);
   }
-*/}
+}
 
 WorldLight* World::GetLightByName(const std::string& name)
-{/*
+{
   WorldLights::iterator it = std::find(lights.begin(), lights.end(), name);
 
   cout << "Getting light by name... light count: " << lights.size() << endl;
   if (it != lights.end())
     return (&(*it));
   return (0);
-*/}
+}
 
 void        World::CompileLight(WorldLight* light, unsigned char colmask)
-{/*
+{
   PT(CollisionSphere)       colSphere = new CollisionSphere(light->nodePath.get_x(),
                                light->nodePath.get_y(),
                                light->nodePath.get_z(),
                                light->zoneSize);
   PT(CollisionNode)         colNode       = new_CollisionNode("compileLightSphere");
-  NodePath                  colNp         = rootLights.attach_new_node(colNode);
+  NodePath                  colNp         = c_attach_new_node(rootLights, colNode);
   PT(CollisionHandlerQueue) handlerQueue  = new CollisionHandlerQueue();
   CollisionTraverser        traverser;
   list<NodePath>::iterator  it            = light->enlightened.begin();
@@ -549,10 +548,10 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
   //cout << "Number of enlightened objects -> " << light->enlightened.size() << endl;
 
   colNp.detach_node();
-*/}
+}
 
 void World::DynamicObjectSetWaypoint(DynamicObject& object, Waypoint& waypoint)
-{/*
+{
   object.waypoint = &waypoint;
   if (object.waypoint->floor != waypoint.floor)
   {
@@ -560,10 +559,10 @@ void World::DynamicObjectSetWaypoint(DynamicObject& object, Waypoint& waypoint)
       object.nodePath.set_alpha_scale(floors[waypoint.floor].get_color_scale().get_w());
     DynamicObjectChangeFloor(object, waypoint.floor);
   }
-*/}
+}
 
 void World::SetWaypointsVisible(bool v)
-{/*
+{
   if (v)
   {
     rootWaypoints.show();
@@ -580,10 +579,10 @@ void World::SetWaypointsVisible(bool v)
       object.waypoints_root.hide();
     });
   }
-*/}
+}
 
 void           World::SetMapObjectsVisible(bool v)
-{/*
+{
   if (v)
   {
     rootMapObjects.show();
@@ -596,10 +595,10 @@ void           World::SetMapObjectsVisible(bool v)
     for (unsigned int i = 0 ; i < floors.size() ; ++i)
      floors[i].get_child(0).hide();
   }
-*/}
+}
 
 void           World::SetDynamicObjectsVisible(bool v)
-{/*
+{
   if (v)
   {
     rootDynamicObjects.show();
@@ -612,13 +611,13 @@ void           World::SetDynamicObjectsVisible(bool v)
     for (unsigned int i = 0 ; i < floors.size() ; ++i)
       floors[i].get_child(1).hide();
   }
-*/}
+}
 
 /*
  * World
  */
 void           World::UnSerialize(Utils::Packet& packet)
-{/*
+{
   if (blob_revision >= 1)
     packet >> blob_revision;
   cout << "Blob revision is  " << blob_revision << endl;
@@ -631,7 +630,7 @@ void           World::UnSerialize(Utils::Packet& packet)
     packet >> size;
     for (int it = 0 ; it < size ; ++it)
     {
-      NodePath sphere = rootWaypoints.attach_new_node("waypoint");
+      NodePath sphere = c_attach_new_node(rootWaypoints, "waypoint");
       Waypoint waypoint(sphere);
 
       model_sphere.instance_to(sphere);
@@ -781,7 +780,7 @@ void           World::UnSerialize(Utils::Packet& packet)
   /*
    * Solving branching relations between MapObjects
    */
-/*  UpdateMapTree();
+  UpdateMapTree();
 
 #ifdef GAME_EDITOR
   if (blob_revision >= 6)
@@ -806,10 +805,10 @@ void           World::UnSerialize(Utils::Packet& packet)
 #else
   for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light, ColMask::Object | ColMask::DynObject); });
 #endif
-*/}
+}
 
 void           World::UpdateMapTree(void)
-{/*
+{
   std::function<void (NodePath, std::string)> set_relations = [this, &set_relations](NodePath parent, std::string solving_for)
   {
     // Solving for MapObjects
@@ -865,10 +864,10 @@ void           World::UpdateMapTree(void)
   std::for_each(dynamicObjects.begin(), dynamicObjects.end(), [this, &set_relations](DynamicObject& object)
   { set_relations(object.nodePath, object.nodePath.get_name()); });
   set_relations(floors_node, "");
-*/}
+}
 
 void           World::Serialize(Utils::Packet& packet, std::function<void (const std::string&, float)> progress_callback)
-{/*
+{
   // Compile Step
 # ifdef GAME_EDITOR
   if (do_compile_waypoints)
@@ -1011,11 +1010,11 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
 
     packet << serialize_sunlight_enabled;
   }
-*/}
+}
 
 // MAP COMPILING
 void           World::CompileWaypoints(ProgressCallback progress_callback)
-{/*
+{
     unsigned int        i   = 0;
     Waypoints::iterator it  = waypoints.begin();
     Waypoints::iterator end = waypoints.end();
@@ -1039,7 +1038,7 @@ void           World::CompileWaypoints(ProgressCallback progress_callback)
             PT(CollisionNode) cnode  = new_CollisionNode("compileWaypointsNode");
             //cnode->set_into_collide_mask(ColMask::Object);
             cnode->set_from_collide_mask(CollideMask(ColMask::Object));
-            np = (*it).nodePath.attach_new_node(cnode);
+            np = c_attach_new_node((*it).nodePath, cnode);
 
             PT(CollisionSegment) ctube  = new CollisionSegment(LPoint3(0, 0, 0),
                                                          dir);
@@ -1063,10 +1062,10 @@ void           World::CompileWaypoints(ProgressCallback progress_callback)
         }
         progress_callback("Compiling Waypoints: ", (float)i / waypoints.size() * 100.f);
     }
-*/}
+}
 
 void World::CompileDoors(ProgressCallback progress_callback)
-{/*
+{
   unsigned int        i   = 0;
   Waypoints::iterator it  = waypoints.begin();
   Waypoints::iterator end = waypoints.end();
@@ -1094,7 +1093,7 @@ void World::CompileDoors(ProgressCallback progress_callback)
       np.set_pos(0, 0, 0);
       np.set_scale(1 / parent.get_scale().get_x());
 
-      np = (*it).nodePath.attach_new_node(cnode);
+      np = c_attach_new_node((*it).nodePath, cnode);
 
       PT(CollisionHandlerQueue) handlerQueue = new CollisionHandlerQueue();
       CollisionTraverser        traverser;
@@ -1115,5 +1114,5 @@ void World::CompileDoors(ProgressCallback progress_callback)
     }
     progress_callback("Compiling Doors: ", (float)i / waypoints.size() * 100.f);
   }
-*/}
+}
 
