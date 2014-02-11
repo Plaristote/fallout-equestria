@@ -5,7 +5,7 @@
 # include "objectnode.hpp"
 # include "inventory.hpp"
 # include "timer.hpp"
-# include "statsheet.hpp"
+# include "cmap/statcontroller.hpp"
 # include "diplomacy.hpp"
 # include <panda3d/collisionRay.h>
 # include <panda3d/collisionSegment.h>

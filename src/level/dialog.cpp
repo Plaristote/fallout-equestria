@@ -1,4 +1,5 @@
 #include "level/dialog.hpp"
+#include "ui/alert_ui.hpp"
 
 using namespace Rocket;
 using namespace std;

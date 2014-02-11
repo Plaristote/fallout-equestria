@@ -5,6 +5,8 @@
 # include "mousecursor.hpp"
 # include "newgametask.hpp"
 
+class AlertUi;
+
 class MainMenu : public AsyncTask
 {
   struct View : public UiBase

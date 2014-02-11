@@ -16,7 +16,9 @@
  */
 #include "timer.hpp"
 #include "executor.hpp"
-#include "gameui.hpp"
+
+//#include "gameui.hpp"
+#include "ui/alert_ui.hpp"
 
 void ScriptApiDeclareFunction(const std::string& name, const std::string& decl)
 {

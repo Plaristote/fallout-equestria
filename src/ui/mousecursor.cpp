@@ -7,14 +7,16 @@ MouseCursor* MouseCursor::_static = 0;
 MouseCursor::MouseCursor(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
   cout << "[MouseCursor] Initializing" << endl;
-  _root   = context->CreateDocument();
+  _root   = context->LoadDocument("data/mouse-cursor.rml");
   if (_root)
   {
-    _root->SetInnerRML("<img id='mouse-cursor' src='textures/cursor-interaction.png' /><span id='mouse-hint'></span>");
     _cursor = _root->GetElementById("mouse-cursor");
     _hint   = _root->GetElementById("mouse-hint");
     if (_cursor)
+    {
       _cursor->SetProperty("position", "absolute");
+      _cursor->SetProperty("src",      "../textures/cursor-interaction.png");
+    }
     if (_hint)
       _hint->SetProperty("position", "absolute");
   }

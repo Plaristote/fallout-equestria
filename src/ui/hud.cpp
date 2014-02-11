@@ -1,4 +1,4 @@
-#include "gameui.hpp"
+#include "ui/game_main_bar.hpp"
 #include "level/inventory.hpp"
 
 using namespace std;

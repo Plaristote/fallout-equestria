@@ -1,6 +1,7 @@
 #include "level/inventory.hpp"
 #include "level/level.hpp"
-#include <level/objects/locker.hpp>
+#include "level/objects/locker.hpp"
+#include "ui/alert_ui.hpp"
 #include <algorithm>
 #define USE_DEBUG_OUTPUT
 

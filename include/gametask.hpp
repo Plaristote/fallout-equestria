@@ -5,9 +5,9 @@
 # include "level/level.hpp"
 # include "worldmap/worldmap.hpp"
 # include "playerparty.hpp"
-# include "gameui.hpp"
+# include "ui/general_ui.hpp"
 # include "saveuis.hpp"
-# include "statsheet.hpp"
+# include "cmap/statcontroller.hpp"
 # include "pipbuck.hpp"
 
 class QuestManager;

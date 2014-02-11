@@ -1,4 +1,5 @@
 #include "level/level.hpp"
+#include "ui/alert_ui.hpp"
 
 #define AP_COST_USE             2
 

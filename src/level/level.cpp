@@ -1,4 +1,11 @@
 #include "globals.hpp"
+// REQUIREMENT FOR THE WALL-EATING BALL OF WRATH
+#include <panda3d/stencilAttrib.h>
+#include <panda3d/colorBlendAttrib.h>
+#include <panda3d/depthTestAttrib.h>
+#include <panda3d/cullFaceAttrib.h>
+// END
+
 #include "level/level.hpp"
 #include "astar.hpp"
 
@@ -7,15 +14,15 @@
 #include <level/objects/locker.hpp>
 #include <i18n.hpp>
 
+#include "ui/alert_ui.hpp"
+#include "options.hpp"
+#include <mousecursor.hpp>
+#include <panda_lock.hpp>
+
 #define AP_COST_USE             2
 #define WORLDTIME_TURN          10
 #define WORLDTIME_DAYLIGHT_STEP 3
 
-// REQUIREMENT FOR THE WALL-EATING BALL OF WRATH
-#include <panda3d/stencilAttrib.h>
-#include <panda3d/colorBlendAttrib.h>
-#include <panda3d/depthTestAttrib.h>
-// END
 
 using namespace std;
 
@@ -26,11 +33,7 @@ Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionUseSpel
 Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
 
-#include "options.hpp"
-#include <mousecursor.hpp>
-#include <panda_lock.hpp>
 Level* Level::CurrentLevel = 0;
-#include <panda3d/cullFaceAttrib.h>
 Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
   _camera(window, window->get_camera_group()), _timeManager(tm), _main_script(name), _chatter_manager(window), _levelUi(window, gameUi)
 {

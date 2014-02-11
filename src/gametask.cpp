@@ -6,8 +6,9 @@
 #include <ui_dialog.hpp>
 #include <Boots/thread.hpp>
 #include <Boots/my_zlib.hpp>
-#include <panda_lock.hpp>
+//#include <panda_lock.hpp>
 #include <iostream>
+#include "ui/alert_ui.hpp"
 
 using namespace std;
 

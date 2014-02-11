@@ -1,28 +1,14 @@
 #include <panda3d/pandaFramework.h>
 #include <panda3d/pandaSystem.h>
-
-#include <panda3d/texturePool.h>
-#include <panda3d/directionalLight.h>
-
-//#define PSTAT_ENABLED
-
-PandaFramework*      framework   = NULL;
-PT(AsyncTaskManager) taskMgr;
-PT(ClockObject)      globalClock;
-
-# include "mainmenu.hpp"
-# include "options.hpp"
-
-using namespace std;
-
 #include <panda3d/load_prc_file.h>
 #include <panda3d/graphicsStateGuardianBase.h>
 #include <panda3d/pStatClient.h>
-#include <panda3d/audioManager.h>
+//#define PSTAT_ENABLED
 
-# include "scriptengine.hpp"
+#include "mainmenu.hpp"
+#include "options.hpp"
+#include "scriptengine.hpp"
 
-#include "serializer.hpp"
 #include <i18n.hpp>
 #include <level/objects/shelf.hpp>
 #include <level/objects/locker.hpp>
@@ -34,44 +20,11 @@ using namespace std;
 
 void AngelScriptInitialize(void);
 int  compile_statsheet(std::string);
+int  compile_heightmap(const std::string& sourcefile, const std::string& out);
 
-#include <panda3d/geoMipTerrain.h>
+PandaFramework*      framework   = NULL;
 
-LPoint3 NodePathSize(NodePath);
-
-void Earthscultor2Bam(Data heightmap, const std::string& out)
-{
-  NodePath terrain;
-
-  GeoMipTerrain* mip_terrain = new GeoMipTerrain("Terrain");
-
-  mip_terrain->set_heightfield(heightmap["heightmap"].Value());
-  mip_terrain->set_block_size(heightmap["block_size"]);
-  mip_terrain->set_factor(heightmap["factor"]);
-  mip_terrain->set_min_level(heightmap["min_level"]);
-
-  mip_terrain->get_root().set_sz(heightmap["max_height"]);
-
-  mip_terrain->generate();
-  mip_terrain->get_root().write_bam_file(out);
-
-  delete mip_terrain;
-}
-
-int compile_heightmap(const std::string& sourcefile, const std::string& out)
-{
-  DataTree* datatree = DataTree::Factory::JSON(sourcefile);
-
-  if (datatree)
-  {
-    Earthscultor2Bam(datatree, out);
-    delete datatree;
-    return (0);
-  }
-  return (-1);
-}
-
-#include "Boots/datetime.hpp"
+using namespace std;
 
 #ifndef UNIT_TESTER
 int main(int argc, char *argv[])
@@ -79,8 +32,6 @@ int main(int argc, char *argv[])
   PandaFramework panda_framework;
 
   framework   = &panda_framework;
-  taskMgr     = AsyncTaskManager::get_global_ptr();
-  globalClock = ClockObject::get_global_clock();
 
   Dices::Initialize();          // Randomness initialization
   Script::Engine::Initialize(); // Script Engine initialization (obviously)
@@ -108,11 +59,11 @@ int main(int argc, char *argv[])
     panda_framework.set_window_title("Fallout Equestria");
     cout << "[FoE] Opening Window" << endl;
     window = panda_framework.open_window();
-	if (window == 0)
-	{
-		cout << "[FoE] Panda3D failed to create a display. Aborting now." << endl;
-		return (-1);
-	}
+    if (window == 0)
+    {
+      cout << "[FoE] Panda3D failed to create a display. Aborting now." << endl;
+      return (-1);
+    }
     cout << "[FoE] Enabling keyboard" << endl;
     //window->enable_keyboard();
     window->get_render().set_shader_auto();
@@ -129,7 +80,7 @@ int main(int argc, char *argv[])
       cout << "[FoE] Applying changes" << endl;
       window->get_graphics_window()->request_properties(props);
     }
-	window->get_mouse();
+
     cout << "[FoE] Loading configuration" << endl;
     OptionsManager::Initialize(); // Loads and handle conf.json file
     {

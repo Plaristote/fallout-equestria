@@ -1,4 +1,4 @@
-#include "gameui.hpp"
+#include "ui/game_console.hpp"
 #include "scriptengine.hpp"
 #include <scripthelper/scripthelper.h>
 #include <sstream>

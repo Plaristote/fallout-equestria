@@ -2,6 +2,8 @@
 #include "musicmanager.hpp"
 #include "executor.hpp"
 #include <dices.hpp>
+#include "ui/alert_ui.hpp"
+#include "ui/loading_screen.hpp"
 
 using namespace std;
 using namespace Rocket;

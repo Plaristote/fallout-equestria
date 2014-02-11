@@ -23,7 +23,7 @@
 # include "objects/dropped_object.hpp"
 # include "character.hpp"
 
-# include "gameui.hpp"
+# include "ui/level_ui.hpp"
 # include "dialog.hpp"
 # include "chatter_manager.hpp"
 # include "inventory_ui.hpp"

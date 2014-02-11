@@ -3,7 +3,8 @@
 
 # include "rocket_extension.hpp"
 # include "options.hpp"
-# include "statsheet.hpp"
+# include "cmap/statcontroller.hpp"
+# include "ui/stat_view_rocket.hpp"
 
 class UiNewGame : public UiBase
 {
