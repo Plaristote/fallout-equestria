@@ -31,7 +31,7 @@ MainMenu::MainMenu(WindowFramework* window) : _window(window), _generalUi(window
   _view.NewGame.Connect (*this, &MainMenu::NewGame);
   _view.Quit.Connect    (*this, &MainMenu::QuitGame);
   _view.Options.Connect (_generalUi.GetOptions(), &UiBase::FireShow);
-  //_view.Show();
+  _view.Show();
   slotToLoadPlz         = -1;
   createLevelPlz        = false;
   quitGamePlz           = false;

@@ -41,7 +41,7 @@ GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
 
   _ih = new RocketInputHandler();
   cout << "[UI] Binding mouse and Rocket" << endl;
-  c_attach_new_node(window->get_mouse(), _ih);
+  window->get_mouse().attach_new_node(_ih);
   cout << "[UI] Set rocket input handler" << endl;
   _rocket->set_input_handler(_ih);
   cout << "[UI] Input handler initialized" << endl;
