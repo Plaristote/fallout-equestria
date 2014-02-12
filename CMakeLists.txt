@@ -6,22 +6,26 @@ project(FalloutEquestria)
 
 cmake_policy(SET CMP0015 NEW) # Linked directories are relative to the CMakeLists.txt file
 
-include_directories(include angelscript 3rd_parties/include)
+include_directories(code/game/include code/world/include code/angelscript 3rd_parties/include)
 link_directories(3rd_parties/lib)
 
 if(UNIX)
   if(CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -Wno-deprecated-declarations -pedantic")
-#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DAUDIO_BACKEND_SFML")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DAUDIO_BACKEND_PANDA3D")
   endif()
 endif()
 
 file(GLOB_RECURSE sourceFiles
-     include/*.h
-     include/*.hpp
-     src/*.cpp
-     angelscript/*.cpp)
+     # Game
+     code/game/include/*.h
+     code/game/include/*.hpp
+     code/game/src/*.cpp
+     # World
+     code/world/include/*.h
+     code/world/include/*.hpp
+     code/world/src/*.cpp
+     # Angelscript
+     code/angelscript/*.cpp)
 
 if(UNIX)
   add_executable(game ${sourceFiles})
