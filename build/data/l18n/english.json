@@ -63,6 +63,16 @@ So, you wanna do some business now ?",
 "10043": "Oh uh haha ! See I was just kidding, I think you're a very neat guy and I'm just gonna back away very slowly, then run in the opposite direction ! Bye bye !",
 "10044": "Pleasure doing business with you stranger !",
 "10045": "I'll just be on my way then.",
-"10046": "Yeah, I can see that. All the crap you sell is completely worthless."
+"10046": "Yeah, I can see that. All the crap you sell is completely worthless.",
+"10058": "Greetings stranger ! My name is #{GetPlayerName}. What brings you to these parts ?",
+"10059": "I compliment you over something trivial and inquire for change.",
+"10060": "I am insulting you for no reason because I am looking for a fight.",
+"10061": "I thank you for your kind words and procede to give you the change.",
+"10062": "I cleverly imply that your mother and I had coitus last night and then I start a fight.",
+"10063": "No I end this conversation.",
+"10064": "I end this conversation.",
+"10065": "This conversation is over.",
+"10067": "Thank you. I will use it to drug myself to death.",
+"10066": "I imply that you probably have more money on you and inform you that I'm about to murder you and loot your dead body."
 
 }
