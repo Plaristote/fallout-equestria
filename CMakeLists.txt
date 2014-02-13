@@ -6,7 +6,11 @@ project(FalloutEquestria)
 
 cmake_policy(SET CMP0015 NEW) # Linked directories are relative to the CMakeLists.txt file
 
-include_directories(code/game/include code/world/include code/angelscript 3rd_parties/include)
+include_directories(code/game/include
+                    code/world/include
+                    code/utils/include
+                    code/angelscript
+                    3rd_parties/include)
 link_directories(3rd_parties/lib)
 
 if(UNIX)
@@ -24,6 +28,10 @@ file(GLOB_RECURSE sourceFiles
      code/world/include/*.h
      code/world/include/*.hpp
      code/world/src/*.cpp
+     # Utils
+     code/utils/include/*.h
+     code/utils/include/*.hpp
+     code/utils/src/*.cpp
      # Angelscript
      code/angelscript/*.cpp)
 

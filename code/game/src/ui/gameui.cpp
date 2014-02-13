@@ -1,4 +1,4 @@
-#include "gameui.hpp"
+#include "ui/gameui.hpp"
 #include <Rocket/Controls.h>
 
 using namespace std;

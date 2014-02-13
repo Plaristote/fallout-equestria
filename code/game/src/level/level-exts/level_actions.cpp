@@ -1,5 +1,9 @@
 #include "level/level.hpp"
 #include "ui/alert_ui.hpp"
+#include "ui/ui_barter.hpp"
+#include "ui/ui_use_object_on.hpp"
+#include "ui/ui_use_skill_on.hpp"
+#include "ui/ui_use_spell_on.hpp"
 
 #define AP_COST_USE             2
 

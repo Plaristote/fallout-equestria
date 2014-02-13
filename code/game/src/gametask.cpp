@@ -3,10 +3,9 @@
 #include "quest_manager.hpp"
 #include <options.hpp>
 #include <dices.hpp>
-#include <ui_dialog.hpp>
-#include <Boots/thread.hpp>
-#include <Boots/my_zlib.hpp>
-//#include <panda_lock.hpp>
+#include <ui/ui_dialog.hpp>
+#include "thread.hpp"
+#include "my_zlib.hpp"
 #include <iostream>
 #include "ui/alert_ui.hpp"
 

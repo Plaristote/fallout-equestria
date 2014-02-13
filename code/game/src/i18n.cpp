@@ -1,6 +1,6 @@
 #include <i18n.hpp>
 #include <directory.hpp>
-#include <gameui.hpp>
+#include <ui/gameui.hpp>
 #include <algorithm>
 
 using namespace std;

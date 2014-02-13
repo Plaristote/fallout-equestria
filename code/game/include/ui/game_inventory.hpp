@@ -3,9 +3,9 @@
 
 # include "globals.hpp"
 # include <panda3d/pandaFramework.h>
-# include "rocket_extension.hpp"
+# include "ui/rocket_extension.hpp"
 # include "observatory.hpp"
-# include "inventory_ui.hpp"
+# include "ui/inventory_ui.hpp"
 
 class GameInventory : public UiBase
 {

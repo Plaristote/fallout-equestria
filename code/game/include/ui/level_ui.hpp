@@ -3,7 +3,7 @@
 
 # include "globals.hpp"
 # include <panda3d/pandaFramework.h>
-# include "rocket_extension.hpp"
+# include "ui/rocket_extension.hpp"
 # include "observatory.hpp"
 # include "gameui.hpp"
 # include "game_main_bar.hpp"

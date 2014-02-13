@@ -26,7 +26,7 @@
 # include "ui/level_ui.hpp"
 # include "dialog.hpp"
 # include "chatter_manager.hpp"
-# include "inventory_ui.hpp"
+# include "ui/inventory_ui.hpp"
 
 # include "world/world.h"
 # include "sun.hpp"

@@ -1,4 +1,4 @@
-#include "ui_dialog.hpp"
+#include "ui/ui_dialog.hpp"
 
 using namespace std;
 

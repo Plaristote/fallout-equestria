@@ -1,7 +1,7 @@
 #ifndef  PANDA_LOCK_HPP
 # define PANDA_LOCK_HPP
 
-# include "Boots/semaphore.hpp"
+# include "semaphore.hpp"
 
 class PandaLock
 {

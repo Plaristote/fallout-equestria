@@ -2,7 +2,7 @@
 # define STATCONTROLLER_HPP
 
 # include "globals.hpp"
-# include "rocket_extension.hpp"
+# include "ui/rocket_extension.hpp"
 # include "datatree.hpp"
 # include "statmodel.hpp"
 

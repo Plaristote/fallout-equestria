@@ -8,8 +8,6 @@ using namespace Rocket;
 
 extern PandaFramework* framework;
 
-NodePath c_attach_new_node(NodePath, PandaNode*);
-
 GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
 {
   //HAIL MICROSOFT!!!

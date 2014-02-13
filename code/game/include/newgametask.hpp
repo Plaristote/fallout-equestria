@@ -1,7 +1,7 @@
 #ifndef  NEWGAMETASK_HPP
 # define NEWGAMETASK_HPP
 
-# include "rocket_extension.hpp"
+# include "ui/rocket_extension.hpp"
 # include "options.hpp"
 # include "cmap/statcontroller.hpp"
 # include "ui/stat_view_rocket.hpp"

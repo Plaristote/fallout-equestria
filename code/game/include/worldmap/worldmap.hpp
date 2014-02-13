@@ -1,9 +1,10 @@
 #ifndef  WORLDMAP_HPP
 # define WORLDMAP_HPP
 
-# include "gameui.hpp"
+# include "ui/gameui.hpp"
 # include "dataengine.hpp"
 # include "worldmap/city_splash.hpp"
+# include "timer.hpp"
 # include <fstream>
 
 class WorldMap : public UiBase

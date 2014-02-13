@@ -1,6 +1,7 @@
 #ifndef  EXECUTOR_HPP
 # define EXECUTOR_HPP
 
+# include "globals.hpp"
 # include <queue>
 # include <functional>
 

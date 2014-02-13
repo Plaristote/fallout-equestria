@@ -1,7 +1,7 @@
 #ifndef  CITY_SPLASH_HPP
 # define CITY_SPLASH_HPP
 
-# include "rocket_extension.hpp"
+# include "ui/rocket_extension.hpp"
 # include "datatree.hpp"
 
 class CitySplash : public UiBase

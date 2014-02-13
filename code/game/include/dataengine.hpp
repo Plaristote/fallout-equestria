@@ -1,6 +1,7 @@
 #ifndef  DATAENGINE_HPP
 # define DATAENGINE_HPP
 
+# include "globals.hpp"
 # include "datatree.hpp"
 
 class WorldDiplomacy;

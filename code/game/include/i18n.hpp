@@ -1,6 +1,7 @@
 #ifndef  I18N_HPP
 # define I18N_HPP
 
+# include "globals.hpp"
 # include "datatree.hpp"
 # include "observatory.hpp"
 # include <vector>

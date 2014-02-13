@@ -3,7 +3,7 @@
 
 #include "functorthread.h"
 #include "qpandaapplication.h"
-#include "world.h"
+#include "world/world.h"
 
 using namespace std;
 

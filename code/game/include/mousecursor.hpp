@@ -1,7 +1,7 @@
 #ifndef  MOUSE_CURSOR_HPP
 # define MOUSE_CURSOR_HPP
 
-# include "rocket_extension.hpp"
+# include "ui/rocket_extension.hpp"
 
 class MouseCursor : public UiBase
 {

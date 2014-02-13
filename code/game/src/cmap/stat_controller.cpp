@@ -1,6 +1,6 @@
 #include "cmap/statcontroller.hpp"
-#include "gameui.hpp"
 #include "gametask.hpp"
+#include "ui/gameui.hpp"
 #include "ui/alert_ui.hpp"
 
 using namespace std;

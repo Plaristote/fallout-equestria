@@ -1,11 +1,11 @@
 #ifndef  DIALOG_HPP
 # define DIALOG_HPP
 
-# include "rocket_extension.hpp"
+# include "ui/rocket_extension.hpp"
 # include "scriptengine.hpp"
 # include "as_object.hpp"
 # include "datatree.hpp"
-# include <inventory_ui.hpp>
+# include <ui/inventory_ui.hpp>
 # include <list>
 # include <string>
 # include <algorithm>

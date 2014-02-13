@@ -2,8 +2,8 @@
 #include "musicmanager.hpp"
 #include "soundmanager.hpp"
 #include "executor.hpp"
-#include <ui_dialog.hpp>
 #include <panda_lock.hpp>
+#include "ui/ui_dialog.hpp"
 #include "ui/alert_ui.hpp"
 
 extern PandaFramework* framework;

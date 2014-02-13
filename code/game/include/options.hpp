@@ -1,6 +1,7 @@
 #ifndef  OPTIONS_HPP
 # define OPTIONS_HPP
 
+# include "globals.hpp"
 # include "datatree.hpp"
 
 class OptionsManager

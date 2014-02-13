@@ -1,7 +1,7 @@
 #ifndef  INTERACT_MENU_HPP
 # define INTERACT_MENU_HPP
 
-# include "rocket_extension.hpp"
+# include "ui/rocket_extension.hpp"
 # include "objectnode.hpp"
 
 class InteractMenu : public UiBase

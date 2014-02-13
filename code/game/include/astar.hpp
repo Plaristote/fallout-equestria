@@ -5,7 +5,7 @@
 #ifndef  ASTAR_HPP
 # define ASTAR_HPP
 
-# include <panda3d/cmath.h>
+# include "globals.hpp"
 # include <list>
 # include <vector>
 # include <algorithm>

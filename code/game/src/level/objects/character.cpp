@@ -11,12 +11,6 @@
 
 using namespace std;
 
-// WTF workaround for the Invalid read/write of size 4
-NodePath c_attach_new_node(NodePath parameter, const string& str)
-{
-  return (parameter.attach_new_node(str));
-}
-
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
 {
   Data     items      = _level->GetItems();  
@@ -54,8 +48,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
 
         if (joint)
         {
-          tmp = c_attach_new_node(body_node, npName.str());
-//          tmp     = bodyNP.attach_new_node(npName.str());
+          tmp     = body_node.attach_new_node(npName.str());
           bodyBundle->control_joint(jointName.str(), tmp.node());
 
           if (listJoints[i] == "Horn")

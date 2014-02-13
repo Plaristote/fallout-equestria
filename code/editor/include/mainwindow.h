@@ -19,7 +19,7 @@
 #include "wizardobject.h"
 #include "dialogobject.h"
 #include "dialogwaypointgenerate.h"
-#include "world.h"
+#include "world/world.h"
 #include "tabscript.h"
 #include "tabdialog.h"
 #include "tabl18n.h"

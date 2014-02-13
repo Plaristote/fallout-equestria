@@ -47,10 +47,10 @@ void WorldLight::Initialize(void)
       break ;
   }
 #ifdef GAME_EDITOR
-  if (!(World::model_sphere.is_empty()))
+/*  if (!(World::model_sphere.is_empty()))
     World::model_sphere.instance_to(symbol);
   else
-    cout << "The horror ! Model spehre is unavailable" << endl;
+    cout << "The horror ! Model spehre is unavailable" << endl;*/
 #endif
 }
 

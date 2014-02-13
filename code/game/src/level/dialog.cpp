@@ -1,5 +1,7 @@
 #include "level/dialog.hpp"
+#include "level/objects/character.hpp"
 #include "ui/alert_ui.hpp"
+#include "ui/gameui.hpp"
 
 using namespace Rocket;
 using namespace std;
@@ -97,7 +99,6 @@ void DialogView::CleanView(const DialogAnswers& answers)
 }
 
 // CONTROLLER
-#include "gameui.hpp"
 DialogController::DialogController(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* character, Data l18n) : DialogView(window, context), _script("scripts/dialogs/" + character->GetDialog() + ".as"), _model(character->GetDialog(), l18n)
 {
   _character = character;

@@ -15,6 +15,8 @@
 #include <i18n.hpp>
 
 #include "ui/alert_ui.hpp"
+#include "ui/ui_loot.hpp"
+#include "ui/ui_equip_mode.hpp"
 #include "options.hpp"
 #include <mousecursor.hpp>
 #include <panda_lock.hpp>

@@ -4,7 +4,7 @@
 # include "globals.hpp"
 # include <panda3d/pandaFramework.h>
 # include <panda3d/rocketRegion.h>
-# include "rocket_extension.hpp"
+# include "ui/rocket_extension.hpp"
 # include "observatory.hpp"
 # include "game_console.hpp"
 # include "game_options.hpp"

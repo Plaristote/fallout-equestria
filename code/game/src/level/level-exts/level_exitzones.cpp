@@ -1,5 +1,6 @@
 #include "level/level_zone.hpp"
 #include "level/level.hpp"
+#include "ui/ui_next_zone.hpp"
 
 LevelExitZone::LevelExitZone(Level* level, Zone& zone, std::list<std::string> destinations) : LevelZone(level, zone)
 {
