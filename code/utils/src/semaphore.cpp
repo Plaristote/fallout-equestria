@@ -7,7 +7,9 @@ using namespace Sync;
 Semaphore::Semaphore(unsigned int initial_count, unsigned int max_count)
 {
   sem_init(&_handle, 0, initial_count);
-  _max_count       = max_count;
+  _max_count           = max_count;
+  _deadlock_safety     = false;
+  _current_thread_lock = 0;
 }
 
 Semaphore::~Semaphore(void)
