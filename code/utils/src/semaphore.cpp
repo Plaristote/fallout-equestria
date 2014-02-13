@@ -38,7 +38,7 @@ bool Semaphore::Post(void)
 
   if (!(sem_getvalue(&_handle, &value)))
   {
-    if (value < (int)_max_count && sem_post(&handle) == 0)
+    if (value < (int)_max_count && sem_post(&_handle) == 0)
     {
       if (_deadlock_safety)
         ClearCurrentThread();
@@ -62,23 +62,6 @@ Semaphore::~Semaphore(void)
   CloseHandle(_handle);
   if (_current_thread_lock != 0)
     delete _current_thread_lock;
-}
-
-void Semaphore::SetDeadlockSafety(bool value)
-{
-  if (value != _deadlock_safety)
-  {
-    _deadlock_safety = value;
-    if (value == true && _current_thread_lock == 0)
-    {
-      _current_thread_lock = new Semaphore;
-    }
-    else if (_current_thread_lock != 0)
-    {
-      delete _current_thread_lock;
-      _current_thread_lock = 0;
-    }
-  }
 }
 
 bool Semaphore::TryWait(void)
@@ -177,8 +160,10 @@ void Semaphore::ClearCurrentThread()
 {
   if (_current_thread_lock)
   {
+    std::thread::id nobody;
+
     _current_thread_lock->Wait();
-    _current_thread = NULL;
+    _current_thread = nobody;
     _current_thread_lock->Post();
   }
 }
@@ -188,7 +173,23 @@ Semaphore::ThreadId Semaphore::CurrentThreadId()
 #ifdef _WIN32
   return (GetCurrentThreadId());
 #else
-  return (std::thread::get_id());
+  return (std::this_thread::get_id());
 #endif
 }
 
+void Semaphore::SetDeadlockSafety(bool value)
+{
+  if (value != _deadlock_safety)
+  {
+    _deadlock_safety = value;
+    if (value == true && _current_thread_lock == 0)
+    {
+      _current_thread_lock = new Semaphore;
+    }
+    else if (_current_thread_lock != 0)
+    {
+      delete _current_thread_lock;
+      _current_thread_lock = 0;
+    }
+  }
+}
