@@ -7,29 +7,22 @@ using namespace std;
 
 unsigned int          blob_revision = 6;
 
-NodePath c_attach_new_node(NodePath, const string&);
-NodePath c_attach_new_node(NodePath p1, PandaNode* p2)
-{
-  return (p1);
-  //return (p1.attach_new_node(p2));
-}
-
 World::World(WindowFramework* window)
 {
   this->window         = window;
   model_sphere         = window->load_model(window->get_panda_framework()->get_models(), std::string(MODEL_ROOT) + "misc/sphere.egg.pz");
-  floors_node          = c_attach_new_node(window->get_render(), "floors");
-  rootWaypoints        = c_attach_new_node(window->get_render(), "waypoints");
-  rootMapObjects       = c_attach_new_node(window->get_render(), "mapobjects");
-  rootDynamicObjects   = c_attach_new_node(window->get_render(), "dynamicobjects");
-  rootLights           = c_attach_new_node(window->get_render(), "lights");
+  floors_node          = window->get_render().attach_new_node("floors");
+  rootWaypoints        = window->get_render().attach_new_node("waypoints");
+  rootMapObjects       = window->get_render().attach_new_node("mapobjects");
+  rootDynamicObjects   = window->get_render().attach_new_node("dynamicobjects");
+  rootLights           = window->get_render().attach_new_node("lights");
   sunlight_enabled     = false;
 #ifdef GAME_EDITOR
   lightSymbols         = window->get_render().attach_new_node("lightSymbols");
   do_compile_doors     = true;
   do_compile_waypoints = true;
 #endif
-  debug_pathfinding    = c_attach_new_node(window->get_render(), "debug_pathfinding");
+  debug_pathfinding    = window->get_render().attach_new_node("debug_pathfinding");
   //rootWaypoints.set_collide_mask(ColMask::Waypoint);
 }
 
@@ -45,7 +38,7 @@ World::~World()
 
 Waypoint* World::AddWayPoint(float x, float y, float z)
 {
-  NodePath  nodePath = c_attach_new_node(rootWaypoints, "waypoint");
+  NodePath  nodePath = rootWaypoints.attach_new_node("waypoint");
   Waypoint  waypoint(nodePath);
   Waypoint* ptr;
 
@@ -173,18 +166,18 @@ Waypoint* World::GetWaypointFromId(unsigned int id)
 
 void World::FloorResize(int newSize)
 {
-  int currentSize = floors.size();
+  size_t currentSize = floors.size();
 
   floors.resize(newSize);
-  for (int it = currentSize ; it < newSize ; ++it)
+  for (size_t it = currentSize ; it < newSize ; ++it)
   {
     std::stringstream stream;
 
     stream << "floor-" << it;
-    floors[it] = c_attach_new_node(floors_node, stream.str());
-    c_attach_new_node(floors[it], "mapobjects");
-    c_attach_new_node(floors[it], "dynamicobjects");
-    c_attach_new_node(floors[it], "lights");
+    floors[it] = floors_node.attach_new_node(stream.str());
+    floors[it].attach_new_node("mapobjects");
+    floors[it].attach_new_node("dynamicobjects");
+    floors[it].attach_new_node("lights");
     floors[it].show();
   }
 }
@@ -196,7 +189,7 @@ MapObject* World::AddMapObject(const string &name, const string &model, const st
 
   object.strModel   = model;
   object.strTexture = texture;
-  object.nodePath   = c_attach_new_node(window->get_render(), name);
+  object.nodePath   = window->get_render().attach_new_node(name);
   object.render     = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model2);
   object.render.reparent_to(object.nodePath);
   if (texture != "")
@@ -207,7 +200,7 @@ MapObject* World::AddMapObject(const string &name, const string &model, const st
   }
   object.render.set_name(name);
   object.nodePath.set_pos(x, y, z);
-  object.waypoints_root = c_attach_new_node(object.nodePath, "waypoints");
+  object.waypoints_root = object.nodePath.attach_new_node("waypoints");
   MapObjectChangeFloor(object, 0);
   {
     LPoint3f scale = NodePathSize(object.render) / 2;
@@ -483,7 +476,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
                                light->nodePath.get_z(),
                                light->zoneSize);
   PT(CollisionNode)         colNode       = new_CollisionNode("compileLightSphere");
-  NodePath                  colNp         = c_attach_new_node(rootLights, colNode);
+  NodePath                  colNp         = rootLights.attach_new_node(colNode);
   PT(CollisionHandlerQueue) handlerQueue  = new CollisionHandlerQueue();
   CollisionTraverser        traverser;
   list<NodePath>::iterator  it            = light->enlightened.begin();
@@ -625,7 +618,7 @@ void           World::UnSerialize(Utils::Packet& packet)
     packet >> size;
     for (int it = 0 ; it < size ; ++it)
     {
-      NodePath sphere = c_attach_new_node(rootWaypoints, "waypoint");
+      NodePath sphere = rootWaypoints.attach_new_node("waypoint");
       Waypoint waypoint(sphere);
 
       model_sphere.instance_to(sphere);
@@ -1033,7 +1026,7 @@ void           World::CompileWaypoints(ProgressCallback progress_callback)
             PT(CollisionNode) cnode  = new_CollisionNode("compileWaypointsNode");
             //cnode->set_into_collide_mask(ColMask::Object);
             cnode->set_from_collide_mask(CollideMask(ColMask::Object));
-            np = c_attach_new_node((*it).nodePath, cnode);
+            np = (*it).nodePath.attach_new_node(cnode);
 
             PT(CollisionSegment) ctube  = new CollisionSegment(LPoint3(0, 0, 0),
                                                          dir);
@@ -1088,7 +1081,7 @@ void World::CompileDoors(ProgressCallback progress_callback)
       np.set_pos(0, 0, 0);
       np.set_scale(1 / parent.get_scale().get_x());
 
-      np = c_attach_new_node((*it).nodePath, cnode);
+      np = (*it).nodePath.attach_new_node(cnode);
 
       PT(CollisionHandlerQueue) handlerQueue = new CollisionHandlerQueue();
       CollisionTraverser        traverser;

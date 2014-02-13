@@ -16,4 +16,11 @@
 # include <algorithm>
 # define ForEach(stlContainer, functor) (std::for_each((stlContainer).begin(), (stlContainer).end(), (functor)))
 
+# ifndef TRUE_SQRT
+#  define SQRT my_sqrt
+float my_sqrt(const float x);
+# else
+#  define SQRT sqrt
+# endif
+
 #endif // GLOBALS_HPP

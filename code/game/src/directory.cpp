@@ -129,7 +129,6 @@ bool Directory::OpenDir(const string& str)
 {
   string          szDir = merge_strings(split(str, '/'), '\\') + "\\*";
   WIN32_FIND_DATA ffd;
-  cout << "Trying to read directory " << szDir << endl;
   HANDLE          dir = FindFirstFile(szDir.c_str(), &ffd);
 
   if (dir != INVALID_HANDLE_VALUE)

@@ -4,7 +4,7 @@
 # include <panda3d/cmath.h>
 #include <QDialog>
 #include <QVector>
-#include "world.h"
+#include "world/world.h"
 #include "dialoginventoryitem.h"
 #include "datatree.hpp"
 

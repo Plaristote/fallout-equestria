@@ -145,6 +145,7 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(CurrentTabChanged(int)));
 
     connect(&splashScreen, SIGNAL(rejected()), app,  SLOT(Terminate()));
+    connect(&splashScreen, SIGNAL(rejected()), app,  SLOT(quit()));
     connect(&splashScreen, SIGNAL(accepted()), this, SLOT(LoadProject()));
 
     connect(ui->widget, SIGNAL(Initialized()), this, SLOT(PandaInitialized()));

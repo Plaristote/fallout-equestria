@@ -1,9 +1,9 @@
-#ifndef DIALOGWAYPOINTGENERATE_H
-#define DIALOGWAYPOINTGENERATE_H
+#ifndef  DIALOGWAYPOINTGENERATE_H
+# define DIALOGWAYPOINTGENERATE_H
 
 # include <panda3d/cmath.h>
-#include <QDialog>
-#include "world.h"
+# include <QDialog>
+# include "world/world.h"
 
 namespace Ui {
 class DialogWaypointGenerate;

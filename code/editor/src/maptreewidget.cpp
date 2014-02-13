@@ -1,7 +1,7 @@
 #include "maptreewidget.h"
 #include <QMessageBox>
 #include <QMimeData>
-#include "world.h"
+#include "world/world.h"
 #include <QTreeWidgetItemIterator>
 
 using namespace std;

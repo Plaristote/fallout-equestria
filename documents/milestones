@@ -173,10 +173,11 @@ x --> Any object accessible through AngelScript::ContextLock must be handled wit
 
 Alpha1 [Started October 2013]
   -> General
-~ --> Preparing a Windows building environment to get Windows nightly builds
+x --> Preparing a Windows building environment to get Windows nightly builds
   --> Preparing Debian packages
 x --> Fixing dialog interface being so ugly
 x --> Implementing collision shapes for MapObjects
 x --> Fixing line of sight performance by checking level's geometry using only CollisionNode
 x --> Fixing Rocket's drag and drop causing crashes
 x --> Fixing game console control not receiving key events anymore
+~ --> Implementing a complete game demo

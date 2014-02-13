@@ -28,9 +28,13 @@ win32:LIBS +=  ../3rd_parties/lib/libp3framework.lib \
                 ../3rd_parties/lib/python27.lib
 unix:LIBS   += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3direct -lX11
 
-INCLUDEPATH += ../3rd_parties/include ../code/editor/include
+INCLUDEPATH += ../3rd_parties/include ../code/editor/include ../code/world/include
+VPATH       += ../code/editor/src \
+               ../code/editor/include \
+               ../code/editor/ui \
+               ../code/world/src \
+               ../code/world/include
 
-VPATH += ../code/editor/src ../code/editor/include ../code/editor/ui
 SOURCES += main.cpp\
            mainwindow.cpp \
            qpandawidget.cpp \
@@ -47,7 +51,6 @@ SOURCES += main.cpp\
            forminternationalization.cpp \
            wizardobject.cpp \
            dialogobject.cpp \
-           world.cpp \
            tabscript.cpp \
            tabdialog.cpp \
            tabl18n.cpp \
@@ -62,7 +65,14 @@ SOURCES += main.cpp\
            charsheeteditor.cpp \
            formkeyvalue.cpp \
            maptreewidget.cpp \
-           citysplashdialog.cpp
+           citysplashdialog.cpp \
+           world.cpp \
+           waypoint.cpp \
+           misc.cpp \
+           map_object.cpp \
+           dynamic_object.cpp \
+           light.cpp
+
 
 HEADERS  += mainwindow.h \
             qpandawidget.h \
@@ -79,7 +89,6 @@ HEADERS  += mainwindow.h \
             forminternationalization.h \
             wizardobject.h \
             dialogobject.h \
-            world.h \
             tabscript.h \
             tabdialog.h \
             tabl18n.h \
@@ -94,7 +103,16 @@ HEADERS  += mainwindow.h \
             charsheeteditor.h \
             formkeyvalue.h \
             maptreewidget.h \
-            citysplashdialog.h
+            citysplashdialog.h \
+            world/world.h \
+            world/colmask.hpp \
+            world/map_object.hpp \
+            world/dynamic_object.hpp \
+            world/interactions.hpp \
+            world/light.hpp \
+            world/waypoint.hpp \
+            world/zone.hpp \
+            divide_and_conquer.hpp
 
 FORMS    += mainwindow.ui \
             dialognewscript.ui \
