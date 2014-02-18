@@ -160,6 +160,12 @@ bool Semaphore::TrySetCurrentThread()
 
 void Semaphore::ClearCurrentThread()
 {
+#ifdef _WIN32
+  if (_current_thread_lock)
+  {
+    _current_thread = NULL;
+  }
+#else
   if (_current_thread_lock)
   {
     std::thread::id nobody;
@@ -168,6 +174,7 @@ void Semaphore::ClearCurrentThread()
     _current_thread = nobody;
     _current_thread_lock->Post();
   }
+#endif
 }
 
 Semaphore::ThreadId Semaphore::CurrentThreadId()

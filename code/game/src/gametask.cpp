@@ -569,7 +569,7 @@ bool GameTask::LoadGame(const std::string& savepath)
   _worldMap->GoToPlace.Connect(*this, &GameTask::MapOpenLevel);
   _worldMap->GoToCityZone.Connect([this](string level, string zone)
   { OpenLevel(_savePath, level, zone); });
-  _worldMap->RequestRandomEncounterCheck.Connect(*this, &GameTask::DoCheckRandomEncounter);
+  _worldMap->RequestRandomEncounter.Connect(*this, &GameTask::MakeEncounter);
 
   if (!(currentLevel.Nil()) && currentLevel.Value() != "0")
   {
@@ -802,7 +802,7 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
       _level->GetPlayer()->SetStatistics(_charSheet, _playerStats);
       if (params.entry_zone == "")
         _level->FetchParty(*_playerParty);
-      if (params.entry_zone != "")
+      else
         _level->SetEntryZone(*_playerParty, params.entry_zone);
       SetLevel(_level);
 
@@ -839,133 +839,64 @@ void GameTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::str
   SyncLoadLevel.Emit(params);
 }
 
-void GameTask::SetLevelSpecialEncounter(const string& special_encounter)
+void GameTask::SetLevelEncounter(const Encounter& encounter)
 {
+  MapOpenLevel(encounter.GetMapName());
   if (_level)
   {
-    float x, y;
+    _worldMap->Hide();
+    _level->SetPersistent(encounter.IsSpecial());
 
-    _level->SetPersistent(true);
-    _worldMap->GetCurrentPosition(x, y);
-    _worldMap->AddCity(special_encounter, x, y, 10);
-    _worldMap->SetCityVisible(special_encounter);
+    // Make a city out of the special encounter
+    if (encounter.IsSpecial())
+    {
+      float x, y;
+
+      _worldMap->GetCurrentPosition(x, y);
+      _worldMap->AddCity(encounter.GetMapName(), x, y, 10);
+      _worldMap->SetCityVisible(encounter.GetMapName());
+    }
+    // Spawn encounter if it contains people/critters
+    else if (encounter.IsEvent())
+    {
+      _level->SpawnEnemies(encounter.GetEncounterName(), 1);
+    }
   }
   SyncLoadLevel.Disconnect(obs_level_unpersistent);
 }
 
-void GameTask::SetLevelEncounter(const string& encounter_type, short n_creeps)
+void GameTask::MakeEncounter(int x, int y, bool is_event)
 {
-  if (_level)
+  Encounter encounter(_playerStats);
+
+  try
   {
-    _level->SetPersistent(false);
-    _level->SpawnEnemies(encounter_type, n_creeps, 1);
-  }
-  SyncLoadLevel.Disconnect(obs_level_unpersistent);
-}
-
-void GameTask::DoCheckRandomEncounter(int x, int y, bool is_event)
-{
-  short     luck        = _playerStats->Model().GetSpecial("LUC");
-  short     outdoorsman = _playerStats->Model().GetSkill("Outdoorspony");
-  bool      has_choice  = (is_event == true) && (Dices::Throw(200) <= outdoorsman);
-  UiDialog* dialog      = (has_choice ? new UiDialog(_window, _gameUi.GetContext()) : 0);
-  Data      case_data   = _worldMap->GetCaseData(x, y);
-
-  function<void ()> callback;
-
-  if (is_event && Dices::Throw(20) <= luck)
-  {
-    // Launch an unhostile encounter
-
-    // Launch a special encounter
-    if (Dices::Throw(100) <= 4 + luck)
-    {
-      string special_encounter = _playerStats->Model().SelectRandomEncounter();
-
-      if (special_encounter == "") // Abort
-      {
-        Data special_encounters = _dataEngine["special-encounters"];
-         
-        if (special_encounters.Count() > 0)
-          special_encounter = special_encounters[0].Value();
-        else
-        {
-          if (dialog) delete dialog;
-          return ;
-        }
-      }
-      if (_worldMap->HasCity(special_encounter))
-      {
-        if (dialog) delete dialog;
-        return ;
-      }
-      callback = [this, special_encounter](void)
-      {
-        auto   _this          = this;
-        string encounter_name = special_encounter;
-
-        MapOpenLevel(special_encounter);
-        obs_level_unpersistent = SyncLoadLevel.Connect([_this, encounter_name](LoadLevelParams) { _this->SetLevelSpecialEncounter(encounter_name); });
-      };
-      if (dialog)
-        dialog->SetMessage(i18n::T("You discovered ") + i18n::T(special_encounter) + ". Do you want to go in ?");
-    }
-    // Launch a regular good encounter
-    else
-    {
-      // TODO Implement good encounters
-      if (dialog) delete dialog;
-      return ;
-    }
-  }
-  else
-  {
-    // Launch a hostile encounter
-    short  n_creeps            = 5 + Dices::Throw(20) - (luck * Dices::Throw(2));
-    string encounter_type, encounter_map;
-    Data   bad_encounters = case_data["type-encounters"];
-    Data   map_encounters = case_data["map-encounters"];
-
-    if (map_encounters.Count() > 0)
-      encounter_map  = map_encounters[Dices::Throw(map_encounters.Count()) - 1].Value();
-    if (bad_encounters.Count() > 0)
-      encounter_type = bad_encounters[Dices::Throw(bad_encounters.Count()) - 1].Value(); 
-    if (is_event == false)
-      n_creeps = 0;
-    else if (n_creeps > 5)
-      n_creeps = 5;
-
-    encounter_map  = "random-desert-1";
-    encounter_type = "timberwolves";
-    if (encounter_map == "" || encounter_type == "")
-    {
-      if (dialog) delete dialog;
-      return ;
-    }
-    callback = [this, encounter_type, encounter_map, n_creeps](void)
-    {
-      auto   _this   = this;
-      string type    = encounter_type;
-      short  n       = n_creeps;
-
-      MapOpenLevel(encounter_map);
-      obs_level_unpersistent = SyncLoadLevel.Connect([_this, type, n](LoadLevelParams) { _this->SetLevelEncounter(type, n); });
-    };
-
-    if (dialog)
-      dialog->SetMessage(i18n::T("Do you want to encounter ") + i18n::T(encounter_type) + " ?");
-  }
-  if (has_choice)
-  {
-    _playerStats->AddExperience(50); // Xp for detecting a threat with outdoorsman
-    dialog->AddChoice(i18n::T("Yes"), [this, callback](Rocket::Core::Event&) { callback(); });
-    dialog->AddChoice(i18n::T("No"),  [this](Rocket::Core::Event&) { _worldMap->SetInterrupted(false); });
-    dialog->Show();
-    dialog->SetModal(true);
     _worldMap->SetInterrupted(true);
+    encounter.SetAsEvent(is_event);
+    encounter.Initialize(_dataEngine, _worldMap);
+    if (is_event && encounter.IsDetectedByParty())
+    {
+      UiDialog* dialog = new UiDialog(_window, _gameUi.GetContext());
+
+      if (encounter.IsSpecial())
+        dialog->SetMessage(i18n::T("You discovered ") + i18n::T(encounter.GetMapName()) + i18n::T(". Do you want to go in ?"));
+      else
+        dialog->SetMessage(i18n::T("You encountered ") + i18n::T(encounter.GetEncounterName()) + i18n::T(". Do you want to go in ?"));
+      dialog->AddChoice(i18n::T("Yes"), [this, encounter](Rocket::Core::Event&) { SetLevelEncounter(encounter);     });
+      dialog->AddChoice(i18n::T("No"),  [this]           (Rocket::Core::Event&) { _worldMap->SetInterrupted(false); });
+      dialog->Show();
+      dialog->SetModal(true);
+      _worldMap->SetInterrupted(true);
+      _playerStats->AddExperience(50);
+    }
+    else
+      SetLevelEncounter(encounter);
   }
-  else
-    callback();
+  catch (const Encounter::NoAvailableEncounters)
+  {
+    _worldMap->SetInterrupted(false);
+    cout << "[GameTask][DoCheckRandomEncounter] No available encounters at " << x << ',' << y << endl;
+  }
 }
 
 ISampleInstance* GameTask::PlaySound(const std::string& name)

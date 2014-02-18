@@ -118,7 +118,6 @@ private:
   void                  GameOver(void);
   
   void                  MakeEncounter(int x, int y, bool is_event = true);
-  void                  ForceEncounter();
 
   void                  SetPlayerInventory(void);
   

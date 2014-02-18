@@ -52,7 +52,7 @@ public:
 
   Sync::Signal<void (std::string)>              GoToPlace;
   Sync::Signal<void (std::string, std::string)> GoToCityZone;
-  Sync::Signal<void (int, int, bool)>           RequestRandomEncounterCheck;
+  Sync::Signal<void (int, int, bool)>           RequestRandomEncounter;
 
 private:
   void                   OpenCitySplash(const std::string& cityname);

@@ -337,7 +337,7 @@ void WorldMap::PartyClicked(Rocket::Core::Event&)
     int x, y;
 
     GetCurrentCase(x, y);
-    RequestRandomEncounterCheck.Emit(x, y, Dices::Throw(100) >= 85);
+    RequestRandomEncounter.Emit(x, y, Dices::Throw(100) >= 85);
   }
 }
 
@@ -424,7 +424,7 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
       int x, y;
 
       GetCurrentCase(x, y);
-      RequestRandomEncounterCheck.Emit(x, y, true);
+      RequestRandomEncounter.Emit(x, y, true);
     }
   }
 }
@@ -447,7 +447,7 @@ void WorldMap::GetCurrentCase(int& x, int& y) const
 Data WorldMap::GetCaseData(int x, int y) const
 {
   int            it       = (y * _size_x) + x;
-  
+
   return (Data(_mapTree)["tiles"][it]);
 }
 

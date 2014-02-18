@@ -173,7 +173,7 @@ public:
   // Misc
   void               SetName(const std::string& name) { _level_name = name;   }
   const std::string& GetName(void) const              { return (_level_name); }
-  void               SpawnEnemies(const std::string& type, unsigned short quantity, unsigned short n_spawn);
+  void               SpawnEnemies(const std::string& type, unsigned short spawn_zone_number);
   bool               IsWaypointOccupied(unsigned int id) const;
   ISampleInstance*   PlaySound(const std::string& name);
   void               InsertProjectile(Projectile* projectile) { _projectiles.push_back(projectile); }

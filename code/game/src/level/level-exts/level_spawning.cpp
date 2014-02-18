@@ -2,22 +2,21 @@
 
 using namespace std;
 
-void Level::SpawnEnemies(const std::string& type, unsigned short quantity, unsigned short n_spawn)
+void Level::SpawnEnemies(const std::string& type, unsigned short spawn_zone_number)
 {
   cout << "[Level] spawning " << type << endl;
   Party          spawn_party;
   stringstream   entry_zone;
   Data           random_party = (*_dataEngine)["random-encounters"][type];
-  unsigned short i            = 0; 
 
-  (*_dataEngine)["random-encounters"].Output();
-  entry_zone << "spawn_" << n_spawn;
+  entry_zone << "spawn_" << spawn_zone_number;
   for (unsigned short ii = 0 ; ii < random_party.Count() ; ++ii)
   {
-    string         critter_type = random_party[ii].Key();
-    unsigned short same_critter = 0;
+    Data           critter       = random_party[ii];
+    string         critter_type  = critter.Key();
+    unsigned short critter_count = critter;
 
-    for (; same_critter < (unsigned short)random_party[ii] && i < quantity ; ++same_critter, ++i)
+    for (unsigned short i = 0 ; i < critter_count ; ++i)
     {
       Data           data         = (*_dataEngine)["bestiary"][critter_type];
       DynamicObject* object;
