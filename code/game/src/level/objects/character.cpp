@@ -951,10 +951,31 @@ void                ObjectCharacter::RunRotate(float elapsedTime)
     rot.set_x(_rotation_goal);
     _rotating = false;
   }
-  else if (_rotation_goal > rot.get_x())
-    rot.set_x(rot.get_x() + factor);
-  else if (_rotation_goal < rot.get_x())
-    rot.set_x(rot.get_x() - factor);
+  else
+  {
+    float positive_distance, negative_distance;
+
+    if (rot.get_x() > _rotation_goal)
+    {
+      positive_distance = ABS(rot.get_x()) + (360 + _rotation_goal);
+      negative_distance = ABS(_rotation_goal + ABS(rot.get_x()));
+    }
+    else
+    {
+      positive_distance = ABS(rot.get_x() - _rotation_goal);
+      negative_distance = (360 + rot.get_x()) + ABS(_rotation_goal);
+    }
+
+    if (negative_distance < positive_distance)
+      rot.set_x(rot.get_x() - factor);
+    else
+      rot.set_x(rot.get_x() + factor);
+
+    if (rot.get_x() < -360)
+      rot.set_x(rot.get_x() + 360);
+    else if (rot.get_x() > 0)
+      rot.set_x(-360 + rot.get_x());
+  }
   _object->nodePath.set_hpr(rot);
 }
 

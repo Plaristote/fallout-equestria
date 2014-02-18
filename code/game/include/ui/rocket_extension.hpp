@@ -12,13 +12,6 @@ namespace Rocket
   void ForeachElement(Rocket::Core::Element* root, const std::string& tag, std::function<void (Rocket::Core::Element*)> lambda);
 }
 
-struct MyRocket
-{
-  static void SetVisibility(Rocket::Core::Context* context, bool visibility);
-private:
-  MyRocket() {}
-};
-
 struct RocketListener : public Rocket::Core::EventListener
 {
   void ProcessEvent(Rocket::Core::Event& event) { EventReceived.Emit(event); }

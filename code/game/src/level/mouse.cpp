@@ -130,7 +130,6 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
       updated         = false;
     if (!(updated == false))
       return ;
-    cout << "MousePos: " << cursorPos.get_x() << ", " << cursorPos.get_y() << endl;
     last_update       = cursorPos;
     updated           = true;
     pickerNode        = new_CollisionNode("mouseRay2");

@@ -440,37 +440,12 @@ bool GameTask::SaveGame(const std::string& savepath)
   if (_level != 0)
   {
     _window->get_render().set_transparency(TransparencyAttrib::M_alpha, 1);
-    MyRocket::SetVisibility(_gameUi.GetContext(), false);
     framework->get_graphics_engine()->render_frame();
     _window->get_graphics_window()->get_screenshot()->write(savepath + "/preview.png");
-    MyRocket::SetVisibility(_gameUi.GetContext(), true);
   }
 
   return (success);
 }
-
-void MyRocket::SetVisibility(Rocket::Core::Context* context, bool visibility)
-  {
-    static std::vector<Rocket::Core::ElementDocument*> hidden_docs;
-    unsigned int max = context->GetNumDocuments();
-
-    for (unsigned int i = 0 ; i < max ; ++i)
-    {
-      Rocket::Core::ElementDocument* doc = context->GetDocument(i);
-      auto                           it  = !visibility ? hidden_docs.end() : find(hidden_docs.begin(), hidden_docs.end(), doc);
-      
-      if (!visibility && doc->IsVisible())
-      {
-        hidden_docs.push_back(doc);
-        doc->Hide();
-      }
-      else if (visibility && it != hidden_docs.end())
-      {
-        hidden_docs.erase(it);
-        doc->Show();
-      }
-    }
-  }
 
 bool GameTask::LoadGame(const std::string& savepath)
 {
