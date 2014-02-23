@@ -64,7 +64,7 @@ void LevelZone::Refresh(void)
 void LevelZone::AddEffect(Effect effect, unsigned short time)
 {
   TimeManager&       time_manager = _level->GetTimeManager();
-  TimeManager::Task* task         = time_manager.AddTask(1, false, time);
+  TimeManager::Task* task         = time_manager.AddTask(1, DateTime::Seconds(time));
 
   task->Interval.Connect(effect);
 }

@@ -186,14 +186,11 @@ void WorldMap::AddCityToList(Data cityData)
     if ((RocketFactoryInstanceElementText(elem, innerRml)))
       ToggleEventListener(true, "city-" + cityData.Key(), "click", CityButtonClicked);
   }
-  cout << "SHOWING CITY " << city.name << " ???" << endl;
   if (show && city.visible)
   {
-    cout << "SHOWING FUCKING CITY" << endl;
     Core::Element* elem = _root->GetElementById("pworldmap");
-    Core::String inner_rml;
-    stringstream rml, css, elem_id;
-    int          radius = city.radius * 2.5f;
+    stringstream   rml, css, elem_id;
+    int            radius = city.radius * 2.5f;
     
     elem_id << "city-halo-" << cityData.Key();
 
@@ -214,26 +211,27 @@ void WorldMap::AddCityToList(Data cityData)
 
 void WorldMap::UpdateClock(void)
 {
-  Core::Element* elem_year  = _root->GetElementById("clock-year");
-  Core::Element* elem_month = _root->GetElementById("clock-month");
-  Core::Element* elem_day   = _root->GetElementById("clock-day");
+  Core::Element* elem_year    = _root->GetElementById("clock-year");
+  Core::Element* elem_month   = _root->GetElementById("clock-month");
+  Core::Element* elem_day     = _root->GetElementById("clock-day");
+  DateTime       current_time = _timeManager.GetDateTime();
   
   if (elem_year)
   {
     stringstream str;
-    str << _timeManager.GetYear();
+    str << current_time.GetYear();
     elem_year->SetInnerRML(str.str().c_str());
   }
   if (elem_month)
   {
     stringstream str;
-    str << _timeManager.GetMonth();
+    str << current_time.GetMonth();
     elem_month->SetInnerRML(str.str().c_str());
   }
   if (elem_day)
   {
     stringstream str;
-    str << _timeManager.GetDay();
+    str << current_time.GetDay();
     elem_day->SetInnerRML(str.str().c_str());
   }
 }
@@ -407,14 +405,15 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
   }
 
   // Update the clock
-  unsigned short lastHour       = _timeManager.GetHour();
-  unsigned short lastDay        = _timeManager.GetDay();
+  DateTime       current_time   = _timeManager.GetDateTime();
+  unsigned short lastHour       = current_time.GetHour();
+  unsigned short lastDay        = current_time.GetDay();
   unsigned short elapsedHours   = movementTime;
   unsigned short elapsedMinutes = (((movementTime * 100) - (elapsedHours * 100)) / 100) * 60;
-  _timeManager.AddElapsedTime(0, elapsedMinutes, elapsedHours);
-  if (lastDay != _timeManager.GetDay())
+  _timeManager.AddElapsedTime(DateTime::Hours(elapsedHours) + DateTime::Minutes(elapsedMinutes));
+  if (lastDay != current_time.GetDay())
     UpdateClock();
-  if (lastHour != _timeManager.GetHour())
+  if (lastHour != current_time.GetHour())
   {
     string which_city;
     

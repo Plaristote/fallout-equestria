@@ -1,17 +1,22 @@
 #include "level/objects/character.hpp"
 #include "level/scene_camera.hpp"
 #include <panda3d/nodePathCollection.h>
+#include "circular_value_set.hpp"
 
 #include "level/level.hpp"
 #include <options.hpp>
 #include <dices.hpp>
+#include <iterator>
 
 #define DEFAULT_WEAPON_1 "hooves"
 #define DEFAULT_WEAPON_2 "buck"
 
 using namespace std;
 
-ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
+ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
+  InstanceDynamicObject(level, object),
+  line_of_sight(*level->GetWorld(), _window->get_render(), GetNodePath()),
+  field_of_view(*level, *this)
 {
   Data     items      = _level->GetItems();  
   string   defEquiped[2];
@@ -72,40 +77,6 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) : Instance
   SetCollideMaskOnSingleNodepath(_object->nodePath, ColMask::DynObject | ColMask::FovTarget);
   _object->nodePath.set_collide_mask(ColMask::DynObject);
 
-  // Line of sight tools
-  _losNode      = new_CollisionNode("losRay");
-  _losNode->set_from_collide_mask(CollideMask(ColMask::FovBlocker | ColMask::FovTarget));
-  _losNode->set_into_collide_mask(0);
-  _losPath      = _window->get_render().attach_new_node(_losNode);
-//  _losPath      = object->nodePath.attach_new_node(_losNode);
-  _losRay       = new CollisionSegment();
-  _losRay->set_point_a(0, 0, 0);
-  _losRay->set_point_b(-10, 0, 0);
-  _losPath.set_pos(0, 0, 0);
-  //_losPath.show();
-  _losNode->add_solid(_losRay);
-  _losHandlerQueue = new CollisionHandlerQueue();
-  _losTraverser.add_collider(_losPath, _losHandlerQueue);  
-
-  // Fov tools
-  _fovNeedsUpdate   = true;
-  _fovTargetNode    = new_CollisionNode("fovTargetSphere");
-  _fovTargetNode->set_from_collide_mask(CollideMask(0));
-  _fovTargetNode->set_into_collide_mask(CollideMask(ColMask::FovTarget));
-  _fovTargetSphere  = new CollisionSphere(0, 0, 0, 2.5f);
-  _fovTargetNp      = _object->nodePath.attach_new_node(_fovTargetNode);
-  _fovTargetNode->add_solid(_fovTargetSphere);
-  //_fovTargetNp.show();
-  
-  _fovNode   = new_CollisionNode("fovSphere");
-  _fovNode->set_from_collide_mask(CollideMask(ColMask::FovTarget));
-  _fovNode->set_into_collide_mask(CollideMask(0));
-  _fovNp     = _object->nodePath.attach_new_node(_fovNode);
-  _fovSphere = new CollisionSphere(0, 0, 0, 0);
-  _fovHandlerQueue = new CollisionHandlerQueue();
-  _fovNode->add_solid(_fovSphere);
-  _fovTraverser.add_collider(_fovNp, _fovHandlerQueue);
-  
   // Faction
   _faction        = 0;
   _self_enemyMask = 0;
@@ -256,12 +227,6 @@ void ObjectCharacter::SetFurtive(bool do_set)
 ObjectCharacter::~ObjectCharacter()
 {
   SetStatistics(0, 0);
-  _losNode->remove_solid(0);
-  _losPath.remove_node();
-  _fovTargetNode->remove_solid(0);
-  _fovTargetNp.remove_node();
-  _fovNode->remove_solid(0);
-  _fovNp.remove_node();
 }
 
 void ObjectCharacter::SetHitPoints(short hp)
@@ -298,6 +263,7 @@ void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* contro
   {
     Data data_stats(_statistics);
 
+    field_of_view.SetIntervalDurationFromStatistics();
     ActionPointChanged.Emit(_actionPoints, data_stats["Statistics"]["Action Points"]);
     if (data_stats["Variables"]["Hit Points"].Nil())
       data_stats["Variables"]["Hit Points"] = data_stats["Statistics"]["Hit Points"].Value();
@@ -511,7 +477,7 @@ void ObjectCharacter::Run(float elapsedTime)
   PStatCollector collector_ai("Level:Characters:AI");
   Timer profile;
   
-  _fovNeedsUpdate = true;
+  field_of_view.MarkForUpdate();
   if (!(IsInterrupted()))
   {
     Level::State state = _level->GetState();
@@ -596,10 +562,10 @@ int                 ObjectCharacter::GetNearestWaypoint(InstanceDynamicObject* o
   return (GetBestWaypoint(object, false));
 }
 
-float               ObjectCharacter::GetDistance(InstanceDynamicObject* object)
+float               ObjectCharacter::GetDistance(const InstanceDynamicObject* object) const
 {
   LPoint3 pos_1  = _object->nodePath.get_pos();
-  LPoint3 pos_2  = object->GetDynamicObject()->nodePath.get_pos();
+  LPoint3 pos_2  = object->GetNodePath().get_pos();
   float   dist_x = pos_1.get_x() - pos_2.get_x();
   float   dist_y = pos_1.get_y() - pos_2.get_y();
 
@@ -953,20 +919,11 @@ void                ObjectCharacter::RunRotate(float elapsedTime)
   }
   else
   {
-    float positive_distance, negative_distance;
+    CircularValueSet value_set(360);
+    float            positive_distance = value_set.AdditionDistance    (ABS(_rotation_goal), ABS(rot.get_x()));
+    float            negative_distance = value_set.SubstractionDistance(ABS(_rotation_goal), ABS(rot.get_x()));
 
-    if (rot.get_x() > _rotation_goal)
-    {
-      positive_distance = ABS(rot.get_x()) + (360 + _rotation_goal);
-      negative_distance = ABS(_rotation_goal + ABS(rot.get_x()));
-    }
-    else
-    {
-      positive_distance = ABS(rot.get_x() - _rotation_goal);
-      negative_distance = (360 + rot.get_x()) + ABS(_rotation_goal);
-    }
-
-    if (negative_distance < positive_distance)
+    if (negative_distance > positive_distance)
       rot.set_x(rot.get_x() - factor);
     else
       rot.set_x(rot.get_x() + factor);
@@ -1002,63 +959,9 @@ void                ObjectCharacter::LookAt(InstanceDynamicObject* object)
   LookAt(pos);
 }
 
-bool                ObjectCharacter::HasLineOfSight_CheckModel(NodePath node)
-{
-  MapObject*                map_object    = _level->GetWorld()->GetMapObjectFromCollisionNode(node);
-  
-  if (map_object)
-  {
-    CollisionTraverser        model_traverser;
-    PT(CollisionHandlerQueue) handler_queue = new CollisionHandlerQueue();
-
-    model_traverser.add_collider(_losPath, handler_queue);
-    model_traverser.traverse(map_object->render);
-    if (handler_queue->get_num_entries() > 0)
-      return (false);
-  }
-  return (true);
-}
-
 bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* object)
 {
-  bool        ret   = true;
-
-  if (object != this)
-  {
-    Timer     profiler;
-    NodePath  root  = _object->nodePath;
-    NodePath  other = object->GetNodePath();
-    LVecBase3 rot   = root.get_hpr();
-    LVector3  rpos  = root.get_pos();
-    LVector3  dir   = root.get_relative_vector(other, other.get_pos() - rpos);
-
-    _losPath.set_hpr(0, 0, 0);
-    _losRay->set_point_a(rpos.get_x(), rpos.get_y(), rpos.get_z() + 4.f);
-    _losRay->set_point_b(other.get_x(), other.get_y(), other.get_z() + 4.f);
-    _losTraverser.traverse(_level->GetWorld()->floors_node);
-    _losHandlerQueue->sort_entries();
-    for (int i = 0 ; i < _losHandlerQueue->get_num_entries() ; ++i)
-    {
-      CollisionEntry* entry = _losHandlerQueue->get_entry(i);
-      NodePath        node  = entry->get_into_node_path();
-      unsigned int    mask  = node.get_collide_mask().get_word();
-
-      if (mask & ColMask::FovBlocker)
-      {
-        if (mask & ColMask::CheckCollisionOnModel && ((ret = HasLineOfSight_CheckModel(node)) == true))
-          continue ;
-        else
-          ret = false;
-      }
-      else if (other.is_ancestor_of(node))
-        ret = true;
-      else
-        continue ;
-      break ;
-    }
-    profiler.Profile("HasLineOfSight");
-  }
-  return (ret);
+  return (line_of_sight.HasLineOfSight(object));
 }
 
 void                ObjectCharacter::RunDeath()
@@ -1082,112 +985,29 @@ void                ObjectCharacter::CallbackActionUse(InstanceDynamicObject* us
 /*
  * Field of View
  */
-# define FOV_TTL 5
-
 Script::StdList<ObjectCharacter*>         ObjectCharacter::GetNearbyEnemies(void) const
 {
   Script::StdList<ObjectCharacter*> ret;
-  
-  auto it  = _fovEnemies.begin();
-  auto end = _fovEnemies.end();
-  
-  while (it != end)
-  {
-    //cout << "[" << it->enemy << "] FovEnemy: " << it->enemy->GetName() << endl;
-    ret.push_back(it->enemy);
-    it++;
-  }
+  auto                              detection = field_of_view.GetDetectedEnemies();
+
+  std::copy(detection.begin(), detection.end(), std::back_inserter(ret));
   return (ret);
 }
 
 Script::StdList<ObjectCharacter*> ObjectCharacter::GetNearbyAllies(void) const
 {
-  return (_fovAllies);
-}
+  Script::StdList<ObjectCharacter*> ret;
+  auto fovEnemies = field_of_view.GetDetectedAllies();
+  auto it         = fovEnemies.begin();
+  auto end        = fovEnemies.end();
 
-void     ObjectCharacter::SetEnemyDetected(ObjectCharacter* character)
-{
-  list<FovEnemy>::iterator enemyIt  = find(_fovEnemies.begin(), _fovEnemies.end(), character);
-
-  cout << "[FOV] " << character->GetName() << " detected" << endl;
-  if (enemyIt != _fovEnemies.end())
-    enemyIt->ttl = FOV_TTL;
-  else
-    _fovEnemies.push_back(FovEnemy(character, FOV_TTL));
-}
-
-void     ObjectCharacter::CheckFieldOfView(void)
-{
-  if (_hitPoints <= 0 || !_fovNeedsUpdate)
-    return ;
-  Timer profile;
-  cout << "Checking Field of View for " << GetName() << endl;
-  PStatCollector       collector("Level:Characters:FieldOfView");
-  short                perception          = (GetStatController() != 0) ? GetStatController()->Model().GetSpecial("PER") : 5;
-  float                fovRadius           = 20 + (perception * 5);
-  NodePath             self_node           = GetNodePath();
-  Level::CharacterList detected_characters = _level->FindCharacters([this, fovRadius](ObjectCharacter* character) -> bool
+  while (it != end)
   {
-    return (character != this && character->GetDistance(this) < fovRadius);
-  });
-  
-  collector.start();
-  _fovNeedsUpdate = false;
-  // Prepare all the FOV data
-  {
-    list<FovEnemy>::iterator it = _fovEnemies.begin();
-
-    // Decrement TTL of nearby enemies
-    while (it != _fovEnemies.end())
-    {
-      it->ttl--;
-      cout << "[FOV] TTL left is '" << (int)it->ttl << '\'' << endl;
-      if (it->ttl == 0)
-	it = _fovEnemies.erase(it);
-      else
-	++it;
-    }
-    _fovAllies.clear();
+    //cout << "[" << it->enemy << "] FovEnemy: " << it->enemy->GetName() << endl;
+    ret.push_back(*it);
+    it++;
   }
-
-  for (unsigned int it = 0 ; it < detected_characters.size() ; ++it)
-  {
-    ObjectCharacter* character = detected_characters[it];
-
-    if (character)
-    {
-      if (!(character->IsAlive()))
-        continue ;
-      if      (IsAlly(character))
-        _fovAllies.push_back(character);
-      else if (IsEnemy(character) && HasLineOfSight(character))
-      {
-        bool                     detected = true;
-
-        if (character->HasFlag(1))
-        {
-          short sneak      = character->GetStatController()->Model().GetSkill("Sneak");
-          short value      = sneak - (perception * 3);
-
-          if (!(Dices::Throw(100) >= (value > 95 ? 95 : value)))
-            detected = false;
-        }
-        if (detected)
-          SetEnemyDetected(character);
-        else
-          cout << "[FOV] " << character->GetName() << " remains undetected" << endl;
-      }
-      else
-        cout << "[FOV] " << character->GetName() << " is out of my line of sight" << endl;
-    }
-  }
-
-  if (_fovEnemies.size() > 0 && _level->GetState() != Level::Fight)
-    _level->StartFight(this);
-  if (this == _level->GetPlayer())
-    _level->RefreshCharactersVisibility();
-  collector.stop();
-  profile.Profile("/!\\ CheckFieldOfView");
+  return (ret);
 }
 
 /*

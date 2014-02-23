@@ -4,6 +4,7 @@
 # include "ui/gameui.hpp"
 # include "dataengine.hpp"
 # include "worldmap/city_splash.hpp"
+# include "time_manager.hpp"
 # include "timer.hpp"
 # include <fstream>
 

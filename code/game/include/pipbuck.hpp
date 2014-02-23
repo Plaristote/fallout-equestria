@@ -82,7 +82,7 @@ private:
   AngelScript::Object* _object;
 };
 
-# include "timer.hpp"
+# include "time_manager.hpp"
 
 class PipbuckClockApp : public Pipbuck::App
 {

@@ -103,3 +103,7 @@ string underscore(const string& tmp)
   return (ret);
 }
 
+bool starts_with(const std::string& str, const std::string& to_compare)
+{
+  return (str.substr(0, to_compare.size()) == to_compare);
+}

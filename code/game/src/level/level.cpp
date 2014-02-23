@@ -1,11 +1,4 @@
 #include "globals.hpp"
-// REQUIREMENT FOR THE WALL-EATING BALL OF WRATH
-#include <panda3d/stencilAttrib.h>
-#include <panda3d/colorBlendAttrib.h>
-#include <panda3d/depthTestAttrib.h>
-#include <panda3d/cullFaceAttrib.h>
-// END
-
 #include "level/level.hpp"
 #include "astar.hpp"
 
@@ -36,8 +29,15 @@ Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
 
 Level* Level::CurrentLevel = 0;
-Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window), _mouse(window),
-  _camera(window, window->get_camera_group()), _timeManager(tm), _main_script(name), _chatter_manager(window), _levelUi(window, gameUi)
+Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window),
+  _mouse(window),
+  _camera(window, window->get_camera_group()),
+  _timeManager(tm),
+  _main_script(name),
+  _chatter_manager(window),
+  _levelUi(window, gameUi),
+  mouse_hint(*this, _levelUi, _mouse),
+  floors(*this)
 {
   cout << "Level Loading Step #1" << endl;
   CurrentLevel = this;
@@ -45,13 +45,14 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   _mouseState  = MouseAction;
   _persistent  = true;
   _level_name  = name;
+  _sunlight    = 0;
+
+  floors.EnableShowLowerFloors(true);
 
   obs.Connect(_levelUi.InterfaceOpened, *this, &Level::SetInterrupted);
 
   cout << "Level Loading Step #2" << endl;
   _items = DataTree::Factory::JSON("data/objects.json");
-
-  _floor_lastWp = 0;
 
   for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
     _currentUis[i] = 0;
@@ -79,7 +80,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
 
   cout << "Level Loading Step #6" << endl;
   if (_world->sunlight_enabled)
-    InitSun();
+    InitializeSun();
 
   LPoint3 upperLeft, upperRight, bottomLeft;
   cout << "Level Loading Step #7" << endl;
@@ -118,7 +119,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   obs.Connect(InstanceDynamicObject::ActionUseSkillOn,  *this, &Level::CallbackActionUseSkillOn);
   obs.Connect(InstanceDynamicObject::ActionUseSpellOn,  *this, &Level::CallbackActionUseSpellOn);
 
-  _task_metabolism = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 0, 1);
+  _task_metabolism = _timeManager.AddRepetitiveTask(TASK_LVL_CITY, DateTime::Hours(1));
   _task_metabolism->Interval.Connect(*this, &Level::RunMetabolism);  
 
 
@@ -206,45 +207,25 @@ LevelZone* Level::GetZoneByName(const std::string& name)
 
 void Level::RefreshCharactersVisibility(void)
 {
-  cout << "RefreshCharactersVisibility" << endl;
-  for_each(_characters.begin(), _characters.end(), [this](ObjectCharacter* character)
-  {
-    std::list<ObjectCharacter*> fov = GetPlayer()->GetNearbyEnemies();
-    auto                        it  = fov.begin();
-    auto                        end = fov.end();
-    NodePath                    np  = character->GetNodePath();
+  ObjectCharacter* player              = GetPlayer();
+  auto             detected_characters = player->GetFieldOfView().GetDetectedCharacters();
 
-    if (character == GetPlayer())
-      return ;
-    else if (GetPlayer()->IsAlly(character))
-      character->SetVisible(true);
-    else if (GetPlayer()->IsEnemy(character))
+  for_each(_characters.begin(), _characters.end(),
+           [this, detected_characters, player](ObjectCharacter* character)
+  {
+    if (character != player)
     {
-      for (; it != end ; ++it)
-      {
-        if (character == *it)
-        {
-          character->SetVisible(true);
-          return ;
-        }
-      }
-      character->SetVisible(false);
+      auto it = find(detected_characters.begin(), detected_characters.end(), character);
+
+      character->SetVisible(it != detected_characters.end());
     }
-    else if (GetPlayer()->HasLineOfSight(character))
-      character->SetVisible(true);
-    else
-      character->SetVisible(false);
   });
 }
 
 void Level::InsertCharacter(ObjectCharacter* character)
 {
-  static unsigned short task_it = 0;
-  TimeManager::Task*    task    = _timeManager.AddTask(TASK_LVL_CITY, true, 3);
-
-  task->next_run = task->next_run + (task_it % 2);
-  task->Interval.Connect(*character, &ObjectCharacter::CheckFieldOfView);
-  ++task_it;
+  character->GetFieldOfView().SetIntervalDurationInSeconds(3);
+  character->GetFieldOfView().Launch();
   _characters.push_back(character);
 }
 
@@ -290,50 +271,15 @@ void Level::InsertDynamicObject(DynamicObject& object)
     _objects.push_back(instance);
 }
 
-PT(DirectionalLight) static_sunlight;
-
-void Level::InitSun(void)
+void Level::InitializeSun(void)
 {
-  NodePath     sun_root             = _world->floors_node;
-  unsigned int shadow_caster_buffer = 128;
-  unsigned int film_size            = 128;
-  unsigned int graphics_quality     = OptionsManager::Get()["graphics-quality"];
-
-  while (graphics_quality--)
-  {
-    shadow_caster_buffer *= 2;
-    film_size            += 128;
-  }
-  if (static_sunlight.is_null())
-    static_sunlight = new DirectionalLight("sun_light");
-  _sunLight = static_sunlight;
-  //_sunLight            = new DirectionalLight("sun_light");
-  _sunLight->set_shadow_caster(true, shadow_caster_buffer, shadow_caster_buffer);
-  _sunLight->get_lens()->set_near_far(10.f, 1200.f);
-  _sunLight->get_lens()->set_film_size(film_size);
-  _sunLightNode        = sun_root.attach_new_node(_sunLight);
-  _sunLightNode.set_pos(150.f, 50, 50.f);
-  _sunLightNode.set_hpr(127, -31,  0);
-
-  _sunLightAmbient     = new AmbientLight("sun_light_ambient");
-  _sunLightAmbientNode = sun_root.attach_new_node(_sunLightAmbient);
-
-  sun_root.set_light(_sunLightNode, 6);
-  sun_root.set_light(_sunLightAmbientNode, 5);
-  sun_root.set_two_sided(false);
-
-  _task_daylight   = _timeManager.AddTask(TASK_LVL_CITY, true, 0, 1);
-  _task_daylight->Interval.Connect(*this, &Level::RunDaylight);
-  _solar_circle.SetFromWorld(_world);
-  RunDaylight();
+  _sunlight = new Sunlight(*_world, _timeManager);
+  _sunlight->SetAsRepetitiveTask(true);
+  _sunlight->SetIntervalDuration(DateTime::Minutes(1));
+  _sunlight->Launch();
 }
 
-bool StartsWith(const std::string& str, const std::string& starts_with)
-{
-  return (str.substr(0, starts_with.size()) == starts_with);
-}
-
-void Level::InitPlayer(void)
+void Level::InitializePlayer(void)
 {
   if (!(GetPlayer()->GetStatistics().Nil()))
   {
@@ -388,58 +334,14 @@ void Level::InitPlayer(void)
     _levelUi.GetInventory().SetEquipedItem(it, GetPlayer()->GetEquipedItem(it));
   }
 
-  //
-  // The wall-eating ball of wrath
-  //
-  PandaNode*        node;
-  CPT(RenderAttrib) atr1 = StencilAttrib::make(1, StencilAttrib::SCF_not_equal, StencilAttrib::SO_keep, StencilAttrib::SO_keep,    StencilAttrib::SO_keep,    1, 1, 0);
-  CPT(RenderAttrib) atr2 = StencilAttrib::make(1, StencilAttrib::SCF_always,    StencilAttrib::SO_zero, StencilAttrib::SO_replace, StencilAttrib::SO_replace, 1, 0, 1);
+  player_halo.SetTarget(GetPlayer());
+  GetPlayer()->GetFieldOfView().Launch();
 
-  _player_halo = _window->load_model(_window->get_panda_framework()->get_models(), "misc/sphere");
-  if ((_player_halo.node()) != 0)
-  {
-    _player_halo.set_scale(5);
-    _player_halo.set_bin("background", 0);
-    _player_halo.set_depth_write(0);
-    _player_halo.reparent_to(_window->get_render());
-    node        = _player_halo.node();
-    node->set_attrib(atr2);
-    node->set_attrib(ColorBlendAttrib::make(ColorBlendAttrib::M_add));
-    for_each(_world->objects.begin(), _world->objects.end(), [node, atr1](MapObject& object)
-    {
-      std::string name = object.nodePath.get_name();
-      std::string patterns[] = { "Wall", "wall", "Ceiling", "ceiling" };
-
-      for (unsigned short i = 0 ; i < 4 ; ++i)
-      {
-        if (StartsWith(name, patterns[i]))
-        {
-          object.nodePath.set_attrib(atr1);
-          break ;
-        }
-      }
-    });
-  }
-
-  //
-  // Field of view refreshing
-  //
-  {
-    TimeManager::Task*    task    = _timeManager.AddTask(TASK_LVL_CITY, true, 1);
-
-    task->loop     = true;
-    task->next_run = task->next_run + 1;
-    task->Interval.Connect(*(GetPlayer()), &ObjectCharacter::CheckFieldOfView);    
-  }
-  
   //
   // Initializing Main Script
   //
   if (_main_script.IsDefined("Initialize"))
-    {
     _main_script.Call("Initialize");
-    exit(0);
-    }
 }
 
 void Level::InsertParty(PlayerParty& party)
@@ -500,7 +402,6 @@ void Level::FetchParty(PlayerParty& party)
       ++cit;
     }
   }
-  //*it = GetPlayer()->GetDynamicObject();
   party.SetHasLocalObjects(false);
 }
 
@@ -572,14 +473,7 @@ Level::~Level()
 	AlertUi::NewAlert.Emit(std::string("Script crashed during Level destruction: ") + exception.what());
   }
   MouseCursor::Get()->SetHint("");
-  _window->get_render().set_light_off(_sunLightAmbientNode);
-  _window->get_render().set_light_off(_sunLightNode);
-  _window->get_render().clear_light(_sunLightAmbientNode);
-  _window->get_render().clear_light(_sunLightNode);
   _window->get_render().clear_light();
-  _sunLightAmbientNode.remove_node();
-  _sunLightNode.remove_node();
-  _player_halo.remove_node();
 
   _timeManager.ClearTasks(TASK_LVL_CITY);
   obs.DisconnectAll();
@@ -595,8 +489,9 @@ Level::~Level()
     if (_currentUis[i] != 0)
       delete _currentUis[i];
   }
-  if (_world) delete _world;
-  if (_items) delete _items;
+  if (_sunlight) delete _sunlight;
+  if (_world)    delete _world;
+  if (_items)    delete _items;
   cout << "-> Done." << endl;
 }
 
@@ -774,7 +669,7 @@ void Level::NextTurn(void)
   if ((++_itCharacter) == _characters.end())
   {
     _itCharacter = _characters.begin();
-    (*_itCharacter)->CheckFieldOfView();
+    (*_itCharacter)->GetFieldOfView().RunCheck();
     _timeManager.AddElapsedTime(WORLDTIME_TURN);
   }
   if (_itCharacter != _characters.end())
@@ -845,76 +740,6 @@ void Level::RunMetabolism(void)
   });
 }
 
-void Level::RunDaylight(void)
-{
-  //cout << "Running daylight task" << endl;
-  if (_sunLightNode.is_empty())
-    return ;
-  
-  LVecBase4f color_steps[6] = {
-    LVecBase4f(0.2, 0.2, 0.5, 1), // 00h00
-    LVecBase4f(0.2, 0.2, 0.3, 1), // 04h00
-    LVecBase4f(0.7, 0.7, 0.5, 1), // 08h00
-    LVecBase4f(1.0, 1.0, 1.0, 1), // 12h00
-    LVecBase4f(1.0, 0.8, 0.8, 1), // 16h00
-    LVecBase4f(0.4, 0.4, 0.6, 1)  // 20h00
-  };
-  
-  DateTime current_time    = _task_daylight->next_run + _task_daylight->length;
-  int      current_hour    = current_time.GetHour();
-  int      current_minute  = current_time.GetMinute();
-  int      current_second  = current_time.GetSecond();
-  int      it              = current_hour / 4;
-  float    total_seconds   = 60 * 60 * 4;
-  float    elapsed_seconds = current_second + (current_minute * 60) + ((current_hour - (it * 4)) * 60 * 60);
-
-  LVecBase4f to_set(0, 0, 0, 0);
-  LVecBase4f dif = (it == 5 ? color_steps[0] : color_steps[it + 1]) - color_steps[it];
-
-  // dif / 5 * (it % 4) -> dif / 100 * (20 * (it % 4)) is this more clear ? I hope it is.
-  to_set += color_steps[it] + (dif / total_seconds * elapsed_seconds);
-  _sunLight->set_color(to_set);
-  to_set.set_w(0.1);
-  _sunLightAmbient->set_color(to_set / 3);
-  //cout << "Sunlight color [" << _timeManager.GetHour() << "]->[" << it << "]: " << to_set.get_x() << "," << to_set.get_y() << "," << to_set.get_z() << endl;
-
-  // Angle va de 0/180 de 8h/20h   20h/8h
-  float    step  = (current_hour) % 12 + (current_minute / 60.f);
-  float    angle = ((180.f / 120.f) / 12.f) * step;
-  LPoint2f pos   = _solar_circle.PointAtAngle(angle);
-
-  //cout << "Sun Step: " << step << endl;
-  //cout << "Sun Position is (" << pos.get_x() << "," << pos.get_y() << ')' << endl;
-  _sunLightNode.set_z(pos.get_x());
-  _sunLightNode.set_y(pos.get_y());
-  _sunLightNode.look_at(_solar_circle.GetPosition());
-}
-
-void Level::MouseSuccessRateHint(void)
-{
-  InstanceDynamicObject* dynObject = FindObjectFromNode(_mouse.Hovering().dynObject);
-  
-  if (dynObject)
-  {
-    ObjectCharacter*     player    = GetPlayer();
-    InventoryObject*     item      = player->active_object;
-    unsigned char        actionIt  = player->active_object_it;
-
-    if ((*item)["actions"][actionIt]["combat"] == "1")
-    {
-      ObjectCharacter*   target = dynObject->Get<ObjectCharacter>();
-      int                rate;
-
-      if (!target)
-        return ;
-      rate = item->HitSuccessRate(player, target, actionIt);
-      MouseCursor::Get()->SetHint(rate);
-    }
-    else
-      ; // Not implemented yet
-  }
-}
-
 AsyncTask::DoneStatus Level::do_task(void)
 {
   float elapsedTime = _timer.GetElapsedTime();
@@ -924,42 +749,16 @@ AsyncTask::DoneStatus Level::do_task(void)
   else
     _mouse.SetMouseState('i');
 
-  // TEST Transparent Ball of Wrath
-  if (!(_player_halo.is_empty()))
-  {
-    _player_halo.set_pos(GetPlayer()->GetDynamicObject()->nodePath.get_pos());
-    _player_halo.set_hpr(GetPlayer()->GetDynamicObject()->nodePath.get_hpr());
-  }
-  // TEST End
+  player_halo.Run();
+
+  bool use_fog_of_war = false;
+  if (use_fog_of_war == false)
+    RefreshCharactersVisibility();
 
   _camera.SlideToHeight(GetPlayer()->GetDynamicObject()->nodePath.get_z());
   _camera.Run(elapsedTime);  
 
-  //
-  // Level Mouse Hints
-  //
-  if (_state != Interrupted && _levelUi.GetContext()->GetHoverElement() == _levelUi.GetContext()->GetRootElement())
-  {
-    _mouse.ClosestWaypoint(_world, _currentFloor);
-    if (_mouse.Hovering().hasWaypoint)
-    {
-      unsigned int waypoint_id = _mouse.Hovering().waypoint_ptr->id;
-      
-      if (_world->IsInExitZone(waypoint_id))
-        MouseCursor::Get()->SetHint("exit");
-      else
-        MouseCursor::Get()->SetHint("");
-    }
-    else
-      MouseCursor::Get()->SetHint("nowhere");
-    if (_mouseState == MouseTarget && _mouse.Hovering().hasDynObject)
-      MouseSuccessRateHint();
-  }
-  else
-    MouseCursor::Get()->SetHint("");
-  //
-  // End Level Mouse Hints
-  //
+  mouse_hint.Run();
 
   std::function<void (InstanceDynamicObject*)> run_object = [elapsedTime](InstanceDynamicObject* obj)
   {
@@ -1002,7 +801,8 @@ AsyncTask::DoneStatus Level::do_task(void)
     _main_script.Call("Run", 1, &param_time);
   }
 
-  CheckCurrentFloor(elapsedTime);
+  floors.SetCurrentFloorFromObject(GetPlayer());
+  floors.RunFadingEffect(elapsedTime);
   _chatter_manager.Run(elapsedTime, _camera.GetNodePath());
   _particle_manager.do_particles(ClockObject::get_global_clock()->get_dt());
   _mouse.Run();
@@ -1154,7 +954,7 @@ void Level::MouseLeftClicked(void)
 	return ;
       else
       {
-	_mouse.ClosestWaypoint(_world, _currentFloor);
+        _mouse.ClosestWaypoint(_world, floors.GetCurrentFloor());
 	if (hovering.hasWaypoint)
 	{
 	  Waypoint* toGo = _world->GetWaypointFromNodePath(hovering.waypoint);
@@ -1193,7 +993,7 @@ void Level::MouseLeftClicked(void)
     case MouseWaypointPicker:
       {
         std::cout << "Mouse Waypoint Picker" << std::endl;
-        _mouse.ClosestWaypoint(_world, _currentFloor);
+        _mouse.ClosestWaypoint(_world, floors.GetCurrentFloor());
         if (hovering.hasWaypoint)
         {
           Waypoint* toGo = _world->GetWaypointFromNodePath(hovering.waypoint);

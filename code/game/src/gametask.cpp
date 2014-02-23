@@ -8,6 +8,7 @@
 #include "my_zlib.hpp"
 #include <iostream>
 #include "ui/alert_ui.hpp"
+#include "scheduled_task.hpp"
 
 using namespace std;
 
@@ -29,7 +30,7 @@ Buff::Buff(const string& name, StatController* stats, Data data, TimeManager& tm
   _target_name  = name;
   _target_stats = stats;
   //_looping    = _buff["loop"].Value() == "1";
-  _task       = tm.AddTask(TASK_LVL_WORLDMAP, _buff["loop"].Value() == "1", data["duration"].Nil() ? 1 : (int)data["duration"]);
+//  _task       = tm.AddTask(TASK_LVL_WORLDMAP, _buff["loop"].Value() == "1", data["duration"].Nil() ? 1 : (int)data["duration"]);
   _task->Interval.Connect(*this, &Buff::Refresh);
 }
 
@@ -49,7 +50,7 @@ Buff::Buff(Utils::Packet& packet, TimeManager& tm, function<StatController* (con
   _context      = 0;
   _target_stats = get_controller(_target_name);
   _looping      = _buff["loop"].Value() == "1";
-  _task         = _tm.AddTask(TASK_LVL_WORLDMAP, _looping, 0);
+  //_task         = _tm.AddTask(TASK_LVL_WORLDMAP, _looping, 0);
   _task->next_run.Serialize(packet);
   _task->length.Serialize(packet);
   _task->Interval.Connect(*this, &Buff::Refresh);
@@ -366,6 +367,22 @@ void                  GameTask::Exit(Rocket::Core::Event&)
 
 bool is_loading = false;
 
+void GameTask::RunLevel(void)
+{
+  if (_level && _level->do_task() == AsyncTask::DS_done)
+  {
+    const string nextZone  = _level->GetNextZone();
+    const string exitPoint = _level->GetExitZone();
+
+    ExitLevel(_savePath);
+    if (nextZone != "")
+      OpenLevel(_savePath, nextZone, exitPoint);
+    SaveGame(_savePath); // Auto-save for the Continue feature
+  }
+  if (!_level && _worldMap)
+    _worldMap->Show();
+}
+
 AsyncTask::DoneStatus GameTask::do_task()
 {
   if (!_continue)
@@ -380,20 +397,7 @@ AsyncTask::DoneStatus GameTask::do_task()
       GameOver();
   }
   if (_level)
-  {
-    if (_level->do_task() == AsyncTask::DS_done)
-    {
-      const string nextZone  = _level->GetNextZone();
-      const string exitPoint = _level->GetExitZone();
-
-      ExitLevel(_savePath);
-      if (nextZone != "")
-	OpenLevel(_savePath, nextZone, exitPoint);
-      SaveGame(_savePath); // Auto-save for the Continue feature
-    }
-    if (!_level && _worldMap)
-      _worldMap->Show();
-  }
+    RunLevel();
   else if (_worldMap)
     _worldMap->Run();
   _pipbuck.Run();
@@ -404,7 +408,8 @@ AsyncTask::DoneStatus GameTask::do_task()
 
 bool GameTask::SaveGame(const std::string& savepath)
 {
-  bool success = true;
+  bool     success      = true;
+  DateTime current_time = _timeManager.GetDateTime();
 
   _worldMap->Save(savepath);
   if (_level)
@@ -427,12 +432,12 @@ bool GameTask::SaveGame(const std::string& savepath)
     }
     _playerInventory->SaveInventory(player_inventory);
   }
-  _dataEngine["time"]["seconds"] = _timeManager.GetSecond();
-  _dataEngine["time"]["minutes"] = _timeManager.GetMinute();
-  _dataEngine["time"]["hours"]   = _timeManager.GetHour();
-  _dataEngine["time"]["days"]    = _timeManager.GetDay();
-  _dataEngine["time"]["month"]   = _timeManager.GetMonth();
-  _dataEngine["time"]["year"]    = _timeManager.GetYear();
+  _dataEngine["time"]["seconds"] = current_time.GetSecond();
+  _dataEngine["time"]["minutes"] = current_time.GetMinute();
+  _dataEngine["time"]["hours"]   = current_time.GetHour();
+  _dataEngine["time"]["days"]    = current_time.GetDay();
+  _dataEngine["time"]["month"]   = current_time.GetMonth();
+  _dataEngine["time"]["year"]    = current_time.GetYear();
   _dataEngine.Save(savepath + "/dataengine.json");
 
   DataTree::Writers::JSON(_charSheet, savepath + "/stats-self.json");
@@ -553,7 +558,7 @@ bool GameTask::LoadGame(const std::string& savepath)
   }
   else
     _worldMap->Show();
-  _timeManager.AddTask(TASK_LVL_WORLDMAP, true, 0, 0, 0, 1)->Interval.Connect(*_playerStats, &StatController::RunMetabolism);
+  _timeManager.AddRepetitiveTask(TASK_LVL_WORLDMAP, DateTime::Days(1))->Interval.Connect(*_playerStats, &StatController::RunMetabolism);
   return (true);
 }
 
@@ -773,7 +778,7 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     if (_level->GetPlayer() != 0)
     {
       SetPlayerInventory();
-      _level->InitPlayer();
+      _level->InitializePlayer();
       _level->GetPlayer()->SetStatistics(_charSheet, _playerStats);
       if (params.entry_zone == "")
         _level->FetchParty(*_playerParty);

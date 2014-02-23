@@ -589,12 +589,14 @@ void PipbuckClockApp::SetValue(Rocket::Core::Element* element, unsigned short va
 
 void PipbuckClockApp::RunAsMainTask(Rocket::Core::Element* root, DataEngine& de)
 {
-  if (_year)   SetValue(_year,   _time_manager.GetYear());
-  if (_month)  SetValue(_month,  _time_manager.GetMonth());
-  if (_day)    SetValue(_day,    _time_manager.GetDay());
-  if (_hour)   SetValue(_hour,   _time_manager.GetHour());
-  if (_minute) SetValue(_minute, _time_manager.GetMinute());
-  if (_second) SetValue(_second, _time_manager.GetSecond());
+  DateTime current_time = _time_manager.GetDateTime();
+
+  if (_year)   SetValue(_year,   current_time.GetYear());
+  if (_month)  SetValue(_month,  current_time.GetMonth());
+  if (_day)    SetValue(_day,    current_time.GetDay());
+  if (_hour)   SetValue(_hour,   current_time.GetHour());
+  if (_minute) SetValue(_minute, current_time.GetMinute());
+  if (_second) SetValue(_second, current_time.GetSecond());
   if (_minutes_to_spend > 0)
   {
      if (Level::CurrentLevel != 0)
@@ -610,12 +612,12 @@ void PipbuckClockApp::RunAsMainTask(Rocket::Core::Element* root, DataEngine& de)
      _span_error->SetInnerRML("");
      if (_minutes_to_spend > 60)
      {
-       _time_manager.AddElapsedTime(0, 0, 1);
+         _time_manager.AddElapsedTime(DateTime::Hours(1));
        _minutes_to_spend -= 60;
      }
      else
      {
-       _time_manager.AddElapsedTime(0, 1);
+       _time_manager.AddElapsedTime(DateTime::Minutes(1));
        _minutes_to_spend--;
      }
      if (_minutes_to_spend == 0 && Level::CurrentLevel != 0)

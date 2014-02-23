@@ -137,5 +137,5 @@ void Level::SetEntryZone(Party& party, const std::string& name)
   }
   _exitingZone = false;
   _camera.CenterCameraInstant(GetPlayer()->GetNodePath().get_pos());
-  _floor_lastWp = 0;
+  cout << "[Level][SetEntryZone] Done" << endl;
 }

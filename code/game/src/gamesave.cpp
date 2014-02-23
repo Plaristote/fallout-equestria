@@ -180,7 +180,7 @@ void CharacterBuff::Load(Level* level, ObjectCharacter* character, Utils::Packet
   string             json;
   DataTree*          buff;
 
-  _task = _timeManager.AddTask(TASK_LVL_CITY, false, 0);
+  _task = _timeManager.AddTask(TASK_LVL_CITY, 0);
   _task->next_run.Unserialize(packet);
   _task->length.Unserialize(packet);
   packet >> json;

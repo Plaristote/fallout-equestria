@@ -69,6 +69,47 @@ bool DateTime::operator==(const DateTime& item) const
   return (!(*this != item));
 }
 
+time_t DateTime::GetTimestamp(void) const
+{
+  if (year != 0)
+  {
+    struct tm timeinfo;
+
+    timeinfo.tm_year = (year < 1900 ? 0 : year - 1900);
+    timeinfo.tm_mon  = month - 1;
+    timeinfo.tm_mday = day;
+    timeinfo.tm_hour = hour;
+    timeinfo.tm_min  = minute;
+    timeinfo.tm_sec  = second;
+    return (mktime(&timeinfo));
+  }
+  return (GetTimeOfTheMonth().seconds);
+}
+
+DateTime::Seconds DateTime::GetTimeOfTheDay() const
+{
+  return (Hours(hour).seconds + Minutes(minute).seconds + second);
+}
+
+DateTime::Seconds DateTime::GetTimeOfTheWeek() const
+{
+  return (GetTimeOfTheDay().seconds + Days(GetDayOfTheWeek() - 1).seconds);
+}
+
+DateTime::Seconds DateTime::GetTimeOfTheMonth() const
+{
+  return (GetTimeOfTheDay().seconds + Days(day).seconds);
+}
+
+unsigned short DateTime::GetDayOfTheWeek() const
+{
+  time_t         timestamp = GetTimestamp();
+  struct tm*     time      = gmtime(&timestamp);
+  unsigned short wday      = time->tm_wday + 1;
+
+  return (wday);
+}
+
 std::string DateTime::ToString(const std::string& format) const
 {
   std::stringstream result;

@@ -32,6 +32,7 @@
  */
 std::string humanize(const std::string&);
 std::string underscore(const std::string&);
+bool        starts_with(const std::string&, const std::string&);
 
 # ifndef TRUE_SQRT
 #  define SQRT my_sqrt

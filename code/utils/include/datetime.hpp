@@ -4,7 +4,8 @@
 # include <queue>
 # include <functional>
 # include <string>
-#include <serializer.hpp>
+# include <ctime>
+# include <serializer.hpp>
 
 template<typename TYPE>
 struct RecursiveChecker
@@ -34,19 +35,28 @@ struct RecursiveChecker
 
 class DateTime
 {
+public:
   struct TimeUnit
   {
     TimeUnit(unsigned int value) : seconds(value) {}
     unsigned int seconds;
+
+    TimeUnit operator+(const TimeUnit& time) const
+    {
+      TimeUnit retval(time);
+
+      retval.seconds += seconds;
+      return (retval);
+    }
   };
 
-public:
   struct Seconds : public TimeUnit { Seconds(unsigned int value) : TimeUnit(value)      {} };
   struct Minutes : public Seconds  { Minutes(unsigned int value) : Seconds (value * 60) {} };
   struct Hours   : public Minutes  { Hours(unsigned int value)   : Minutes (value * 60) {} };
   struct Days    : public Hours    { Days(unsigned int value)    : Hours   (value * 24) {} };
   struct Weeks   : public Days     { Weeks(unsigned int value)   : Days    (value * 7)  {} };
 
+  DateTime(TimeUnit time) : year(0), month(0), day(0), hour(0), minute(0), second(time.seconds) { adjust_values(); }
   DateTime(unsigned int h, unsigned int m, unsigned int s) : year(0), month(0), day(0), hour(h), minute(m), second(s) { adjust_values(); }
   DateTime(unsigned int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) : year(year), month(month), day(day), hour(hour), minute(minute), second(second) { adjust_values(); }
   DateTime() : year(0), month(0), day(0), hour(0), minute(0), second(0) {}
@@ -68,10 +78,15 @@ public:
   unsigned short  GetDay(void)    const { return (day);    }
   unsigned short  GetHour(void)   const { return (hour);   }
   unsigned short  GetMinute(void) const { return (minute); }
-  unsigned short  GetSecond(void) const { return (second); }  
+  unsigned short  GetSecond(void) const { return (second); }
+  time_t          GetTimestamp(void)      const;
+  Seconds         GetTimeOfTheDay(void)   const;
+  Seconds         GetTimeOfTheWeek(void)  const;
+  Seconds         GetTimeOfTheMonth(void) const;
+  unsigned short  GetDayOfTheWeek(void)   const;
 
   static unsigned short days_per_months(unsigned short month, unsigned short year = 1);
-  
+
   void           Serialize(Utils::Packet&);
   void           Unserialize(Utils::Packet&);
 

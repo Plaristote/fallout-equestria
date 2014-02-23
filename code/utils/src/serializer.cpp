@@ -75,6 +75,7 @@ namespace Utils
     sizeBuffer  = size;
     realloc(size);
     updateHeader();
+    std::cout << "Allocated: " << (unsigned int)buffer << ", " << (unsigned int)reading << std::endl;
   }
 
   Packet::Packet(char* raw, size_t size, bool duplicate) : isDuplicate(duplicate)
@@ -196,7 +197,16 @@ namespace Utils
   {
     char	        type = -1;
 
-    read<char>(type);
+    unsigned int ptr_buff = (unsigned int)buffer;
+    unsigned int ptr_read = (unsigned int)reading;
+
+    cout << "Size: " << sizeBuffer << ", buffer: " << ptr_buff << ", reading: " << ptr_read << endl;
+
+    if ((canIHaz(sizeof(char), 1)))
+      type = *(reinterpret_cast<char*>(reading));
+    reading = reinterpret_cast<void*>((long)reading + sizeof(char));
+
+    //read<char>(type);
     if (type != assumedType)
     {
       int offset = (long)reading - (long)buffer;

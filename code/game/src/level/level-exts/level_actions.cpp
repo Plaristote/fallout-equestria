@@ -437,7 +437,7 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
     bullseye = (item->UseAsWeapon(user, target, actionIt));
     MouseRightClicked();
     if (!(target->IsAlly(user)))
-      target->SetEnemyDetected(user);
+      target->GetFieldOfView().SetEnemyDetected(*user);
     if (xpFetcher.character_died)
       xpFetcher.Execute();
 

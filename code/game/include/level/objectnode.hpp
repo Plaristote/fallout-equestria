@@ -111,16 +111,17 @@ public:
   virtual void       Run(float elapsedTime)
   {
     TaskAnimation();
-  };
+  }
 
-  bool               operator==(NodePath np)             const { return (_object->nodePath.is_ancestor_of(np)); }
-  bool               operator==(const std::string& name) const { return (GetName() == name);                    }
-  std::string        GetName(void)                       const { return (_object->nodePath.get_name());         }
-  NodePath           GetNodePath(void)                   const { return (_object->nodePath);                    }
-  InteractionList&   GetInteractions(void)                     { return (_interactions);                        }
-  const std::string& GetDialog(void)                     const { return (_object->dialog);                      }
-  DynamicObject*     GetDynamicObject(void)                    { return (_object);                              }
-  virtual GoToData   GetGoToData(InstanceDynamicObject* character);
+  bool                 operator==(NodePath np)             const { return (_object->nodePath.is_ancestor_of(np)); }
+  bool                 operator==(const std::string& name) const { return (GetName() == name);                    }
+  std::string          GetName(void)                       const { return (_object->nodePath.get_name());         }
+  NodePath             GetNodePath(void)                   const { return (_object->nodePath);                    }
+  InteractionList&     GetInteractions(void)                     { return (_interactions);                        }
+  const std::string&   GetDialog(void)                     const { return (_object->dialog);                      }
+  DynamicObject*       GetDynamicObject(void)                    { return (_object);                              }
+  const DynamicObject* GetDynamicObjec(void)               const { return (_object);                              }
+  virtual GoToData     GetGoToData(InstanceDynamicObject* character);
   
   template<class C>
   C*                 Get(void)

@@ -101,7 +101,7 @@ void CharacterBuff::Begin(ObjectCharacter* from, TimeManager::Task* task)
       _context->SetArgAddress(0, _character);
       _context->SetArgAddress(1, from);
       _context->Execute();
-      _task = _timeManager.AddTask(TASK_LVL_CITY, false, _duration);
+      //_task = _timeManager.AddTask(TASK_LVL_CITY, false, _duration);
     }
     else
       _task = task;

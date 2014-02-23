@@ -137,7 +137,7 @@ AsyncTask::DoneStatus MainMenu::do_task()
   fps++;
   if (timer.GetElapsedTime() > 1.f)
   {
-    std::cout << ":::: Frame per seconds: " << fps << std::endl;
+    //std::cout << ":::: Frames per seconds: " << fps << std::endl;
     fps = 0;
     timer.Restart();
   }

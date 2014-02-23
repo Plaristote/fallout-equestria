@@ -11,6 +11,7 @@
 # include "playerparty.hpp"
 
 # include "timer.hpp"
+# include "time_manager.hpp"
 # include "datatree.hpp"
 # include "scene_camera.hpp"
 # include "mouse.hpp"
@@ -29,12 +30,16 @@
 # include "ui/inventory_ui.hpp"
 
 # include "world/world.h"
-# include "sun.hpp"
+# include "sunlight.hpp"
 # include "projectile.hpp"
 # include "soundmanager.hpp"
 # include "main_script.hpp"
 # include "script_zone.hpp"
-#include <executor.hpp>
+# include "executor.hpp"
+
+# include "mouse_hint.hpp"
+# include "visibility_halo.hpp"
+# include "floors.hpp"
 
 # include <functional>
 
@@ -48,8 +53,8 @@ public:
   
   Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& data, TimeManager& tm);
   
-  void InitSun(void);
-  void InitPlayer(void);
+  void InitializeSun(void);
+  void InitializePlayer(void);
 
   // Saving/Loading
   void SetDataEngine(DataEngine* de)   { _dataEngine = de; }
@@ -92,6 +97,7 @@ public:
   void                   UnprocessAllCollisions(void);
   void                   ProcessAllCollisions(void);
   void                   RefreshCharactersVisibility(void);
+  unsigned char          GetCurrentFloor(void) const { return (floors.GetCurrentFloor()); }
 
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);
@@ -160,14 +166,15 @@ public:
   };
 
   void               SetMouseState(MouseState);
+  MouseState         GetMouseState(void) const { return (_mouseState); }
   void               MouseLeftClicked(void);
   void               MouseRightClicked(void);
   void               MouseWheelUp(void);
   void               MouseWheelDown(void);
-  void               MouseSuccessRateHint(void);
 
   void               StartCombat(void);
 
+  MouseHint          mouse_hint;
   MouseState         _mouseState;
 
   // Misc
@@ -189,7 +196,6 @@ private:
   
   void              SetupCamera(void);
 
-  void              RunDaylight(void);
   void              RunMetabolism(void);
   void              RunProjectiles(float elapsed_time);
   void              MouseInit(void);
@@ -222,19 +228,16 @@ private:
   Characters::iterator  _itCharacter;
   Characters::iterator  _currentCharacter;
   Parties               _parties;
-  NodePath              _player_halo;
+  VisibilityHalo        player_halo;
+  Sunlight*             _sunlight;
+  Floors                floors;
   
   ExitZones             _exitZones;
   bool                  _exitingZone;
   std::string           _exitingZoneTo, _exitingZoneName;
 
-  PT(DirectionalLight)  _sunLight;
-  NodePath              _sunLightNode;
-  PT(AmbientLight)      _sunLightAmbient;
-  NodePath              _sunLightAmbientNode;
   World::WorldLights::iterator _light_iterator;
-  
-  TimeManager::Task*    _task_daylight;
+
   TimeManager::Task*    _task_metabolism;
 
   enum UiIterator
@@ -278,37 +281,6 @@ private:
    */
   std::list<Waypoint> _combat_path;
   NodePath            _last_combat_path;
-
-  /*
-   * Floor Management
-   */
-  class HidingFloor
-  {
-    NodePath floor;
-    bool     fadingIn, done;
-    float    alpha;  
-  public:
-    HidingFloor() : done(false) {}
-    
-    bool  operator==(NodePath np) const { return (floor == np); }
-    bool  Done(void)              const { return (done);        }
-    float Alpha(void)             const { return (alpha);       }
-    void  ForceAlpha(float _alpha)      { alpha = _alpha;       }
-    void  SetNodePath(NodePath np);
-    void  SetFadingIn(bool set);
-    void  Run(float elapsedTime);
-  };
-
-  std::list<HidingFloor> _hidingFloors;
-
-  unsigned char     _currentFloor;
-  Waypoint*         _floor_lastWp;
-  Circle            _solar_circle;
-  
-  bool              IsInsideBuilding(unsigned char& floor);
-  void              CheckCurrentFloor(float elapsedTime);
-  void              SetCurrentFloor(unsigned char floor);
-  void              FloorFade(bool in, NodePath floor);
 };
 
 #endif

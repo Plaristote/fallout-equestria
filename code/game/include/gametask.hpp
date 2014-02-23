@@ -115,6 +115,7 @@ private:
   static bool           SaveLevel(Level* level, const std::string& name);
   void                  LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& path, const std::string& name, const std::string& entry_zone = "", bool isSaveFile = false);
   void                  DoLoadLevel(LoadLevelParams);
+  void                  RunLevel(void);
   void                  GameOver(void);
   
   void                  MakeEncounter(int x, int y, bool is_event = true);

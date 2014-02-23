@@ -91,6 +91,32 @@ void StatController::LevelChanged(unsigned short lvl)
   }
 }
 
+/*class Metabolism : public ScheduledTask
+{
+public:
+  void SetStatController(StatController* controller) { this->controller = controller; }
+protected:
+  void Run();
+private:
+  StatController* controller;
+};
+
+void Metabolism::Run()
+{
+  StatModel&   model      = controller->Model();
+  stringstream stream, stream_hp;
+  int          metabolism, max_hp;
+  int          current_hp = model.GetAll()["Variables"]["Hit Points"];
+
+  stream    << model.GetStatistic("Healing Rate");
+  stream_hp << model.GetStatistic("Hit Points");
+  stream    >> metabolism;
+  stream_hp >> max_hp;
+  current_hp += metabolism;
+  SetCurrentHp(current_hp > max_hp ? max_hp : current_hp);
+  ScheduledTask::Run();
+}*/
+
 void StatController::RunMetabolism(void)
 {
   stringstream stream, stream_hp;
