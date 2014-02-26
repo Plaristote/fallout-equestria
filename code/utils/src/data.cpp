@@ -97,6 +97,12 @@ Data::Data(const std::string& key, DataBranch* father)
     father->children.push_back(_data);
 }
 
+Data::Data(const Data& copy) : _data(copy._data)
+{
+  if (_data)
+    _data->pointers++;
+}
+
 Data::~Data()
 {
   if (_data)
@@ -170,10 +176,23 @@ const Data Data::operator[](const std::string& key) const
   return (Data(key, _data));
 }
 
+void        Data::RemoveAllChildren(void)
+{
+  Data::iterator it   = begin();
+  Data::iterator last = end();
+
+  for (; it != last ; ++it)
+  {
+    Data child = *it;
+    
+    child.Remove();
+  }
+}
+
 void        Data::Duplicate(Data var)
 {
-  Data::iterator it  = var.begin();
-  Data::iterator end = var.end();
+  Data::iterator it   = begin();
+  Data::iterator last = end();
 
   if (_data == 0)
   {
@@ -183,15 +202,14 @@ void        Data::Duplicate(Data var)
   _data->key   = var.Key();
   _data->value = var.Value();
   _data->nil   = false;
-
-  for (; it != end ; ++it)
+  for (; it != last ; ++it)
   {
-    Data        children = *it;
-    DataBranch* tmp      = new DataBranch;
+    Data        child = *it;
+    DataBranch* tmp   = new DataBranch;
 
     tmp->father = _data;
     _data->children.push_back(tmp);
-    Data(tmp).Duplicate(children);
+    Data(tmp).Duplicate(child);
   }
 }
 

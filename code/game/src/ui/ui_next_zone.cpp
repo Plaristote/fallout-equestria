@@ -54,6 +54,7 @@ void UiNextZone::CallbackLevelSelected(Rocket::Core::Event& event)
   string               tmp = str.CString();
 
   NextZoneSelected.Emit(tmp);
+  Done.Emit();
 }
 
 void UiNextZone::CallbackCancel(Rocket::Core::Event&)

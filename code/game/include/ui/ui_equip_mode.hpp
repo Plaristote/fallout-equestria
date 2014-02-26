@@ -3,6 +3,7 @@
 
 # include "globals.hpp"
 # include "rocket_extension.hpp"
+# include "datatree.hpp"
 
 class UiEquipMode : public UiBase
 {
@@ -19,7 +20,7 @@ public:
   void Destroy(void);
 
 private:
-  RocketListener   ModeClicked, CancelClicked;
+  RocketListener         ModeClicked, CancelClicked;
   Rocket::Core::Element* root_choices;
 
   void CallbackCancel(Rocket::Core::Event&) { Closed.Emit(); }

@@ -371,12 +371,11 @@ void GameTask::RunLevel(void)
 {
   if (_level && _level->do_task() == AsyncTask::DS_done)
   {
-    const string nextZone  = _level->GetNextZone();
-    const string exitPoint = _level->GetExitZone();
+    Level::Exit  exit      = _level->GetExit();
 
     ExitLevel(_savePath);
-    if (nextZone != "")
-      OpenLevel(_savePath, nextZone, exitPoint);
+    if (!(exit.ToWorldmap()))
+      OpenLevel(_savePath, exit.level, exit.zone);
     SaveGame(_savePath); // Auto-save for the Continue feature
   }
   if (!_level && _worldMap)
@@ -783,7 +782,7 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
       if (params.entry_zone == "")
         _level->FetchParty(*_playerParty);
       else
-        _level->SetEntryZone(*_playerParty, params.entry_zone);
+        _level->GetZoneManager().InsertPartyInZone(*_playerParty, params.entry_zone);
       SetLevel(_level);
 
       _level->obs.Connect(_pipbuck.VisibilityToggled, [this](bool visible)

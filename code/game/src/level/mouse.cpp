@@ -103,12 +103,16 @@ LPoint2f Mouse::GetPosition(void) const
 
 LPoint2f Mouse::GetPositionRatio(void) const
 {
-  int      size_x   = _window->get_graphics_window()->get_x_size();
-  int      size_y   = _window->get_graphics_window()->get_y_size();
   LPoint2f position = GetPosition();
+  
+  if (_window->get_graphics_window())
+  {
+    int      size_x   = _window->get_graphics_window()->get_x_size();
+    int      size_y   = _window->get_graphics_window()->get_y_size();
 
-  position.set_x( ((position.get_x() / size_x) - 0.5) * 2);
-  position.set_y(-(((position.get_y() / size_y) - 0.5) * 2));
+    position.set_x( ((position.get_x() / size_x) - 0.5) * 2);
+    position.set_y(-(((position.get_y() / size_y) - 0.5) * 2));
+  }
   return (position);
 }
 

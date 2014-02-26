@@ -3,7 +3,7 @@
 #include "qpandaapplication.h"
 #include <QInputDialog>
 
-#include "scenecamera.h"
+#include "world/scene_camera.hpp"
 #include "mouse.h"
 #include <QElapsedTimer>
 #include "functorthread.h"
@@ -1985,7 +1985,7 @@ void MainWindow::ExitZoneDestinationDelete()
         {
             QString destName = item->text();
 
-            zone->destinations.remove(destName.toStdString());
+            std::remove(zone->destinations.begin(), zone->destinations.end(), destName.toStdString());
             ui->exitZoneDestinations->removeItemWidget(item);
             delete item;
         }

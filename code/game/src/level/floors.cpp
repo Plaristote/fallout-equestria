@@ -22,23 +22,34 @@ void Floors::SetCurrentFloorFromObject(InstanceDynamicObject* object)
   last_waypoint = wp->id;
 }
 
+void Floors::ShowOnlyFloor(unsigned char floor)
+{
+  World&        world       = *level.GetWorld();
+  unsigned char floor_above = floor + 1;
+
+  for (unsigned int it = 0 ; it < floor ; ++it)
+    FadeFloor(world.floors[it], false);
+  for (unsigned int it = floor_above ; it < world.floors.size() ; ++it)
+    FadeFloor(world.floors[it], false);
+  FadeFloor(world.floors[floor], true);
+}
+
 void Floors::SetCurrentFloor(unsigned char floor)
 {
   World&        world            = *level.GetWorld();
   unsigned char floorAbove       = floor + 1;
   bool          isInsideBuilding = IsInsideBuilding(floorAbove);
 
-  for (unsigned int it = 0 ; it < floor ; ++it)
+  if (floorAbove < floor)
+    ShowOnlyFloor(floor);
+  else
   {
-    cout << "Floor " << it << " show: " << show_lower_floors << endl;
-    FadeFloor(world.floors[it], show_lower_floors);
-  }
-  for (unsigned int it = floor ; it < floorAbove && it < world.floors.size() ; ++it)
-    FadeFloor(world.floors[it], true);
-  for (unsigned int it = floorAbove ; it < world.floors.size() ; ++it)
-  {
-    FadeFloor(world.floors[it], !isInsideBuilding);
-    cout << "Floor " << it << "show: " << (isInsideBuilding ? it < floorAbove : true) << ", isInsideBuilding: " << isInsideBuilding << endl;
+    for (unsigned int it = 0 ; it < floor ; ++it)
+      FadeFloor(world.floors[it], show_lower_floors);
+    for (unsigned int it = floor ; it < floorAbove && it < world.floors.size() ; ++it)
+      FadeFloor(world.floors[it], true);
+    for (unsigned int it = floorAbove ; it < world.floors.size() ; ++it)
+      FadeFloor(world.floors[it], !isInsideBuilding);
   }
   current_floor = floor;
 }
@@ -84,7 +95,7 @@ void Floors::HidingFloor::SetNodePath(NodePath np)
 
 void Floors::HidingFloor::SetFadingIn(bool set)
 {
-  fadingIn = set;
+  fadingIn = !set;
   alpha    = fadingIn ? 1.f : 0.f;
   if (!fadingIn)
     floor.show();

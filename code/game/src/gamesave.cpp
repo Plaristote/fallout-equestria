@@ -119,13 +119,14 @@ void ObjectCharacter::Load(Utils::Packet& packet)
 
   InstanceDynamicObject::Load(packet);
   packet >> _actionPoints >> _hitPoints >> _armorClass >> _tmpArmorClass;
+  // TODO rewrite this for fuck sake
   packet.operator>> <unsigned int>(pathSize);
   for (unsigned int i = 0 ; i < pathSize ; ++i)
   {
     unsigned int id;
 
     packet.operator>> <unsigned int>(id);
-    _path.push_back(*(_level->GetWorld()->GetWaypointFromId(id)));
+    //_path.push_back(*(_level->GetWorld()->GetWaypointFromId(id)));
   }
   
   packet.operator>> <unsigned int>(buffs_size);
@@ -159,8 +160,9 @@ void ObjectCharacter::Save(Utils::Packet& packet)
 {
   InstanceDynamicObject::Save(packet);
   packet << _actionPoints << _hitPoints << _armorClass << _tmpArmorClass;
-  packet << (unsigned int)_path.size();
-  for_each(_path.begin(), _path.end(),   [this, &packet](Waypoint& wp)        { packet << wp.id;    });
+  // TODO rewrite this for fuck sake
+  packet << (unsigned int)0;
+  //for_each(_path.begin(), _path.end(),   [this, &packet](Waypoint& wp)        { packet << wp.id;    });
   packet << (unsigned int)_buffs.size();
   for_each(_buffs.begin(), _buffs.end(), [this, &packet](CharacterBuff* buff) { buff->Save(packet); });
   

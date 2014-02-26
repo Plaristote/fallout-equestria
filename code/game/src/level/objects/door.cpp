@@ -1,6 +1,7 @@
 #include "level/objects/door.hpp"
 #include "level/objects/character.hpp"
 #include "level/level.hpp"
+#include <level/pathfinding.hpp>
 
 void ObjectDoor::ProcessCollisions(void)
 {
@@ -49,26 +50,25 @@ InstanceDynamicObject::GoToData ObjectDoor::GetGoToData(InstanceDynamicObject* c
     character->UnprocessCollisions();
     std::for_each(_waypointDisconnected.begin(), _waypointDisconnected.end(), [this, waypoint, &ret](std::pair<int, int> waypoints)
     {
-      Waypoint* waypoint1 = _level->GetWorld()->GetWaypointFromId(waypoints.first);
-      Waypoint* waypoint2 = _level->GetWorld()->GetWaypointFromId(waypoints.second);
+      Waypoint*         waypoint1 = _level->GetWorld()->GetWaypointFromId(waypoints.first);
+      Waypoint*         waypoint2 = _level->GetWorld()->GetWaypointFromId(waypoints.second);
+      Pathfinding::Path path;
 
-      std::list<Waypoint> path;
-
-      if (waypoint1 && (_level->FindPath(path, *waypoint, *waypoint1)))
+      if (path.FindPath(waypoint, waypoint1))
       {
-        if (ret.max_distance > (int)path.size() || ret.max_distance == -1)
+        if (ret.max_distance > path.Size() || ret.max_distance == -1)
         {
-          ret.nearest      = waypoint1;
-          ret.max_distance = path.size();
+          ret.nearest      = &path.Last();
+          ret.max_distance = path.Size();
         }
       }
 
-      if (waypoint2 && (_level->FindPath(path, *waypoint, *waypoint2)))
+      if (path.FindPath(waypoint, waypoint2))
       {
-        if (ret.max_distance > (int)path.size() || ret.max_distance == -1)
+        if (ret.max_distance > path.Size() || ret.max_distance == -1)
         {
-          ret.nearest      = waypoint2;
-          ret.max_distance = path.size();
+          ret.nearest      = &path.Last();
+          ret.max_distance = path.Size();
         }
       }
     });

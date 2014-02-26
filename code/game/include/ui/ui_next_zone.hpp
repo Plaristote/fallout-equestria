@@ -12,6 +12,7 @@ public:
   ~UiNextZone();
 
   Sync::Signal<void (const std::string&)> NextZoneSelected;
+  Sync::Signal<void (void)>               Done;
   Sync::Signal<void (void)>               Cancel;
 
 private:

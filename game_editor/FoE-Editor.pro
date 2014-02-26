@@ -50,7 +50,7 @@ SOURCES += main.cpp\
            dialogeditor.cpp \
            data.cpp \
            json.cpp \
-           scenecamera.cpp \
+           scene_camera.cpp \
            mouse.cpp \
            dialogsplashscreen.cpp \
            dialognewmap.cpp \
@@ -89,7 +89,6 @@ HEADERS  += globals.hpp \
             dialogeditor.h \
             json.hpp \
             datatree.hpp \
-            scenecamera.h \
             mouse.h \
             dialogsplashscreen.h \
             dialognewmap.h \
@@ -119,6 +118,7 @@ HEADERS  += globals.hpp \
             world/light.hpp \
             world/waypoint.hpp \
             world/zone.hpp \
+            world/scene_camera.hpp \
             divide_and_conquer.hpp
 
 FORMS    += mainwindow.ui \

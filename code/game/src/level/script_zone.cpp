@@ -8,41 +8,43 @@ ScriptZone* ScriptZone::Factory(const std::string& zone_name)
 {
   if (Level::CurrentLevel != 0)
   {
-    asIScriptContext* context = AngelScript::ContextLock::Context();
-    asIScriptModule*  module  = AngelScript::ContextLock::Module();
-    LevelZone*        zone    = Level::CurrentLevel->GetZoneByName(zone_name);
-
-    if (context && module && zone)
+    try
     {
-      ScriptZone* script = new ScriptZone(*zone, context, module);
+      asIScriptContext*  context = AngelScript::ContextLock::Context();
+      asIScriptModule*   module  = AngelScript::ContextLock::Module();
+      Zones::Manager&    zones   = Level::CurrentLevel->GetZoneManager();
+      Zones::Controller& zone    = zones.GetZone(zone_name);
 
-      return (script);
+      if (context && module)
+      {
+        ScriptZone* script = new ScriptZone(zone, context, module);
+
+        return (script);
+      }
+    }
+    catch (...)
+    {
+      // TODO proper exception handling
     }
   }
   return (0);
 }
 
-ScriptZone::ScriptZone(LevelZone& zone, asIScriptContext* context, asIScriptModule* module) :
+ScriptZone::ScriptZone(Zones::Controller& zone, asIScriptContext* context, asIScriptModule* module) :
   AngelScript::Object(context, module), zone(zone)
 {
   effect_enabled = true;
-  signals.Connect(zone.Entered, [this](InstanceDynamicObject* object)
+  signals.Connect(zone.EnteredZone, [this](InstanceDynamicObject* object)
   {
-    if (IsDefined("Callback"))
-    {
-      AngelScript::Type<InstanceDynamicObject*> param(object);
-
-      Call("Callback", 1, &param);
-    }
+    CallCallback("Callback", object);
   });
-  signals.Connect(zone.Exited, [this](InstanceDynamicObject* object)
+  signals.Connect(zone.ExitedZone, [this](InstanceDynamicObject* object)
   {
-    if (IsDefined("Exit"))
-    {
-      AngelScript::Type<InstanceDynamicObject*> param(object);
-
-      Call("Exit", 1, &param);
-    }
+    CallCallback("Exit", object);
+  });
+  signals.Connect(zone.MovedWithinZone, [this](InstanceDynamicObject* object)
+  {
+    CallCallback("MovedWithinZone", object);
   });
 }
 
@@ -51,31 +53,14 @@ ScriptZone::~ScriptZone()
   signals.DisconnectAll();
 }
 
-void ScriptZone::SetEffect(const std::string& effect, int time)
+void ScriptZone::CallCallback(const std::string& callback, InstanceDynamicObject* object)
 {
-  std::function<void (void)> apply_effect = [this, effect, time](void)
+  if (IsDefined(callback))
   {
-    try
-    {
-      AngelScript::Type<ScriptZone*> self(this);
-
-      Call("Effect", 1, &self);
-    }
-    catch (const AngelScript::Exception&)
-    {
-    }
-    if (effect_enabled == true)
-      SetEffect(effect, time);
-  };
-
-  asDefineMethod("Effect", "void " + effect + "(Zone@)");
-  effect_enabled = true;
-  zone.AddEffect(apply_effect, time);
-}
-
-void ScriptZone::DisableEffect(void)
-{
-  effect_enabled = false;
+    AngelScript::Type<InstanceDynamicObject*> param(object);
+    
+    Call(callback, 1, &param);
+  }
 }
 
 void ScriptZone::SetEnterCallback(const string &signature)

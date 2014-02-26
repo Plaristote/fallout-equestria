@@ -17,6 +17,14 @@ class InventoryObject;
 class Projectile
 {
 public:
+  class Set : public std::list<Projectile*>
+  {
+  public:
+    void Run(float elapsed_time);
+    void CleanUp(void);
+  private:
+  };  
+  
   Projectile(World* world, NodePath parent, NodePath target, Data data);
   ~Projectile(void);
 

@@ -10,6 +10,7 @@
 # include "level/characters/line_of_sight.hpp"
 # include "level/characters/field_of_view.hpp"
 # include "level/characters/metabolism.hpp"
+# include "level/pathfinding.hpp"
 # include <panda3d/character.h>
 # include <panda3d/pointLight.h>
 
@@ -85,51 +86,51 @@ public:
     return (ret);
   }
 
-  void                  SetInventory(Inventory* inventory);
+  void                     SetInventory(Inventory* inventory);
 
-  void                  ProcessCollisions(void)         { if (_hitPoints > 0) InstanceDynamicObject::ProcessCollisions();     }
-  bool                  HasOccupiedWaypoint(void) const { return (_hitPoints > 0 && WaypointModifier::HasOccupiedWaypoint()); }
+  void                     ProcessCollisions(void)         { if (_hitPoints > 0) InstanceDynamicObject::ProcessCollisions();     }
+  bool                     HasOccupiedWaypoint(void) const { return (_hitPoints > 0 && WaypointModifier::HasOccupiedWaypoint()); }
 
-  void                  Run(float elapsedTime);
-  void                  RunEffects(float elapsedTime);
-  void                  SetRunning(bool running) { _running = running; }
-  void                  LookAt(LVecBase3);
-  void                  LookAt(InstanceDynamicObject*);
-  void                  TeleportTo(unsigned int id);
-  void                  TeleportTo(Waypoint* waypoint);
-  void                  GoTo(unsigned int id);
-  void                  GoTo(Waypoint* waypoint);
-  void                  GoTo(InstanceDynamicObject* object, int max_distance = 0);
-  void                  GoTo(LPoint3f position);
-  void                  GoToRandomWaypoint(void);
-  void                  TruncatePath(unsigned short max_length);
-  std::list<Waypoint>   GetPath(Waypoint* waypoint);
-  unsigned short        GetPathDistance(Waypoint* waypoint);
-  unsigned short        GetPathDistance(InstanceDynamicObject* object);
-  float                 GetDistance(const InstanceDynamicObject* object) const;
-  int                   GetBestWaypoint(InstanceDynamicObject* object, bool farthest);
-  int                   GetNearestWaypoint(InstanceDynamicObject* object);
-  int                   GetFarthestWaypoint(InstanceDynamicObject* object);
-  unsigned int          GetPathSize(void) const    { return (_path.size());          }
-  bool                  HasLineOfSight(InstanceDynamicObject* object);
-  bool                  IsMoving(void) const       { return (_path.size() > 0);      }
-  bool                  IsAlive(void) const        { return (_hitPoints > 0);        }
-  bool                  IsInterrupted(void) const  { return (AnimationEnded.ObserverCount() > 0); }
-  Inventory&            GetInventory(void)         { return (*_inventory);           }
-  const Inventory&      GetInventory(void) const   { return (*_inventory); }
-  Data                  GetStatistics(void)        { return (_statistics ? Data(_statistics) : Data()); }
-  StatController*       GetStatController(void)    { return (_stats);                }
-  const StatController* GetStatController(void) const { return (_stats); }
-  const std::string     GetFactionName(void) const { return (_faction ? _faction->name : ""); }
-  unsigned int          GetFaction(void) const     { return (_faction ? _faction->flag : 0);  }
+  void                     Run(float elapsedTime);
+  void                     RunEffects(float elapsedTime);
+  void                     SetRunning(bool running) { _running = running; }
+  void                     LookAt(LVecBase3);
+  void                     LookAt(InstanceDynamicObject*);
+  void                     TeleportTo(unsigned int id);
+  void                     TeleportTo(Waypoint* waypoint);
+  void                     GoTo(unsigned int id);
+  void                     GoTo(Waypoint* waypoint);
+  void                     GoTo(InstanceDynamicObject* object, int max_distance = 0);
+  void                     GoTo(LPoint3f position);
+  void                     GoToRandomWaypoint(void);
+  void                     TruncatePath(unsigned short max_length);
+  unsigned short           GetPathDistance(Waypoint* waypoint);
+  unsigned short           GetPathDistance(InstanceDynamicObject* object);
+  float                    GetDistance(const InstanceDynamicObject* object) const;
+  int                      GetBestWaypoint(InstanceDynamicObject* object, bool farthest);
+  int                      GetNearestWaypoint(InstanceDynamicObject* object);
+  int                      GetFarthestWaypoint(InstanceDynamicObject* object);
+  Pathfinding::Path&       GetPath(void)              { return (_path);                 }
+  const Pathfinding::Path& GetPath(void) const        { return (_path);                 }
+  bool                     HasLineOfSight(InstanceDynamicObject* object);
+  bool                     IsMoving(void) const       { return (_path.Size() > 0);      }
+  bool                     IsAlive(void) const        { return (_hitPoints > 0);        }
+  bool                     IsInterrupted(void) const  { return (AnimationEnded.ObserverCount() > 0); }
+  Inventory&               GetInventory(void)         { return (*_inventory);           }
+  const Inventory&         GetInventory(void) const   { return (*_inventory); }
+  Data                     GetStatistics(void)        { return (_statistics ? Data(_statistics) : Data()); }
+  StatController*          GetStatController(void)    { return (_stats);                }
+  const StatController*    GetStatController(void) const { return (_stats); }
+  const std::string        GetFactionName(void) const { return (_faction ? _faction->name : ""); }
+  unsigned int             GetFaction(void) const     { return (_faction ? _faction->flag : 0);  }
 
-  unsigned short        GetActionPoints(void) const;
-  void                  SetActionPoints(unsigned short ap);
-  void                  RestartActionPoints(void);
+  unsigned short           GetActionPoints(void) const;
+  void                     SetActionPoints(unsigned short ap);
+  void                     RestartActionPoints(void);
   
-  short                 GetHitPoints(void) const        { return (_hitPoints); }
-  void                  SetHitPoints(short hp);
-  void                  StatHpUpdate(short);
+  short                    GetHitPoints(void) const        { return (_hitPoints); }
+  void                     SetHitPoints(short hp);
+  void                     StatHpUpdate(short);
   
   short                 GetArmorClass(void) const        { return (_armorClass); }
   void                  SetArmorClass(short ac)          { _armorClass = ac; ArmorClassChanged.Emit(_armorClass); }
@@ -194,7 +195,7 @@ private:
   Sync::ObserverHandler          _obs_handler;
 
   PT(Character)                  _character;
-  std::list<Waypoint>            _path;
+  Pathfinding::Path              _path;
   GoToData                       _goToData;
 
   DataTree*                      _statistics;

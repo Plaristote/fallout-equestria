@@ -70,7 +70,7 @@ void MainMenu::CancelNewGame(void)
 
 void MainMenu::Continue(Rocket::Core::Event&)
 {
-  createLevelPlz = true;
+  StartGame();
 }
 
 void MainMenu::EndGame(void)

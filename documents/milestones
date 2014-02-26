@@ -183,4 +183,7 @@ x --> Fixing Rocket's drag and drop causing crashes
 x --> Fixing game console control not receiving key events anymore
 x --> Fixing character rotation
 ~ --> Merging/Rewriting buff management and task scheduling
+x --> Rewriting Zone Management
+~ --> Cleaning up Level class
+  --> Cleaning up GameTask class
 ~ --> Implementing a complete game demo

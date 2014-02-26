@@ -1,8 +1,9 @@
 #include "globals.hpp"
-#include "scenecamera.h"
+#include "world/scene_camera.hpp"
 #ifndef GAME_EDITOR
-# include "level/objectnode.hpp"
 # include <options.hpp>
+#else
+float editor_camera_height = 110;
 #endif
 
 using namespace std;
@@ -78,10 +79,6 @@ void SceneCamera::RunSlideHeight(float elapsedTime)
   _camera.set_pos(pos);
 }
 
-#ifdef GAME_EDITOR
-float editor_camera_height = 110;
-#endif
-
 void SceneCamera::RefreshCameraHeight(void)
 {
 #ifndef GAME_EDITOR
@@ -122,19 +119,6 @@ void SceneCamera::SwapCameraView(void)
   _centeringCamera = true;
 
   _objectivePos.set_z(_camera.get_z());
-
-//   if (_currentCameraAngle == 0)
-//   {
-//     _objectivePos.set_y(_camera.get_y() + 40 - 65);
-//     _objectivePos.set_x(_camera.get_x() + 0  - 60);
-//     _objectivePos.set_z(_camera.get_z());
-//   }
-//   else if (_currentCameraAngle == 1)
-//   {
-//     _objectivePos.set_y(_camera.get_y() + 65 - 40);
-//     _objectivePos.set_x(_camera.get_x() + 60 - 0);
-//     _objectivePos.set_z(_camera.get_z());
-//   }
 }
 
 void SceneCamera::Run(float elapsedTime)
@@ -282,18 +266,6 @@ void SceneCamera::CenterCameraInstant(LPoint3f pos)
     _camera.set_y(_camera.get_y() + 40 - (_camera_height - 50) * 1);
   }
 }
-
-#ifndef GAME_EDITOR
-void SceneCamera::FollowObject(InstanceDynamicObject* object)
-{
-  FollowNodePath(object->GetNodePath());
-}
-
-void SceneCamera::CenterOnObject(InstanceDynamicObject* object)
-{
-  CenterCameraOn(object->GetNodePath());
-}
-#endif
 
 void SceneCamera::CenterCameraOn(NodePath np)
 {

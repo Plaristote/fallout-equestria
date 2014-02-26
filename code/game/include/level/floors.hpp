@@ -32,6 +32,7 @@ public:
   void          RunFadingEffect(float elapsed_time);
   void          SetCurrentFloorFromObject(InstanceDynamicObject*);
   void          SetCurrentFloor(unsigned char floor);
+  void          ShowOnlyFloor(unsigned char floor);
   bool          IsInsideBuilding(unsigned char& floor);
   unsigned char GetCurrentFloor(void) const { return (current_floor); }
   unsigned char GetFloorFromObject(InstanceDynamicObject*);

@@ -13,6 +13,8 @@
 #include "options.hpp"
 #include <mousecursor.hpp>
 #include <panda_lock.hpp>
+#include <boost/concept_check.hpp>
+#include <boost/detail/container_fwd.hpp>
 
 #define AP_COST_USE             2
 #define WORLDTIME_TURN          10
@@ -30,39 +32,36 @@ Sync::Signal<void (InstanceDynamicObject*)> InstanceDynamicObject::ActionTalkTo;
 
 Level* Level::CurrentLevel = 0;
 Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : _window(window),
-  _mouse(window),
-  _camera(window, window->get_camera_group()),
+  camera(*this, window, window->get_camera_group()),
+  mouse (*this, window),
   _timeManager(tm),
   _main_script(name),
+  level_ui(window, gameUi),
+  mouse_hint(*this, level_ui, mouse),
   _chatter_manager(window),
-  _levelUi(window, gameUi),
-  mouse_hint(*this, _levelUi, _mouse),
-  floors(*this)
+  floors(*this),
+  zones(*this)
 {
   cout << "Level Loading Step #1" << endl;
   CurrentLevel = this;
   _state       = Normal;
-  _mouseState  = MouseAction;
   _persistent  = true;
   _level_name  = name;
   _sunlight    = 0;
 
   floors.EnableShowLowerFloors(true);
 
-  obs.Connect(_levelUi.InterfaceOpened, *this, &Level::SetInterrupted);
+  hovered_path.SetRenderNode(window->get_render());
+
+  obs.Connect(level_ui.InterfaceOpened, *this, &Level::SetInterrupted);
 
   cout << "Level Loading Step #2" << endl;
   _items = DataTree::Factory::JSON("data/objects.json");
-
-  for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
-    _currentUis[i] = 0;
-  _mouseActionBlocked   = false;
 
   cout << "Level Loading Step #3" << endl;
   _graphicWindow = _window->get_graphics_window();
 
   cout << "Level Loading Step #4" << endl;
-  MouseInit();
   _timer.Restart();
 
   // WORLD LOADING
@@ -85,27 +84,11 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   LPoint3 upperLeft, upperRight, bottomLeft;
   cout << "Level Loading Step #7" << endl;
   _world->GetWaypointLimits(0, upperRight, upperLeft, bottomLeft);
-  _camera.SetLimits(bottomLeft.get_x() - 50, bottomLeft.get_y() - 50, upperRight.get_x() - 50, upperRight.get_y() - 50);  
+  camera.SetLimits(bottomLeft.get_x() - 50, bottomLeft.get_y() - 50, upperRight.get_x() - 50, upperRight.get_y() - 50);  
 
   cout << "Level Loading Step #8" << endl;
-  ForEach(_world->entryZones, [this](EntryZone& zone)
-  {
-    LevelZone* lvl_zone = new LevelZone(this, zone);
-
-    cout << "Registering Zone '" << zone.name << '\'' << endl;
-    _zones.push_back(lvl_zone);
-  });
-  ForEach(_world->exitZones, [this](ExitZone& zone)
-  {
-    LevelExitZone* exitZone = new LevelExitZone(this, zone, zone.destinations);
-
-    cout << "Registering ExitZone '" << zone.name << " with " << zone.waypoints.size() << " waypoints." << endl;
-    exitZone->ExitZone.Connect      (*this, &Level::CallbackExitZone);
-    exitZone->GoToNextZone.Connect  (*this, &Level::CallbackGoToZone);
-    exitZone->SelectNextZone.Connect(*this, &Level::CallbackSelectNextZone);
-    _zones.push_back(exitZone);
-  });
-  _exitingZone = false;
+  ForEach(_world->entryZones, [this](EntryZone& zone) { zones.RegisterZone(zone); });
+  ForEach(_world->exitZones,  [this](ExitZone& zone)  { zones.RegisterZone(zone); });
 
   ForEach(_world->dynamicObjects, [this](DynamicObject& dobj) { InsertDynamicObject(dobj); });
   _itCharacter = _characters.end();
@@ -191,20 +174,6 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   //window->get_render().set_shader_auto();
 }
 
-LevelZone* Level::GetZoneByName(const std::string& name)
-{
-  auto it  = _zones.begin();
-  auto end = _zones.end();
-
-  while (it != end)
-  {
-    if ((*it)->GetName() == name)
-      return (*it);
-    ++it;
-  }
-  return (0);
-}
-
 void Level::RefreshCharactersVisibility(void)
 {
   ObjectCharacter* player              = GetPlayer();
@@ -286,7 +255,7 @@ void Level::InitializePlayer(void)
     Data stats(GetPlayer()->GetStatistics());
     
     if (!(stats["Statistics"]["Action Points"].Nil()))
-      _levelUi.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
+      level_ui.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
   }
   {
     ObjectCharacter::InteractionList& interactions = GetPlayer()->GetInteractions();
@@ -296,46 +265,47 @@ void Level::InitializePlayer(void)
     interactions.push_back(ObjectCharacter::Interaction("use_skill",  GetPlayer(), &(GetPlayer()->ActionUseSkillOn)));
     interactions.push_back(ObjectCharacter::Interaction("use_magic",  GetPlayer(), &(GetPlayer()->ActionUseSpellOn)));
   }
-  _levelUi.GetMainBar().OpenSkilldex.Connect([this]() { ObjectCharacter::ActionUseSkillOn.Emit(GetPlayer()); });
-  _levelUi.GetMainBar().OpenSpelldex.Connect([this]() { ObjectCharacter::ActionUseSpellOn.Emit(0);           });
+  level_ui.GetMainBar().OpenSkilldex.Connect([this]() { ObjectCharacter::ActionUseSkillOn.Emit(GetPlayer()); });
+  level_ui.GetMainBar().OpenSpelldex.Connect([this]() { ObjectCharacter::ActionUseSpellOn.Emit(0);           });
 
-  obs_player.Connect(GetPlayer()->HitPointsChanged,         _levelUi.GetMainBar(),   &GameMainBar::SetCurrentHp);
-  obs_player.Connect(GetPlayer()->ActionPointChanged,       _levelUi.GetMainBar(),   &GameMainBar::SetCurrentAP);
-  obs_player.Connect(GetPlayer()->EquipedItemActionChanged, _levelUi.GetMainBar(),   &GameMainBar::SetEquipedItemAction);
-  obs_player.Connect(GetPlayer()->EquipedItemChanged,       _levelUi.GetMainBar(),   &GameMainBar::SetEquipedItem);
-  obs_player.Connect(GetPlayer()->EquipedItemChanged,       _levelUi.GetInventory(), &GameInventory::SetEquipedItem);
-  _levelUi.GetMainBar().EquipedItemNextAction.Connect(*GetPlayer(), &ObjectCharacter::ItemNextUseType);
-  _levelUi.GetMainBar().UseEquipedItem.Connect       (*this, &Level::CallbackActionTargetUse);
-  _levelUi.GetMainBar().CombatEnd.Connect            ([this](void)
+  obs_player.Connect(GetPlayer()->HitPointsChanged,         level_ui.GetMainBar(),   &GameMainBar::SetCurrentHp);
+  obs_player.Connect(GetPlayer()->ActionPointChanged,       level_ui.GetMainBar(),   &GameMainBar::SetCurrentAP);
+  obs_player.Connect(GetPlayer()->EquipedItemActionChanged, level_ui.GetMainBar(),   &GameMainBar::SetEquipedItemAction);
+  obs_player.Connect(GetPlayer()->EquipedItemChanged,       level_ui.GetMainBar(),   &GameMainBar::SetEquipedItem);
+  obs_player.Connect(GetPlayer()->EquipedItemChanged,       level_ui.GetInventory(), &GameInventory::SetEquipedItem);
+  level_ui.GetMainBar().EquipedItemNextAction.Connect(*GetPlayer(), &ObjectCharacter::ItemNextUseType);
+  level_ui.GetMainBar().UseEquipedItem.Connect       (*this, &Level::CallbackActionTargetUse);
+  level_ui.GetMainBar().CombatEnd.Connect            ([this](void)
   {
     StopFight();
     if (_state == Fight)
       ConsoleWrite("You can't leave combat mode if enemies are nearby.");
   });
-  _levelUi.GetMainBar().CombatPassTurn.Connect       (*this, &Level::NextTurn);
+  level_ui.GetMainBar().CombatPassTurn.Connect       (*this, &Level::NextTurn);
 
-  obs.Connect(_levelUi.GetInventory().EquipItem,   [this](const std::string& target, unsigned int slot, InventoryObject* object)
+  obs.Connect(level_ui.GetInventory().EquipItem,   [this](const std::string& target, unsigned int slot, InventoryObject* object)
   {
     if (target == "equiped")
       PlayerEquipObject(slot, object);
   });
-  obs.Connect(_levelUi.GetInventory().UnequipItem, [this](const std::string& target, unsigned int slot)
+  obs.Connect(level_ui.GetInventory().UnequipItem, [this](const std::string& target, unsigned int slot)
   {
     if (target == "equiped")
       GetPlayer()->UnequipItem(slot);
   });
 
-  obs.Connect(_levelUi.GetInventory().DropObject,  *this,        &Level::PlayerDropObject);
-  obs.Connect(_levelUi.GetInventory().UseObject,   *this,        &Level::PlayerUseObject);
+  obs.Connect(level_ui.GetInventory().DropObject,  *this,        &Level::PlayerDropObject);
+  obs.Connect(level_ui.GetInventory().UseObject,   *this,        &Level::PlayerUseObject);
 
   for (unsigned short it = 0 ; it < 2 ; ++it) // For every equiped item slot
   {
-    _levelUi.GetMainBar().SetEquipedItem(it, GetPlayer()->GetEquipedItem(it));
-    _levelUi.GetInventory().SetEquipedItem(it, GetPlayer()->GetEquipedItem(it));
+    level_ui.GetMainBar().SetEquipedItem(it, GetPlayer()->GetEquipedItem(it));
+    level_ui.GetInventory().SetEquipedItem(it, GetPlayer()->GetEquipedItem(it));
   }
 
   player_halo.SetTarget(GetPlayer());
   GetPlayer()->GetFieldOfView().Launch();
+  target_outliner.UsePerspectiveOfCharacter(GetPlayer());
 
   //
   // Initializing Main Script
@@ -370,7 +340,7 @@ void Level::InsertParty(PlayerParty& party)
     }
   }
   party.SetHasLocalObjects(false);
-  SetupCamera();
+  camera.SetConfigurationFromLevelState();
 }
 
 void Level::FetchParty(PlayerParty& party)
@@ -455,7 +425,7 @@ void Level::SetPlayerInventory(Inventory* inventory)
   }
   else
   {  player->SetInventory(inventory);       }
-  _levelUi.GetInventory().SetInventory(*inventory);
+  level_ui.GetInventory().SetInventory(*inventory);
   player->EquipedItemChanged.Emit(0, player->GetEquipedItem(0));
   player->EquipedItemChanged.Emit(1, player->GetEquipedItem(1));  
 }
@@ -478,38 +448,15 @@ Level::~Level()
   _timeManager.ClearTasks(TASK_LVL_CITY);
   obs.DisconnectAll();
   obs_player.DisconnectAll();
-  ForEach(_zones,       [](LevelZone* zone)            { delete zone;       });
-  ForEach(_projectiles, [](Projectile* projectile)     { delete projectile; });
+  _projectiles.CleanUp();
   ForEach(_objects,     [](InstanceDynamicObject* obj) { delete obj;        });
-  ForEach(_exitZones,   [](LevelExitZone* zone)        { delete zone;       });
   ForEach(_parties,     [](Party* party)               { delete party;      });
+  zones.UnregisterAllZones();
   CurrentLevel = 0;
-  for (unsigned short i = 0 ; i < UiTotalIt ; ++i)
-  {
-    if (_currentUis[i] != 0)
-      delete _currentUis[i];
-  }
   if (_sunlight) delete _sunlight;
   if (_world)    delete _world;
   if (_items)    delete _items;
   cout << "-> Done." << endl;
-}
-
-bool Level::FindPath(std::list<Waypoint>& path, Waypoint& from, Waypoint& to)
-{
-  AstarPathfinding<Waypoint>        astar;
-  int                               max_iterations = 0;
-  AstarPathfinding<Waypoint>::State state;
-
-  astar.SetStartAndGoalStates(from, to);
-  while ((state = astar.SearchStep()) == AstarPathfinding<Waypoint>::Searching && max_iterations++ < 250);
-
-  if (state == AstarPathfinding<Waypoint>::Succeeded)
-  {
-    path = astar.GetSolution();
-    return (true);
-  }
-  return (false);  
 }
 
 InstanceDynamicObject* Level::GetObject(const string& name)
@@ -581,20 +528,17 @@ void Level::SetState(State state)
     _itCharacter = _characters.end();
   if (state != Fight)
   {
-    DestroyCombatPath();
-    ToggleCharacterOutline(false);
+    hovered_path.Hide();
+    target_outliner.DisableOutline();
   }
-  _camera.SetEnabledScroll(state != Interrupted);
-  SetupCamera();  
+  camera.SetEnabledScroll(state != Interrupted);
+  camera.SetConfigurationFromLevelState();
 }
 
 void Level::SetInterrupted(bool set)
 {
-  for (int i = 0 ; i < UiTotalIt ; ++i)
-  {
-    if (_currentUis[i] && _currentUis[i]->IsVisible())
-      set = true;
-  }
+  if (set == false && level_ui.HasOpenedWindows())
+    set = true;
   
   if (set)
     SetState(Interrupted);
@@ -620,7 +564,7 @@ void Level::StartFight(ObjectCharacter* starter)
     }
     _itCharacter = _characters.begin();
   }
-  _levelUi.GetMainBar().SetEnabledAP(true);
+  level_ui.GetMainBar().SetEnabledAP(true);
   (*_itCharacter)->RestartActionPoints();
   if (_state != Fight)
     ConsoleWrite("You are now in combat mode.");
@@ -644,11 +588,11 @@ void Level::StopFight(void)
           return ;
       }
     }
-    if (_mouseState == MouseTarget)
-      SetMouseState(MouseAction);
+    if (mouse.GetState() == MouseEvents::MouseTarget)
+      mouse.SetState(MouseEvents::MouseAction);
     ConsoleWrite("Combat ended.");
     SetState(Normal);
-    _levelUi.GetMainBar().SetEnabledAP(false);
+    level_ui.GetMainBar().SetEnabledAP(false);
   }
 }
 
@@ -676,55 +620,7 @@ void Level::NextTurn(void)
     (*_itCharacter)->RestartActionPoints();
   else
     cout << "[FATAL ERROR][Level::NextTurn] Character Iterator points to nothing (n_characters = " << _characters.size() << ")" << endl;
-  SetupCamera();
-}
-
-void Level::SetupCamera(void)
-{
-  if (_state == Fight)
-  {
-    if  (*_itCharacter != GetPlayer())
-    {
-      if (OptionsManager::Get()["camera"]["fight"]["focus-enemies"].Value() == "1")
-        _camera.FollowObject(*_itCharacter);
-      else
-        _camera.StopFollowingNodePath();
-    }
-    else
-    {
-      if (OptionsManager::Get()["camera"]["fight"]["focus-self"].Value() == "1")
-        _camera.FollowObject(*_itCharacter);
-      else
-        _camera.StopFollowingNodePath();
-    }
-  }
-  else
-  {
-    if (OptionsManager::Get()["camera"]["focus-self"].Value() == "1")
-      _camera.FollowObject(GetPlayer());
-    else
-      _camera.StopFollowingNodePath();
-  }
-}
-
-void Level::RunProjectiles(float elapsed_time)
-{
-  auto it  = _projectiles.begin();
-  auto end = _projectiles.end();
-
-  while (it != end)
-  {
-    if ((*it)->HasExpired())
-    {
-      delete *it;
-      it = _projectiles.erase(it);
-    }
-    else
-    {
-      (*it)->Run(elapsed_time);
-      ++it;
-    }
-  }
+  camera.SetConfigurationFromLevelState();
 }
 
 void Level::RunMetabolism(void)
@@ -744,10 +640,10 @@ AsyncTask::DoneStatus Level::do_task(void)
 {
   float elapsedTime = _timer.GetElapsedTime();
 
-  if (_levelUi.GetContext()->GetHoverElement() == _levelUi.GetContext()->GetRootElement())
-    SetMouseState(_mouseState);
+  if (level_ui.GetContext()->GetHoverElement() == level_ui.GetContext()->GetRootElement())
+    mouse.SetCursorFromState();
   else
-    _mouse.SetMouseState('i');
+    mouse.SetMouseState('i');
 
   player_halo.Run();
 
@@ -755,8 +651,8 @@ AsyncTask::DoneStatus Level::do_task(void)
   if (use_fog_of_war == false)
     RefreshCharactersVisibility();
 
-  _camera.SlideToHeight(GetPlayer()->GetDynamicObject()->nodePath.get_z());
-  _camera.Run(elapsedTime);  
+  camera.SlideToHeight(GetPlayer()->GetDynamicObject()->nodePath.get_z());
+  camera.Run(elapsedTime);  
 
   mouse_hint.Run();
 
@@ -772,18 +668,18 @@ AsyncTask::DoneStatus Level::do_task(void)
       ForEach(_objects, run_object);
       // If projectiles are moving, run them. Otherwise, run the current character
       if (_projectiles.size() > 0)
-        RunProjectiles(elapsedTime);
+        _projectiles.Run(elapsedTime);
       else
       {
         _currentCharacter = _itCharacter; // Keep a character from askin NextTurn several times
         if (_itCharacter != _characters.end())
           run_object(*_itCharacter);
-        if (_mouse.Hovering().hasWaypoint && _mouse.Hovering().waypoint != _last_combat_path && _mouseState == MouseAction)
-          DisplayCombatPath();
+        if (mouse.Hovering().hasWaypoint && mouse.GetState() == MouseEvents::MouseAction)
+          hovered_path.DisplayHoveredPath(GetPlayer(), mouse);
       }
       break ;
     case Normal:
-      RunProjectiles(elapsedTime);
+      _projectiles.Run(elapsedTime);
       _timeManager.AddElapsedSeconds(elapsedTime);
       ForEach(_objects,    run_object);
       ForEach(_characters, run_object);
@@ -792,7 +688,7 @@ AsyncTask::DoneStatus Level::do_task(void)
       break ;
   }
   ForEach(_characters, [elapsedTime](ObjectCharacter* character) { character->RunEffects(elapsedTime); });
-  ForEach(_zones,      []           (LevelZone* zone)            { zone->Refresh();                    });
+  zones.Refresh();
   
   if (_main_script.IsDefined("Run"))
   {
@@ -803,11 +699,11 @@ AsyncTask::DoneStatus Level::do_task(void)
 
   floors.SetCurrentFloorFromObject(GetPlayer());
   floors.RunFadingEffect(elapsedTime);
-  _chatter_manager.Run(elapsedTime, _camera.GetNodePath());
+  _chatter_manager.Run(elapsedTime, camera.GetNodePath());
   _particle_manager.do_particles(ClockObject::get_global_clock()->get_dt());
-  _mouse.Run();
+  mouse.Run();
   _timer.Restart();
-  return (_exitingZone ? AsyncTask::DS_done : AsyncTask::DS_cont);
+  return (exit.ReadyForNextZone() ? AsyncTask::DS_done : AsyncTask::DS_cont);
 }
 
 /*
@@ -862,170 +758,18 @@ void                   Level::ProcessAllCollisions(void)
   ForEach(_characters, [](ObjectCharacter*       object) { object->ProcessCollisions(); });
 }
 
-/*
- * Level Mouse
- */
-void Level::MouseInit(void)
-{
-  SetMouseState(MouseAction);
-  _mouse.ButtonLeft.Connect  (*this,   &Level::MouseLeftClicked);
-  _mouse.ButtonRight.Connect (*this,   &Level::MouseRightClicked);
-  _mouse.WheelUp.Connect     (*this,   &Level::MouseWheelUp);
-  _mouse.WheelDown.Connect   (*this,   &Level::MouseWheelDown);
-  _mouse.ButtonMiddle.Connect(_camera, &SceneCamera::SwapCameraView);
-}
-
-void Level::SetMouseState(MouseState state)
-{
-  if (state != _mouseState)
-  {
-    // Cleanup if needed
-    switch (_mouseState)
-    {
-      case MouseTarget:
-        TargetPicked.DisconnectAll();
-        break ;
-      case MouseWaypointPicker:
-        WaypointPicked.DisconnectAll();
-        break ;
-      default:
-        break ;
-    }
-    DestroyCombatPath();
-    _mouseState = state;
-    ToggleCharacterOutline(_state == Level::Fight && _mouseState == MouseTarget && *_itCharacter == GetPlayer());
-  }
-  // Set mouse cursor
-  switch (state)
-  {
-    case MouseWaypointPicker:
-    case MouseAction:
-      _mouse.SetMouseState('a');
-      break ;
-    case MouseInteraction:
-      _mouse.SetMouseState('i');
-      break ;
-    case MouseTarget:
-      _mouse.SetMouseState('t');
-      break ;
-  }
-}
-
-void Level::MouseWheelDown(void)
-{
-  if (!(_levelUi.GetContext()->GetHoverElement() != _levelUi.GetContext()->GetRootElement()))
-  {
-    Data options = OptionsManager::Get();
-    float distance = options["camera"]["distance"];
-
-    if (distance < 140.f)
-      distance += 10.f;
-    options["camera"]["distance"] = distance;
-    _camera.RefreshCameraHeight();
-  }
-}
-
-void Level::MouseWheelUp(void)
-{
-  if (!(_levelUi.GetContext()->GetHoverElement() != _levelUi.GetContext()->GetRootElement()))
-  {
-    Data options = OptionsManager::Get();
-    float distance = options["camera"]["distance"];
-
-    if (distance > 50.f)
-      distance -= 10.f;
-    options["camera"]["distance"] = distance;
-    _camera.RefreshCameraHeight();
-  }
-}
-
-void Level::MouseLeftClicked(void)
-{
-  const MouseHovering& hovering = _mouse.Hovering();
-
-  if (_mouseActionBlocked || _state == Interrupted)
-    return ;
-  if (_levelUi.GetContext()->GetHoverElement() != _levelUi.GetContext()->GetRootElement())
-    return ;
-  switch (_mouseState)
-  {
-    case MouseAction:
-      if (_currentUis[UiItInteractMenu] && _currentUis[UiItInteractMenu]->IsVisible())
-	return ;
-      else
-      {
-        _mouse.ClosestWaypoint(_world, floors.GetCurrentFloor());
-	if (hovering.hasWaypoint)
-	{
-	  Waypoint* toGo = _world->GetWaypointFromNodePath(hovering.waypoint);
-
-	  if (toGo && _characters.size() > 0)
-	    GetPlayer()->GoTo(toGo);
-	}
-      }
-      break ;
-    case MouseInteraction:
-      if (hovering.hasDynObject)
-      {
-        InstanceDynamicObject* object = FindObjectFromNode(hovering.dynObject);
-
-        if (_currentUis[UiItInteractMenu] && _currentUis[UiItInteractMenu]->IsVisible())
-          CloseRunningUi<UiItInteractMenu>();
-        if (object && object->GetInteractions().size() != 0)
-        {
-          CloseRunningUi<UiItInteractMenu>();
-          _currentUis[UiItInteractMenu] = new InteractMenu(_window, _levelUi.GetContext(), *object);
-          _camera.SetEnabledScroll(false);
-        }
-      }
-      break ;
-    case MouseTarget:
-      std::cout << "Mouse Target" << std::endl;
-      if (hovering.hasDynObject)
-      {
-        InstanceDynamicObject* dynObject = FindObjectFromNode(hovering.dynObject);
-
-        std::cout << "HasDynObject" << std::endl;
-        if (dynObject)
-          TargetPicked.Emit(dynObject);
-      }
-      break ;
-    case MouseWaypointPicker:
-      {
-        std::cout << "Mouse Waypoint Picker" << std::endl;
-        _mouse.ClosestWaypoint(_world, floors.GetCurrentFloor());
-        if (hovering.hasWaypoint)
-        {
-          Waypoint* toGo = _world->GetWaypointFromNodePath(hovering.waypoint);
-
-          if (toGo)
-            WaypointPicked.Emit(toGo);
-        }
-      }
-      break ;
-  }
-}
-
-void Level::MouseRightClicked(void)
-{
-  CloseRunningUi<UiItInteractMenu>();
-  SetMouseState(_mouseState == MouseInteraction || _mouseState == MouseTarget ? MouseAction : MouseInteraction);
-}
-
 void Level::ConsoleWrite(const string& str)
 {
-  _levelUi.GetMainBar().AppendToConsole(str);
+  level_ui.GetMainBar().AppendToConsole(str);
 }
 
 void Level::PlayerLootWithScript(Inventory* inventory, InstanceDynamicObject* target, asIScriptContext* context, const std::string& filepath)
 {
-  UiBase* old_ptr = _currentUis[UiItLoot];
-
-  PlayerLoot(inventory);
-  if (!(old_ptr == _currentUis[UiItLoot] || _currentUis[UiItLoot] == 0))
+  if (inventory && target && context)
   {
-    UiLoot* ui_loot = (UiLoot*)(_currentUis[UiItLoot]);
+    UiLoot* ui_loot = level_ui.OpenUiLoot(&GetPlayer()->GetInventory(), inventory);
 
+    SetInterrupted(true);
     ui_loot->SetScriptObject(GetPlayer(), target, context, filepath);
   }
 }
@@ -1037,53 +781,41 @@ void Level::PlayerLoot(Inventory* inventory)
     Script::Engine::ScriptError.Emit("<span class='console-error'>[PlayerLoot] Aborted: NullPointer Error</span>");
     return ;
   }
-  CloseRunningUi<UiItInteractMenu>();
   {
-    UiLoot* ui_loot = new UiLoot(_window, _levelUi.GetContext(), GetPlayer()->GetInventory(), *inventory);
+    UiLoot* ui_loot = level_ui.OpenUiLoot(&GetPlayer()->GetInventory(), inventory);
 
-    ui_loot->Done.Connect(*this, &Level::CloseRunningUi<UiItLoot>);
-    _mouseActionBlocked = true;
-    _camera.SetEnabledScroll(false);
     SetInterrupted(true);
-    _currentUis[UiItLoot] = ui_loot;
   }
 }
 
 void Level::PlayerEquipObject(unsigned short it, InventoryObject* object)
 {
-  bool canWeildMouth        = object->CanWeild(GetPlayer(), "equiped", EquipedMouth);
-  bool canWeildMagic        = object->CanWeild(GetPlayer(), "equiped", EquipedMagic);
-  bool canWeildBattleSaddle = object->CanWeild(GetPlayer(), "equiped", EquipedBattleSaddle);
-  int  canWeildTotal        = (canWeildMouth ? 1 : 0) + (canWeildMagic ? 1 : 0) + (canWeildBattleSaddle ? 1 : 0);
-
-  if (canWeildTotal >= 2)
+  equip_modes.SearchForUserOnItemWithSlot(GetPlayer(), object, "equiped");
+  if (equip_modes.HasOptions())
   {
-    UiEquipMode* ui = new UiEquipMode(_window, _levelUi.GetContext());
-
-    if (canWeildMouth)
-      ui->AddOption(EquipedMouth,        "Mouth/Hoof");
-    if (canWeildMagic)
-      ui->AddOption(EquipedMagic,        "Magic");
-    if (canWeildBattleSaddle)
-      ui->AddOption(EquipedBattleSaddle, "Battlesaddle");
-    ui->Initialize();
-
-    CloseRunningUi<UiItEquipMode>();
-    _currentUis[UiItEquipMode] = ui;
-    ui->Closed.Connect(*this, &Level::CloseRunningUi<UiItEquipMode>);
-    ui->EquipModeSelected.Connect([this, it, object](unsigned char mode)
+    auto player_set_equiped_item = [this, it, object](unsigned char mode, const string& = "")
     {
-      _currentUis[UiItEquipMode]->Destroy();
-      GetPlayer()->GetInventory().SetEquipedItem("equiped", it, object, (EquipedMode)mode);
-    });
-  }
-  else if (canWeildTotal)
-  {
-    GetPlayer()->GetInventory().SetEquipedItem("equiped", it, object, (canWeildMouth ? EquipedMouth :
-                                                                      (canWeildMagic ? EquipedMagic : EquipedBattleSaddle)));
+      GetPlayer()->GetInventory().SetEquipedItem("equiped", it, object, mode);
+    };
+    
+    if (equip_modes.HasChoice())
+    {
+      UiEquipMode* ui = level_ui.OpenUiEquipMode();
+
+      equip_modes.Foreach([ui](unsigned char mode, const string& name)
+      {
+        ui->AddOption(mode, name);
+      });
+      ui->EquipModeSelected.Connect(player_set_equiped_item);
+      ui->Initialize();
+    }
+    else
+    {
+      equip_modes.Foreach(player_set_equiped_item);
+    }
   }
   else
-    ConsoleWrite("You can't equip " + object->GetName());
+    ConsoleWrite(i18n::T("You can't equip " + i18n::T(object->GetName())));
 }
 
 void Level::PlayerEquipObject(const std::string& target, unsigned int slot, InventoryObject* object)

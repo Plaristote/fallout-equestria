@@ -18,22 +18,18 @@ enum
   MotionRight  = 8
 };
 
-# ifndef GAME_EDITOR
-class InstanceDynamicObject;
-# endif
-
 class SceneCamera
 {
 public:
   SceneCamera(WindowFramework* window, NodePath camera);
 
-  void            Run(float elapsedTime);
-  void            SetEnabledScroll(bool set);
-  void            SetEnabledTrackball(bool set);
+  void             Run(float elapsedTime);
+  void             SetEnabledScroll(bool set);
+  void             SetEnabledTrackball(bool set);
 
-  void            SwapCameraView(void);
+  void             SwapCameraView(void);
 
-  void            SetLimits(unsigned int minX, unsigned int minY, unsigned int maxX, unsigned maxY)
+  void             SetLimits(unsigned int minX, unsigned int minY, unsigned int maxX, unsigned maxY)
   {
     _minPosX = minX;
     _minPosY = minY;
@@ -41,30 +37,25 @@ public:
     _maxPosY = maxY;
   }
 
-  void            RefreshCameraHeight(void);
-  void            SlideToHeight(float);
-  void            CenterCameraInstant(LPoint3f);
-  void            CenterCameraOn(NodePath np);
-  void            FollowNodePath(NodePath np);
-  void            StopFollowingNodePath(void);
-  void            MoveV(float);
-  void            MoveH(float);
-  void            SetPosition(float x, float y, float z)
+  void             RefreshCameraHeight(void);
+  void             SlideToHeight(float);
+  void             CenterCameraInstant(LPoint3f);
+  void             CenterCameraOn(NodePath np);
+  void             FollowNodePath(NodePath np);
+  void             StopFollowingNodePath(void);
+  void             MoveV(float);
+  void             MoveH(float);
+  void             SetPosition(float x, float y, float z)
   {
     _camera.set_pos(x, y, z);
   }
 
-# ifndef GAME_EDITOR
-  void            CenterOnObject(InstanceDynamicObject*);
-  void            FollowObject(InstanceDynamicObject*);
-# endif
-
-  NodePath        GetNodePath(void) const { return (_camera); }
+  NodePath         GetNodePath(void) const { return (_camera); }
 
 private:
-  void            RunScroll(float elapsedTime);
-  void            RunFollow(float elapsedTime);
-  void            RunSlideHeight(float elapsedTime);
+  void             RunScroll(float elapsedTime);
+  void             RunFollow(float elapsedTime);
+  void             RunSlideHeight(float elapsedTime);
 
   WindowFramework* _window;
   GraphicsWindow*  _graphicWindow;

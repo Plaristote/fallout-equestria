@@ -459,7 +459,7 @@ list<string> split(const std::string& str, char c);
 
 static Data DataGetFromPathRec(Data data, list<string> array)
 {
-  if (!(array.empty()))
+  if (!(array.empty()) && data.NotNil())
   {
     string key = (*array.begin());
     
@@ -514,7 +514,7 @@ list<string> StatModel::GetAvailablePerks(void)
           string       comp        = requirement["Comp"].Value();
           short        value       = requirement["Value"];
           Data         data_check  = DataGetFromPath(_statsheet, requirement.Key());
-          short        to_check    = data_check;
+          short        to_check    = data_check.Nil() ? 0 : (short)data_check;
 
           if      (comp == "==") do_add = data_check.Value() == requirement["Value"].Value();
           else if (comp == ">=") do_add = to_check >= value;

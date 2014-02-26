@@ -51,7 +51,7 @@ InstanceDynamicObject::GoToData ObjectShelf::GetGoToData(InstanceDynamicObject* 
 
       list<Waypoint> path;
 
-      if (waypoint1 && (_level->FindPath(path, *waypoint, *waypoint1)))
+/*      if (waypoint1 && (_level->FindPath(path, *waypoint, *waypoint1)))
       {
 	if (ret.max_distance > (int)path.size() || ret.max_distance == -1)
 	{
@@ -67,7 +67,7 @@ InstanceDynamicObject::GoToData ObjectShelf::GetGoToData(InstanceDynamicObject* 
 	  ret.nearest      = waypoint2;
 	  ret.max_distance = path.size();
 	}
-      }
+      }*/
     });
     character->ProcessCollisions();
   }

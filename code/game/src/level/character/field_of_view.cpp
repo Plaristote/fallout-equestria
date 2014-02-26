@@ -48,7 +48,6 @@ Level::CharacterList FieldOfView::GetDetectedCharacters(void) const
 {
   CharacterList list;
 
-  list.resize(detected_enemies.size() + detected_characters.size());
   AppendEntriesToCharacterList(detected_enemies,    list);
   AppendEntriesToCharacterList(detected_characters, list);
   return (list);
@@ -58,7 +57,6 @@ Level::CharacterList FieldOfView::GetDetectedEnemies(void) const
 {
   CharacterList list;
 
-  list.resize(detected_enemies.size());
   AppendEntriesToCharacterList(detected_enemies, list);
   return (list);
 }
@@ -67,11 +65,13 @@ Level::CharacterList FieldOfView::GetDetectedAllies(void) const
 {
   CharacterList list;
 
-  list.resize(detected_characters.size());
+  cout << "Checking allies for " << character.GetName() << endl;
   AppendEntriesToCharacterList(detected_characters, list);
   for (auto it = list.begin() ; it != list.end() ;)
   {
-    if (!(character.IsAlly(*it)))
+    ObjectCharacter* detected_character = *it;
+
+    if (!(character.IsAlly(detected_character)))
       it = list.erase(it);
     else
       ++it;
@@ -83,9 +83,8 @@ void FieldOfView::AppendEntriesToCharacterList(const std::list<Entry>& entries, 
 {
   for (auto it = entries.begin() ; it != entries.end() ; ++it)
   {
-    ObjectCharacter& character = **it;
-
-    list.push_back(&character);
+    if (it->character)
+      list.push_back(it->character);
   }
 }
 
@@ -120,7 +119,7 @@ void FieldOfView::DetectCharacters()
   {
     ObjectCharacter* checking_character = *iterator;
 
-    if (checking_character->IsAlive())
+    if (checking_character->IsAlive() && checking_character != &character)
     {
       if (character.IsAlly(checking_character))
         SetCharacterDetected(*checking_character);
@@ -178,7 +177,6 @@ void FieldOfView::InsertOrUpdateCharacterInList(ObjectCharacter& character, std:
     iterator->time_to_live = FOV_TTL;
   else
     list.push_back(&character);
-  
 }
 
 float FieldOfView::GetRadius() const

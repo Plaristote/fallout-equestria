@@ -120,7 +120,7 @@ public:
   InteractionList&     GetInteractions(void)                     { return (_interactions);                        }
   const std::string&   GetDialog(void)                     const { return (_object->dialog);                      }
   DynamicObject*       GetDynamicObject(void)                    { return (_object);                              }
-  const DynamicObject* GetDynamicObjec(void)               const { return (_object);                              }
+  const DynamicObject* GetDynamicObject(void)              const { return (_object);                              }
   virtual GoToData     GetGoToData(InstanceDynamicObject* character);
   
   template<class C>

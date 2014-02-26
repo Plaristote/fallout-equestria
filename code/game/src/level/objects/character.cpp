@@ -1,5 +1,4 @@
 #include "level/objects/character.hpp"
-#include "level/scene_camera.hpp"
 #include <panda3d/nodePathCollection.h>
 #include "circular_value_set.hpp"
 
@@ -415,7 +414,7 @@ void ObjectCharacter::ItemNextUseType(unsigned short it)
 
 void ObjectCharacter::RestartActionPoints(void)
 {
-  _path.clear();
+  _path.Clear();
   if (_statistics)
   {
     Data stats(_statistics);
@@ -515,7 +514,7 @@ void ObjectCharacter::Run(float elapsedTime)
         }
       }
     }
-    if (_path.size() > 0)
+    if (_path.Size() > 0)
       RunMovement(elapsedTime);
   }
   InstanceDynamicObject::Run(elapsedTime);
@@ -580,30 +579,15 @@ unsigned short      ObjectCharacter::GetPathDistance(InstanceDynamicObject* obje
   return (ret);
 }
 
-list<Waypoint>     ObjectCharacter::GetPath(Waypoint* waypoint)
-{
-  list<Waypoint>   path;
-  
-  UnprocessCollisions();
-  _level->FindPath(path, *_waypointOccupied, *waypoint);
-  if (!(path.empty()))
-    path.erase(path.begin());
-  if (path.size() > _actionPoints)
-    path.resize(_actionPoints);
-  ProcessCollisions();
-  return (path);
-}
-
 unsigned short      ObjectCharacter::GetPathDistance(Waypoint* waypoint)
 {
-  list<Waypoint> path;
-  
+  Pathfinding::Path path(_waypointOccupied, waypoint);
+
   UnprocessCollisions();
-  _level->FindPath(path, *_waypointOccupied, *waypoint);
-  if (!(path.empty()))
-    path.erase(path.begin());
+  path.FindPath(_waypointOccupied, waypoint);
   ProcessCollisions();
-  return (path.size());
+  path.StripFirstWaypointFromList();
+  return (path.Size());
 }
 
 void                ObjectCharacter::GoTo(LPoint3f position)
@@ -623,7 +607,7 @@ void                ObjectCharacter::GoTo(unsigned int id)
 
 void                ObjectCharacter::DebugPathfinding(void)
 {
-  NodePath debug_root = _window->get_render().find("debug_pathfinding");
+  /*NodePath debug_root = _window->get_render().find("debug_pathfinding");
   NodePath debug      = debug_root.find(GetName());
 
   if (debug.is_empty())
@@ -635,7 +619,7 @@ void                ObjectCharacter::DebugPathfinding(void)
     NodePath np = debug.attach_new_node("debug_pathfinding_node");
 
     wp.nodePath.copy_to(np);
-  });
+  });*/
 }
 
 void                ObjectCharacter::TeleportTo(unsigned int id)
@@ -666,15 +650,15 @@ void                ObjectCharacter::GoTo(Waypoint* waypoint)
   ReachedDestination.DisconnectAll();
   _goToData.objective = 0;
   UnprocessCollisions();
-  if (_path.size() > 0)
+  if (_path.Size() > 0)
   {
     //cout << "SETTING START FROM FOR SOME REASON" << endl;
-    start_from = _level->GetWorld()->GetWaypointFromId(_path.front().id);
+    start_from = _level->GetWorld()->GetWaypointFromId(_path.Front().id);
   }
-  _path.clear();
+  _path.Clear();
   if (start_from && waypoint)
   {
-    if (!(_level->FindPath(_path, *start_from, *waypoint)))
+    if (!(_path.FindPath(start_from, waypoint)))
     {
       if (_level->GetPlayer() == this)
         _level->ConsoleWrite(i18n::T("No path."));
@@ -707,9 +691,9 @@ void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max
   GoTo(_goToData.nearest);
   object->ProcessCollisions();
 
-  while (_goToData.min_distance && _path.size() > 1)
+  while (_goToData.min_distance && _path.Size() > 1)
   {
-    _path.erase(--(_path.end()));
+    _path.StripLastWaypointFromList();
     _goToData.min_distance--;
   }
 }
@@ -719,7 +703,7 @@ void                ObjectCharacter::GoToRandomWaypoint(void)
   if (_waypointOccupied)
   {
     _goToData.objective = 0;
-    _path.clear();
+    _path.Clear();
     ReachedDestination.DisconnectAll();
     UnprocessCollisions();
     {
@@ -731,7 +715,8 @@ void                ObjectCharacter::GoToRandomWaypoint(void)
 	list<Waypoint*>::iterator it     = wplist.begin();
 
 	for (it = wplist.begin() ; rit ; --rit, ++it);
-	_path.push_back(**it);
+        // TODO reimplement that with the new pathfinding system
+	//_path.push_back(**it);
 	StartRunAnimation();
       }
     }
@@ -741,10 +726,9 @@ void                ObjectCharacter::GoToRandomWaypoint(void)
 
 void                ObjectCharacter::TruncatePath(unsigned short max_size)
 {
-  if ((_path.size() > 0) && (*_path.begin()).id == (unsigned int)GetOccupiedWaypointAsInt())
+  if ((_path.Size() > 0) && _path.Front().id == (unsigned int)GetOccupiedWaypointAsInt())
     max_size++;
-  if (_path.size() > max_size)
-    _path.resize(max_size);
+  _path.Truncate(max_size);
 }
 
 void                ObjectCharacter::StartRunAnimation(void)
@@ -764,7 +748,7 @@ void                ObjectCharacter::StopRunAnimation(InstanceDynamicObject*)
 
 void                ObjectCharacter::RunMovementNext(float elapsedTime)
 {
-  Waypoint* wp = _level->GetWorld()->GetWaypointFromId(_path.begin()->id);
+  Waypoint* wp = _level->GetWorld()->GetWaypointFromId(_path.Front().id);
 
   if (wp != _waypointOccupied && _level->GetState() == Level::Fight)
     SetActionPoints(_actionPoints - 1);
@@ -773,7 +757,7 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
   // do not swap waypoints: instead, find another path.
   if (_waypointOccupied->id != wp->id && _level->IsWaypointOccupied(wp->id))
   {
-    GoTo(_level->GetWorld()->GetWaypointFromId((*(--(_path.end()))).id));
+    GoTo(_level->GetWorld()->GetWaypointFromId((_path.Last().id)));
     return ;
   }
   SetOccupiedWaypoint(wp);
@@ -781,33 +765,33 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
   // Has reached object objective, if there is one ?
   if (_goToData.objective)
   {
-    if (_path.size() <= (unsigned int)_goToData.max_distance && HasLineOfSight(_goToData.objective))
+    if (_path.Size() <= (unsigned int)_goToData.max_distance && HasLineOfSight(_goToData.objective))
     {
-      _path.clear();
+      _path.Clear();
       ReachedDestination.Emit(this);
       ReachedDestination.DisconnectAll();
       return ;
     }
   }
 
-  _path.erase(_path.begin());  
-  while (_path.size() > 0 && _path.front().id == _waypointOccupied->id)
-    _path.erase(_path.begin());
-  if (_path.size() > 0)
+  _path.StripFirstWaypointFromList();
+  while (_path.Size() > 0 && _path.Front().id == _waypointOccupied->id)
+    _path.StripFirstWaypointFromList();
+  if (_path.Size() > 0)
   {
     bool pathAvailable = true;
     // Check if the next waypoint is still accessible
     UnprocessCollisions();
-    Waypoint::Arc* arc = _waypointOccupied->GetArcTo(_path.begin()->id);
+    Waypoint::Arc* arc = _waypointOccupied->GetArcTo(_path.Front().id);
 
     if (arc)
     {
       if (arc->observer)
       {
-	if (arc->observer->CanGoThrough(0))
-	  arc->observer->GoingThrough(this);
-	else
-	  pathAvailable = false;
+        if (arc->observer->CanGoThrough(0))
+          arc->observer->GoingThrough(this);
+        else
+          pathAvailable = false;
       }
     }
     else
@@ -821,10 +805,10 @@ void                ObjectCharacter::RunMovementNext(float elapsedTime)
 	GoTo(_goToData.objective);
       else
       {
-	Waypoint* dest = _level->GetWorld()->GetWaypointFromId((*(--(_path.end()))).id);
+	Waypoint* dest = _level->GetWorld()->GetWaypointFromId((_path.Last()).id);
 	GoTo(dest);
       }
-      if (_path.size() == 0)
+      if (_path.Size() == 0)
 	ReachedDestination.DisconnectAll();
     }
   }
@@ -841,7 +825,7 @@ void                ObjectCharacter::RunMovement(float elapsedTime)
 {
   Timer             profile;
   PStatCollector    collector("Level:Characters:Movement"); collector.start();
-  Waypoint&         next      = *(_path.begin());
+  Waypoint&         next      = _path.Front();
   LPoint3           pos       = _object->nodePath.get_pos();
   LPoint3           objective = next.nodePath.get_pos();
   float             max_speed;

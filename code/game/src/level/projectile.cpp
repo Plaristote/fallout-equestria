@@ -110,3 +110,35 @@ void Projectile::Run(float elapsed_time)
     }
   }
 }
+
+void Projectile::Set::Run(float elapsed_time)
+{
+  auto it   = begin();
+
+  while (it != end())
+  {
+    Projectile* projectile = *it;
+    
+    if (projectile->HasExpired())
+    {
+      delete projectile;
+      it = erase(it);
+    }
+    else
+    {
+      projectile->Run(elapsed_time);
+      ++it;
+    }
+  }
+}
+
+void Projectile::Set::CleanUp(void)
+{
+  auto it = begin();
+  
+  while (it != end())
+  {
+    delete *it;
+    it = erase(it);
+  }
+}

@@ -1,21 +1,7 @@
 #include "ui/ui_equip_mode.hpp"
+#include <level/inventory.hpp>
 
 using namespace std;
-
-void UiEquipMode::AddOption(unsigned char mode, const std::string& name)
-{
-  if (root_choices)
-  {
-    std::stringstream    rml;
-    Rocket::Core::String rml_;
-
-    rml << "<button data-mode='" << (int)mode << "' i18n=\"" << name << "\" class='universal_button'>";
-    rml << name;
-    rml << "</button><br />";
-    root_choices->GetInnerRML(rml_);
-    root_choices->SetInnerRML(rml_ + rml.str().c_str());
-  }
-}
 
 UiEquipMode::UiEquipMode(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
@@ -68,4 +54,19 @@ void UiEquipMode::Initialize(void)
       EquipModeSelected.Emit(mode);
     }
   });
+}
+
+void UiEquipMode::AddOption(unsigned char mode, const std::string& name)
+{
+  if (root_choices)
+  {
+    std::stringstream    rml;
+    Rocket::Core::String rml_;
+
+    rml << "<button data-mode='" << (int)mode << "' i18n=\"" << name << "\" class='universal_button'>";
+    rml << name;
+    rml << "</button><br />";
+    root_choices->GetInnerRML(rml_);
+    root_choices->SetInnerRML(rml_ + rml.str().c_str());
+  }
 }

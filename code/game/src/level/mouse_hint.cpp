@@ -6,14 +6,16 @@ using namespace std;
 
 void MouseHint::Run(void)
 {
-  if (level_ui.GetContext()->GetHoverElement() == level_ui.GetContext()->GetRootElement())
+  MouseEvents& mouse = level.GetMouse();
+  
+  if (!(mouse.IsHoveringUi()))
   {
-    switch (level.GetMouseState())
+    switch (mouse.GetState())
     {
-      case Level::MouseTarget:
+      case MouseEvents::MouseTarget:
         TargetHint();
         break ;
-      case Level::MouseAction:
+      case MouseEvents::MouseAction:
         ActionHint();
         break ;
       default:

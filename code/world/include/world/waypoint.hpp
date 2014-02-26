@@ -14,6 +14,7 @@ struct Waypoint
 {
     struct ArcObserver
     {
+      virtual ~ArcObserver() {}
       virtual bool CanGoThrough(unsigned char type) = 0;
       virtual void GoingThrough(void*)              = 0;
     };

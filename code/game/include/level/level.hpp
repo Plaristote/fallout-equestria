@@ -13,7 +13,7 @@
 # include "timer.hpp"
 # include "time_manager.hpp"
 # include "datatree.hpp"
-# include "scene_camera.hpp"
+# include "level_camera.hpp"
 # include "mouse.hpp"
 # include "interact_menu.hpp"
 
@@ -40,6 +40,11 @@
 # include "mouse_hint.hpp"
 # include "visibility_halo.hpp"
 # include "floors.hpp"
+# include "characters/object_outline.hpp"
+# include "path_preview.hpp"
+# include "zones/manager.hpp"
+# include "equip_modes.hpp"
+# include "mouse_events.hpp"
 
 # include <functional>
 
@@ -47,6 +52,15 @@ class Level
 {
   friend class Party;
 public:
+  struct Exit
+  {
+    bool        ToWorldmap(void)       const { return (level == "worldmap"); }
+    bool        ReadyForNextZone(void) const { return (level == "");         }
+
+    std::string level;
+    std::string zone;
+  };
+  
   typedef std::vector<ObjectCharacter*> CharacterList;
   
   static Level* CurrentLevel;
@@ -82,44 +96,38 @@ public:
   void                    SetState(State);
   State                   GetState(void) const { return (_state); }
   void                    SetInterrupted(bool);
-  void                    DisplayCombatPath(void);
-  void                    DestroyCombatPath(void);
   
   // World Interactions
-  bool                   FindPath(std::list<Waypoint>&, Waypoint&, Waypoint&);
   World*                 GetWorld(void)       { return (_world); }
-  SceneCamera&           GetCamera(void)      { return (_camera); }
+  LevelUi&               GetLevelUi(void)     { return (level_ui); }
+  MouseEvents&           GetMouse(void)       { return (mouse); }
+  Floors&                GetFloors(void)      { return (floors); }
+  TargetOutliner&        GetTargetOutliner(void) { return (target_outliner); }
+  Zones::Manager&        GetZoneManager(void) { return (zones); }
+  LevelCamera&           GetCamera(void)      { return (camera); }
   ObjectCharacter*       GetCharacter(const std::string& name);
   ObjectCharacter*       GetCharacter(const DynamicObject*);
   CharacterList          FindCharacters(std::function<bool (ObjectCharacter*)> = [](ObjectCharacter*) { return (true); }) const;
   ObjectCharacter*       GetPlayer(void);
-  LevelZone*             GetZoneByName(const std::string& name);
   void                   UnprocessAllCollisions(void);
   void                   ProcessAllCollisions(void);
   void                   RefreshCharactersVisibility(void);
   unsigned char          GetCurrentFloor(void) const { return (floors.GetCurrentFloor()); }
+  Exit&                  GetExit(void)       { return (exit); }
+  const Exit&            GetExit(void) const { return (exit); }
 
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);
   TimeManager&           GetTimeManager(void)    { return (_timeManager);      }
   ParticleSystemManager& GetParticleManager(void){ return (_particle_manager); }
   ChatterManager&        GetChatterManager(void) { return (_chatter_manager);  }
+  PathPreview&           GetHoveredPath(void)    { return (hovered_path);      }
   Data                   GetDataEngine(void)     { return (*_dataEngine);      }
   Data                   GetItems(void)          { return (_items);            }
   void                   ConsoleWrite(const std::string& str);
 
   void                   RemoveObject(InstanceDynamicObject* object);
-  
-  void                   CallbackExitZone(void);
-  void                   CallbackGoToZone(const std::string& name);
-  void                   CallbackSelectNextZone(const std::vector<std::string>& zones);
-  void                   CallbackCancelSelectZone(void);
-  const std::string&     GetNextZone(void) const;
-  const std::string&     GetExitZone(void) const;
-  void                   SetEntryZone(Party&, const std::string&);
-  void                   SetEntryZone(ObjectCharacter*, const std::string&);
-  bool                   MoveCharacterTo(ObjectCharacter*, Waypoint* wp);
-  bool                   MoveCharacterTo(ObjectCharacter*, unsigned int wp_id);
+
 
   // Interaction Management
   void                   CallbackActionBarter(ObjectCharacter*);
@@ -147,35 +155,13 @@ public:
   void                   PlayerEquipObject(unsigned short it, InventoryObject* object);
   void                   PlayerEquipObject(const std::string& target, unsigned int slot, InventoryObject* object);
 
-  Sync::Signal<void (Waypoint*)>              WaypointPicked;
-  Sync::Signal<void (InstanceDynamicObject*)> TargetPicked;
-
   // Fight Management
+  void                   StartCombat(void);
   void                   StartFight(ObjectCharacter* starter);
   void                   StopFight(void);
   void                   NextTurn(void);
   bool                   UseActionPoints(unsigned short ap);
-
-  // Mouse Management
-  enum MouseState
-  {
-    MouseAction,
-    MouseInteraction,
-    MouseTarget,
-    MouseWaypointPicker
-  };
-
-  void               SetMouseState(MouseState);
-  MouseState         GetMouseState(void) const { return (_mouseState); }
-  void               MouseLeftClicked(void);
-  void               MouseRightClicked(void);
-  void               MouseWheelUp(void);
-  void               MouseWheelDown(void);
-
-  void               StartCombat(void);
-
-  MouseHint          mouse_hint;
-  MouseState         _mouseState;
+  ObjectCharacter*       GetCurrentFightPlayer(void) const { return (_itCharacter != _characters.end() ? *_itCharacter : 0); }
 
   // Misc
   void               SetName(const std::string& name) { _level_name = name;   }
@@ -189,17 +175,9 @@ public:
 private:
   typedef std::list<InstanceDynamicObject*> InstanceObjects;
   typedef std::list<ObjectCharacter*>       Characters;
-  typedef std::list<LevelExitZone*>         ExitZones;
-  typedef std::list<Projectile*>            Projectiles;
-  typedef std::vector<LevelZone*>           LevelZones;
   typedef std::list<Party*>                 Parties;
   
-  void              SetupCamera(void);
-
   void              RunMetabolism(void);
-  void              RunProjectiles(float elapsed_time);
-  void              MouseInit(void);
-  void              ToggleCharacterOutline(bool);
   
   void              InsertDynamicObject(DynamicObject&);
   void              InsertCharacter(ObjectCharacter*);
@@ -209,20 +187,21 @@ private:
   std::string           _level_name;
   WindowFramework*      _window;
   GraphicsWindow*       _graphicWindow;
-  Mouse                 _mouse;
-  SceneCamera           _camera;
+  LevelCamera           camera;
+  MouseEvents           mouse;
   Timer                 _timer;
   TimeManager&          _timeManager;
   MainScript            _main_script;
   State                 _state;
   bool                  _persistent;
 
+  LevelUi               level_ui;
+  MouseHint             mouse_hint;
   World*                _world;
-  LevelZones            _zones;
   ParticleSystemManager _particle_manager;
   SoundManager          _sound_manager;
   ChatterManager        _chatter_manager;
-  Projectiles           _projectiles;
+  Projectile::Set       _projectiles;
   InstanceObjects       _objects;
   Characters            _characters;
   Characters::iterator  _itCharacter;
@@ -231,56 +210,18 @@ private:
   VisibilityHalo        player_halo;
   Sunlight*             _sunlight;
   Floors                floors;
-  
-  ExitZones             _exitZones;
-  bool                  _exitingZone;
-  std::string           _exitingZoneTo, _exitingZoneName;
+  TargetOutliner        target_outliner;
+  PathPreview           hovered_path;
+  Zones::Manager        zones;
+  EquipModes            equip_modes;
+  Exit                  exit;
 
   World::WorldLights::iterator _light_iterator;
 
   TimeManager::Task*    _task_metabolism;
 
-  enum UiIterator
-  {
-    UiItInteractMenu,
-    UiItRunningDialog,
-    UiItUseObjectOn,
-    UiItUseSkillOn,
-    UiItUseSpellOn,
-    UiItLoot,
-    UiItEquipMode,
-    UiItNextZone,
-    UiItBarter,
-    UiTotalIt
-  };
-  
-  template<UiIterator it> void CloseRunningUi(void)
-  {
-    if (_currentUis[it])
-    {
-      UiBase* ui      = _currentUis[it];
-
-      _currentUis[it] = 0;
-      ui->Destroy();
-      Executor::ExecuteLater([ui]() { delete ui; });
-    }
-    _mouseActionBlocked = false;
-    _camera.SetEnabledScroll(true);
-    SetInterrupted(false);
-  }
-
-  LevelUi           _levelUi;
-  UiBase*           _currentUis[UiTotalIt];
-  bool              _mouseActionBlocked;
-
-  DataEngine*       _dataEngine;
-  DataTree*         _items;
-
-  /*
-   * Combat Path Shower
-   */
-  std::list<Waypoint> _combat_path;
-  NodePath            _last_combat_path;
+  DataEngine*           _dataEngine;
+  DataTree*             _items;
 };
 
 #endif

@@ -5,7 +5,7 @@
 
 struct Zone
 {
-  bool operator==(const std::string& comp) { return (name == comp); }
+  bool operator==(const std::string& comp)     const { return (name == comp); }
 
   bool Contains(unsigned int id) const
   {
@@ -19,15 +19,18 @@ struct Zone
     return (false);
   }
 
-  bool Contains(Waypoint* wp) const { return (Contains(wp->id)); }
+  bool Contains(Waypoint* wp)                  const { return (Contains(wp->id));                                                                }
+  bool HasDestination(const std::string& name) const { return (std::find(destinations.begin(), destinations.end(), name) != destinations.end()); }
+  void AddDestination(const std::string& name)       { if (!(HasDestination(name))) { destinations.push_back(name); }                            }
+  void DelDestination(const std::string& name)       { destinations.erase(std::find(destinations.begin(), destinations.end(), name));            }
 
-  std::string          name;
-  std::list<Waypoint*> waypoints;
+  std::string              name;
+  std::list<Waypoint*>     waypoints;
+  std::vector<std::string> destinations;
 };
 
 struct ExitZone : public Zone
 {
-  std::list<std::string> destinations;
 };
 
 typedef Zone EntryZone;

@@ -44,6 +44,7 @@ public:
   Data(void)          : _data(0)       { }
   Data(DataTree*   d);
   Data(DataBranch* d) : _data(d)       { _data->pointers++; }
+  Data(const Data& d);
   virtual ~Data(void);
 
   /*! \brief Returns a Data containing the child DataBranch corresponding to key if it exists, or Nil Data otherwise (see the Nil method) */
@@ -106,6 +107,7 @@ public:
 
   /*! \brief Sets the DataBranch to nil, thus removing it cleanly when Data is destroyed */
   void Remove(void)       { if (_data) _data->nil = true; }
+  void RemoveAllChildren(void);
   void CutBranch(void);
   /*! \brief Checks if the current Data is attached to a DataBranch */
   bool Nil(void) const    { return (!_data || _data->nil);          }

@@ -16,27 +16,21 @@ using namespace std;
 
 void Level::CallbackActionUse(InstanceDynamicObject* object)
 {
-  CloseRunningUi<UiItInteractMenu>();
+  level_ui.CloseRunningUi<LevelUi::UiItInteractMenu>();
   ActionUse(GetPlayer(), object);
 }
 
 void Level::CallbackActionBarter(ObjectCharacter* character)
 {
   cout << "CallbackActionBarter" << endl;
-  UiBarter* ui_barter;
-  
-  CloseRunningUi<UiItBarter>();
-  ui_barter = new UiBarter(_window, _levelUi.GetContext(), GetPlayer(), character);
-  ui_barter->BarterEnded.Connect(*this, &Level::CloseRunningUi<UiItBarter>);
-  ui_barter->Show();
-  _currentUis[UiItBarter] = ui_barter;
-  _camera.SetEnabledScroll(false);
-  SetInterrupted(true);
+  UiBarter* ui_barter = level_ui.OpenUiBarter(GetPlayer(), character);
+
+  camera.SetEnabledScroll(false);
 }
 
 void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 {
-  CloseRunningUi<UiItInteractMenu>();
+  level_ui.CloseRunningUi<LevelUi::UiItInteractMenu>();
   if (GetState() == Fight)
   {
     ConsoleWrite(i18n::T("Can't talk during fight."));
@@ -44,9 +38,6 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
   }
   if ((GetPlayer()->HasLineOfSight(object)) && GetPlayer()->GetPathDistance(object) <= 3)
   {
-    if (_currentUis[UiItRunningDialog])
-      delete _currentUis[UiItRunningDialog];
-    
     // Player must look at its target
     GetPlayer()->LookAt(object);
     // If target is a character, then it must look back
@@ -55,22 +46,15 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
       talkTo->LookAt(GetPlayer());
 
     {
-      DialogController* controller = new DialogController(_window, _levelUi.GetContext(), talkTo, i18n::GetDialogs());
+      DialogController* controller = level_ui.OpenUiDialog(talkTo);
 
-      controller->DialogEnded.Connect(*this, &Level::CloseRunningUi<UiItRunningDialog>);
-      controller->DialogEnded.Connect(_levelUi.GetMainBar(), &UiBase::Show);
       controller->StartBarter.Connect(*this, &Level::CallbackActionBarter);
-      _mouseActionBlocked = true;
-      _camera.SetEnabledScroll(false);
-      _levelUi.GetMainBar().Hide();
-      _currentUis[UiItRunningDialog] = controller;
-      SetInterrupted(true);
     }
   }
   else
   {
     GetPlayer()->GoTo(object, 3);
-    if (GetPlayer()->GetPathSize() > 1)
+    if (GetPlayer()->GetPath().Size() > 1)
       GetPlayer()->ReachedDestination.Connect([this, object](InstanceDynamicObject*) { CallbackActionTalkTo(object); });
     else
       ConsoleWrite(i18n::T("No line of sight"));
@@ -79,60 +63,34 @@ void Level::CallbackActionTalkTo(InstanceDynamicObject* object)
 
 void Level::CallbackActionUseObjectOn(InstanceDynamicObject* target)
 {
-  UiUseObjectOn* ui = new UiUseObjectOn(_window, _levelUi.GetContext(), GetPlayer()->GetInventory());
-  
-  CloseRunningUi<UiItInteractMenu>();
-  CloseRunningUi<UiItUseObjectOn>();
-  std::cout << "CallbackActionUseObjectOn" << std::endl;
-  ui->ActionCanceled.Connect(*this, &Level::CloseRunningUi<UiItUseObjectOn>);
+  UiUseObjectOn* ui = level_ui.OpenUiUseObjectOn(&(GetPlayer()->GetInventory()));
+
   ui->ObjectSelected.Connect([this, target](InventoryObject* object)
   {
     ActionUseObjectOn(GetPlayer(), target, object, 0);
   });
-  _currentUis[UiItUseObjectOn] = ui;
-  _mouseActionBlocked          = true;
-  _camera.SetEnabledScroll(false);
-  SetInterrupted(true);
 }
 
 void Level::CallbackActionUseSkillOn(InstanceDynamicObject* target)
 {
-  CloseRunningUi<UiItInteractMenu>();
-  CloseRunningUi<UiItUseSkillOn>();
-  {
-    UiUseSkillOn* ui_use_skill_on = new UiUseSkillOn(_window, _levelUi.GetContext(), GetPlayer(), target);
+  UiUseSkillOn* ui_use_skill_on = level_ui.OpenUiUseSkillOn(GetPlayer(), target);
 
-    ui_use_skill_on->Closed.Connect(*this, &Level::CloseRunningUi<UiItUseSkillOn>);
-    ui_use_skill_on->SkillPicked.Connect([this, target](const std::string& skill)
-    {
-      ActionUseSkillOn(GetPlayer(), target, skill);
-    });
-    ui_use_skill_on->Show();
-    _mouseActionBlocked = true;
-    _camera.SetEnabledScroll(false);
-    _currentUis[UiItUseSkillOn] = ui_use_skill_on;
-    SetInterrupted(true);
-  }
+  ui_use_skill_on->SkillPicked.Connect([this, target](const std::string& skill)
+  {
+    ActionUseSkillOn(GetPlayer(), target, skill);
+  });
+  ui_use_skill_on->Show();
 }
 
 void Level::CallbackActionUseSpellOn(InstanceDynamicObject* target)
 {
-  CloseRunningUi<UiItInteractMenu>();
-  CloseRunningUi<UiItUseSpellOn>();
-  {
-    UiUseSpellOn* ui_use_spell_on = new UiUseSpellOn(_window, _levelUi.GetContext(), GetPlayer(), target);
+  UiUseSpellOn* ui_use_spell_on = level_ui.OpenUiUseSpellOn(GetPlayer(), target);
 
-    _currentUis[UiItUseSpellOn]   = ui_use_spell_on;
-    _mouseActionBlocked           = true;
-    _camera.SetEnabledScroll(false);
-    SetInterrupted(true);
-    ui_use_spell_on->Show();
-    ui_use_spell_on->Closed.Connect(*this, &Level::CloseRunningUi<UiItUseSpellOn>);
-    ui_use_spell_on->SkillPicked.Connect([this, target](const std::string& skill)
-    {
-      ActionUseSpellOn(GetPlayer(), target, skill);
-    });
-  }
+  ui_use_spell_on->Show();
+  ui_use_spell_on->SkillPicked.Connect([this, target](const std::string& skill)
+  {
+    ActionUseSpellOn(GetPlayer(), target, skill);
+  });
 }
 
 void Level::CallbackActionTargetUse(unsigned short it)
@@ -152,8 +110,8 @@ void Level::CallbackActionTargetUse(unsigned short it)
     {
       if (action["combat"].Value() == "1" && _state != Fight)
         StartFight(player);
-      SetMouseState(MouseTarget);
-      TargetPicked.Connect([this, item, action, action_it](InstanceDynamicObject* object)
+      mouse.SetState(MouseEvents::MouseTarget);
+      mouse.TargetPicked.Connect([this, item, action, action_it](InstanceDynamicObject* object)
       {
         cout << "TargetPicked Callback Called" << endl;
         ObjectCharacter* character = object->Get<ObjectCharacter>();
@@ -180,7 +138,7 @@ void Level::ActionUse(ObjectCharacter* user, InstanceDynamicObject* target)
     if (!(UseActionPoints(AP_COST_USE)))
       return ;
     target->CallbackActionUse(user);
-    SetMouseState(MouseAction);
+    mouse.SetState(MouseEvents::MouseAction);
   };
   animation_step = [this, user, logic_step](InstanceDynamicObject*)
   {
@@ -235,7 +193,7 @@ void Level::ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* targ
   user->GoTo(target, 0);
   user->ReachedDestination.Connect(animation_step);
   if (user == GetPlayer())
-    CloseRunningUi<UiItUseObjectOn>();
+    level_ui.CloseRunningUi<LevelUi::UiItUseObjectOn>();
 }
 
 struct XpFetcher
@@ -297,8 +255,8 @@ void Level::ActionUseSpellOn(ObjectCharacter* user, InstanceDynamicObject* targe
     teleport_handler.name = "waypoints";
     teleport_handler.Pick = [this](std::function<void (void*)> callback)
     {
-      SetMouseState(Level::MouseWaypointPicker);
-      WaypointPicked.Connect([callback](Waypoint* waypoint)
+      mouse.SetState(MouseEvents::MouseWaypointPicker);
+      mouse.WaypointPicked.Connect([callback](Waypoint* waypoint)
       {
         callback(waypoint);
       });
@@ -308,8 +266,8 @@ void Level::ActionUseSpellOn(ObjectCharacter* user, InstanceDynamicObject* targe
     teleport_handler.name = "characters";
     teleport_handler.Pick = [this](std::function<void (void*)> callback)
     {
-      SetMouseState(Level::MouseTarget);
-      TargetPicked.Connect([callback](InstanceDynamicObject* object)
+      mouse.SetState(MouseEvents::MouseTarget);
+      mouse.TargetPicked.Connect([callback](InstanceDynamicObject* object)
       {
         if (object->Get<ObjectCharacter>() != 0)
           callback(object);
@@ -384,7 +342,7 @@ void Level::ActionUseSkillOn(ObjectCharacter* user, InstanceDynamicObject* targe
   else
     animation_step(target);
   if (user == GetPlayer())
-    CloseRunningUi<UiItUseSkillOn>();
+    level_ui.CloseRunningUi<LevelUi::UiItUseSkillOn>();
 }
 
 void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* item, unsigned char actionIt)
@@ -435,7 +393,7 @@ void Level::ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, In
 
     user->SetAsEnemy(target, true);
     bullseye = (item->UseAsWeapon(user, target, actionIt));
-    MouseRightClicked();
+    mouse.MouseRightClicked();
     if (!(target->IsAlly(user)))
       target->GetFieldOfView().SetEnemyDetected(*user);
     if (xpFetcher.character_died)

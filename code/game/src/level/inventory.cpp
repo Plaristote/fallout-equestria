@@ -448,6 +448,7 @@ void Inventory::SaveInventory(Data items)
         item["equiped-save"]["new"].SetKey("");
       }
       item["quantity"] = quantity;
+      items[item.Key()].RemoveAllChildren();
       items[item.Key()].Duplicate(item);
       item["quantity"].Remove();
       item["equiped-save"].Remove();
