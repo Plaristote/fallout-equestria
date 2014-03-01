@@ -410,12 +410,12 @@ std::string    StatModel::GetStatistic(const std::string& stat) const
 
 short          StatModel::GetSpecial(const std::string& stat)   const
 {
-  return (_statsheet["Special"][stat] || 1);
+  return (_statsheet["Special"][stat].Or(1));
 }
 
 short          StatModel::GetSkill(const std::string& stat)     const
 {
-  return (_statsheet["Skills"][stat]  || 1);
+  return (_statsheet["Skills"][stat].Or(1));
 }
 
 vector<string> StatModel::GetStatKeys(Data stats) const
@@ -441,7 +441,7 @@ string StatModel::SelectRandomEncounter(void)
 
 int StatModel::GetReputation(const std::string& faction) const
 {
-  return (_statsheet["Reputation"][faction] || 0);
+  return (_statsheet["Reputation"][faction].Or(0));
 }
 
 void StatModel::AddReputation(const std::string& faction, int amount)

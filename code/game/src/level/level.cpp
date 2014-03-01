@@ -14,8 +14,6 @@
 #include "ui/ui_equip_mode.hpp"
 #include "options.hpp"
 #include <mousecursor.hpp>
-#include <boost/concept_check.hpp>
-#include <boost/detail/container_fwd.hpp>
 
 #define AP_COST_USE             2
 #define WORLDTIME_TURN          10

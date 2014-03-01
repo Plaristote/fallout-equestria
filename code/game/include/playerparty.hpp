@@ -9,6 +9,8 @@
 class PlayerParty : public Party
 {
 public:
+  struct PlayerNotFound : public std::exception { const char* what(void) const throw() { return ("The player's character was not found: party-player.blob file might be corrupted."); } };
+
   PlayerParty() : stat_view(0) {}
   PlayerParty(const std::string& savepath);
   ~PlayerParty(void);
@@ -17,7 +19,7 @@ public:
 
   StatController*       GetPlayerController(void);
   Inventory*            GetPlayerInventory(void);
-  Party::Member*        GetPlayer(void);
+  Party::Member*        GetPlayer(void) throw(PlayerNotFound);
 
 private:
   

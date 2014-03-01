@@ -78,6 +78,13 @@ public:
   }
 
   template<typename T>
+  T Or(const T& var) const
+  {
+    return (Nil() ? var : (T)(*this));
+  }
+
+  // WARNING Does not work with MSVC
+  template<typename T>
   T operator||(const T& var)
   {
     return (Nil() ? var : (T)(*this));

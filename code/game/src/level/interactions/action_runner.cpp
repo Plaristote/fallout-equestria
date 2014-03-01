@@ -57,7 +57,7 @@ void Interactions::ActionRunner::PickObject(void)
   mouse.SetState(MouseEvents::MouseTarget);
   observers.Connect(mouse.TargetPicked, [this](InstanceDynamicObject* object)
   {
-    if (target_type == Character && object->Get<ObjectCharacter>() == 0)
+    if (target_type == ActionRunner::Character && object->Get<ObjectCharacter>() == 0)
       ; // wrong type
     SetTarget(object);
     PlayAnimation();

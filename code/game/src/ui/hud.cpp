@@ -44,10 +44,10 @@ GameMainBar::~GameMainBar()
   ToggleEventListener(false, "charsheet",  "click",   PersButtonClicked);
   ToggleEventListener(false, "equiped_1",  "mouseup", EquipedItem1Clicked);
   ToggleEventListener(false, "equiped_2",  "mouseup", EquipedItem2Clicked);
-  ToggleEventListener(false, "pass_turn",  "click",   PassTurnClicked);
-  ToggleEventListener(false, "stop_fight", "click",   CombatEndClicked);
   ToggleEventListener(false, "skilldex",   "click",   SkilldexButtonClicked);
   ToggleEventListener(false, "spellbook",  "click",   SpelldexButtonClicked);
+  ToggleEventListener(false, "pass_turn",  "click",   PassTurnClicked);
+  ToggleEventListener(false, "stop_fight", "click",   CombatEndClicked);
 }
 
 void GameMainBar::SetStatistics(StatController* controller)
@@ -71,51 +71,60 @@ void GameMainBar::SetStatistics(StatController* controller)
 
 void GameMainBar::AppendToConsole(const std::string& str)
 {
-  Rocket::Core::Element* console = _root->GetElementById("console");
-  
-  if (console)
+  if (_root)
   {
-    Rocket::Core::String rml;
-    Rocket::Core::String toAdd;
+    Rocket::Core::Element* console = _root->GetElementById("console");
+  
+    if (console)
+    {
+      Rocket::Core::String rml;
+      Rocket::Core::String toAdd;
 
-    console->GetInnerRML(rml);
-    toAdd  = "<li>- ";
-    toAdd += str.c_str();
-    toAdd += "</li><br />";
-    console->SetInnerRML(toAdd + rml);
+      console->GetInnerRML(rml);
+      toAdd  = "<li>- ";
+      toAdd += str.c_str();
+      toAdd += "</li><br />";
+      console->SetInnerRML(toAdd + rml);
+    }
   }
 }
 
 void GameMainBar::SetCurrentHp(short hp)
 {
-  Rocket::Core::Element* elem_hp = _root->GetElementById("current-hp");
-  
-  if (elem_hp)
+  if (_root)
   {
-    stringstream rml;
+    Rocket::Core::Element* elem_hp = _root->GetElementById("current-hp");
+  
+    if (elem_hp)
+    {
+      stringstream rml;
 
-    rml << hp;
-    elem_hp->SetInnerRML(rml.str().c_str());
+      rml << hp;
+      elem_hp->SetInnerRML(rml.str().c_str());
+    }
   }
 }
 
 void GameMainBar::SetCurrentAc(short ac)
 {
-  Rocket::Core::Element* elem_ac = _root->GetElementById("current-ac");
-  
-  if (elem_ac)
+  if (_root)
   {
-    stringstream rml;
+    Rocket::Core::Element* elem_ac = _root->GetElementById("current-ac");
+  
+    if (elem_ac)
+    {
+      stringstream rml;
 
-    rml << ac;
-    elem_ac->SetInnerRML(rml.str().c_str());
+      rml << ac;
+      elem_ac->SetInnerRML(rml.str().c_str());
+    }
   }
 }
 
 void GameMainBar::SetCurrentAP(unsigned short ap, unsigned short max)
 {
   SetMaxAP(max);
-  if (_apEnabled)
+  if (_apEnabled && _root)
   {
     Rocket::Core::Element* apbar = _root->GetElementById("action_points");
     string                 rml;
@@ -133,35 +142,29 @@ void GameMainBar::SetCurrentAP(unsigned short ap, unsigned short max)
 
 void GameMainBar::SetMaxAP(unsigned short ap)
 {
-  Rocket::Core::Element* apbar = _root->GetElementById("action_points");
-  string                 rml;
-
-  _apMax = ap;
-  if (apbar)
+  if (_root)
   {
-    for (unsigned short i = 0 ; i < ap ; ++i)
-      rml += "<img class='img-ap' src='../textures/ap-inactive.png' /> ";
-    apbar->SetInnerRML(rml.c_str());
+    Rocket::Core::Element* apbar = _root->GetElementById("action_points");
+    string                 rml;
+
+    _apMax = ap;
+    if (apbar)
+    {
+      for (unsigned short i = 0 ; i < ap ; ++i)
+        rml += "<img class='img-ap' src='../textures/ap-inactive.png' /> ";
+      apbar->SetInnerRML(rml.c_str());
+    }
   }
 }
 
 void GameMainBar::SetEnabledAP(bool enabled)
 {
-  _apEnabled = enabled;
-  SetMaxAP(_apMax);
-  
-  Rocket::Core::Element* passTurn  = _root->GetElementById("pass_turn");
-  Rocket::Core::Element* combatEnd = _root->GetElementById("stop_fight");
-
-  if (enabled)
+  if (_root)
   {
-    passTurn->AddEventListener("click", &PassTurnClicked);
-    combatEnd->AddEventListener("click", &CombatEndClicked);  
-  }
-  else
-  {
-    passTurn->RemoveEventListener("click", &PassTurnClicked);
-    combatEnd->RemoveEventListener("click", &CombatEndClicked);  
+    _apEnabled = enabled;
+    SetMaxAP(_apMax);
+    ToggleEventListener(enabled, "pass_turn",  "click", PassTurnClicked);
+    ToggleEventListener(enabled, "stop_fight", "click", CombatEndClicked);
   }
 }
 
@@ -196,7 +199,7 @@ void GameMainBar::SetEquipedItem(unsigned short it, InventoryObject* item)
 void GameMainBar::SetEquipedItemAction(unsigned short it, InventoryObject* item, unsigned char actionIt)
 {
   cout << "SetEquipedItemAction: " << (int)actionIt << endl;
-  if (item)
+  if (item && _root)
   {
     Rocket::Core::Element* elem;
     stringstream           stream;
