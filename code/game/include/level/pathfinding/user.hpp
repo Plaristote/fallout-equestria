@@ -11,6 +11,13 @@ namespace Pathfinding
 {
   class User : public InstanceDynamicObject
   {
+    struct Destination
+    {
+      Destination() : object(0), min_distance(0) {}
+
+      InstanceDynamicObject* object;
+      unsigned short         min_distance;
+    };
   public:
     Sync::Signal<void>       ReachedDestination;
     Sync::Signal<void>       MovedFor1ActionPoint;
@@ -59,7 +66,7 @@ namespace Pathfinding
     //Pathfinding::Path        path;
     std::string              movement_animation;
     float                    movement_speed;
-    GoToData                 current_target;
+    Destination              current_target;
     float                    rotation_goal;
     bool                     path_visible;
   };

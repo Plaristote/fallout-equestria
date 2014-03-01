@@ -92,9 +92,20 @@ void NewGameTask::GeneratePlayerParty(void)
     player_data["model"]        = "lpip.egg";
     player_data["texture"]      = "characters/lpip.png";
     party.Join(player_data);
+    GeneratePlayerInventory(party.GetMember("self")->GetInventory());
   }
   party.SetName("player");
   party.Save(savepath);
+}
+
+void NewGameTask::GeneratePlayerInventory(Inventory* inventory)
+{
+  DataTree* inventory_data = DataTree::Factory::JSON("data/newgame/inventory.json");
+
+  if (inventory_data)
+    inventory->LoadInventory(inventory_data);
+  else
+    AlertUi::NewAlert.Emit("Your character's inventory failed to initialize.");
 }
 
 void NewGameTask::Done(void)

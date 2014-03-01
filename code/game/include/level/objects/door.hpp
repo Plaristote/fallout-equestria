@@ -33,7 +33,6 @@ public:
   void               UnprocessCollision(void);
 
   void               CallbackActionUse(InstanceDynamicObject* object);
-  GoToData           GetGoToData(InstanceDynamicObject* character);
   
 private:
   void               InitializePassageWay(void);

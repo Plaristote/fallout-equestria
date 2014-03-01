@@ -14,12 +14,12 @@ namespace Pathfinding
   class Path
   {
   public:
-    Path(void) : from(0), to(0)
+    Path(void) : from(0), to(0), contains_valid_path(false)
     {
     }
 
     bool                 FindPath(Waypoint* from, Waypoint* to);
-    bool                 ContainsValidPath(void) const { return (from != 0 && to != 0); }
+    bool                 ContainsValidPath(void) const { return (contains_valid_path); }
     void                 StripFirstWaypointFromList(void);
     void                 StripLastWaypointFromList(void);
     unsigned int         Size(void)  const { return (waypoints.size());    }
@@ -30,15 +30,16 @@ namespace Pathfinding
     void                 Clear(void);
     void                 Truncate(unsigned int max_size);
     
-    void Serialize(Utils::Packet&);
-    void Unserialize(World*, Utils::Packet&);
-    
+    void                 Serialize(Utils::Packet&);
+    void                 Unserialize(World*, Utils::Packet&);
+
   protected:
     void                 ForeachWaypoint(std::function<void (Waypoint&)>);
 
     Waypoint*            from;
     Waypoint*            to;
     std::list<Waypoint>  waypoints;
+    bool                 contains_valid_path;
   };
 }
 

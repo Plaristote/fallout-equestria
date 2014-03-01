@@ -13,21 +13,17 @@ InstanceDynamicObject::InstanceDynamicObject(Level* level, DynamicObject* object
 {
   _type                 = Other;
   _level                = level;
+  data_store            = new DataTree;
   idle_size             = NodePathSize(object->nodePath);
   waypoint_disconnected = object->lockedArcs;
   SetOccupiedWaypoint(object->waypoint);
   SetModelNameFromPath(object->strModel);
 }
 
-InstanceDynamicObject::GoToData   InstanceDynamicObject::GetGoToData(InstanceDynamicObject* character)
+InstanceDynamicObject::~InstanceDynamicObject()
 {
-  GoToData         ret;
-
-  ret.nearest      = GetOccupiedWaypoint();
-  ret.objective    = this;
-  ret.max_distance = 0;
-  ret.min_distance = 0;
-  return (ret);
+  if (data_store)
+    delete data_store;
 }
 
 void InstanceDynamicObject::AddTextBox(const std::string& text, unsigned short r, unsigned short g, unsigned short b, float timeout)
@@ -48,6 +44,7 @@ void InstanceDynamicObject::Unserialize(Utils::Packet& packet)
     SetOccupiedWaypoint(_level->GetWorld()->GetWaypointFromId(waypointId));
   }
   tasks.Unserialize(packet);
+  UnserializeDataStore(packet);
 }
 
 void InstanceDynamicObject::Serialize(Utils::Packet& packet)
@@ -60,4 +57,23 @@ void InstanceDynamicObject::Serialize(Utils::Packet& packet)
   else
     packet << '0';
   tasks.Serialize(packet);
+  SerializeDataStore(packet);
+}
+
+void InstanceDynamicObject::SerializeDataStore(Utils::Packet& packet)
+{
+  string data_store_json;
+  
+  DataTree::Writers::StringJSON(data_store, data_store_json);
+  packet << data_store_json;
+}
+
+void InstanceDynamicObject::UnserializeDataStore(Utils::Packet& packet)
+{
+  string data_store_json;
+
+  packet >> data_store_json;
+  if (data_store)
+    delete data_store;
+  data_store = DataTree::Factory::StringJSON(data_store_json);
 }

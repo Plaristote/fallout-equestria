@@ -3,9 +3,17 @@
 
 using namespace std;
 
-Interactions::Target::Target(Level* level, DynamicObject* object) : skill_target((InstanceDynamicObject*)this), level(level)
+Interactions::Target::Target(Level* level, DynamicObject* object) : skill_target((InstanceDynamicObject*)this), level(level), script(0)
 {
   SetInteractionsFromDynamicObject(object);
+}
+
+void Interactions::Target::SetupScript(AngelScript::Object* script)
+{
+  this->script = script;
+  script->asDefineMethod("LookAt", "void look_at(Character@)");
+  script->asDefineMethod("Use",    "void use(Character@)");
+  script->asDefineMethod("TalkTo", "bool talk_to(Character@)");
 }
 
 void Interactions::Target::ActionUseSkill(ObjectCharacter* user, const std::string& skill)
@@ -16,7 +24,40 @@ void Interactions::Target::ActionUseSkill(ObjectCharacter* user, const std::stri
 void Interactions::Target::ActionLookAt(InstanceDynamicObject* user)
 {
   if (IsPlayer(user))
-    DisplayMessage(i18n::T("You see ") + i18n::T(GetName()));
+  {
+    if (script && script->IsDefined("LookAt"))
+    {
+      AngelScript::Type<ObjectCharacter*> param((ObjectCharacter*)(user));
+      
+      script->Call("LookAt", 1, &param);
+    }
+    else
+      DisplayMessage(i18n::T("You see ") + i18n::T(GetName()));
+  }
+}
+
+void Interactions::Target::ActionUse(InstanceDynamicObject* user)
+{
+  if (script && script->IsDefined("Use"))
+  {
+    AngelScript::Type<ObjectCharacter*> param((ObjectCharacter*)(user));
+
+    script->Call("Use", 1, &param);
+  }
+  else
+    ThatDoesNothing(user);
+}
+
+void Interactions::Target::ActionTalkTo(ObjectCharacter* user)
+{
+  if (script && script->IsDefined("TalkTo"))
+  {
+    AngelScript::Type<ObjectCharacter*> param((ObjectCharacter*)(user));
+
+    script->Call("TalkTo", 1, &param);
+  }
+  else
+    ThatDoesNothing(user);
 }
 
 void Interactions::Target::ThatDoesNothing(InstanceDynamicObject* user)

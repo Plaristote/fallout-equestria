@@ -11,11 +11,8 @@ public:
 
   ~ObjectShelf()
   {
-    LockWaypoints(false);
   }
 
-  void         LockWaypoints(bool);
-  GoToData     GetGoToData(InstanceDynamicObject*);
   Inventory&   GetInventory(void)      { return (_inventory); }
 
   virtual void CallbackActionUse(InstanceDynamicObject*);

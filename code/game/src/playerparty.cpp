@@ -31,7 +31,7 @@ Inventory* PlayerParty::GetPlayerInventory(void)
   return (GetPlayer()->GetInventory());
 }
 
-Party::Member* PlayerParty::GetPlayer(void)
+Party::Member* PlayerParty::GetPlayer(void) throw(PlayerNotFound)
 {
   auto player = GetMember("self");
 
@@ -67,8 +67,8 @@ void PlayerParty::UpdateView(void)
 {
   if (stat_view)
   {
-    PartyMembers&           party_members = GetPartyMembers();
-    std:vector<std::string> names;
+    PartyMembers&  party_members = GetPartyMembers();
+    vector<string> names;
     
     for_each(party_members.begin(), party_members.end(), [&names](Party::Member* member)
     {

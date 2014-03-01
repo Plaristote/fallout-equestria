@@ -6,7 +6,7 @@
 
 struct DynamicObject : public MapObject
 {
-  DynamicObject() : waypoint(0), interactions(0), locked(false), type(Shelf)
+  DynamicObject() : waypoint(0), type(Shelf), interactions(0), locked(false)
   {
   }
 

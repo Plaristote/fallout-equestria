@@ -78,6 +78,7 @@ void                Pathfinding::User::GoTo(Waypoint* waypoint)
   PStatCollector collector("Level:Characters:Pathfinding");
   Waypoint*      start_from = GetOccupiedWaypoint();
 
+  current_target = Destination();
   collector.start();
   ReachedDestination.DisconnectAll();
   UnprocessCollisions();
@@ -106,21 +107,16 @@ void                Pathfinding::User::GoTo(Waypoint* waypoint)
   collector.stop();
 }
 
-void                Pathfinding::User::GoTo(InstanceDynamicObject* object, int max_distance)
+void                Pathfinding::User::GoTo(InstanceDynamicObject* object, int min_distance)
 {
   ReachedDestination.DisconnectAll();
-  current_target              = object->GetGoToData(this);
-  current_target.max_distance = max_distance;
-
-  object->UnprocessCollisions();
-  GoTo(current_target.nearest);
-  object->ProcessCollisions();
-
-  while (current_target.min_distance && path.Size() > 1)
-  {
-    path.StripLastWaypointFromList();
-    current_target.min_distance--;
-  }
+  current_target.object       = object;
+  current_target.min_distance = min_distance;
+  path                        = object->GetPathTowardsObject(this);
+  if (path.ContainsValidPath())
+    StartRunAnimation();
+  else if (_level->GetPlayer() == this)
+    _level->ConsoleWrite(i18n::T("No path."));
 }
 
 void Pathfinding::User::StartRunAnimation()
@@ -131,21 +127,21 @@ void Pathfinding::User::StartRunAnimation()
 
 void Pathfinding::User::TruncatePath(unsigned short max_size)
 {
-  if ((path.Size() > 0) && path.Front().id == (unsigned int)GetOccupiedWaypointAsInt())
+  if ((path.Size() > 0) && path.Front().id == GetOccupiedWaypointAsInt())
     max_size++;
   path.Truncate(max_size);
 }
 
 bool                Pathfinding::User::HasReachedTarget(void)
 {
-  return (current_target.objective &&
-          path.Size() <= (unsigned int)current_target.max_distance && HasLineOfSight(current_target.objective));
+  return (current_target.object &&
+          path.Size() <= current_target.min_distance && HasLineOfSight(current_target.object));
 }
 
 void Pathfinding::User::FindNewWayOrAbort(void)
 {
-  if (current_target.objective)
-    GoTo(current_target.objective);
+  if (current_target.object)
+    GoTo(current_target.object, current_target.min_distance);
   else
   {
     Waypoint* dest = _level->GetWorld()->GetWaypointFromId((path.Last()).id);
@@ -163,26 +159,21 @@ void Pathfinding::User::MovePathForward(void)
   else
   {
     do { path.StripFirstWaypointFromList(); }
-    while (path.Size() > 0 && path.Front().id == (unsigned int)GetOccupiedWaypointAsInt());
+    while (path.Size() > 0 && path.Front().id == GetOccupiedWaypointAsInt());
   }
 }
 
 void Pathfinding::User::GoThroughNextWaypoint(void)
 {
+  Waypoint::Arc* arc;
+  
   UnprocessCollisions();
-  Waypoint::Arc* arc = GetOccupiedWaypoint()->GetArcTo(path.Front().id);
-
-  if (arc)
   {
-    if (arc->observer)
-    {
-      int player_flag = (this == _level->GetPlayer() ? 1 : 0);
-
-      if (!(arc->CanGoThrough(this)))
-        arc = 0;
-      if (arc)
-        arc->GoingThrough(this);
-    }
+    arc = GetOccupiedWaypoint()->GetArcTo(path.Front().id);
+    if (arc && arc->CanGoThrough(this))
+      arc->GoingThrough(this);
+    else
+      arc = 0;
   }
   ProcessCollisions();
   if (!arc)

@@ -32,6 +32,8 @@ private:
   std::vector<std::string>::const_iterator _current_profile;
 };
 
+class Inventory;
+
 class NewGameTask
 {
 public:
@@ -47,6 +49,7 @@ private:
   void                      ClearSaveDirectory(Directory&);
   void                      GenerateFirstSaveFromTemplate(const std::string& savepath);
   void                      GeneratePlayerParty(void);
+  void                      GeneratePlayerInventory(Inventory*);
   void                      Done(void);
 
   WindowFramework*          _window;

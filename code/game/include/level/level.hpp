@@ -71,11 +71,10 @@ public:
   void                    InitializePlayer(void);
 
   // Saving/Loading
-  void                    SetDataEngine(DataEngine* de)   { _dataEngine = de; }
+  void                    SetDataEngine(DataEngine* de)   { data_engine = de; }
   void                    SetPlayerInventory(Inventory*);
-  void                    SaveUpdateWorld(void);
-  void                    Save(Utils::Packet&);
-  void                    Load(Utils::Packet&);
+  void                    Serialize(Utils::Packet&);
+  void                    Unserialize(Utils::Packet&);
   
   void                    SetAsPlayerParty(Party& party);
   void                    InsertParty(Party& party, const std::string& entry_zone);
@@ -93,14 +92,14 @@ public:
   };
 
   AsyncTask::DoneStatus   do_task(void);
-  void                    SetPersistent(bool set)  { _persistent = set;    }
-  bool                    IsPersistent(void) const { return (_persistent); }
+  void                    SetPersistent(bool set)  { is_persistent = set;    }
+  bool                    IsPersistent(void) const { return (is_persistent); }
   void                    SetState(State);
-  State                   GetState(void) const { return (_state); }
+  State                   GetState(void) const { return (level_state); }
   void                    SetInterrupted(bool);
   
   // World Interactions
-  World*                 GetWorld(void)       { return (_world); }
+  World*                 GetWorld(void)       { return (world); }
   LevelUi&               GetLevelUi(void)     { return (level_ui); }
   MouseEvents&           GetMouse(void)       { return (mouse); }
   Floors&                GetFloors(void)      { return (floors); }
@@ -120,32 +119,19 @@ public:
 
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);
-  TimeManager&           GetTimeManager(void)    { return (_timeManager);      }
-  ParticleSystemManager& GetParticleManager(void){ return (_particle_manager); }
-  ChatterManager&        GetChatterManager(void) { return (_chatter_manager);  }
+  TimeManager&           GetTimeManager(void)    { return (time_manager);      }
+  ParticleSystemManager& GetParticleManager(void){ return (particle_manager); }
+  ChatterManager&        GetChatterManager(void) { return (chatter_manager);  }
   PathPreview&           GetHoveredPath(void)    { return (hovered_path);      }
-  Data                   GetDataEngine(void)     { return (*_dataEngine);      }
-  Data                   GetItems(void)          { return (_items);            }
+  Data                   GetDataEngine(void)     { return (*data_engine);      }
+  Data                   GetItems(void)          { return (items);            }
   void                   ConsoleWrite(const std::string& str);
 
   void                   RemoveObject(InstanceDynamicObject* object);
 
-
-  // Interaction Management
-  void                   CallbackActionBarter(ObjectCharacter*);
-  void                   CallbackActionUse(InstanceDynamicObject* object);
-  void                   CallbackActionTalkTo(InstanceDynamicObject* object);
-  void                   CallbackActionUseObjectOn(InstanceDynamicObject* object);
-  void                   CallbackActionUseSkillOn(InstanceDynamicObject* object);
-  void                   CallbackActionUseSpellOn(InstanceDynamicObject* object);
-  void                   CallbackActionTargetUse(unsigned short it);
-
   // Interace Interactions
   Interactions::Player&  GetInteractions() { return (interactions); }
-  void                   PlayerDropObject(InventoryObject*);
-  void                   PlayerUseObject(InventoryObject*);
-  void                   PlayerLoot(Inventory*);
-  void                   PlayerLootWithScript(Inventory*, InstanceDynamicObject*, asIScriptContext*, const std::string& script_path);
+  EquipModes&            GetEquipModes()   { return (equip_modes);  }
 
   void                   PlayerEquipObject(unsigned short it, InventoryObject* object);
   void                   PlayerEquipObject(const std::string& target, unsigned int slot, InventoryObject* object);
@@ -155,57 +141,59 @@ public:
   void                   StartFight(ObjectCharacter* starter);
   void                   StopFight(void);
   void                   NextTurn(void);
-  bool                   UseActionPoints(unsigned short ap);
-  ObjectCharacter*       GetCurrentFightPlayer(void) const { return (_itCharacter != _characters.end() ? *_itCharacter : 0); }
+  ObjectCharacter*       GetCurrentFightPlayer(void) const { return (combat_character_it != characters.end() ? *combat_character_it : 0); }
 
   // Misc
-  void               SetName(const std::string& name) { _level_name = name;   }
-  const std::string& GetName(void) const              { return (_level_name); }
+  void               SetName(const std::string& name) { level_name = name;   }
+  const std::string& GetName(void) const              { return (level_name); }
   void               SpawnEnemies(const std::string& type, unsigned short spawn_zone_number);
   bool               IsWaypointOccupied(unsigned int id) const;
   ISampleInstance*   PlaySound(const std::string& name);
 
-  void               InsertProjectile(Projectile* projectile) { _projectiles.push_back(projectile); }
+  void               InsertProjectile(Projectile* projectile) { projectiles.push_back(projectile); }
   void               InsertDynamicObject(DynamicObject&);
   void               InsertInstanceDynamicObject(InstanceDynamicObject*);
   void               InsertCharacter(ObjectCharacter*);
   
   Sync::ObserverHandler obs;
 private:
+  void               BackupInventoriesToDynamicObjects(void);
+  void               SerializeParties(Utils::Packet&);
+  void               UnserializeParties(Utils::Packet&);
+  void               RunMetabolism(void);
+  
   typedef std::list<InstanceDynamicObject*> InstanceObjects;
   typedef std::list<ObjectCharacter*>       Characters;
   typedef std::list<Party*>                 Parties;
   
-  void              RunMetabolism(void);
   
   Sync::ObserverHandler obs_player;
 
-  std::string           _level_name;
-  WindowFramework*      _window;
-  GraphicsWindow*       _graphicWindow;
+  std::string           level_name;
+  WindowFramework*      window;
   LevelCamera           camera;
   MouseEvents           mouse;
-  Timer                 _timer;
-  TimeManager&          _timeManager;
-  MainScript            _main_script;
-  State                 _state;
-  bool                  _persistent;
+  Timer                 timer;
+  TimeManager&          time_manager;
+  MainScript            main_script;
+  State                 level_state;
+  bool                  is_persistent;
 
   LevelUi               level_ui;
   MouseHint             mouse_hint;
   Interactions::Player  interactions;
-  World*                _world;
-  ParticleSystemManager _particle_manager;
-  SoundManager          _sound_manager;
-  ChatterManager        _chatter_manager;
-  Projectile::Set       _projectiles;
-  InstanceObjects       _objects;
-  Characters            _characters;
-  Characters::iterator  _itCharacter;
-  Characters::iterator  _currentCharacter;
-  Parties               _parties;
+  World*                world;
+  ParticleSystemManager particle_manager;
+  SoundManager          sound_manager;
+  ChatterManager        chatter_manager;
+  Projectile::Set       projectiles;
+  InstanceObjects       objects;
+  Characters            characters;
+  Characters::iterator  combat_character_it;
+  Characters::iterator  current_character;
+  Parties               parties;
   VisibilityHalo        player_halo;
-  Sunlight*             _sunlight;
+  Sunlight*             sunlight;
   Floors                floors;
   TargetOutliner        target_outliner;
   PathPreview           hovered_path;
@@ -215,10 +203,10 @@ private:
 
   World::WorldLights::iterator _light_iterator;
 
-  TimeManager::Task*    _task_metabolism;
+  TimeManager::Task*    task_metabolism;
 
-  DataEngine*           _dataEngine;
-  DataTree*             _items;
+  DataEngine*           data_engine;
+  DataTree*             items;
 };
 
 #endif

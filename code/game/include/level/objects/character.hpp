@@ -23,20 +23,11 @@ public:
   ObjectCharacter(Level* level, DynamicObject* object);
   ~ObjectCharacter(void);
   
-  void Unserialize(Utils::Packet&);
-  void Serialize(Utils::Packet&);
+  void                     Unserialize(Utils::Packet&);
+  void                     Serialize(Utils::Packet&);
 
-  virtual GoToData     GetGoToData(InstanceDynamicObject* character)
-  {
-    GoToData         ret;
-
-    ret.nearest      = GetOccupiedWaypoint();
-    ret.objective    = this;
-    ret.max_distance = 0;
-    ret.min_distance = 1;
-    return (ret);
-  }
-
+  void                     ActionTalkTo(ObjectCharacter* user);
+  
   void                     SetInventory(Inventory* inventory);
 
   void                     ProcessCollisions(void)         { if (IsAlive()) InstanceDynamicObject::ProcessCollisions();     }
@@ -89,6 +80,7 @@ public:
   void                     SendMessage(std::string&);
 
 private:
+  void                     SetupScript(AngelScript::Object*);
   void                     RefreshStatistics(void);
   void                     RunDeath(void);
   void                     Fading(void);
@@ -107,7 +99,7 @@ private:
   bool                           _fading_off, _fading_in;
   LineOfSight                    line_of_sight;
   FieldOfView                    field_of_view;
-  AngelScript::Object*           _script;
+  AngelScript::Object*           script;
   Interactions::ActionRunner*    current_action;
 
   public:

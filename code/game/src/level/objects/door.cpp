@@ -83,20 +83,6 @@ void ObjectDoor::GoingThrough(InstanceDynamicObject* object)
   }
 }
 
-InstanceDynamicObject::GoToData ObjectDoor::GetGoToData(InstanceDynamicObject* character)
-{
-  Pathfinding::Path best_path;
-  Waypoint*         waypoint = character->GetOccupiedWaypoint();
-  GoToData          ret;
-
-  ret.nearest      = GetOccupiedWaypoint();
-  ret.max_distance = -1;
-  ret.min_distance = 0;
-  ret.objective    = this;
-  ret.max_distance = 0;
-  return (ret);
-}
-
 void ObjectDoor::CallbackActionUse(InstanceDynamicObject* object)
 {
   if (!IsLocked())

@@ -20,9 +20,11 @@ bool Pathfinding::Path::FindPath(Waypoint* from, Waypoint* to)
   if (state == AstarPathfinding<Waypoint>::Succeeded)
   {
     waypoints = astar.GetSolution();
-    return (true);
+    contains_valid_path = true;
   }
-  return (false);
+  else
+    contains_valid_path = false;
+  return (contains_valid_path);
 }
 
 void Pathfinding::Path::Clear(void)

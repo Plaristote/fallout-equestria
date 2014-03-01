@@ -72,6 +72,7 @@ class DialogView : public UiBase
 {
 public:
   void Destroy(void);
+  void SetCurrentNpcText(const std::string&);
 protected:
   DialogView(WindowFramework* window, Rocket::Core::Context* context);
   virtual ~DialogView();

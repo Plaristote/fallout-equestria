@@ -10,6 +10,7 @@
 #include "ui/alert_ui.hpp"
 #include <loading_exception.hpp>
 #include "scheduled_task.hpp"
+#include "encounter_spawn.hpp"
 
 using namespace std;
 
@@ -43,7 +44,6 @@ GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : game_ui(wind
 GameTask::~GameTask()
 {
   if (player_party)  { delete player_party;   }
-  if (player_stats)  { delete player_stats;   }
   if (world_map)     { world_map->Destroy();   delete world_map;   }
   if (quest_manager) { delete quest_manager; }
   if (level)         { delete level;         }
@@ -173,9 +173,8 @@ void GameTask::LoadPlayerData(void)
 {
   player_party     = new PlayerParty(save_path);
   player_stats     = player_party->GetPlayerController();
-  player_stats->SetView(&(game_ui.GetPers()));
   quest_manager    = new QuestManager(data_engine, player_stats);
-  cout << "Current weight: " << player_party->GetPlayerInventory()->GetCurrentWeight() << endl;
+  player_stats->SetView(&(game_ui.GetPers()));
   game_ui.GetInventory().SetInventory(*(player_party->GetPlayerInventory()));
 }
 
@@ -212,7 +211,7 @@ bool GameTask::LoadGame()
     exception.Display();
     return (false);
   }
-  return (false);
+  return (true);
 }
 
 void GameTask::OpenLevel(const std::string& level_name, const std::string& entry_zone)
@@ -251,12 +250,10 @@ void GameTask::EraseSlot(unsigned char slot)
   remove(stream.str().c_str());
   remove((stream.str() + ".png").c_str());
   remove((stream.str() + ".json").c_str());
-  cout << "Clearing Slot: " << stream.str() << endl;
 }
 
 void GameTask::SaveToSlot(unsigned char slot)
 {
-  cout << "SaveToSlot Called" << endl;
   if (SaveGame())
   {
     std::stringstream stream;
@@ -308,11 +305,10 @@ void GameTask::RemoveCurrentProgression(void)
 
 bool GameTask::SaveLevel(Level* level, const std::string& name)
 {
-  cout << "Saving level" << endl;
   Utils::Packet packet;
   std::ofstream file;
 
-  level->Save(packet);
+  level->Serialize(packet);
   file.open(name.c_str(), std::ios::binary);
   if (file.is_open())
   {
@@ -331,7 +327,7 @@ void GameTask::LoadLevelFromPacket(LoadLevelParams params, Utils::Packet& packet
 {
   level = new Level(params.name, window, game_ui, packet, time_manager);
   if (params.isSaveFile)
-    level->Load(packet);
+    level->Unserialize(packet);
   level->SetDataEngine(&data_engine);
   if (params.entry_zone != "")
     level->InsertParty(*player_party, params.entry_zone);
@@ -404,10 +400,14 @@ void GameTask::SetLevelEncounter(const Encounter& encounter)
     // Spawn encounter if it contains people/critters
     else if (encounter.IsEvent())
     {
-      level->SpawnEnemies(encounter.GetEncounterName(), 1);
+      EncounterSpawn* spawn = new EncounterSpawn(encounter.GetEncounterName());
+      stringstream    entry_zone;
+
+      entry_zone << "spawn_" << 1;
+      spawn->LoadFromDataEngine(data_engine);
+      level->InsertParty(*spawn, entry_zone.str());
     }
   }
-  SyncLoadLevel.Disconnect(obs_level_unpersistent);
 }
 
 void GameTask::MakeEncounter(int x, int y, bool is_event)

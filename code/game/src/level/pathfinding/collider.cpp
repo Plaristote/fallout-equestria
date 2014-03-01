@@ -25,6 +25,23 @@ void         Collider::UnprocessCollisions(void)
   withdrawed_arcs.clear();
 }
 
+Path Collider::GetPathTowardsObject(Collider* character)
+{
+  Pathfinding::Path path;
+
+  if (HasOccupiedWaypoint())
+  {
+    character->UnprocessCollisions();
+    UnprocessCollisions();
+    path.FindPath(character->GetOccupiedWaypoint(), GetOccupiedWaypoint());
+    path.StripFirstWaypointFromList();
+    path.StripLastWaypointFromList();
+    ProcessCollisions();
+    character->ProcessCollisions();
+  }
+  return (path);
+}
+
 void        Collider::WithdrawAllArcs(Waypoint* waypoint)
 {
   for_each(waypoint->arcs_withdrawed.begin(), waypoint->arcs_withdrawed.end(), [this, waypoint](std::pair<Waypoint::Arc, unsigned short>& withdrawable)

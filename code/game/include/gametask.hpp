@@ -8,7 +8,7 @@
 # include "ui/general_ui.hpp"
 # include "ui/saveuis.hpp"
 # include "cmap/statcontroller.hpp"
-# include "pipbuck.hpp"
+# include "pipbuck/pipbuck.hpp"
 # include "encounter.hpp"
 
 class QuestManager;
@@ -82,7 +82,6 @@ private:
   Level*                level;
 
   Sync::Signal<void (LoadLevelParams)> SyncLoadLevel;
-  Sync::ObserverId                     obs_level_unpersistent;
 };
 
 #endif

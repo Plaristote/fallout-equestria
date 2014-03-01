@@ -13,6 +13,8 @@ class PathPreview : public Pathfinding::Path
 public:
   ~PathPreview();
   
+  const PathPreview& operator=(const Pathfinding::Path& path) { Path::operator=(path); return (*this); }
+  
   void               SetColor(LVector4f color);
   void               SetRenderNode(NodePath render) { this->render = render; }
 

@@ -86,25 +86,15 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
   {
     string prefixPath  = "scripts/ai/";
 
-    _script = new AngelScript::Object(prefixPath + object->script + ".as");
-    skill_target.Initialize(prefixPath + object->script + ".as", _script->GetContext());
-    _script->asDefineMethod("main",                 "void   main(Character@, float)");
-    _script->asDefineMethod("combat",               "void   combat(Character@)");
-    _script->asDefineMethod("RequestStopFollowing", "void   RequestStopFollowing(Character@, Character@)");
-    _script->asDefineMethod("RequestFollow",        "void   RequestFollow(Character@, Character@)");
-    _script->asDefineMethod("RequestHeal",          "void   RequestHeal(Character@, Character@)");
-    _script->asDefineMethod("AskMorale",            "int    AskMorale(Character@)");
-    _script->asDefineMethod("SendMessage",          "void   ReceiveMessage(string)");
-    _script->asDefineMethod("Load",                 "void   Load(Serializer@)");
-    _script->asDefineMethod("Save",                 "void   Save(Serializer@)");
-    _script->asDefineMethod("DefaultWeapon1",       "string default_weapon_1()");
-    _script->asDefineMethod("DefaultWeapon2",       "string default_weapon_2()");
+    script = new AngelScript::Object(prefixPath + object->script + ".as");
+    skill_target.Initialize(prefixPath + object->script + ".as", script->GetContext());
+    SetupScript(script);
 
     const char* default_weapons[] = { "DefaultWeapon1", "DefaultWeapon2" };
     for (unsigned short i = 0 ; i < 2 ; ++i)
     {
-      if (_script->IsDefined(default_weapons[i]))
-        defEquiped[i] = *(string*)(_script->Call(default_weapons[i]));
+      if (script->IsDefined(default_weapons[i]))
+        defEquiped[i] = *(string*)(script->Call(default_weapons[i]));
     }
   }
   
@@ -133,6 +123,50 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
     LoadAnimation(anims[i]);
 
   GetNodePath().set_transparency(TransparencyAttrib::M_alpha);
+}
+
+void ObjectCharacter::SetupScript(AngelScript::Object* script)
+{
+  script->asDefineMethod("main",                 "void   main(Character@, float)");
+  script->asDefineMethod("combat",               "void   combat(Character@)");
+  script->asDefineMethod("RequestStopFollowing", "void   RequestStopFollowing(Character@, Character@)");
+  script->asDefineMethod("RequestFollow",        "void   RequestFollow(Character@, Character@)");
+  script->asDefineMethod("RequestHeal",          "void   RequestHeal(Character@, Character@)");
+  script->asDefineMethod("AskMorale",            "int    AskMorale(Character@)");
+  script->asDefineMethod("SendMessage",          "void   ReceiveMessage(string)");
+  script->asDefineMethod("Load",                 "void   Load(Serializer@)");
+  script->asDefineMethod("Save",                 "void   Save(Serializer@)");
+  script->asDefineMethod("DefaultWeapon1",       "string default_weapon_1()");
+  script->asDefineMethod("DefaultWeapon2",       "string default_weapon_2()");
+  Target::SetupScript(script);
+}
+
+void ObjectCharacter::ActionTalkTo(ObjectCharacter* user)
+{
+  bool open_dialog = _object->dialog != "";
+
+  if (script && script->IsDefined("TalkTo"))
+  {
+    AngelScript::Type<ObjectCharacter*> param(user);
+    
+    open_dialog = open_dialog && (bool)(script->Call("TalkTo", 1, &param));
+  }
+  if (open_dialog)
+  {
+    DialogController* controller = _level->GetLevelUi().OpenUiDialog(this);
+    
+    controller->StartBarter.Connect([this, user, controller](ObjectCharacter*)
+    {
+      bool can_barter = true;
+      
+      if (script && script->IsDefined("CanBarter"))
+        can_barter = script->Call("CanBarter");
+      if (can_barter)
+        _level->GetLevelUi().OpenUiBarter(user, this);
+      else
+        controller->SetCurrentNpcText(i18n::T("[This individual does not want to barter with you.]"));
+    });
+  }
 }
 
 void ObjectCharacter::SetInventory(Inventory* inventory)
@@ -383,13 +417,13 @@ void ObjectCharacter::Run(float elapsedTime)
       Fading();
     if (state == Level::Normal && GetHitPoints() > 0)
     {
-      if (_script->IsDefined("main"))
+      if (script->IsDefined("main"))
       {
         collector_ai.start();
         AngelScript::Type<ObjectCharacter*> self(this);
         AngelScript::Type<float>            p_time(elapsedTime);
         
-        _script->Call("main", 2, &self, &p_time);
+        script->Call("main", 2, &self, &p_time);
         collector_ai.stop();
       }
     }
@@ -397,13 +431,13 @@ void ObjectCharacter::Run(float elapsedTime)
     {
       if (GetHitPoints() <= 0 || GetActionPoints() == 0)
 	_level->NextTurn();
-      else if (!(IsMoving()) && _script->IsDefined("combat")) // TODO replace with something more appropriate
+      else if (!(IsMoving()) && script->IsDefined("combat")) // TODO replace with something more appropriate
       {
         collector_ai.start();
         AngelScript::Type<ObjectCharacter*> self(this);
         unsigned int                        ap_before = GetActionPoints();
 
-        _script->Call("combat", 1, &self);
+        script->Call("combat", 1, &self);
         collector_ai.stop();
         if (ap_before == GetActionPoints() && !IsInterrupted() && !IsMoving()) // If stalled, skip turn
         {
@@ -516,10 +550,15 @@ bool ObjectCharacter::IsPlayer(void) const
   return (_level->GetPlayer() == this);
 }
 
-void                ObjectCharacter::CallbackActionUse(InstanceDynamicObject* user)
+void ObjectCharacter::ActionUse(InstanceDynamicObject* user)
 {
   if (user == _level->GetPlayer())
-    _level->PlayerLootWithScript(&(GetInventory()), this, _script->GetContext(), "scripts/ai/" + _object->script + ".as");
+  {
+    if (IsAlive())
+      _level->GetInteractions().ActionLootWithScript(&(GetInventory()), this, script->GetContext(), "scripts/ai/" + _object->script + ".as");
+    else
+      _level->GetInteractions().ActionLoot(&(GetInventory()));
+  }
 }
 
 /*
@@ -555,22 +594,22 @@ Script::StdList<ObjectCharacter*> ObjectCharacter::GetNearbyAllies(void) const
  */
 void     ObjectCharacter::SendMessage(string& str)
 {
-  if (_script->IsDefined("SendMessage"))
+  if (script->IsDefined("SendMessage"))
   {
     AngelScript::Type<ObjectCharacter*> self(this);
     AngelScript::Type<std::string*>     message(&str);
     
-    _script->Call("SendMessage", 2, &self, &message);
+    script->Call("SendMessage", 2, &self, &message);
   }
 }
 
 int      ObjectCharacter::AskMorale(void)
 {
-  if (_script->IsDefined("AskMorale"))
+  if (script->IsDefined("AskMorale"))
   {
     AngelScript::Type<ObjectCharacter*> self(this);
     
-    return (_script->Call("AskMorale", 1, &self));
+    return (script->Call("AskMorale", 1, &self));
   }
   return (0);
 }
@@ -597,12 +636,12 @@ void     ObjectCharacter::RequestStopFollowing(ObjectCharacter* f, ObjectCharact
 
 void     ObjectCharacter::RequestCharacter(ObjectCharacter* f, ObjectCharacter* s, const std::string& func)
 {
-  if (_script->IsDefined(func))
+  if (script->IsDefined(func))
   {
     AngelScript::Type<ObjectCharacter*> self(f);
     AngelScript::Type<ObjectCharacter*> buddy(s);
     
-    _script->Call(func, 2, &self, &buddy);
+    script->Call(func, 2, &self, &buddy);
   }
 }
 

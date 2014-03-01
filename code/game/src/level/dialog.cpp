@@ -56,6 +56,11 @@ void DialogView::Destroy()
   }
 }
 
+void DialogView::SetCurrentNpcText(const string& message)
+{
+  _containerNpcLine->SetInnerRML(message.c_str());
+}
+
 void DialogView::UpdateView(const std::string& npcLine, const DialogAnswers& answers)
 {
   if (_root && _containerAnswers && _containerNpcLine)

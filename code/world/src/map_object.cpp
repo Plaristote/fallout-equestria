@@ -5,6 +5,7 @@
 using namespace std;
 
 extern unsigned int blob_revision;
+extern std::function<void (void)> bite_collision;
 
 void MapObject::InitializeTree(World *world)
 {
@@ -33,13 +34,16 @@ void MapObject::InitializeCollider(Collider type, LPoint3f position, LPoint3f sc
   collider = type;
   switch (type)
   {
+  default:
   case NONE:
     return ;
   case MODEL:
   case BOX:
+      cout << "Creationg box collision" << endl;
       solid_ptr = new CollisionBox(LPoint3f(0, 0, 0), 1, 1, 1);
       break ;
   case SPHERE:
+      cout << "Creating collision sphere" << endl;
       solid_ptr = new CollisionSphere(LPoint3(0, 0, 0), 1);
       break ;
   }

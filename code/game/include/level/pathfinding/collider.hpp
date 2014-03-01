@@ -2,6 +2,7 @@
 # define WAYPOINT_MODIFIER_HPP
 
 # include "world/waypoint.hpp"
+# include "path.hpp"
 
 class Level;
 
@@ -22,18 +23,19 @@ namespace Pathfinding
     Collider() : waypoint_occupied(0)
     {}
 
-    virtual NodePath GetNodePath()                  const = 0;
+    virtual NodePath          GetNodePath()                  const = 0;
 
-    virtual void     ProcessCollisions(void);
-    void             UnprocessCollisions(void);
-    virtual bool     HasOccupiedWaypoint(void)      const { return (waypoint_occupied != 0); }
-    int              GetOccupiedWaypointAsInt(void) const { return (waypoint_occupied ? waypoint_occupied->id : 0);  }
-    Waypoint*        GetOccupiedWaypoint(void)      const { return (waypoint_occupied);      }
-    void             SetOccupiedWaypoint(Waypoint* wp);
+    virtual void              ProcessCollisions(void);
+    void                      UnprocessCollisions(void);
+    virtual Pathfinding::Path GetPathTowardsObject(Pathfinding::Collider* character);
+    virtual bool              HasOccupiedWaypoint(void)      const { return (waypoint_occupied != 0); }
+    unsigned int              GetOccupiedWaypointAsInt(void) const { return (waypoint_occupied ? waypoint_occupied->id : 0);  }
+    Waypoint*                 GetOccupiedWaypoint(void)      const { return (waypoint_occupied);      }
+    void                      SetOccupiedWaypoint(Waypoint* wp);
 
   protected:
-    void             WithdrawAllArcs(Waypoint* waypoint);
-    void             WithdrawArc(Waypoint* first, Waypoint* second);
+    void                      WithdrawAllArcs(Waypoint* waypoint);
+    void                      WithdrawArc(Waypoint* first, Waypoint* second);
 
     std::list<std::pair<int, int> >         waypoint_disconnected;
   private:
