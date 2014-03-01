@@ -111,6 +111,7 @@ public:
 
   Inventory(void) { _currentWeight = _capacity = 0; }
   
+  void               LoadItemFromData(Data);
   void               LoadInventory(DynamicObject*);
   void               SaveInventory(DynamicObject*);
   void               LoadInventory(Data);

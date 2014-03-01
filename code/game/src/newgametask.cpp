@@ -1,7 +1,6 @@
 #include "newgametask.hpp"
 #include "ui/alert_ui.hpp"
-#include <directory.hpp>
-#include <playerparty.hpp>
+#include "playerparty.hpp"
 
 using namespace std;
 using namespace Rocket;
@@ -50,33 +49,66 @@ void NewGameTask::StartFromScratch(void)
   SelectProfile("null");
 }
 
+void NewGameTask::ClearSaveDirectory(Directory& savedir)
+{
+  const string& savepath = savedir.Path();
+
+  for_each(savedir.GetEntries().begin(), savedir.GetEntries().end(), [savepath](const Dirent entry)
+  {
+    if (entry.d_type == DT_REG)
+    {
+      cout << "[Clearing old game save] Removing file " << entry.d_name << endl;
+      remove(string(savepath + "/" + entry.d_name).c_str());
+    }
+  });
+}
+
+void NewGameTask::GenerateFirstSaveFromTemplate(const std::string& savepath)
+{
+  string    to_copy[] = { "dataengine.json", "map.json", "cities.json" };
+
+  for (unsigned short i = 0 ; i < 3 ; ++i)
+  {
+    bool ret = Filesystem::FileCopy("data/newgame/" + to_copy[i], savepath + "/" + to_copy[i]);
+
+    cout << "[NewGameTask] Copying '" << "data/newgame/" + to_copy[i] << "' to '" << savepath + "/" + to_copy[i] << "'" << endl;
+
+    if (ret == false)
+      cerr << "[NewGameTask] Failed to copy file " << to_copy[i] << endl;
+  }
+}
+
+void NewGameTask::GeneratePlayerParty(void)
+{
+  string       savepath = OptionsManager::Get()["savepath"].Value();
+  PlayerParty  party;
+  DataTree     datatree;
+
+  {
+    Data       player_data(&datatree);
+
+    player_data["name"]         = "self";
+    player_data["interactions"] = (int)(Interactions::UseObject | Interactions::UseSkill | Interactions::UseSpell | Interactions::LookAt);
+    player_data["model"]        = "lpip.egg";
+    player_data["texture"]      = "characters/lpip.png";
+    party.Join(player_data);
+  }
+  party.SetName("player");
+  party.Save(savepath);
+}
+
 void NewGameTask::Done(void)
 {
   Directory savedir;
   string    savepath  = OptionsManager::Get()["savepath"].Value();
-  string    to_copy[] = { "dataengine.json", "map.json", "cities.json", "player-party.blob" };
 
   cout << "[NewGameTask] Done. Creating initial save." << endl;
   if (savedir.OpenDir(savepath))
   {
-    for_each(savedir.GetEntries().begin(), savedir.GetEntries().end(), [savepath](const Dirent entry)
-    {
-      if (entry.d_type == DT_REG)
-      {
-        cout << "[Clearing old game save] Removing file " << entry.d_name << endl;
-        remove(string(savepath + "/" + entry.d_name).c_str());
-      }
-    });
-    DataTree::Writers::JSON(_stat_sheet, savepath + "/stats-self.json");
-    for (unsigned short i = 0 ; i < 3 ; ++i)
-    {
-      cout << "[NewGameTask] Copying '" << "data/newgame/" + to_copy[i] << "' to '" << savepath + "/" + to_copy[i] << "'" << endl;
-      bool ret = Filesystem::FileCopy("data/newgame/" + to_copy[i], savepath + "/" + to_copy[i]);
-
-      if (ret == false)
-        cerr << "[NewGameTask] Failed to copy file " << to_copy[i] << endl;
-    }
-    PlayerParty::Create(savepath, (*_stat_sheet)["Name"], "lpip.egg", "characters/lpip.png");
+    ClearSaveDirectory(savedir);
+    GenerateFirstSaveFromTemplate(savepath);
+    DataTree::Writers::JSON(_stat_sheet, "data/charsheets/self.json");
+    GeneratePlayerParty();
   }
   else
     AlertUi::NewAlert.Emit("Could not open save directory '" + savepath + "'");

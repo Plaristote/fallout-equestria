@@ -1,5 +1,5 @@
 #include "scheduled_task.hpp"
-#include "gametask.h"
+#include "gametask.hpp"
 #include "circular_value_set.hpp"
 
 using namespace std;
@@ -158,4 +158,23 @@ void ScheduledTask::SetAsWeeklyTask(unsigned short day_of_the_week, DateTime::Ti
   interval_until_next_execution = DateTime::Seconds(value_set.AdditionDistance(target_second, current_second));
   interval_duration             = DateTime::Weeks(1);
   SetAsRepetitiveTask(true);
+}
+
+void ScheduledTask::Serialize(Utils::Packet& packet)
+{
+  unsigned int duration_1 = interval_duration.seconds;
+  unsigned int duration_2 = interval_until_next_execution.seconds;
+
+  task->Serialize(packet);
+  packet << duration_1 << duration_2;
+}
+
+void ScheduledTask::Unserialize(Utils::Packet& packet)
+{
+  if (!task)
+    task        = time_manager.AddTask(0, DateTime::Seconds(1));
+  task->Unserialize(packet);
+  is_repetitive = task->loop;
+  task_level    = task->level;
+  packet >> interval_duration.seconds >> interval_until_next_execution.seconds;
 }

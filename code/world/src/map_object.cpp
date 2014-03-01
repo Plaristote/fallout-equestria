@@ -43,7 +43,7 @@ void MapObject::InitializeCollider(Collider type, LPoint3f position, LPoint3f sc
       solid_ptr = new CollisionSphere(LPoint3(0, 0, 0), 1);
       break ;
   }
-  node_ptr       = new_CollisionNode("collision_node");
+  node_ptr       = new CollisionNode("collision_node");
   collision_node = nodePath.attach_new_node(node_ptr);
   collision_node.set_pos(position);
   collision_node.set_scale(scale);
@@ -71,12 +71,18 @@ void MapObject::ReparentTo(MapObject* object)
     parent = "";
 }
 
+void MapObject::SetName(const std::string& name)
+{
+  this->name = name;
+  if (!(nodePath.is_empty()))
+    nodePath.set_name(name);
+}
+
 /*
  * Serialization
  */
 void MapObject::UnSerialize(World* world, Utils::Packet& packet)
 {
-  string name;
   float  posX,   posY,   posZ;
   float  rotX,   rotY,   rotZ;
   float  scaleX, scaleY, scaleZ;
@@ -87,28 +93,31 @@ void MapObject::UnSerialize(World* world, Utils::Packet& packet)
   if (blob_revision >= 1)
     packet >> parent;
 
-  nodePath   = world->window->get_render().attach_new_node(name);
-  render     = world->window->load_model(world->window->get_panda_framework()->get_models(), MODEL_ROOT + strModel);
-  render.reparent_to(nodePath);
-  if (render.is_empty())
+  if (world)
   {
-    std::cerr << "[World][Unserialize] Could not load model " << strModel << " for object '" << name << '\'' << std::endl;
-  }
-  else
-  {
-    nodePath.set_depth_offset(1);
-    nodePath.set_two_sided(false);
-    if (strTexture != "")
+    nodePath   = world->window->get_render().attach_new_node(name);
+    render     = world->window->load_model(world->window->get_panda_framework()->get_models(), MODEL_ROOT + strModel);
+    render.reparent_to(nodePath);
+    if (render.is_empty())
     {
-      texture    = TexturePool::load_texture(TEXT_ROOT + strTexture);
-      if (texture)
-        render.set_texture(texture);
+      std::cerr << "[World][Unserialize] Could not load model " << strModel << " for object '" << name << '\'' << std::endl;
     }
-    render.set_name(name);
-    nodePath.set_hpr(rotX, rotY, rotZ);
-    nodePath.set_scale(scaleX, scaleY, scaleZ);
-    nodePath.set_pos(posX, posY, posZ);
-    waypoints_root = nodePath.attach_new_node("waypoints");
+    else
+    {
+      nodePath.set_depth_offset(1);
+      nodePath.set_two_sided(false);
+      if (strTexture != "")
+      {
+        texture    = TexturePool::load_texture(TEXT_ROOT + strTexture);
+        if (texture)
+          render.set_texture(texture);
+      }
+      render.set_name(name);
+      nodePath.set_hpr(rotX, rotY, rotZ);
+      nodePath.set_scale(scaleX, scaleY, scaleZ);
+      nodePath.set_pos(posX, posY, posZ);
+      waypoints_root = nodePath.attach_new_node("waypoints");
+    }
   }
 
   if (blob_revision >= 2)
@@ -144,30 +153,31 @@ void MapObject::UnserializeWaypoints(World* world, Utils::Packet& packet)
   vector<int> waypoint_ids;
 
   packet >> waypoint_ids;
-  for_each(waypoint_ids.begin(), waypoint_ids.end(), [this, world](int id)
+  if (world)
   {
-    Waypoint* wp = world->GetWaypointFromId(id);
-
-    if (wp)
+    for_each(waypoint_ids.begin(), waypoint_ids.end(), [this, world](int id)
     {
-      wp->floor = this->floor;
-      waypoints.push_back(wp);
-#ifdef GAME_EDITOR
-      if (!(wp->nodePath.is_empty()))
-        wp->nodePath.reparent_to(waypoints_root);
-#endif
-    }
-  });
+      Waypoint* wp = world->GetWaypointFromId(id);
+
+      if (wp)
+      {
+        wp->floor = this->floor;
+        waypoints.push_back(wp);
+  #ifdef GAME_EDITOR
+        if (!(wp->nodePath.is_empty()))
+          wp->nodePath.reparent_to(waypoints_root);
+  #endif
+      }
+    });
+  }
 }
 
-void MapObject::Serialize(Utils::Packet& packet)
+void MapObject::Serialize(Utils::Packet& packet) const
 {
   float  posX,   posY,   posZ;
   float  rotX,   rotY,   rotZ;
   float  scaleX, scaleY, scaleZ;
-  string name;
 
-  name   = nodePath.get_name();
   posX   = nodePath.get_pos().get_x();
   posY   = nodePath.get_pos().get_y();
   posZ   = nodePath.get_pos().get_z();

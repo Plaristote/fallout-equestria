@@ -5,6 +5,7 @@
 # include "options.hpp"
 # include "cmap/statcontroller.hpp"
 # include "ui/stat_view_rocket.hpp"
+# include "directory.hpp"
 
 class UiNewGame : public UiBase
 {
@@ -42,7 +43,10 @@ public:
   
 private:
   void                      SelectProfile(const std::string&);
-  void                      StartFromScratch(void);  
+  void                      StartFromScratch(void);
+  void                      ClearSaveDirectory(Directory&);
+  void                      GenerateFirstSaveFromTemplate(const std::string& savepath);
+  void                      GeneratePlayerParty(void);
   void                      Done(void);
 
   WindowFramework*          _window;

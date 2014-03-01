@@ -46,13 +46,7 @@ namespace Utils
   */
   Packet::Packet(void)
   {
-    std::int32_t tmp_buffer = 0;
-
-    buffer      = 0;
-    sizeBuffer  = 0;
-    reading     = 0;
-    isDuplicate = true;
-    *this << tmp_buffer;
+    initializeAsEmpty();
   }
   
   Packet::Packet(std::ifstream& file)
@@ -96,30 +90,74 @@ namespace Utils
 
   Packet::Packet(const char* raw, size_t size) : isDuplicate(true)
   {
-      char* dupRaw = new char[size + 1];
-
-      copy(raw, &raw[size + 1], dupRaw);
-      buffer = reinterpret_cast<void*>(dupRaw);
-      sizeBuffer = size;
-      reading = buffer;
-      realloc(size);
-      updateHeader();
+    initializeFromBuffer(raw, size);
   }
 
   Packet::~Packet(void)
+  {
+    finalize();
+  }
+  
+  void Packet::Clear(void)
+  {
+    finalize();
+    initializeAsEmpty();
+  }
+
+  void Packet::finalize(void)
   {
     if (isDuplicate && buffer)
       delete[] reinterpret_cast<char*>(buffer);
   }
 
-  const char*	Packet::raw(void) const
+  size_t		Packet::size(void) const
+  {
+    return (sizeBuffer);
+  }
+  
+  void Packet::initializeAsEmpty(void)
+  {
+    std::int32_t tmp_buffer = 0;
+
+    buffer      = 0;
+    sizeBuffer  = 0;
+    reading     = 0;
+    isDuplicate = true;
+    *this << tmp_buffer;
+  }
+  
+  void Packet::initializeFromBuffer(const char* raw, size_t size)
+  {
+    char* dupRaw = new char[size + 1];
+
+    copy(raw, &raw[size + 1], dupRaw);
+    buffer = reinterpret_cast<void*>(dupRaw);
+    sizeBuffer = size;
+    reading = buffer;
+    realloc(size);
+    updateHeader();
+  }
+
+  const char*   Packet::raw(void) const
   {
     return (reinterpret_cast<char*>(buffer));
   }
 
-  size_t		Packet::size(void) const
+  void Packet::Serialize(Utils::Packet& packet) const
   {
-    return (sizeBuffer);
+    std::string string_buffer(raw(), size());
+
+    packet << string_buffer;
+  }
+  
+  void Packet::Unserialize(Utils::Packet& packet)
+  {
+    std::string string_buffer;
+
+    packet >> string_buffer;
+    finalize();
+    isDuplicate = true;
+    initializeFromBuffer(string_buffer.c_str(), string_buffer.length());
   }
 
   /*
@@ -195,9 +233,6 @@ namespace Utils
   void		Packet::checkType(int assumedType)
   {
     char	        type = -1;
-
-    long ptr_buff = (long)buffer;
-    long ptr_read = (long)reading;
 
     read<char>(type);
     if (type != assumedType)

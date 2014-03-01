@@ -2,7 +2,7 @@
 # define INTERACT_MENU_HPP
 
 # include "ui/rocket_extension.hpp"
-# include "objectnode.hpp"
+# include "level/objects/instance_dynamic_object.hpp"
 
 class InteractMenu : public UiBase
 {  
@@ -14,10 +14,10 @@ private:
   void ButtonHovered(Rocket::Core::Event&);
   void MouseButton(Rocket::Core::Event&);
   
-  void ExecuteForButtonId(Rocket::Core::Event& event, std::function<bool (Rocket::Core::Event&, const std::string&, InstanceDynamicObject::Interaction*)> callback);
+  void ExecuteForButtonId(Rocket::Core::Event& event, std::function<bool (Rocket::Core::Event&, const std::string&, Interactions::Interaction*)> callback);
 
-  typedef std::vector<InstanceDynamicObject::Interaction*> Listeners;
-  typedef std::vector<Rocket::Core::Element*>              Buttons;
+  typedef std::vector<Interactions::Interaction*> Listeners;
+  typedef std::vector<Rocket::Core::Element*>     Buttons;
 
   Buttons                      _buttons;
   Listeners                    _listeners;

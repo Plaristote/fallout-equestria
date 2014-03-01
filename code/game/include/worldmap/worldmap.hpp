@@ -51,9 +51,9 @@ public:
   Data        GetCaseData(int x, int y) const;
   void        GetCurrentPosition(float& x, float& y) const { x = _current_pos_x; y = _current_pos_y; }
 
-  Sync::Signal<void (std::string)>              GoToPlace;
-  Sync::Signal<void (std::string, std::string)> GoToCityZone;
-  Sync::Signal<void (int, int, bool)>           RequestRandomEncounter;
+  Sync::Signal<void (const std::string&)>               GoToPlace;
+  Sync::Signal<void (const std::string&, std::string&)> GoToCityZone;
+  Sync::Signal<void (int, int, bool)>                   RequestRandomEncounter;
 
 private:
   void                   OpenCitySplash(const std::string& cityname);

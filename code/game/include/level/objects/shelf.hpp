@@ -1,7 +1,7 @@
 #ifndef  OBJECT_SHELF_HPP
 # define OBJECT_SHELF_HPP
 
-# include "level/objectnode.hpp"
+# include "level/objects/instance_dynamic_object.hpp"
 # include "level/inventory.hpp"
 
 class ObjectShelf : public InstanceDynamicObject

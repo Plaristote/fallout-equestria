@@ -22,7 +22,7 @@ ObjectLocker::~ObjectLocker()
 // Apparently you can't call 'super' in a lambda with MSVC2010. Nice...
 void ObjectLocker::FuckYouMSVC(InstanceDynamicObject* object)
 {
-  AnimationEnded.DisconnectAll();
+  AnimationEndForObject.DisconnectAll();
   ObjectShelf::CallbackActionUse(object);
 }
 
@@ -34,8 +34,8 @@ void ObjectLocker::CallbackActionUse(InstanceDynamicObject* object)
     _level->ConsoleWrite(i18n::T("It's locked"));
   else
   {
-    AnimationEnded.DisconnectAll();
-    AnimationEnded.Connect([this, object](InstanceDynamicObject*)
+    AnimationEndForObject.DisconnectAll();
+    AnimationEndForObject.Connect([this, object](AnimatedObject*)
     {
       FuckYouMSVC(object);
     });

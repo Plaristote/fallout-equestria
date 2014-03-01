@@ -1,6 +1,7 @@
 #include "dataengine.hpp"
 #include "json.hpp"
 #include "level/diplomacy.hpp"
+#include "loading_exception.hpp"
 
 DataEngine::DataEngine()
 {
@@ -22,7 +23,7 @@ void      DataEngine::Load(const std::string& filepath)
     delete _dataTree;
   _dataTree = DataTree::Factory::JSON(filepath);
   if (!_dataTree)
-    throw 0;
+    throw LoadingException("Couldn't load dataengine (" + filepath + ")");
   _data     = _dataTree;
   _diplomacy->Initialize();
 }

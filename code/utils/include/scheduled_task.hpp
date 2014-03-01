@@ -21,6 +21,10 @@ public:
 
   void               Launch(void);
   void               Interrupt(void);
+  bool               IsScheduled(void) const { return (task != 0); }
+  
+  void               Serialize(Utils::Packet&);
+  void               Unserialize(Utils::Packet&);
 
 protected:
   virtual void       Run(void);

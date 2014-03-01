@@ -7,6 +7,7 @@
 # include "observatory.hpp"
 
 class InventoryObject;
+class StatController;
 
 class GameMainBar : public UiBase
 {
@@ -16,6 +17,8 @@ public:
   ~GameMainBar();
   
   void                   AppendToConsole(const std::string& str);
+  
+  void                   SetStatistics(StatController*);
 
   void                   SetCurrentAP(unsigned short ap, unsigned short maxap);
   void                   SetMaxAP(unsigned short ap);
@@ -53,6 +56,7 @@ private:
   
   unsigned short         _apMax;
   bool                   _apEnabled;
+  StatController*        statistics;
 };
 
 #endif

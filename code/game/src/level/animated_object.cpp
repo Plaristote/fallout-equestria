@@ -1,10 +1,10 @@
-#include "level/objectnode.hpp"
+#include "level/objects/instance_dynamic_object.hpp"
 #include <panda3d/nodePathCollection.h>
 #include <panda3d/auto_bind.h>
 
 using namespace std;
 
-AnimatedObject::AnimatedObject(WindowFramework* window) : _window(window)
+AnimatedObject::AnimatedObject(WindowFramework* window) : _window(window), _anim(0), _animLoop(true)
 {
   AnimationEnd.Connect(*this, &AnimatedObject::PlayIdleAnimation);
 }
@@ -47,7 +47,10 @@ void                     AnimatedObject::PlayAnimation(const std::string& name, 
   else if (!loop && name != ANIMATION_DEFAULT)
     PlayAnimation(ANIMATION_DEFAULT, loop);
   else
+  {
     AnimationEnd.Emit();
+    AnimationEndForObject.Emit(this);
+  }
 }
 
 void                      AnimatedObject::TaskAnimation(void)
@@ -60,7 +63,8 @@ void                      AnimatedObject::TaskAnimation(void)
     {
       cout << this << " - Animation ended naturally" << endl;
       AnimationEnd.Emit();
-      ResetAnimation();
+      AnimationEndForObject.Emit(this);
+      AnimationEndForObject.DisconnectAll();
       _anim = 0;
     }
   }
@@ -76,4 +80,15 @@ void                      AnimatedObject::PlayIdleAnimation(void)
     anim->play();
 }
 
-
+void                      AnimatedObject::SetModelNameFromPath(const string& path)
+{
+  _modelName = path;
+  for (short i = _modelName.size() - 1 ; i >= 0 ; --i)
+  {
+    if (_modelName[i] == '.')
+    {
+      _modelName.erase(i);
+      break ;
+    }
+  }
+}

@@ -165,7 +165,7 @@ void Quest::WatcherCharacterKill(Data condition, Level* level)
     if (character->GetHitPoints() <= 0)
       eval();
     else
-      _observers.Connect(character->CharacterDied, eval);
+      _observers.Connect(character->GetStatController()->Died, eval);
   }
 }
 

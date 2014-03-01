@@ -1,4 +1,5 @@
-#include "level/pathfinding.hpp"
+#include "level/pathfinding/path.hpp"
+#include "world/world.h"
 #include "astar.hpp"
 #include <panda3d/collisionNode.h>
 
@@ -64,4 +65,33 @@ void Pathfinding::Path::Truncate(unsigned int max_size)
 {
   if (waypoints.size() > max_size)
     waypoints.resize(max_size);
+}
+
+void Pathfinding::Path::Serialize(Utils::Packet& packet)
+{
+  std::vector<int> waypoint_ids;
+  
+  for_each(waypoints.begin(), waypoints.end(), [&waypoint_ids](Waypoint& waypoint) { waypoint_ids.push_back(waypoint.id); });
+  packet << waypoint_ids;
+}
+
+void Pathfinding::Path::Unserialize(World* world, Utils::Packet& packet)
+{
+  std::vector<int> waypoint_ids;
+  
+  from = to = 0;
+  waypoints.clear();
+  packet >> waypoint_ids;
+  for_each(waypoint_ids.begin(), waypoint_ids.end(), [this, world](int waypoint_id)
+  {
+    Waypoint* waypoint = world->GetWaypointFromId(waypoint_id);
+    
+    if (waypoint)
+    {
+      if (from == 0)
+        from = waypoint;
+      to     = waypoint;
+      waypoints.push_back(*waypoint);
+    }
+  });
 }

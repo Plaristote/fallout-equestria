@@ -32,7 +32,7 @@ void Level::SpawnEnemies(const std::string& type, unsigned short spawn_zone_numb
         object->dialog    = data["dialog"].Value();
         object->script    = data["script"].Value();
         InsertCharacter(new ObjectCharacter(this, object));
-        spawn_party.Join(object);
+        spawn_party.Join(*_characters.rbegin());
       }
     }
   }

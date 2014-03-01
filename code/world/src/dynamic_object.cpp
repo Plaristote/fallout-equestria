@@ -29,7 +29,8 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
     packet >> key;
 
   packet >> iWaypoint;
-  waypoint = world->GetWaypointFromId(iWaypoint);
+  if (world)
+    waypoint = world->GetWaypointFromId(iWaypoint);
 
   // Blocked Arcs
   {
@@ -64,7 +65,7 @@ void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
   }
 }
 
-void DynamicObject::Serialize(Utils::Packet& packet)
+void DynamicObject::Serialize(Utils::Packet& packet) const
 {
     MapObject::Serialize(packet);
 
@@ -87,8 +88,8 @@ void DynamicObject::Serialize(Utils::Packet& packet)
 
     // Blocked Arcs
     {
-        list<pair<int, int> >::iterator it  = lockedArcs.begin();
-        list<pair<int, int> >::iterator end = lockedArcs.end();
+        list<pair<int, int> >::const_iterator it  = lockedArcs.begin();
+        list<pair<int, int> >::const_iterator end = lockedArcs.end();
         int size = lockedArcs.size();
 
         packet << size;
@@ -98,9 +99,9 @@ void DynamicObject::Serialize(Utils::Packet& packet)
 
     // Inventory serialization
     {
-      list<pair<string, int> >::iterator it   = inventory.begin();
-      list<pair<string, int> >::iterator end  = inventory.end();
-      int                                size = inventory.size();
+      list<pair<string, int> >::const_iterator it   = inventory.begin();
+      list<pair<string, int> >::const_iterator end  = inventory.end();
+      int                                      size = inventory.size();
 
       packet << size;
       for (; it != end ; ++it)

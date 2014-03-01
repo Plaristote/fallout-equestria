@@ -211,7 +211,7 @@ namespace asUtils
   
   void GoTo(int x, int y, int z, ObjectCharacter* character)
   {
-    character->GoTo(LPoint3f(x, y, z));
+    //character->GoTo(LPoint3f(x, y, z));
   }
 }
 
@@ -359,23 +359,23 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(dynObjectClass, "string GetName()",                    asMETHOD(InstanceDynamicObject,GetName), asCALL_THISCALL);
   engine->RegisterObjectMethod(dynObjectClass, "Character@ AsCharacter()",            asFUNCTION(asUtils::DynObjAsCharacter), asCALL_CDECL_OBJLAST);
   engine->RegisterObjectMethod(dynObjectClass, "void AddTextBox(string, int, int, int, float)", asMETHOD(InstanceDynamicObject,AddTextBox), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "void SetRunning(const bool)",              asMETHOD(ObjectCharacter,SetRunning), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(charClass, "void SetRunning(const bool)",              asMETHOD(ObjectCharacter,SetRunning), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "string GetName()",                         asMETHOD(ObjectCharacter,GetName), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool HasLineOfSight(DynamicObject@)",      asMETHOD(ObjectCharacter,HasLineOfSight), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void GoTo(int, int, int)",                 asFUNCTION(asUtils::GoTo), asCALL_CDECL_OBJLAST);
-  engine->RegisterObjectMethod(charClass, "void TeleportTo(int)",                     asMETHODPR(ObjectCharacter,TeleportTo, (unsigned int), void), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "void GoTo(int)",                           asMETHODPR(ObjectCharacter,GoTo, (unsigned int), void), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(charClass, "void TeleportTo(int)",                     asMETHODPR(ObjectCharacter,TeleportTo, (unsigned int), void), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(charClass, "void GoTo(int)",                           asMETHODPR(ObjectCharacter,GoTo, (unsigned int), void), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void GoTo(DynamicObject@, int)",           asMETHODPR(ObjectCharacter,GoTo, (InstanceDynamicObject*, int), void), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "void GoToRandomWaypoint()",                asMETHOD(ObjectCharacter,GoToRandomWaypoint), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(charClass, "void GoToRandomWaypoint()",                asMETHOD(ObjectCharacter,GoToRandomWaypoint), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void TruncatePath(int)",                   asMETHOD(ObjectCharacter,TruncatePath), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "int  GetNearestWaypoint(DynamicObject@)",  asMETHOD(ObjectCharacter,GetNearestWaypoint), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "int  GetFarthestWaypoint(DynamicObject@)", asMETHOD(ObjectCharacter,GetFarthestWaypoint), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "int  GetPathDistance(DynamicObject@)",     asMETHODPR(ObjectCharacter,GetPathDistance, (InstanceDynamicObject*), unsigned short), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "float GetDistance(DynamicObject@)",        asMETHOD(ObjectCharacter,GetDistance), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(charClass, "int  GetNearestWaypoint(DynamicObject@)",  asMETHOD(ObjectCharacter,GetNearestWaypoint), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(charClass, "int  GetFarthestWaypoint(DynamicObject@)", asMETHOD(ObjectCharacter,GetFarthestWaypoint), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(charClass, "int  GetPathDistance(DynamicObject@)",     asMETHODPR(ObjectCharacter,GetPathDistance, (InstanceDynamicObject*), unsigned short), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(charClass, "float GetDistance(DynamicObject@)",        asMETHOD(ObjectCharacter,GetDistance), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "Inventory@ GetInventory()",                asMETHODPR(ObjectCharacter,GetInventory, (), Inventory&), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "Data GetStatistics()",                     asMETHOD(ObjectCharacter,GetStatistics), asCALL_THISCALL);
   //MSVC2010 strangeness for this function: Base/Derived thingymajig complications
-  engine->RegisterObjectMethod(charClass, "int  GetCurrentWaypoint() const",          asMETHODPR(WaypointModifier,GetOccupiedWaypointAsInt, (void) const, int), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "int  GetCurrentWaypoint() const",          asMETHODPR(Pathfinding::Collider,GetOccupiedWaypointAsInt, (void) const, int), asCALL_THISCALL);
   // TODO expose the following function some other way:
   //engine->RegisterObjectMethod(charClass, "int  GetPathSize() const",                 asMETHOD(ObjectCharacter,GetPathSize), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool IsInterrupted() const",               asMETHOD(ObjectCharacter,IsInterrupted), asCALL_THISCALL);
@@ -386,17 +386,16 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "void SetActionPoints(int)",                asMETHOD(ObjectCharacter,SetActionPoints), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "int  GetHitPoints()",                      asMETHOD(ObjectCharacter,GetHitPoints), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void SetHitPoints(int)",                   asMETHOD(ObjectCharacter,SetHitPoints), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "int  GetArmorClass()",                     asMETHOD(ObjectCharacter,GetArmorClass), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(charClass, "int  GetArmorClass()",                     asMETHOD(ObjectCharacter,GetArmorClass), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "Item@ GetEquipedItem(int)",                asMETHOD(ObjectCharacter,GetEquipedItem), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void LookAt(Character@)",                  asMETHODPR(ObjectCharacter,LookAt,(InstanceDynamicObject*),void),         asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void LookAt(DynamicObject@)",              asMETHODPR(ObjectCharacter,LookAt,(InstanceDynamicObject*),void),         asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "void PushBuff(Data, Character@)",          asMETHOD(ObjectCharacter,PushBuff), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "string GetFactionName()",                  asMETHOD(ObjectCharacter,GetFactionName), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void   SetFaction(string)",                asMETHODPR(ObjectCharacter,SetFaction,(const string&), void),     asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void   SetAsEnemy(Character@, bool)",      asMETHOD(ObjectCharacter,SetAsEnemy),     asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool   IsEnemy(const Character@) const",   asMETHOD(ObjectCharacter,IsEnemy),        asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool   IsAlly(const Character@) const",    asMETHOD(ObjectCharacter,IsAlly),         asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass, "Special@ GetStatController()",             asMETHODPR(ObjectCharacter,GetStatController,(),StatController*), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "Special@ GetStatController()",             asMETHODPR(ObjectCharacter,GetStatController,() const,StatController*), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void   SetFurtive(bool)",                  asMETHOD(ObjectCharacter,SetFurtive),        asCALL_THISCALL);
 
   engine->RegisterObjectMethod(doorClass, "void   Unlock()",     asMETHOD(Lockable,Unlock),         asCALL_THISCALL);
@@ -445,11 +444,11 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(levelClass, "Character@     GetPlayer()",                           asMETHOD(Level,GetPlayer),           asCALL_THISCALL);  
   engine->RegisterObjectMethod(levelClass, "DynamicObject@ GetObject(string)",                     asMETHOD(Level,GetObject),           asCALL_THISCALL);
   //engine->RegisterObjectMethod(levelClass, "void           SendToZone(Character@, string)",        asMETHODPR(Level,SetEntryZone,(ObjectCharacter*,const std::string&),void),        asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "void           ActionUseWeaponOn(Character@, Character@, Item@, int)",     asMETHOD(Level,ActionUseWeaponOn), asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "void           ActionUseObjectOn(Character@, DynamicObject@, Item@, int)", asMETHOD(Level,ActionUseObjectOn), asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "void           ActionUseSkillOn(Character@, DynamicObject@, string)",      asMETHOD(Level,ActionUseSkillOn),  asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "void           ActionUse(Character@, DynamicObject@)",                     asMETHOD(Level,ActionUse),         asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "void           ActionDropObject(Character@, Item@)",   asMETHOD(Level,ActionDropObject),    asCALL_THISCALL);
+  //engine->RegisterObjectMethod(levelClass, "void           ActionUseWeaponOn(Character@, Character@, Item@, int)",     asMETHOD(Level,ActionUseWeaponOn), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(levelClass, "void           ActionUseObjectOn(Character@, DynamicObject@, Item@, int)", asMETHOD(Level,ActionUseObjectOn), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(levelClass, "void           ActionUseSkillOn(Character@, DynamicObject@, string)",      asMETHOD(Level,ActionUseSkillOn),  asCALL_THISCALL);
+  //engine->RegisterObjectMethod(levelClass, "void           ActionUse(Character@, DynamicObject@)",                     asMETHOD(Level,ActionUse),         asCALL_THISCALL);
+  //engine->RegisterObjectMethod(levelClass, "void           ActionDropObject(Character@, Item@)",   asMETHOD(Level,ActionDropObject),    asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           PlayerLoot(Inventory@)",                asMETHOD(Level,PlayerLoot),          asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           StartFight(Character@)",                asMETHOD(Level,StartFight),          asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           StopFight()",                           asMETHOD(Level,StopFight),           asCALL_THISCALL);
@@ -477,16 +476,14 @@ void AngelScriptInitialize(void)
   
   const char* partyClass = "Party";
   engine->RegisterObjectType(partyClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(partyClass, "void Join(Character@)",     asMETHODPR(Party,Join,(InstanceDynamicObject*),void), asCALL_THISCALL);
-  engine->RegisterObjectMethod(partyClass, "void Leave(Character@)",    asMETHODPR(Party,Join,(InstanceDynamicObject*),void), asCALL_THISCALL);
-  engine->RegisterObjectMethod(partyClass, "void Export(string) const", asMETHOD(Party,Export), asCALL_THISCALL);
-  engine->RegisterGlobalFunction("Party@ ImportParty(string)", asFUNCTION(Party::Import), asCALL_CDECL);
+  engine->RegisterObjectMethod(partyClass, "void Join(Character@)",     asMETHODPR(Party,Join,(ObjectCharacter*),void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(partyClass, "void Leave(Character@)",    asMETHODPR(Party,Join,(ObjectCharacter*),void), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(partyClass, "void Export(string) const", asMETHOD(Party,Export), asCALL_THISCALL);
+  //engine->RegisterGlobalFunction("Party@ ImportParty(string)", asFUNCTION(Party::Import), asCALL_CDECL);
   //engine->RegisterObjectMethod(levelClass, "void SetEntryZone(Party@, string)", asMETHODPR(Level,SetEntryZone,(Party&, const std::string&),void), asCALL_THISCALL);
 
   const char* gametaskClass = "Game";
   engine->RegisterObjectType(gametaskClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(gametaskClass, "void PushBuff(Character@, Data)", asMETHODPR(GameTask,PushBuff,(ObjectCharacter*,Data),void), asCALL_THISCALL);
-  engine->RegisterObjectMethod(gametaskClass, "void PushBuff(string,     Data)", asMETHODPR(GameTask,PushBuff,(const string&,Data),   void), asCALL_THISCALL);
   engine->RegisterObjectMethod(gametaskClass, "QuestManager@ GetQuestManager()", asMETHOD(GameTask,GetQuestManager), asCALL_THISCALL);
   engine->RegisterObjectMethod(gametaskClass, "Party@ GetPlayerParty()", asMETHOD(GameTask,GetPlayerParty), asCALL_THISCALL);
 

@@ -19,7 +19,7 @@
 
 # include "dataengine.hpp"
 
-# include "objectnode.hpp"
+# include "objects/instance_dynamic_object.hpp"
 # include "objects/door.hpp"
 # include "objects/dropped_object.hpp"
 # include "objects/character.hpp"
@@ -45,6 +45,7 @@
 # include "zones/manager.hpp"
 # include "equip_modes.hpp"
 # include "mouse_events.hpp"
+# include "level/interactions.hpp"
 
 # include <functional>
 
@@ -52,34 +53,35 @@ class Level
 {
   friend class Party;
 public:
+  typedef std::vector<ObjectCharacter*> CharacterList;
+
   struct Exit
   {
-    bool        ToWorldmap(void)       const { return (level == "worldmap"); }
-    bool        ReadyForNextZone(void) const { return (level == "");         }
+    bool                  ToWorldmap(void)       const { return (level == "worldmap"); }
+    bool                  ReadyForNextZone(void) const { return (level != "");         }
 
-    std::string level;
-    std::string zone;
+    std::string           level, zone;
   };
   
-  typedef std::vector<ObjectCharacter*> CharacterList;
-  
-  static Level* CurrentLevel;
+  static Level*           CurrentLevel;
   
   Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& data, TimeManager& tm);
   
-  void InitializeSun(void);
-  void InitializePlayer(void);
+  void                    InitializeSun(void);
+  void                    InitializePlayer(void);
 
   // Saving/Loading
-  void SetDataEngine(DataEngine* de)   { _dataEngine = de; }
-  void SetPlayerInventory(Inventory*);
-  void SaveUpdateWorld(void);
-  void Save(Utils::Packet&);
-  void Load(Utils::Packet&);
+  void                    SetDataEngine(DataEngine* de)   { _dataEngine = de; }
+  void                    SetPlayerInventory(Inventory*);
+  void                    SaveUpdateWorld(void);
+  void                    Save(Utils::Packet&);
+  void                    Load(Utils::Packet&);
   
-  void InsertParty(PlayerParty& party);
-  void FetchParty(PlayerParty& party);
-  void StripParty(PlayerParty& party);
+  void                    SetAsPlayerParty(Party& party);
+  void                    InsertParty(Party& party, const std::string& entry_zone);
+  void                    MatchPartyToExistingCharacters(Party& party);
+  void                    RemovePartyFromLevel(Party& party);
+  void                    RunForPartyMembers(Party& party, std::function<void (Party::Member*,ObjectCharacter*)>);
 
   ~Level();
 
@@ -138,15 +140,8 @@ public:
   void                   CallbackActionUseSpellOn(InstanceDynamicObject* object);
   void                   CallbackActionTargetUse(unsigned short it);
 
-  void                   ActionUse(ObjectCharacter* user, InstanceDynamicObject* target);
-  void                   ActionUseObject(ObjectCharacter* user, InventoryObject* object, unsigned char actionIt);
-  void                   ActionUseObjectOn(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* object, unsigned char actionIt);
-  void                   ActionUseSkillOn(ObjectCharacter* user, InstanceDynamicObject* target, const std::string& skill);
-  void                   ActionUseSpellOn(ObjectCharacter* user, InstanceDynamicObject* target, const std::string& skill);
-  void                   ActionDropObject(ObjectCharacter* user, InventoryObject* object);
-  void                   ActionUseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* object, unsigned char actionIt);
-
   // Interace Interactions
+  Interactions::Player&  GetInteractions() { return (interactions); }
   void                   PlayerDropObject(InventoryObject*);
   void                   PlayerUseObject(InventoryObject*);
   void                   PlayerLoot(Inventory*);
@@ -169,8 +164,12 @@ public:
   void               SpawnEnemies(const std::string& type, unsigned short spawn_zone_number);
   bool               IsWaypointOccupied(unsigned int id) const;
   ISampleInstance*   PlaySound(const std::string& name);
-  void               InsertProjectile(Projectile* projectile) { _projectiles.push_back(projectile); }
 
+  void               InsertProjectile(Projectile* projectile) { _projectiles.push_back(projectile); }
+  void               InsertDynamicObject(DynamicObject&);
+  void               InsertInstanceDynamicObject(InstanceDynamicObject*);
+  void               InsertCharacter(ObjectCharacter*);
+  
   Sync::ObserverHandler obs;
 private:
   typedef std::list<InstanceDynamicObject*> InstanceObjects;
@@ -178,9 +177,6 @@ private:
   typedef std::list<Party*>                 Parties;
   
   void              RunMetabolism(void);
-  
-  void              InsertDynamicObject(DynamicObject&);
-  void              InsertCharacter(ObjectCharacter*);
   
   Sync::ObserverHandler obs_player;
 
@@ -197,6 +193,7 @@ private:
 
   LevelUi               level_ui;
   MouseHint             mouse_hint;
+  Interactions::Player  interactions;
   World*                _world;
   ParticleSystemManager _particle_manager;
   SoundManager          _sound_manager;

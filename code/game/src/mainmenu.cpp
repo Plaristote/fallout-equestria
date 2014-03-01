@@ -2,12 +2,10 @@
 #include "musicmanager.hpp"
 #include "soundmanager.hpp"
 #include "executor.hpp"
-#include <panda_lock.hpp>
 #include "ui/ui_dialog.hpp"
 #include "ui/alert_ui.hpp"
 
 extern PandaFramework* framework;
-PandaLock*             PandaLock::instance = 0;
 
 static AsyncTask::DoneStatus main_menu_task(GenericAsyncTask* task, void* main_menu)
 {
@@ -151,7 +149,7 @@ void MainMenu::AsyncCreateLevel(void)
   if (slotToLoadPlz >= 0)
     _levelTask->LoadSlot(slotToLoadPlz);
   else
-    _levelTask->LoadLastState();
+    _levelTask->LoadGame();
   slotToLoadPlz  = -1;
   if (_new_game_task)
   {

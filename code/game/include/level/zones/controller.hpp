@@ -1,7 +1,7 @@
 #ifndef  ZONES_CONTROLLER_HPP
 # define ZONES_CONTROLLER_HPP
 
-# include "level/objectnode.hpp"
+# include "level/objects/instance_dynamic_object.hpp"
 
 namespace Zones
 {

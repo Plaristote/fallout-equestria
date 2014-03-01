@@ -11,8 +11,10 @@ LPoint2f SolarOrbit::PointAtAngle(float angle)
 
 void    SolarOrbit::SetFromWorld(World* world)
 {
-  LPoint3 upper_left, bottom_left, upper_right;
-
+  LPoint3 upper_left(0, 0, 0);
+  LPoint3 bottom_left(0, 0, 0);
+  LPoint3 upper_right(0, 0, 0);
+  
   world->GetWaypointLimits(0, upper_right, upper_left, bottom_left);
   
   cx     = (bottom_left.get_x() + upper_right.get_x()) / 2;

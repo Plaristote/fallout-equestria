@@ -1,5 +1,6 @@
 #include "level/zones/manager.hpp"
 #include "level/level.hpp"
+#include <ui/alert_ui.hpp>
  
 using namespace std;
 
@@ -55,7 +56,7 @@ void Zones::Manager::InitializeZoneObservers(Controller& entry)
     if (!observer)
     {
       observer = new Observer(waypoint);
-      
+
       observers.push_back(observer);
     }
     observer->zones.push_back(&entry);
@@ -103,20 +104,22 @@ void Zones::Manager::InsertPartyInZone(Party& party, const string& zone)
   try
   {
     Controller& controller = GetZone(zone);
-    auto        iterator   = party.ConstGetObjects().begin();
-    auto        end        = party.ConstGetObjects().end();
+    auto        iterator   = party.GetPartyMembers().begin();
+    auto        end        = party.GetPartyMembers().end();
 
     for (; iterator != end ; ++iterator)
     {
-      const DynamicObject* object    = *iterator;
-      ObjectCharacter*     character = level.GetCharacter(object);
+      Party::Member*   member    = *iterator;
+      ObjectCharacter* character = level.GetCharacter(member->GetDynamicObject().name);
 
-      controller.InsertObject(character);
+      if (character)
+        controller.InsertObject(character);
     }
   }
   catch (...)
   {
     // TODO proper exception handling
+    AlertUi::NewAlert.Emit("Could not insert party '" + party.GetName() + "' into zone '" + zone + "'");
   }
 }
 

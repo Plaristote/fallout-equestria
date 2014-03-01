@@ -5,6 +5,7 @@
 # include <panda3d/pandaSystem.h>
 # include <panda3d/texturePool.h>
 # include <panda3d/animControlCollection.h>
+# include "observatory.hpp"
 
 # define ANIMATION_PATH(model, str) ("models/anims/" + model + "-" + str + ".egg") 
 # define ANIMATION_DEFAULT "use"
@@ -18,7 +19,6 @@ public:
   AnimatedObject(WindowFramework*);
 
   virtual NodePath          GetNodePath(void) const = 0;
-  virtual void              ResetAnimation(void)    = 0;
 
   /**
    * @brief ... Starts an animation
@@ -28,18 +28,22 @@ public:
    * @return void
    **/
   void                      PlayAnimation(const std::string& name, bool loop = false);
+  void                      PlayIdleAnimation(void);
+  void                      StopAnimationLoop(void) { _animLoop = false; }
 
   /**
    * @brief ... Triggered when a not looping animation ends.
    **/
-  Sync::Signal<void> AnimationEnd;
+  Sync::Signal<void>                   AnimationEnd;
+  Sync::Signal<void (AnimatedObject*)> AnimationEndForObject;
 
 protected:
   typedef std::map<std::string, AnimControl*> MapAnims;
 
   bool                      LoadAnimation(const std::string& name);
   void                      TaskAnimation(void);
-  void                      PlayIdleAnimation(void);
+  void                      SetModelName(const std::string& model_name) { _modelName = model_name; }
+  void                      SetModelNameFromPath(const std::string& path);
 
   WindowFramework*          _window;
   std::string               _modelName;

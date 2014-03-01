@@ -13,7 +13,7 @@
 using namespace std;
 
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
-  InstanceDynamicObject(level, object),
+  CharacterStatistics(level, object),
   line_of_sight(*level->GetWorld(), _window->get_render(), GetNodePath()),
   field_of_view(*level, *this)
 {
@@ -21,13 +21,13 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
   string   defEquiped[2];
   NodePath body_node  = object->nodePath.find("**/+Character");
 
-  _running            = true;
-  _rotating           = false;
   _fading_in          = _fading_off = false;
   _flags              = 0;
-  _goToData.objective = 0;  
   _inventory          = new Inventory;
   _character          = dynamic_cast<Character*>(body_node.node());
+  current_action      = 0;
+
+  SetMovementAnimation("run");
 
   if (_character && _character->get_bundle(0))
   {
@@ -71,7 +71,6 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
 
 
   _type         = ObjectTypes::Character;
-  _actionPoints = 0;
 
   SetCollideMaskOnSingleNodepath(_object->nodePath, ColMask::DynObject | ColMask::FovTarget);
   _object->nodePath.set_collide_mask(ColMask::DynObject);
@@ -79,29 +78,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
   // Faction
   _faction        = 0;
   _self_enemyMask = 0;
-
-  // Statistics
-  _stats        = 0;
-  std::string savepath = "saves";
-  _statistics   = DataTree::Factory::JSON(savepath + "/stats-" + object->charsheet + ".json");
-  if (_statistics == 0)
-    _statistics = DataTree::Factory::JSON("data/charsheets/" + object->charsheet + ".json");
-  if (_statistics)
-  {
-    Data stats  = GetStatistics();
-
-    _inventory->SetCapacity(stats["Statistics"]["Carry Weight"]);
-    _armorClass = stats["Statistics"]["Armor Class"].Nil() ? 5  : (int)(stats["Statistics"]["Armor Class"]);
-    _hitPoints  = stats["Statistics"]["Hit Points"].Nil()  ? 15 : (int)(stats["Statistics"]["Hit Points"]);
-    _stats      = new StatController(stats);
-    SetStatistics(_statistics, _stats);
-  }
-  else
-  {
-    _inventory->SetCapacity(275);
-    _hitPoints  = 15;
-    _armorClass = 5;
-  }
+  RefreshStatistics();
   
   // Script
   if (object->script == "")
@@ -110,7 +87,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
     string prefixPath  = "scripts/ai/";
 
     _script = new AngelScript::Object(prefixPath + object->script + ".as");
-    _skill_target.Initialize(prefixPath + object->script + ".as", _script->GetContext());
+    skill_target.Initialize(prefixPath + object->script + ".as", _script->GetContext());
     _script->asDefineMethod("main",                 "void   main(Character@, float)");
     _script->asDefineMethod("combat",               "void   combat(Character@)");
     _script->asDefineMethod("RequestStopFollowing", "void   RequestStopFollowing(Character@, Character@)");
@@ -155,33 +132,15 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
   for (unsigned int i = 0; i<GET_ARRAY_SIZE(anims); i++)
     LoadAnimation(anims[i]);
 
-  // Others
-  CharacterDied.Connect(*this, &ObjectCharacter::RunDeath);
-
   GetNodePath().set_transparency(TransparencyAttrib::M_alpha);
-}
-
-void ObjectCharacter::SetActionPoints(unsigned short ap)
-{
-  if (_level->GetState() == Level::Fight)
-  {
-    _actionPoints = ap;
-    if (_statistics)
-      ActionPointChanged.Emit(_actionPoints, Data(_statistics)["Statistics"]["Action Points"]);
-  }
-}
-
-unsigned short ObjectCharacter::GetActionPoints(void) const
-{
-  if (_level->GetState() != Level::Fight)
-    return (Data(_statistics)["Statistics"]["Action Points"]);
-  return (_actionPoints);
 }
 
 void ObjectCharacter::SetInventory(Inventory* inventory)
 {
   if (inventory)
   {
+    Data statistics = GetStatistics();
+
     if (_inventory) delete _inventory;
     _inventory = inventory;
     _obs_handler.Connect(_inventory->ContentChanged, *this, &ObjectCharacter::RefreshEquipment);
@@ -200,12 +159,7 @@ void ObjectCharacter::SetInventory(Inventory* inventory)
       }
     });
     _inventory->InitializeSlots();
-    if (_statistics)
-    {
-      Data statistics(_statistics);
-
-      inventory->SetCapacity(statistics["Statistics"]["Carry Weight"]);
-    }
+    _inventory->SetCapacity(statistics["Statistics"]["Carry Weight"]);
   }
 }
 
@@ -225,56 +179,22 @@ void ObjectCharacter::SetFurtive(bool do_set)
 
 ObjectCharacter::~ObjectCharacter()
 {
-  SetStatistics(0, 0);
+  if (current_action)
+    delete current_action;
 }
 
-void ObjectCharacter::SetHitPoints(short hp)
+void ObjectCharacter::RefreshStatistics(void)
 {
-  _hitPoints = hp;
-  if (_stats)
-    _stats->SetCurrentHp(hp);
-  HitPointsChanged.Emit(_hitPoints);
-  if (hp <= 0)
-    CharacterDied.Emit();
-}
-
-void ObjectCharacter::StatHpUpdate(short hp)
-{
-  _hitPoints = hp;
-  HitPointsChanged.Emit(_hitPoints);
-  if (hp <= 0)
-    CharacterDied.Emit();
-}
-
-void ObjectCharacter::NullifyStatistics(void)
-{
-  _stats      = 0;
-  _statistics = 0;
-}
-
-void ObjectCharacter::SetStatistics(DataTree* statistics, StatController* controller)
-{
-  if (_stats      && _stats      != controller) delete _stats;
-  if (_statistics && _statistics != statistics) delete _statistics;
-  _statistics = statistics;
-  _stats      = controller;
-  if (_statistics)
-  {
-    Data data_stats(_statistics);
-
-    field_of_view.SetIntervalDurationFromStatistics();
-    ActionPointChanged.Emit(_actionPoints, data_stats["Statistics"]["Action Points"]);
-    if (data_stats["Variables"]["Hit Points"].Nil())
-      data_stats["Variables"]["Hit Points"] = data_stats["Statistics"]["Hit Points"].Value();
-    SetHitPoints(data_stats["Variables"]["Hit Points"]);
-    _obs_handler.Connect(_stats->HpChanged, *this, &ObjectCharacter::StatHpUpdate);
-    cout << "Faction is named " << data_stats["Faction"].Value() << endl;
-    if (data_stats["Faction"].NotNil())
-      SetFaction(data_stats["Faction"].Value());
-    else
-      _faction = 0;
-    GetDynamicObject()->nodePath.set_name(data_stats["Name"].Value());
-  }
+  Data statistics = GetStatistics();
+  
+  _inventory->SetCapacity(statistics["Statistics"]["Carry Weight"]);
+  field_of_view.SetIntervalDurationFromStatistics();
+  if (statistics["Faction"].NotNil())
+    SetFaction(statistics["Faction"].Value());
+  else
+    _faction = 0;
+  GetStatController()->Died.Connect(*this, &ObjectCharacter::RunDeath);
+  CharacterStatistics::RefreshStatistics();
 }
 
 void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& name, InstanceDynamicObject* target)
@@ -412,20 +332,6 @@ void ObjectCharacter::ItemNextUseType(unsigned short it)
   }
 }
 
-void ObjectCharacter::RestartActionPoints(void)
-{
-  _path.Clear();
-  if (_statistics)
-  {
-    Data stats(_statistics);
-
-    _actionPoints = stats["Statistics"]["Action Points"];
-  }
-  else
-    _actionPoints = 10;
-  ActionPointChanged.Emit(_actionPoints, _actionPoints);
-}
-
 void ObjectCharacter::Fading(void)
 {
   LColor color = GetNodePath().get_color();
@@ -463,14 +369,6 @@ void ObjectCharacter::Fading(void)
     GetNodePath().show();
 }
 
-void ObjectCharacter::RunEffects(float elapsedTime)
-{
-  if (_fading_in || _fading_off)
-    Fading();
-  if (_rotating && _rotation_goal != _object->nodePath.get_hpr().get_x())
-    RunRotate(elapsedTime);
-}
-
 void ObjectCharacter::Run(float elapsedTime)
 {
   PStatCollector collector_ai("Level:Characters:AI");
@@ -483,7 +381,7 @@ void ObjectCharacter::Run(float elapsedTime)
 
     if (_fading_in || _fading_off)
       Fading();
-    if (state == Level::Normal && _hitPoints > 0)
+    if (state == Level::Normal && GetHitPoints() > 0)
     {
       if (_script->IsDefined("main"))
       {
@@ -497,31 +395,29 @@ void ObjectCharacter::Run(float elapsedTime)
     }
     else if (state == Level::Fight)
     {
-      if (_hitPoints <= 0 || _actionPoints == 0)
+      if (GetHitPoints() <= 0 || GetActionPoints() == 0)
 	_level->NextTurn();
       else if (!(IsMoving()) && _script->IsDefined("combat")) // TODO replace with something more appropriate
       {
         collector_ai.start();
         AngelScript::Type<ObjectCharacter*> self(this);
-        unsigned int                        ap_before = _actionPoints;
+        unsigned int                        ap_before = GetActionPoints();
 
         _script->Call("combat", 1, &self);
         collector_ai.stop();
-        if (ap_before == _actionPoints && !IsInterrupted() && !IsMoving()) // If stalled, skip turn
+        if (ap_before == GetActionPoints() && !IsInterrupted() && !IsMoving()) // If stalled, skip turn
         {
           cout << "Character " << GetName() << " is stalling" << endl;
           _level->NextTurn();
         }
       }
     }
-    if (_path.Size() > 0)
-      RunMovement(elapsedTime);
   }
-  InstanceDynamicObject::Run(elapsedTime);
+  Pathfinding::User::Run(elapsedTime);
   //profile.Profile("Level:Characters:AI");
 }
 
-int                 ObjectCharacter::GetBestWaypoint(InstanceDynamicObject* object, bool farthest)
+/*int                 ObjectCharacter::GetBestWaypoint(InstanceDynamicObject* object, bool farthest)
 {
   Waypoint* self  = GetOccupiedWaypoint();
   Waypoint* other = object->GetOccupiedWaypoint();
@@ -561,153 +457,16 @@ int                 ObjectCharacter::GetNearestWaypoint(InstanceDynamicObject* o
   return (GetBestWaypoint(object, false));
 }
 
-float               ObjectCharacter::GetDistance(const InstanceDynamicObject* object) const
-{
-  LPoint3 pos_1  = _object->nodePath.get_pos();
-  LPoint3 pos_2  = object->GetNodePath().get_pos();
-  float   dist_x = pos_1.get_x() - pos_2.get_x();
-  float   dist_y = pos_1.get_y() - pos_2.get_y();
-
-  return (SQRT(dist_x * dist_x + dist_y * dist_y));
-}
-
-unsigned short      ObjectCharacter::GetPathDistance(InstanceDynamicObject* object)
-{
-  unsigned short ret;
-
-  ret = GetPathDistance(object->GetOccupiedWaypoint());
-  return (ret);
-}
-
-unsigned short      ObjectCharacter::GetPathDistance(Waypoint* waypoint)
-{
-  Pathfinding::Path path(_waypointOccupied, waypoint);
-
-  UnprocessCollisions();
-  path.FindPath(_waypointOccupied, waypoint);
-  ProcessCollisions();
-  path.StripFirstWaypointFromList();
-  return (path.Size());
-}
-
-void                ObjectCharacter::GoTo(LPoint3f position)
-{
-  Waypoint* waypoint = _level->GetWorld()->waypoint_graph.GetClosest(position);
-  
-  if (waypoint)
-    GoTo(waypoint);
-}
-
-void                ObjectCharacter::GoTo(unsigned int id)
-{
-  Waypoint*         wp = _level->GetWorld()->GetWaypointFromId(id);
-  
-  if (wp) GoTo(wp);
-}
-
-void                ObjectCharacter::DebugPathfinding(void)
-{
-  /*NodePath debug_root = _window->get_render().find("debug_pathfinding");
-  NodePath debug      = debug_root.find(GetName());
-
-  if (debug.is_empty())
-    debug = debug_root.attach_new_node(GetName());
-  for (unsigned short i = 0 ; i < debug.get_num_children() ; ++i)
-    debug.get_child(i).remove_node();
-  for_each(_path.begin(), _path.end(), [this, debug](Waypoint& wp)
-  {
-    NodePath np = debug.attach_new_node("debug_pathfinding_node");
-
-    wp.nodePath.copy_to(np);
-  });*/
-}
-
-void                ObjectCharacter::TeleportTo(unsigned int id)
-{
-  TeleportTo(_level->GetWorld()->GetWaypointFromId(id));
-}
-
-void                ObjectCharacter::TeleportTo(Waypoint* waypoint)
-{
-  if (waypoint)
-  {
-    LPoint3  wp_size  = NodePathSize(waypoint->nodePath);
-    LPoint3f position = waypoint->nodePath.get_pos();
-    float    z        = (position.get_z() - wp_size.get_z()) + 0.25;
-
-    position.set_z(z + (_idle_size.get_z() / 2));
-    GetNodePath().set_pos(position);
-    SetOccupiedWaypoint(waypoint);
-  }
-}
-
-void                ObjectCharacter::GoTo(Waypoint* waypoint)
-{
-  PStatCollector collector("Level:Characters:Pathfinding");
-  Waypoint*      start_from = _waypointOccupied;
-
-  collector.start();
-  ReachedDestination.DisconnectAll();
-  _goToData.objective = 0;
-  UnprocessCollisions();
-  if (_path.Size() > 0)
-  {
-    //cout << "SETTING START FROM FOR SOME REASON" << endl;
-    start_from = _level->GetWorld()->GetWaypointFromId(_path.Front().id);
-  }
-  _path.Clear();
-  if (start_from && waypoint)
-  {
-    if (!(_path.FindPath(start_from, waypoint)))
-    {
-      if (_level->GetPlayer() == this)
-        _level->ConsoleWrite(i18n::T("No path."));
-    }
-    else
-    {
-      if (OptionsManager::Get()["debug"]["pathfinding"] == 1)
-        DebugPathfinding();
-      StartRunAnimation();
-    }
-  }
-  else
-    cout << "Character " << GetName() << " doesn't have a waypointOccupied" << endl;
-  ProcessCollisions();
-  collector.stop();
-}
-
-void                ObjectCharacter::GoTo(InstanceDynamicObject* object, int max_distance)
-{
-  if (object == 0)
-  {
-    Script::Engine::ScriptError.Emit("Character::GoTo: NullPointer Error");
-    return ;
-  }
-  ReachedDestination.DisconnectAll();
-  _goToData              = object->GetGoToData(this);
-  _goToData.max_distance = max_distance;
-
-  object->UnprocessCollisions();
-  GoTo(_goToData.nearest);
-  object->ProcessCollisions();
-
-  while (_goToData.min_distance && _path.Size() > 1)
-  {
-    _path.StripLastWaypointFromList();
-    _goToData.min_distance--;
-  }
-}
-
 void                ObjectCharacter::GoToRandomWaypoint(void)
 {
-  if (_waypointOccupied)
+  if (HasOccupiedWaypoint())
   {
     _goToData.objective = 0;
     _path.Clear();
     ReachedDestination.DisconnectAll();
     UnprocessCollisions();
     {
-      list<Waypoint*>             wplist = _waypointOccupied->GetSuccessors(0);
+      list<Waypoint*>             wplist = GetOccupiedWaypoint()->GetSuccessors(0);
       
       if (!(wplist.empty()))
       {
@@ -722,225 +481,16 @@ void                ObjectCharacter::GoToRandomWaypoint(void)
     }
     ProcessCollisions();
   }
-}
+}*/
 
-void                ObjectCharacter::TruncatePath(unsigned short max_size)
+float               ObjectCharacter::GetDistance(const InstanceDynamicObject* object) const
 {
-  if ((_path.Size() > 0) && _path.Front().id == (unsigned int)GetOccupiedWaypointAsInt())
-    max_size++;
-  _path.Truncate(max_size);
-}
+  LPoint3 pos_1  = _object->nodePath.get_pos();
+  LPoint3 pos_2  = object->GetNodePath().get_pos();
+  float   dist_x = pos_1.get_x() - pos_2.get_x();
+  float   dist_y = pos_1.get_y() - pos_2.get_y();
 
-void                ObjectCharacter::StartRunAnimation(void)
-{
-  ReachedDestination.Connect(*this, &ObjectCharacter::StopRunAnimation);
-  PlayAnimation(_running ? "run" : "walk", true);
-}
-
-void                ObjectCharacter::StopRunAnimation(InstanceDynamicObject*)
-{
-  if (_anim)
-  {
-    _animLoop = false;
-    PlayIdleAnimation();
-  }
-}
-
-void                ObjectCharacter::RunMovementNext(float elapsedTime)
-{
-  Waypoint* wp = _level->GetWorld()->GetWaypointFromId(_path.Front().id);
-
-  if (wp != _waypointOccupied && _level->GetState() == Level::Fight)
-    SetActionPoints(_actionPoints - 1);
-  
-  // If the next waypoint is already occupied by someone else,
-  // do not swap waypoints: instead, find another path.
-  if (_waypointOccupied->id != wp->id && _level->IsWaypointOccupied(wp->id))
-  {
-    GoTo(_level->GetWorld()->GetWaypointFromId((_path.Last().id)));
-    return ;
-  }
-  SetOccupiedWaypoint(wp);
-
-  // Has reached object objective, if there is one ?
-  if (_goToData.objective)
-  {
-    if (_path.Size() <= (unsigned int)_goToData.max_distance && HasLineOfSight(_goToData.objective))
-    {
-      _path.Clear();
-      ReachedDestination.Emit(this);
-      ReachedDestination.DisconnectAll();
-      return ;
-    }
-  }
-
-  _path.StripFirstWaypointFromList();
-  while (_path.Size() > 0 && _path.Front().id == _waypointOccupied->id)
-    _path.StripFirstWaypointFromList();
-  if (_path.Size() > 0)
-  {
-    bool pathAvailable = true;
-    // Check if the next waypoint is still accessible
-    UnprocessCollisions();
-    Waypoint::Arc* arc = _waypointOccupied->GetArcTo(_path.Front().id);
-
-    if (arc)
-    {
-      if (arc->observer)
-      {
-        if (arc->observer->CanGoThrough(0))
-          arc->observer->GoingThrough(this);
-        else
-          pathAvailable = false;
-      }
-    }
-    else
-      pathAvailable = false;
-    ProcessCollisions();
-
-    if (!pathAvailable)
-    {
-      //cout << "Path is not available" << endl;
-      if (_goToData.objective)
-	GoTo(_goToData.objective);
-      else
-      {
-	Waypoint* dest = _level->GetWorld()->GetWaypointFromId((_path.Last()).id);
-	GoTo(dest);
-      }
-      if (_path.Size() == 0)
-	ReachedDestination.DisconnectAll();
-    }
-  }
-  else
-  {
-    ReachedDestination.Emit(this);
-    ReachedDestination.DisconnectAll();
-  }
-}
-
-LPoint3 NodePathSize(NodePath);
-
-void                ObjectCharacter::RunMovement(float elapsedTime)
-{
-  Timer             profile;
-  PStatCollector    collector("Level:Characters:Movement"); collector.start();
-  Waypoint&         next      = _path.Front();
-  LPoint3           pos       = _object->nodePath.get_pos();
-  LPoint3           objective = next.nodePath.get_pos();
-  float             max_speed;
-  LPoint3           distance;
-  float             max_distance;    
-  LPoint3           speed, axis_speed, dest;
-  int               dirX, dirY, dirZ;
-
-  if (_level->GetState() == Level::Fight)
-    max_speed = OptionsManager::Get()["combat-speed"];
-  else
-    max_speed = _running ? 20.f : 8.f;
-  max_speed  *= elapsedTime;  
-  
-  //
-  LPoint3 wp_size = NodePathSize(next.nodePath);
-
-  float z = (objective.get_z() - wp_size.get_z()) + 0.25;
-  objective.set_z(z + (_idle_size.get_z() / 2));
-  //
-  
-  distance  = pos - objective;
-  
-  if (distance.get_x() == 0 && distance.get_y() == 0 && distance.get_z() == 0)
-    RunMovementNext(elapsedTime);
-  else
-  {
-    dirX = dirY = dirZ = 1;
-    if (distance.get_x() < 0)
-    {
-      distance.set_x(-(distance.get_x()));
-      dirX = -1;
-    }
-    if (distance.get_y() < 0)
-    {
-      distance.set_y(-(distance.get_y()));
-      dirY = -1;
-    }
-    if (distance.get_z() < 0)
-    {
-      distance.set_z(-(distance.get_z()));
-      dirZ = -1;
-    }
-    
-    max_distance = (distance.get_x() > distance.get_y() ? distance.get_x() : distance.get_y());
-    max_distance = (distance.get_z() > max_distance     ? distance.get_z() : max_distance);
-
-    axis_speed.set_x(distance.get_x() / max_distance);
-    axis_speed.set_y(distance.get_y() / max_distance);
-    axis_speed.set_z(distance.get_z() / max_distance);
-    if (max_speed > max_distance)
-      max_speed = max_distance;
-    speed.set_x(max_speed * axis_speed.get_x() * dirX);
-    speed.set_y(max_speed * axis_speed.get_y() * dirY);
-    speed.set_z(max_speed * axis_speed.get_z() * dirZ);
-
-    dest = pos - speed;
-
-    LookAt(dest);
-    _object->nodePath.set_pos(dest);
-  }
-  collector.stop();
-  //profile.Profile("Level:Characters:Movement");
-}
-
-void                ObjectCharacter::RunRotate(float elapsedTime)
-{
-  LVecBase3 rot    = _object->nodePath.get_hpr();
-  float     factor = elapsedTime * 500;
-
-  if ((ABS(_rotation_goal - rot.get_x())) < factor)
-  {
-    rot.set_x(_rotation_goal);
-    _rotating = false;
-  }
-  else
-  {
-    CircularValueSet value_set(360);
-    float            positive_distance = value_set.AdditionDistance    (ABS(_rotation_goal), ABS(rot.get_x()));
-    float            negative_distance = value_set.SubstractionDistance(ABS(_rotation_goal), ABS(rot.get_x()));
-
-    if (negative_distance > positive_distance)
-      rot.set_x(rot.get_x() - factor);
-    else
-      rot.set_x(rot.get_x() + factor);
-
-    if (rot.get_x() < -360)
-      rot.set_x(rot.get_x() + 360);
-    else if (rot.get_x() > 0)
-      rot.set_x(-360 + rot.get_x());
-  }
-  _object->nodePath.set_hpr(rot);
-}
-
-void                ObjectCharacter::LookAt(LVecBase3 pos)
-{
-   LVecBase3 rot;
-   float     backup;
-
-   backup = _object->nodePath.get_hpr().get_x();
-   _object->nodePath.look_at(pos);
-   rot = _object->nodePath.get_hpr();
-   rot.set_x(rot.get_x() - 180);
-   rot.set_y(-rot.get_y());
-   _rotation_goal = rot.get_x();
-   rot.set_x(backup);
-   _rotating      = true;
-   _object->nodePath.set_hpr(rot);
-}
-
-void                ObjectCharacter::LookAt(InstanceDynamicObject* object)
-{
-  LVecBase3 pos = object->GetNodePath().get_pos();
-
-  LookAt(pos);
+  return (SQRT(dist_x * dist_x + dist_y * dist_y));
 }
 
 bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* object)
@@ -952,12 +502,18 @@ void                ObjectCharacter::RunDeath()
 {
   UnequipItem(0);
   UnequipItem(1);
-  ResetInteractions();
-  _interactions.push_back(Interaction("use", this, &ActionUse));
+  ClearInteractions();
+  AddInteraction("use", _level->GetInteractions().Use);
 
   GetNodePath().set_hpr(0, 0, 90);
   UnprocessCollisions();
-  _hitPoints = 0;
+  if (GetHitPoints() > 0)
+    SetHitPoints(0);
+}
+
+bool ObjectCharacter::IsPlayer(void) const
+{
+  return (_level->GetPlayer() == this);
 }
 
 void                ObjectCharacter::CallbackActionUse(InstanceDynamicObject* user)
@@ -1103,3 +659,16 @@ bool     ObjectCharacter::IsAlly(const ObjectCharacter* other) const
   return (_faction && _faction->flag == other->GetFaction());
 }
 
+void ObjectCharacter::Unserialize(Utils::Packet& packet)
+{
+  packet >> _self_enemyMask;
+  CharacterStatistics::Unserialize(packet);
+  if (GetHitPoints() <= 0)
+    RunDeath();
+}
+
+void ObjectCharacter::Serialize(Utils::Packet& packet)
+{
+  packet << _self_enemyMask;
+  CharacterStatistics::Serialize(packet);
+}

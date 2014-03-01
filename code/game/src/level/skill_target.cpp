@@ -1,5 +1,5 @@
 #include "level/skill_target.hpp"
-#include "level/objectnode.hpp"
+#include "level/objects/instance_dynamic_object.hpp"
 #include "level/objects/character.hpp"
 
 SkillTarget::SkillTarget(InstanceDynamicObject* self) : self(self)
@@ -35,5 +35,5 @@ void SkillTarget::UseSkill(ObjectCharacter* user, std::string skill)
     if (has_effect)
       return ;
   }
-  user->ThatDoesNothing();
+  user->ThatDoesNothing(user);
 }

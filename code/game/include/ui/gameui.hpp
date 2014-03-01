@@ -17,6 +17,7 @@
 # include "ui/game_inventory.hpp"
 # include "ui/game_console.hpp"
 # include "ui/stat_view_rocket.hpp"
+# include "saveuis.hpp"
 
 class GameUi
 {
@@ -32,16 +33,22 @@ public:
   void                   OpenMenu(Rocket::Core::Event&);
   void                   OpenInventory(Rocket::Core::Event&);
   void                   OpenPers(Rocket::Core::Event&);
+  UiLoad*                OpenLoadingInterface(const std::string& savepath);
+  UiSave*                OpenSavingInterface(const std::string& savepath);
+  
   Sync::Signal<void (Rocket::Core::Event&)> OpenPipbuck;
   
   PT(RocketRegion)       GetRocketRegion(void) { return (_rocket); }
 
 private:
+  WindowFramework* window;
   PT(RocketRegion) _rocket;
   GameConsole*     _console;
   GameMenu*        _menu;
   GameInventory*   _inventory;
   StatViewRocket*  _pers;
+  UiSave*          ui_save_game;
+  UiLoad*          ui_load_game;
 };
 
 #endif

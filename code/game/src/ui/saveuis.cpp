@@ -178,6 +178,7 @@ void UiLoad::LoadGame(Rocket::Core::Event&)
 
     slot = varSlot->Get<unsigned int>();
     LoadSlot.Emit((unsigned char)slot);
+    Done.Emit();
   }
 }
 
@@ -200,6 +201,7 @@ void UiLoad::ClickSlot(Rocket::Core::Event& event)
 void UiLoad::Cancel(Rocket::Core::Event&)
 {
   Hide();
+  Done.Emit();
 }
 
 void UiLoad::Erase(Rocket::Core::Event&)
@@ -317,6 +319,7 @@ void UiSave::SaveGame(Rocket::Core::Event&)
 
     slot = varSlot->Get<unsigned int>();
     SaveToSlot.Emit((unsigned char)slot);
+    Done.Emit();
   }
 }
 
@@ -339,4 +342,5 @@ void UiSave::ClickSlot(Rocket::Core::Event& event)
 void UiSave::Cancel(Rocket::Core::Event&)
 {
   Hide();
+  Done.Emit();
 }

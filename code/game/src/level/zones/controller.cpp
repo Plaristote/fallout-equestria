@@ -13,7 +13,6 @@ void Zones::Controller::ObjectMovesWithinZone(InstanceDynamicObject* object)
 {
   if (enabled)
   {
-    cout << "Object " << object->GetName() << " moving in zone " << zone.name << endl;
     if (IsExitZone())
       ExitingZone(object);
     else

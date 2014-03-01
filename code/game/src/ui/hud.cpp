@@ -1,5 +1,6 @@
 #include "ui/game_main_bar.hpp"
 #include "level/inventory.hpp"
+#include <cmap/statcontroller.hpp>
 
 using namespace std;
 using namespace Rocket;
@@ -47,6 +48,25 @@ GameMainBar::~GameMainBar()
   ToggleEventListener(false, "stop_fight", "click",   CombatEndClicked);
   ToggleEventListener(false, "skilldex",   "click",   SkilldexButtonClicked);
   ToggleEventListener(false, "spellbook",  "click",   SpelldexButtonClicked);
+}
+
+void GameMainBar::SetStatistics(StatController* controller)
+{
+  StatModel& model   = controller->Model();
+  Data       data_ap = controller->GetData()["Variables"]["Action Points"];
+  short      max_ap  = controller->GetData()["Statistics"]["Action Points"];
+  short      ap      = data_ap.Nil() ? max_ap : (short)data_ap;
+
+  statistics = controller;
+  SetCurrentAP(ap, max_ap);
+  controller->HpChanged.Connect(*this, &GameMainBar::SetCurrentHp);
+  controller->ArmorClassChanged.Connect(*this, &GameMainBar::SetCurrentAc);
+  controller->ActionPointChanged.Connect([this](unsigned short ap)
+  {
+    short max_ap  = statistics->GetData()["Statistics"]["Action Points"];
+    
+    SetCurrentAP(ap, max_ap);
+  });
 }
 
 void GameMainBar::AppendToConsole(const std::string& str)

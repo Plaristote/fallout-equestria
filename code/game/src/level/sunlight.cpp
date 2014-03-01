@@ -126,8 +126,9 @@ void Sunlight::SetSunlightPositionFromTime()
 
   //sunlight_nodepath.set_z(10);
   //sunlight_nodepath.set_y(0);
-  cout << "SunLightPosition: " << position.get_x() << ',' << position.get_y() << endl;
+  /*cout << "SunLightPosition: " << position.get_x() << ',' << position.get_y() << endl;
+  sunlight_nodepath.set_x(0);
   sunlight_nodepath.set_z(position.get_x());
   sunlight_nodepath.set_y(position.get_y());
-  sunlight_nodepath.look_at(solar_orbit.GetPosition());
+  sunlight_nodepath.look_at(solar_orbit.GetPosition());*/
 }

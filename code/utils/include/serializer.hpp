@@ -30,7 +30,7 @@ namespace Utils
 /*! \class Packet
  * \brief Serialization utility.
  */
-class		Packet
+class		Packet : public Serializable
 {
 public:
   enum Types
@@ -77,6 +77,11 @@ public:
   
   Packet&	operator=(const Packet& cpy);
 
+  // Self serialization (embedding packets in packet)
+  void Serialize(Utils::Packet& packet) const;
+  void Unserialize(Utils::Packet& packet);
+  void Clear(void);
+  
   // Serialization
   template<typename T> Packet&  operator<<(const Utils::Serializable& serializable)
   {
@@ -210,6 +215,9 @@ private:
     updateHeader();
   }
 
+  void          initializeFromBuffer(const char* raw, size_t size);
+  void          initializeAsEmpty(void);
+  void          finalize(void);
   bool		canIHaz(size_t sizeType, int howMany); // Checks if the buffer is big enough for Packet to read size_t
   void		checkType(int assumedType);            // Check if the next type in buffer match the assumed type
   void		realloc(int newsize);                  // Realloc the buffer (used in serializing)

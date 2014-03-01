@@ -10,7 +10,8 @@ namespace Interactions
       UseSkill  = 2,
       UseObject = 4,
       TalkTo    = 8,
-      UseSpell  = 16
+      UseSpell  = 16,
+      LookAt    = 32
   };
 }
 

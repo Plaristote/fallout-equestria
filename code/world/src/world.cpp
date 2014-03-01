@@ -475,7 +475,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
                                light->nodePath.get_y(),
                                light->nodePath.get_z(),
                                light->zoneSize);
-  PT(CollisionNode)         colNode       = new_CollisionNode("compileLightSphere");
+  PT(CollisionNode)         colNode       = new CollisionNode("compileLightSphere");
   NodePath                  colNp         = rootLights.attach_new_node(colNode);
   PT(CollisionHandlerQueue) handlerQueue  = new CollisionHandlerQueue();
   CollisionTraverser        traverser;
@@ -1023,7 +1023,7 @@ void           World::CompileWaypoints(ProgressCallback progress_callback)
             LPoint3           tmp    = other.get_pos() - parent.get_pos();
             LPoint3           dir    = parent.get_relative_vector(other, tmp);
 
-            PT(CollisionNode) cnode  = new_CollisionNode("compileWaypointsNode");
+            PT(CollisionNode) cnode  = new CollisionNode("compileWaypointsNode");
             //cnode->set_into_collide_mask(ColMask::Object);
             cnode->set_from_collide_mask(CollideMask(ColMask::Object));
             np = (*it).nodePath.attach_new_node(cnode);
@@ -1072,7 +1072,7 @@ void World::CompileDoors(ProgressCallback progress_callback)
       PT(CollisionTube) ctube  = new CollisionTube(LPoint3(0, 0, 0),
                                                     parent.get_relative_vector(other, other.get_pos() - parent.get_pos()),
                                                     2.f);
-      PT(CollisionNode) cnode  = new_CollisionNode("compileWaypointsNode");
+      PT(CollisionNode) cnode  = new CollisionNode("compileWaypointsNode");
       cnode->set_into_collide_mask(CollideMask(ColMask::DynObject));
       cnode->set_from_collide_mask(CollideMask(ColMask::None));
       cnode->add_solid(ctube);

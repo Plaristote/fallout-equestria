@@ -184,7 +184,7 @@ void Waypoint::Arc::SetVisible(bool set)
   if (set && nodePath.is_empty())
   {
     csegment = new CollisionSegment();
-    node     = new_CollisionNode("waypointArc");
+    node     = new CollisionNode("waypointArc");
     node->set_into_collide_mask(CollideMask(0));
     node->set_from_collide_mask(CollideMask(0));
     node->add_solid(csegment);

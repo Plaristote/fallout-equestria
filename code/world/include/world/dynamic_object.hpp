@@ -15,11 +15,16 @@ struct DynamicObject : public MapObject
     Item
     };
 
-    Waypoint* waypoint;
-    Type      type;
-
+    Waypoint*   waypoint;
+    Type        type;
+    // Interactions
+    char        interactions;
+    std::string dialog;
     // All
-    std::string          script;
+    std::string script;
+    // Character
+    std::string charsheet;
+
 
     // Door / Locker
     bool                            locked;
@@ -29,15 +34,8 @@ struct DynamicObject : public MapObject
     // Shelf / Character
     std::list<std::pair<std::string, int> > inventory;
 
-    // Character
-    std::string          charsheet;
-
-    // Interactions
-    char                 interactions;
-    std::string          dialog;
-
     void UnSerialize(World*, Utils::Packet& packet);
-    void Serialize(Utils::Packet& packet);
+    void Serialize(Utils::Packet& packet) const;
 };
 
 

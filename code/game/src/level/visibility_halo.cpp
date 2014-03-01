@@ -1,5 +1,5 @@
 #include "level/visibility_halo.hpp"
-#include "level/objectnode.hpp"
+#include "level/objects/instance_dynamic_object.hpp"
 #include <panda3d/stencilAttrib.h>
 #include <panda3d/colorBlendAttrib.h>
 #include <panda3d/depthTestAttrib.h>

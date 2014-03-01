@@ -1,6 +1,6 @@
 #include "test.hpp"
 #include "timer.hpp"
-#include <level/world.h>
+#include <world/world.h>
 #include <sstream>
 
 using namespace std;
@@ -130,9 +130,9 @@ static void TestArcs(UnitTest& tester)
   });
 }
 
-#include <level/objectnode.hpp>
+#include <level/objects/instance_dynamic_object.hpp>
 
-class MyWaypointModifier : public WaypointModifier
+class MyWaypointModifier : public Pathfinding::Collider
 {
 public:
   NodePath GetNodePath(void) const { return ((NodePath())); }

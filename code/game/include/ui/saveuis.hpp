@@ -10,6 +10,7 @@ public:
   UiLoad(WindowFramework* window, Rocket::Core::Context* context, const std::string& savePath);
   virtual ~UiLoad();
   Sync::Signal<void (unsigned char)> LoadSlot, EraseSlot;
+  Sync::Signal<void>                 Done;
   
   static std::string LoadSlotRml(const std::string& prefix, unsigned short slot);
   
@@ -32,6 +33,7 @@ public:
   UiSave(WindowFramework* window, Rocket::Core::Context* context, const std::string& savePath);
   virtual ~UiSave();
   Sync::Signal<bool (unsigned char)> SaveToSlot, EraseSlot;
+  Sync::Signal<void>                 Done;
 
 private:
   void LoadSlots(const std::string& savepath);

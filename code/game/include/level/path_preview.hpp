@@ -2,7 +2,7 @@
 # define PATH_PREVIEW_HPP
 
 # include "globals.hpp"
-# include "level/pathfinding.hpp"
+# include "level/pathfinding/path.hpp"
 # include "level/mouse.hpp"
 # include <panda3d/nodePathCollection.h>
 

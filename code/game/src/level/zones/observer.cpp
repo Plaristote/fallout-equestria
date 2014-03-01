@@ -8,6 +8,10 @@ Zones::Observer::Observer(Waypoint* to_observe) : waypoint(to_observe)
   {
     arc.observer = this;
   });
+  for_each(waypoint->arcs_withdrawed.begin(), waypoint->arcs_withdrawed.end(), [this](std::pair<Waypoint::Arc, unsigned short>& arc)
+  {
+    arc.first.observer = this;
+  });
 }
 
 Zones::Observer::~Observer()
@@ -16,6 +20,11 @@ Zones::Observer::~Observer()
   {
     if (arc.observer == this)
       arc.observer = 0;
+  });
+  for_each(waypoint->arcs_withdrawed.begin(), waypoint->arcs_withdrawed.end(), [this](std::pair<Waypoint::Arc, unsigned short>& arc)
+  {
+    if (arc.first.observer == this)
+      arc.first.observer = 0;
   });
 }
 

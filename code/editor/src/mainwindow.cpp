@@ -43,7 +43,7 @@ struct PandaTask : public AsyncTask
   {
     NodePath                  camera                  = window->get_camera_group();
     PT(CollisionRay)          picker_ray              = new CollisionRay();
-    PT(CollisionNode)         picker_node             = new_CollisionNode("mouse_ray");
+    PT(CollisionNode)         picker_node             = new CollisionNode("mouse_ray");
     NodePath                  picker_path             = camera.attach_new_node(picker_node);
     CollisionTraverser        traverser;
     PT(CollisionHandlerQueue) collision_handler_queue = new CollisionHandlerQueue();
@@ -582,7 +582,7 @@ void MainWindow::ShowWaypointZone(void)
 
     LPoint3                   position       = my_task.CollidingAt(mapobjectSelected);
     PT(CollisionSphere)       collision_box  = new CollisionSphere(position, 50);
-    PT(CollisionNode)         collision_node = new_CollisionNode("waypoint_box");
+    PT(CollisionNode)         collision_node = new CollisionNode("waypoint_box");
     NodePath                  collision_path = mapobjectSelected->nodePath.attach_new_node(collision_node);
     CollisionTraverser        traverser;
     PT(CollisionHandlerQueue) collision_handler_queue = new CollisionHandlerQueue();
@@ -1545,7 +1545,7 @@ void MainWindow::WaypointSyncTerrain(void)
       CollisionTraverser col_traverser;
       PT(CollisionHandlerQueue) col_queue = new CollisionHandlerQueue;
 
-      PT(CollisionNode) cnode = new_CollisionNode("waypointSyncTerrainNode");
+      PT(CollisionNode) cnode = new CollisionNode("waypointSyncTerrainNode");
       cnode->set_from_collide_mask(CollideMask(ColMask::Object));
 
       PT(CollisionSegment) segment = new CollisionSegment;

@@ -91,45 +91,22 @@ void StatController::LevelChanged(unsigned short lvl)
   }
 }
 
-/*class Metabolism : public ScheduledTask
-{
-public:
-  void SetStatController(StatController* controller) { this->controller = controller; }
-protected:
-  void Run();
-private:
-  StatController* controller;
-};
-
-void Metabolism::Run()
-{
-  StatModel&   model      = controller->Model();
-  stringstream stream, stream_hp;
-  int          metabolism, max_hp;
-  int          current_hp = model.GetAll()["Variables"]["Hit Points"];
-
-  stream    << model.GetStatistic("Healing Rate");
-  stream_hp << model.GetStatistic("Hit Points");
-  stream    >> metabolism;
-  stream_hp >> max_hp;
-  current_hp += metabolism;
-  SetCurrentHp(current_hp > max_hp ? max_hp : current_hp);
-  ScheduledTask::Run();
-}*/
-
 void StatController::RunMetabolism(void)
 {
-  stringstream stream, stream_hp;
-  int          hp, max_hp;
+  if (_model.GetCurrentHp() > 0)
+  {
+    stringstream stream, stream_hp;
+    int          hp, max_hp;
 
-  stream << _model.GetStatistic("Healing Rate");
-  stream >> hp;
-  cout << "Healing Rate => " << hp << endl;
-  stream_hp << _model.GetStatistic("Hit Points");
-  stream_hp >> max_hp;
-  hp = (int)(_model.GetAll()["Variables"]["Hit Points"]) + hp;
-  hp = hp > max_hp ? max_hp : hp;
-  SetCurrentHp(hp);  
+    stream << _model.GetStatistic("Healing Rate");
+    stream >> hp;
+    cout << "Healing Rate => " << hp << endl;
+    stream_hp << _model.GetStatistic("Hit Points");
+    stream_hp >> max_hp;
+    hp = (int)(_model.GetAll()["Variables"]["Hit Points"]) + hp;
+    hp = hp > max_hp ? max_hp : hp;
+    SetCurrentHp(hp);  
+  }
 }
 
 void StatController::AddKill(const string& race)
@@ -315,6 +292,8 @@ void StatController::SetCurrentHp(short hp)
   if (_view)
     _view->SetInformation("char-state-hp-id-value", hp);
   HpChanged.Emit(hp);
+  if (hp <= 0)
+    Died.Emit();
 }
 
 void StatController::SetMaxHp(short hp)
@@ -325,6 +304,18 @@ void StatController::SetMaxHp(short hp)
     if (_view->GetEditMode() == StatView::Create)
       SetCurrentHp(hp);
   }
+}
+
+void StatController::SetActionPoints(unsigned short action_points)
+{
+  _model.SetActionPoints(action_points);
+  ActionPointChanged.Emit(action_points);
+}
+
+void StatController::SetArmorClass(unsigned short armor_class)
+{
+  _model.SetArmorClass(armor_class);
+  ArmorClassChanged.Emit(armor_class);
 }
 
 void StatController::InformationChanged(const string& info, const string& value)

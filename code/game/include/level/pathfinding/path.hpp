@@ -3,6 +3,7 @@
 
 # include "globals.hpp"
 # include "world/waypoint.hpp"
+# include "serializer.hpp"
 # include <functional>
 # include <list>
 
@@ -12,7 +13,6 @@ namespace Pathfinding
 {
   class Path
   {
-    friend class Pathfinding;
   public:
     Path(Waypoint* from, Waypoint* to) : from(from), to(to)
     {
@@ -25,14 +25,16 @@ namespace Pathfinding
     bool                 FindPath(Waypoint* from, Waypoint* to);
     void                 StripFirstWaypointFromList(void);
     void                 StripLastWaypointFromList(void);
-    unsigned int         Size(void) const { return (waypoints.size());    }
-    Waypoint&            Front(void)      { return (*waypoints.begin());  }
-    Waypoint&            Last(void)       { return (*waypoints.rbegin()); }
+    unsigned int         Size(void)  const { return (waypoints.size());    }
+    Waypoint&            Front(void)       { return (*waypoints.begin());  }
+    const Waypoint&      Front(void) const { return (*waypoints.begin());  }
+    Waypoint&            Last(void)        { return (*waypoints.rbegin()); }
+    const Waypoint&      Last(void)  const { return (*waypoints.rbegin()); }
     void                 Clear(void);
     void                 Truncate(unsigned int max_size);
     
-    void Save();
-    void Load(World*);
+    void Serialize(Utils::Packet&);
+    void Unserialize(World*, Utils::Packet&);
     
   protected:
     void                 ForeachWaypoint(std::function<void (Waypoint&)>);

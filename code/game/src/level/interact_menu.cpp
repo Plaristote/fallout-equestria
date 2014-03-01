@@ -7,7 +7,7 @@ using namespace std;
 
 InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* context, InstanceDynamicObject& object) : UiBase(window, context)
 {
-  InstanceDynamicObject::InteractionList& interactions = object.GetInteractions();
+  Interactions::InteractionList& interactions = object.GetInteractions();
 
   _done = false;
   _root = context->LoadDocument("data/interact_menu.rml");
@@ -33,7 +33,7 @@ InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* conte
       {
         std::stringstream rml;
         
-        for_each(interactions.begin(), interactions.end(), [&rml](InstanceDynamicObject::Interaction& interaction)
+        for_each(interactions.begin(), interactions.end(), [&rml](Interactions::Interaction& interaction)
         {
           rml << "<div id='interaction-" << interaction.name << "'>";
           rml << "<button id='" << interaction.name << "' class='interact_button'>";
@@ -47,7 +47,7 @@ InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* conte
       int it = 0;
       _listeners.resize(interactions.size());
 
-      for_each(interactions.begin(), interactions.end(), [this, &it](InstanceDynamicObject::Interaction& interaction)
+      for_each(interactions.begin(), interactions.end(), [this, &it](Interactions::Interaction& interaction)
       {
         Rocket::Core::Element* button = _root->GetElementById(interaction.name.c_str());
 
@@ -68,7 +68,7 @@ InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* conte
   Show();
 }
 
-void InteractMenu::ExecuteForButtonId(Rocket::Core::Event& event, std::function<bool (Rocket::Core::Event&, const std::string&, InstanceDynamicObject::Interaction*)> callback)
+void InteractMenu::ExecuteForButtonId(Rocket::Core::Event& event, std::function<bool (Rocket::Core::Event&, const std::string&, Interactions::Interaction*)> callback)
 {
   if (!_done)
   {
@@ -85,7 +85,7 @@ void InteractMenu::ExecuteForButtonId(Rocket::Core::Event& event, std::function<
 
 void InteractMenu::ButtonHovered(Rocket::Core::Event& event)
 {
-  ExecuteForButtonId(event, [this](Rocket::Core::Event& event, const string& event_type, InstanceDynamicObject::Interaction* interaction) -> bool
+  ExecuteForButtonId(event, [this](Rocket::Core::Event& event, const string& event_type, Interactions::Interaction* interaction) -> bool
   {
     bool                   mouse_over = event_type == "mouseover";
     Rocket::Core::Element* img        = event.GetCurrentElement()->GetChild(0);
@@ -99,7 +99,7 @@ void InteractMenu::ButtonHovered(Rocket::Core::Event& event)
 
 void InteractMenu::MouseButton(Rocket::Core::Event& event)
 {
-  ExecuteForButtonId(event, [this](Rocket::Core::Event& event, const string& event_type, InstanceDynamicObject::Interaction* interaction) -> bool
+  ExecuteForButtonId(event, [this](Rocket::Core::Event& event, const string& event_type, Interactions::Interaction* interaction) -> bool
   {
     bool                   mouse_over = event_type == "mousedown";
     Rocket::Core::Element* img        = event.GetCurrentElement()->GetChild(0);

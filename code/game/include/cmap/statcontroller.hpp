@@ -32,13 +32,18 @@ public:
 
   void AddExperience(unsigned int experience);
   void SetCurrentHp(short hp);
+  void SetActionPoints(unsigned short action_points);
+  void SetArmorClass(unsigned short armor_class);
   void RunMetabolism(void);
 
   void AddKill(const std::string& race);
   void AddReputation(const std::string& faction, int);
 
   Sync::Signal<void (short)>          HpChanged;
+  Sync::Signal<void (unsigned short)> ActionPointChanged;
+  Sync::Signal<void (short)>          ArmorClassChanged;
   Sync::Signal<void (unsigned short)> LevelUp;
+  Sync::Signal<void>                  Died;
   Sync::Signal<void>                  ChangesAccepted;
   Sync::Signal<void>                  ChangesCanceled;
 

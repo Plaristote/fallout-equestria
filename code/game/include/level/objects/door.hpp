@@ -1,7 +1,7 @@
 #ifndef  OBJECT_DOOR_HPP
 # define OBJECT_DOOR_HPP
 
-# include "level/objectnode.hpp"
+# include "level/objects/instance_dynamic_object.hpp"
 
 class Lockable
 {

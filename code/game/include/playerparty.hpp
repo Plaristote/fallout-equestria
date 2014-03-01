@@ -2,56 +2,30 @@
 # define PLAYERPARTY_HPP
 
 # include "globals.hpp"
-# include "serializer.hpp"
-# include "observatory.hpp"
-# include <map>
-
-struct DynamicObject;
-class  InstanceDynamicObject;
-
-class Party
-{
-public:
-  typedef std::list<DynamicObject*>          DynamicObjects;
-  typedef std::map<std::string, std::string> Statsheets;
-
-  void                  Join(InstanceDynamicObject* i);
-  void                  Join(DynamicObject*);
-  void                  Leave(InstanceDynamicObject* i);  
-  void                  Leave(DynamicObject*);
-
-  void                  Export(const std::string& name) const;
-  static Party*         Import(const std::string& name);
-
-  const DynamicObjects& ConstGetObjects(void) const { return (_objects); }
-  DynamicObjects&       GetObjects(void)            { return (_objects); }
-  Statsheets            GetStatsheets(void)   const;
-
-  Sync::Signal<void>    Updated;
-  
-protected:
-  void                  Serialize(Utils::Packet&) const;
-  void                  UnSerialize(Utils::Packet&);
-
-  DynamicObjects        _objects;
-  std::string           _name;
-};
+# include "party.hpp"
+# include "level/objects/character.hpp"
+# include "ui/stat_view_rocket.hpp"
 
 class PlayerParty : public Party
 {
 public:
-  typedef std::list<DynamicObject*> DynamicObjects;
+  PlayerParty() : stat_view(0) {}
   PlayerParty(const std::string& savepath);
   ~PlayerParty(void);
-  
-  static void           Create(const std::string& savepath, const std::string& name, const std::string& model, const std::string& texture);
-  bool                  Save(const std::string& savepath) const;
-  void                  SetHasLocalObjects(bool val) { _local_objects = val; }
-  
+
+  void                  SetView(StatViewRocket* view);
+
+  StatController*       GetPlayerController(void);
+  Inventory*            GetPlayerInventory(void);
+  Party::Member*        GetPlayer(void);
+
 private:
-  PlayerParty() {};
   
-  bool                  _local_objects;
+  void                  UpdateView(void);
+  void                  SetViewOnPartyMember(const std::string&);
+  
+  Sync::ObserverHandler observers;
+  StatViewRocket*       stat_view;
 };
 
 #endif

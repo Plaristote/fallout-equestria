@@ -73,8 +73,12 @@ public:
   void           SetExperience(unsigned short e);
   void           LevelUp(void);
   void           SetCurrentHp(short hp);
-  short          GetCurrentHp(void) const { return (_statsheet["Variables"]["Hit Points"]);  }
-  short          GetMaxHp(void)     const { return (_statsheet["Statistics"]["Hit Points"]); }
+  void           SetArmorClass(unsigned short ac)   { _statsheet["Variables"]["Armor Class"]   = ac;    }
+  void           SetActionPoints(unsigned short ap) { _statsheet["Variables"]["Action Points"] = ap;    }
+  short          GetCurrentHp(void)      const      { return (_statsheet["Variables"]["Hit Points"]);   }
+  short          GetMaxHp(void)          const      { return (_statsheet["Statistics"]["Hit Points"]);  }
+  unsigned short GetArmorClass(void)     const      { return (_statsheet["Variables"]["Armor Class"]);  }
+  unsigned short GetBaseArmorClass(void) const      { return (_statsheet["Statistics"]["Armor Class"]); }
 
   int            GetReputation(const std::string& faction) const;
   void           AddReputation(const std::string& faction, int amount);

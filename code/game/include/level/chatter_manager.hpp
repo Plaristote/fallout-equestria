@@ -2,7 +2,7 @@
 # define CHATTER_MANAGER_HPP
 
 # include <panda3d/fontPool.h>
-# include "level/objectnode.hpp"
+# include "level/objects/instance_dynamic_object.hpp"
 
 class ChatterManager
 {

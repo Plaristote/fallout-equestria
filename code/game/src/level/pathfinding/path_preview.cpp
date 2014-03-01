@@ -1,5 +1,5 @@
 #include "level/path_preview.hpp"
-#include "level/objectnode.hpp"
+#include "level/objects/instance_dynamic_object.hpp"
 #include <panda3d/depthTestAttrib.h>
 
 using namespace std;

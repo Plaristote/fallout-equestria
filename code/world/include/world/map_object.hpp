@@ -27,17 +27,19 @@ struct MapObject
   Waypoints     waypoints;
   NodePath      waypoints_root;
 
+  std::string   name;
   std::string   strModel;
   std::string   strTexture;
   std::string   parent;
   Collider      collider;
 
+  void          SetName(const std::string&);
   void          SetFloor(unsigned char floor);
   void          ReparentTo(MapObject* object);
 
   void          UnSerialize(World* world, Utils::Packet& packet);
   void          UnserializeWaypoints(World*, Utils::Packet& packet);
-  void          Serialize(Utils::Packet& packet);
+  void          Serialize(Utils::Packet& packet) const;
   static void   InitializeTree(World* world);
   void          InitializeCollider(Collider type, LPoint3f position, LPoint3f scale, LPoint3f hpr);
 };

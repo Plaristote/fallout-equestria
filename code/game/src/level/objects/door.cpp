@@ -1,23 +1,24 @@
 #include "level/objects/door.hpp"
 #include "level/objects/character.hpp"
 #include "level/level.hpp"
-#include <level/pathfinding.hpp>
+#include <level/pathfinding/path.hpp>
 
 void ObjectDoor::ProcessCollisions(void)
 {
-  if (_waypointOccupied->arcs.begin()->observer == 0)
+  if (GetOccupiedWaypoint()->arcs.begin()->observer == 0)
     ObserveWaypoints(true);
 }
 
 void ObjectDoor::ObserveWaypoints(bool doObserver)
 {
-  _waypointDisconnected = _object->lockedArcs;
-  std::cout << "Observe Waypoints " << _waypointDisconnected.size() << " (" << doObserver << ')' << std::endl;
-  std::for_each(_waypointOccupied->arcs.begin(), _waypointOccupied->arcs.end(), [this, doObserver](Waypoint::Arc& arc)
+  Waypoint* waypoint_occupied = GetOccupiedWaypoint();
+  
+  waypoint_disconnected = _object->lockedArcs;
+  std::for_each(waypoint_occupied->arcs.begin(), waypoint_occupied->arcs.end(), [this, doObserver](Waypoint::Arc& arc)
   {
     arc.observer = (doObserver ? this : 0);
   });
-  std::for_each(_waypointDisconnected.begin(), _waypointDisconnected.end(), [this, doObserver](std::pair<int, int> waypoints)
+  std::for_each(waypoint_disconnected.begin(), waypoint_disconnected.end(), [this, doObserver](std::pair<int, int> waypoints)
   {
     Waypoint*        waypoint = _level->GetWorld()->GetWaypointFromId(waypoints.first);
 
@@ -42,13 +43,13 @@ InstanceDynamicObject::GoToData ObjectDoor::GetGoToData(InstanceDynamicObject* c
   Waypoint* waypoint = character->GetOccupiedWaypoint();
   GoToData  ret;
 
-  ret.nearest      = _waypointOccupied;
+  ret.nearest      = GetOccupiedWaypoint();
   ret.max_distance = -1;
   ret.min_distance = 0;
   if (waypoint)
   {
     character->UnprocessCollisions();
-    std::for_each(_waypointDisconnected.begin(), _waypointDisconnected.end(), [this, waypoint, &ret](std::pair<int, int> waypoints)
+    std::for_each(waypoint_disconnected.begin(), waypoint_disconnected.end(), [this, waypoint, &ret](std::pair<int, int> waypoints)
     {
       Waypoint*         waypoint1 = _level->GetWorld()->GetWaypointFromId(waypoints.first);
       Waypoint*         waypoint2 = _level->GetWorld()->GetWaypointFromId(waypoints.second);
@@ -98,8 +99,8 @@ void ObjectDoor::CallbackActionUse(InstanceDynamicObject* object)
 {
   if (!IsLocked())
   {
-    AnimationEnded.DisconnectAll();
-    AnimationEnded.Connect([this](InstanceDynamicObject*) { _closed = !_closed; });
+    AnimationEndForObject.DisconnectAll();
+    AnimationEndForObject.Connect([this](AnimatedObject*) { _closed = !_closed; });
     PlayAnimation(_closed ? "open" : "close");
   }
   else

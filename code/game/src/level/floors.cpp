@@ -1,5 +1,5 @@
 #include "level/floors.hpp"
-#include "level/objectnode.hpp"
+#include "level/objects/instance_dynamic_object.hpp"
 #include "level/level.hpp"
 
 using namespace std;
@@ -16,10 +16,13 @@ unsigned char Floors::GetFloorFromObject(InstanceDynamicObject* object)
 void Floors::SetCurrentFloorFromObject(InstanceDynamicObject* object)
 {
   Waypoint* wp = object->GetOccupiedWaypoint();
-  
-  if (wp->id != last_waypoint)
-    SetCurrentFloor(wp->floor);
-  last_waypoint = wp->id;
+
+  if (wp)
+  {
+    if (wp->id != last_waypoint)
+      SetCurrentFloor(wp->floor);
+    last_waypoint = wp->id;
+  }
 }
 
 void Floors::ShowOnlyFloor(unsigned char floor)
@@ -122,7 +125,7 @@ bool Floors::IsInsideBuilding(unsigned char& floor)
   PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
   NodePath                  character_node        = level.GetPlayer()->GetNodePath();
   
-  pickerNode   = new_CollisionNode("isInsideBuildingRay");
+  pickerNode   = new CollisionNode("isInsideBuildingRay");
   pickerPath   = world.window->get_render().attach_new_node(pickerNode);
   pickerRay    = new CollisionRay();
   pickerNode->add_solid(pickerRay);
@@ -138,7 +141,7 @@ bool Floors::IsInsideBuilding(unsigned char& floor)
 
   collisionTraverser.add_collider(pickerPath, collisionHandlerQueue);
   collisionTraverser.traverse(world.floors_node);
-  
+
   collisionHandlerQueue->sort_entries();
   
   for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)

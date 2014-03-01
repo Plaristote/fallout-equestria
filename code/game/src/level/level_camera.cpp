@@ -1,6 +1,6 @@
 #include "level/level_camera.hpp"
 #include "level/level.hpp"
-#include "level/objectnode.hpp"
+#include "level/objects/instance_dynamic_object.hpp"
 #include "options.hpp"
 
 using namespace std;

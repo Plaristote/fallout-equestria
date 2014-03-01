@@ -16,7 +16,7 @@ Mouse::Mouse(WindowFramework* window) : _window(window)
   _camera                = window->get_camera_group();
   _hovering.Reset();
   _mouseWatcher          = dynamic_cast<MouseWatcher*>(window->get_mouse().node());
-  _pickerNode            = new_CollisionNode("mouseRay");
+  _pickerNode            = new CollisionNode("mouseRay");
   _pickerPath            = _camera.attach_new_node(_pickerNode);
   _pickerNode->set_from_collide_mask(CollideMask(/*ColMask::Waypoint | */ColMask::DynObject));
   _pickerNode->set_into_collide_mask(0);
@@ -136,7 +136,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
       return ;
     last_update       = cursorPos;
     updated           = true;
-    pickerNode        = new_CollisionNode("mouseRay2");
+    pickerNode        = new CollisionNode("mouseRay2");
     pickerPath        = _camera.attach_new_node(pickerNode);
     pickerRay         = new CollisionRay();
     pickerNode->set_from_collide_mask(CollideMask(ColMask::WpPlane));
