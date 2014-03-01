@@ -18,7 +18,7 @@ public:
   StatController*       GetPlayerController(void);
   Inventory*            GetPlayerInventory(void);
   Party::Member*        GetPlayer(void);
-
+  
 private:
   
   void                  UpdateView(void);

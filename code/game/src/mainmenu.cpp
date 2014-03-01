@@ -194,15 +194,8 @@ MainMenu::View::View(WindowFramework* window, Rocket::Core::Context* context) : 
 
     for (int it = 0 ; it < 5 ; ++it)
     {
-      Rocket::Core::Element* element = _root->GetElementById(idz[it].c_str());
-
-      if (element)
-      {
-	element->AddEventListener("click", listenerz[it]);
-	listenerz[it]->EventReceived.Connect(*signalz[it], &Sync::Signal<void (Rocket::Core::Event&)>::Emit);
-      }
-      else
-	cerr << "Missing button " << idz[it] << endl;
+      ToggleEventListener(true, idz[it], "click", *listenerz[it]);
+      listenerz[it]->EventReceived.Connect(*signalz[it], &Sync::Signal<void (Rocket::Core::Event&)>::Emit);
     }
     Translate();
   }

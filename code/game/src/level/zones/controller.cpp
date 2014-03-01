@@ -1,5 +1,6 @@
 #include "level/zones/controller.hpp"
 #include "level/zones/manager.hpp"
+#include <level/zones/exception.hpp>
 #include "level/level.hpp"
 #include <ui/ui_next_zone.hpp>
 
@@ -66,8 +67,6 @@ void Zones::Controller::InsertObject(InstanceDynamicObject* object)
 
   for (; it != end ; ++it)
   {
-    cout << manager->ZoneExists(zone.name) << endl;
-    cout << manager->level.GetPlayer()->GetName() << endl;
     if (!(manager->level.IsWaypointOccupied((*it)->id)))
     {
       InsertObjectOnWaypoint(object, *it);
@@ -78,7 +77,7 @@ void Zones::Controller::InsertObject(InstanceDynamicObject* object)
   if (success)
     InsertResident(object);
   else
-    throw "bite";
+    throw ZoneIsFull(zone.name, "Failed to insert " + object->GetName() + " into zone.");
 }
 
 void Zones::Controller::InsertObjectOnWaypoint(InstanceDynamicObject* object, Waypoint* waypoint)

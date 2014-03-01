@@ -3,96 +3,98 @@
 #include "level/level.hpp"
 #include <level/pathfinding/path.hpp>
 
-void ObjectDoor::ProcessCollisions(void)
+ObjectDoor::ObjectDoor(Level* level, DynamicObject* object): InstanceDynamicObject(level, object), Lockable(object)
 {
-  if (GetOccupiedWaypoint()->arcs.begin()->observer == 0)
-    ObserveWaypoints(true);
+  _type             = ObjectTypes::Door;
+  _closed           = true;
+  collision_enabled = true;
+  InitializePassageWay();
 }
 
-void ObjectDoor::ObserveWaypoints(bool doObserver)
+ObjectDoor::~ObjectDoor()
 {
-  Waypoint* waypoint_occupied = GetOccupiedWaypoint();
-  
-  waypoint_disconnected = _object->lockedArcs;
-  std::for_each(waypoint_occupied->arcs.begin(), waypoint_occupied->arcs.end(), [this, doObserver](Waypoint::Arc& arc)
+  if (passage_way)
   {
-    arc.observer = (doObserver ? this : 0);
-  });
-  std::for_each(waypoint_disconnected.begin(), waypoint_disconnected.end(), [this, doObserver](std::pair<int, int> waypoints)
-  {
-    Waypoint*        waypoint = _level->GetWorld()->GetWaypointFromId(waypoints.first);
+    Zones::Manager& zone_manager = _level->GetZoneManager();
 
-    if (waypoint)
+    zone_manager.UnregisterPassageway(passage_way);
+  }
+}
+
+void ObjectDoor::ProcessCollisions(void)
+{
+  collision_enabled = true;
+}
+
+void ObjectDoor::UnprocessCollision(void)
+{
+  collision_enabled = false;
+}
+
+void ObjectDoor::InitializePassageWay(void)
+{
+  Zones::Manager&   zone_manager      = _level->GetZoneManager();
+  Waypoint*         waypoint_occupied = GetOccupiedWaypoint();
+  vector<Waypoint*> to_observe;
+
+  // From occupied waypoint, if one was specified  
+  if (waypoint_occupied)
+  {
+    for_each(waypoint_occupied->arcs.begin(), waypoint_occupied->arcs.end(), [this, &to_observe](const Waypoint::Arc& arc)
     {
-      Waypoint::Arc* arc1 = waypoint->GetArcTo(waypoints.second);
-      Waypoint::Arc* arc2 = 0;
+      to_observe.push_back(arc.to);
+    });
+  }
 
-      if (arc1)
-      {
-        arc1->observer = (doObserver ? this : 0);
-        arc2           = arc1->to->GetArcTo(waypoints.first);
-      }
-      if (arc2)
-        arc2->observer = (doObserver ? this : 0);
-    }
+  // From disconnected list
+  for_each(_object->lockedArcs.begin(), _object->lockedArcs.end(), [this, &to_observe](const std::pair<int, int>& waypoint_ids)
+  {
+    World*    world         = _level->GetWorld();
+    Waypoint* waypoint_from = world->GetWaypointFromId(waypoint_ids.first);
+    Waypoint* waypoint_to   = world->GetWaypointFromId(waypoint_ids.second);
+
+    if (find(to_observe.begin(), to_observe.end(), waypoint_from) == to_observe.end())
+      to_observe.push_back(waypoint_from);
+    if (find(to_observe.begin(), to_observe.end(), waypoint_to)   == to_observe.end())
+      to_observe.push_back(waypoint_to);
   });
+  passage_way = zone_manager.RegisterPassageway(to_observe);
+  passage_way->CanGoThrough = [this](InstanceDynamicObject* object) -> bool { return (CanGoThrough(object)); };
+  passage_way->ObjectGoingThrough.Connect(*this, &ObjectDoor::GoingThrough);
+}
+
+bool ObjectDoor::CanGoThrough(InstanceDynamicObject* object)
+{
+  if (collision_enabled)
+  {
+    if (_closed)
+      return (object != _level->GetPlayer());
+  }
+  return (true);
+}
+
+void ObjectDoor::GoingThrough(InstanceDynamicObject* object)
+{
+  if (collision_enabled)
+  {
+    if (_closed)
+      PlayAnimation("open");
+    _closed = false;
+  }
 }
 
 InstanceDynamicObject::GoToData ObjectDoor::GetGoToData(InstanceDynamicObject* character)
 {
-  Waypoint* waypoint = character->GetOccupiedWaypoint();
-  GoToData  ret;
+  Pathfinding::Path best_path;
+  Waypoint*         waypoint = character->GetOccupiedWaypoint();
+  GoToData          ret;
 
   ret.nearest      = GetOccupiedWaypoint();
   ret.max_distance = -1;
   ret.min_distance = 0;
-  if (waypoint)
-  {
-    character->UnprocessCollisions();
-    std::for_each(waypoint_disconnected.begin(), waypoint_disconnected.end(), [this, waypoint, &ret](std::pair<int, int> waypoints)
-    {
-      Waypoint*         waypoint1 = _level->GetWorld()->GetWaypointFromId(waypoints.first);
-      Waypoint*         waypoint2 = _level->GetWorld()->GetWaypointFromId(waypoints.second);
-      Pathfinding::Path path;
-
-      if (path.FindPath(waypoint, waypoint1))
-      {
-        if (ret.max_distance > path.Size() || ret.max_distance == -1)
-        {
-          ret.nearest      = &path.Last();
-          ret.max_distance = path.Size();
-        }
-      }
-
-      if (path.FindPath(waypoint, waypoint2))
-      {
-        if (ret.max_distance > path.Size() || ret.max_distance == -1)
-        {
-          ret.nearest      = &path.Last();
-          ret.max_distance = path.Size();
-        }
-      }
-    });
-    character->ProcessCollisions();
-  }
-
   ret.objective    = this;
   ret.max_distance = 0;
   return (ret);
-}
-
-bool ObjectDoor::CanGoThrough(unsigned char id)
-{
-  if (_closed)
-    return (id != 0);
-  return (true);
-}
-
-void ObjectDoor::GoingThrough(void*)
-{
-  if (_closed)
-    PlayAnimation("open");
-  _closed = false;
 }
 
 void ObjectDoor::CallbackActionUse(InstanceDynamicObject* object)
@@ -106,4 +108,3 @@ void ObjectDoor::CallbackActionUse(InstanceDynamicObject* object)
   else
     _level->ConsoleWrite(i18n::T("It's locked"));
 }
-

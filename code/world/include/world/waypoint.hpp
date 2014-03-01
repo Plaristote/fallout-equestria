@@ -15,13 +15,13 @@ struct Waypoint
     struct ArcObserver
     {
       virtual ~ArcObserver() {}
-      virtual bool CanGoThrough(unsigned char type) = 0;
-      virtual void GoingThrough(void*)              = 0;
+      virtual bool CanGoThrough(Waypoint* from, Waypoint* to, void* object) = 0;
+      virtual void GoingThrough(Waypoint* from, Waypoint* to, void* object) = 0;
     };
 
     struct Arc
     {
-        Arc(NodePath from, Waypoint* to);
+        Arc(Waypoint* from, Waypoint* to);
         Arc(const Arc&);
     ~Arc();
 
@@ -30,11 +30,13 @@ struct Waypoint
         void Destroy(void);
 
         void SetVisible(bool);
+        bool CanGoThrough(void* object);
+        void GoingThrough(void* object);
 
         PT(CollisionSegment) csegment;
         PT(CollisionNode)    node;
         NodePath             nodePath;
-        NodePath             from;
+        Waypoint*            from;
         Waypoint*            to;
 
         ArcObserver*         observer;

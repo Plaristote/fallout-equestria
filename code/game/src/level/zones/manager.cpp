@@ -1,4 +1,5 @@
 #include "level/zones/manager.hpp"
+#include <level/zones/exception.hpp>
 #include "level/level.hpp"
 #include <ui/alert_ui.hpp>
  
@@ -11,6 +12,7 @@ Zones::Manager::Manager(Level& level) : level(level)
 Zones::Manager::~Manager()
 {
   UnregisterAllZones();
+  UnregisterAllPassageways();
 }
 
 void Zones::Manager::Refresh(void)
@@ -30,6 +32,17 @@ void Zones::Manager::RegisterZone(Zone& zone)
   InitializeZoneObservers(*controller);
 }
 
+Zones::PassageWay* Zones::Manager::RegisterPassageway(const std::vector<Waypoint*>& waypoints)
+{
+  PassageWay* passage_way = new PassageWay;
+  
+  passage_way->waypoints          = waypoints;
+  passage_way->CanGoThrough       = [](InstanceDynamicObject*) -> bool { return (true); };
+  passage_ways.push_back(passage_way);
+  InitializePassagewayObservers(*passage_way);
+  return (passage_way);
+}
+
 Zones::Observer* Zones::Manager::FindObserver(Waypoint* waypoint) const
 {
   auto it  = observers.begin();
@@ -43,6 +56,19 @@ Zones::Observer* Zones::Manager::FindObserver(Waypoint* waypoint) const
   return (0);
 }
 
+Zones::Observer* Zones::Manager::InitializeObserver(Waypoint* waypoint)
+{
+  Observer* observer = FindObserver(waypoint);
+
+  if (!observer)
+  {
+    observer = new Observer(waypoint);
+
+    observers.push_back(observer);
+  }
+  return (observer);
+}
+
 void Zones::Manager::InitializeZoneObservers(Controller& entry)
 {
   auto     it     = entry.zone.waypoints.begin();
@@ -50,16 +76,22 @@ void Zones::Manager::InitializeZoneObservers(Controller& entry)
 
   for (; it != end ; ++it)
   {
-    Waypoint* waypoint = *it;
-    Observer* observer = FindObserver(waypoint);
+    Observer* observer = InitializeObserver(*it);
 
-    if (!observer)
-    {
-      observer = new Observer(waypoint);
+    observer->AddObserver(&entry);
+  }
+}
 
-      observers.push_back(observer);
-    }
-    observer->zones.push_back(&entry);
+void Zones::Manager::InitializePassagewayObservers(PassageWay& entry)
+{
+  auto it  = entry.waypoints.begin();
+  auto end = entry.waypoints.end();
+  
+  for (; it != end ; ++it)
+  {
+    Observer* observer = InitializeObserver(*it);
+
+    observer->AddObserver(&entry);
   }
 }
 
@@ -78,7 +110,7 @@ void Zones::Manager::UnregisterZone(const string& name)
       Observer& observer = **observers_it;
 
       std::remove(observer.zones.begin(), observer.zones.end(), entry);
-      if (observer.zones.size() == 0)
+      if (!observer.HasObservers())
       {
         delete &observer;
         observers_it = observers.erase(observers_it);
@@ -91,12 +123,42 @@ void Zones::Manager::UnregisterZone(const string& name)
   }
 }
 
+void Zones::Manager::UnregisterPassageway(Zones::PassageWay* passage_way)
+{
+  auto it = find(passage_ways.begin(), passage_ways.end(), passage_way);
+  
+  if (it != passage_ways.end())
+  {
+    auto observers_it  = observers.begin();
+    auto observers_end = observers.end();
+
+    while (observers_it != observers_end)
+    {
+      Observer& observer = **observers_it;
+
+      std::remove(observer.passage_ways.begin(), observer.passage_ways.end(), passage_way);
+      if (!observer.HasObservers())
+      {
+        observers_it = observers.erase(observers_it);
+      }
+      else
+        observers_it++;
+    }
+    passage_ways.erase(it);
+    delete passage_way;
+  }
+}
+
 void Zones::Manager::UnregisterAllZones(void)
 {
-  for_each(zones.begin(),     zones.end(),     [](Controller* controller) { delete controller; });
-  for_each(observers.begin(), observers.end(), [](Observer* observer)     { delete observer;   });
-  zones.clear();
-  observers.clear();
+  while (zones.begin() != zones.end())
+    UnregisterZone((*zones.begin())->zone.name);
+}
+
+void Zones::Manager::UnregisterAllPassageways(void)
+{
+  while (passage_ways.begin() != passage_ways.end())
+    UnregisterPassageway(*passage_ways.begin());
 }
 
 void Zones::Manager::InsertPartyInZone(Party& party, const string& zone)
@@ -116,10 +178,10 @@ void Zones::Manager::InsertPartyInZone(Party& party, const string& zone)
         controller.InsertObject(character);
     }
   }
-  catch (...)
+  catch (ZoneException exception)
   {
-    // TODO proper exception handling
-    AlertUi::NewAlert.Emit("Could not insert party '" + party.GetName() + "' into zone '" + zone + "'");
+    cerr << "Inserting party '" << party.GetName() << "': " << exception.what() << endl;
+    exception.Display();
   }
 }
 
@@ -131,9 +193,9 @@ void Zones::Manager::InsertObjectInZone(InstanceDynamicObject* object, const str
 
     controller.InsertObject(object);
   }
-  catch (...)
+  catch (ZoneException exception)
   {
-    // TODO proper exception handling
+    cerr << "Inserting object '" << object->GetName() << "': " << exception.what() << endl;
   }
 }
 
@@ -147,7 +209,7 @@ Zones::Controller& Zones::Manager::GetZone(const string& name)
   auto it = find_if(zones.begin(), zones.end(), [name](Controller* controller) -> bool { return (controller->zone.name == name); });
   
   if (it == zones.end())
-    throw "bite"; // TODO throw some real exception
+    throw ZoneNotFound(name, "Could not find such zone");
   return (**it);
 }
 
@@ -156,6 +218,6 @@ const Zones::Controller& Zones::Manager::GetZone(const string& name) const
   auto it = find_if(zones.begin(), zones.end(), [name](Controller* controller) -> bool { return (controller->zone.name == name); });
 
   if (it == zones.end())
-    throw "bite"; // TODO throw some real exception
+    throw ZoneNotFound(name, "Could not find such zone");
   return (**it);
 }

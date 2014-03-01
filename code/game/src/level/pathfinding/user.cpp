@@ -4,6 +4,11 @@
 
 using namespace std;
 
+namespace Pathfinding
+{
+  extern void* current_user;
+}
+
 LPoint3f NodePathSize(NodePath);
 
 Pathfinding::User::User(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
@@ -43,10 +48,12 @@ unsigned short      Pathfinding::User::GetPathDistance(Pathfinding::Collider* ob
 
 unsigned short      Pathfinding::User::GetPathDistance(Waypoint* waypoint)
 {
-  Pathfinding::Path path(GetOccupiedWaypoint(), waypoint);
+  Pathfinding::Path path;
 
   UnprocessCollisions();
+  current_user = this;
   path.FindPath(GetOccupiedWaypoint(), waypoint);
+  current_user = 0;
   ProcessCollisions();
   path.StripFirstWaypointFromList();
   return (path.Size());
@@ -74,6 +81,7 @@ void                Pathfinding::User::GoTo(Waypoint* waypoint)
   collector.start();
   ReachedDestination.DisconnectAll();
   UnprocessCollisions();
+  current_user = this;
   if (path.Size() > 0)
   {
     // TODO this shouldn't do anything. might be related to why characters bump into each others
@@ -93,6 +101,7 @@ void                Pathfinding::User::GoTo(Waypoint* waypoint)
   }
   else
     cout << "Character " << GetName() << " doesn't have a waypointOccupied" << endl;
+  current_user = 0;
   ProcessCollisions();
   collector.stop();
 }
@@ -168,11 +177,11 @@ void Pathfinding::User::GoThroughNextWaypoint(void)
     if (arc->observer)
     {
       int player_flag = (this == _level->GetPlayer() ? 1 : 0);
-      
-      if (!(arc->observer->CanGoThrough(player_flag)))
+
+      if (!(arc->CanGoThrough(this)))
         arc = 0;
       if (arc)
-        arc->observer->GoingThrough(this);
+        arc->GoingThrough(this);
     }
   }
   ProcessCollisions();

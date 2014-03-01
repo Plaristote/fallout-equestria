@@ -2,6 +2,7 @@
 # define OBJECT_DOOR_HPP
 
 # include "level/objects/instance_dynamic_object.hpp"
+# include "level/zones/passage_way.hpp"
 
 class Lockable
 {
@@ -9,9 +10,9 @@ public:
   Lockable(DynamicObject* o) : __object(o) {}
   Lockable(void) {}
 
-  string         GetKeyName(void) const { return (__object->key);              }
-  bool           IsLocked(void)   const { return (__object->locked);           }
-  bool           IsOpen(void)     const { return (!_closed);                  }
+  string         GetKeyName(void) const { return (__object->key);               }
+  bool           IsLocked(void)   const { return (__object->locked);            }
+  bool           IsOpen(void)     const { return (!_closed);                    }
   void           Unlock(void)           { __object->locked = !__object->locked; }
 
 protected:
@@ -20,35 +21,27 @@ private:
   DynamicObject* __object;
 };
 
-class ObjectDoor : public InstanceDynamicObject, public Lockable, public Waypoint::ArcObserver
+class ObjectDoor : public InstanceDynamicObject, public Lockable
 {
 public:
-  ObjectDoor(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object), Lockable(object)
-  {
-    _type   = ObjectTypes::Door;
-    _closed = true;
-    ObserveWaypoints(true);
-  }
-  
-  ~ObjectDoor()
-  {
-    ObserveWaypoints(false);
-  }
+  ObjectDoor(Level* level, DynamicObject* object);  
+  ~ObjectDoor();
 
-  bool     HasOccupiedWaypoint(void) const { return (false); }
+  bool               HasOccupiedWaypoint(void) const { return (false);        }
+  
+  void               ProcessCollisions(void);
+  void               UnprocessCollision(void);
 
-  void     ProcessCollisions(void);
+  void               CallbackActionUse(InstanceDynamicObject* object);
+  GoToData           GetGoToData(InstanceDynamicObject* character);
+  
+private:
+  void               InitializePassageWay(void);
+  bool               CanGoThrough(InstanceDynamicObject*);
+  void               GoingThrough(InstanceDynamicObject*);
 
-  string   GetKeyName() const { return (_object->key); }
-  
-  void     CallbackActionUse(InstanceDynamicObject* object);
-  GoToData GetGoToData(InstanceDynamicObject* character);
-  void     ObserveWaypoints(bool doObserver);
-  
-  bool     CanGoThrough(unsigned char id);
-  void     GoingThrough(void*);
-  
-  std::list<std::pair<int, int> > _workaround_wp_disconnected;
+  Zones::PassageWay* passage_way;
+  bool               collision_enabled;
 };
 
 template<> struct ObjectType2Code<ObjectDoor>      { enum { Type = ObjectTypes::Door      }; };

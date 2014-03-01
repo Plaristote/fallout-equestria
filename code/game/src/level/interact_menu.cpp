@@ -51,12 +51,11 @@ InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* conte
       {
         Rocket::Core::Element* button = _root->GetElementById(interaction.name.c_str());
 
-        _buttons.push_back(button);
-        button->AddEventListener("click",     &_buttonListener);
-        button->AddEventListener("mouseover", &_buttonHover);
-        button->AddEventListener("mouseout",  &_buttonHover);
-        button->AddEventListener("mousedown", &_buttonClick);
-        button->AddEventListener("mouseup",   &_buttonClick);
+        ToggleEventListener(true, interaction.name, "click",     _buttonListener);
+        ToggleEventListener(true, interaction.name, "mouseover", _buttonHover);
+        ToggleEventListener(true, interaction.name, "mouseout",  _buttonHover);
+        ToggleEventListener(true, interaction.name, "mousedown", _buttonClick);
+        ToggleEventListener(true, interaction.name, "mouseup",   _buttonClick);
         _listeners[it] = &interaction;
         _obs.Connect(_buttonListener.EventReceived, *this, &InteractMenu::ButtonClicked);
         _obs.Connect(_buttonHover.EventReceived,    *this, &InteractMenu::ButtonHovered);

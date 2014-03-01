@@ -28,21 +28,43 @@ Zones::Observer::~Observer()
   });
 }
 
-bool Zones::Observer::CanGoThrough(unsigned char)
+bool Zones::Observer::CanGoThrough(Waypoint* from, Waypoint* to, void* _object)
 {
-  // TODO Implement doors management in ZoneManagement
-  return (true);
+  InstanceDynamicObject* object         = reinterpret_cast<InstanceDynamicObject*>(_object);
+  bool                   can_go_through = true;
+  
+  for_each(passage_ways.begin(), passage_ways.end(), [from, to, object, &can_go_through](PassageWay* entry)
+  {
+    if (entry->ConnectsWaypoints(from, to))
+      can_go_through = can_go_through && entry->CanGoThrough(object);
+  });
+  return (can_go_through);
 }
 
-void Zones::Observer::GoingThrough(void* _object)
+void Zones::Observer::GoingThrough(Waypoint* from, Waypoint* to, void* _object)
 {
   InstanceDynamicObject* object = reinterpret_cast<InstanceDynamicObject*>(_object);
 
   if (object)
   {
-    for_each(zones.begin(), zones.end(), [object](Controller* entry)
-    {
-      entry->ObjectMovesWithinZone(object);
-    });
+    GoingThroughZones(object);
+    GoingThroughPassageways(from, to, object);
   }
+}
+
+void Zones::Observer::GoingThroughPassageways(Waypoint* from, Waypoint* to, InstanceDynamicObject* object)
+{
+  for_each(passage_ways.begin(), passage_ways.end(), [object, from, to](PassageWay* entry)
+  {
+    if (entry->ConnectsWaypoints(from, to))
+      entry->ObjectGoingThrough.Emit(object);
+  });
+}
+
+void Zones::Observer::GoingThroughZones(InstanceDynamicObject* object)
+{
+  for_each(zones.begin(), zones.end(), [object](Controller* entry)
+  {
+    entry->ObjectMovesWithinZone(object);
+  });
 }

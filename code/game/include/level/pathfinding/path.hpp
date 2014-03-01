@@ -14,15 +14,12 @@ namespace Pathfinding
   class Path
   {
   public:
-    Path(Waypoint* from, Waypoint* to) : from(from), to(to)
-    {
-    }
-    
     Path(void) : from(0), to(0)
     {
     }
 
     bool                 FindPath(Waypoint* from, Waypoint* to);
+    bool                 ContainsValidPath(void) const { return (from != 0 && to != 0); }
     void                 StripFirstWaypointFromList(void);
     void                 StripLastWaypointFromList(void);
     unsigned int         Size(void)  const { return (waypoints.size());    }

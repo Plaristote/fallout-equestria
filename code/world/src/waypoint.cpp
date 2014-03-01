@@ -6,8 +6,11 @@
 using namespace std;
 
 extern unsigned int   blob_revision;
-unsigned char         gPathfindingUnitType = 0; // TODO: Use these to determine whether object can go through things
-void*                 gPathfindingData     = 0;
+
+namespace Pathfinding
+{
+  void* current_user = 0;
+}
 
 Waypoint::Waypoint(NodePath root)
 {
@@ -21,6 +24,19 @@ Waypoint::Waypoint(NodePath root)
   nodePath.set_color(0, 0, 0, 0.5);
 
   floor    = 0;
+}
+
+bool                Waypoint::Arc::CanGoThrough(void* object)
+{
+  if (observer)
+    return (observer->CanGoThrough(from, to, object));
+  return (true);
+}
+
+void                Waypoint::Arc::GoingThrough(void* object)
+{
+  if (observer)
+    observer->GoingThrough(from, to, object);
 }
 
 void                Waypoint::SetSelected(bool selected)
@@ -45,7 +61,7 @@ bool                Waypoint::operator==(const Waypoint* other) const { return (
 
 Waypoint::Arcs::iterator Waypoint::ConnectUnsafe(Waypoint* other)
 {
-  arcs.push_back(Arc(nodePath, other));
+  arcs.push_back(Arc(this, other));
   return (--(arcs.end()));
 }
 
@@ -55,8 +71,8 @@ Waypoint::Arcs::iterator Waypoint::Connect(Waypoint* other)
 
   if (it == arcs.end())
   {
-    arcs.push_back(Arc(nodePath, other));
-    other->arcs.push_back(Arc(other->nodePath, this));
+    arcs.push_back(Arc(this, other));
+    other->arcs.push_back(Arc(other, this));
     return (--(arcs.end()));
   }
   return (it);
@@ -127,7 +143,7 @@ list<Waypoint*> Waypoint::GetSuccessors(Waypoint* parent)
 
       if (parent == arc.to)
         continue ;
-      if (arc.observer && arc.observer->CanGoThrough(gPathfindingUnitType) == false)
+      if (arc.CanGoThrough(Pathfinding::current_user) == false)
         continue ;
       successors.push_back(arc.to);
   }
@@ -159,7 +175,7 @@ void Waypoint::UpdateArcDirection(Waypoint* to)
 #endif
 
 // WAYPOINTS ARCS
-Waypoint::Arc::Arc(NodePath from, Waypoint* to) : from(from), to(to)
+Waypoint::Arc::Arc(Waypoint* from, Waypoint* to) : from(from), to(to)
 {
   observer = 0;
 }
@@ -189,7 +205,7 @@ void Waypoint::Arc::SetVisible(bool set)
     node->set_from_collide_mask(CollideMask(0));
     node->add_solid(csegment);
     csegment->set_point_a(0, 0, 0);
-    nodePath = from.attach_new_node(node);
+    nodePath = from->nodePath.attach_new_node(node);
     nodePath.set_pos(0, 0, 0);
     UpdateDirection();
     nodePath.show();
