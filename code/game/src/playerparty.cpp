@@ -36,7 +36,7 @@ Party::Member* PlayerParty::GetPlayer(void)
   auto player = GetMember("self");
 
   if (player == 0)
-    throw "bite";
+    throw PlayerNotFound();
   return (player);
 }
 

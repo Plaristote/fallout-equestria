@@ -95,10 +95,14 @@ std::string NodePathFullName(NodePath nodepath, NodePath root)
 
 LPoint2f Mouse::GetPosition(void) const
 {
-  MouseData  pointer = _window->get_graphics_window()->get_pointer(0);
-  LPoint2f   cursorPos(pointer.get_x(), pointer.get_y());
+  if (_window->get_graphics_window())
+  {
+    MouseData  pointer = _window->get_graphics_window()->get_pointer(0);
+    LPoint2f   cursorPos(pointer.get_x(), pointer.get_y());
 
-  return (cursorPos);
+    return (cursorPos);
+  }
+  return (LPoint2f(0.f, 0.f));
 }
 
 LPoint2f Mouse::GetPositionRatio(void) const

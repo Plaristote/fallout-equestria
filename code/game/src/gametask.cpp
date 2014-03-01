@@ -7,7 +7,6 @@
 #include "thread.hpp"
 #include "my_zlib.hpp"
 #include <iostream>
-#include <boost/iterator/iterator_concepts.hpp>
 #include "ui/alert_ui.hpp"
 #include <loading_exception.hpp>
 #include "scheduled_task.hpp"
@@ -213,7 +212,7 @@ bool GameTask::LoadGame()
     exception.Display();
     return (false);
   }
-  return (true);
+  return (false);
 }
 
 void GameTask::OpenLevel(const std::string& level_name, const std::string& entry_zone)
