@@ -78,7 +78,7 @@ bool UseSkill(DynamicObject@ target, Character@ user, string skill)
 
 void StartStealing(Character@ user, DynamicObject@ target)
 {
-  level.ActionUse(user, target);
+  Use(user, target);
 }
 
 void StartSneaking(Character@ user)
@@ -106,7 +106,7 @@ void ai_template_follow_char(Character@ self, Character@ to_follow, float elapse
   }
   if (!(self.IsMoving()) && (follow_char_timer2 > 3))
   {
-    self.GoToRandomWaypoint();
+    self.GoToRandomDirection();
     follow_char_timer2 = 0;
   }
 }

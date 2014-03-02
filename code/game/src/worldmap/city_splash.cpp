@@ -27,7 +27,7 @@ CitySplash::CitySplash(Data data, WindowFramework* w, Rocket::Core::Context* c) 
       {
         Rocket::Core::String rml;
         stringstream         stream;
-        std::string          zone_name = "zone-" + humanize(zone.Key());
+        std::string          zone_name = "zone-" + underscore(zone.Key());
 
         stream << "<div class='zone-button' id='" << zone_name << "'>";
         stream << zone.Key();

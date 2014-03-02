@@ -9,7 +9,7 @@ public:
   PipbuckQuestApp(Data script);
   ~PipbuckQuestApp() {}
 
-  const std::string GetAppId(void) const { return (_appid); }
+  std::string GetAppId(void) { return (_appid); }
   
   void RunAsMainTask(Rocket::Core::Element*, DataEngine&);
   void RunAsBackgroundTask(DataEngine&) {}

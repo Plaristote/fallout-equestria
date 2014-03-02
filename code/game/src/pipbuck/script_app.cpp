@@ -2,9 +2,8 @@
 
 using namespace std;
 
-PipbuckAppScript::PipbuckAppScript(Data script)
+PipbuckAppScript::PipbuckAppScript(Data script) : _data(script)
 {
-  _data.Duplicate(script);
   _object = new AngelScript::Object((const std::string&)("scripts/pipbuck/" + _data["src"].Value()));
 }
 
@@ -35,7 +34,7 @@ void PipbuckAppScript::Focused(Rocket::Core::Element* root, DataEngine& de)
 
   if (!(_object->IsDefined(function_name)))
   {
-    const string function_decl = "void" + function_name + "(RmlElement@, Data)";
+    const string function_decl = "void " + function_name + "(RmlElement@, Data)";
 
     _object->asDefineMethod(function_name, function_decl);
     if (!(_object->IsDefined(function_name)))

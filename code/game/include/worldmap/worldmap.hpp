@@ -33,6 +33,7 @@ public:
   void Show(void);
   
   void SetCityVisible(const std::string&);
+  void AddEntryZoneToCity(const std::string& city_name, const std::string& zone);
   void AddCity(const std::string&, float pos_x, float pos_y, float radius);
   bool HasCity(const std::string&) const;
 
@@ -45,7 +46,6 @@ public:
   void Save(const std::string&);
   
   void MoveTowardsCoordinates(float x, float y);
-  void MoveTowardsPlace(const std::string&);
 
   DataEngine& GetDataEngine(void) { return (_dataEngine); }
   Data        GetCaseData(int x, int y) const;

@@ -13,7 +13,7 @@ public:
       delete _object;
   }
   
-  const std::string GetAppId(void) const { return (_data.Key()); }
+  std::string GetAppId(void) { return (_data.Key()); }
 
   void RunAsMainTask(Rocket::Core::Element*, DataEngine&);
   void RunAsBackgroundTask(DataEngine&);

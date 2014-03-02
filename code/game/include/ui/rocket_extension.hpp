@@ -81,10 +81,11 @@ protected:
   WindowFramework*               _window;
   Rocket::Core::ElementDocument* _root;
   Rocket::Core::Context*         _context;
+  bool                           root_outlives_this_object;
 private:
   void RecursiveTranslate(Rocket::Core::Element*);
   
-  Sync::ObserverId        _languageObs;
+  Sync::ObserverId               _languageObs;
   Listeners                      _listeners;
 };
 

@@ -20,6 +20,7 @@ namespace Rocket
 
 UiBase::UiBase(WindowFramework* window, Rocket::Core::Context* context) : _window(window), _root(0), _context(context)
 {
+  root_outlives_this_object = false;
   _languageObs = i18n::LanguageChanged.Connect(*this, &UiBase::Translate);
 }
 
@@ -34,9 +35,12 @@ UiBase::~UiBase()
       if (elem)
         elem->RemoveEventListener(listener.event.c_str(), &(listener.instance));
     });
-    _root->Close();
-    _root->RemoveReference();
-    _root = 0;
+    if (!root_outlives_this_object)
+    {
+      _root->Close();
+      _root->RemoveReference();
+      _root = 0;
+    }
   }
   i18n::LanguageChanged.Disconnect(_languageObs);
 }

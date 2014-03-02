@@ -59,6 +59,23 @@ unsigned short      Pathfinding::User::GetPathDistance(Waypoint* waypoint)
   return (path.Size());
 }
 
+void                Pathfinding::User::GoToRandomDirection(void)
+{
+  Waypoint* from = GetOccupiedWaypoint();
+  
+  if (from)
+  {
+    Waypoint* to   = from->GetRandomWaypoint();
+
+    if (to)
+    {
+      UnprocessCollisions();
+      path.FindPath(from, to);
+      ProcessCollisions();
+    }
+  }
+}
+
 void                Pathfinding::User::TeleportTo(Waypoint* waypoint)
 {
   if (waypoint)

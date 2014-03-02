@@ -169,6 +169,17 @@ void ObjectCharacter::ActionTalkTo(ObjectCharacter* user)
   }
 }
 
+void ObjectCharacter::ActionUse(InstanceDynamicObject* user)
+{
+  if (user == _level->GetPlayer())
+  {
+    if (IsAlive())
+      _level->GetInteractions().ActionLootWithScript(&(GetInventory()), this, script->GetContext(), "scripts/ai/" + _object->script + ".as");
+    else
+      _level->GetInteractions().ActionLoot(&(GetInventory()));
+  }
+}
+
 void ObjectCharacter::SetInventory(Inventory* inventory)
 {
   if (inventory)
@@ -548,17 +559,6 @@ void                ObjectCharacter::RunDeath()
 bool ObjectCharacter::IsPlayer(void) const
 {
   return (_level->GetPlayer() == this);
-}
-
-void ObjectCharacter::ActionUse(InstanceDynamicObject* user)
-{
-  if (user == _level->GetPlayer())
-  {
-    if (IsAlive())
-      _level->GetInteractions().ActionLootWithScript(&(GetInventory()), this, script->GetContext(), "scripts/ai/" + _object->script + ".as");
-    else
-      _level->GetInteractions().ActionLoot(&(GetInventory()));
-  }
 }
 
 /*

@@ -28,6 +28,7 @@ namespace Pathfinding
     
     void                     GoTo(Waypoint*);
     void                     GoTo(InstanceDynamicObject* target, int max_distance = 0);
+    void                     GoToRandomDirection();
     unsigned short           GetPathDistance(Pathfinding::Collider*);
     unsigned short           GetPathDistance(Waypoint*);
     void                     TeleportTo(Waypoint*);

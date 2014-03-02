@@ -38,7 +38,8 @@ public:
   
   Sync::Signal<void (Rocket::Core::Event&)> OpenPipbuck;
   
-  PT(RocketRegion)       GetRocketRegion(void) { return (_rocket); }
+  WindowFramework*       GetWindowFramework(void) const { return (window);  }
+  PT(RocketRegion)       GetRocketRegion(void)    const { return (_rocket); }
 
 private:
   WindowFramework* window;

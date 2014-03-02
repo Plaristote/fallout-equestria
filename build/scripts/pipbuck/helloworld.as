@@ -2,9 +2,10 @@
 // 0: file list
 // 1: file text
 // 2: file sound
-int         current_interface = 0;
-string      current_file;
-RmlElement@ myroot;
+int            current_interface = 0;
+string         current_file;
+UserInterface@ user_interface;
+RmlElement@    myroot;
 
 // AudioFile Playing stuff
 SoundManager@ pb_snd_manager;
@@ -22,6 +23,9 @@ bool start(Data data)
 
 void exit(Data data)
 {
+  UnregisterUserInterface(user_interface);
+  @user_interface   = null;
+  @myroot           = null;
   current_interface = 0;
   current_file      = "";
   if (@pb_sound_playing != null)
@@ -38,8 +42,9 @@ void focused(RmlElement@ root, Data data)
   Write("FileManager Focused");
   string rml;
 
-  @myroot = @root;
-  rml     = "<h1>File Manager 2000</h1>";
+  @user_interface = RegisterUserInterface(root);
+  @myroot         = @root;
+  rml             = "<h1>File Manager 2000</h1>";
   if (current_interface == 0)
     rml += display_file_list(data);
   else if (current_interface == 1)
@@ -87,16 +92,10 @@ void   events_file_list(Data data)
 
   while (it < n_files)
   {
-    Data        file = files[it];
-    RmlElement@ elem = myroot.GetElementById("file-" + file.Key());
+    Data        file    = files[it];
+    string      elem_id = "file-" + file.Key();
 
-    if (@elem != null)
-    {
-      elem.ClearEventListeners();
-      elem.AddEventListener("click", "file_opened");
-    }
-    else
-      Write("[Pipbuck][FileManager][Error] No element with id 'file-" + file.Key() + "'");
+    user_interface.AddEventListener(elem_id, "click", "file_opened");
     it += 1;
   }
 }
@@ -104,17 +103,14 @@ void   events_file_list(Data data)
 void   events_file_audio(Data data)
 {
   Write("Executing events_file_audio");
-  RmlElement@ elem_play  = myroot.GetElementById("pipbuck-audio-play");
-  RmlElement@ elem_stop  = myroot.GetElementById("pipbuck-audio-stop");
-  RmlElement@ elem_pause = myroot.GetElementById("pipbuck-audio-pause");
-
-  elem_play.AddEventListener("click", "file_audio_play");
-  elem_stop.AddEventListener("click", "file_audio_stop");
-  elem_pause.AddEventListener("click", "file_audio_pause");
+  user_interface.AddEventListener("pipbuck-audio-play",  "click", "file_audio_play");
+  user_interface.AddEventListener("pipbuck-audio-stop",  "click", "file_audio_stop");
+  user_interface.AddEventListener("pipbuck-audio-pause", "click", "file_audio_pause");
 }
 
 void file_audio_play(Data data, RmlElement@ current_element, string event)
 {
+  Cout("FileAudioPlay");
   Write("FileAudioPlay");
   if (pb_sound_paused)
   {
@@ -169,13 +165,9 @@ void file_audio_pause(Data data, RmlElement@ current_element, string event)
 
 void   release_events_file_audio(Data)
 {
-  RmlElement@ elem_play  = myroot.GetElementById("pipbuck-audio-play");
-  RmlElement@ elem_stop  = myroot.GetElementById("pipbuck-audio-stop");
-  RmlElement@ elem_pause = myroot.GetElementById("pipbuck-audio-pause");
-
-  elem_play.ClearEventListeners();
-  elem_stop.ClearEventListeners();
-  elem_pause.ClearEventListeners();
+  user_interface.DelEventListener("pipbuck-audio-play",  "click", "file_audio_play");
+  user_interface.DelEventListener("pipbuck-audio-stop",  "click", "file_audio_stop");
+  user_interface.DelEventListener("pipbuck-audio-pause", "click", "file_audio_pause");
 }
 
 void   file_opened(Data data, RmlElement@ current_element, string event)
@@ -202,7 +194,6 @@ void   file_opened(Data data, RmlElement@ current_element, string event)
     }
     it += 1;
   }
-  current_element.ClearEventListeners();
   if (current_interface == 1)
     rml = display_file_text(data);
   else if (current_interface == 2)
@@ -236,6 +227,8 @@ string display_file_audio(Data data)
 
 void unfocused(Data data)
 {
+  UnregisterUserInterface(user_interface);
+  @user_interface = null;
   Write("Helloworld Unfocused");
 }
 

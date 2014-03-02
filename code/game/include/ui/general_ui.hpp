@@ -15,8 +15,9 @@ public:
   GeneralUi(WindowFramework*);
   ~GeneralUi();
 
-  PT(RocketRegion)       GetRocketRegion(void) const { return (_rocket); }
-  GameOptions&           GetOptions(void) { return (*_options); }
+  PT(RocketRegion)       GetRocketRegion(void)    const { return (_rocket);   }
+  WindowFramework*       GetWindowFramework(void) const { return (_window);   }
+  GameOptions&           GetOptions(void)               { return (*_options); }
 
 private:
   WindowFramework*       _window;

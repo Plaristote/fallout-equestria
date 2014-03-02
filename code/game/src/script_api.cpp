@@ -11,6 +11,12 @@
 
 #include "worldmap/worldmap.hpp"
 
+#include "level/interactions/action_use.hpp"
+#include "level/interactions/action_use_object.hpp"
+#include "level/interactions/action_use_skill.hpp"
+#include "level/interactions/action_use_spell.hpp"
+#include "level/interactions/action_use_weapon.hpp"
+
 /*
  * Script Interface for Tasks
  */
@@ -30,6 +36,7 @@ void ScriptApiDeclareFunction(const std::string& name, const std::string& decl)
 }
 
 #include "scheduled_task.hpp"
+#include <boost/iterator/iterator_concepts.hpp>
 
 class ScheduledScriptTask : public ScheduledTask
 {
@@ -71,95 +78,104 @@ void ScheduledScriptTask::Run()
 /*
  * Script Interface for Rocket Listeners
  */
-class RocketAsListener : public Rocket::Core::EventListener
+
+namespace ScriptApi
 {
-public:
-  RocketAsListener(DataEngine& de, Rocket::Core::Element* elem, const std::string& event, const std::string& func_name) : _element(elem), _event(event), _de(de)
+  class RocketUi : public UiBase
   {
-    cout << "RocketAsListener::RocketAsListener" << endl;
-    if (_element)
-      _element->AddEventListener(_event.c_str(), this);
-    else
-      cout << "RocketAsListener constructed with null RmlElement" << endl;
-    _callback = "void " + func_name + "(Data, RmlElement@, string)";
-    _context  = AngelScript::ContextLock::Context();
-    _module   = AngelScript::ContextLock::Module();
-  }
-
-  ~RocketAsListener()
-  {
-    if (_element)
-      _element->RemoveEventListener(_event.c_str(), this);
-  }
-
-  void ProcessEvent(Rocket::Core::Event& event)
-  {
-    cout << "RocketAsListener::ProcessEvent" << endl;
-    if (_module && _element)
+    struct EventListener : public RocketListener
     {
-      asIScriptFunction* callback = _module->GetFunctionByDecl(_callback.c_str());
-
-      if (_context && callback)
+      EventListener()
       {
-        _context->Prepare(callback);
-        _context->SetArgObject(0, &_de);
-        _context->SetArgObject(1, event.GetCurrentElement());
-        _context->SetArgObject(2, &_event);
-        _context->Execute();
+        EventReceived.Connect(*this, &EventListener::Callback);
+      }
+      
+      void Callback(Rocket::Core::Event& event)
+      {
+        try
+        {
+          if (object->IsDefined(callback))
+          {
+            std::string                               event_name = event.GetType().CString();
+            AngelScript::Type<Data*>                  param1(&GameTask::CurrentGameTask->GetDataEngine());
+            AngelScript::Type<Rocket::Core::Element*> param2(event.GetCurrentElement());
+            AngelScript::Type<std::string*>           param3(&event_name);
+
+            object->Call(callback, 3, &param1, &param2, &param3);
+          }
+          else
+            cout << "[AngelScript][UserInterface] Cannot react to '" << this->event << "' on '" << id << "': function '" << callback << "' does not exist." << endl;
+        }
+        catch (const AngelScript::Exception& e)
+        {
+          AlertUi::NewAlert.Emit(std::string("Script crashed: ") + e.what());
+        }
+      }
+
+      std::string          callback, id, event;
+      AngelScript::Object* object;
+    };
+    
+  public:
+    RocketUi(GameUi& game_ui, Rocket::Core::Element* root) : UiBase(game_ui.GetWindowFramework(), game_ui.GetRocketRegion()->get_context())
+    {
+      _root                     = root->GetOwnerDocument();
+      root_outlives_this_object = true;
+      object                    = AngelScript::ContextLock::CurrentObject();
+    }
+    
+    ~RocketUi()
+    {
+      //for_each(listeners.begin(), listeners.end(), [](EventListener* i) { delete i; });
+    }
+    
+    void AddEventListener(const std::string& id, const std::string& event, const std::string& callback)
+    {
+      EventListener* new_listener = new EventListener;
+
+      DelEventListener(id, event, callback);
+      if (!(object->IsDefined(callback)))
+        object->asDefineMethod(callback, "void " + callback + "(Data, RmlElement@, string)");
+      new_listener->id       = id;
+      new_listener->event    = event;
+      new_listener->callback = callback;
+      new_listener->object   = object;
+      ToggleEventListener(true, id, event, *new_listener);
+      listeners.push_back(new_listener);
+    }
+    
+    void DelEventListener(const std::string& id, const std::string& event, const std::string& callback)
+    {
+      auto it = find_if(listeners.begin(), listeners.end(), [id, event, callback](EventListener* listener) -> bool
+      {
+        return (listener->id == id && listener->event == event && listener->callback == callback);
+      });
+
+      if (it != listeners.end())
+      {
+        ToggleEventListener(false, id, event, **it);
+        delete *it;
+        listeners.erase(it);
       }
     }
-  }
-
-private:
-  Rocket::Core::Element* _element;
-  std::string            _event;
-  DataEngine&            _de;
-  asIScriptContext*      _context;
-  asIScriptModule*       _module;
-  std::string            _callback;
-};
-
-class RocketAsManager
-{
-  struct ListenerPair
-  {
-    ListenerPair(Rocket::Core::Element* f, RocketAsListener* s) : element(f), listener(s) {}
-    Rocket::Core::Element* element;
-    RocketAsListener*      listener;
-    bool operator==(Rocket::Core::Element* comp) { return (element == comp); }
-  };
-  typedef std::list<ListenerPair> ListenerPairs;
-public:
-  static RocketAsManager self;
-  
-  void          AddEventListener(Rocket::Core::Element* e, RocketAsListener* l)
-  {
-    _event_listeners.push_back(ListenerPair(e, l));
-  }
-  
-  void          DelEventListener(Rocket::Core::Element* e)
-  {
-    bool keep_searching;
-
-    do
+    
+    static RocketUi* Factory(Rocket::Core::Element* root)
     {
-      auto it = std::find(_event_listeners.begin(), _event_listeners.end(), e);
+      RocketUi* rocket_ui = new RocketUi(GameTask::CurrentGameTask->GetGameUi(), root);
 
-      keep_searching = it != _event_listeners.end();
-      if (keep_searching)
-      {
-        cout << "Deleted an event listener" << endl;
-        delete it->listener;
-        _event_listeners.erase(it);
-      }
-    } while (keep_searching);
-  }
-  
-private:
-  ListenerPairs _event_listeners;
-};
+      return (rocket_ui);
+    }
+    
+    static void      Destroy(RocketUi* rocket_ui)
+    {
+      delete rocket_ui;
+    }
 
-RocketAsManager RocketAsManager::self;
+  private:
+    AngelScript::Object*      object;
+    std::list<EventListener*> listeners;
+  };
+}
 
 void AngelCout(const std::string& str)
 {
@@ -200,18 +216,15 @@ namespace asUtils
   std::string            RocketGetId(Rocket::Core::Element* self)                            { return (self->GetId().CString());          }
   Rocket::Core::Element* RocketGetElementById(Rocket::Core::Element* self, const string& id) { return (self->GetElementById(id.c_str())); }
   void                   RocketSetInnerRML(Rocket::Core::Element* self, const string& rml)   { return (self->SetInnerRML(rml.c_str()));   }
-  void                   RocketClearListeners(Rocket::Core::Element* self) { cout << "RocketClearListeners" << endl; RocketAsManager::self.DelEventListener(self); }
-  void                   RocketSetListener(Rocket::Core::Element* self, const string& event, const string& callback)
-  {
-    DataEngine&       data_engine = WorldMap::CurrentWorldMap->GetDataEngine();
-    RocketAsListener* listener    = new RocketAsListener(data_engine, self, event, callback);
 
-    RocketAsManager::self.AddEventListener(self, listener);
-  }
-  
   void GoTo(int x, int y, int z, ObjectCharacter* character)
   {
     //character->GoTo(LPoint3f(x, y, z));
+  }
+
+  int GetPathDistance(ObjectCharacter* self, InstanceDynamicObject* target)
+  {
+    return (target->GetPathTowardsObject(self).Size());
   }
 }
 
@@ -325,11 +338,13 @@ void AngelScriptInitialize(void)
 
   const char* statsheetClass = "Special";
   engine->RegisterObjectType(statsheetClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(statsheetClass, "void SetCurrentHp(int)",          asMETHOD(StatController,SetCurrentHp),  asCALL_THISCALL);
-  engine->RegisterObjectMethod(statsheetClass, "void AddExperience(int)",         asMETHOD(StatController,AddExperience), asCALL_THISCALL);
-  engine->RegisterObjectMethod(statsheetClass, "void AddReputation(string, int)", asMETHOD(StatController,AddReputation), asCALL_THISCALL);
-  engine->RegisterObjectMethod(statsheetClass, "void SetStatistic(string, int)",  asMETHOD(StatController,SetStatistic),  asCALL_THISCALL);
-  engine->RegisterObjectMethod(statsheetClass, "Data GetData()",                  asMETHOD(StatController,GetData),       asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void SetCurrentHp(int)",          asMETHOD(StatController,SetCurrentHp),    asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void SetArmorClass(int)",         asMETHOD(StatController,SetArmorClass),   asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void SetActionPoints(int)",       asMETHOD(StatController,SetActionPoints), asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void AddExperience(int)",         asMETHOD(StatController,AddExperience),   asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void AddReputation(string, int)", asMETHOD(StatController,AddReputation),   asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "void SetStatistic(string, int)",  asMETHOD(StatController,SetStatistic),    asCALL_THISCALL);
+  engine->RegisterObjectMethod(statsheetClass, "Data GetData()",                  asMETHOD(StatController,GetData),         asCALL_THISCALL);
 
   const char* itemClass      = "Item";
   const char* inventoryClass = "Inventory";
@@ -343,6 +358,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(itemClass, "string GetName()", asMETHOD(InventoryObject,GetName), asCALL_THISCALL);
   engine->RegisterObjectMethod(itemClass, "Data   AsData()",  asFUNCTION(asUtils::ItemAsData), asCALL_CDECL_OBJFIRST);
 
+  const char* partyClass     = "Party";
   const char* dynObjectClass = "DynamicObject";
   const char* charClass      = "Character";
   const char* doorClass      = "Door";
@@ -351,14 +367,31 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectType(charClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(doorClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(shelfClass,     0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectType(partyClass,     0, asOBJ_REF | asOBJ_NOCOUNT);
+
+  engine->RegisterObjectMethod(partyClass, "void Join(Data)",            asMETHODPR(Party,Join,(Data),void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(partyClass, "void Join(Character@)",      asMETHODPR(Party,Join,(ObjectCharacter*),void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(partyClass, "void Leave(Character@)",     asMETHODPR(Party,Leave,(ObjectCharacter*),void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(partyClass, "bool IsInParty(Character@)", asMETHOD(Party,IsInParty), asCALL_THISCALL);
 
   Script::StdList<ObjectCharacter*>::Register(engine, "CharacterList", "Character@");
   engine->RegisterObjectMethod(charClass, "CharacterList GetNearbyAllies()",  asMETHOD(ObjectCharacter,GetNearbyAllies),  asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "CharacterList GetNearbyEnemies()", asMETHOD(ObjectCharacter,GetNearbyEnemies), asCALL_THISCALL);
 
-  engine->RegisterObjectMethod(dynObjectClass, "string GetName()",                    asMETHOD(InstanceDynamicObject,GetName), asCALL_THISCALL);
-  engine->RegisterObjectMethod(dynObjectClass, "Character@ AsCharacter()",            asFUNCTION(asUtils::DynObjAsCharacter), asCALL_CDECL_OBJLAST);
-  engine->RegisterObjectMethod(dynObjectClass, "void AddTextBox(string, int, int, int, float)", asMETHOD(InstanceDynamicObject,AddTextBox), asCALL_THISCALL);
+  engine->RegisterObjectMethod(dynObjectClass, "Character@ AsCharacter()",                      asFUNCTION(asUtils::DynObjAsCharacter),       asCALL_CDECL_OBJLAST);
+  engine->RegisterObjectMethod(dynObjectClass, "string GetName()",                              asMETHOD(InstanceDynamicObject,GetName),      asCALL_THISCALL);
+  engine->RegisterObjectMethod(dynObjectClass, "void AddTextBox(string, int, int, int, float)", asMETHOD(InstanceDynamicObject,AddTextBox),   asCALL_THISCALL);
+
+  engine->RegisterObjectMethod(dynObjectClass, "Data GetDataStore()",                           asMETHOD(InstanceDynamicObject,GetDataStore), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass,      "Data GetDataStore()",                           asMETHOD(ObjectCharacter,GetDataStore),       asCALL_THISCALL);
+  engine->RegisterObjectMethod(doorClass,      "Data GetDataStore()",                           asMETHOD(ObjectDoor,GetDataStore),            asCALL_THISCALL);
+  engine->RegisterObjectMethod(shelfClass,     "Data GetDataStore()",                           asMETHOD(ObjectShelf,GetDataStore),           asCALL_THISCALL);
+  
+  engine->RegisterObjectMethod(dynObjectClass, "void Use(Character@)",                          asMETHOD(InstanceDynamicObject,ActionUse), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass,      "void Use(Character@)",                          asMETHOD(ObjectCharacter,ActionUse), asCALL_THISCALL);
+  engine->RegisterObjectMethod(dynObjectClass, "void TalkTo(Character@)",                       asMETHOD(InstanceDynamicObject,ActionTalkTo), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass,      "void TalkTo(Character@)",                       asMETHOD(ObjectCharacter,ActionTalkTo), asCALL_THISCALL);
+
   //engine->RegisterObjectMethod(charClass, "void SetRunning(const bool)",              asMETHOD(ObjectCharacter,SetRunning), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "string GetName()",                         asMETHOD(ObjectCharacter,GetName), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool HasLineOfSight(DynamicObject@)",      asMETHOD(ObjectCharacter,HasLineOfSight), asCALL_THISCALL);
@@ -366,12 +399,13 @@ void AngelScriptInitialize(void)
   //engine->RegisterObjectMethod(charClass, "void TeleportTo(int)",                     asMETHODPR(ObjectCharacter,TeleportTo, (unsigned int), void), asCALL_THISCALL);
   //engine->RegisterObjectMethod(charClass, "void GoTo(int)",                           asMETHODPR(ObjectCharacter,GoTo, (unsigned int), void), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void GoTo(DynamicObject@, int)",           asMETHODPR(ObjectCharacter,GoTo, (InstanceDynamicObject*, int), void), asCALL_THISCALL);
-  //engine->RegisterObjectMethod(charClass, "void GoToRandomWaypoint()",                asMETHOD(ObjectCharacter,GoToRandomWaypoint), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "void GoToRandomDirection()",               asMETHOD(ObjectCharacter,GoToRandomDirection), asCALL_THISCALL);
+  // TODO implement C++ for that
+  //engine->RegisterObjectMethod(charClass, "void MoveTowards(DynamicObject@)",         asMETHOD(ObjectCharacter,MoveTowards), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(charClass, "void MoveAwayFrom(DynamicObject@)",        asMETHOD(ObjectCharacter,MoveAwayFrom), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void TruncatePath(int)",                   asMETHOD(ObjectCharacter,TruncatePath), asCALL_THISCALL);
-  //engine->RegisterObjectMethod(charClass, "int  GetNearestWaypoint(DynamicObject@)",  asMETHOD(ObjectCharacter,GetNearestWaypoint), asCALL_THISCALL);
-  //engine->RegisterObjectMethod(charClass, "int  GetFarthestWaypoint(DynamicObject@)", asMETHOD(ObjectCharacter,GetFarthestWaypoint), asCALL_THISCALL);
-  //engine->RegisterObjectMethod(charClass, "int  GetPathDistance(DynamicObject@)",     asMETHODPR(ObjectCharacter,GetPathDistance, (InstanceDynamicObject*), unsigned short), asCALL_THISCALL);
-  //engine->RegisterObjectMethod(charClass, "float GetDistance(DynamicObject@)",        asMETHOD(ObjectCharacter,GetDistance), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "int  GetPathDistance(DynamicObject@)",     asFUNCTION(asUtils::GetPathDistance), asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(charClass, "float GetDistance(DynamicObject@)",        asMETHOD(ObjectCharacter,GetDistance), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "Inventory@ GetInventory()",                asMETHODPR(ObjectCharacter,GetInventory, (), Inventory&), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "Data GetStatistics()",                     asMETHOD(ObjectCharacter,GetStatistics), asCALL_THISCALL);
   //MSVC2010 strangeness for this function: Base/Derived thingymajig complications
@@ -397,6 +431,12 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "bool   IsAlly(const Character@) const",    asMETHOD(ObjectCharacter,IsAlly),         asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "Special@ GetStatController()",             asMETHODPR(ObjectCharacter,GetStatController,() const,StatController*), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void   SetFurtive(bool)",                  asMETHOD(ObjectCharacter,SetFurtive),        asCALL_THISCALL);
+
+  engine->RegisterGlobalFunction("void Use(Character@, DynamicObject@)",                asFUNCTION(Interactions::Actions::Use::Factory),         asCALL_CDECL);
+  engine->RegisterGlobalFunction("void UseObjectOn(Character@, DynamicObject@, Item@)", asFUNCTION(Interactions::Actions::UseObjectOn::Factory), asCALL_CDECL);
+  engine->RegisterGlobalFunction("void UseSpellOn(Character@, DynamicObject@, string)", asFUNCTION(Interactions::Actions::UseSpellOn::Factory),  asCALL_CDECL);
+  engine->RegisterGlobalFunction("void UseSkillon(Character@, DynamicObject@, string)", asFUNCTION(Interactions::Actions::UseSkillOn::Factory),  asCALL_CDECL);
+  engine->RegisterGlobalFunction("void UseWeapon(Character@, Character@, Item@, int)",  asFUNCTION(Interactions::Actions::UseWeaponOn::Factory), asCALL_CDECL);
 
   engine->RegisterObjectMethod(doorClass, "void   Unlock()",     asMETHOD(Lockable,Unlock),         asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "bool   IsLocked()",   asMETHOD(Lockable,IsLocked),       asCALL_THISCALL);
@@ -434,22 +474,23 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(cameraClass, "void Follow(DynamicObject@)",   asMETHOD(LevelCamera,FollowObject),   asCALL_THISCALL);
   engine->RegisterObjectMethod(cameraClass, "void StopFollowing()",          asMETHOD(LevelCamera,StopFollowingNodePath), asCALL_THISCALL);
   
+  const char* zoneManagerClass = "ZoneManager";
+  engine->RegisterObjectType(zoneManagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(zoneManagerClass, "bool ZoneExists(string)", asMETHOD(Zones::Manager,ZoneExists), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneManagerClass, "void InsertPartyInZone(Party@, string)",  asMETHOD(Zones::Manager,InsertPartyInZone),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneManagerClass, "void InsertObjectInZone(Party@, string)", asMETHOD(Zones::Manager,InsertObjectInZone), asCALL_THISCALL);
+
   const char* levelClass = "Level";
   engine->RegisterObjectType(levelClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(levelClass, "void           ConsoleWrite(string)",                  asMETHOD(Level,ConsoleWrite),        asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "Data           GetDataEngine()",                       asMETHOD(Level,GetDataEngine),       asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "World@         GetWorld()",                            asMETHOD(Level,GetWorld),            asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "Camera@        GetCamera()",                           asMETHOD(Level,GetCamera),           asCALL_THISCALL);
+  OBJ_REF_REGISTER_METHOD(Level, void,    ConsoleWrite,  (string));
+  OBJ_REF_REGISTER_METHOD(Level, Data,    GetDataEngine, ());
+  OBJ_REF_REGISTER_METHOD(Level, World@,  GetWorld,      ());
+  OBJ_REF_REGISTER_METHOD(Level, Camera@, GetCamera,     ());
   engine->RegisterObjectMethod(levelClass, "Character@     GetCharacter(string)",                  asMETHODPR(Level,GetCharacter,(const std::string&),ObjectCharacter*), asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "Character@     GetPlayer()",                           asMETHOD(Level,GetPlayer),           asCALL_THISCALL);  
-  engine->RegisterObjectMethod(levelClass, "DynamicObject@ GetObject(string)",                     asMETHOD(Level,GetObject),           asCALL_THISCALL);
-  //engine->RegisterObjectMethod(levelClass, "void           SendToZone(Character@, string)",        asMETHODPR(Level,SetEntryZone,(ObjectCharacter*,const std::string&),void),        asCALL_THISCALL);
-  //engine->RegisterObjectMethod(levelClass, "void           ActionUseWeaponOn(Character@, Character@, Item@, int)",     asMETHOD(Level,ActionUseWeaponOn), asCALL_THISCALL);
-  //engine->RegisterObjectMethod(levelClass, "void           ActionUseObjectOn(Character@, DynamicObject@, Item@, int)", asMETHOD(Level,ActionUseObjectOn), asCALL_THISCALL);
-  //engine->RegisterObjectMethod(levelClass, "void           ActionUseSkillOn(Character@, DynamicObject@, string)",      asMETHOD(Level,ActionUseSkillOn),  asCALL_THISCALL);
-  //engine->RegisterObjectMethod(levelClass, "void           ActionUse(Character@, DynamicObject@)",                     asMETHOD(Level,ActionUse),         asCALL_THISCALL);
-  //engine->RegisterObjectMethod(levelClass, "void           ActionDropObject(Character@, Item@)",   asMETHOD(Level,ActionDropObject),    asCALL_THISCALL);
-  //engine->RegisterObjectMethod(levelClass, "void           PlayerLoot(Inventory@)",                asMETHOD(Level,PlayerLoot),          asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "Character@     GetPlayer()",                           asMETHOD(Level,GetPlayer),            asCALL_THISCALL);  
+  engine->RegisterObjectMethod(levelClass, "DynamicObject@ GetObject(string)",                     asMETHOD(Level,GetObject),            asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "void           InsertParty(Party@, string)",           asMETHOD(Level,InsertParty),          asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "void           StripParty(Party@)",                    asMETHOD(Level,RemovePartyFromLevel), asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           StartFight(Character@)",                asMETHOD(Level,StartFight),          asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           StopFight()",                           asMETHOD(Level,StopFight),           asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "void           NextTurn()",                            asMETHOD(Level,NextTurn),            asCALL_THISCALL);
@@ -457,8 +498,9 @@ void AngelScriptInitialize(void)
 
   const char* worldmapClass = "WorldMap";
   engine->RegisterObjectType(worldmapClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(worldmapClass, "void SetCityVisible(string)", asMETHOD(WorldMap,SetCityVisible), asCALL_THISCALL);
-  engine->RegisterObjectMethod(worldmapClass, "Data GetDataEngine()",        asMETHOD(WorldMap,GetDataEngine),  asCALL_THISCALL);
+  OBJ_REF_REGISTER_METHOD(WorldMap, void, SetCityVisible,     (string));
+  OBJ_REF_REGISTER_METHOD(WorldMap, Data, GetDataEngine,      ());
+  OBJ_REF_REGISTER_METHOD(WorldMap, void, AddEntryZoneToCity, (string, string));
 
   const char* questClass = "Quest";
   engine->RegisterObjectType(questClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
@@ -471,21 +513,13 @@ void AngelScriptInitialize(void)
 
   const char* questmanagerClass = "QuestManager";
   engine->RegisterObjectType(questmanagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(questmanagerClass, "void AddQuest(Data)", asMETHOD(QuestManager,AddQuest), asCALL_THISCALL);
+  OBJ_REF_REGISTER_METHOD(QuestManager, void, AddQuest, (Data));
   engine->RegisterObjectMethod(questmanagerClass, "Quest@ opIndex(const string &in)", asMETHODPR(QuestManager,operator[], (const std::string&), Quest*), asCALL_THISCALL);
   
-  const char* partyClass = "Party";
-  engine->RegisterObjectType(partyClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(partyClass, "void Join(Character@)",     asMETHODPR(Party,Join,(ObjectCharacter*),void), asCALL_THISCALL);
-  engine->RegisterObjectMethod(partyClass, "void Leave(Character@)",    asMETHODPR(Party,Join,(ObjectCharacter*),void), asCALL_THISCALL);
-  //engine->RegisterObjectMethod(partyClass, "void Export(string) const", asMETHOD(Party,Export), asCALL_THISCALL);
-  //engine->RegisterGlobalFunction("Party@ ImportParty(string)", asFUNCTION(Party::Import), asCALL_CDECL);
-  //engine->RegisterObjectMethod(levelClass, "void SetEntryZone(Party@, string)", asMETHODPR(Level,SetEntryZone,(Party&, const std::string&),void), asCALL_THISCALL);
-
   const char* gametaskClass = "Game";
   engine->RegisterObjectType(gametaskClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(gametaskClass, "QuestManager@ GetQuestManager()", asMETHOD(GameTask,GetQuestManager), asCALL_THISCALL);
-  engine->RegisterObjectMethod(gametaskClass, "Party@ GetPlayerParty()", asMETHOD(GameTask,GetPlayerParty), asCALL_THISCALL);
+  engine->RegisterObjectMethod(gametaskClass, "Party@ GetPlayerParty()",         asMETHOD(GameTask,GetPlayerParty), asCALL_THISCALL);
 
   engine->RegisterGlobalProperty("Level@    level",    &(Level::CurrentLevel));
   engine->RegisterGlobalProperty("WorldMap@ worldmap", &(WorldMap::CurrentWorldMap));
@@ -496,6 +530,11 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(rmlDocumentClass, "string      GetId()",                          asFUNCTION(asUtils::RocketGetId),          asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(rmlDocumentClass, "RmlElement@ GetElementById(string)",           asFUNCTION(asUtils::RocketGetElementById), asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(rmlDocumentClass, "void        SetInnerRML(string)",              asFUNCTION(asUtils::RocketSetInnerRML),    asCALL_CDECL_OBJFIRST);
-  engine->RegisterObjectMethod(rmlDocumentClass, "void        ClearEventListeners()",            asFUNCTION(asUtils::RocketClearListeners), asCALL_CDECL_OBJFIRST);
-  engine->RegisterObjectMethod(rmlDocumentClass, "void        AddEventListener(string, string)", asFUNCTION(asUtils::RocketSetListener),    asCALL_CDECL_OBJFIRST);
+  
+  const char* rocketUiClass = "UserInterface";
+  engine->RegisterObjectType(rocketUiClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectMethod(rocketUiClass, "void AddEventListener(string, string, string)",  asMETHOD(ScriptApi::RocketUi,AddEventListener), asCALL_THISCALL);
+  engine->RegisterObjectMethod(rocketUiClass, "void DelEventListener(string, string, string)",  asMETHOD(ScriptApi::RocketUi,DelEventListener), asCALL_THISCALL);
+  engine->RegisterGlobalFunction("UserInterface@ RegisterUserInterface(RmlElement@)",      asFUNCTION(ScriptApi::RocketUi::Factory), asCALL_CDECL);
+  engine->RegisterGlobalFunction("void           UnregisterUserInterface(UserInterface@)", asFUNCTION(ScriptApi::RocketUi::Destroy), asCALL_CDECL);
 }

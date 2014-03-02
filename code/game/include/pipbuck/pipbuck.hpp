@@ -12,7 +12,7 @@ public:
   struct App
   {
     virtual ~App(void) {}
-    virtual const std::string GetAppId(void) const                  = 0;
+    virtual std::string GetAppId(void)                              = 0;
     
     virtual void RunAsMainTask(Rocket::Core::Element*, DataEngine&) = 0;
     virtual void RunAsBackgroundTask(DataEngine&)                   = 0;

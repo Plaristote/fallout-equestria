@@ -27,7 +27,8 @@ public:
   void                     Serialize(Utils::Packet&);
 
   void                     ActionTalkTo(ObjectCharacter* user);
-  
+  void                     ActionUse(InstanceDynamicObject* object);
+
   void                     SetInventory(Inventory* inventory);
 
   void                     ProcessCollisions(void)         { if (IsAlive()) InstanceDynamicObject::ProcessCollisions();     }
@@ -86,8 +87,6 @@ private:
   void                     Fading(void);
   
   void                     RequestCharacter(ObjectCharacter*, ObjectCharacter*, const std::string& func);
-
-  void                     CallbackActionUse(InstanceDynamicObject* object);
   
   Sync::ObserverHandler          _obs_handler;
   PT(Character)                  _character;

@@ -151,6 +151,15 @@ void WorldMap::AddCity(const string& name, float x, float y, float radius)
   }
 }
 
+void WorldMap::AddEntryZoneToCity(const string& city_name, const string& zone)
+{
+  Data cities(_cityTree);
+  Data city = cities[city_name];
+
+  if (city.NotNil())
+    city["zones"][zone] = '1';
+}
+
 void WorldMap::SaveMapStatus(void) const
 {
   DataTree::Writers::JSON(_mapTree, _mapTree->GetSourceFile());

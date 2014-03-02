@@ -35,11 +35,13 @@ public:
   void                  SetLevelEncounter(const Encounter&);
 
   // Getters
-  TimeManager&          GetTimeManager(void)    { return (time_manager); }
+  GameUi&               GetGameUi(void)         { return (game_ui);                    }
+  DataEngine&           GetDataEngine(void)     { return (data_engine);                }
+  TimeManager&          GetTimeManager(void)    { return (time_manager);               }
   WorldDiplomacy&       GetDiplomacy(void)      { return (data_engine.GetDiplomacy()); }
-  QuestManager&         GetQuestManager(void)   { return (*quest_manager); }
-  Party*                GetPlayerParty(void)    { return (player_party); }
-  const std::string&    GetSavePath(void) const { return (save_path); }
+  QuestManager&         GetQuestManager(void)   { return (*quest_manager);             }
+  Party*                GetPlayerParty(void)    { return (player_party);               }
+  const std::string&    GetSavePath(void) const { return (save_path);                  }
 
   ISampleInstance*      PlaySound(const std::string&);
 

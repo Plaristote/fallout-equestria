@@ -44,7 +44,7 @@ public:
 
   Sync::Signal<void (bool)>       InterfaceOpened;
   
-  Rocket::Core::Context*          GetContext()       { return (_gameUi.GetRocketRegion()->get_context()); }  
+  Rocket::Core::Context*          GetContext()       { return (_gameUi.GetRocketRegion()->get_context()); }
   GameMainBar&                    GetMainBar(void)   { return (*_mainBar);                                }
   GameMenu&                       GetMenu(void)      { return (_gameUi.GetMenu());                        }
   GameInventory&                  GetInventory(void) { return (_gameUi.GetInventory());                   }

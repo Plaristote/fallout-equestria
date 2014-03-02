@@ -135,8 +135,9 @@ void Pipbuck::DoQuitApp(App* to_quit)
   {
     auto it = find(_running_apps.begin(), _running_apps.end(), _running_app);
 
-    _running_apps.erase(it);
     to_quit->Exited(_data_engine);
+    delete *it;
+    _running_apps.erase(it);
   }
 }
 
