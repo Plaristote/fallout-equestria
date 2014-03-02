@@ -36,7 +36,6 @@ void ScriptApiDeclareFunction(const std::string& name, const std::string& decl)
 }
 
 #include "scheduled_task.hpp"
-#include <boost/iterator/iterator_concepts.hpp>
 
 class ScheduledScriptTask : public ScheduledTask
 {
@@ -424,9 +423,9 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(doorClass,      "Data GetDataStore()",                           asMETHOD(ObjectDoor,GetDataStore),            asCALL_THISCALL);
   engine->RegisterObjectMethod(shelfClass,     "Data GetDataStore()",                           asMETHOD(ObjectShelf,GetDataStore),           asCALL_THISCALL);
   
-  engine->RegisterObjectMethod(dynObjectClass, "void Use(Character@)",                          asMETHOD(InstanceDynamicObject,ActionUse), asCALL_THISCALL);
+  engine->RegisterObjectMethod(dynObjectClass, "void Use(Character@)",                          asMETHOD(Interactions::Target,ActionUse), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass,      "void Use(Character@)",                          asMETHOD(ObjectCharacter,ActionUse), asCALL_THISCALL);
-  engine->RegisterObjectMethod(dynObjectClass, "void TalkTo(Character@)",                       asMETHOD(InstanceDynamicObject,ActionTalkTo), asCALL_THISCALL);
+  engine->RegisterObjectMethod(dynObjectClass, "void TalkTo(Character@)",                       asMETHOD(Interactions::Target,ActionTalkTo), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass,      "void TalkTo(Character@)",                       asMETHOD(ObjectCharacter,ActionTalkTo), asCALL_THISCALL);
 
   //engine->RegisterObjectMethod(charClass, "void SetRunning(const bool)",              asMETHOD(ObjectCharacter,SetRunning), asCALL_THISCALL);

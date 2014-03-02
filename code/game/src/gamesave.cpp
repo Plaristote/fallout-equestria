@@ -2,7 +2,6 @@
 #include "level/objects/shelf.hpp"
 #include "level/objects/locker.hpp"
 #include <gametask.hpp>
-#include <boost/iterator/iterator_concepts.hpp>
 
 void Level::BackupInventoriesToDynamicObjects(void)
 {

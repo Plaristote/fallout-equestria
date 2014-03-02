@@ -37,7 +37,7 @@ UiBase::~UiBase()
     });
     if (!root_outlives_this_object)
     {
-      _root->Close();
+      _root->Hide();
       _root->RemoveReference();
       _root = 0;
     }
