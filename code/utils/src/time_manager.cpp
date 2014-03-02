@@ -2,6 +2,8 @@
 
 using namespace std;
 
+TimeManager* TimeManager::CurrentTimeManager = 0;
+
 void TimeManager::AddElapsedSeconds(float s)
 {
   fseconds += s;

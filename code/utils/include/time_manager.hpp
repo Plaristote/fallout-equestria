@@ -11,6 +11,8 @@
 class TimeManager
 {
 public:
+  static TimeManager* CurrentTimeManager;
+  
   struct Task
   {
     ~Task() {}
@@ -37,12 +39,14 @@ public:
 
   TimeManager(void)
   {
-    fseconds = 0.f;
+    CurrentTimeManager = this;
+    fseconds           = 0.f;
   }
 
   ~TimeManager(void)
   {
     ClearTasks(0);
+    CurrentTimeManager = 0;
   }
   
   void            ClearTasks(unsigned char level)

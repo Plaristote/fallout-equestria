@@ -80,7 +80,7 @@ void Interactions::Player::ActionTargetUse(short unsigned int it)
     if (action["targeted"].Value() == "1")
     {
       if (action["combat"].Value() == "1" && level.GetState() != Level::Fight)
-        level.StartFight(player);
+        level.GetCombat().Start(player);
       mouse.SetState(MouseEvents::MouseTarget);
       mouse.TargetPicked.Connect([this, item, action, action_it](InstanceDynamicObject* object)
       {

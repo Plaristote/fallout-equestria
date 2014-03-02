@@ -14,7 +14,7 @@
 using namespace std;
 
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
-  CharacterStatistics(level, object),
+  CharacterActionPoints(level, object),
   line_of_sight(*level->GetWorld(), _window->get_render(), GetNodePath()),
   field_of_view(*level, *this)
 {
@@ -442,7 +442,7 @@ void ObjectCharacter::Run(float elapsedTime)
     else if (state == Level::Fight)
     {
       if (GetHitPoints() <= 0 || GetActionPoints() == 0)
-	_level->NextTurn();
+	_level->GetCombat().NextTurn();
       else if (!(IsMoving()) && script->IsDefined("combat")) // TODO replace with something more appropriate
       {
         collector_ai.start();
@@ -454,7 +454,7 @@ void ObjectCharacter::Run(float elapsedTime)
         if (ap_before == GetActionPoints() && !IsInterrupted() && !IsMoving()) // If stalled, skip turn
         {
           cout << "Character " << GetName() << " is stalling" << endl;
-          _level->NextTurn();
+          _level->GetCombat().NextTurn();
         }
       }
     }

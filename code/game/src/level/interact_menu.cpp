@@ -49,8 +49,6 @@ InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* conte
 
       for_each(interactions.begin(), interactions.end(), [this, &it](Interactions::Interaction& interaction)
       {
-        Rocket::Core::Element* button = _root->GetElementById(interaction.name.c_str());
-
         ToggleEventListener(true, interaction.name, "click",     _buttonListener);
         ToggleEventListener(true, interaction.name, "mouseover", _buttonHover);
         ToggleEventListener(true, interaction.name, "mouseout",  _buttonHover);

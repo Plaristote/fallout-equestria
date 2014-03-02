@@ -40,7 +40,7 @@ void MouseEvents::SetState(State state)
     level.GetHoveredPath().Hide();
     mouse_state = state;
 
-    if (level.GetState() == Level::Fight && mouse_state == MouseTarget && level.GetCurrentFightPlayer() == level.GetPlayer())
+    if (level.GetState() == Level::Fight && mouse_state == MouseTarget && level.GetCombat().GetCurrentCharacter() == level.GetPlayer())
       level.GetTargetOutliner().EnableOutline();
     else
       level.GetTargetOutliner().DisableOutline();

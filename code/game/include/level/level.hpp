@@ -46,6 +46,7 @@
 # include "equip_modes.hpp"
 # include "mouse_events.hpp"
 # include "level/interactions.hpp"
+# include "level/combat.hpp"
 
 # include <functional>
 
@@ -114,8 +115,10 @@ public:
   void                   ProcessAllCollisions(void);
   void                   RefreshCharactersVisibility(void);
   unsigned char          GetCurrentFloor(void) const { return (floors.GetCurrentFloor()); }
-  Exit&                  GetExit(void)       { return (exit); }
-  const Exit&            GetExit(void) const { return (exit); }
+  Exit&                  GetExit(void)         { return (exit);   }
+  const Exit&            GetExit(void)   const { return (exit);   }
+  Combat&                GetCombat(void)       { return (combat); }
+  const Combat&          GetCombat(void) const { return (combat); }
 
   InstanceDynamicObject* FindObjectFromNode(NodePath node);
   InstanceDynamicObject* GetObject(const std::string& name);
@@ -135,12 +138,6 @@ public:
   void                   PlayerEquipObject(unsigned short it, InventoryObject* object);
   void                   PlayerEquipObject(const std::string& target, unsigned int slot, InventoryObject* object);
 
-  // Fight Management
-  void                   StartCombat(void);
-  void                   StartFight(ObjectCharacter* starter);
-  void                   StopFight(void);
-  void                   NextTurn(void);
-  ObjectCharacter*       GetCurrentFightPlayer(void) const { return (combat_character_it != characters.end() ? *combat_character_it : 0); }
 
   // Misc
   void               SetName(const std::string& name) { level_name = name;   }
@@ -159,7 +156,6 @@ private:
   void               BackupInventoriesToDynamicObjects(void);
   void               SerializeParties(Utils::Packet&);
   void               UnserializeParties(Utils::Packet&);
-  void               RunMetabolism(void);
   
   typedef std::list<InstanceDynamicObject*> InstanceObjects;
   typedef std::list<ObjectCharacter*>       Characters;
@@ -170,12 +166,14 @@ private:
 
   std::string           level_name;
   WindowFramework*      window;
+  DataEngine*           data_engine;
   LevelCamera           camera;
   MouseEvents           mouse;
   Timer                 timer;
   TimeManager&          time_manager;
   MainScript            main_script;
   State                 level_state;
+  Combat                combat;
   bool                  is_persistent;
 
   LevelUi               level_ui;
@@ -188,8 +186,6 @@ private:
   Projectile::Set       projectiles;
   InstanceObjects       objects;
   Characters            characters;
-  Characters::iterator  combat_character_it;
-  Characters::iterator  current_character;
   Parties               parties;
   VisibilityHalo        player_halo;
   Sunlight*             sunlight;
@@ -201,10 +197,6 @@ private:
   Exit                  exit;
 
   World::WorldLights::iterator _light_iterator;
-
-  TimeManager::Task*    task_metabolism;
-
-  DataEngine*           data_engine;
 };
 
 #endif

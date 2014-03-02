@@ -16,8 +16,6 @@
 #include "loading_exception.hpp"
 
 #define AP_COST_USE             2
-#define WORLDTIME_TURN          10
-#define WORLDTIME_DAYLIGHT_STEP 3
 
 using namespace std;
 
@@ -27,6 +25,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   mouse (*this, window),
   time_manager(tm),
   main_script(name),
+  combat(*this, characters),
   level_ui(window, gameUi),
   mouse_hint(*this, level_ui, mouse),
   interactions(*this),
@@ -74,12 +73,8 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   ForEach(world->exitZones,  [this](ExitZone& zone)  { zones.RegisterZone(zone); });
   
   ForEach(world->dynamicObjects, [this](DynamicObject& dobj) { InsertDynamicObject(dobj); });
-  combat_character_it = characters.end();
 
   world->SetWaypointsVisible(false);
-
-  task_metabolism = time_manager.AddRepetitiveTask(TASK_LVL_CITY, DateTime::Hours(1));
-  task_metabolism->Interval.Connect(*this, &Level::RunMetabolism);  
 
   /*
    * DIVIDE AND CONQUER WAYPOINTS
@@ -259,11 +254,18 @@ void Level::InitializePlayer(void)
   level_ui.GetMainBar().UseEquipedItem.Connect       (interactions, &Interactions::Player::ActionTargetUse);
   level_ui.GetMainBar().CombatEnd.Connect            ([this](void)
   {
-    StopFight();
-    if (level_state == Fight)
+    if (combat.CanStop())
+      combat.Stop();
+    else
       ConsoleWrite("You can't leave combat mode if enemies are nearby.");
   });
-  level_ui.GetMainBar().CombatPassTurn.Connect       (*this, &Level::NextTurn);
+  level_ui.GetMainBar().CombatPassTurn.Connect([this](void)
+  {
+    if (combat.GetCurrentCharacter() == GetPlayer())
+      combat.NextTurn();
+    else
+      ConsoleWrite("You cannot pass other characters' turns.");
+  });
 
   obs.Connect(level_ui.GetInventory().EquipItem,   [this](const std::string& target, unsigned int slot, InventoryObject* object)
   {
@@ -497,7 +499,7 @@ void Level::SetState(State state)
 {
   level_state = state;
   if (state == Normal)
-    combat_character_it = characters.end();
+    combat.Stop();
   if (state != Fight)
   {
     hovered_path.Hide();
@@ -516,104 +518,11 @@ void Level::SetInterrupted(bool set)
     SetState(Interrupted);
   else
   {
-    if (combat_character_it == characters.end())
+    if (combat.GetCurrentCharacter() == 0)
       SetState(Normal);
     else
       SetState(Fight);
   }
-}
-
-void Level::StartFight(ObjectCharacter* starter)
-{
-  combat_character_it = std::find(characters.begin(), characters.end(), starter);
-  if (combat_character_it == characters.end())
-  { 
-    cout << "[FATAL ERROR][Level::StartFight] Unable to find starting character" << endl;
-    if (characters.size() < 1)
-    {
-      cout << "[FATAL ERROR][Level::StartFight] Can't find a single character" << endl;
-      return ;
-    }
-    combat_character_it = characters.begin();
-  }
-  level_ui.GetMainBar().SetEnabledAP(true);
-  {
-    ObjectCharacter* current_fighter = *combat_character_it;
-
-    current_fighter->SetActionPoints(current_fighter->GetMaxActionPoints());
-  }
-  if (level_state != Fight)
-    ConsoleWrite("You are now in combat mode.");
-  SetState(Fight);
-}
-
-void Level::StopFight(void)
-{
-  if (level_state == Fight)
-  {
-    Characters::iterator it  = characters.begin();
-    Characters::iterator end = characters.end();
-    
-    for (; it != end ; ++it)
-    {
-      if (!((*it)->IsAlly(GetPlayer())))
-      {
-        list<ObjectCharacter*> listEnemies = (*it)->GetNearbyEnemies();
-
-        if (!(listEnemies.empty()) && (*it)->IsAlive())
-          return ;
-      }
-    }
-    if (mouse.GetState() == MouseEvents::MouseTarget)
-      mouse.SetState(MouseEvents::MouseAction);
-    ConsoleWrite("Combat ended.");
-    SetState(Normal);
-    level_ui.GetMainBar().SetEnabledAP(false);
-  }
-}
-
-void Level::NextTurn(void)
-{
-  if (level_state != Fight || current_character != combat_character_it)
-  {
-    cout << "cannot go to next turn" << endl;
-    return ;
-  }
-  if (*combat_character_it == GetPlayer())
-    StopFight();
-  if (combat_character_it != characters.end())
-  {
-    cout << "Playing animation idle" << endl;
-    (*combat_character_it)->PlayAnimation("idle");
-  }
-  if ((++combat_character_it) == characters.end())
-  {
-    combat_character_it = characters.begin();
-    (*combat_character_it)->GetFieldOfView().RunCheck();
-    time_manager.AddElapsedTime(WORLDTIME_TURN);
-  }
-  if (combat_character_it != characters.end())
-  {
-    ObjectCharacter* current_fighter = *combat_character_it;
-    
-    current_fighter->SetActionPoints(current_fighter->GetMaxActionPoints());
-  }
-  else
-    cout << "[FATAL ERROR][Level::NextTurn] Character Iterator points to nothing (n_characters = " << characters.size() << ")" << endl;
-  camera.SetConfigurationFromLevelState();
-}
-
-void Level::RunMetabolism(void)
-{
-  for_each(characters.begin(), characters.end(), [this](ObjectCharacter* character)
-  {
-    if (character != GetPlayer() && character->GetHitPoints() > 0)
-    {
-      StatController* controller = character->GetStatController();
-
-      controller->RunMetabolism();
-    }
-  });
 }
 
 AsyncTask::DoneStatus Level::do_task(void)
@@ -651,9 +560,10 @@ AsyncTask::DoneStatus Level::do_task(void)
         projectiles.Run(elapsedTime);
       else
       {
-        current_character = combat_character_it; // Keep a character from askin NextTurn several times
-        if (combat_character_it != characters.end())
-          run_object(*combat_character_it);
+        ObjectCharacter* combat_character = combat.GetCurrentCharacter();
+
+        if (combat_character)
+          run_object(combat_character);
         if (mouse.Hovering().hasWaypoint && mouse.GetState() == MouseEvents::MouseAction)
           hovered_path.DisplayHoveredPath(GetPlayer(), mouse);
       }

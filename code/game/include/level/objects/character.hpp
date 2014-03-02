@@ -9,14 +9,12 @@
 # include "level/diplomacy.hpp"
 # include "level/characters/line_of_sight.hpp"
 # include "level/characters/field_of_view.hpp"
-# include "level/characters/metabolism.hpp"
-# include "level/pathfinding/path.hpp"
-# include "level/characters/statistics.hpp"
+# include "level/characters/action_points.hpp"
 # include "level/interactions/action_runner.hpp"
 # include <panda3d/character.h>
 # include <panda3d/pointLight.h>
 
-class ObjectCharacter : public CharacterStatistics
+class ObjectCharacter : public CharacterActionPoints
 {
   friend class Interactions::ActionRunner;
 public:

@@ -9,7 +9,7 @@ using namespace std;
 /*
  * Party Member
  */
-Party::Member::Member(void) : statistics_datatree(0), statistics(0)
+Party::Member::Member(void) : statistics_datatree(0), statistics(0), metabolism(0)
 {
   inventory = new Inventory;
   TaskSet(0).Serialize(task_set);
@@ -22,6 +22,7 @@ Party::Member::Member(Data data)
   statistics_datatree = DataTree::Factory::JSON(path);
   if (statistics_datatree)
     statistics        = new StatController(statistics_datatree);
+  metabolism          = new Metabolism(statistics);
   object.name         = data["name"].Value();
   object.script       = data["script"].Value();
   object.charsheet    = data["name"].Value();
@@ -39,6 +40,8 @@ Party::Member::Member(ObjectCharacter* character)
   statistics_datatree = new DataTree;
   Data(statistics_datatree).Duplicate(character->GetStatistics());
   statistics          = new StatController(statistics_datatree);
+  metabolism          = character->GetMetabolism();
+  character->SetMetabolism(0);
   character->ForceStatController(statistics);
   inventory           = new Inventory;
   TaskSet(0).Serialize(task_set);
@@ -48,6 +51,7 @@ Party::Member::~Member()
 {
   if (statistics_datatree)
   {
+    delete metabolism;
     delete statistics;
     delete statistics_datatree;
   }
@@ -74,14 +78,17 @@ void Party::Member::LinkCharacter(ObjectCharacter* character)
   character->ForceStatController(statistics);
   character->SetInventory(inventory);
   character->GetTaskSet().Unserialize(task_set);
+  character->SetMetabolism(0);
 }
 
 void Party::Member::UnlinkCharacter(ObjectCharacter* character)
 {
   character->ForceStatDatatree(statistics_datatree);
+  character->SetMetabolism(metabolism);
   statistics_datatree = 0;
   statistics          = 0;
   inventory           = 0;
+  metabolism          = 0;
 }
 
 void Party::Member::Serialize(Utils::Packet& packet)
@@ -93,6 +100,7 @@ void Party::Member::Serialize(Utils::Packet& packet)
   packet << statistics_json;
   inventory->SaveInventory(&object);
   object.Serialize(packet);
+  metabolism->Serialize(packet);
 }
 
 void Party::Member::Unserialize(Utils::Packet& packet)
@@ -105,6 +113,8 @@ void Party::Member::Unserialize(Utils::Packet& packet)
   object.UnSerialize(0, packet);
   statistics_datatree = DataTree::Factory::StringJSON(statistics_json);
   statistics          = new StatController(statistics_datatree);
+  metabolism          = new Metabolism(statistics);
+  metabolism->Unserialize(packet);
   inventory->LoadInventory(&object);
 }
 

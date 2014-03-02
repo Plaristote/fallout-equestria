@@ -59,19 +59,14 @@ void Level::Serialize(Utils::Packet& packet)
 {
   BackupInventoriesToDynamicObjects();
   UnprocessAllCollisions();
-  GetWorld()->Serialize(packet);
   {
+    GetWorld()->Serialize(packet);
     packet << (char)(level_state);
-    if (level_state == Fight)
-      packet << ((*combat_character_it)->GetName());
-
     for_each(objects.begin(),    objects.end(),    [&packet](InstanceDynamicObject* object) { object->Serialize(packet);    });
     for_each(characters.begin(), characters.end(), [&packet](ObjectCharacter* character)    { character->Serialize(packet); });
-
-    task_metabolism->Serialize(packet);
+    combat.Serialize(packet);
   }
   ProcessAllCollisions();
-  cout << "End Level::Save" << endl;
 }
 
 void Level::Unserialize(Utils::Packet& packet)
@@ -80,18 +75,7 @@ void Level::Unserialize(Utils::Packet& packet)
 
   packet >> tmpState;
   level_state = (State)tmpState;
-  if (level_state == Fight)
-  {
-    string nameItCharacter;
-
-    packet >> nameItCharacter;
-    combat_character_it = find_if(characters.begin(), characters.end(), [nameItCharacter](ObjectCharacter* character) -> bool { return (character->GetName() == nameItCharacter); });
-    if (combat_character_it != characters.end())
-      StartFight(*combat_character_it);
-  }
-
   for_each(objects.begin(),    objects.end(),    [&packet](InstanceDynamicObject* object) { object->Unserialize(packet);    });
   for_each(characters.begin(), characters.end(), [&packet](ObjectCharacter* character)    { character->Unserialize(packet); });
-
-  task_metabolism->Unserialize(packet);
+  combat.Unserialize(packet);
 }

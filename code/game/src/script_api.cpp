@@ -233,6 +233,36 @@ namespace asUtils
   {
     return (target->GetPathTowardsObject(self).Size());
   }
+  
+  namespace Combat
+  {
+    void StartFight(Level* level, ObjectCharacter* character)
+    {
+      if (level)
+        level->GetCombat().Start(character);
+    }
+    
+    void NextTurn(Level* level)
+    {
+      if (level)
+        level->GetCombat().NextTurn();
+    }
+    
+    bool StopFight(Level* level)
+    {
+      if (level)
+      {
+        ::Combat& combat = level->GetCombat();
+
+        if (combat.CanStop())
+        {
+          combat.Stop();
+          return (true);
+        }
+      }
+      return (false);
+    }
+  }
 }
 
 struct asConsoleOutput
@@ -494,14 +524,14 @@ void AngelScriptInitialize(void)
   OBJ_REF_REGISTER_METHOD(Level, World@,  GetWorld,      ());
   OBJ_REF_REGISTER_METHOD(Level, Camera@, GetCamera,     ());
   engine->RegisterObjectMethod(levelClass, "Character@     GetCharacter(string)",                  asMETHODPR(Level,GetCharacter,(const std::string&),ObjectCharacter*), asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "Character@     GetPlayer()",                           asMETHOD(Level,GetPlayer),            asCALL_THISCALL);  
-  engine->RegisterObjectMethod(levelClass, "DynamicObject@ GetObject(string)",                     asMETHOD(Level,GetObject),            asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "void           InsertParty(Party@, string)",           asMETHOD(Level,InsertParty),          asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "void           StripParty(Party@)",                    asMETHOD(Level,RemovePartyFromLevel), asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "void           StartFight(Character@)",                asMETHOD(Level,StartFight),          asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "void           StopFight()",                           asMETHOD(Level,StopFight),           asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "void           NextTurn()",                            asMETHOD(Level,NextTurn),            asCALL_THISCALL);
-  engine->RegisterObjectMethod(levelClass, "Sound@         PlaySound(string)",                     asMETHOD(Level,PlaySound),           asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "Character@     GetPlayer()",                           asMETHOD(Level,GetPlayer),              asCALL_THISCALL);  
+  engine->RegisterObjectMethod(levelClass, "DynamicObject@ GetObject(string)",                     asMETHOD(Level,GetObject),              asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "void           InsertParty(Party@, string)",           asMETHOD(Level,InsertParty),            asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "void           StripParty(Party@)",                    asMETHOD(Level,RemovePartyFromLevel),   asCALL_THISCALL);
+  engine->RegisterObjectMethod(levelClass, "void           StartFight(Character@)",                asFUNCTION(asUtils::Combat::StartFight),asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(levelClass, "void           StopFight()",                           asFUNCTION(asUtils::Combat::StopFight), asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(levelClass, "void           NextTurn()",                            asFUNCTION(asUtils::Combat::NextTurn),  asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(levelClass, "Sound@         PlaySound(string)",                     asMETHOD(Level,PlaySound),              asCALL_THISCALL);
 
   const char* worldmapClass = "WorldMap";
   engine->RegisterObjectType(worldmapClass, 0, asOBJ_REF | asOBJ_NOCOUNT);

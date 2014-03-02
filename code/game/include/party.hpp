@@ -6,6 +6,7 @@
 # include "serializer.hpp"
 # include "datatree.hpp"
 # include "cmap/statcontroller.hpp"
+#include "level/tasks/metabolism.hpp"
 # include "world/dynamic_object.hpp"
 
 class ObjectCharacter;
@@ -39,6 +40,7 @@ public:
     DataTree*            statistics_datatree;
     StatController*      statistics;
     Inventory*           inventory;
+    Metabolism*          metabolism;
     Utils::Packet        task_set;
   };
 

@@ -1,11 +1,12 @@
 #include "scheduled_task.hpp"
-#include "gametask.hpp"
+#include "time_manager.hpp"
 #include "circular_value_set.hpp"
+#include "executor.hpp"
 
 using namespace std;
 
 ScheduledTask::ScheduledTask() :
-  time_manager(GameTask::CurrentGameTask->GetTimeManager()),
+  time_manager(*TimeManager::CurrentTimeManager),
   task(0),
   interval_duration(1),
   interval_until_next_execution(0),
@@ -149,12 +150,9 @@ void ScheduledTask::SetAsWeeklyTask(unsigned short day_of_the_week, DateTime::Ti
   DateTime         current_time            = time_manager.GetDateTime();
   unsigned short   current_day_of_the_week = current_time.GetDayOfTheWeek();
   unsigned int     current_second, target_second;
-  int              days_to_wait;
 
   current_second                = current_time.GetTimeOfTheWeek().seconds;
   target_second                 = DateTime::Days(day_of_the_week - 1).seconds + time_of_the_day.seconds;
-  days_to_wait                  = value_set.AdditionDistance(day_of_the_week - 1,
-                                                             current_day_of_the_week - 1);
   interval_until_next_execution = DateTime::Seconds(value_set.AdditionDistance(target_second, current_second));
   interval_duration             = DateTime::Weeks(1);
   SetAsRepetitiveTask(true);

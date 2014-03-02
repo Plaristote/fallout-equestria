@@ -31,5 +31,7 @@ bool GivePotion(Item@ item, Character@ user, Character@ target)
     user.GetInventory().DelObject(item);
     return (true);
   }
+  else if (@user == @level.GetPlayer())
+    level.ConsoleWrite("You don't have enough action points.");
   return (false);
 }

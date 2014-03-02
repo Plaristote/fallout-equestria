@@ -262,9 +262,6 @@ bool InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target
   if (hooks.IsDefined("UseOnOthers"))
     return (ExecuteHook("UseOnOthers", user, target, useType));
   Level::CurrentLevel->ConsoleWrite(i18n::T("That does nothing"));
-#ifdef USE_DEBUG_OUTPUT
-  Level::CurrentLevel->ConsoleWrite(i18n::T("InventoryObject didn't find any hook for this interaction."));
-#endif
   return (false);
 }
 

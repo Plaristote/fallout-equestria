@@ -37,7 +37,7 @@ void LevelCamera::UseRegularConfiguration(void)
 
 void LevelCamera::UseCombatConfiguration(void)
 {
-  if (level.GetCurrentFightPlayer() == level.GetPlayer())
+  if (level.GetCombat().GetCurrentCharacter() == level.GetPlayer())
     UseCombatConfigurationForPlayer();
   else
     UseCombatConfigurationForNPCs();
@@ -46,7 +46,7 @@ void LevelCamera::UseCombatConfiguration(void)
 void LevelCamera::UseCombatConfigurationForPlayer()
 {
   if (OptionsManager::Get()["camera"]["fight"]["focus-enemies"].Value() == "1")
-    FollowObject(level.GetCurrentFightPlayer());
+    FollowObject(level.GetCombat().GetCurrentCharacter());
   else
     StopFollowingNodePath();
 }
@@ -54,7 +54,7 @@ void LevelCamera::UseCombatConfigurationForPlayer()
 void LevelCamera::UseCombatConfigurationForNPCs()
 {
   if (OptionsManager::Get()["camera"]["fight"]["focus-self"].Value() == "1")
-    FollowObject(level.GetCurrentFightPlayer());
+    FollowObject(level.GetCombat().GetCurrentCharacter());
   else
     StopFollowingNodePath();
 }

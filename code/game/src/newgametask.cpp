@@ -119,7 +119,16 @@ void NewGameTask::Done(void)
     ClearSaveDirectory(savedir);
     GenerateFirstSaveFromTemplate(savepath);
     DataTree::Writers::JSON(_stat_sheet, "data/charsheets/self.json");
-    GeneratePlayerParty();
+    {
+      DataEngine  data_engine;
+      TimeManager time_manager;
+      Data        time;
+      
+      data_engine.Load("data/newgame/dataengine.json");
+      time = data_engine["time"];
+      time_manager.SetTime(time["seconds"], time["minutes"], time["hours"], time["days"], time["month"], time["year"]);
+      GeneratePlayerParty();
+    }
   }
   else
     AlertUi::NewAlert.Emit("Could not open save directory '" + savepath + "'");
