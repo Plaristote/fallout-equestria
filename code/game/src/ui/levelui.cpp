@@ -73,7 +73,7 @@ UiUseObjectOn*     LevelUi::OpenUiUseObjectOn(Inventory* user_inventory)
   UiUseObjectOn* ui_use_object_on = new UiUseObjectOn(window, GetContext(), *user_inventory);
   
   SetUi<UiItUseObjectOn>(ui_use_object_on);
-  ui_use_object_on->ActionCanceled.Connect(*this, &LevelUi::CloseRunningUi<UiItUseObjectOn>);
+  ui_use_object_on->Closed.Connect(*this, &LevelUi::CloseRunningUi<UiItUseObjectOn>);
   return (ui_use_object_on);
 }
 
@@ -100,7 +100,7 @@ UiNextZone*        LevelUi::OpenZonePicker(const vector<string>& destinations)
   UiNextZone* ui_next_zone = new UiNextZone(window, GetContext(), destinations);
   
   SetUi<UiItNextZone>(ui_next_zone);
-  ui_next_zone->Cancel.Connect(*this, &LevelUi::CloseRunningUi<UiItNextZone>);
+  ui_next_zone->Done.Connect(*this, &LevelUi::CloseRunningUi<UiItNextZone>);
   return (ui_next_zone);
 }
 

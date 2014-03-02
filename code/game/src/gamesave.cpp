@@ -4,31 +4,6 @@
 #include <gametask.hpp>
 #include <boost/iterator/iterator_concepts.hpp>
 
-/*
- * Level
- */
-void Level::Unserialize(Utils::Packet& packet)
-{
-  char tmpState;
-
-  packet >> tmpState;
-  level_state = (State)tmpState;
-  if (level_state == Fight)
-  {
-    string nameItCharacter;
-
-    packet >> nameItCharacter;
-    for (combat_character_it = characters.begin() ; combat_character_it != characters.end() && 
-                                              (*combat_character_it)->GetName() != nameItCharacter ; ++combat_character_it);
-    StartFight(*combat_character_it);
-  }
-
-  for_each(objects.begin(),    objects.end(),    [&packet](InstanceDynamicObject* object) { object->Unserialize(packet);    });
-  for_each(characters.begin(), characters.end(), [&packet](ObjectCharacter* character)    { character->Unserialize(packet); });
-
-  task_metabolism->Unserialize(packet);
-}
-
 void Level::BackupInventoriesToDynamicObjects(void)
 {
   //
@@ -97,4 +72,26 @@ void Level::Serialize(Utils::Packet& packet)
   }
   ProcessAllCollisions();
   cout << "End Level::Save" << endl;
+}
+
+void Level::Unserialize(Utils::Packet& packet)
+{
+  char tmpState;
+
+  packet >> tmpState;
+  level_state = (State)tmpState;
+  if (level_state == Fight)
+  {
+    string nameItCharacter;
+
+    packet >> nameItCharacter;
+    combat_character_it = find_if(characters.begin(), characters.end(), [nameItCharacter](ObjectCharacter* character) -> bool { return (character->GetName() == nameItCharacter); });
+    if (combat_character_it != characters.end())
+      StartFight(*combat_character_it);
+  }
+
+  for_each(objects.begin(),    objects.end(),    [&packet](InstanceDynamicObject* object) { object->Unserialize(packet);    });
+  for_each(characters.begin(), characters.end(), [&packet](ObjectCharacter* character)    { character->Unserialize(packet); });
+
+  task_metabolism->Unserialize(packet);
 }

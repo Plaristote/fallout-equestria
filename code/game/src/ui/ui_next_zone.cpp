@@ -60,6 +60,7 @@ void UiNextZone::CallbackLevelSelected(Rocket::Core::Event& event)
 void UiNextZone::CallbackCancel(Rocket::Core::Event&)
 {
   Cancel.Emit();
+  Done.Emit();
 }
 
 UiNextZone::~UiNextZone()

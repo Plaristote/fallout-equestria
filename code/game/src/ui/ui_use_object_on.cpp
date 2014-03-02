@@ -18,6 +18,7 @@ UiUseObjectOn::UiUseObjectOn(WindowFramework* window, Rocket::Core::Context* con
     }
     _root->Show();
   }
+  ObjectSelected.Connect([this](InventoryObject*) { Closed.Emit(); });
 }
 
 UiUseObjectOn::~UiUseObjectOn()

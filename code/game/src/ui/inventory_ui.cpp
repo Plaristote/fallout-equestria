@@ -94,7 +94,6 @@ void InventoryView::UpdateView(void)
           stream << "<span class='inventory-item-quantity'>x" << quantity << "</span>";
         stream << "</span>";
         rml += stream.str();
-        cout << stream.str() << endl;
       }
     }
   }

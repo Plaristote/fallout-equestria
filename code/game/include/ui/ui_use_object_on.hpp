@@ -13,11 +13,11 @@ public:
 
   void Destroy(void);
 
-  Sync::Signal<void ()>                 ActionCanceled;
+  Sync::Signal<void ()>                 Closed;
   Sync::Signal<void (InventoryObject*)> ObjectSelected;
 
 private:
-  void RocketCancelClicked(Rocket::Core::Event&) { ActionCanceled.Emit(); }
+  void RocketCancelClicked(Rocket::Core::Event&) { Closed.Emit(); }
 
   RocketListener                               CancelClicked;
   InventoryViewController                      _viewController;

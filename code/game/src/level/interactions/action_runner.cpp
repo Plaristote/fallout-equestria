@@ -78,8 +78,13 @@ void Interactions::ActionRunner::PickWaypoint(void)
 
 void Interactions::ActionRunner::ReachTarget(void)
 {
-  user->GoTo(target.object, range);
-  observers.Connect(user->ReachedDestination, *this, &Interactions::ActionRunner::PlayAnimation);
+  if (user->GetDistance(target.object) > range * 10 || !user->HasLineOfSight(target.object))
+  {
+    user->GoTo(target.object, range);
+    observers.Connect(user->ReachedDestination, *this, &Interactions::ActionRunner::PlayAnimation);
+  }
+  else
+    PlayAnimation();
 }
 
 void Interactions::ActionRunner::PlayAnimation(void)

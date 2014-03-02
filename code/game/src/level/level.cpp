@@ -315,7 +315,6 @@ void Level::InsertParty(Party& party, const std::string& zone_name)
     DynamicObject*   world_object   = world->InsertDynamicObject(dynamic_object);
     ObjectCharacter* character      = new ObjectCharacter(this, world_object);
 
-    world->InsertDynamicObject(dynamic_object);
     member->LinkCharacter(character);
     characters.insert(characters.begin(), character);
   }
@@ -342,12 +341,14 @@ void Level::RemovePartyFromLevel(Party& party)
     obs_player.DisconnectAll();
   RunForPartyMembers(party, [this](Party::Member* member, ObjectCharacter* character)
   {
-    auto character_it = find(characters.begin(), characters.end(), character);
+    auto           character_it = find(characters.begin(), characters.end(), character);
+    DynamicObject* world_object = character->GetDynamicObject();
 
     member->SaveCharacter(character);
     character->UnprocessCollisions();
     delete character;
     characters.erase(character_it);
+    world->DeleteDynamicObject(world_object);
   });
   parties.remove(&party);
 }

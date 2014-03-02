@@ -57,6 +57,7 @@ private:
   unsigned short         _apMax;
   bool                   _apEnabled;
   StatController*        statistics;
+  Sync::ObserverHandler  statistics_observer;
 };
 
 #endif

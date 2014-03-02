@@ -71,9 +71,7 @@ bool BuckHit(Item@ item, Character@ user, Character@ target)
 
   if (success)
   {
-    Write("Putting buff on target");
-    Data poison_buff = level.GetDataEngine()["poisoning"];
-    game.PushBuff(target, poison_buff);
+    // Implement K.Os
   }
   return (success);
 }

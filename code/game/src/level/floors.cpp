@@ -115,7 +115,7 @@ void Floors::HidingFloor::Run(float elapsedTime)
 
 bool Floors::IsInsideBuilding(unsigned char& floor)
 {
-  Timer profile;
+  //Timer profile;
   World&                    world                 = *level.GetWorld();
   bool                      isInsideBuilding      = false;
   PT(CollisionRay)          pickerRay;
@@ -158,8 +158,7 @@ bool Floors::IsInsideBuilding(unsigned char& floor)
       break ;
     }
   }
-  //pickerPath.show();
   pickerPath.detach_node();
-  profile.Profile("[Level::IsInsideBuilding]");
+  //profile.Profile("[Level::IsInsideBuilding]");
   return (isInsideBuilding);
 }

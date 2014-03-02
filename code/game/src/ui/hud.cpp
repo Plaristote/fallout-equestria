@@ -52,16 +52,16 @@ GameMainBar::~GameMainBar()
 
 void GameMainBar::SetStatistics(StatController* controller)
 {
-  StatModel& model   = controller->Model();
   Data       data_ap = controller->GetData()["Variables"]["Action Points"];
   short      max_ap  = controller->GetData()["Statistics"]["Action Points"];
   short      ap      = data_ap.Nil() ? max_ap : (short)data_ap;
 
   statistics = controller;
   SetCurrentAP(ap, max_ap);
-  controller->HpChanged.Connect(*this, &GameMainBar::SetCurrentHp);
-  controller->ArmorClassChanged.Connect(*this, &GameMainBar::SetCurrentAc);
-  controller->ActionPointChanged.Connect([this](unsigned short ap)
+  statistics_observer.DisconnectAll();
+  statistics_observer.Connect(controller->HpChanged,          *this, &GameMainBar::SetCurrentHp);
+  statistics_observer.Connect(controller->ArmorClassChanged,  *this, &GameMainBar::SetCurrentAc);
+  statistics_observer.Connect(controller->ActionPointChanged, [this](unsigned short ap)
   {
     short max_ap  = statistics->GetData()["Statistics"]["Action Points"];
     
