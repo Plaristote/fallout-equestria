@@ -69,6 +69,7 @@ AngelScript::Object::Object(asIScriptContext* context, asIScriptModule* module) 
 
 AngelScript::Object::~Object()
 {
+  ObjectDestroyed.Emit();
   if (required_module == true)
     Script::ModuleManager::Release(module);
   if (required_context == true && context != 0)

@@ -191,8 +191,8 @@ void        Data::RemoveAllChildren(void)
 
 void        Data::Duplicate(Data var)
 {
-  Data::iterator it   = begin();
-  Data::iterator last = end();
+  Data::iterator it   = var.begin();
+  Data::iterator last = var.end();
 
   if (_data == 0)
   {

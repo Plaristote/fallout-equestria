@@ -24,12 +24,13 @@ GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : game_ui(wind
   CurrentGameTask  = this;
   _continue        = true;
   this->window     = window;
-  level           = 0;
+  item_index       = DataTree::Factory::JSON("data/objects.json");
+  level            = 0;
   save_path        = OptionsManager::Get()["savepath"].Value();
   world_map        = 0;
   player_party     = 0;
   player_stats     = 0;
-  quest_manager   = 0;
+  quest_manager    = 0;
   game_ui.GetMenu().SaveClicked.Connect(*this, &GameTask::SaveClicked);
   game_ui.GetMenu().LoadClicked.Connect(*this, &GameTask::LoadClicked);
   game_ui.GetMenu().ExitClicked.Connect(*this, &GameTask::Exit);
@@ -45,8 +46,9 @@ GameTask::~GameTask()
 {
   if (player_party)  { delete player_party;   }
   if (world_map)     { world_map->Destroy();   delete world_map;   }
-  if (quest_manager) { delete quest_manager; }
-  if (level)         { delete level;         }
+  if (quest_manager) { delete quest_manager;  }
+  if (level)         { delete level;          }
+  if (item_index)    { delete item_index;     }
   CurrentGameTask = 0;
 }
 

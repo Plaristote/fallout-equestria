@@ -3,6 +3,7 @@
 
 # include "scriptengine.hpp"
 # include <memory>
+# include "observatory.hpp"
 
 namespace AngelScript
 {
@@ -108,6 +109,8 @@ namespace AngelScript
     Object(asIScriptContext* context, const std::string& filepath);
     Object(asIScriptContext* context, asIScriptModule* module);
     ~Object();
+    
+    Sync::Signal<void>    ObjectDestroyed;
 
     std::weak_ptr<Object> GetPtr(void) { return (shared_ptr); }
   protected:

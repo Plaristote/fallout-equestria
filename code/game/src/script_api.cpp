@@ -78,7 +78,6 @@ void ScheduledScriptTask::Run()
 /*
  * Script Interface for Rocket Listeners
  */
-
 namespace ScriptApi
 {
   class RocketUi : public UiBase
@@ -117,16 +116,17 @@ namespace ScriptApi
     };
     
   public:
-    RocketUi(GameUi& game_ui, Rocket::Core::Element* root) : UiBase(game_ui.GetWindowFramework(), game_ui.GetRocketRegion()->get_context())
+    RocketUi(GameUi& game_ui, AngelScript::Object* object, Rocket::Core::Element* root) : UiBase(game_ui.GetWindowFramework(), game_ui.GetRocketRegion()->get_context()), object(object)
     {
       _root                     = root->GetOwnerDocument();
       root_outlives_this_object = true;
-      object                    = AngelScript::ContextLock::CurrentObject();
+      observer_object_destroyed = object->ObjectDestroyed.Connect([this](void) { delete this; });
     }
-    
+
     ~RocketUi()
     {
-      //for_each(listeners.begin(), listeners.end(), [](EventListener* i) { delete i; });
+      object->ObjectDestroyed.Disconnect(observer_object_destroyed);
+      for_each(listeners.begin(), listeners.end(), [](EventListener* i) { delete i; });
     }
     
     void AddEventListener(const std::string& id, const std::string& event, const std::string& callback)
@@ -161,9 +161,15 @@ namespace ScriptApi
     
     static RocketUi* Factory(Rocket::Core::Element* root)
     {
-      RocketUi* rocket_ui = new RocketUi(GameTask::CurrentGameTask->GetGameUi(), root);
+      AngelScript::Object* object = AngelScript::ContextLock::CurrentObject();
 
-      return (rocket_ui);
+      if (object && root)
+      {
+        RocketUi* rocket_ui = new RocketUi(GameTask::CurrentGameTask->GetGameUi(), object, root);
+
+        return (rocket_ui);
+      }
+      return (0);
     }
     
     static void      Destroy(RocketUi* rocket_ui)
@@ -174,6 +180,7 @@ namespace ScriptApi
   private:
     AngelScript::Object*      object;
     std::list<EventListener*> listeners;
+    Sync::ObserverId          observer_object_destroyed;
   };
 }
 

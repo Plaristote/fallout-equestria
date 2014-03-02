@@ -2,6 +2,8 @@
 #include "level/level.hpp"
 #include "level/objects/locker.hpp"
 #include "ui/alert_ui.hpp"
+#include <gametask.hpp>
+#include <gametask.hpp>
 #include <algorithm>
 #define USE_DEBUG_OUTPUT
 
@@ -9,10 +11,6 @@ using namespace std;
 
 InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts/objects/" + data["script"]["file"].Value())
 {
-#ifdef USE_DEBUG_OUTPUT
-  std::cout << "LOADING OBJECT " << data.Key() << " WITH SCRIPT " << "scripts/objects/" << data["script"]["file"].Value() << endl;
-#endif
-  
   // Duplicate the DataBranch into the InventoryObject
   Duplicate(data);
 
@@ -321,7 +319,7 @@ void Inventory::LoadInventory(DynamicObject* object)
 {
   std::for_each(object->inventory.begin(), object->inventory.end(), [this](std::pair<std::string, int> data)
   {
-    Data      objectTree = Level::CurrentLevel->GetItems();
+    Data      objectTree = GameTask::CurrentGameTask->GetItemIndex();
     DataTree  objectTmp;
     DataTree* dataTree = DataTree::Factory::StringJSON(data.first);
     {
@@ -363,9 +361,6 @@ void Inventory::LoadInventory(Data items)
     unsigned int     quantity;
 
     quantity = item["quantity"].NotNil() ? (unsigned int)item["quantity"] : 1;
-#ifdef USE_DEBUG_OUTPUT
-    cout << "Loading " << quantity << ' ' << item["Name"].Value() << endl;
-#endif
     for (unsigned short i = 0 ; i < quantity ; ++i)
       LoadItemFromData(item);
   });
@@ -478,7 +473,7 @@ void Inventory::SaveInventory(Data items)
 
 InventoryObject* Inventory::AddObject(const string& name)
 {
-  Data items = Level::CurrentLevel->GetItems();
+  Data items = GameTask::CurrentGameTask->GetItemIndex();
   
   if (items[name].NotNil())
   {

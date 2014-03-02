@@ -91,8 +91,8 @@ void Party::Member::Serialize(Utils::Packet& packet)
   DataTree::Writers::StringJSON(statistics->GetData(), statistics_json);
   task_set.Serialize(packet);
   packet << statistics_json;
-  object.Serialize(packet);
   inventory->SaveInventory(&object);
+  object.Serialize(packet);
 }
 
 void Party::Member::Unserialize(Utils::Packet& packet)

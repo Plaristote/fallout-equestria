@@ -35,13 +35,14 @@ public:
   void                  SetLevelEncounter(const Encounter&);
 
   // Getters
-  GameUi&               GetGameUi(void)         { return (game_ui);                    }
-  DataEngine&           GetDataEngine(void)     { return (data_engine);                }
-  TimeManager&          GetTimeManager(void)    { return (time_manager);               }
-  WorldDiplomacy&       GetDiplomacy(void)      { return (data_engine.GetDiplomacy()); }
-  QuestManager&         GetQuestManager(void)   { return (*quest_manager);             }
-  Party*                GetPlayerParty(void)    { return (player_party);               }
-  const std::string&    GetSavePath(void) const { return (save_path);                  }
+  GameUi&               GetGameUi(void)         { return (game_ui);                                }
+  DataEngine&           GetDataEngine(void)     { return (data_engine);                            }
+  Data                  GetItemIndex(void)      { return (item_index ? Data(item_index) : Data()); }
+  TimeManager&          GetTimeManager(void)    { return (time_manager);                           }
+  WorldDiplomacy&       GetDiplomacy(void)      { return (data_engine.GetDiplomacy());             }
+  QuestManager&         GetQuestManager(void)   { return (*quest_manager);                         }
+  Party*                GetPlayerParty(void)    { return (player_party);                           }
+  const std::string&    GetSavePath(void) const { return (save_path);                              }
 
   ISampleInstance*      PlaySound(const std::string&);
 
@@ -74,6 +75,7 @@ private:
   SoundManager          sound_manager;
   GameUi                game_ui;
   DataEngine            data_engine;
+  DataTree*             item_index;
   TimeManager           time_manager;
   Pipbuck               pipbuck;
   PlayerParty*          player_party;

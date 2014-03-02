@@ -6,6 +6,7 @@
 #include <options.hpp>
 #include <dices.hpp>
 #include <iterator>
+#include "gametask.hpp"
 
 #define DEFAULT_WEAPON_1 "hooves"
 #define DEFAULT_WEAPON_2 "buck"
@@ -17,7 +18,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
   line_of_sight(*level->GetWorld(), _window->get_render(), GetNodePath()),
   field_of_view(*level, *this)
 {
-  Data     items      = _level->GetItems();  
+  Data     items      = GameTask::CurrentGameTask->GetItemIndex(); 
   string   defEquiped[2];
   NodePath body_node  = object->nodePath.find("**/+Character");
 

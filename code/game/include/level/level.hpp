@@ -124,7 +124,6 @@ public:
   ChatterManager&        GetChatterManager(void) { return (chatter_manager);  }
   PathPreview&           GetHoveredPath(void)    { return (hovered_path);      }
   Data                   GetDataEngine(void)     { return (*data_engine);      }
-  Data                   GetItems(void)          { return (items);            }
   void                   ConsoleWrite(const std::string& str);
 
   void                   RemoveObject(InstanceDynamicObject* object);
@@ -206,7 +205,6 @@ private:
   TimeManager::Task*    task_metabolism;
 
   DataEngine*           data_engine;
-  DataTree*             items;
 };
 
 #endif

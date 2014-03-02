@@ -13,6 +13,8 @@
 #include "options.hpp"
 #include <mousecursor.hpp>
 
+#include "loading_exception.hpp"
+
 #define AP_COST_USE             2
 #define WORLDTIME_TURN          10
 #define WORLDTIME_DAYLIGHT_STEP 3
@@ -44,7 +46,6 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
 
   obs.Connect(level_ui.InterfaceOpened, *this, &Level::SetInterrupted);
 
-  items = DataTree::Factory::JSON("data/objects.json");
   timer.Restart();
 
   // WORLD LOADING
@@ -56,7 +57,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   }
   catch (unsigned int&)
   {
-    std::cout << "Failed to load file" << std::endl;
+    throw LoadingException("Couldn't load the level's world");
   }
 
   cout << "Level Loading Step #6" << endl;
@@ -426,7 +427,6 @@ Level::~Level()
   CurrentLevel = 0;
   if (sunlight) delete sunlight;
   if (world)    delete world;
-  if (items)    delete items;
   cout << "-> Done." << endl;
 }
 
