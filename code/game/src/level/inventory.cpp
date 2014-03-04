@@ -59,6 +59,8 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts
       hooks.asDefineMethod("HitChances",     "int " + action["hookHitChances"].Value() + "(Item@, Character@, Character@)");
     if (sanity_check("hookCanUse"))
       hooks.asDefineMethod("CanUse",         "bool " + action["hookCanUse"].Value() + "(Item@, Character@, DynamicObject@)");
+    if (sanity_check("hookActionPoints"))
+      hooks.asDefineMethod("ActionPointCost", "int " + action["hookActionPoints"].Value() + "(Item@, Character@, DynamicObject@)");
     _actionHooks.push_back(hooks);
   });
 }
@@ -240,6 +242,21 @@ int               InventoryObject::HitSuccessRate(ObjectCharacter* user, ObjectC
     return (hooks.Call("HitChances", 3, &this_param, &user_param, &target_param));
   }
   return (0);
+}
+
+unsigned short    InventoryObject::GetActionPointCost(ObjectCharacter* user, unsigned char use_type)
+{
+  AngelScript::Object hooks = _actionHooks[use_type];
+
+  if (hooks.IsDefined("ActionPointCost"))
+  {
+    AngelScript::Type<InventoryObject*> this_param(this);
+    AngelScript::Type<ObjectCharacter*> user_param(user);
+    AngelScript::Type<int>              use_type_param(use_type);
+
+    return ((int)hooks.Call("ActionPointCost", 3, &this_param, &user_param, &use_type_param));
+  }
+  return ((*this)["actions"][use_type]["ap-cost"]);
 }
 
 bool InventoryObject::UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType)

@@ -123,7 +123,7 @@ public:
   /*! \brief Move the parameter Data into this Data's children. */
   void PushBack(Data d);
   /*! \brief For debug purposes, writes the content of the DataTree from the current branch to the standard output */
-  void Output(unsigned char indent = 0);
+  void Output(unsigned char indent = 0) const;
   
   /*! \brief Returns the amount of children the branch has */
   unsigned int Count(void) const { return (_data ? _data->children.size() : 0); }

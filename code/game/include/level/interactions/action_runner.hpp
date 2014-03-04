@@ -51,7 +51,7 @@ namespace Interactions
     void                   PickObject(void);
     void                   PickWaypoint(void);
 
-    void                   ReachTarget(void);
+    virtual void           ReachTarget(void);
     virtual void           PlayAnimation(void);
     virtual void           RunAction(void);
 

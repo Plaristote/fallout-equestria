@@ -20,9 +20,8 @@ void Actions::Use::RunAction()
 
 ActionRunner* Actions::Use::Factory(ObjectCharacter* user, InstanceDynamicObject* target)
 {
-  Interactions::ActionRunner* runner = new Actions::Use(user, target);
+  Actions::Use* runner = new Actions::Use(user, target);
 
-  if (runner)
-    runner->Run();
+  runner->Run();
   return (runner);
 }

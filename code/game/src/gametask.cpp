@@ -144,12 +144,12 @@ bool GameTask::SaveGame()
   data_engine["time"]["year"]    = current_time.GetYear();
   data_engine.Save(save_path + "/dataengine.json");
 
-  if (level != 0)
+  /*if (level != 0)
   {
     window->get_render().set_transparency(TransparencyAttrib::M_alpha, 1);
     framework->get_graphics_engine()->render_frame();
     window->get_graphics_window()->get_screenshot()->write(save_path + "/preview.png");
-  }
+  }*/
   return (success);
 }
 
@@ -363,11 +363,13 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     {
       if (level) { delete level; level = 0; }
       AlertUi::NewAlert.Emit("Failed to load level (" + std::string(error) + ")");
+      world_map->Show();
     }
   }
   else
   {
     AlertUi::NewAlert.Emit("Failed to open map file '" + params.path + '\'');
+    world_map->Show();
   }
 }
 

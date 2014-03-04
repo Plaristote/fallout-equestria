@@ -44,7 +44,7 @@ void Actions::UseSpellOn::RunAction()
 
 ActionRunner* Actions::UseSpellOn::Factory(ObjectCharacter* user, InstanceDynamicObject* target, const std::string& spell_name)
 {
-  Interactions::ActionRunner* runner = new UseSpellOn(user, target, spell_name);
+  UseSpellOn* runner = new UseSpellOn(user, target, spell_name);
 
   runner->Run();  
   return (runner);  

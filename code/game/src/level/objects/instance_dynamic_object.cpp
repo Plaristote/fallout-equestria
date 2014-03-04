@@ -49,10 +49,12 @@ void InstanceDynamicObject::Unserialize(Utils::Packet& packet)
 
 void InstanceDynamicObject::Serialize(Utils::Packet& packet)
 {
-  if (HasOccupiedWaypoint())
+  Waypoint* waypoint = GetOccupiedWaypoint();
+  
+  if (waypoint != 0)
   {
     packet << '1'; // has a waypointOccupied
-    packet << GetOccupiedWaypoint()->id;
+    packet << waypoint->id;
   }
   else
     packet << '0';
@@ -64,6 +66,7 @@ void InstanceDynamicObject::SerializeDataStore(Utils::Packet& packet)
 {
   string data_store_json;
   
+  cout << "Serialize datastore" << endl;
   DataTree::Writers::StringJSON(data_store, data_store_json);
   packet << data_store_json;
 }

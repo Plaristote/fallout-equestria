@@ -40,7 +40,7 @@ ActionRunner* Actions::UseObject::Factory(ObjectCharacter* user, InventoryObject
 
 ActionRunner* Actions::UseObjectOn::Factory(ObjectCharacter* user, InstanceDynamicObject* target, InventoryObject* item, unsigned char action_it)
 {
-  Interactions::ActionRunner* runner = new UseObjectOn(user, target, item, action_it);
+  UseObjectOn* runner = new UseObjectOn(user, target, item, action_it);
 
   runner->Run();  
   return (runner);

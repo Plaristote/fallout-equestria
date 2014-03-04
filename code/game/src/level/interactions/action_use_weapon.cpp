@@ -5,15 +5,20 @@
 using namespace std;
 using namespace Interactions;
 
-void Actions::UseWeaponOn::ReachTarget()
+void Actions::UseWeaponOn::Run()
 {
-  PlayAnimation();
+  if (CheckAndRemoveActionPoints())
+  {
+    cout << "Use weapon play animation" << endl;
+    PlayAnimation();
+  }
 }
 
 void Actions::UseWeaponOn::PlayAnimation()
 {
+  cout << "Use weapon, play animation" << endl;
   ObjectCharacter* user = GetUser();
-  
+
   user->LookAt(GetObjectTarget());
   user->AnimationEndForObject.DisconnectAll();
   observers.Connect(user->AnimationEndForObject, [this](AnimatedObject*)
@@ -25,6 +30,7 @@ void Actions::UseWeaponOn::PlayAnimation()
 
 void Actions::UseWeaponOn::RunAction()
 {
+  cout << "Use weapon, play action" << endl;
   ObjectCharacter* target      = GetObjectTarget()->Get<ObjectCharacter>();
   StatController*  target_stat = target->GetStatController();
 
@@ -118,12 +124,13 @@ Actions::UseWeaponOn::UseWeaponOn(ObjectCharacter* user, ObjectCharacter* target
   FindEquipedIterator();
   SetTargetType(ActionRunner::Character);
   SetTarget(target);
-  //SetActionPointCost(); // TODO find action point cost ? Or let item do it for us ?
+  SetActionPointCost(item->GetActionPointCost(user, action_it));
 }
 
 ActionRunner* Actions::UseWeaponOn::Factory(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* item, unsigned char action_it)
 {
-  Interactions::ActionRunner* runner = 0;
+  cout << "Use weapon, factory" << endl;
+  UseWeaponOn* runner = 0;
   
   if (user == target)
     ConsoleWrite(user, "You cannot target yourself");
@@ -135,6 +142,7 @@ ActionRunner* Actions::UseWeaponOn::Factory(ObjectCharacter* user, ObjectCharact
     ConsoleWrite(user, "No line of sight");
   else
   {
+    cout << "Bite" << endl;
     runner = new UseWeaponOn(user, target, item, action_it);
     runner->Run();
   }

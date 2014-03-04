@@ -5,7 +5,6 @@
 using namespace std;
 
 extern unsigned int blob_revision;
-extern std::function<void (void)> bite_collision;
 
 void MapObject::InitializeTree(World *world)
 {
@@ -148,7 +147,7 @@ void MapObject::UnSerialize(World* world, Utils::Packet& packet)
     LPoint3f scale = NodePathSize(render) / 2;
 
     collider = MODEL;
-    InitializeCollider(collider, LPoint3f(), scale, LPoint3f());
+    InitializeCollider(collider, LPoint3f(0, 0, 0), scale, LPoint3f(0, 0, 0));
   }
 }
 

@@ -35,10 +35,11 @@ public:
   InventoryObject(Data);
   ~InventoryObject();
 
-  int               HitSuccessRate(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType);
-  bool              UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType);
-  bool              UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType);
-  bool              Use(ObjectCharacter* user, unsigned char useType);
+  int               HitSuccessRate(ObjectCharacter* user, ObjectCharacter* target, unsigned char use_type);
+  unsigned short    GetActionPointCost(ObjectCharacter* user, unsigned char use_type);
+  bool              UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char use_type);
+  bool              UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char use_type);
+  bool              Use(ObjectCharacter* user, unsigned char use_type);
   const std::string GetName(void) const { return (this->Key());             }
   const std::string GetIcon(void) const { return ((*this)["icon"].Value()); }
   DynamicObject*    CreateDynamicObject(World* world) const;

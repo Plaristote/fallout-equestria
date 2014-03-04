@@ -13,6 +13,7 @@ Party::Member::Member(void) : statistics_datatree(0), statistics(0), metabolism(
 {
   inventory = new Inventory;
   TaskSet(0).Serialize(task_set);
+  object.collider     = MapObject::MODEL;
 }
 
 Party::Member::Member(Data data)
@@ -23,6 +24,7 @@ Party::Member::Member(Data data)
   if (statistics_datatree)
     statistics        = new StatController(statistics_datatree);
   metabolism          = new Metabolism(statistics);
+  object.collider     = MapObject::MODEL;
   object.name         = data["name"].Value();
   object.script       = data["script"].Value();
   object.charsheet    = data["name"].Value();

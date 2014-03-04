@@ -20,7 +20,7 @@ namespace Interactions
       
       UseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* item, unsigned char action_it);
 
-      virtual void ReachTarget();
+      void         Run(void);
       virtual void PlayAnimation();
       virtual void RunAction();
       void         TargetDied();

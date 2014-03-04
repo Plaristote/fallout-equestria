@@ -8,7 +8,6 @@ extern unsigned int blob_revision;
 /*
  * Serialization
  */
-extern std::function<void (void)> bite_collision;
 void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
 {
   int  iType;

@@ -4,10 +4,10 @@
 
 using namespace std;
 
-void      Data::Output(unsigned char indent)
+void      Data::Output(unsigned char indent) const
 {
-  Data::iterator it  = this->begin();
-  Data::iterator end = this->end();
+  Data::const_iterator it  = this->const_begin();
+  Data::const_iterator end = this->const_end();
 
   for (unsigned char toIndent = indent ; toIndent ; --toIndent)
     std::cout << ' ';

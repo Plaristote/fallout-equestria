@@ -23,7 +23,7 @@ void Actions::UseSkillOn::RunAction()
 
 ActionRunner* Actions::UseSkillOn::Factory(ObjectCharacter* user, InstanceDynamicObject* target, const std::string& skill_name)
 {
-  Interactions::ActionRunner* runner = new UseSkillOn(user, target, skill_name);
+  UseSkillOn* runner = new UseSkillOn(user, target, skill_name);
 
   runner->Run();  
   return (runner);

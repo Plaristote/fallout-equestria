@@ -112,20 +112,7 @@ void Interactions::ActionRunner::RunAction(void)
 
 bool Interactions::ActionRunner::CheckAndRemoveActionPoints(void)
 {
-  if (GetLevel()->GetState() == Level::Fight)
-  {
-    unsigned short action_points = user->GetActionPoints();
-    
-    if (action_points >= action_point_cost)
-    {
-      user->SetActionPoints(action_points - action_point_cost);
-      return (true);
-    }
-    else if (user->IsPlayer())
-      ; // TODO display message about not having enough action points
-    return (false);
-  }
-  return (true);
+  return (user->UseActionPoints(action_point_cost));
 }
 
 void Interactions::ActionRunner::ConsoleWrite(ObjectCharacter* user, const string& message)
