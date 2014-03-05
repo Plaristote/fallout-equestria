@@ -283,11 +283,19 @@ bool GameTask::CompressSave(const std::string& slotPath)
   DataTree metadata;
   Data     data(&metadata);
 
-  data["time"].Duplicate(data_engine["time"]);
-  data["system"].Duplicate(data_engine["system"]);
-  Utils::DirectoryCompressor::Compress(slotPath, save_path, [](const string& i) { return (i != "preview.png"); });
-  Filesystem::FileCopy(save_path + "preview.png", slotPath + ".png");
-  DataTree::Writers::JSON(data, slotPath + ".json");
+  try
+  {
+    data["time"].Duplicate(data_engine["time"]);
+    data["system"].Duplicate(data_engine["system"]);
+    Utils::DirectoryCompressor::Compress(slotPath, save_path, [](const string& i) { return (i != "preview.png"); });
+    Filesystem::FileCopy(save_path + "preview.png", slotPath + ".png");
+    DataTree::Writers::JSON(data, slotPath + ".json");
+  }
+  catch (const std::exception& exception)
+  {
+    AlertUi::NewAlert.Emit("Failed to save: " + std::string(exception.what()));
+    return (false);
+  }
   return (true);
 }
 
@@ -297,8 +305,17 @@ void GameTask::LoadSlot(unsigned char slot)
 
   slot_path << save_path << "/slots/slot-" << (unsigned int)slot;
   RemoveCurrentProgression();
-  Utils::DirectoryCompressor::Uncompress(slot_path.str(), save_path);
-  LoadGame();
+  try
+  {
+    Utils::DirectoryCompressor::Uncompress(slot_path.str(), save_path);
+    LoadGame();
+  }
+  catch (const std::exception& exception)
+  {
+    AlertUi::NewAlert.Emit("Failed to load: " + std::string(exception.what()));
+    if (world_map == 0 && level == 0) // If nothin's running, go back to main menu
+      _continue = 0;
+  }
 }
 
 void GameTask::RemoveCurrentProgression(void)

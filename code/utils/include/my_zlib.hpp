@@ -13,6 +13,26 @@ namespace Utils
   class zlib
   {
   public:
+    struct Exception : public std::exception
+    {
+    public:
+      Exception(const std::string& message, int error_code) : message("zlib call failed because " + message), error_code(error_code)
+      {
+      }
+
+      const char* what(void) const throw() { return (message.c_str()); }
+      int         error_number(void) const throw() { return (error_code);      }
+      
+    private:
+      std::string message;
+      int         error_code;
+    };
+    
+    struct BufferError : public Exception { BufferError() : Exception("there was not enough memory",                   Z_BUF_ERROR)  {} };
+    struct MemoryError : public Exception { MemoryError() : Exception("there wasn't enough room in the output buffer", Z_MEM_ERROR)  {} };
+    struct DataError   : public Exception { DataError()   : Exception("the input data was corrupted or incomplete",    Z_DATA_ERROR) {} };
+    
+    
     zlib(char op, const char* _buffer, unsigned long length) : buffer(0), buffer_length(0)
     {
       switch (op)
@@ -52,9 +72,9 @@ namespace Utils
       switch (compress(buffer, &buffer_length, reinterpret_cast<const unsigned char*>(_buffer), length))
       {
         case Z_MEM_ERROR:
+          throw MemoryError();
         case Z_BUF_ERROR:
-          throw 0;
-          break ;
+          throw BufferError();
         case Z_OK:
           break ;
       }
@@ -67,9 +87,11 @@ namespace Utils
       switch (uncompress(buffer, &buffer_length, reinterpret_cast<const unsigned char*>(_buffer), length))
       {
         case Z_MEM_ERROR:
+          throw MemoryError();
         case Z_BUF_ERROR:
-          throw 0;
-          break ;
+          throw BufferError();
+        case Z_DATA_ERROR:
+          throw DataError();
         case Z_OK:
           break ;
       }
