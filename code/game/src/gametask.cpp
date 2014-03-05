@@ -343,6 +343,7 @@ void GameTask::LoadLevelFromPacket(LoadLevelParams params, Utils::Packet& packet
 void GameTask::DoLoadLevel(LoadLevelParams params)
 {
   ifstream file;
+  bool     success = false;
 
   file.open(params.path.c_str(), std::ios::binary);
   if (file.is_open())
@@ -353,22 +354,27 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     try
     {
       LoadLevelFromPacket(params, packet);
+      success = true;
     }
     catch (LoadingException exception)
     {
       exception.SetName(params.name);
       exception.Display();
     }
+    catch (const std::exception& exception)
+    {
+      AlertUi::NewAlert.Emit("Failed to load level (" + std::string(exception.what()) + ")");
+    }
     catch (const char* error)
     {
-      if (level) { delete level; level = 0; }
       AlertUi::NewAlert.Emit("Failed to load level (" + std::string(error) + ")");
-      world_map->Show();
     }
   }
   else
-  {
     AlertUi::NewAlert.Emit("Failed to open map file '" + params.path + '\'');
+  if (success == false)
+  {
+    if (level) { delete level; level = 0; }
     world_map->Show();
   }
 }

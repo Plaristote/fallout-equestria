@@ -203,11 +203,11 @@ namespace Utils
     str.clear();
     checkType(Packet::String);
     if (!(canIHaz(sizeof(std::int32_t), 1)))
-      return (*this);
+      throw CorruptPacket(this);
     size = *(reinterpret_cast<std::int32_t*>(reading));
     reading = reinterpret_cast<void*>((long)reading + sizeof(std::int32_t));
     if (!(canIHaz(sizeof(char), size)))
-      return (*this);
+      throw CorruptPacket(this);
     str.append(static_cast<char*>(reading), size);
     reading = reinterpret_cast<void*>((long)reading + sizeof(char) * size);
     return (*this);
@@ -236,36 +236,9 @@ namespace Utils
 
     read<char>(type);
     if (type != assumedType)
-    {
-      int offset = (long)reading - (long)buffer;
-
-      // Hex debug
-      int   it  = 0;
-      char* hex = (char*)buffer;
-
-      while (it < offset)
-      {
-          cerr << (int)(hex[it]) << " ";
-          ++it;
-      }
-      cerr << endl;
-
-      cerr << "[Serializer] Type Mismatch: waiting for " << assumedType << ", getting " << (int)type << "..." << endl;
-      cerr << "[Serializer] Type Mismatch at offset " << offset << endl;
-      throw static_cast<unsigned int>(TypeMismatch);
-    }
+      throw UnserializeUnknownType(this, assumedType, (char)type);
   }
   
-  void          Packet::PrintRawContent(void)
-  {
-    char*        hex = (char*)buffer;
-    unsigned int it  = 0;
-
-    while (it < sizeBuffer)
-      cout << (int)(hex[it++]) << ' ';
-    cout << endl;
-  }
-
   void		Packet::realloc(int newSize)
   {
     char*		alloc = new char[newSize];
@@ -275,7 +248,6 @@ namespace Utils
       char*	toCopy = static_cast<char*>(buffer);
 
       copy(toCopy, &toCopy[sizeBuffer], alloc);
-      // WARNING may need to be commented:
       delete[] (char*)buffer;
     }
     buffer  = reinterpret_cast<void*>(alloc);
@@ -294,5 +266,54 @@ namespace Utils
   void		Packet::PrintContent(void)
   {
     std::cout << "[Packet::PrintContent] isn't implemented yet" << std::endl;
+  }
+  
+  std::string Packet::Exception::type_names[] = { "[unsupported type]", "std::string", "int", "float", "short", "char", "array", "unsigned int", "unsigned short", "unsigned char" };
+  
+  Packet::CorruptPacket::CorruptPacket(Packet* packet)
+  {
+    std::stringstream stream;
+
+    assumed_type = provided_type = 0;
+    this->packet = packet;
+    offset       = (long)packet->reading - (long)packet->buffer;
+    size         = packet->size();
+    stream << "Packet is corrupted (packet's size do not match what it claims to be) at offset " << offset;
+    message = stream.str();
+  }
+  
+  Packet::SerializeUnknownType::SerializeUnknownType(Packet* packet)
+  {
+    std::stringstream stream;
+
+    assumed_type = provided_type = 0;
+    this->packet = packet;
+    offset       = packet->sizeBuffer;
+    size         = packet->size();
+    stream << "Exception while serializing packet at offset: attempt to serialize an unsupported type.";
+    message = stream.str();
+  }
+  
+  Packet::UnserializeUnknownType::UnserializeUnknownType(Packet* packet, char assumed_type, char provided_type)
+  {
+    std::stringstream stream;
+    
+    this->packet        = packet;
+    this->assumed_type  = assumed_type;
+    this->provided_type = provided_type;
+    offset              = (long)packet->reading - (long)packet->buffer;
+    size                = packet->size();
+    stream << "Exception while unserializing packet at offset " << offset << " : packet provided " << ProvidedType() << ", user tried to unserialize " << ExpectedType();
+    message = stream.str();
+  }
+  
+  const std::string& Packet::Exception::ExpectedType(void) const
+  {
+    return (type_names[(size_t)assumed_type]);
+  }
+  
+  const std::string& Packet::Exception::ProvidedType(void) const
+  {
+    return (type_names[(size_t)provided_type]);
   }
 }

@@ -33,6 +33,40 @@ namespace Utils
 class		Packet : public Serializable
 {
 public:
+  struct Exception : public std::exception
+  {
+  public:
+    Exception(Packet* packet);
+    
+    const char* what(void) const throw()
+    {
+      return (message.c_str());
+    }
+    
+    Packet*            GetPacket(void)      const { return (packet); }
+    unsigned int       ThrownAtOffset(void) const { return (offset); }
+    unsigned int       PacketSize(void)     const { return (size);   }
+    const std::string& ExpectedType(void)   const;
+    const std::string& ProvidedType(void)   const;
+
+  protected:
+    Exception(void) {}
+    
+    Packet*            packet;
+    unsigned int       offset, size;
+    char               assumed_type, provided_type;
+    std::string        message;
+    static std::string type_names[];
+  };
+
+  struct SerializeUnknownType   : public Exception { SerializeUnknownType(Packet* packet); };
+  struct UnserializeUnknownType : public Exception { UnserializeUnknownType(Packet* packet, char assumed_type, char provided_type); };
+  struct CorruptPacket          : public Exception { CorruptPacket(Packet* packet); };
+
+  friend struct SerializeUnknownType;
+  friend struct UnserializeUnknownType;
+  friend struct CorruptPacket;
+  
   enum Types
   {
     String = 1,
@@ -44,12 +78,6 @@ public:
     UInt   = 7,
     UShort = 8,
     UChar  = 9
-  };
-
-  enum Errors
-  {
-    TypeMismatch,
-    InvalidSize
   };
 
   /*! \brief Use to create an empty Packet. */
@@ -73,7 +101,6 @@ public:
   size_t	size(void) const;
   /*! \brief Prints the content of the packet in an human-readable form */
   void		PrintContent(void);
-  void          PrintRawContent(void);
   
   Packet&	operator=(const Packet& cpy);
 
@@ -101,10 +128,7 @@ public:
     T*	    copy;
 
     if (TypeToCode<T>::TypeCode == 0)
-    {
-      cerr << "[Serializer] Trying to unserialize unknown type" << endl;
-      throw 5;
-    }
+      throw SerializeUnknownType(this);
     newSize += sizeof(T) + sizeof(char);
     realloc(newSize);
     typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
