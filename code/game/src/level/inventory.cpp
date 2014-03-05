@@ -278,7 +278,7 @@ bool InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target
     return (ExecuteHook("UseOnDoor", user, lockTarget, useType));
   if (hooks.IsDefined("UseOnOthers"))
     return (ExecuteHook("UseOnOthers", user, target, useType));
-  Level::CurrentLevel->ConsoleWrite(i18n::T("That does nothing"));
+  Level::CurrentLevel->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("That does nothing"));
   return (false);
 }
 
@@ -303,7 +303,7 @@ bool InventoryObject::ExecuteHook(const std::string& hook, ObjectCharacter* user
     return ((bool)(handle.Call(hook, 3, &this_param, &user_param, &target_param)));
   }
   cout << "Method " << hook << " undefined" << endl;
-  Level::CurrentLevel->ConsoleWrite(i18n::T("That does nothing"));
+  Level::CurrentLevel->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("That does nothing"));
   return (false);
 }
 

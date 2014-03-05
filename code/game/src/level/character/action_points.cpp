@@ -45,7 +45,7 @@ bool CharacterActionPoints::UseActionPoints(unsigned short amount)
     }
     else if (this == _level->GetPlayer())
     {
-      _level->ConsoleWrite(i18n::T("You do not have enough action points."));
+      _level->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("You do not have enough action points."));
       return (false);
     }
   }

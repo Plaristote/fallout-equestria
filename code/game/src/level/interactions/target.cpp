@@ -73,7 +73,7 @@ bool Interactions::Target::IsPlayer(InstanceDynamicObject* user) const
 
 void Interactions::Target::DisplayMessage(const string& message)
 {
-  level->ConsoleWrite(message);
+  level->GetLevelUi().GetMainBar().AppendToConsole(message);
 }
 
 void Interactions::Target::SetInteractionsFromDynamicObject(DynamicObject* object)

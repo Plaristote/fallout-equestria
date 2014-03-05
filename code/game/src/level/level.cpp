@@ -28,7 +28,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   combat(*this, characters),
   level_ui(window, gameUi),
   mouse_hint(*this, level_ui, mouse),
-  interactions(*this),
+  player(*this),
   chatter_manager(window),
   floors(*this),
   zones(*this)
@@ -144,6 +144,40 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   //window->get_render().set_shader_auto();
 }
 
+Level::~Level()
+{
+  cout << "- Destroying Level" << endl;
+  try
+  {
+    if (main_script.IsDefined("Finalize"))
+      main_script.Call("Finalize");
+  }
+  catch (const AngelScript::Exception& exception)
+  {
+    AlertUi::NewAlert.Emit(std::string("Script crashed during Level destruction: ") + exception.what());
+  }
+  
+  for_each(parties.begin(), parties.end(), [](Party* party)
+  {
+    if (party->GetName() != "player")
+      delete party;
+  });
+  
+  
+  MouseCursor::Get()->SetHint("");
+  window->get_render().clear_light();
+
+  time_manager.ClearTasks(TASK_LVL_CITY);
+  obs.DisconnectAll();
+  projectiles.CleanUp();
+  ForEach(objects,     [](InstanceDynamicObject* obj) { delete obj;        });
+  ForEach(parties,     [](Party* party)               { delete party;      });
+  zones.UnregisterAllZones();
+  CurrentLevel = 0;
+  if (sunlight) delete sunlight;
+  if (world)    delete world;
+}
+
 void Level::RefreshCharactersVisibility(void)
 {
   ObjectCharacter* player              = GetPlayer();
@@ -225,75 +259,7 @@ void Level::InitializeSun(void)
 
 void Level::InitializePlayer(void)
 {
-  interactions.SetPlayer(GetPlayer());
-
-  if (!(GetPlayer()->GetStatistics().Nil()))
-  {
-    Data stats(GetPlayer()->GetStatistics());
-    
-    if (!(stats["Statistics"]["Action Points"].Nil()))
-      level_ui.GetMainBar().SetMaxAP(stats["Statistics"]["Action Points"]);
-  }
-  {
-    Interactions::InteractionList& interactions_on_player = GetPlayer()->GetInteractions();
-
-    interactions_on_player.clear();
-    interactions_on_player.push_back(Interactions::Interaction("use_object", GetPlayer(), &(interactions.UseObjectOn)));
-    interactions_on_player.push_back(Interactions::Interaction("use_skill",  GetPlayer(), &(interactions.UseSkillOn)));
-    interactions_on_player.push_back(Interactions::Interaction("use_magic",  GetPlayer(), &(interactions.UseSpellOn)));
-  }
-  
-  level_ui.GetMainBar().SetStatistics(GetPlayer()->GetStatController());
-  level_ui.GetMainBar().OpenSkilldex.Connect([this]() { interactions.UseSkillOn.Emit(GetPlayer()); });
-  level_ui.GetMainBar().OpenSpelldex.Connect([this]() { interactions.UseSpellOn.Emit(0);           });
-
-  obs_player.Connect(GetPlayer()->EquipedItemActionChanged, level_ui.GetMainBar(),   &GameMainBar::SetEquipedItemAction);
-  obs_player.Connect(GetPlayer()->EquipedItemChanged,       level_ui.GetMainBar(),   &GameMainBar::SetEquipedItem);
-  obs_player.Connect(GetPlayer()->EquipedItemChanged,       level_ui.GetInventory(), &GameInventory::SetEquipedItem);
-  level_ui.GetMainBar().EquipedItemNextAction.Connect(*GetPlayer(), &ObjectCharacter::ItemNextUseType);
-  level_ui.GetMainBar().UseEquipedItem.Connect       (interactions, &Interactions::Player::ActionTargetUse);
-  level_ui.GetMainBar().CombatEnd.Connect            ([this](void)
-  {
-    if (combat.CanStop())
-      combat.Stop();
-    else
-      ConsoleWrite("You can't leave combat mode if enemies are nearby.");
-  });
-  level_ui.GetMainBar().CombatPassTurn.Connect([this](void)
-  {
-    if (combat.GetCurrentCharacter() == GetPlayer())
-      combat.NextTurn();
-    else
-      ConsoleWrite("You cannot pass other characters' turns.");
-  });
-
-  obs.Connect(level_ui.GetInventory().EquipItem,   [this](const std::string& target, unsigned int slot, InventoryObject* object)
-  {
-    if (target == "equiped")
-      interactions.ActionEquipForQuickUse(slot, object);
-  });
-  obs.Connect(level_ui.GetInventory().UnequipItem, [this](const std::string& target, unsigned int slot)
-  {
-    if (target == "equiped")
-      GetPlayer()->UnequipItem(slot);
-  });
-
-  obs.Connect(level_ui.GetInventory().DropObject, interactions, &Interactions::Player::ActionDropObject);
-  obs.Connect(level_ui.GetInventory().UseObject,  interactions, &Interactions::Player::ActionUseObject);
-
-  for (unsigned short it = 0 ; it < 2 ; ++it) // For every equiped item slot
-  {
-    level_ui.GetMainBar().SetEquipedItem(it, GetPlayer()->GetEquipedItem(it));
-    level_ui.GetInventory().SetEquipedItem(it, GetPlayer()->GetEquipedItem(it));
-  }
-
-  player_halo.SetTarget(GetPlayer());
-  GetPlayer()->GetFieldOfView().Launch();
-  target_outliner.UsePerspectiveOfCharacter(GetPlayer());
-
-  //
-  // Initializing Main Script
-  //
+  player.SetPlayer(GetPlayer());
   if (main_script.IsDefined("Initialize"))
     main_script.Call("Initialize");
 }
@@ -339,8 +305,8 @@ void Level::MatchPartyToExistingCharacters(Party& party)
 
 void Level::RemovePartyFromLevel(Party& party)
 {
-  if (party.GetName() == "player")
-    obs_player.DisconnectAll();
+  /*if (party.GetName() == "player") WARNING check if we can remove that for real
+    obs_player.DisconnectAll();*/
   RunForPartyMembers(party, [this](Party::Member* member, ObjectCharacter* character)
   {
     auto           character_it = find(characters.begin(), characters.end(), character);
@@ -395,42 +361,6 @@ void Level::SetPlayerInventory(Inventory* inventory)
   level_ui.GetInventory().SetInventory(*inventory);
   player->EquipedItemChanged.Emit(0, player->GetEquipedItem(0));
   player->EquipedItemChanged.Emit(1, player->GetEquipedItem(1));
-}
-
-Level::~Level()
-{
-  cout << "- Destroying Level" << endl;
-  try
-  {
-    if (main_script.IsDefined("Finalize"))
-      main_script.Call("Finalize");
-  }
-  catch (const AngelScript::Exception& exception)
-  {
-	AlertUi::NewAlert.Emit(std::string("Script crashed during Level destruction: ") + exception.what());
-  }
-  
-  for_each(parties.begin(), parties.end(), [](Party* party)
-  {
-    if (party->GetName() != "player")
-      delete party;
-  });
-  
-  
-  MouseCursor::Get()->SetHint("");
-  window->get_render().clear_light();
-
-  time_manager.ClearTasks(TASK_LVL_CITY);
-  obs.DisconnectAll();
-  obs_player.DisconnectAll();
-  projectiles.CleanUp();
-  ForEach(objects,     [](InstanceDynamicObject* obj) { delete obj;        });
-  ForEach(parties,     [](Party* party)               { delete party;      });
-  zones.UnregisterAllZones();
-  CurrentLevel = 0;
-  if (sunlight) delete sunlight;
-  if (world)    delete world;
-  cout << "-> Done." << endl;
 }
 
 InstanceDynamicObject* Level::GetObject(const string& name)
@@ -646,11 +576,6 @@ void                   Level::ProcessAllCollisions(void)
 {
   ForEach(objects,    [](InstanceDynamicObject* object) { object->ProcessCollisions(); });
   ForEach(characters, [](ObjectCharacter*       object) { object->ProcessCollisions(); });
-}
-
-void Level::ConsoleWrite(const string& str)
-{
-  level_ui.GetMainBar().AppendToConsole(str);
 }
 
 bool Level::IsWaypointOccupied(unsigned int id) const

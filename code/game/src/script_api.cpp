@@ -233,6 +233,11 @@ namespace asUtils
     return (target->GetPathTowardsObject(self).Size());
   }
   
+  void AppendToConsole(Level* level, const std::string& message)
+  {
+    level->GetLevelUi().GetMainBar().AppendToConsole(message);
+  }
+  
   namespace Combat
   {
     void StartFight(Level* level, ObjectCharacter* character)
@@ -518,7 +523,7 @@ void AngelScriptInitialize(void)
 
   const char* levelClass = "Level";
   engine->RegisterObjectType(levelClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  OBJ_REF_REGISTER_METHOD(Level, void,    ConsoleWrite,  (string));
+  engine->RegisterObjectMethod(levelClass, "void AppendToConsole(string)", asFUNCTION(asUtils::AppendToConsole), asCALL_CDECL_OBJFIRST);
   OBJ_REF_REGISTER_METHOD(Level, Data,    GetDataEngine, ());
   OBJ_REF_REGISTER_METHOD(Level, World@,  GetWorld,      ());
   OBJ_REF_REGISTER_METHOD(Level, Camera@, GetCamera,     ());

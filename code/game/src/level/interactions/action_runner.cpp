@@ -118,5 +118,5 @@ bool Interactions::ActionRunner::CheckAndRemoveActionPoints(void)
 void Interactions::ActionRunner::ConsoleWrite(ObjectCharacter* user, const string& message)
 {
   if (user->IsPlayer())
-    user->_level->ConsoleWrite(message);
+    user->_level->GetLevelUi().GetMainBar().AppendToConsole(message);
 }

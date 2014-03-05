@@ -47,6 +47,7 @@
 # include "mouse_events.hpp"
 # include "level/interactions.hpp"
 # include "level/combat.hpp"
+# include "level/player.hpp"
 
 # include <functional>
 
@@ -100,13 +101,15 @@ public:
   void                    SetInterrupted(bool);
   
   // World Interactions
-  World*                 GetWorld(void)       { return (world); }
-  LevelUi&               GetLevelUi(void)     { return (level_ui); }
-  MouseEvents&           GetMouse(void)       { return (mouse); }
-  Floors&                GetFloors(void)      { return (floors); }
+  World*                 GetWorld(void)          { return (world); }
+  LevelUi&               GetLevelUi(void)        { return (level_ui); }
+  MouseEvents&           GetMouse(void)          { return (mouse); }
+  Floors&                GetFloors(void)         { return (floors); }
   TargetOutliner&        GetTargetOutliner(void) { return (target_outliner); }
-  Zones::Manager&        GetZoneManager(void) { return (zones); }
-  LevelCamera&           GetCamera(void)      { return (camera); }
+  VisibilityHalo&        GetPlayerHalo(void)     { return (player_halo);     }
+  Zones::Manager&        GetZoneManager(void)    { return (zones); }
+  LevelCamera&           GetCamera(void)         { return (camera); }
+  SoundManager&          GetSoundManager(void)   { return (sound_manager); }
   ObjectCharacter*       GetCharacter(const std::string& name);
   ObjectCharacter*       GetCharacter(const DynamicObject*);
   CharacterList          FindCharacters(std::function<bool (ObjectCharacter*)> = [](ObjectCharacter*) { return (true); }) const;
@@ -127,12 +130,11 @@ public:
   ChatterManager&        GetChatterManager(void) { return (chatter_manager);  }
   PathPreview&           GetHoveredPath(void)    { return (hovered_path);      }
   Data                   GetDataEngine(void)     { return (*data_engine);      }
-  void                   ConsoleWrite(const std::string& str);
 
   void                   RemoveObject(InstanceDynamicObject* object);
 
   // Interace Interactions
-  Interactions::Player&  GetInteractions() { return (interactions); }
+  Interactions::Player&  GetInteractions() { return (player);       }
   EquipModes&            GetEquipModes()   { return (equip_modes);  }
 
   void                   PlayerEquipObject(unsigned short it, InventoryObject* object);
@@ -161,9 +163,6 @@ private:
   typedef std::list<ObjectCharacter*>       Characters;
   typedef std::list<Party*>                 Parties;
   
-  
-  Sync::ObserverHandler obs_player;
-
   std::string           level_name;
   WindowFramework*      window;
   DataEngine*           data_engine;
@@ -178,7 +177,7 @@ private:
 
   LevelUi               level_ui;
   MouseHint             mouse_hint;
-  Interactions::Player  interactions;
+  Player                player;
   World*                world;
   ParticleSystemManager particle_manager;
   SoundManager          sound_manager;

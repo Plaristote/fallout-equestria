@@ -31,7 +31,7 @@ void ObjectLocker::CallbackActionUse(InstanceDynamicObject* object)
   if (_closed == false)
     ObjectShelf::CallbackActionUse(object);
   else if (IsLocked())
-    _level->ConsoleWrite(i18n::T("It's locked"));
+    _level->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("It's locked"));
   else
   {
     AnimationEndForObject.DisconnectAll();

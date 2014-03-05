@@ -31,6 +31,6 @@ void ObjectItem::CallbackActionUse(InstanceDynamicObject* user)
       _level->RemoveObject(this);
     }
     else
-      _level->ConsoleWrite(character->GetName() + " " + i18n::T("can't carry this"));
+      _level->GetLevelUi().GetMainBar().AppendToConsole(character->GetName() + " " + i18n::T("can't carry this"));
   }
 }

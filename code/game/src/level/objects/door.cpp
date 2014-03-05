@@ -92,5 +92,5 @@ void ObjectDoor::CallbackActionUse(InstanceDynamicObject* object)
     PlayAnimation(_closed ? "open" : "close");
   }
   else
-    _level->ConsoleWrite(i18n::T("It's locked"));
+    _level->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("It's locked"));
 }

@@ -38,7 +38,7 @@ void Interactions::Player::ActionTalkTo(InstanceDynamicObject* object)
 {
   if (level.GetState() == Level::Fight)
   {
-    level.ConsoleWrite(i18n::T("Can't talk during fight."));
+    level.GetLevelUi().GetMainBar().AppendToConsole(i18n::T("Can't talk during fight."));
     return ;
   }
   if ((player->HasLineOfSight(object)) && player->GetPathDistance(object) <= 3)
@@ -60,7 +60,7 @@ void Interactions::Player::ActionTalkTo(InstanceDynamicObject* object)
     if (player->GetPath().Size() > 1)
       player->ReachedDestination.Connect([this, object]() { ActionTalkTo(object); });
     else
-      level.ConsoleWrite(i18n::T("No line of sight"));
+      level.GetLevelUi().GetMainBar().AppendToConsole(i18n::T("No line of sight"));
   }
 }
 
@@ -190,7 +190,7 @@ void Interactions::Player::ActionEquipForQuickUse(unsigned short it, InventoryOb
     }
   }
   else
-    level.ConsoleWrite(i18n::T("You can't equip " + i18n::T(object->GetName())));
+    level.GetLevelUi().GetMainBar().AppendToConsole(i18n::T("You can't equip " + i18n::T(object->GetName())));
 }
 
 void Interactions::Player::ActionEquipObject(const std::string& target, unsigned int slot, InventoryObject* object)

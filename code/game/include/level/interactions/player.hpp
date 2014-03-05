@@ -41,7 +41,7 @@ namespace Interactions
     void    ActionLootWithScript(Inventory* inventory, InstanceDynamicObject* target, asIScriptContext* context, const std::string& filepath);
     void    ActionLoot(Inventory* inventory);
 
-  private:
+  protected:
     Level&           level;
     ObjectCharacter* player;
   };

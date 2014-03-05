@@ -112,7 +112,7 @@ void                Pathfinding::User::GoTo(Waypoint* waypoint)
     if (!(path.FindPath(start_from, waypoint)))
     {
       if (_level->GetPlayer() == this)
-        _level->ConsoleWrite(i18n::T("No path."));
+        _level->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("No path."));
     }
     else
       StartRunAnimation();
@@ -133,7 +133,7 @@ void                Pathfinding::User::GoTo(InstanceDynamicObject* object, int m
   if (path.ContainsValidPath())
     StartRunAnimation();
   else if (_level->GetPlayer() == this)
-    _level->ConsoleWrite(i18n::T("No path."));
+    _level->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("No path."));
 }
 
 void Pathfinding::User::StartRunAnimation()

@@ -33,7 +33,7 @@ void Combat::InitializeLevelForFight(void)
 {
   level.SetState(Level::Fight);
   level.GetLevelUi().GetMainBar().SetEnabledAP(true);
-  level.ConsoleWrite("Combat started.");
+  level.GetLevelUi().GetMainBar().AppendToConsole("Combat started.");
 }
 
 void Combat::FinalizeFightForLevel(void)
@@ -42,7 +42,7 @@ void Combat::FinalizeFightForLevel(void)
     level.GetMouse().SetState(MouseEvents::MouseAction);
   level.SetState(Level::Normal);
   level.GetLevelUi().GetMainBar().SetEnabledAP(false);
-  level.ConsoleWrite("Combat ended.");
+  level.GetLevelUi().GetMainBar().AppendToConsole("Combat ended.");
 }
 
 void Combat::Start(ObjectCharacter* character)
