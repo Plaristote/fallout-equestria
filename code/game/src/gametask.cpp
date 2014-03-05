@@ -38,7 +38,7 @@ GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : game_ui(wind
   game_ui.OpenPipbuck.Connect(pipbuck, &UiBase::FireShow);
 
   SyncLoadLevel.SetDirect(false);
-  SyncLoadLevel.Connect(*this, &GameTask::DoLoadLevel);
+  SyncLoadLevel.Connect(*this, &GameTask::LoadLevel);
   _signals.push_back(&SyncLoadLevel);
 }
 
@@ -201,8 +201,15 @@ bool GameTask::LoadGame()
     current_level = data_engine["system"]["current-level"];
     if (!(current_level.Nil()) && current_level.Value() != "0")
     {
+      LoadLevelParams params;
+      
+      params.name       = current_level.Value();
+      params.path       = save_path + '/' + params.name + ".blob";
+      params.entry_zone = "";
+      params.isSaveFile = true;
+      SyncLoadLevel.Emit(params);
       world_map->Hide();
-      LoadLevel(window, game_ui, save_path + "/" + current_level.Value() + ".blob", current_level.Value(), "", true);
+//      LoadLevel(window, game_ui, save_path + "/" + current_level.Value() + ".blob", current_level.Value(), "", true);
     }
     else
       world_map->Show();
@@ -218,13 +225,18 @@ bool GameTask::LoadGame()
 
 void GameTask::OpenLevel(const std::string& level_name, const std::string& entry_zone)
 {
-  std::ifstream fileTest;
-  std::string   filename = level_name + ".blob";
+  std::ifstream   fileTest;
+  std::string     filename = level_name + ".blob";
+  LoadLevelParams params;
 
-  if (Filesystem::FileExists(save_path + "/" + filename))
-    LoadLevel(window, game_ui, save_path + "/" + filename, level_name, entry_zone, true);
+  params.name       = level_name;
+  params.entry_zone = entry_zone;
+  params.isSaveFile = Filesystem::FileExists(save_path + '/' + filename);
+  if (params.isSaveFile)
+    params.path     = save_path + '/' + filename;
   else
-    LoadLevel(window, game_ui, "maps/" + filename,        level_name, entry_zone, false);
+    params.path     = "maps/" + filename;
+  SyncLoadLevel.Emit(params);
 }
 
 void GameTask::ExitLevel()
@@ -340,7 +352,7 @@ void GameTask::LoadLevelFromPacket(LoadLevelParams params, Utils::Packet& packet
   world_map->Hide();
 }
 
-void GameTask::DoLoadLevel(LoadLevelParams params)
+void GameTask::LoadLevel(LoadLevelParams params)
 {
   ifstream file;
   bool     success = false;
@@ -377,17 +389,6 @@ void GameTask::DoLoadLevel(LoadLevelParams params)
     if (level) { delete level; level = 0; }
     world_map->Show();
   }
-}
-
-void GameTask::LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& path, const std::string& name, const std::string& entry_zone, bool isSaveFile)
-{
-  LoadLevelParams params;
-  
-  params.name       = name;
-  params.path       = path;
-  params.isSaveFile = isSaveFile;
-  params.entry_zone = entry_zone;
-  SyncLoadLevel.Emit(params);
 }
 
 void GameTask::SetLevelEncounter(const Encounter& encounter)

@@ -51,9 +51,8 @@ private:
   void                  LoadClicked(Rocket::Core::Event&);
   void                  SaveClicked(Rocket::Core::Event&);
   static bool           SaveLevel(Level* level, const std::string& name);
-  void                  LoadLevel(WindowFramework* window, GameUi& gameUi, const std::string& path, const std::string& name, const std::string& entry_zone = "", bool isSaveFile = false);
   void                  LoadLevelFromPacket(LoadLevelParams, Utils::Packet&);
-  void                  DoLoadLevel(LoadLevelParams);
+  void                  LoadLevel(LoadLevelParams);
   void                  GameOver(void);
   void                  RunLevel(void);
   
