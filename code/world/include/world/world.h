@@ -55,8 +55,7 @@ struct World
     typedef std::list<MapObject>     MapObjects;
     typedef std::list<DynamicObject> DynamicObjects;
     typedef std::list<WorldLight>    WorldLights;
-    typedef std::list<ExitZone>      ExitZones;
-    typedef std::list<EntryZone>     EntryZones;
+    typedef std::list<Zone>          Zones;
     typedef std::vector<NodePath>    Floors;
 
     WindowFramework* window;
@@ -82,8 +81,7 @@ struct World
     bool             do_compile_waypoints;
 #endif
 
-    ExitZones        exitZones;
-    EntryZones       entryZones;
+    Zones            zones;
 
     World(WindowFramework* window);
     ~World(void);
@@ -174,14 +172,9 @@ struct World
     void           ReparentObject(MapObject* object, MapObject*     new_parent);
     void           ReparentObject(MapObject* object, const std::string& name);
 
-    void           AddExitZone(const std::string&);
-    void           DeleteExitZone(const std::string&);
-    ExitZone*      GetExitZoneByName(const std::string&);
-    bool           IsInExitZone(unsigned int id) const;
-
-    void           AddEntryZone(const std::string&);
-    void           DeleteEntryZone(const std::string&);
-    EntryZone*     GetEntryZoneByName(const std::string&);
+    void           AddZone(const std::string&);
+    void           DeleteZone(const std::string&);
+    Zone*          GetZoneByName(const std::string&);
 
     void           AddLight(WorldLight::Type, const std::string&);
     void           AddLight(WorldLight::Type, const std::string&, MapObject* parent);

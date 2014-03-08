@@ -69,9 +69,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   camera.SetLimits((bottomLeft.get_x() - 50) * 1.25, (bottomLeft.get_y() - 50) * 1.25, (upperRight.get_x() + 50) * 1.25, (upperRight.get_y() + 50) * 1.25);
 
   cout << "Level Loading Step #8" << endl;
-  ForEach(world->entryZones, [this](EntryZone& zone) { zones.RegisterZone(zone); });
-  ForEach(world->exitZones,  [this](ExitZone& zone)  { zones.RegisterZone(zone); });
-  
+  ForEach(world->zones,          [this](Zone& zone)          { zones.RegisterZone(zone);  });
   ForEach(world->dynamicObjects, [this](DynamicObject& dobj) { InsertDynamicObject(dobj); });
 
   world->SetWaypointsVisible(false);

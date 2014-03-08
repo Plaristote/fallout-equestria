@@ -35,6 +35,7 @@ namespace Zones
     bool         IsExitZone(void)                    const { return (zone.destinations.size() > 0); }
     bool         IsEnabled(void)                     const { return (enabled);                      }
     bool         IsInZone(InstanceDynamicObject*)    const;
+    bool         IsInZone(Waypoint*)                 const;
     void         Refresh(void);
     void         SetEnabled(bool);
     void         DisableZone(void);

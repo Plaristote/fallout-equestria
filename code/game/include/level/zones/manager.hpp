@@ -35,6 +35,7 @@ namespace Zones
     ~Manager();
 
     bool                     ZoneExists(const std::string& name) const;
+    bool                     IsInsideExitZone(Waypoint*);
     const Controller&        GetZone(const std::string& name)    const;
     Controller&              GetZone(const std::string& name);
     void                     RegisterZone(Zone& zone);

@@ -45,10 +45,9 @@ void MouseHint::ActionHint()
 
 void MouseHint::ExitZoneHint()
 {
-  unsigned int waypoint_id = mouse.Hovering().waypoint_ptr->id;
-  World*       world       = level.GetWorld();
+  Waypoint* waypoint = mouse.Hovering().waypoint_ptr;
 
-  if (world->IsInExitZone(waypoint_id))
+  if (level.GetZoneManager().IsInsideExitZone(waypoint))
     MouseCursor::Get()->SetHint("exit");
   else
     ClearHint();

@@ -110,18 +110,13 @@ private slots:
     void TerrainPickerPicked(bool);
     void TerrainSelectorPicked(bool);
 
-    // ENTRY/EXIT ZONES
-    void EntryZoneAdd(void);
-    void EntryZoneDelete(void);
-    void EntryZoneSetAsSelection(void);
-    void EntryZoneChanged(QString);
-
-    void ExitZoneAdd(void);
-    void ExitZoneDelete(void);
-    void ExitZoneSetAsSelection(void);
-    void ExitZoneChanged(QString);
-    void ExitZoneDestinationAdd(void);
-    void ExitZoneDestinationDelete(void);
+    // ZONES
+    void ZoneAdd(void);
+    void ZoneDelete(void);
+    void ZoneSetAsSelection(void);
+    void ZoneChanged(QString);
+    void ZoneDestinationAdd(void);
+    void ZoneDestinationDelete(void);
 
     // OBJECTS
     void ObjectAdd(void);

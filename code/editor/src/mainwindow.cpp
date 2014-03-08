@@ -766,17 +766,12 @@ void MainWindow::PandaInitialized()
      connect(&wizardObject, SIGNAL(accepted()), this, SLOT(ObjectAdd()));
 
 // ENTRY/EXIT ZONES
-     connect(ui->entryZoneAdd,    SIGNAL(clicked()), this, SLOT(EntryZoneAdd()));
-     connect(ui->entryZoneDelete, SIGNAL(clicked()), this, SLOT(EntryZoneDelete()));
-     connect(ui->entryZoneSetWaypoints, SIGNAL(clicked()), this, SLOT(EntryZoneSetAsSelection()));
-     connect(ui->entryZoneList,   SIGNAL(currentIndexChanged(QString)), this, SLOT(EntryZoneChanged(QString)));
-
-     connect(ui->exitZoneAdd,     SIGNAL(clicked()), this, SLOT(ExitZoneAdd()));
-     connect(ui->exitZoneDelete,  SIGNAL(clicked()), this, SLOT(ExitZoneDelete()));
-     connect(ui->exitZoneSetSelection, SIGNAL(clicked()), this, SLOT(ExitZoneSetAsSelection()));
-     connect(ui->exitZoneList,    SIGNAL(currentIndexChanged(QString)), this, SLOT(ExitZoneChanged(QString)));
-     connect(ui->exitZoneAddDestination, SIGNAL(clicked()), this, SLOT(ExitZoneDestinationAdd()));
-     connect(ui->exitZoneDeleteDestination, SIGNAL(clicked()), this, SLOT(ExitZoneDestinationDelete()));
+     connect(ui->zoneAdd,               SIGNAL(clicked()),                    this, SLOT(ZoneAdd()));
+     connect(ui->zoneDelete,            SIGNAL(clicked()),                    this, SLOT(ZoneDelete()));
+     connect(ui->zoneSetSelection,      SIGNAL(clicked()),                    this, SLOT(ZoneSetAsSelection()));
+     connect(ui->zoneList,              SIGNAL(currentIndexChanged(QString)), this, SLOT(ZoneChanged(QString)));
+     connect(ui->zoneAddDestination,    SIGNAL(clicked()),                    this, SLOT(ZoneDestinationAdd()));
+     connect(ui->zoneDeleteDestination, SIGNAL(clicked()),                    this, SLOT(ZoneDestinationDelete()));
 
 // MAPOBJECTS
      mapobjectSelected = 0;
@@ -1674,12 +1669,10 @@ void MainWindow::LoadMap(const QString& path)
         ui->treeWidget->SetWorld(world);
         dialogSaveMap.SetEnabledSunlight(world->sunlight_enabled);
 
-        ui->entryZoneList->clear();
         Ui::MainWindow* _ui = ui;
-        ForEach(world->entryZones, [_ui](EntryZone& zone) { _ui->entryZoneList->addItem(zone.name.c_str()); });
 
-        ui->exitZoneList->clear();
-        ForEach(world->exitZones,  [_ui](ExitZone& zone)  { _ui->exitZoneList->addItem(zone.name.c_str());  });
+        ui->zoneList->clear();
+        ForEach(world->zones,  [_ui](Zone& zone)  { _ui->zoneList->addItem(zone.name.c_str());  });
 
         ui->lightsSelect->clear();
         ui->lightFrame->setEnabled(false);
@@ -1707,107 +1700,57 @@ void MainWindow::LoadMap(const QString& path)
     //thread.start();
 }
 
-void MainWindow::EntryZoneAdd()
+void MainWindow::ZoneAdd()
 {
-    QString name = QInputDialog::getText(this, "Create Entry Zone", "Name");
+    QString name = QInputDialog::getText(this, "Create Zone", "Name");
 
     if (name != "")
     {
-        ui->entryZoneList->addItem(name);
-        world->AddEntryZone(name.toStdString());
+        world->AddZone(name.toStdString());
+        ui->zoneList->addItem(name);
     }
 }
 
-void MainWindow::EntryZoneDelete()
+void MainWindow::ZoneDelete()
 {
-    QString name = ui->entryZoneList->currentText();
+    QString name = ui->zoneList->currentText();
 
     if (name != "")
     {
-        ui->entryZoneList->removeItem(ui->entryZoneList->currentIndex());
-        world->DeleteEntryZone(name.toStdString());
+        ui->zoneList->removeItem(ui->zoneList->currentIndex());
+        world->DeleteZone(name.toStdString());
     }
 }
 
-void MainWindow::EntryZoneSetAsSelection()
+void MainWindow::ZoneSetAsSelection()
 {
-    QString name = ui->entryZoneList->currentText();
+  QString name = ui->zoneList->currentText();
 
-    if (name != "")
-    {
-        EntryZone* entryZone = world->GetEntryZoneByName(name.toStdString());
+  if (name != "")
+  {
+    Zone* zone = world->GetZoneByName(name.toStdString());
 
-        if (entryZone)
-            entryZone->waypoints = waypointsSelection;
-    }
+    if (zone)
+      zone->waypoints = waypointsSelection;
+  }
 }
 
-void MainWindow::ExitZoneAdd()
+void MainWindow::ZoneChanged(QString string)
 {
-    QString name = QInputDialog::getText(this, "Create Exit Zone", "Name");
+  if (string != "")
+  {
+    Zone* zone = world->GetZoneByName(string.toStdString());
 
-    if (name != "")
+    if (zone)
     {
-        world->AddExitZone(name.toStdString());
-        ui->exitZoneList->addItem(name);
+      ui->zoneDestinations->clear();
+      ForEach(zone->destinations, [this](std::string name) { ui->zoneDestinations->addItem(name.c_str()); });
+
+      std::list<Waypoint*> tmp = waypointsSelection;
+      ForEach(tmp,             [this](Waypoint* wp) { this->WaypointSelect(wp); });
+      ForEach(zone->waypoints, [this](Waypoint* wp) { this->WaypointSelect(wp); });
     }
-}
-
-void MainWindow::ExitZoneDelete()
-{
-    QString name = ui->exitZoneList->currentText();
-
-    if (name != "")
-    {
-        ui->exitZoneList->removeItem(ui->exitZoneList->currentIndex());
-        world->DeleteExitZone(name.toStdString());
-    }
-}
-
-void MainWindow::ExitZoneSetAsSelection()
-{
-    QString name = ui->exitZoneList->currentText();
-
-    if (name != "")
-    {
-        ExitZone* exitZone = world->GetExitZoneByName(name.toStdString());
-
-        if (exitZone)
-            exitZone->waypoints = waypointsSelection;
-    }
-}
-
-void MainWindow::EntryZoneChanged(QString string)
-{
-    if (string != "")
-    {
-        EntryZone* zone = world->GetEntryZoneByName(string.toStdString());
-
-        if (zone)
-        {
-            std::list<Waypoint*> tmp = waypointsSelection;
-            ForEach(tmp,             [this](Waypoint* wp) { this->WaypointSelect(wp); });
-            ForEach(zone->waypoints, [this](Waypoint* wp) { this->WaypointSelect(wp); });
-        }
-    }
-}
-
-void MainWindow::ExitZoneChanged(QString string)
-{
-    if (string != "")
-    {
-        ExitZone* zone = world->GetExitZoneByName(string.toStdString());
-
-        if (zone)
-        {
-            ui->exitZoneDestinations->clear();
-            ForEach(zone->destinations, [this](std::string name) { ui->exitZoneDestinations->addItem(name.c_str()); });
-
-            std::list<Waypoint*> tmp = waypointsSelection;
-            ForEach(tmp,             [this](Waypoint* wp) { this->WaypointSelect(wp); });
-            ForEach(zone->waypoints, [this](Waypoint* wp) { this->WaypointSelect(wp); });
-        }
-    }
+  }
 }
 
 void MainWindow::LightCompile(void)
@@ -1958,38 +1901,38 @@ void MainWindow::LightDelete(void)
     }
 }
 
-void MainWindow::ExitZoneDestinationAdd()
+void MainWindow::ZoneDestinationAdd()
 {
-    QString   name = ui->exitZoneList->currentText();
-    ExitZone* zone = world->GetExitZoneByName(name.toStdString());
+  QString name = ui->zoneList->currentText();
+  Zone*   zone = world->GetZoneByName(name.toStdString());
 
-    if (zone)
-    {
-        QString newDest = QInputDialog::getText(this, "Add destination", "Map name");
+  if (zone)
+  {
+    QString newDest = QInputDialog::getText(this, "Add destination", "Map name");
 
-        zone->destinations.push_back(newDest.toStdString());
-        ui->exitZoneDestinations->addItem(newDest);
-    }
+    zone->destinations.push_back(newDest.toStdString());
+    ui->zoneDestinations->addItem(newDest);
+  }
 }
 
-void MainWindow::ExitZoneDestinationDelete()
+void MainWindow::ZoneDestinationDelete()
 {
-    QString   name = ui->exitZoneList->currentText();
-    ExitZone* zone = world->GetExitZoneByName(name.toStdString());
+  QString name = ui->zoneList->currentText();
+  Zone*   zone = world->GetZoneByName(name.toStdString());
 
-    if (zone)
+  if (zone)
+  {
+    QListWidgetItem* item = ui->zoneDestinations->currentItem();
+
+    if (item)
     {
-        QListWidgetItem* item = ui->exitZoneDestinations->currentItem();
+      QString destName = item->text();
 
-        if (item)
-        {
-            QString destName = item->text();
-
-            std::remove(zone->destinations.begin(), zone->destinations.end(), destName.toStdString());
-            ui->exitZoneDestinations->removeItemWidget(item);
-            delete item;
-        }
+      std::remove(zone->destinations.begin(), zone->destinations.end(), destName.toStdString());
+      ui->zoneDestinations->removeItemWidget(item);
+      delete item;
     }
+  }
 }
 
 void MainWindow::EnableLevelEditor(void)

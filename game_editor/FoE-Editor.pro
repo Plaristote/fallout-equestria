@@ -77,6 +77,7 @@ SOURCES += main.cpp\
            misc.cpp \
            map_object.cpp \
            dynamic_object.cpp \
+           zone.cpp \
            light.cpp
 
 

@@ -5,7 +5,7 @@
 
 using namespace std;
 
-unsigned int          blob_revision = 6;
+unsigned int          blob_revision = 7;
 
 World::World(WindowFramework* window)
 {
@@ -361,68 +361,28 @@ DynamicObject* World::GetDynamicObjectFromNodePath(NodePath path)
   return (GetObjectFromNodePath(path, dynamicObjects));
 }
 
-// EXIT ZONES
-void World::AddExitZone(const std::string& name)
-{
-  ExitZone exitZone;
-
-  exitZone.name = name;
-  exitZones.push_back(exitZone);
-}
-
-void World::DeleteExitZone(const std::string& name)
-{
-  ExitZones::iterator it = std::find(exitZones.begin(), exitZones.end(), name);
-
-  if (it != exitZones.end())
-    exitZones.erase(it);
-}
-
-ExitZone* World::GetExitZoneByName(const std::string& name)
-{
-  ExitZones::iterator it = std::find(exitZones.begin(), exitZones.end(), name);
-
-  if (it != exitZones.end())
-    return (&(*it));
-  return (0);
-}
-
-bool      World::IsInExitZone(unsigned int id) const
-{
-  auto it = exitZones.begin(), end = exitZones.end();
-
-  for (; it != end ; ++it)
-  {
-    const ExitZone& exit_zone = *it;
-
-    if (exit_zone.Contains(id))
-      return (true);
-  }
-  return (false);
-}
-
 // ENTRY ZONES
-void World::AddEntryZone(const std::string& name)
+void World::AddZone(const std::string& name)
 {
-  EntryZone entryZone;
+  Zone zone;
 
-  entryZone.name = name;
-  entryZones.push_back(entryZone);
+  zone.name = name;
+  zones.push_back(zone);
 }
 
-void World::DeleteEntryZone(const std::string& name)
+void World::DeleteZone(const std::string& name)
 {
-  EntryZones::iterator it = std::find(entryZones.begin(), entryZones.end(), name);
+  Zones::iterator it = std::find(zones.begin(), zones.end(), name);
 
-  if (it != entryZones.end())
-    entryZones.erase(it);
+  if (it != zones.end())
+    zones.erase(it);
 }
 
-EntryZone* World::GetEntryZoneByName(const std::string& name)
+Zone* World::GetZoneByName(const std::string& name)
 {
-  EntryZones::iterator it = std::find(entryZones.begin(), entryZones.end(), name);
+  Zones::iterator it = std::find(zones.begin(), zones.end(), name);
 
-  if (it != entryZones.end())
+  if (it != zones.end())
     return (&(*it));
   return (0);
 }
@@ -701,60 +661,76 @@ void           World::UnSerialize(Utils::Packet& packet)
     }
   }
 
-    cout << "Unserialize zones" << endl;
-  // ExitZones
+  cout << "Unserialize zones" << endl;
+  if (blob_revision > 7)
   {
     int size;
-
+    
     packet >> size;
     for (int it = 0 ; it < size ; ++it)
     {
-      ExitZone       zone;
-      std::list<int> waypointsId;
-
-      packet >> zone.name;
-      packet >> zone.destinations;
-      packet >> waypointsId;
-
-      std::list<int>::iterator begin = waypointsId.begin();
-      std::list<int>::iterator end   = waypointsId.end();
-
-      for (; begin != end ; ++begin)
-      {
-        Waypoint* wp = GetWaypointFromId(*begin);
-
-       if (wp)
-         zone.waypoints.push_back(wp);
-      }
-      exitZones.push_back(zone);
+      Zone           zone;
+      
+      zone.Unserialize(this, packet);
+      zones.push_back(zone);
     }
   }
-
-  // EntryZone
+  else // Revisions < 7 used EntryZone and ExitZone types
   {
-    int size;
-
-    packet >> size;
-    for (int it = 0 ; it < size ; ++it)
+    // ExitZones
     {
-      EntryZone      zone;
-      std::list<int> waypointsId;
+      int size;
 
-      packet >> zone.name;
-      packet >> waypointsId;
-      std::list<int>::iterator begin = waypointsId.begin();
-      std::list<int>::iterator end   = waypointsId.end();
-
-      for (; begin != end ; ++begin)
+      packet >> size;
+      for (int it = 0 ; it < size ; ++it)
       {
-        Waypoint* wp = GetWaypointFromId(*begin);
+        Zone       zone;
+        std::list<int> waypointsId;
+
+        packet >> zone.name;
+        packet >> zone.destinations;
+        packet >> waypointsId;
+
+        std::list<int>::iterator begin = waypointsId.begin();
+        std::list<int>::iterator end   = waypointsId.end();
+
+        for (; begin != end ; ++begin)
+        {
+          Waypoint* wp = GetWaypointFromId(*begin);
 
         if (wp)
           zone.waypoints.push_back(wp);
+        }
+        zones.push_back(zone);
       }
-      entryZones.push_back(zone);
     }
-  }
+
+    // EntryZone
+    {
+      int size;
+
+      packet >> size;
+      for (int it = 0 ; it < size ; ++it)
+      {
+        Zone      zone;
+        std::list<int> waypointsId;
+
+        packet >> zone.name;
+        packet >> waypointsId;
+        std::list<int>::iterator begin = waypointsId.begin();
+        std::list<int>::iterator end   = waypointsId.end();
+
+        for (; begin != end ; ++begin)
+        {
+          Waypoint* wp = GetWaypointFromId(*begin);
+
+          if (wp)
+            zone.waypoints.push_back(wp);
+        }
+        zones.push_back(zone);
+      }
+    }
+  } // End compatibility with Revision < 7
 
     cout << "Unserialize sunlight" << endl;
   {
@@ -950,46 +926,18 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
     for (; it != end ; ++it) { (*it).Serialize(packet); }
   }
 
-  // ExitZones
+  // Zones
   {
-    ExitZones::iterator it   = exitZones.begin();
-    ExitZones::iterator end  = exitZones.end();
-    int                 size = exitZones.size();
-
+    Zones::iterator it   = zones.begin();
+    Zones::iterator end  = zones.end();
+    int             size = zones.size();
+    
     packet << size;
     for (; it != end ; ++it)
     {
-      ExitZone&                      zone = *it;
-      std::list<int>                 waypointsId;
-      std::list<Waypoint*>::iterator wpIt  = zone.waypoints.begin();
-      std::list<Waypoint*>::iterator wpEnd = zone.waypoints.end();
-
-      for (; wpIt != wpEnd ; ++wpIt)
-        waypointsId.push_back((*wpIt)->id);
-      packet << zone.name;
-      packet << zone.destinations;
-      packet << waypointsId;
-    }
-  }
-
-  // EntryZone
-  {
-    EntryZones::iterator it   = entryZones.begin();
-    EntryZones::iterator end  = entryZones.end();
-    int                  size = entryZones.size();
-
-    packet << size;
-    for (; it != end ; ++it)
-    {
-      EntryZone&                     zone  = *it;
-      std::list<int>                 waypointsId;
-      std::list<Waypoint*>::iterator wpIt  = zone.waypoints.begin();
-      std::list<Waypoint*>::iterator wpEnd = zone.waypoints.end();
-
-      for (; wpIt != wpEnd ; ++wpIt)
-        waypointsId.push_back((*wpIt)->id);
-      packet << zone.name;
-      packet << waypointsId;
+      Zone& zone = *it;
+      
+      zone.Serialize(packet);
     }
   }
 

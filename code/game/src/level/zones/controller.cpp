@@ -157,10 +157,14 @@ void Zones::Controller::DisableZone(void)
   residents.clear();
 }
 
-bool Zones::Controller::IsInZone(InstanceDynamicObject* object) const
+bool Zones::Controller::IsInZone(Waypoint* waypoint) const
 {
-  Waypoint* waypoint = object->GetOccupiedWaypoint();
   auto      match    = find(zone.waypoints.begin(), zone.waypoints.end(), waypoint);
   
   return (match != zone.waypoints.end());
+}
+
+bool Zones::Controller::IsInZone(InstanceDynamicObject* object) const
+{
+  return (IsInZone(object->GetOccupiedWaypoint()));
 }

@@ -168,7 +168,7 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>258</width>
+                    <width>261</width>
                     <height>254</height>
                    </rect>
                   </property>
@@ -327,114 +327,62 @@
                    </item>
                   </layout>
                  </widget>
-                 <widget class="QWidget" name="entryZonePage">
+                 <widget class="QWidget" name="zonePage">
                   <property name="geometry">
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>157</width>
-                    <height>89</height>
+                    <width>278</width>
+                    <height>230</height>
                    </rect>
                   </property>
                   <attribute name="label">
-                   <string>Entry Zones</string>
-                  </attribute>
-                  <layout class="QGridLayout" name="gridLayout_12">
-                   <item row="2" column="0" colspan="2">
-                    <widget class="QPushButton" name="entryZoneSetWaypoints">
-                     <property name="text">
-                      <string>Set as selection</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QPushButton" name="entryZoneDelete">
-                     <property name="text">
-                      <string>Delete</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QComboBox" name="entryZoneList"/>
-                   </item>
-                   <item row="0" column="0" colspan="2">
-                    <widget class="QPushButton" name="entryZoneAdd">
-                     <property name="text">
-                      <string>Add</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="3" column="0" colspan="2">
-                    <spacer name="verticalSpacer_4">
-                     <property name="orientation">
-                      <enum>Qt::Vertical</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                      <size>
-                       <width>20</width>
-                       <height>40</height>
-                      </size>
-                     </property>
-                    </spacer>
-                   </item>
-                  </layout>
-                 </widget>
-                 <widget class="QWidget" name="exitZonePage">
-                  <property name="geometry">
-                   <rect>
-                    <x>0</x>
-                    <y>0</y>
-                    <width>162</width>
-                    <height>210</height>
-                   </rect>
-                  </property>
-                  <attribute name="label">
-                   <string>Exit Zones</string>
+                   <string>Zones</string>
                   </attribute>
                   <layout class="QGridLayout" name="gridLayout_11">
                    <item row="1" column="1">
-                    <widget class="QPushButton" name="exitZoneDelete">
+                    <widget class="QPushButton" name="zoneDelete">
                      <property name="text">
                       <string>Delete</string>
                      </property>
                     </widget>
                    </item>
                    <item row="5" column="1">
-                    <widget class="QPushButton" name="exitZoneDeleteDestination">
+                    <widget class="QPushButton" name="zoneDeleteDestination">
                      <property name="text">
                       <string>Delete</string>
                      </property>
                     </widget>
                    </item>
                    <item row="3" column="0">
-                    <widget class="QLabel" name="exitZoneLabelDestination">
+                    <widget class="QLabel" name="zoneLabelDestination">
                      <property name="text">
                       <string>Destinations:</string>
                      </property>
                     </widget>
                    </item>
                    <item row="0" column="0" colspan="2">
-                    <widget class="QPushButton" name="exitZoneAdd">
+                    <widget class="QPushButton" name="zoneAdd">
                      <property name="text">
                       <string>Add</string>
                      </property>
                     </widget>
                    </item>
                    <item row="5" column="0">
-                    <widget class="QPushButton" name="exitZoneAddDestination">
+                    <widget class="QPushButton" name="zoneAddDestination">
                      <property name="text">
                       <string>Add</string>
                      </property>
                     </widget>
                    </item>
                    <item row="1" column="0">
-                    <widget class="QComboBox" name="exitZoneList"/>
+                    <widget class="QComboBox" name="zoneList"/>
                    </item>
                    <item row="4" column="0" colspan="2">
-                    <widget class="QListWidget" name="exitZoneDestinations"/>
+                    <widget class="QListWidget" name="zoneDestinations"/>
                    </item>
                    <item row="2" column="0" colspan="2">
-                    <widget class="QPushButton" name="exitZoneSetSelection">
+                    <widget class="QPushButton" name="zoneSetSelection">
                      <property name="text">
                       <string>Set as selection</string>
                      </property>

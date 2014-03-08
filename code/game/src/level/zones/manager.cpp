@@ -204,6 +204,21 @@ bool Zones::Manager::ZoneExists(const string& name) const
   return (find_if(zones.begin(), zones.end(), [name](Controller* controller) -> bool { return (controller->zone.name == name); }) != zones.end());
 }
 
+bool Zones::Manager::IsInsideExitZone(Waypoint* waypoint)
+{
+  auto it  = zones.begin();
+  auto end = zones.end();
+  
+  for (; it != end ; ++it)
+  {
+    Controller* zone_controller = *it;
+    
+    if (zone_controller->IsEnabled() && zone_controller->IsExitZone() && zone_controller->IsInZone(waypoint))
+      return (true);
+  }
+  return (false);
+}
+
 Zones::Controller& Zones::Manager::GetZone(const string& name)
 {
   auto it = find_if(zones.begin(), zones.end(), [name](Controller* controller) -> bool { return (controller->zone.name == name); });
