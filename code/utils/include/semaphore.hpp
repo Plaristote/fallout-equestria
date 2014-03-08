@@ -45,6 +45,7 @@ namespace Sync
     };
 
     Semaphore(unsigned int initial_count = 1, unsigned int maximum_count = 1);
+    Semaphore(const Semaphore&);
     ~Semaphore(void);
 
     bool            TryWait(void);

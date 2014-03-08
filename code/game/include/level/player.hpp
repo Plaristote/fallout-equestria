@@ -9,6 +9,7 @@ public:
   Player(Level& level) : Interactions::Player(level) {}
   
   void SetPlayer(ObjectCharacter* character);
+  void UnsetPlayer(void);
 
 private:
   void InitializeInventoryUi(void);

@@ -17,9 +17,9 @@ class TargetOutliner
     friend class TargetOutliner;
   public:
     Outline(InstanceDynamicObject* object);
-    ~Outline(void);
 
     void     Initialize(void);
+    void     Finalize(void);
     void     Show(void);
     void     Hide(void);
     void     SetColor(LVector4f);

@@ -12,8 +12,19 @@ Semaphore::Semaphore(unsigned int initial_count, unsigned int max_count)
   _current_thread_lock = 0;
 }
 
+Semaphore::Semaphore(const Semaphore& copy)
+{
+  _max_count           = copy._max_count;
+  _deadlock_safety     = false;
+  _current_thread_lock = 0;
+  sem_init(&_handle, 0, _max_count);
+  SetDeadlockSafety(copy._deadlock_safety);
+}
+
 Semaphore::~Semaphore(void)
 {
+  if (_current_thread_lock)
+    delete _current_thread_lock;
   sem_destroy(&_handle);
 }
 
@@ -55,8 +66,20 @@ bool Semaphore::Post(void)
 Semaphore::Semaphore(unsigned int initial_count, unsigned int maximum_count)
 {
   _handle              = CreateSemaphore(NULL, initial_count, maximum_count, NULL);
+  _max_count           = maximum_count;
   _deadlock_safety     = false;
   _current_thread_lock = 0;
+}
+
+Semaphore::Semaphore(const Semaphore& copy)
+{
+  int initial_count = copy._max_count; // WARNING Perhaps change this behaviour
+  
+  _handle              = CreateSemaphore(NULL, initial_count, copy._max_count, NULL);
+  _max_count           = copy._max_count;
+  _deadlock_safety     = false;
+  _current_thread_lock = 0;
+  SetDeadlockSafety(copy._deadlock_safety):
 }
 
 Semaphore::~Semaphore(void)
@@ -160,21 +183,18 @@ bool Semaphore::TrySetCurrentThread()
 
 void Semaphore::ClearCurrentThread()
 {
+  if (_current_thread_lock)
+  {
+    _current_thread_lock->Wait();
 #ifdef _WIN32
-  if (_current_thread_lock)
-  {
     _current_thread = NULL;
-  }
 #else
-  if (_current_thread_lock)
-  {
     std::thread::id nobody;
 
-    _current_thread_lock->Wait();
     _current_thread = nobody;
+#endif
     _current_thread_lock->Post();
   }
-#endif
 }
 
 Semaphore::ThreadId Semaphore::CurrentThreadId()

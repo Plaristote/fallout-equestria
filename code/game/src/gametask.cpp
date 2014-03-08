@@ -44,11 +44,8 @@ GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : game_ui(wind
 
 GameTask::~GameTask()
 {
-  if (player_party)  { delete player_party;   }
-  if (world_map)     { world_map->Destroy();   delete world_map;   }
-  if (quest_manager) { delete quest_manager;  }
-  if (level)         { delete level;          }
-  if (item_index)    { delete item_index;     }
+  Cleanup();
+  if (item_index) delete item_index;
   CurrentGameTask = 0;
 }
 
@@ -155,9 +152,10 @@ bool GameTask::SaveGame()
 
 void GameTask::Cleanup(void)
 {
-  if (world_map)     delete world_map;
   if (player_party)  delete player_party;
   if (quest_manager) delete quest_manager;
+  if (level)         delete level;
+  if (world_map)     delete world_map;
   time_manager.ClearTasks(0);
 }
 
@@ -209,7 +207,6 @@ bool GameTask::LoadGame()
       params.isSaveFile = true;
       SyncLoadLevel.Emit(params);
       world_map->Hide();
-//      LoadLevel(window, game_ui, save_path + "/" + current_level.Value() + ".blob", current_level.Value(), "", true);
     }
     else
       world_map->Show();

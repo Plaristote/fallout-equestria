@@ -32,6 +32,8 @@ namespace Pathfinding
     unsigned int              GetOccupiedWaypointAsInt(void) const { return (waypoint_occupied ? waypoint_occupied->id : 0);  }
     Waypoint*                 GetOccupiedWaypoint(void)      const { return (waypoint_occupied);      }
     void                      SetOccupiedWaypoint(Waypoint* wp);
+    Waypoint*                 GetClosestWaypointFrom (Collider* from, bool looking_for_closest = true);
+    Waypoint*                 GetFarthestWaypointFrom(Collider* from) { return (GetClosestWaypointFrom(from, false)); }
 
   protected:
     void                      WithdrawAllArcs(Waypoint* waypoint);

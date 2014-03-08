@@ -1,10 +1,9 @@
 #include "general_pony.as"
 
-Timer myTimer;
-int   movCount     = 0;
-int   initWaypoint = 0;
-
-bool shieldCasted = false;
+bool cares_about_accuracy(Character@ self)
+{
+  return (true);
+}
 
 void main(Character@ self, float elapsedTime)
 {
@@ -24,13 +23,9 @@ bool       Fleeing(Character@ self)
   if (enemies.Size() > 0)
   {
     Character@ other = enemies[0];
-    int waypoint = self.GetFarthestWaypoint(other.AsObject());
-
-    if (waypoint != self.GetCurrentWaypoint())
-    {
-      if (self.GetPathSize() == 0)
-        self.GoTo(waypoint);
-    }
+    
+    self.MoveAwayFrom(other.AsObject());
+    return (self.IsMoving());
   }
   return (false);
 }
@@ -63,6 +58,145 @@ Character@ SelectTarget(Character@ self)
   return (bestMatch);
 }
 
+int get_available_ammo_for(Character@ self, Item@ item)
+{
+  Data ammo         = item.AsData()["ammo"];
+  Data current_ammo = ammo["current"];
+
+  if (current_ammo.Nil())
+    current_ammo = ammo["types"][0];
+  if (current_ammo.Nil())
+    return (self.GetInventory().ContainsHowMany(current_ammo.AsString()));
+  return (0);
+}
+
+bool is_weapon_loaded(Item@ item)
+{
+  Data ammo = item.AsData()["actions"]["ammo"];
+  
+  if (ammo["types"].NotNil())
+  {
+    Data amount = ammo["amount"];
+
+    return (amount.NotNil() && amount.AsInt() > 0);
+  }
+  return (true);
+}
+
+int    max_perform_action(Character@ self, Item@ item, int action_point_cost)
+{
+  int    action_points         = self.GetActionPoints();
+  bool   has_max_action_points = action_points == self.GetMaxActionPoints();
+
+  if (!is_weapon_loaded(item))
+  {
+    if (get_available_ammo_for(self, item) > 0)
+      action_points -= 2;
+    else
+      return (0);
+  }
+  if (!has_max_action_points)
+    return (action_points / action_point_cost);
+  return (1);
+}
+
+int    max_damage_action(Character@ self, Item@ item, string action_name)
+{
+  int  action_cost = item.GetActionPointCost(self, action_name);
+  int  max_uses    = max_perform_action(self, item, action_cost);
+  
+  return (item.AsData()["actions"][action_name]["damage-max"].AsInt() * max_uses);
+}
+
+bool   is_in_range(Character@ self, Character@ target, Data action)
+{
+  float distance = self.GetDistance(target.AsObject());
+
+  return (action["range"].AsInt() >= distance);
+}
+
+string get_best_offensive_action(Character@ self, Character@ target, Item@ item)
+{
+  Data   item_data              = item.AsData();
+  Data   actions                = item_data["actions"];
+  int    action_iterator        = 0;
+  int    action_points          = self.GetActionPoints();
+  int    max_action_points      = self.GetMaxActionPoints();
+  string best_action;
+  int    best_action_max_damage = 0;
+
+  while (action_iterator < actions.Count())
+  {
+    Data action      = actions[action_iterator];
+    
+    if (is_in_range(self, target, action))
+    {
+      int  max_damage  = max_damage_action(self, item, action.Key());
+
+      if (max_damage > best_action_max_damage)
+      {
+        best_action            = action.Key();
+        best_action_max_damage = max_damage;
+      }
+    }
+    action_iterator++;
+  }
+  return (best_action);
+}
+
+bool is_action_better_than_action(Character@ self, Character@ target, Item@ item_1, string action_1, Item@ item_2, string action_2)
+{
+  int max_damage_1 = max_damage_action(self, item_1, action_1);
+  int max_damage_2 = max_damage_action(self, item_2, action_2);
+
+  if (cares_about_accuracy(self))
+  {
+    max_damage_1 = (max_damage_1 * item_1.HitSuccessRate(self, target, action_1)) / 100;
+    max_damage_2 = (max_damage_2 * item_2.HitSuccessRate(self, target, action_2)) / 100;
+  }
+  return (max_damage_1 > max_damage_2);
+}
+
+Item@ select_most_suitable_weapon(Character@ self, Character@ target)
+{
+  Item@ equiped_left    = self.GetEquipedItem(0);
+  Item@ equiped_right   = self.GetEquipedItem(1);
+  Data  data_item_left  = equiped_left.AsData();
+  Data  data_item_right = equiped_right.AsData();
+  Item@ best_choice;
+
+  string best_action_left  = get_best_offensive_action(self, target, equiped_left);
+  string best_action_right = get_best_offensive_action(self, target, equiped_right);
+
+  if (best_action_left != "" && best_action_right != "")
+  {
+    if (is_action_better_than_action(self, target, equiped_left, best_action_left, equiped_right, best_action_right))
+      @best_choice = @equiped_right;
+    else
+      @best_choice = @equiped_left;
+  }
+  else if (best_action_left != "")
+    @best_choice = @equiped_left;
+  else if (best_action_right != "")
+    @best_choice = @equiped_right;
+  else
+  {
+    // TODO Pick item from inventory
+  }
+  return (best_choice);
+}
+
+void go_to_target(Character@ self)
+{
+  if (@currentTarget != null)
+  {
+    self.GoTo(currentTarget.AsObject(), 1);
+    self.TruncatePath(self.GetActionPoints());
+  }
+  else
+    level.NextTurn();
+}
+
 void combat(Character@ self)
 {
   Cout("Civilian in Combat mode");
@@ -84,83 +218,19 @@ void combat(Character@ self)
     Cout("-> Civilian acting on an enemy");
     if (self.HasLineOfSight(currentTarget.AsObject()))
     {
-      int   actionPoints = self.GetActionPoints();
-      int   actionPointsCost;
-      Item@ equiped1 = self.GetEquipedItem(0);
-      Item@ equiped2 = self.GetEquipedItem(1);
-      Data  data1    = equiped1.AsData();
-      Data  data2    = equiped2.AsData();
-      bool  suitable1,  suitable2;
-      int   distance = currentTarget.GetDistance(self.AsObject());
-
-      Item@  bestEquipedItem;
-      int    bestAction = -1;
-
-      int    nActions = data1["actions"].Count();
-      int    cAction  = 0;
-      Data   cData    = data1;
-      Item@  cItem    = @equiped1;
-
-      while (cAction < nActions)
+      Item@ weapon = @select_most_suitable_weapon(self, currentTarget);
+      
+      if (@weapon != null)
       {
-        Data action   = cData["actions"][cAction];
-
-        // If it's a combative action
-        if (action["combat"].AsInt() == 1)
-        {
-          // If we're in range
-          if (action["range"].AsFloat() > distance)
-          {
-            bool setAsBest = true;
-
-            // If there's an action to compare this one to
-            if (bestAction >= 0)
-            {
-              Data dataBestAction   = bestEquipedItem.AsData()["actions"][bestAction];
-              int  bestActionNShots = dataBestAction["ap-cost"].AsInt() / actionPoints;
-              int  curActionNShots  = action["ap-cost"].AsInt()         / actionPoints;
-
-              if (bestActionNShots * dataBestAction["damage"].AsInt() >= curActionNShots * action["damage"].AsInt())
-                setAsBest = false;
-            }
-            if (setAsBest)
-            {
-              @bestEquipedItem = @cItem;
-              bestAction       = cAction;
-            }
-          }
-        }
-        cAction++;
-      }
-
-      if (@bestEquipedItem != null)
-      {
-        actionPointsCost = bestEquipedItem.AsData()["actions"][bestAction]["ap-cost"].AsInt();
-        if (actionPoints >= actionPointsCost)
-          level.ActionUseWeaponOn(self, currentTarget, bestEquipedItem, bestAction);
+        if (!is_weapon_loaded(weapon))
+          weapon.Use(self, "reload");
         else
-          level.NextTurn();
+          weapon.UseWeaponOn(self, currentTarget, get_best_offensive_action(self, currentTarget, weapon));
       }
       else
-      {
-        /*if (currentTarget.GetPathDistance(self.AsObject()) <= 1)
-        {
-          Cout("Path distance <= 1");
-          level.NextTurn();
-        }
-        else*/
-        {
-          Cout("Civilian going to player");
-          self.GoTo(level.GetPlayer().AsObject(), 1);
-          self.TruncatePath(1);
-        }
-      }
+        go_to_target(self);
     }
     else
-    {
-      Cout("Civilian going to player");
-      self.GoTo(level.GetPlayer().AsObject(), 1);
-      self.TruncatePath(1);
-    }
+      go_to_target(self);
   }
 }

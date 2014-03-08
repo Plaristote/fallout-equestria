@@ -54,13 +54,12 @@ GeneralUi::GeneralUi(WindowFramework* window) : _window(window)
   cout << "[UI] GameOptions ready" << endl;
 
   _window->enable_keyboard();
-  //framework->define_key("tab", "ConsoleHandle", GameConsole::Toggle, (void*)_console);  
+  framework->define_key("tab", "ConsoleHandle", GameConsole::Toggle, (void*)_console);  
   cout << "[UI] Keyboard shortcut initialized" << endl;
 }
 
 GeneralUi::~GeneralUi(void)
 {
-  //framework->define_key("tab", "ConsoleHandle", 0, 0);
   delete _console;
   delete _options;
 }

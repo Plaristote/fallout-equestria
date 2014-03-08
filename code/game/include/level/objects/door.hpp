@@ -31,6 +31,10 @@ public:
   
   void               ProcessCollisions(void);
   void               UnprocessCollision(void);
+  
+  void               Open(void)  { SetOpened(true);  }
+  void               Close(void) { SetOpened(false); }
+  void               SetOpened(bool set_open);
 
   void               CallbackActionUse(InstanceDynamicObject* object);
   

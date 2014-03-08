@@ -290,20 +290,27 @@ bool InventoryObject::Use(ObjectCharacter* user, unsigned char useType)
 template<class C>
 bool InventoryObject::ExecuteHook(const std::string& hook, ObjectCharacter* user, C* target, unsigned char useType)
 {
-  AngelScript::Object& handle = _actionHooks[useType];
-
-  if (handle.IsDefined(hook))
+  try
   {
-    AngelScript::Type<InventoryObject*> this_param(this);
-    AngelScript::Type<ObjectCharacter*> user_param(user);
-    AngelScript::Type<C*>               target_param(target);
+    AngelScript::Object& handle = _actionHooks[useType];
 
-    if (target == nullptr)
-      return ((bool)(handle.Call(hook, 2, &this_param, &user_param)));
-    return ((bool)(handle.Call(hook, 3, &this_param, &user_param, &target_param)));
+    if (handle.IsDefined(hook))
+    {
+      AngelScript::Type<InventoryObject*> this_param(this);
+      AngelScript::Type<ObjectCharacter*> user_param(user);
+      AngelScript::Type<C*>               target_param(target);
+
+      if (target == nullptr)
+        return ((bool)(handle.Call(hook, 2, &this_param, &user_param)));
+      return ((bool)(handle.Call(hook, 3, &this_param, &user_param, &target_param)));
+    }
+    cout << "Method " << hook << " undefined" << endl;
+    Level::CurrentLevel->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("That does nothing"));
   }
-  cout << "Method " << hook << " undefined" << endl;
-  Level::CurrentLevel->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("That does nothing"));
+  catch (const AngelScript::Exception& exception)
+  {
+    AlertUi::NewAlert.Emit("Script crashed: " + std::string(exception.what()));
+  }
   return (false);
 }
 
@@ -315,7 +322,6 @@ void Inventory::LoadItemFromData(Data item)
   InventoryObject* newObject    = new InventoryObject(item);
   Data             equiped_data = item["equiped-save"];
 
-  AddObject(newObject);
   if (equiped_data.NotNil() && equiped_data.Count() > 0)
   {
     Data equiped = (*newObject)["equiped"];
@@ -327,6 +333,7 @@ void Inventory::LoadItemFromData(Data item)
   }
   (*newObject)["quantity"].Remove();
   (*newObject)["equiped-save"].Remove();
+  AddObject(newObject);
 }
 
 void Inventory::LoadInventory(DynamicObject* object)
@@ -334,33 +341,15 @@ void Inventory::LoadInventory(DynamicObject* object)
   std::for_each(object->inventory.begin(), object->inventory.end(), [this](std::pair<std::string, int> data)
   {
     Data      objectTree = GameTask::CurrentGameTask->GetItemIndex();
-    DataTree  objectTmp;
     DataTree* dataTree = DataTree::Factory::StringJSON(data.first);
     {
-      Data      data_(dataTree);
-      Data*     objectBuilder = new Data(dataTree);
+      Data    item_data(dataTree);
 
       data.second = data.second > 9999 ? 1 : data.second; // Do not let object quantity go above 9999
-      if (!data_["type"].Nil())
-      {
-        Data      object(&objectTmp);
-
-        object.Duplicate(objectTree[data_["type"].Value()]);
-        if (!(data_["ammo"].Nil()))
-        {
-          if (!(data_["ammo"]["ammount"].Nil()))
-            object["ammo"]["ammount"] = data_["ammo"]["ammount"];
-          if (!(data_["ammo"]["current"].Nil()))
-            object["ammo"]["current"] = data_["ammo"]["current"];
-        }
-        delete objectBuilder;
-        objectBuilder = new Data(object);
-      }
-      else
-	objectBuilder->SetKey(data_["Name"]);
+      item_data.SetKey(item_data["Name"]);
+      cout << "Loading " << data.second << " instances of " << item_data.Key() << endl;
       for (int i = 0 ; i < data.second ; ++i)
-        LoadItemFromData(*objectBuilder);
-      delete objectBuilder;
+        LoadItemFromData(item_data);
     }
     delete dataTree;
   });

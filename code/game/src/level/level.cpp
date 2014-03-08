@@ -66,7 +66,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   LPoint3 upperLeft, upperRight, bottomLeft;
   cout << "Level Loading Step #7" << endl;
   world->GetWaypointLimits(0, upperRight, upperLeft, bottomLeft);
-  camera.SetLimits(bottomLeft.get_x() - 50, bottomLeft.get_y() - 50, upperRight.get_x() - 50, upperRight.get_y() - 50);  
+  camera.SetLimits((bottomLeft.get_x() - 50) * 1.25, (bottomLeft.get_y() - 50) * 1.25, (upperRight.get_x() + 50) * 1.25, (upperRight.get_y() + 50) * 1.25);
 
   cout << "Level Loading Step #8" << endl;
   ForEach(world->entryZones, [this](EntryZone& zone) { zones.RegisterZone(zone); });
@@ -75,6 +75,8 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   ForEach(world->dynamicObjects, [this](DynamicObject& dobj) { InsertDynamicObject(dobj); });
 
   world->SetWaypointsVisible(false);
+  
+  player_halo.Initialize(window, world);
 
   /*
    * DIVIDE AND CONQUER WAYPOINTS
@@ -157,12 +159,13 @@ Level::~Level()
     AlertUi::NewAlert.Emit(std::string("Script crashed during Level destruction: ") + exception.what());
   }
   
+  player.UnsetPlayer();
+  
   for_each(parties.begin(), parties.end(), [](Party* party)
   {
     if (party->GetName() != "player")
       delete party;
   });
-  
   
   MouseCursor::Get()->SetHint("");
   window->get_render().clear_light();
@@ -180,19 +183,23 @@ Level::~Level()
 
 void Level::RefreshCharactersVisibility(void)
 {
-  ObjectCharacter* player              = GetPlayer();
-  auto             detected_characters = player->GetFieldOfView().GetDetectedCharacters();
-
-  for_each(characters.begin(), characters.end(),
-           [this, detected_characters, player](ObjectCharacter* character)
+  ObjectCharacter*   player              = GetPlayer();
+  
+  if (player)
   {
-    if (character != player)
-    {
-      auto it = find(detected_characters.begin(), detected_characters.end(), character);
+    auto             detected_characters = player->GetFieldOfView().GetDetectedCharacters();
 
-      character->SetVisible(it != detected_characters.end());
-    }
-  });
+    for_each(characters.begin(), characters.end(),
+            [this, detected_characters, player](ObjectCharacter* character)
+    {
+      if (character != player)
+      {
+        auto it = find(detected_characters.begin(), detected_characters.end(), character);
+
+        character->SetVisible(it != detected_characters.end());
+      }
+    });
+  }
 }
 
 void Level::InsertCharacter(ObjectCharacter* character)
@@ -257,17 +264,16 @@ void Level::InitializeSun(void)
   sunlight->Launch();
 }
 
-void Level::InitializePlayer(void)
-{
-  player.SetPlayer(GetPlayer());
-  if (main_script.IsDefined("Initialize"))
-    main_script.Call("Initialize");
-}
-
 void Level::SetAsPlayerParty(Party&)
 {
-  InitializePlayer();
-  camera.SetConfigurationFromLevelState();
+  if (GetPlayer() != 0)
+  {
+    player.SetPlayer(GetPlayer());
+    if (main_script.IsDefined("Initialize"))
+      main_script.Call("Initialize");
+    camera.SetConfigurationFromLevelState();
+    player_halo.SetTarget(GetPlayer());
+  }
 }
 
 void Level::InsertParty(Party& party, const std::string& zone_name)
@@ -305,8 +311,8 @@ void Level::MatchPartyToExistingCharacters(Party& party)
 
 void Level::RemovePartyFromLevel(Party& party)
 {
-  /*if (party.GetName() == "player") WARNING check if we can remove that for real
-    obs_player.DisconnectAll();*/
+  if (party.GetName() == "player")
+    player.UnsetPlayer();
   RunForPartyMembers(party, [this](Party::Member* member, ObjectCharacter* character)
   {
     auto           character_it = find(characters.begin(), characters.end(), character);
@@ -447,12 +453,7 @@ void Level::SetInterrupted(bool set)
   if (set)
     SetState(Interrupted);
   else
-  {
-    if (combat.GetCurrentCharacter() == 0)
-      SetState(Normal);
-    else
-      SetState(Fight);
-  }
+    SetState(combat.GetCurrentCharacter() == 0 ? Normal : Fight);
 }
 
 AsyncTask::DoneStatus Level::do_task(void)
@@ -463,8 +464,6 @@ AsyncTask::DoneStatus Level::do_task(void)
     mouse.SetCursorFromState();
   else
     mouse.SetMouseState('i');
-
-  player_halo.Run();
 
   bool use_fog_of_war = false;
   if (use_fog_of_war == false)
@@ -507,7 +506,6 @@ AsyncTask::DoneStatus Level::do_task(void)
     case Interrupted:
       break ;
   }
-  //ForEach(_characters, [elapsedTime](ObjectCharacter* character) { character->RunEffects(elapsedTime); });
   zones.Refresh();
   
   if (main_script.IsDefined("Run"))
@@ -526,30 +524,19 @@ AsyncTask::DoneStatus Level::do_task(void)
   return (exit.ReadyForNextZone() ? AsyncTask::DS_done : AsyncTask::DS_cont);
 }
 
-/*
- * Nodes Management
- */
 InstanceDynamicObject* Level::FindObjectFromNode(NodePath node)
 {
+  function<bool (InstanceDynamicObject*)> condition = [node](InstanceDynamicObject* object) -> bool { return (*object == node); };
+  auto result_object = find_if(objects.begin(), objects.end(), condition);
+  
+  if (result_object != objects.end())
+    return (*result_object);
+  else
   {
-    InstanceObjects::iterator cur = objects.begin();
+    auto result_character = find_if(characters.begin(), characters.end(), condition);
     
-    while (cur != objects.end())
-    {
-      if ((**cur) == node)
-	return (*cur);
-      ++cur;
-    }
-  }
-  {
-    Characters::iterator      cur = characters.begin();
-    
-    while (cur != characters.end())
-    {
-      if ((**cur) == node)
-	return (*cur);
-      ++cur;
-    }
+    if (result_character != characters.end())
+      return (*result_character);
   }
   return (0);
 }
@@ -658,7 +645,6 @@ void Level::UnserializeParties(Utils::Packet& packet)
     MatchPartyToExistingCharacters(*party);
   }
 }
-
 
 void Level::Serialize(Utils::Packet& packet)
 {

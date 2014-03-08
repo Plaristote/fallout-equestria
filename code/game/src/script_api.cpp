@@ -40,11 +40,18 @@ void ScriptApiDeclareFunction(const std::string& name, const std::string& decl)
 class ScheduledScriptTask : public ScheduledTask
 {
   ScheduledScriptTask();
+  virtual ~ScheduledScriptTask();
 public:
   static void  asConstructor(void* memory) { new(memory) ScheduledScriptTask();                      }
   static void  asDestructor (void* memory) { ((ScheduledScriptTask*)memory)->~ScheduledScriptTask(); }
 
-  void         SetCallback(const std::string& function) { callback = function; }
+  void         SetCallback(const std::string& function)
+  {
+    object   = AngelScript::ContextLock::CurrentObject();
+    callback = function;
+    if (!(object->IsDefined(callback)))
+      object->asDefineMethod(callback, "void " + callback + "()");
+  }
 
 protected:
   virtual void Run();
@@ -54,16 +61,21 @@ private:
   std::string          callback;
 };
 
-ScheduledScriptTask::ScheduledScriptTask()
+ScheduledScriptTask::ScheduledScriptTask() : object(0)
 {
-  object = AngelScript::ContextLock::CurrentObject();
+}
+
+ScheduledScriptTask::~ScheduledScriptTask()
+{
 }
 
 void ScheduledScriptTask::Run()
 {
+  cout << "Running task" << endl;
   try
   {
-    object->Call(callback);
+    if (object)
+      object->Call(callback);
   }
   catch (const AngelScript::Exception& exception)
   {
@@ -72,6 +84,7 @@ void ScheduledScriptTask::Run()
     AlertUi::NewAlert.Emit(message + exception.what());
   }
   ScheduledTask::Run();
+  cout << "Has task been deleted ?" << endl;
 }
 
 /*
@@ -79,6 +92,116 @@ void ScheduledScriptTask::Run()
  */
 namespace ScriptApi
 {
+  class Character
+  {
+  public:
+    static void GoTo(ObjectCharacter* character, int waypoint_id)
+    {
+      if (character)
+      {
+        Waypoint* waypoint = character->GetLevel()->GetWorld()->GetWaypointFromId(waypoint_id);
+        
+        if (waypoint)
+          character->GoTo(waypoint);
+      }
+    }
+    
+    static void TeleportTo(ObjectCharacter* character, int waypoint_id)
+    {
+      if (character)
+      {
+        Waypoint* waypoint = character->GetLevel()->GetWorld()->GetWaypointFromId(waypoint_id);
+        
+        if (waypoint)
+          character->TeleportTo(waypoint);
+      }
+    }
+    
+    static int GetPathSize(ObjectCharacter* character)
+    {
+      if (character)
+        return (character->GetPath().Size());
+      return (0);
+    }
+    
+    static void MoveTowards(ObjectCharacter* character, InstanceDynamicObject* object)
+    {
+      if (character && object)
+      {
+        Waypoint* waypoint = character->GetClosestWaypointFrom(object);
+        
+        character->GoTo(waypoint);
+      }
+    }
+    
+    static void MoveAwayFrom(ObjectCharacter* character, InstanceDynamicObject* object)
+    {
+      if (character && object)
+      {
+        Waypoint* waypoint = character->GetFarthestWaypointFrom(object);
+        
+        character->GoTo(waypoint);
+      }
+    }
+
+  private:
+  };
+  
+  class Item
+  {
+  public:
+    static int            HitSuccessRate(InventoryObject* item, ObjectCharacter* user, ObjectCharacter* target, const std::string& use_type)
+    {
+      if (item)
+        return (item->HitSuccessRate(user, target, GetUseIteratorForType(*item, use_type)));
+      return (0);
+    }
+
+    static unsigned short GetActionPointCost(InventoryObject* item, ObjectCharacter* user, const std::string& use_type)
+    {
+      if (item)
+        return (item->GetActionPointCost(user, GetUseIteratorForType(*item, use_type)));
+      return (0);
+    }
+
+    static bool           UseAsWeapon(InventoryObject* item, ObjectCharacter* user, ObjectCharacter* target, const std::string& use_type)
+    {
+      if (item)
+        return (item->UseAsWeapon(user, target, GetUseIteratorForType(*item, use_type)));
+      return (false);
+    }
+
+    static bool           UseOn(InventoryObject* item, ObjectCharacter* user, InstanceDynamicObject* target, const std::string& use_type)
+    {
+      if (item)
+        return (item->UseOn(user, target, GetUseIteratorForType(*item, use_type)));
+      return (false);
+    }
+
+    static bool           Use(InventoryObject* item, ObjectCharacter* user, const std::string& use_type)
+    {
+      if (item)
+        return (item->Use(user, GetUseIteratorForType(*item, use_type)));
+      return (false);
+    }
+
+  private:
+    static unsigned char  GetUseIteratorForType(InventoryObject& item, const std::string& use_type)
+    {
+      auto iterator = item["actions"].begin();
+      auto over     = item["actions"].end();
+      
+      for (unsigned char action_count = 0 ; iterator != over ; ++iterator, ++action_count)
+      {
+        Data action = *iterator;
+        
+        if (action.Key() == use_type)
+          return (action_count);
+      }
+      return (0);
+    }
+  };
+  
   class RocketUi : public UiBase
   {
     struct EventListener : public RocketListener
@@ -267,6 +390,16 @@ namespace asUtils
       return (false);
     }
   }
+  
+  int ceil(float value)
+  {
+    return (std::ceil(value));
+  }
+  
+  int floor(float value)
+  {
+    return (std::floor(value));
+  }
 }
 
 struct asConsoleOutput
@@ -291,6 +424,8 @@ void AngelScriptInitialize(void)
   engine->RegisterGlobalFunction("void Write(const string &in)", asFUNCTION(GameConsole::WriteOn), asCALL_CDECL);
   engine->RegisterGlobalFunction("void SetLanguage(const string& in)", asFUNCTION(i18n::Load), asCALL_CDECL);
   engine->RegisterGlobalFunction("int  Random()", asFUNCTION(rand), asCALL_CDECL);
+  engine->RegisterGlobalFunction("int ceil(float)", asFUNCTION(asUtils::ceil), asCALL_CDECL);
+  engine->RegisterGlobalFunction("int floor(float)", asFUNCTION(asUtils::floor), asCALL_CDECL);
 
   engine->RegisterGlobalFunction("void ApiDefineFunction(string, string)", asFUNCTION(ScriptApiDeclareFunction), asCALL_CDECL);
 
@@ -389,26 +524,32 @@ void AngelScriptInitialize(void)
 
   const char* itemClass      = "Item";
   const char* inventoryClass = "Inventory";
-  engine->RegisterObjectType(itemClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectType(inventoryClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-
-  engine->RegisterObjectMethod(inventoryClass, "void  AddObject(string)",  asMETHODPR(Inventory,AddObject, (const string&), InventoryObject*), asCALL_THISCALL);
-  engine->RegisterObjectMethod(inventoryClass, "void  DelObject(Item@)",   asMETHOD(Inventory,DelObject), asCALL_THISCALL);
-  engine->RegisterObjectMethod(inventoryClass, "Item@ GetObject(string)",  asMETHODPR(Inventory,GetObject, (const string&), InventoryObject*), asCALL_THISCALL);
-
-  engine->RegisterObjectMethod(itemClass, "string GetName()", asMETHOD(InventoryObject,GetName), asCALL_THISCALL);
-  engine->RegisterObjectMethod(itemClass, "Data   AsData()",  asFUNCTION(asUtils::ItemAsData), asCALL_CDECL_OBJFIRST);
-
   const char* partyClass     = "Party";
   const char* dynObjectClass = "DynamicObject";
   const char* charClass      = "Character";
   const char* doorClass      = "Door";
   const char* shelfClass     = "Shelf";
+  engine->RegisterObjectType(itemClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectType(inventoryClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(dynObjectClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(charClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(doorClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(shelfClass,     0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(partyClass,     0, asOBJ_REF | asOBJ_NOCOUNT);
+
+  engine->RegisterObjectMethod(inventoryClass, "void  AddObject(string)",  asMETHODPR(Inventory,AddObject, (const string&), InventoryObject*), asCALL_THISCALL);
+  engine->RegisterObjectMethod(inventoryClass, "void  DelObject(Item@)",   asMETHOD(Inventory,DelObject), asCALL_THISCALL);
+  engine->RegisterObjectMethod(inventoryClass, "Item@ GetObject(string)",  asMETHODPR(Inventory,GetObject, (const string&), InventoryObject*), asCALL_THISCALL);
+  engine->RegisterObjectMethod(inventoryClass, "int   ContainsHowMany(string) const", asMETHOD(Inventory,ContainsHowMany), asCALL_THISCALL);
+
+  engine->RegisterObjectMethod(itemClass, "string GetName() const",                                asMETHOD(InventoryObject,GetName),               asCALL_THISCALL);
+  engine->RegisterObjectMethod(itemClass, "Data   AsData()",                                       asFUNCTION(asUtils::ItemAsData),                 asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(itemClass, "int    HitSuccessRate(Character@, Character@, string)", asFUNCTION(ScriptApi::Item::HitSuccessRate),     asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(itemClass, "bool   UseWeaponOn(Character@, Character@, string)",    asFUNCTION(ScriptApi::Item::UseAsWeapon),        asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(itemClass, "bool   UseOn(Character@, DynamicObject@, string)",      asFUNCTION(ScriptApi::Item::UseOn),              asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(itemClass, "bool   Use(Character@, string)",                        asFUNCTION(ScriptApi::Item::Use),                asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(itemClass, "int    GetActionPointCost(Character@, string)",         asFUNCTION(ScriptApi::Item::GetActionPointCost), asCALL_CDECL_OBJFIRST);
+
 
   engine->RegisterObjectMethod(partyClass, "void Join(Data)",            asMETHODPR(Party,Join,(Data),void), asCALL_THISCALL);
   engine->RegisterObjectMethod(partyClass, "void Join(Character@)",      asMETHODPR(Party,Join,(ObjectCharacter*),void), asCALL_THISCALL);
@@ -437,13 +578,13 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "string GetName()",                         asMETHOD(ObjectCharacter,GetName), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool HasLineOfSight(DynamicObject@)",      asMETHOD(ObjectCharacter,HasLineOfSight), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void GoTo(int, int, int)",                 asFUNCTION(asUtils::GoTo), asCALL_CDECL_OBJLAST);
-  //engine->RegisterObjectMethod(charClass, "void TeleportTo(int)",                     asMETHODPR(ObjectCharacter,TeleportTo, (unsigned int), void), asCALL_THISCALL);
-  //engine->RegisterObjectMethod(charClass, "void GoTo(int)",                           asMETHODPR(ObjectCharacter,GoTo, (unsigned int), void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "void TeleportTo(int)",                     asFUNCTION(ScriptApi::Character::TeleportTo), asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(charClass, "void GoTo(int)",                           asFUNCTION(ScriptApi::Character::GoTo),       asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(charClass, "void GoTo(DynamicObject@, int)",           asMETHODPR(ObjectCharacter,GoTo, (InstanceDynamicObject*, int), void), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void GoToRandomDirection()",               asMETHOD(ObjectCharacter,GoToRandomDirection), asCALL_THISCALL);
   // TODO implement C++ for that
-  //engine->RegisterObjectMethod(charClass, "void MoveTowards(DynamicObject@)",         asMETHOD(ObjectCharacter,MoveTowards), asCALL_THISCALL);
-  //engine->RegisterObjectMethod(charClass, "void MoveAwayFrom(DynamicObject@)",        asMETHOD(ObjectCharacter,MoveAwayFrom), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "void MoveTowards(DynamicObject@)",         asFUNCTION(ScriptApi::Character::MoveTowards),  asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(charClass, "void MoveAwayFrom(DynamicObject@)",        asFUNCTION(ScriptApi::Character::MoveAwayFrom), asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(charClass, "void TruncatePath(int)",                   asMETHOD(ObjectCharacter,TruncatePath), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "int  GetPathDistance(DynamicObject@)",     asFUNCTION(asUtils::GetPathDistance), asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(charClass, "float GetDistance(DynamicObject@)",        asMETHOD(ObjectCharacter,GetDistance), asCALL_THISCALL);
@@ -451,17 +592,16 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "Data GetStatistics()",                     asMETHOD(ObjectCharacter,GetStatistics), asCALL_THISCALL);
   //MSVC2010 strangeness for this function: Base/Derived thingymajig complications
   engine->RegisterObjectMethod(charClass, "int  GetCurrentWaypoint() const",          asMETHODPR(Pathfinding::Collider,GetOccupiedWaypointAsInt, (void) const, unsigned int), asCALL_THISCALL);
-  // TODO expose the following function some other way:
-  //engine->RegisterObjectMethod(charClass, "int  GetPathSize() const",                 asMETHOD(ObjectCharacter,GetPathSize), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "int  GetPathSize() const",                 asFUNCTION(ScriptApi::Character::GetPathSize), asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(charClass, "bool IsInterrupted() const",               asMETHOD(ObjectCharacter,IsInterrupted), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool IsMoving() const",                    asMETHOD(ObjectCharacter,IsMoving), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool IsAlive() const",                     asMETHOD(ObjectCharacter,IsAlive),  asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "DynamicObject@ AsObject()",                asFUNCTION(asUtils::CharacterAsObject), asCALL_CDECL_OBJLAST);
-  engine->RegisterObjectMethod(charClass, "int  GetActionPoints()",                   asMETHOD(ObjectCharacter,GetActionPoints), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "int  GetActionPoints() const",             asMETHOD(ObjectCharacter,GetActionPoints), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "int  GetMaxActionPoints() const",          asMETHOD(ObjectCharacter,GetMaxActionPoints), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void SetActionPoints(int)",                asMETHOD(ObjectCharacter,SetActionPoints), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "int  GetHitPoints()",                      asMETHOD(ObjectCharacter,GetHitPoints), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void SetHitPoints(int)",                   asMETHOD(ObjectCharacter,SetHitPoints), asCALL_THISCALL);
-  //engine->RegisterObjectMethod(charClass, "int  GetArmorClass()",                     asMETHOD(ObjectCharacter,GetArmorClass), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "Item@ GetEquipedItem(int)",                asMETHOD(ObjectCharacter,GetEquipedItem), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void LookAt(Character@)",                  asMETHODPR(ObjectCharacter,LookAt,(InstanceDynamicObject*),void),         asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void LookAt(DynamicObject@)",              asMETHODPR(ObjectCharacter,LookAt,(InstanceDynamicObject*),void),         asCALL_THISCALL);
@@ -476,9 +616,11 @@ void AngelScriptInitialize(void)
   engine->RegisterGlobalFunction("void Use(Character@, DynamicObject@)",                asFUNCTION(Interactions::Actions::Use::Factory),         asCALL_CDECL);
   engine->RegisterGlobalFunction("void UseObjectOn(Character@, DynamicObject@, Item@)", asFUNCTION(Interactions::Actions::UseObjectOn::Factory), asCALL_CDECL);
   engine->RegisterGlobalFunction("void UseSpellOn(Character@, DynamicObject@, string)", asFUNCTION(Interactions::Actions::UseSpellOn::Factory),  asCALL_CDECL);
-  engine->RegisterGlobalFunction("void UseSkillon(Character@, DynamicObject@, string)", asFUNCTION(Interactions::Actions::UseSkillOn::Factory),  asCALL_CDECL);
+  engine->RegisterGlobalFunction("void UseSkillOn(Character@, DynamicObject@, string)", asFUNCTION(Interactions::Actions::UseSkillOn::Factory),  asCALL_CDECL);
   engine->RegisterGlobalFunction("void UseWeapon(Character@, Character@, Item@, int)",  asFUNCTION(Interactions::Actions::UseWeaponOn::Factory), asCALL_CDECL);
 
+  engine->RegisterObjectMethod(doorClass, "void   Open()",       asMETHOD(ObjectDoor,Open),         asCALL_THISCALL);
+  engine->RegisterObjectMethod(doorClass, "void   Close()",      asMETHOD(ObjectDoor,Close),        asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "void   Unlock()",     asMETHOD(Lockable,Unlock),         asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "bool   IsLocked()",   asMETHOD(Lockable,IsLocked),       asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "bool   IsOpen()",     asMETHOD(Lockable,IsOpen),         asCALL_THISCALL);
@@ -519,14 +661,15 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectType(zoneManagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(zoneManagerClass, "bool ZoneExists(string)", asMETHOD(Zones::Manager,ZoneExists), asCALL_THISCALL);
   engine->RegisterObjectMethod(zoneManagerClass, "void InsertPartyInZone(Party@, string)",  asMETHOD(Zones::Manager,InsertPartyInZone),  asCALL_THISCALL);
-  engine->RegisterObjectMethod(zoneManagerClass, "void InsertObjectInZone(Party@, string)", asMETHOD(Zones::Manager,InsertObjectInZone), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneManagerClass, "void InsertObjectInZone(DynamicObject@, string)", asMETHOD(Zones::Manager,InsertObjectInZone), asCALL_THISCALL);
 
   const char* levelClass = "Level";
   engine->RegisterObjectType(levelClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(levelClass, "void AppendToConsole(string)", asFUNCTION(asUtils::AppendToConsole), asCALL_CDECL_OBJFIRST);
-  OBJ_REF_REGISTER_METHOD(Level, Data,    GetDataEngine, ());
-  OBJ_REF_REGISTER_METHOD(Level, World@,  GetWorld,      ());
-  OBJ_REF_REGISTER_METHOD(Level, Camera@, GetCamera,     ());
+  OBJ_REF_REGISTER_METHOD(Level, Data,         GetDataEngine,  ());
+  OBJ_REF_REGISTER_METHOD(Level, World@,       GetWorld,       ());
+  OBJ_REF_REGISTER_METHOD(Level, Camera@,      GetCamera,      ());
+  OBJ_REF_REGISTER_METHOD(Level, ZoneManager@, GetZoneManager, ());
   engine->RegisterObjectMethod(levelClass, "Character@     GetCharacter(string)",                  asMETHODPR(Level,GetCharacter,(const std::string&),ObjectCharacter*), asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Character@     GetPlayer()",                           asMETHOD(Level,GetPlayer),              asCALL_THISCALL);  
   engine->RegisterObjectMethod(levelClass, "DynamicObject@ GetObject(string)",                     asMETHOD(Level,GetObject),              asCALL_THISCALL);

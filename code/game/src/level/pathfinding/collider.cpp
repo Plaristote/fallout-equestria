@@ -98,3 +98,33 @@ void        Collider::SetOccupiedWaypoint(Waypoint* wp)
   waypoint_occupied = wp;
 #endif
 }
+
+Waypoint*   Collider::GetClosestWaypointFrom(Collider* object, bool closest)
+{
+  Waypoint* self  = GetOccupiedWaypoint();
+  Waypoint* other = object->GetOccupiedWaypoint();
+  Waypoint* wp    = self;
+  float     currentDistance;
+  
+  if (other)
+  {
+    currentDistance = wp->GetDistanceEstimate(*other);
+    UnprocessCollisions();
+    {
+      list<Waypoint*> list = self->GetSuccessors(other);
+      
+      cout << "BestWaypoint choices: " << list.size() << endl;
+      for_each(list.begin(), list.end(), [&wp, &currentDistance, other, closest](Waypoint* waypoint)
+      {
+        float compDistance = waypoint->GetDistanceEstimate(*other);
+        bool  comp         = (closest == false ? currentDistance < compDistance : currentDistance > compDistance);
+
+        if (comp)
+          wp = waypoint;
+      });
+    }
+    ProcessCollisions();
+  }
+  cout << self->id << " versus " << wp->id << endl;
+  return (wp);
+}

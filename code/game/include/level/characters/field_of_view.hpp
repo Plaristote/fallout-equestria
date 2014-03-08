@@ -35,11 +35,12 @@ public:
   
   void                 SetEnemyDetected(ObjectCharacter& enemy);
   void                 SetCharacterDetected(ObjectCharacter& character);
-  CharacterList        GetCharactersInRange(void) const;
-  CharacterList        GetDetectedEnemies(void) const;
-  CharacterList        GetDetectedAllies(void) const;
+  CharacterList        GetCharactersInRange(void)  const;
+  CharacterList        GetDetectedEnemies(void)    const;
+  CharacterList        GetDetectedAllies(void)     const;
+  CharacterList        GetDetectedNonHostile(void) const;
   CharacterList        GetDetectedCharacters(void) const;
-  float                GetRadius(void) const;
+  float                GetRadius(void)             const;
   
   void                 RunCheck(void);
   void                 MarkForUpdate(void) { needs_update = true; }
@@ -49,11 +50,12 @@ protected:
 
   void                 LoseTrackOfCharacters(std::list<Entry>&);
   void                 DetectCharacters(void);
-  bool                 CheckIfEnemyIsDetected(const ObjectCharacter& enemy) const;
-  bool                 CheckIfSneakingEnemyIsDetected(const ObjectCharacter& enemy) const;
+  bool                 CheckIfEnemyIsDetected(const ObjectCharacter& enemy)                  const;
+  bool                 CheckIfSneakingEnemyIsDetected(const ObjectCharacter& enemy)          const;
   void                 InsertOrUpdateCharacterInList(ObjectCharacter&, std::list<Entry>&);
-  bool                 IsCharacterInList(const ObjectCharacter*, const std::list<Entry>&) const;
+  bool                 IsCharacterInList(const ObjectCharacter*, const std::list<Entry>&)    const;
   void                 AppendEntriesToCharacterList(const std::list<Entry>&, CharacterList&) const;
+  CharacterList        GetDetectedCharactersMatching(std::function<bool (ObjectCharacter*)>) const;
   
 private:
   Level&               level;

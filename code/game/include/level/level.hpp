@@ -70,8 +70,6 @@ public:
   Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& data, TimeManager& tm);
   
   void                    InitializeSun(void);
-  void                    InitializePlayer(void);
-
   // Saving/Loading
   void                    SetDataEngine(DataEngine* de)   { data_engine = de; }
   void                    SetPlayerInventory(Inventory*);
@@ -144,7 +142,6 @@ public:
   // Misc
   void               SetName(const std::string& name) { level_name = name;   }
   const std::string& GetName(void) const              { return (level_name); }
-  void               SpawnEnemies(const std::string& type, unsigned short spawn_zone_number);
   bool               IsWaypointOccupied(unsigned int id) const;
   ISampleInstance*   PlaySound(const std::string& name);
 

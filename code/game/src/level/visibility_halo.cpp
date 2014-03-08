@@ -43,7 +43,7 @@ bool VisibilityHalo::IsObjectCuttable(const MapObject &object) const
 void VisibilityHalo::Initialize(WindowFramework* window, World* world)
 {
   PandaNode*        node;
-  CPT(RenderAttrib) attribute = StencilAttrib::make(1, StencilAttrib::SCF_not_equal, StencilAttrib::SO_keep, StencilAttrib::SO_keep,    StencilAttrib::SO_keep,    1, 1, 0);
+  CPT(RenderAttrib) attribute = StencilAttrib::make(1, StencilAttrib::SCF_always,    StencilAttrib::SO_zero, StencilAttrib::SO_replace, StencilAttrib::SO_replace, 1, 0, 1);
 
   halo = window->load_model(window->get_panda_framework()->get_models(), "misc/sphere");
   if ((halo.node()) != 0)
@@ -59,13 +59,11 @@ void VisibilityHalo::Initialize(WindowFramework* window, World* world)
   }
 }
 
-void VisibilityHalo::Run(void)
+void VisibilityHalo::SetTarget(InstanceDynamicObject* target)
 {
-  if (!(halo.is_empty()))
-  {
-    NodePath target_nodepath = target->GetNodePath();
-
-    halo.set_pos(target_nodepath.get_pos());
-    halo.set_hpr(target_nodepath.get_hpr());
-  }
+  this->target = target;
+  if (target)
+    halo.reparent_to(target->GetNodePath());
+  else
+    halo.detach_node();
 }

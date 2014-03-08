@@ -61,22 +61,34 @@ Level::CharacterList FieldOfView::GetDetectedEnemies(void) const
   return (list);
 }
 
-Level::CharacterList FieldOfView::GetDetectedAllies(void) const
+Level::CharacterList FieldOfView::GetDetectedCharactersMatching(std::function<bool (ObjectCharacter*)> functor) const
 {
-  CharacterList list;
-
-  cout << "Checking allies for " << character.GetName() << endl;
-  AppendEntriesToCharacterList(detected_characters, list);
+  CharacterList list = GetDetectedCharacters();
+  
   for (auto it = list.begin() ; it != list.end() ;)
   {
-    ObjectCharacter* detected_character = *it;
-
-    if (!(character.IsAlly(detected_character)))
-      it = list.erase(it);
-    else
+    if (functor(*it))
       ++it;
+    else
+      it = list.erase(it);
   }
   return (list);
+}
+
+Level::CharacterList FieldOfView::GetDetectedNonHostile(void) const
+{
+  return (GetDetectedCharactersMatching([this](ObjectCharacter* detected_character) -> bool
+  {
+    return (!(character.IsAlly(detected_character)) && !(character.IsEnemy(detected_character)));
+  }));
+}
+
+Level::CharacterList FieldOfView::GetDetectedAllies(void) const
+{
+  return (GetDetectedCharactersMatching([this](ObjectCharacter* detected_character) -> bool
+  {
+    return (character.IsAlly(detected_character));
+  }));
 }
 
 void FieldOfView::AppendEntriesToCharacterList(const std::list<Entry>& entries, CharacterList& list) const

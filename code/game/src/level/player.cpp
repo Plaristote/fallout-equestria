@@ -1,6 +1,13 @@
 #include "level/player.hpp"
 #include "level/level.hpp"
 
+void Player::UnsetPlayer(void)
+{
+  level.GetLevelUi().GetMainBar().SetStatistics(0);
+  obs.DisconnectAll();
+  player = 0;
+}
+
 void Player::SetPlayer(ObjectCharacter* character)
 {
   Interactions::Player::SetPlayer(character);
@@ -46,16 +53,16 @@ void Player::InitializeMainBar(void)
   LevelUi& level_ui = level.GetLevelUi();
 
   level_ui.GetMainBar().SetStatistics(player->GetStatController());
-  level_ui.GetMainBar().OpenSkilldex.Connect([this]() { UseSkillOn.Emit(player); });
-  level_ui.GetMainBar().OpenSpelldex.Connect([this]() { UseSpellOn.Emit(0);         });
+  obs.Connect(level_ui.GetMainBar().OpenSkilldex, [this]() { UseSkillOn.Emit(player); });
+  obs.Connect(level_ui.GetMainBar().OpenSpelldex, [this]() { UseSpellOn.Emit(0);      });
   obs.Connect(player->EquipedItemActionChanged, level_ui.GetMainBar(),   &GameMainBar::SetEquipedItemAction);
   obs.Connect(player->EquipedItemChanged,       level_ui.GetMainBar(),   &GameMainBar::SetEquipedItem);
   obs.Connect(player->EquipedItemChanged,       level_ui.GetInventory(), &GameInventory::SetEquipedItem);
-  
-  level_ui.GetMainBar().EquipedItemNextAction.Connect(*player, &ObjectCharacter::ItemNextUseType);
-  level_ui.GetMainBar().UseEquipedItem.Connect       (*this,   &Interactions::Player::ActionTargetUse);
-  level_ui.GetMainBar().CombatEnd.Connect            (*this,   &Player::TryToEndCombat);
-  level_ui.GetMainBar().CombatPassTurn.Connect       (*this,   &Player::PassTurn);
+
+  obs.Connect(level_ui.GetMainBar().EquipedItemNextAction, *player, &ObjectCharacter::ItemNextUseType);
+  obs.Connect(level_ui.GetMainBar().UseEquipedItem,        *this,   &Interactions::Player::ActionTargetUse);
+  obs.Connect(level_ui.GetMainBar().CombatEnd,             *this,   &Player::TryToEndCombat);
+  obs.Connect(level_ui.GetMainBar().CombatPassTurn,        *this,   &Player::PassTurn);
 
   obs.Connect(level_ui.GetInventory().EquipItem,   [this](const std::string& target, unsigned int slot, InventoryObject* object)
   {

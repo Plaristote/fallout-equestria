@@ -13,8 +13,7 @@ public:
   ~VisibilityHalo(void);
 
   void                   Initialize(WindowFramework*, World*);
-  void                   Run(void);
-  void                   SetTarget(InstanceDynamicObject* t) { target = t; }
+  void                   SetTarget(InstanceDynamicObject* t);
   
 private:
   void                   MarkCuttableObjects(World*);

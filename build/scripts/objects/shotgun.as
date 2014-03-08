@@ -33,7 +33,7 @@ bool CanUse(Item@ item, Character@ user, DynamicObject@ target)
     if (@user == @(level.GetPlayer()))
     {
       level.PlaySound("out-of-ammo");
-      level.ConsoleWrite(item.GetName() + " is out of ammo.");
+      level.AppendToConsole(item.GetName() + " is out of ammo.");
     }
     return (false);
   }

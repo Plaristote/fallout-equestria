@@ -76,11 +76,14 @@ bool ObjectDoor::CanGoThrough(InstanceDynamicObject* object)
 void ObjectDoor::GoingThrough(InstanceDynamicObject* object)
 {
   if (collision_enabled)
-  {
-    if (_closed)
-      PlayAnimation("open");
-    _closed = false;
-  }
+    Open();
+}
+
+void ObjectDoor::SetOpened(bool set_open)
+{
+  if (set_open != _closed)
+    PlayAnimation(set_open ? "open" : "close");
+  _closed = !set_open;
 }
 
 void ObjectDoor::CallbackActionUse(InstanceDynamicObject* object)

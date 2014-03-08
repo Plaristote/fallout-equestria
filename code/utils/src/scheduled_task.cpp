@@ -148,7 +148,6 @@ void ScheduledTask::SetAsWeeklyTask(unsigned short day_of_the_week, DateTime::Ti
 {
   CircularValueSet value_set(DateTime::Weeks(1).seconds);
   DateTime         current_time            = time_manager.GetDateTime();
-  unsigned short   current_day_of_the_week = current_time.GetDayOfTheWeek();
   unsigned int     current_second, target_second;
 
   current_second                = current_time.GetTimeOfTheWeek().seconds;

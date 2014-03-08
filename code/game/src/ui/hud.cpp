@@ -52,21 +52,25 @@ GameMainBar::~GameMainBar()
 
 void GameMainBar::SetStatistics(StatController* controller)
 {
-  Data       data_ap = controller->GetData()["Variables"]["Action Points"];
-  short      max_ap  = controller->GetData()["Statistics"]["Action Points"];
-  short      ap      = data_ap.Nil() ? max_ap : (short)data_ap;
-
-  statistics = controller;
-  SetCurrentAP(ap, max_ap);
   statistics_observer.DisconnectAll();
-  statistics_observer.Connect(controller->HpChanged,          *this, &GameMainBar::SetCurrentHp);
-  statistics_observer.Connect(controller->ArmorClassChanged,  *this, &GameMainBar::SetCurrentAc);
-  statistics_observer.Connect(controller->ActionPointChanged, [this](unsigned short ap)
+  if (controller)
   {
-    short max_ap  = statistics->GetData()["Statistics"]["Action Points"];
-    
+    Data       data_ap = controller->GetData()["Variables"]["Action Points"];
+    short      max_ap  = controller->GetData()["Statistics"]["Action Points"];
+    short      ap      = data_ap.Nil() ? max_ap : (short)data_ap;
+
+    statistics = controller;
     SetCurrentAP(ap, max_ap);
-  });
+    statistics_observer.DisconnectAll();
+    statistics_observer.Connect(controller->HpChanged,          *this, &GameMainBar::SetCurrentHp);
+    statistics_observer.Connect(controller->ArmorClassChanged,  *this, &GameMainBar::SetCurrentAc);
+    statistics_observer.Connect(controller->ActionPointChanged, [this](unsigned short ap)
+    {
+      short max_ap  = statistics->GetData()["Statistics"]["Action Points"];
+      
+      SetCurrentAP(ap, max_ap);
+    });
+  }
 }
 
 void GameMainBar::AppendToConsole(const std::string& str)

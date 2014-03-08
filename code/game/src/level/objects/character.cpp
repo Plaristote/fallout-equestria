@@ -463,46 +463,7 @@ void ObjectCharacter::Run(float elapsedTime)
   //profile.Profile("Level:Characters:AI");
 }
 
-/*int                 ObjectCharacter::GetBestWaypoint(InstanceDynamicObject* object, bool farthest)
-{
-  Waypoint* self  = GetOccupiedWaypoint();
-  Waypoint* other = object->GetOccupiedWaypoint();
-  Waypoint* wp    = self;
-  float     currentDistance;
-  
-  if (other)
-  {
-    currentDistance = wp->GetDistanceEstimate(*other);
-    UnprocessCollisions();
-    {
-      list<Waypoint*> list = self->GetSuccessors(other);
-      
-      cout << "BestWaypoint choices: " << list.size() << endl;
-      for_each(list.begin(), list.end(), [&wp, &currentDistance, other, farthest](Waypoint* waypoint)
-      {
-	float compDistance = waypoint->GetDistanceEstimate(*other);
-	bool  comp         = (farthest ? currentDistance < compDistance : currentDistance > compDistance);
-
-	if (comp)
-	  wp = waypoint;
-      });
-    }
-    ProcessCollisions();
-  }
-  cout << self->id << " versus " << wp->id << endl;
-  return (wp->id);
-}
-
-int                 ObjectCharacter::GetFarthestWaypoint(InstanceDynamicObject* object)
-{
-  return (GetBestWaypoint(object, true));
-}
-
-int                 ObjectCharacter::GetNearestWaypoint(InstanceDynamicObject* object)
-{
-  return (GetBestWaypoint(object, false));
-}
-
+/*
 void                ObjectCharacter::GoToRandomWaypoint(void)
 {
   if (HasOccupiedWaypoint())

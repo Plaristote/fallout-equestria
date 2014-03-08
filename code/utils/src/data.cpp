@@ -204,12 +204,19 @@ void        Data::Duplicate(Data var)
   _data->nil   = false;
   for (; it != last ; ++it)
   {
-    Data        child = *it;
-    DataBranch* tmp   = new DataBranch;
+    Data        child      = *it;
+    Data        self_child = operator[](child.Key());
+    
+    if (self_child.NotNil())
+      self_child.Duplicate(child);
+    else
+    {
+      DataBranch* tmp   = new DataBranch;
 
-    tmp->father = _data;
-    _data->children.push_back(tmp);
-    Data(tmp).Duplicate(child);
+      tmp->father = _data;
+      _data->children.push_back(tmp);
+      Data(tmp).Duplicate(child);
+    }
   }
 }
 
