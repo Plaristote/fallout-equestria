@@ -66,7 +66,6 @@ void InstanceDynamicObject::SerializeDataStore(Utils::Packet& packet)
 {
   string data_store_json;
   
-  cout << "Serialize datastore" << endl;
   DataTree::Writers::StringJSON(data_store, data_store_json);
   packet << data_store_json;
 }

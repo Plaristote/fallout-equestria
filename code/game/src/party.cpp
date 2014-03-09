@@ -13,6 +13,7 @@ Party::Member::Member(void) : statistics_datatree(0), statistics(0), metabolism(
 {
   inventory = new Inventory;
   TaskSet(0).Serialize(task_set);
+  object.type         = DynamicObject::Character;
   object.collider     = MapObject::MODEL;
 }
 
@@ -24,6 +25,7 @@ Party::Member::Member(Data data)
   if (statistics_datatree)
     statistics        = new StatController(statistics_datatree);
   metabolism          = new Metabolism(statistics);
+  object.type         = DynamicObject::Character;
   object.collider     = MapObject::MODEL;
   object.name         = data["name"].Value();
   object.script       = data["script"].Value();
@@ -113,6 +115,7 @@ void Party::Member::Unserialize(Utils::Packet& packet)
   task_set.Unserialize(packet);
   packet >> statistics_json;
   packet >> object;
+  object.type         = DynamicObject::Character;
   statistics_datatree = DataTree::Factory::StringJSON(statistics_json);
   statistics          = new StatController(statistics_datatree);
   metabolism          = new Metabolism(statistics);

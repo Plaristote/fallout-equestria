@@ -667,6 +667,9 @@ void Level::Unserialize(Utils::Packet& packet)
   packet >> tmpState;
   level_state = (State)tmpState;
   for_each(objects.begin(),    objects.end(),    [&packet](InstanceDynamicObject* object) { object->Unserialize(packet);    });
+  cout << "objects unserialized" << endl;
   for_each(characters.begin(), characters.end(), [&packet](ObjectCharacter* character)    { character->Unserialize(packet); });
+  cout << "characters unserialized" << endl;
   combat.Unserialize(packet);
+  cout << "bite" << endl;
 }

@@ -120,6 +120,7 @@ float ComputeDamage(Item@ item, string action, Character@ user, Character@ targe
   float min_damage, max_damage;
   float damage;
 
+  Cout("Bite");
   if (@item == null)
   {
     max_damage = statistics["Statistics"]["Melee Damage"].AsInt();
@@ -132,10 +133,14 @@ float ComputeDamage(Item@ item, string action, Character@ user, Character@ targe
     max_damage = item_data["damage-max"].AsInt();
     min_damage = item_data["damage"].AsInt();
   }
+  Cout("Bite2");
   damage = ComputeBaseDamage(min_damage, max_damage);
+  Cout("Bite3");
   damage = ComputeDamageResistance(item, action, target, damage);
+  Cout("Bite4");
   if (ComputeIfCritical(user, critical_roll))
     damage = ComputeCriticalDamage(damage, critical_roll);
+  Cout("Bite5");
   return (damage);
 }
 

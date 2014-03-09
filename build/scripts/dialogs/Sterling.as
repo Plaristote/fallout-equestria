@@ -15,18 +15,16 @@ string MakeDeal()
   return ("SuccessfulBusiness");
 }
 
-string HookInit()
+string HookInit(Character@ self)
 {
   Data data_engine = level.GetDataEngine();
   Data have_talked = data_engine["dialogs"]["Sterling"]["happened"];
 
   if (have_talked.Nil())
   {
-    data_engine["variables"]["Sterling"]["allied"] = 1;
-
-    Character@ self  = level.GetCharacter("Sterling");
     Party@     party = game.GetPlayerParty();
     
+    Cout("Sterling joining party '" + party.GetName() + "'");
     party.Join(self);
     have_talked = 1;
     return ("Howdy");
