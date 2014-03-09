@@ -528,13 +528,10 @@ void WorldMap::MapTileGenerator(Data map)
   _tsize_y = tsize_y;
 
   {
-    LoadingScreen loadingScreen(window, context);
-
-    loadingScreen.AppendText("No compiled worldmap found. Generating one instead...");
     //
     // Generate RCSS and RML for the Tilemap
     //
-    loadingScreen.AppendText("Generating Tiles...");
+    LoadingScreen::AppendText("Generating Tiles...");
     
     rcss << "#pworldmap\n";
     rcss << "{\n" << "  background-decorator: image;\n";
@@ -571,7 +568,7 @@ void WorldMap::MapTileGenerator(Data map)
     //
     ifstream file("data/worldmap.rml.tpl", std::ios::binary);
 
-    loadingScreen.AppendText("Compiling Worldmap. This might take a while.");
+    LoadingScreen::AppendText("Compiling Worldmap.");
     if (file.is_open())
     {
       string fileRml;
@@ -613,10 +610,8 @@ void WorldMap::MapTileGenerator(Data map)
       // to the RocketListener MapClickedEvent.
       // While adding every case Element to the Case array.
       //
-      loadingScreen.AppendText("Loading compiled worldmap");
-      loadingScreen.Wait();
+      LoadingScreen::AppendText("Loading compiled worldmap");
       root = context->LoadDocument("data/worldmap.rml");
-      loadingScreen.Post();
     }
   }
 
@@ -650,6 +645,7 @@ void WorldMap::MapTileGenerator(Data map)
     }
     unlink("data/worldmap.rml");
   }
+  LoadingScreen::AppendText("Worldmap loaded.");
 }
 
 void WorldMap::SetInterrupted(bool set)

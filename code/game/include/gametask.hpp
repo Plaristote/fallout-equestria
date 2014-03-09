@@ -7,6 +7,7 @@
 # include "playerparty.hpp"
 # include "ui/general_ui.hpp"
 # include "ui/saveuis.hpp"
+#include "ui/loading_screen.hpp"
 # include "cmap/statcontroller.hpp"
 # include "pipbuck/pipbuck.hpp"
 # include "encounter.hpp"
@@ -66,6 +67,9 @@ private:
 
   void                  EraseSlot(unsigned char slot);
   bool                  CompressSave(const std::string& output_path);
+  
+  void                  SetupLoadingScreen(void);
+  void                  RemoveLoadingScreen(void);
 
   Sync::Signals         _signals;
   bool                  _continue;
@@ -80,6 +84,7 @@ private:
   PlayerParty*          player_party;
   StatController*       player_stats;
   QuestManager*         quest_manager;
+  LoadingScreen*        loading_screen;
 
   WorldMap*             world_map;
   Level*                level;

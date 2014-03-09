@@ -10,6 +10,7 @@
 #include "ui/alert_ui.hpp"
 #include "ui/ui_loot.hpp"
 #include "ui/ui_equip_mode.hpp"
+#include <ui/loading_screen.hpp>
 #include "options.hpp"
 #include <mousecursor.hpp>
 
@@ -48,6 +49,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   timer.Restart();
 
   // WORLD LOADING
+  LoadingScreen::AppendText("Loading World...");
   world = new World(window);  
   try
   {
@@ -61,15 +63,19 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
 
   cout << "Level Loading Step #6" << endl;
   if (world->sunlight_enabled)
+  {
+    LoadingScreen::AppendText("Celestial bodies detected.");
     InitializeSun();
+  }
 
   LPoint3 upperLeft(0,0,0), upperRight(0,0,0), bottomLeft(0,0,0);
-  cout << "Level Loading Step #7" << endl;
+  LoadingScreen::AppendText("Setting up visual sensors...");
   world->GetWaypointLimits(0, upperRight, upperLeft, bottomLeft);
   camera.SetLimits((bottomLeft.get_x() - 50) * 1.25, (bottomLeft.get_y() - 50) * 1.25, (upperRight.get_x() + 50) * 1.25, (upperRight.get_y() + 50) * 1.25);
 
-  cout << "Level Loading Step #8" << endl;
+  LoadingScreen::AppendText("Processing topology...");
   ForEach(world->zones,          [this](Zone& zone)          { zones.RegisterZone(zone);  });
+  LoadingScreen::AppendText("Analyzing surrounding objects...");
   ForEach(world->dynamicObjects, [this](DynamicObject& dobj) { InsertDynamicObject(dobj); });
 
   world->SetWaypointsVisible(false);

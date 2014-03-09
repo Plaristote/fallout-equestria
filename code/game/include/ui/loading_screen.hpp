@@ -11,12 +11,16 @@ class LoadingScreen : public UiBase, public Sync::Semaphore
 {
   typedef std::queue<std::string> StringQueue;
 public:
+  static LoadingScreen* Current;
+  
   LoadingScreen(WindowFramework*, Rocket::Core::Context* rocket);
   ~LoadingScreen();
-  
-  void             AppendText(const std::string& str);
+
+  static void      AppendText(const std::string& str);
+  static void      SetBackground(const std::string& str);
 
 private:
+  void             DoAppendText(const std::string& str);
   void             Refresh(void);
 
   bool                       done;

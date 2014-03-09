@@ -31,6 +31,7 @@ GameTask::GameTask(WindowFramework* window, GeneralUi& generalUi) : game_ui(wind
   player_party     = 0;
   player_stats     = 0;
   quest_manager    = 0;
+  loading_screen   = 0;
   game_ui.GetMenu().SaveClicked.Connect(*this, &GameTask::SaveClicked);
   game_ui.GetMenu().LoadClicked.Connect(*this, &GameTask::LoadClicked);
   game_ui.GetMenu().ExitClicked.Connect(*this, &GameTask::Exit);
@@ -196,15 +197,17 @@ void GameTask::Cleanup(void)
 void GameTask::LoadDataEngine(void)
 {
   Data time;
-  
+
   data_engine.Load(save_path + "/dataengine.json");
   time             = data_engine["time"];
   time_manager.SetTime(time["seconds"], time["minutes"], time["hours"], time["days"], time["month"], time["year"]);
   pipbuck.Restart();
+  LoadingScreen::AppendText("The time is " + time_manager.GetDateTime().ToString());
 }
 
 void GameTask::LoadPlayerData(void)
 {
+  LoadingScreen::AppendText("Loading party");
   player_party     = new PlayerParty(save_path);
   player_stats     = player_party->GetPlayerController();
   quest_manager    = new QuestManager(data_engine, player_stats);
@@ -222,6 +225,7 @@ void GameTask::LoadWorldMap(void)
 
 bool GameTask::LoadGame()
 {
+  SetupLoadingScreen();
   Cleanup();
   try
   {
@@ -231,6 +235,7 @@ bool GameTask::LoadGame()
     LoadPlayerData();
     LoadWorldMap();
     current_level = data_engine["system"]["current-level"];
+    LoadingScreen::SetBackground(current_level);
     if (!(current_level.Nil()) && current_level.Value() != "0")
     {
       LoadLevelParams params;
@@ -243,11 +248,15 @@ bool GameTask::LoadGame()
       world_map->Hide();
     }
     else
+    {
       world_map->Show();
+      RemoveLoadingScreen();
+    }
     time_manager.AddRepetitiveTask(TASK_LVL_WORLDMAP, DateTime::Days(1))->Interval.Connect(*player_stats, &StatController::RunMetabolism);
   }
   catch (LoadingException exception)
   {
+    RemoveLoadingScreen();
     exception.Display();
     return (false);
   }
@@ -267,6 +276,7 @@ void GameTask::OpenLevel(const std::string& level_name, const std::string& entry
     params.path     = save_path + '/' + filename;
   else
     params.path     = "maps/" + filename;
+  SetupLoadingScreen();
   SyncLoadLevel.Emit(params);
 }
 
@@ -381,6 +391,7 @@ bool GameTask::SaveLevel(Level* level, const std::string& name)
 
 void GameTask::LoadLevelFromPacket(LoadLevelParams params, Utils::Packet& packet)
 {
+  LoadingScreen::AppendText("Entering " + params.name);
   level = new Level(params.name, window, game_ui, packet, time_manager);
   if (params.isSaveFile)
     level->Unserialize(packet);
@@ -431,6 +442,7 @@ void GameTask::LoadLevel(LoadLevelParams params)
     if (level) { delete level; level = 0; }
     world_map->Show();
   }
+  RemoveLoadingScreen();
 }
 
 void GameTask::SetLevelEncounter(const Encounter& encounter)
@@ -508,3 +520,21 @@ ISampleInstance* GameTask::PlaySound(const std::string& name)
   }
   return (0);
 }
+
+void GameTask::SetupLoadingScreen(void)
+{
+  if (!loading_screen)
+  {
+    loading_screen = new LoadingScreen(window, game_ui.GetContext());
+  }
+}
+
+void GameTask::RemoveLoadingScreen(void)
+{
+  if (loading_screen)
+  {
+    delete loading_screen;
+    loading_screen = 0;
+  }
+}
+
