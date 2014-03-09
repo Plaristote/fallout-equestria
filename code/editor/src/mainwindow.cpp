@@ -1630,37 +1630,36 @@ void MainWindow::LoadMap(const QString& path)
       file.open(fullpath.c_str(),ios::binary);
       if (file.is_open())
       {
+        Utils::Packet* packet;
+        long           begin, end;
+        long           size;
+        char*          raw;
+
+        begin     = file.tellg();
+        file.seekg (0, ios::end);
+        end       = file.tellg();
+        file.seekg(0, ios::beg);
+        size      = end - begin;
+        raw       = new char[size + 1];
+        file.read(raw, size);
+        file.close();
+        raw[size] = 0;
+
+        packet = new Utils::Packet(raw, size);
+        if (world)
+          delete world;
         try
         {
-          Utils::Packet* packet;
-          long           begin, end;
-          long           size;
-          char*          raw;
-
-          begin     = file.tellg();
-          file.seekg (0, ios::end);
-          end       = file.tellg();
-          file.seekg(0, ios::beg);
-          size      = end - begin;
-          raw       = new char[size + 1];
-          file.read(raw, size);
-          file.close();
-          raw[size] = 0;
-
-          packet = new Utils::Packet(raw, size);
-          if (world)
-            delete world;
           world = new World(_window);
           world->UnSerialize(*packet);
           std::cout << "World unserialized" << std::endl;
-
-          delete   packet;
-          delete[] raw;
         }
-        catch (unsigned int error)
+        catch (const Utils::Packet::Exception& exception)
         {
-          QMessageBox::warning(this, "Fatal Error", "Map file is corrupted. You are sooooo screwed.");
+          QMessageBox::warning(this, "Fatal Error", QString("Map file seems corrupted. Unserializer said: ") + exception.what());
         }
+        delete   packet;
+        delete[] raw;
       }
       else
         QMessageBox::warning(this, "Fatal Error", "Can't load map file '" + QString::fromStdString(fullpath) + "'");

@@ -79,7 +79,7 @@ Semaphore::Semaphore(const Semaphore& copy)
   _max_count           = copy._max_count;
   _deadlock_safety     = false;
   _current_thread_lock = 0;
-  SetDeadlockSafety(copy._deadlock_safety):
+  SetDeadlockSafety(copy._deadlock_safety);
 }
 
 Semaphore::~Semaphore(void)

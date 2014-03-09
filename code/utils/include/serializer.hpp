@@ -123,19 +123,19 @@ public:
 
   template<typename T> Packet&	operator<<(const T& i)
   {
-    int	    newSize = sizeBuffer;
+    size_t  newSize = sizeBuffer;
     char*   typeCode;
     T*	    copy;
 
     if (TypeToCode<T>::TypeCode == 0)
     {
       if (std::is_base_of<Utils::Serializable, T>::value)
-        return (this->operator<< <Utils::Serializable>((const Utils::Serializable&)i));
+        return (this->operator<< <T>((const Utils::Serializable&)i));
       else
         throw SerializeUnknownType(this);
     }
     newSize += sizeof(T) + sizeof(char);
-    realloc(newSize);
+    realloc((int)newSize);
     typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
     copy = reinterpret_cast<T*>((long)typeCode + sizeof(char));
     *typeCode = TypeToCode<T>::TypeCode;
