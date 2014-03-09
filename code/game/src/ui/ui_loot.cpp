@@ -6,11 +6,11 @@ UiLoot::UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventor
 {
   _quantity_picker = 0;
   as_object        = 0;
-  _root            = context->LoadDocument("data/looting.rml");
-  if (_root)
+  root            = context->LoadDocument("data/looting.rml");
+  if (root)
   {
-    Rocket::Core::Element* eInvLooter = _root->GetElementById("self-inventory");
-    Rocket::Core::Element* eInvLooted = _root->GetElementById("other-inventory");
+    Rocket::Core::Element* eInvLooter = root->GetElementById("self-inventory");
+    Rocket::Core::Element* eInvLooted = root->GetElementById("other-inventory");
     
     ToggleEventListener(true, "button_done",     "click", DoneClicked);
     ToggleEventListener(true, "button_take_all", "click", TakeAllClicked);
@@ -22,7 +22,7 @@ UiLoot::UiLoot(WindowFramework* window, Rocket::Core::Context* context, Inventor
       _viewController.AddView(eInvLooted, looted);
     _viewController.ObjectSelected.Connect(*this, &UiLoot::SwapObjects);
     _viewController.SetCanSwap([this](InventoryObject* object) -> bool { return (CanSwap(object)); });
-    _root->Show();
+    root->Show();
   }
 }
 
@@ -31,20 +31,17 @@ UiLoot::~UiLoot()
   if (_quantity_picker) delete _quantity_picker;
   if (as_object)        delete as_object;
   _viewController.Destroy();
-  if (_root)
+  if (root)
   {
     ToggleEventListener(false, "button_done",     "click", DoneClicked);
     ToggleEventListener(false, "button_take_all", "click", TakeAllClicked);
-    _root->Close();
-    _root->RemoveReference();
-    _root = 0;
   }
 }
 
 void UiLoot::Destroy(void)
 {
-  if (_root)
-    _root->Hide();
+  if (root)
+    root->Hide();
 }
 
 void UiLoot::SetScriptObject(ObjectCharacter* user, InstanceDynamicObject* target, asIScriptContext* context, const std::string& filepath)
@@ -114,7 +111,7 @@ void UiLoot::SwapObjects(InventoryObject* object)
   if (looted.ContainsHowMany(object->GetName()) > 1)
   {
     if (_quantity_picker) delete _quantity_picker;
-    _quantity_picker = new UiObjectQuantityPicker(_window, _context, looted, object);
+    _quantity_picker = new UiObjectQuantityPicker(window, context, looted, object);
     _quantity_picker->Show();
     _quantity_picker->SetModal(true);
     _quantity_picker->QuantityPicked.Connect(loot_callback);

@@ -8,10 +8,10 @@ Sync::Signal<void (const string)> AlertUi::NewAlert;
 AlertUi::AlertUi(WindowFramework* window, Core::Context* context, const string& message) : UiBase(window, context)
 {
   _continue = true;
-  _root     = context->LoadDocument("data/alert.rml");
-  if (_root)
+  root     = context->LoadDocument("data/alert.rml");
+  if (root)
   {
-    Core::Element* elem_message = _root->GetElementById("message");
+    Core::Element* elem_message = root->GetElementById("message");
 
     elem_message->SetInnerRML(message.c_str());
     ToggleEventListener(true, "button-ok", "click", ButtonClicked);
@@ -25,9 +25,9 @@ AlertUi::~AlertUi()
 
 bool AlertUi::Run(void)
 {
-  if (_root)
+  if (root)
   {
-    _root->PullToFront();
+    root->PullToFront();
   }
   return (_continue);
 }

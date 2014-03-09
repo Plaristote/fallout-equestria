@@ -38,9 +38,9 @@ WorldMap::~WorldMap()
   if (_city_splash)
     delete _city_splash;
   CurrentWorldMap = 0;
-  _root->Close();
-  _root->RemoveReference();
-  _root = 0;
+  root->Close();
+  root->RemoveReference();
+  root = 0;
 }
 
 void WorldMap::Save(const string& savepath)
@@ -58,7 +58,7 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, Time
   _mapTree = DataTree::Factory::JSON("saves/map.json");
   MapTileGenerator(_mapTree);
 
-  if (_root)
+  if (root)
   {
     //
     // Adds the known cities to the CityList.
@@ -74,7 +74,7 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, Time
     //
     // Get some required elements
     //
-    _cursor       = _root->GetElementById("party-cursor");
+    _cursor       = root->GetElementById("party-cursor");
 
     //
     // Event management
@@ -182,7 +182,7 @@ void WorldMap::AddCityToList(Data cityData)
     _cities.push_back(city);
   if (city.visible)
   {
-    Core::Element* elem = _root->GetElementById("city-list");
+    Core::Element* elem = root->GetElementById("city-list");
     Core::String   innerRml;
     stringstream   rml;
 
@@ -197,7 +197,7 @@ void WorldMap::AddCityToList(Data cityData)
   }
   if (show && city.visible)
   {
-    Core::Element* elem = _root->GetElementById("pworldmap");
+    Core::Element* elem = root->GetElementById("pworldmap");
     stringstream   rml, css, elem_id;
     int            radius = city.radius * 2.5f;
     
@@ -220,9 +220,9 @@ void WorldMap::AddCityToList(Data cityData)
 
 void WorldMap::UpdateClock(void)
 {
-  Core::Element* elem_year    = _root->GetElementById("clock-year");
-  Core::Element* elem_month   = _root->GetElementById("clock-month");
-  Core::Element* elem_day     = _root->GetElementById("clock-day");
+  Core::Element* elem_year    = root->GetElementById("clock-year");
+  Core::Element* elem_month   = root->GetElementById("clock-month");
+  Core::Element* elem_day     = root->GetElementById("clock-day");
   DateTime       current_time = _timeManager.GetDateTime();
   
   if (elem_year)
@@ -314,7 +314,7 @@ void WorldMap::OpenCitySplash(const std::string& cityname)
   {
     try
     {
-      _city_splash = new CitySplash(city, _window, _context);
+      _city_splash = new CitySplash(city, window, context);
       _city_splash->Canceled.Connect(*this, &WorldMap::CloseCitySplash);
       _city_splash->EntryZonePicked.Connect([this, cityname](std::string zone)
       {
@@ -496,7 +496,7 @@ void WorldMap::MoveTowardsCoordinates(float x, float y)
 
 void WorldMap::MapClicked(Rocket::Core::Event& event)
 {
-  Core::Element* frame = _root->GetElementById("map-frame");
+  Core::Element* frame = root->GetElementById("map-frame");
 
   if (frame)
   {
@@ -528,7 +528,7 @@ void WorldMap::MapTileGenerator(Data map)
   _tsize_y = tsize_y;
 
   {
-    LoadingScreen loadingScreen(_window, _context);
+    LoadingScreen loadingScreen(window, context);
 
     loadingScreen.AppendText("No compiled worldmap found. Generating one instead...");
     //
@@ -615,15 +615,15 @@ void WorldMap::MapTileGenerator(Data map)
       //
       loadingScreen.AppendText("Loading compiled worldmap");
       loadingScreen.Wait();
-      _root = _context->LoadDocument("data/worldmap.rml");
+      root = context->LoadDocument("data/worldmap.rml");
       loadingScreen.Post();
     }
   }
 
-  if (_root)
+  if (root)
   {
     stringstream           streamSizeX, streamSizeY;
-    Rocket::Core::Element* mapElem = _root->GetElementById("pworldmap");
+    Rocket::Core::Element* mapElem = root->GetElementById("pworldmap");
 
     streamSizeX << (_size_x * _tsize_x);
     streamSizeY << (_size_y * _tsize_y);
@@ -636,7 +636,7 @@ void WorldMap::MapTileGenerator(Data map)
       stringstream           idElem;
 
       idElem << "tile" << pos_x << "-" << pos_y;
-      tileElem = _root->GetElementById(idElem.str().c_str());
+      tileElem = root->GetElementById(idElem.str().c_str());
       if (tileElem)
       {
 	tileElem->AddEventListener("click", &MapClickedEvent);

@@ -3,15 +3,15 @@
 
 using namespace std;
 
-CitySplash::CitySplash(Data data, WindowFramework* w, Rocket::Core::Context* c) : UiBase(w, c)
+CitySplash::CitySplash(Data data, WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
-  _root = _context->LoadDocument("data/city_splash.rml");
-  if (!_root)
+  root = context->LoadDocument("data/city_splash.rml");
+  if (!root)
     throw 0;
 
-  Rocket::Core::Element* splash      = _root->GetElementById("splash");
+  Rocket::Core::Element* splash      = root->GetElementById("splash");
   Data                   entry_zones = data["zones"];
-  Rocket::Core::Element* zone_root   = _root->GetElementById("zones");
+  Rocket::Core::Element* zoneroot   = root->GetElementById("zones");
 
   if (splash)
   {
@@ -19,9 +19,9 @@ CitySplash::CitySplash(Data data, WindowFramework* w, Rocket::Core::Context* c) 
 
     splash->SetAttribute("src", path.c_str());
   }
-  if (zone_root)
+  if (zoneroot)
   {
-    for_each(entry_zones.begin(), entry_zones.end(), [this, zone_root](Data zone)
+    for_each(entry_zones.begin(), entry_zones.end(), [this, zoneroot](Data zone)
     {
       if (zone == '1')
       {
@@ -32,9 +32,9 @@ CitySplash::CitySplash(Data data, WindowFramework* w, Rocket::Core::Context* c) 
         stream << "<div class='zone-button' id='" << zone_name << "'>";
         stream << zone.Key();
         stream << "</div>";
-        zone_root->GetInnerRML(rml);
+        zoneroot->GetInnerRML(rml);
         rml += stream.str().c_str();
-        zone_root->SetInnerRML(rml);
+        zoneroot->SetInnerRML(rml);
         {
           RocketListener* listener = new RocketListener;
 

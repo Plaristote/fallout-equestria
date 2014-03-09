@@ -25,9 +25,9 @@ StatViewRocket::~StatViewRocket()
 
 StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context), _perks_dialog(window, context)
 {
-  _root     = context->LoadDocument("data/charsheet.rml");
+  root     = context->LoadDocument("data/charsheet.rml");
 
-  if (_root)
+  if (root)
   {
     _i18n = i18n::GetStatistics();
     
@@ -56,7 +56,7 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
     {
       function<void (const Core::Event&)> functor = [this](const Core::Event&)
       {
-        Core::Element*   element =  _context->GetHoverElement();
+        Core::Element*   element =  this->context->GetHoverElement();
         Core::Dictionary dictionary;
         Core::Event      event(element, "click", dictionary);
 
@@ -78,7 +78,7 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
 
     PartyMemberClicked.EventReceived.Connect([this](Rocket::Core::Event& event)
     {
-      Core::Element* elem = _context->GetHoverElement();
+      Core::Element* elem = this->context->GetHoverElement();
 
       while (elem != 0 && elem != event.GetCurrentElement() && elem->GetClassNames() != "party-member")
         elem = elem->GetParentNode();
@@ -106,7 +106,7 @@ void StatViewRocket::SetReputation(const std::string& faction, int reputation)
 
 void StatViewRocket::SetPartyMembers(const std::vector<std::string>& members)
 {
-  Rocket::Core::Element* team_panel = _root->GetElementById("team-panel");
+  Rocket::Core::Element* team_panel = root->GetElementById("team-panel");
   
   if (team_panel)
   {
@@ -125,7 +125,7 @@ void StatViewRocket::SetPartyMembers(const std::vector<std::string>& members)
 
 void StatViewRocket::UpdateAge(Core::Event& event)
 {
-  Core::Element* age_field = _root->GetElementById("char-age-value");
+  Core::Element* age_field = root->GetElementById("char-age-value");
   
   if (age_field)
   {
@@ -148,7 +148,7 @@ void StatViewRocket::UpdateAge(Core::Event& event)
 
 void StatViewRocket::UpdateName(Core::Event& event)
 {
-  Core::Element* name_field = _root->GetElementById("char-name-value");
+  Core::Element* name_field = root->GetElementById("char-name-value");
   
   if (name_field)
   {
@@ -166,9 +166,9 @@ void StatViewRocket::UpdateName(Core::Event& event)
 
 void StatViewRocket::UpdateGender(Core::Event& event)
 {
-  Core::Element* gender_edit   = _root->GetElementById("char-gender-edit");
-  Core::Element* gender_male   = _root->GetElementById("char-gender-option-male");
-  Core::Element* gender_female = _root->GetElementById("char-gender-option-female");
+  Core::Element* gender_edit   = root->GetElementById("char-gender-edit");
+  Core::Element* gender_male   = root->GetElementById("char-gender-option-male");
+  Core::Element* gender_female = root->GetElementById("char-gender-option-female");
   
   if (gender_male && gender_female)
   {
@@ -189,7 +189,7 @@ void StatViewRocket::UpdateGender(Core::Event& event)
 
 void        StatViewRocket::StatUpdate(Core::Event& event, string& ret_type, string& ret_stat)
 {
-  Core::Element* cursor    = _root->GetElementById("edit-value-cursor");
+  Core::Element* cursor    = root->GetElementById("edit-value-cursor");
 
   if (cursor)
   {
@@ -226,12 +226,12 @@ void        StatViewRocket::StatLess(Core::Event& event)
 
 void StatViewRocket::SpecialClicked(Core::Event& event)
 {
-  Core::Element* cursor = _root->GetElementById("edit-value-cursor");
+  Core::Element* cursor = root->GetElementById("edit-value-cursor");
 
   DisplayDetails(event);
   if (cursor)
   {
-    Core::Element* current = _context->GetHoverElement();
+    Core::Element* current = context->GetHoverElement();
 
     cursor->SetProperty("display", "block");
     current = current->GetParentNode();
@@ -246,7 +246,7 @@ void StatViewRocket::SpecialClicked(Core::Event& event)
 void StatViewRocket::DisplayDetails(Core::Event& event)
 {
   cout << "[CMAP] DisplayDetails" << endl;
-  Core::Element* element   = _context->GetHoverElement();
+  Core::Element* element   = context->GetHoverElement();
   Rocket::Core::String t;
   element->GetParentNode()->GetInnerRML(t);
   cout << element->GetClassNames().CString() << " -> " << t.CString() << endl;
@@ -264,9 +264,9 @@ void StatViewRocket::DisplayDetails(Core::Event& event)
 
 void StatViewRocket::SetDetails(const string& icon, const string& title, const string& text)
 {
-  Core::Element* elem_icon  = _root->GetElementById("details-icon");
-  Core::Element* elem_title = _root->GetElementById("details-title");
-  Core::Element* elem_text  = _root->GetElementById("details-text");
+  Core::Element* elem_icon  = root->GetElementById("details-icon");
+  Core::Element* elem_title = root->GetElementById("details-title");
+  Core::Element* elem_text  = root->GetElementById("details-text");
 
   if (elem_icon)  elem_icon->SetInnerRML(Core::String("<img src='") + icon.c_str() + "'/>");
   if (elem_title) elem_title->SetInnerRML(title.c_str());
@@ -275,7 +275,7 @@ void StatViewRocket::SetDetails(const string& icon, const string& title, const s
 
 void StatViewRocket::SkillClicked(Core::Event& event)
 {
-  Core::Element* current = _context->GetHoverElement();
+  Core::Element* current = context->GetHoverElement();
 
   while (current && current->GetClassNames() != "skill-datagrid")
     current = current->GetParentNode();
@@ -291,7 +291,7 @@ void StatViewRocket::SkillClicked(Core::Event& event)
     }
     else if (_editMode == StatView::Update)
     {
-      Core::Element* cursor = _root->GetElementById("edit-value-cursor");
+      Core::Element* cursor = root->GetElementById("edit-value-cursor");
       
       if (cursor)
       {
@@ -306,9 +306,9 @@ void StatViewRocket::SkillClicked(Core::Event& event)
 void StatViewRocket::GeneralClicked(Rocket::Core::Event& event)
 {
   Core::String   id     = event.GetCurrentElement()->GetId();
-  Core::Element* name   = _root->GetElementById("char-name-edit");
-  Core::Element* age    = _root->GetElementById("char-age-edit");
-  Core::Element* gender = _root->GetElementById("char-gender-edit");
+  Core::Element* name   = root->GetElementById("char-name-edit");
+  Core::Element* age    = root->GetElementById("char-age-edit");
+  Core::Element* gender = root->GetElementById("char-gender-edit");
 
   name->SetProperty  ("display", "none");
   age->SetProperty   ("display", "none");
@@ -325,17 +325,17 @@ void StatViewRocket::SetEditMode(EditMode mode)
   const char*    displayElems[] = { "cancel",   "experience", 0 };
   const char**   toShow         = 0;
   const char**   elemArrays[]   = { createElems, updateElems, displayElems, 0 };
-  Core::Element* cursor         = _root->GetElementById("edit-value-cursor");
-  Core::Element* special        = _root->GetElementById("special");
-  Core::Element* skill          = _root->GetElementById("body");
-  Core::Element* traits_create  = _root->GetElementById("panel-traits-create");
-  Core::Element* traits         = _root->GetElementById("panel-traits-default");
-  Core::Element* perks          = _root->GetElementById("panel-perks");
-  Core::Element* statistics     = _root->GetElementById("statistics");
+  Core::Element* cursor         = root->GetElementById("edit-value-cursor");
+  Core::Element* special        = root->GetElementById("special");
+  Core::Element* skill          = root->GetElementById("body");
+  Core::Element* traits_create  = root->GetElementById("panel-traits-create");
+  Core::Element* traits         = root->GetElementById("panel-traits-default");
+  Core::Element* perks          = root->GetElementById("panel-perks");
+  Core::Element* statistics     = root->GetElementById("statistics");
 
-  Core::Element* name   = _root->GetElementById("char-name");
-  Core::Element* age    = _root->GetElementById("char-age");
-  Core::Element* gender = _root->GetElementById("char-gender");
+  Core::Element* name   = root->GetElementById("char-name");
+  Core::Element* age    = root->GetElementById("char-age");
+  Core::Element* gender = root->GetElementById("char-gender");
 
   if (cursor)     cursor->SetProperty("display", "none");
   if (special)    special->RemoveEventListener   ("click", &EventSpecialClicked);
@@ -380,14 +380,14 @@ void StatViewRocket::SetEditMode(EditMode mode)
     if (elemArray == toShow) continue ;
     for (unsigned int i = 0 ; elemArray[i] != 0 ; ++i)
     {
-      Core::Element* elem = _root->GetElementById(elemArray[i]);
+      Core::Element* elem = root->GetElementById(elemArray[i]);
 
       if (elem) elem->SetProperty("display", "none");
     }
   }
   for (unsigned int i = 0 ; toShow[i] != 0 ; ++i)
   {
-    Core::Element* elem = _root->GetElementById(toShow[i]);
+    Core::Element* elem = root->GetElementById(toShow[i]);
 
     if (elem) elem->SetProperty("display", "block");
   }
@@ -399,7 +399,7 @@ void StatViewRocket::SetInformation(const std::string& name, const std::string& 
   Core::Element* element;
   string         id = "char-" + underscore(name);
   
-  element = _root->GetElementById(id.c_str());
+  element = root->GetElementById(id.c_str());
   if (element)
     element->SetInnerRML(value.c_str());
 }
@@ -418,7 +418,7 @@ void StatViewRocket::SetFieldValue(const std::string& category, const std::strin
   string         strId;
 
   strId = underscore(category) + "-value-" + underscore(key);
-  if ((element = _root->GetElementById(strId.c_str())))
+  if ((element = root->GetElementById(strId.c_str())))
     element->SetInnerRML(value.c_str());
   else
   {
@@ -427,7 +427,7 @@ void StatViewRocket::SetFieldValue(const std::string& category, const std::strin
       stringstream rml;
       Core::String old_rml;
 
-      if ((element = _root->GetElementById("panel-kills")))
+      if ((element = root->GetElementById("panel-kills")))
       {
         element->GetInnerRML(old_rml);
         rml << "<datagrid>";
@@ -442,7 +442,7 @@ void StatViewRocket::SetFieldValue(const std::string& category, const std::strin
       stringstream rml;
       Core::String old_rml;
 
-      if ((element = _root->GetElementById("panel-reputation")))
+      if ((element = root->GetElementById("panel-reputation")))
       {
         element->GetInnerRML(old_rml);
         rml << "<datagrid>";
@@ -467,7 +467,7 @@ void StatViewRocket::SetFieldValue(const std::string& category, const std::strin
   {
     string         comm = "Very bad";
     string         id   = "special-commt-" + underscore(key);
-    Core::Element* elem = _root->GetElementById(id.c_str());
+    Core::Element* elem = root->GetElementById(id.c_str());
     
     if (elem)
     {
@@ -488,7 +488,7 @@ void StatViewRocket::SetFieldValue(const std::string& category, const std::strin
 
 void StatViewRocket::SetIdValue(const std::string& id, short value)
 {
-  Core::Element* element = _root->GetElementById(id.c_str());
+  Core::Element* element = root->GetElementById(id.c_str());
   
   if (element)
   {
@@ -501,7 +501,7 @@ void StatViewRocket::SetIdValue(const std::string& id, short value)
 
 void StatViewRocket::SetIdValue(const std::string& id, const std::string& value)
 {
-  Core::Element* element = _root->GetElementById(id.c_str());
+  Core::Element* element = root->GetElementById(id.c_str());
   
   if (element)
     element->SetInnerRML(value.c_str());
@@ -509,9 +509,9 @@ void StatViewRocket::SetIdValue(const std::string& id, const std::string& value)
 
 void StatViewRocket::SetExperience(unsigned int xp, unsigned short lvl, unsigned int next_level)
 {
-  if (_root)
+  if (root)
   {
-    Core::Element* element = _root->GetElementById("experience");
+    Core::Element* element = root->GetElementById("experience");
     
     if (element)
     {
@@ -539,10 +539,10 @@ void StatViewRocket::TraitClicked(Core::Event& event)
 
 void StatViewRocket::SetSkillAffinity(const string& skill, bool active)
 {
-  if (_root)
+  if (root)
   {
     string         elem_id = "skill-datagrid-" + underscore(skill);
-    Core::Element* elem    = _root->GetElementById(elem_id.c_str());
+    Core::Element* elem    = root->GetElementById(elem_id.c_str());
 
     if (elem)
       elem->SetProperty("color", (active ? "yellow" : "white"));
@@ -551,12 +551,12 @@ void StatViewRocket::SetSkillAffinity(const string& skill, bool active)
 
 void StatViewRocket::SetTraitActive(const string& trait, bool active)
 {
-  if (_root)
+  if (root)
   {
     // Create Traits Interface
     {
       string         elem_id = "text-" + underscore(trait);
-      Core::Element* elem    = _root->GetElementById(elem_id.c_str());
+      Core::Element* elem    = root->GetElementById(elem_id.c_str());
 
       if (elem)
         elem->SetProperty("color", (active ? "yellow" : "white"));
@@ -564,7 +564,7 @@ void StatViewRocket::SetTraitActive(const string& trait, bool active)
     // Display Traits Interface
     {
       string         elem_id = "display-trait-" + underscore(trait);
-      Core::Element* elem    = _root->GetElementById(elem_id.c_str());
+      Core::Element* elem    = root->GetElementById(elem_id.c_str());
       
       if (elem)
         elem->SetProperty("display", active ? "block" : "none");
@@ -574,10 +574,10 @@ void StatViewRocket::SetTraitActive(const string& trait, bool active)
 
 void StatViewRocket::SetTraits(list<string> traits)
 {
-  if (_root)
+  if (root)
   {
-    Core::Element* create_element  = _root->GetElementById("panel-traits-create");
-    Core::Element* display_element = _root->GetElementById("panel-traits-default");
+    Core::Element* create_element  = root->GetElementById("panel-traits-create");
+    Core::Element* display_element = root->GetElementById("panel-traits-default");
 
     stringstream create_rml, display_rml;
 
@@ -603,16 +603,16 @@ void StatViewRocket::SetTraits(list<string> traits)
       ToggleEventListener(true, button_id,       "click", EventTraitClicked);
       ToggleEventListener(true, display_text_id, "click", EventDetails);
       ToggleEventListener(true, text_id,         "click", EventDetails);
-      _traits.push_back(_root->GetElementById(button_id.c_str()));
+      _traits.push_back(root->GetElementById(button_id.c_str()));
     });
   }
 }
 
 void StatViewRocket::SetCategoryFields(const std::string& category, const std::vector<std::string>& keys)
 {
-  if (_root)
+  if (root)
   {
-    Core::Element* element = _root->GetElementById(underscore(category).c_str());
+    Core::Element* element = root->GetElementById(underscore(category).c_str());
     stringstream   rml;
 
     if (element)
@@ -671,9 +671,9 @@ void StatViewRocket::Hide(void)
 
 void StatViewRocket::SetPerks(list<string> perks)
 {
-  if (_root)
+  if (root)
   {
-    Core::Element* panel_perks = _root->GetElementById("panel-perks");
+    Core::Element* panel_perks = root->GetElementById("panel-perks");
     stringstream   rml;
 
     for_each(perks.begin(), perks.end(), [&rml](const string& perk)
@@ -703,8 +703,8 @@ void StatViewRocket::SetPerkDescription(const string& icon, const string& descri
  */
 StatViewRocket::PerksDialog::PerksDialog(WindowFramework* w, Core::Context* c) : UiBase(w, c)
 {
-  _root = c->LoadDocument("data/perks_menu.rml");
-  if (_root)
+  root = c->LoadDocument("data/perks_menu.rml");
+  if (root)
   {
     ToggleEventListener(true, "cancel", "click", Cancel);
     ToggleEventListener(true, "select", "click", ChoosePerk);
@@ -765,9 +765,9 @@ void StatViewRocket::PerksDialog::SetAvailablePerks(list<string> perks)
 {
   if (_perks_buttons.size())
     ClearPerksButtons();
-  if (_root)
+  if (root)
   {
-    Core::Element* element = _root->GetElementById("perks-selector");
+    Core::Element* element = root->GetElementById("perks-selector");
     
     if (element)
     {
@@ -799,10 +799,10 @@ void StatViewRocket::PerksDialog::SetAvailablePerks(list<string> perks)
 void StatViewRocket::PerksDialog::SetPerkDescription(const string& icon, const string& description)
 {
   cout << "Set Perk Description" << endl;
-  if (_root)
+  if (root)
   {
     cout << "Has root" << endl;
-    Core::Element* element = _root->GetElementById("perks-description");
+    Core::Element* element = root->GetElementById("perks-description");
     
     if (element)
       element->SetInnerRML(description.c_str());

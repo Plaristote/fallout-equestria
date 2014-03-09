@@ -80,18 +80,16 @@ void Utils::DirectoryCompressor::Compress(const std::string& target, const std::
   file_output.open(target, std::ios::binary);
   directory.OpenDir(path);
   // Header
-  std::for_each(directory.GetEntries().begin(), directory.GetEntries().end(), [&file_count](Dirent entry)
+  std::for_each(directory.GetEntries().begin(), directory.GetEntries().end(), [&file_count, selector](Dirent entry)
   {
-    if (entry.d_type == DT_REG)
+    if (entry.d_type == DT_REG && selector(entry.d_name))
       file_count++;
   });
   output << file_count;
   // Files
   std::for_each(directory.GetEntries().begin(), directory.GetEntries().end(), [&output, path, selector](Dirent entry)
   {
-    if (selector(entry.d_name) == false)
-      return ;
-    if (entry.d_type == DT_REG)
+    if (entry.d_type == DT_REG && selector(entry.d_name))
     {
       std::ifstream  input;
       std::streampos begin, end, size;
@@ -148,7 +146,7 @@ void Utils::DirectoryCompressor::Uncompress(const std::string& path, const std::
       unsigned int  file_count;
 
       packet >> file_count;
-      cout << "Amount of files" << endl;
+      cout << "Amount of files: " << file_count << endl;
       for (unsigned int i = 0 ; i < file_count ; ++i)
       {
         std::ofstream output;

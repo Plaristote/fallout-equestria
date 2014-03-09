@@ -4,7 +4,7 @@ using namespace std;
 
 UiUseSpellOn::UiUseSpellOn(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* player, InstanceDynamicObject* target) : UiUseSkillOn(window, context)
 {
-  if (_root)
+  if (root)
   {
     map<string, short> spells;
 

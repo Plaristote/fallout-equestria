@@ -6,12 +6,12 @@ using namespace std;
 UiObjectQuantityPicker::UiObjectQuantityPicker(WindowFramework* window, Rocket::Core::Context* context, const Inventory& inventory, const InventoryObject* object) : UiBase(window, context)
 {
   _max_quantity = inventory.ContainsHowMany(object->GetName());
-  _root         = context->LoadDocument("data/object_quantity_picker.rml");
-  if (_root)
+  root         = context->LoadDocument("data/object_quantity_picker.rml");
+  if (root)
   {
-    Rocket::Core::Element* icon = _root->GetElementById("item_icon");
+    Rocket::Core::Element* icon = root->GetElementById("item_icon");
 
-    _line_edit  = _root->GetElementById("item_quantity");
+    _line_edit  = root->GetElementById("item_quantity");
     if (_line_edit)
     {
       ToggleEventListener(true, "button_confirm", "click", EventAccepted);
@@ -32,7 +32,7 @@ UiObjectQuantityPicker::UiObjectQuantityPicker(WindowFramework* window, Rocket::
     EventValueChanged.EventReceived.Connect([this](Rocket::Core::Event&) { SetQuantity(GetQuantity()); });
     EventCanceled.EventReceived.Connect(    [this](Rocket::Core::Event&) { Canceled.Emit();            });
     Canceled.Connect(*this, &UiBase::Hide);
-    _root->Show(Rocket::Core::ElementDocument::MODAL);
+    root->Show(Rocket::Core::ElementDocument::MODAL);
   }
 }
 

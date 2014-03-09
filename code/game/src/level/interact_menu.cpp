@@ -10,23 +10,25 @@ InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* conte
   Interactions::InteractionList& interactions = object.GetInteractions();
 
   _done = false;
-  _root = context->LoadDocument("data/interact_menu.rml");
-  if (_root)
+  root = context->LoadDocument("data/interact_menu.rml");
+  if (root)
   {
-    Rocket::Core::Element* element = _root->GetElementById("menu");
+    Rocket::Core::Element* element = root->GetElementById("menu");
     
     if (element)
     {
       // Positioning the interact_menu
       {
-        std::stringstream strTop, strLeft;
-        MouseData    pointer = _window->get_graphics_window()->get_pointer(0);
+        std::stringstream strTop, strLeft, maxHeight;
+        MouseData    pointer = window->get_graphics_window()->get_pointer(0);
 
-        strTop  << (pointer.get_y());
-        strLeft << (pointer.get_x());
+        strTop    << (pointer.get_y());
+        strLeft   << (pointer.get_x());
+        maxHeight << (window->get_graphics_window()->get_y_size() - pointer.get_y());
         element->SetProperty("position", "absolute");
         element->SetProperty("top",  strTop.str().c_str());
         element->SetProperty("left", strLeft.str().c_str());
+        element->SetProperty("max-height", maxHeight.str().c_str());
       }
 
       // Generating and setting the RML for the interact_menu
@@ -61,8 +63,8 @@ InteractMenu::InteractMenu(WindowFramework* window, Rocket::Core::Context* conte
         ++it;
       });
     }
+    Show();
   }
-  Show();
 }
 
 void InteractMenu::ExecuteForButtonId(Rocket::Core::Event& event, std::function<bool (Rocket::Core::Event&, const std::string&, Interactions::Interaction*)> callback)

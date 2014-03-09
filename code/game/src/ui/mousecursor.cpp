@@ -7,12 +7,12 @@ MouseCursor* MouseCursor::_static = 0;
 MouseCursor::MouseCursor(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
   cout << "[MouseCursor] Initializing" << endl;
-  _root   = context->CreateDocument();
-  if (_root)
+  root   = context->CreateDocument();
+  if (root)
   {
-    _root->SetInnerRML("<img id='mouse-cursor' src='textures/cursor-interaction.png' /><span id='mouse-hint'></span>");
-    _cursor = _root->GetElementById("mouse-cursor");
-    _hint   = _root->GetElementById("mouse-hint");
+    root->SetInnerRML("<img id='mouse-cursor' src='textures/cursor-interaction.png' /><span id='mouse-hint'></span>");
+    _cursor = root->GetElementById("mouse-cursor");
+    _hint   = root->GetElementById("mouse-hint");
     if (_cursor)
       _cursor->SetProperty("position", "absolute");
     if (_hint)
@@ -63,9 +63,9 @@ void MouseCursor::SetHint(int value)
 
 void MouseCursor::Update(void)
 {
-  if (_cursor && IsVisible() && _window->get_graphics_window() != 0)
+  if (_cursor && IsVisible() && window->get_graphics_window() != 0)
   {
-    MouseData    pointer = _window->get_graphics_window()->get_pointer(0);
+    MouseData    pointer = window->get_graphics_window()->get_pointer(0);
     
     {
       stringstream strTop, strLeft;
@@ -83,6 +83,6 @@ void MouseCursor::Update(void)
       _hint->SetProperty("top",  strTop.str().c_str());
       _hint->SetProperty("left", strLeft.str().c_str());
     }
-    _root->PullToFront();
+    root->PullToFront();
   }
 }

@@ -5,10 +5,10 @@ using namespace std;
 UiNextZone::UiNextZone(WindowFramework* window, Rocket::Core::Context* context, const std::vector<std::string> zones)
   : UiBase(window, context)
 {
-  _root = context->LoadDocument("data/dialog_zone_selector.rml");
-  if (_root)
+  root = context->LoadDocument("data/dialog_zone_selector.rml");
+  if (root)
   {
-    Rocket::Core::Element*         eContainer = _root->GetElementById("choices");
+    Rocket::Core::Element*         eContainer = root->GetElementById("choices");
     vector<string>::const_iterator it         = zones.begin();
     vector<string>::const_iterator end        = zones.end();
     Rocket::Core::String           lastRml;
@@ -33,7 +33,7 @@ UiNextZone::UiNextZone(WindowFramework* window, Rocket::Core::Context* context, 
 	Rocket::Core::Element* zoneButton;
 
 	name << "choice-" << n;
-	zoneButton = _root->GetElementById(name.str().c_str());
+	zoneButton = root->GetElementById(name.str().c_str());
 	if (zoneButton)
 	{
 	  _elements.push_back(zoneButton);
@@ -43,7 +43,7 @@ UiNextZone::UiNextZone(WindowFramework* window, Rocket::Core::Context* context, 
       LevelSelected.EventReceived.Connect (*this, &UiNextZone::CallbackLevelSelected);
       CancelSelected.EventReceived.Connect(*this, &UiNextZone::CallbackCancel);
     }
-    _root->Show();
+    root->Show();
   }
 }
 

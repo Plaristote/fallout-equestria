@@ -6,61 +6,6 @@ using namespace std;
 
 extern PandaFramework framework;
 
-void SetOpacityOnAll(Rocket::Core::Element* element, float alpha)
-{
-  const Rocket::Core::Property* property = element->GetProperty("color");
-  std::string                   string   = property->ToString().CString();
-
-  for (int it = 0 ; element->GetChild(it) ; ++it)
-  {
-    Rocket::Core::Element* cur = element->GetChild(it);
-
-    SetOpacityOnAll(cur, alpha);
-  }
-}
-
-void UiBase::FadeOut(void)
-{
-  Hide();
-  /*float alpha = 255;
-  Timer timer;
-  float elapsedTime;
-
-  for (alpha = 255 ; alpha >= 0 ; alpha -= (elapsedTime * 10.f))
-  {
-    std::stringstream stream;
-
-    stream << "rgba(0, 0, 0, " << alpha << ")";
-    SetOpacityOnAll(_root, alpha);
-    //SetPropertyOnAll(_root, "color", stream.str());
-    framework.get_graphics_engine()->render_frame();
-    elapsedTime = timer.GetElapsedTime();
-    timer.Restart();
-  }
-  Hide();*/
-}
-
-void UiBase::FadeIn(void)
-{
-  Show();
-  /*float alpha = 0;
-  Timer timer;
-  float elapsedTime;    
-
-  Show();
-  for (alpha = 0 ; alpha <= 255 ; alpha -= (elapsedTime * 10.f))
-  {
-    std::stringstream stream;
-    
-    stream << "rgba(0, 0, 0, " << alpha << ")";
-    SetOpacityOnAll(_root, alpha);
-    //SetPropertyOnAll(_root, "color", stream.str());
-    framework.get_graphics_engine()->render_frame();
-    elapsedTime = timer.GetElapsedTime();
-    timer.Restart();
-  }*/
-}
-
 string UiLoad::LoadSlotRml(const string& prefix, unsigned short it)
 {
   DataTree*    tree;
@@ -98,8 +43,8 @@ UiLoad::UiLoad(WindowFramework* window, Rocket::Core::Context* context, const st
 {
   cout << "UiLoad used" << endl;
   _selectedSlot = 0;
-  _root         = context->LoadDocument("data/loadgame.rml");
-  if (_root)
+  root         = context->LoadDocument("data/loadgame.rml");
+  if (root)
   {
     LoadSlots(savePath);
     ToggleEventListener(true, "button-load",   "click", EventLoadGame);
@@ -115,7 +60,7 @@ UiLoad::UiLoad(WindowFramework* window, Rocket::Core::Context* context, const st
 
 void UiLoad::LoadSlots(const string& savePath)
 {
-  Rocket::Core::Element* slotContainer = _root->GetElementById("slot-container");
+  Rocket::Core::Element* slotContainer = root->GetElementById("slot-container");
   
   if (slotContainer)
   {
@@ -140,7 +85,7 @@ void UiLoad::LoadSlots(const string& savePath)
       Rocket::Core::Element* slotElement;
 
       idSlot << "load-slot-" << it;
-      slotElement = _root->GetElementById(idSlot.str().c_str());
+      slotElement = root->GetElementById(idSlot.str().c_str());
       slotElement->AddEventListener("click",    &EventClickSlot);
       slotElement->AddEventListener("dblclick", &EventClickSlot);
       slotElement->AddEventListener("dblclick", &EventLoadGame);
@@ -150,7 +95,7 @@ void UiLoad::LoadSlots(const string& savePath)
 
 UiLoad::~UiLoad()
 {
-  Rocket::Core::Element*   slot_container = _root->GetElementById("slot-container");
+  Rocket::Core::Element*   slot_container = root->GetElementById("slot-container");
   
   if (slot_container)
   {
@@ -184,7 +129,7 @@ void UiLoad::LoadGame(Rocket::Core::Event&)
 
 void UiLoad::ClickSlot(Rocket::Core::Event& event)
 {
-  Rocket::Core::Element* preview = _root->GetElementById("slot-preview");
+  Rocket::Core::Element* preview = root->GetElementById("slot-preview");
 
   _selectedSlot = event.GetCurrentElement();
   if (preview)
@@ -224,8 +169,8 @@ void UiLoad::Erase(Rocket::Core::Event&)
 UiSave::UiSave(WindowFramework* window, Rocket::Core::Context* context, const std::string& savePath) : UiBase(window, context), _savePath(savePath)
 {
   _selectedSlot = 0;
-  _root         = context->LoadDocument("data/savegame.rml");
-  if (_root)
+  root         = context->LoadDocument("data/savegame.rml");
+  if (root)
   {
     LoadSlots(savePath);
     ToggleEventListener(true, "button-save",   "click", EventSaveGame);
@@ -241,7 +186,7 @@ UiSave::UiSave(WindowFramework* window, Rocket::Core::Context* context, const st
 
 void UiSave::LoadSlots(const string& savePath)
 {
-  Rocket::Core::Element* slotContainer = _root->GetElementById("slot-container");
+  Rocket::Core::Element* slotContainer = root->GetElementById("slot-container");
   
   if (slotContainer)
   {
@@ -268,7 +213,7 @@ void UiSave::LoadSlots(const string& savePath)
       Rocket::Core::Element* slotElement;
       
       idSlot << "save-slot-" << it;
-      slotElement = _root->GetElementById(idSlot.str().c_str());
+      slotElement = root->GetElementById(idSlot.str().c_str());
       slotElement->AddEventListener("click",    &EventClickSlot);
       slotElement->AddEventListener("dblclick", &EventClickSlot);
       slotElement->AddEventListener("dblclick", &EventSaveGame);
@@ -278,7 +223,7 @@ void UiSave::LoadSlots(const string& savePath)
 
 UiSave::~UiSave()
 {
-  Rocket::Core::Element*   slot_container = _root->GetElementById("slot-container");
+  Rocket::Core::Element*   slot_container = root->GetElementById("slot-container");
   
   if (slot_container)
   {
@@ -325,7 +270,7 @@ void UiSave::SaveGame(Rocket::Core::Event&)
 
 void UiSave::ClickSlot(Rocket::Core::Event& event)
 {
-  Rocket::Core::Element* preview = _root->GetElementById("slot-preview");
+  Rocket::Core::Element* preview = root->GetElementById("slot-preview");
 
   _selectedSlot = event.GetCurrentElement();
   if (preview)

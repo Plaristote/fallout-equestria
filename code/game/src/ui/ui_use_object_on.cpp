@@ -4,10 +4,10 @@ using namespace std;
 
 UiUseObjectOn::UiUseObjectOn(WindowFramework* window, Rocket::Core::Context* context, Inventory& inventory) : UiBase(window, context)
 {
-  _root = context->LoadDocument("data/useobjecton.rml");
-  if (_root)
+  root = context->LoadDocument("data/useobjecton.rml");
+  if (root)
   {
-    Rocket::Core::Element* eInventory = _root->GetElementById("inventory");
+    Rocket::Core::Element* eInventory = root->GetElementById("inventory");
 
     ToggleEventListener(true, "button_cancel", "click", CancelClicked);
     CancelClicked.EventReceived.Connect(*this, &UiUseObjectOn::RocketCancelClicked);
@@ -16,7 +16,7 @@ UiUseObjectOn::UiUseObjectOn(WindowFramework* window, Rocket::Core::Context* con
       _viewController.AddView(eInventory, inventory);
       _viewController.ObjectSelected.Connect(ObjectSelected, &Sync::Signal<void (InventoryObject*)>::Emit);
     }
-    _root->Show();
+    root->Show();
   }
   ObjectSelected.Connect([this](InventoryObject*) { Closed.Emit(); });
 }
@@ -25,16 +25,10 @@ UiUseObjectOn::~UiUseObjectOn()
 {
   ToggleEventListener(false, "button_cancel", "click", CancelClicked);
   _viewController.Destroy();
-  if (_root)
-  {
-    _root->Close();
-    _root->RemoveReference();
-    _root = 0;
-  }
 }
 
 void UiUseObjectOn::Destroy(void)
 {
-  if (_root)
-    _root->Hide();
+  if (root)
+    root->Hide();
 }

@@ -7,7 +7,7 @@ GameMenu::GameMenu(WindowFramework* window, Rocket::Core::Context* context) : Ui
 {
   Rocket::Core::ElementDocument* doc     = context->LoadDocument("data/main_menu.rml");
 
-  _root = doc;
+  root = doc;
   if (doc)
   {
     doc->Show();

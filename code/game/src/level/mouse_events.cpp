@@ -125,8 +125,7 @@ void MouseEvents::MouseLeftClicked(void)
       {
         InstanceDynamicObject* object = level.FindObjectFromNode(hovering.dynObject);
 
-        if (level_ui.HasOpenedUi<LevelUi::UiItInteractMenu>())
-          level_ui.CloseRunningUi<LevelUi::UiItInteractMenu>();
+        level_ui.CloseRunningUi<LevelUi::UiItInteractMenu>();
         if (object && object->GetInteractions().size() != 0)
         {
           level_ui.CloseRunningUi<LevelUi::UiItInteractMenu>();

@@ -11,7 +11,7 @@ extern asIScriptModule*  as_current_module;
 
 Pipbuck::Pipbuck(WindowFramework* w, Rocket::Core::Context* c, DataEngine& data): UiBase(w, c), _data_engine(data), _object("scripts/ai/general_pony.as")
 {
-  _root          = c->LoadDocument("data/pipbuck.rml");
+  root          = c->LoadDocument("data/pipbuck.rml");
   _asked_unfocus = false;
   EventStartApp.EventReceived.Connect   (*this, &Pipbuck::StartApp);
   EventQuitApp.EventReceived.Connect    (*this, &Pipbuck::QuitApp);
@@ -20,7 +20,7 @@ Pipbuck::Pipbuck(WindowFramework* w, Rocket::Core::Context* c, DataEngine& data)
 
   _object.asDefineMethod("GetAvailableApps", "StringList GetAvailableApps(Data)");
 
-  if (_root)
+  if (root)
   {
     ToggleEventListener(true, "button-quit", "click", EventQuitApp);
     ToggleEventListener(true, "button-home", "click", EventHome);
@@ -31,9 +31,9 @@ Pipbuck::Pipbuck(WindowFramework* w, Rocket::Core::Context* c, DataEngine& data)
 
 Pipbuck::~Pipbuck()
 {
-  if (_root)
+  if (root)
   {
-    Rocket::Core::Element* element = _root->GetElementById("app_list");
+    Rocket::Core::Element* element = root->GetElementById("app_list");
 
     if (element)
     {
@@ -113,7 +113,7 @@ void Pipbuck::StartApp(Rocket::Core::Event& event)
       }
       else
         cout << "Application is executing as background task right now" << endl;
-      app->Focused(_root->GetElementById("app_container"), _data_engine);
+      app->Focused(root->GetElementById("app_container"), _data_engine);
       _running_app = app;
     }
   }
@@ -168,7 +168,7 @@ void Pipbuck::AppAskedExit(App* app)
 
 void Pipbuck::Run(void)
 {
-  Rocket::Core::Element* app_container = (_root ? _root->GetElementById("app_container") : 0);
+  Rocket::Core::Element* app_container = (root ? root->GetElementById("app_container") : 0);
   AppList::iterator      it, end;
 
   for_each(_running_apps.begin(), _running_apps.end(), [this, app_container](App* app)
@@ -223,8 +223,8 @@ void Pipbuck::Restart(void)
 
 void Pipbuck::ReloadApps(void)
 {
-  if (!_root) return ;
-  Rocket::Core::Element* elem      = _root->GetElementById("app_container");
+  if (!root) return ;
+  Rocket::Core::Element* elem      = root->GetElementById("app_container");
   Data                   apps_data = _data_engine["Pipbuck"]["Apps"];
   list<string>           apps;
   stringstream           rml;

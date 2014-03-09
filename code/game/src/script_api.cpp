@@ -237,10 +237,10 @@ namespace ScriptApi
       AngelScript::Object* object;
     };
     
-  public:
+  public: 
     RocketUi(GameUi& game_ui, AngelScript::Object* object, Rocket::Core::Element* root) : UiBase(game_ui.GetWindowFramework(), game_ui.GetRocketRegion()->get_context()), object(object)
     {
-      _root                     = root->GetOwnerDocument();
+      root                      = root->GetOwnerDocument();
       root_outlives_this_object = true;
       observer_object_destroyed = object->ObjectDestroyed.Connect([this](void) { delete this; });
     }

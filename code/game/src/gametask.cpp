@@ -52,8 +52,27 @@ GameTask::~GameTask()
 void                  GameTask::SaveClicked(Rocket::Core::Event&)
 {
   UiSave* ui_save = game_ui.OpenSavingInterface(save_path);
-  
+
+  // SaveToSlot signal is emitted from Rocket's callback. Saving from that thread
+  // would cause a deadlock when taking the screenshot. The signal has to be delayed
+  // using SetDirect(false) and the Sync::Signals object.
+  _signals.push_back(&ui_save->SaveToSlot);
+  _signals.push_back(&ui_save->Done);
+  ui_save->SaveToSlot.SetDirect(false);
+  ui_save->Done.SetDirect(false);
   ui_save->SaveToSlot.Connect(*this, &GameTask::SaveToSlot);
+  ui_save->Done.Connect([this, ui_save]()
+  {
+    Sync::Signals& signals  = _signals;
+    UiSave*        ui_save_ = ui_save;
+
+    // This lambda will be called in the signals object. The cleanup must be run later.
+    Executor::ExecuteLater([&signals, ui_save_]()
+    {
+      signals.remove(&ui_save_->SaveToSlot);
+      signals.remove(&ui_save_->Done);
+    });
+  });
   ui_save->EraseSlot.Connect (*this, &GameTask::EraseSlot);
 }
 
@@ -93,10 +112,18 @@ void GameTask::RunLevel(void)
   {
     Level::Exit  exit      = level->GetExit();
 
-    ExitLevel();
+    if (level->IsPersistent())
+    {
+      SaveGame();
+      ExitLevel();
+    }
+    else
+    {
+      ExitLevel();
+      SaveGame();
+    }
     if (!(exit.ToWorldmap()))
       OpenLevel(exit.level, exit.zone);
-    SaveGame(); // Auto-save for the Continue feature
   }
   if (!level && world_map)
     world_map->Show();
@@ -141,12 +168,14 @@ bool GameTask::SaveGame()
   data_engine["time"]["year"]    = current_time.GetYear();
   data_engine.Save(save_path + "/dataengine.json");
 
-  /*if (level != 0)
+  if (level != 0)
   {
+    UiBase::ToggleUserInterface.Emit(false);
     window->get_render().set_transparency(TransparencyAttrib::M_alpha, 1);
     framework->get_graphics_engine()->render_frame();
     window->get_graphics_window()->get_screenshot()->write(save_path + "/preview.png");
-  }*/
+    UiBase::ToggleUserInterface.Emit(true);
+  }
   return (success);
 }
 
@@ -244,12 +273,6 @@ void GameTask::OpenLevel(const std::string& level_name, const std::string& entry
 void GameTask::ExitLevel()
 {
   level->RemovePartyFromLevel(*player_party);
-  if (level->IsPersistent())
-  {
-    cout << "Level is persistent" << endl;
-    if (!(SaveGame()))
-      AlertUi::NewAlert.Emit(i18n::T("Fatal Error") + ": " + i18n::T("Cannot save level"));
-  }
   quest_manager->Finalize();
   delete level;
   level = 0;

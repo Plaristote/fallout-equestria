@@ -7,9 +7,9 @@ using namespace std;
 UiUseSkillOn::UiUseSkillOn(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* player, InstanceDynamicObject* target) : UiBase(window, context)
 {
 
-  _root = context->LoadDocument("data/skill_picker.rml");
+  root = context->LoadDocument("data/skill_picker.rml");
   Initialize();
-  if (_root)
+  if (root)
   {
     StatController*    statistics = player->GetStatController();
     auto               skill_list = statistics->Model().GetUsableSkills(player == target);
@@ -27,13 +27,13 @@ UiUseSkillOn::UiUseSkillOn(WindowFramework* window, Rocket::Core::Context* conte
 
 UiUseSkillOn::UiUseSkillOn(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
-  _root = context->LoadDocument("data/skill_picker.rml");
+  root = context->LoadDocument("data/skill_picker.rml");
   Initialize();
 }
 
 void UiUseSkillOn::Initialize(void)
 {
-  if (_root)
+  if (root)
   {
     ToggleEventListener(true, "button_cancel", "click", EventCloseClicked);
     EventCloseClicked.EventReceived.Connect([this](Rocket::Core::Event&) { Hide(); Closed.Emit(); });
@@ -51,7 +51,7 @@ void UiUseSkillOn::Initialize(void)
 
 void UiUseSkillOn::SetSkillList(const map<string, short>& skill_list)
 {
-  Rocket::Core::Element* list = _root->GetElementById("skill-list");
+  Rocket::Core::Element* list = root->GetElementById("skill-list");
   stringstream           stream;
 
   for_each(skill_list.begin(), skill_list.end(), [&stream](pair<string,short> skill)

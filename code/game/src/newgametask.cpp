@@ -139,8 +139,8 @@ void NewGameTask::Done(void)
  */
 UiNewGame::UiNewGame(WindowFramework* window, Core::Context* context) : UiBase(window, context)
 {
-  _root = context->LoadDocument("data/new_game.rml");
-  if (_root)
+  root = context->LoadDocument("data/new_game.rml");
+  if (root)
   {
     ToggleEventListener(true, "button-start-from-scratch", "click", EventStartFromScratch);
     ToggleEventListener(true, "button-select-profile",     "click", EventSelectProfile);
@@ -188,10 +188,10 @@ void UiNewGame::GoToProfile(const string& profile)
 {
   Data profiles(_data_profiles);
   
-  Core::Element* name        = _root->GetElementById("character-name");
-  Core::Element* description = _root->GetElementById("character-description");
-  Core::Element* pros        = _root->GetElementById("character-pros");
-  Core::Element* cons        = _root->GetElementById("character-cons");
+  Core::Element* name        = root->GetElementById("character-name");
+  Core::Element* description = root->GetElementById("character-description");
+  Core::Element* pros        = root->GetElementById("character-pros");
+  Core::Element* cons        = root->GetElementById("character-cons");
   
   name->SetInnerRML       (profiles[profile]["Name"].Value().c_str());
   description->SetInnerRML(profiles[profile]["Description"].Value().c_str());
@@ -199,7 +199,7 @@ void UiNewGame::GoToProfile(const string& profile)
   cons->SetInnerRML       (profiles[profile]["Cons"].Value().c_str());
   
   string rml = "<img src='newgame/" + profiles[profile]["Image"].Value() + "' style='width: 100%; height: 100%;' />";
-  Core::Element* image = _root->GetElementById("background-image");
+  Core::Element* image = root->GetElementById("background-image");
   image->SetInnerRML(rml.c_str());
 }
 

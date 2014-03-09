@@ -9,12 +9,12 @@ extern PandaFramework* framework;
 
 GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBase(window, context)
 {
-  _root = context->LoadDocument("data/options.rml");
-  if (_root)
+  root = context->LoadDocument("data/options.rml");
+  if (root)
   {
-    Core::Element* fullscreen_box   = _root->GetElementById("fullscreen");
-    Core::Element* screen_select    = _root->GetElementById("screen-select");
-    Core::Element* language_select  = _root->GetElementById("language-select");
+    Core::Element* fullscreen_box   = root->GetElementById("fullscreen");
+    Core::Element* screen_select    = root->GetElementById("screen-select");
+    Core::Element* language_select  = root->GetElementById("language-select");
     vector<string> languages        = i18n::LanguagesAvailable();
     Data           current_language = OptionsManager::Get()["language"];
 
@@ -50,7 +50,7 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
     }
 
     {
-      Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("language-select"));
+      Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(root->GetElementById("language-select"));
       
       for (int i = 0 ; i < select->GetNumOptions() ; ++i)
       {
@@ -88,14 +88,14 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
     {
       typedef std::pair<std::string, Controls::ElementFormControlInput*> RadioButton;
       RadioButton radios_yes[] = {
-        RadioButton("focus-self",    dynamic_cast<Controls::ElementFormControlInput*>(_root->GetElementById("camera-focus"))),
-        RadioButton("focus-self",    dynamic_cast<Controls::ElementFormControlInput*>(_root->GetElementById("camera-fight-focus"))),
-        RadioButton("focus-enemies", dynamic_cast<Controls::ElementFormControlInput*>(_root->GetElementById("camera-enemy-focus")))
+        RadioButton("focus-self",    dynamic_cast<Controls::ElementFormControlInput*>(root->GetElementById("camera-focus"))),
+        RadioButton("focus-self",    dynamic_cast<Controls::ElementFormControlInput*>(root->GetElementById("camera-fight-focus"))),
+        RadioButton("focus-enemies", dynamic_cast<Controls::ElementFormControlInput*>(root->GetElementById("camera-enemy-focus")))
       };
       RadioButton radios_no[] = {
-        RadioButton("focus-self",    dynamic_cast<Controls::ElementFormControlInput*>(_root->GetElementById("camera-free"))),
-        RadioButton("focus-self",    dynamic_cast<Controls::ElementFormControlInput*>(_root->GetElementById("camera-fight-free"))),
-        RadioButton("focus-enemies", dynamic_cast<Controls::ElementFormControlInput*>(_root->GetElementById("camera-enemy-free")))
+        RadioButton("focus-self",    dynamic_cast<Controls::ElementFormControlInput*>(root->GetElementById("camera-free"))),
+        RadioButton("focus-self",    dynamic_cast<Controls::ElementFormControlInput*>(root->GetElementById("camera-fight-free"))),
+        RadioButton("focus-enemies", dynamic_cast<Controls::ElementFormControlInput*>(root->GetElementById("camera-enemy-free")))
       };
       Data        options = OptionsManager::Get();
 
@@ -180,7 +180,7 @@ void GameOptions::ToggleFullscreen(Rocket::Core::Event& event)
 
 void GameOptions::SetQuality(Rocket::Core::Event&)
 {
-  Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("graphics-quality"));
+  Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(root->GetElementById("graphics-quality"));
   int                                 it_select = select->GetSelection();
   Controls::SelectOption*             option    = select->GetOption(it_select);
   
@@ -196,7 +196,7 @@ void GameOptions::SetQuality(Rocket::Core::Event&)
 
 void GameOptions::SetResolution(Rocket::Core::Event&)
 {
-  Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("screen-select"));
+  Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(root->GetElementById("screen-select"));
   int                                 it_select = select->GetSelection();
   Controls::SelectOption*             option    = select->GetOption(it_select);
 
@@ -223,7 +223,7 @@ void GameOptions::SetResolution(Rocket::Core::Event&)
 
 void GameOptions::SetLanguage(Core::Event& event)
 {
-  Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(_root->GetElementById("language-select"));
+  Controls::ElementFormControlSelect* select    = dynamic_cast<Controls::ElementFormControlSelect*>(root->GetElementById("language-select"));
   int                                 it_select = select->GetSelection();
   Controls::SelectOption*             option    = select->GetOption(it_select);
   

@@ -15,7 +15,7 @@ public:
   
   void Update(void);
   
-  void PullToFront(void) { _root->PullToFront(); }
+  void PullToFront(void) { root->PullToFront(); }
   
   static MouseCursor*    Get(void) { return (_static); }
 

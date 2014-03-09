@@ -9,18 +9,18 @@ using namespace std;
 // VIEW
 DialogView::DialogView(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
-  _root = context->LoadDocument("data/dialog.rml");
-  if (_root)
+  root = context->LoadDocument("data/dialog.rml");
+  if (root)
   {
-    _containerNpcLine = _root->GetElementById("npcLine");
-    _containerAnswers = _root->GetElementById("answers");
+    _containerNpcLine = root->GetElementById("npcLine");
+    _containerAnswers = root->GetElementById("answers");
     ToggleEventListener(true, "button-open-barter", "click", BarterOpened);
   }
 }
 
 DialogView::~DialogView()
 {
-  if (_root)
+  if (root)
   {
     if (_containerAnswers)
     {
@@ -32,14 +32,14 @@ DialogView::~DialogView()
       }
     }
     ToggleEventListener(false, "button-open-barter", "click", BarterOpened);
-    _root->Close();
-    _root->RemoveReference();
+    root->Close();
+    root->RemoveReference();
   }
 }
 
 void DialogView::Destroy()
 {
-  if (_root)
+  if (root)
   {
     if (_containerAnswers)
     {
@@ -50,9 +50,9 @@ void DialogView::Destroy()
         element->RemoveEventListener("click", &AnswerSelected);
       }
     }
-    _root->Close();
-    _root->RemoveReference();
-    _root = 0;
+    root->Close();
+    root->RemoveReference();
+    root = 0;
   }
 }
 
@@ -63,7 +63,7 @@ void DialogView::SetCurrentNpcText(const string& message)
 
 void DialogView::UpdateView(const std::string& npcLine, const DialogAnswers& answers)
 {
-  if (_root && _containerAnswers && _containerNpcLine)
+  if (root && _containerAnswers && _containerNpcLine)
   {
     std::string answersRml;
 
@@ -84,7 +84,7 @@ void DialogView::UpdateView(const std::string& npcLine, const DialogAnswers& ans
       element = _containerAnswers->GetElementById(data.first.c_str());
       element->AddEventListener("click", &AnswerSelected);
     });
-    _root->Show();
+    root->Show();
   }
 }
 

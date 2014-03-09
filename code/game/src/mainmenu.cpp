@@ -185,8 +185,8 @@ void MainMenu::QuitGame(Rocket::Core::Event&)
 MainMenu::View::View(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
   cout << "[MainMenu][View] Initializing" << endl;
-  _root = context->LoadDocument("data/startmenu.rml");
-  if (_root)
+  root = context->LoadDocument("data/startmenu.rml");
+  if (root)
   {
     std::string                      idz[]                 = { "button-continue", "button-new-game", "button-load-game", "button-options", "button-quit" };
     Sync::Signal<void (Rocket::Core::Event&)>* signalz[]   = { &Continue, &NewGame, &LoadGame, &Options, &Quit };

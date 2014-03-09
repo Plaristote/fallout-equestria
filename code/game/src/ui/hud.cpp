@@ -9,7 +9,7 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
 {
   Rocket::Core::ElementDocument* doc = context->LoadDocument("data/main_bar.rml");
 
-  _root = doc;
+  root = doc;
   if (doc)
   {
     doc->Show();
@@ -33,6 +33,7 @@ GameMainBar::GameMainBar(WindowFramework* window, Rocket::Core::Context* context
     SpelldexButtonClicked.EventReceived.Connect([this](Rocket::Core::Event&) { OpenSpelldex.Emit(); });
     
     Translate();
+    Show();
   }
 }
 
@@ -75,9 +76,9 @@ void GameMainBar::SetStatistics(StatController* controller)
 
 void GameMainBar::AppendToConsole(const std::string& str)
 {
-  if (_root)
+  if (root)
   {
-    Rocket::Core::Element* console = _root->GetElementById("console");
+    Rocket::Core::Element* console = root->GetElementById("console");
   
     if (console)
     {
@@ -95,9 +96,9 @@ void GameMainBar::AppendToConsole(const std::string& str)
 
 void GameMainBar::SetCurrentHp(short hp)
 {
-  if (_root)
+  if (root)
   {
-    Rocket::Core::Element* elem_hp = _root->GetElementById("current-hp");
+    Rocket::Core::Element* elem_hp = root->GetElementById("current-hp");
   
     if (elem_hp)
     {
@@ -111,9 +112,9 @@ void GameMainBar::SetCurrentHp(short hp)
 
 void GameMainBar::SetCurrentAc(short ac)
 {
-  if (_root)
+  if (root)
   {
-    Rocket::Core::Element* elem_ac = _root->GetElementById("current-ac");
+    Rocket::Core::Element* elem_ac = root->GetElementById("current-ac");
   
     if (elem_ac)
     {
@@ -128,9 +129,9 @@ void GameMainBar::SetCurrentAc(short ac)
 void GameMainBar::SetCurrentAP(unsigned short ap, unsigned short max)
 {
   SetMaxAP(max);
-  if (_apEnabled && _root)
+  if (_apEnabled && root)
   {
-    Rocket::Core::Element* apbar = _root->GetElementById("action_points");
+    Rocket::Core::Element* apbar = root->GetElementById("action_points");
     string                 rml;
 
     if (apbar)
@@ -146,9 +147,9 @@ void GameMainBar::SetCurrentAP(unsigned short ap, unsigned short max)
 
 void GameMainBar::SetMaxAP(unsigned short ap)
 {
-  if (_root)
+  if (root)
   {
-    Rocket::Core::Element* apbar = _root->GetElementById("action_points");
+    Rocket::Core::Element* apbar = root->GetElementById("action_points");
     string                 rml;
 
     _apMax = ap;
@@ -163,7 +164,7 @@ void GameMainBar::SetMaxAP(unsigned short ap)
 
 void GameMainBar::SetEnabledAP(bool enabled)
 {
-  if (_root)
+  if (root)
   {
     _apEnabled = enabled;
     SetMaxAP(_apMax);
@@ -203,13 +204,13 @@ void GameMainBar::SetEquipedItem(unsigned short it, InventoryObject* item)
 void GameMainBar::SetEquipedItemAction(unsigned short it, InventoryObject* item, unsigned char actionIt)
 {
   cout << "SetEquipedItemAction: " << (int)actionIt << endl;
-  if (item && _root)
+  if (item && root)
   {
     Rocket::Core::Element* elem;
     stringstream           stream;
     
     stream << "equiped_" << (it + 1);
-    elem = _root->GetElementById(stream.str().c_str());
+    elem = root->GetElementById(stream.str().c_str());
     if (elem)
     {
       stringstream rml;

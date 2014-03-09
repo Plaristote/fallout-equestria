@@ -4,6 +4,8 @@
 using namespace std;
 using namespace Rocket;
 
+Sync::Signal<void (bool)> UiBase::ToggleUserInterface;
+
 namespace Rocket
 {
   void ForeachElement(Rocket::Core::Element* root, const std::string& tag, std::function<void (Rocket::Core::Element*)> lambda)
@@ -18,48 +20,49 @@ namespace Rocket
   }
 }
 
-UiBase::UiBase(WindowFramework* window, Rocket::Core::Context* context) : _window(window), _root(0), _context(context)
+UiBase::UiBase(WindowFramework* window, Rocket::Core::Context* context) : window(window), root(0), context(context)
 {
   root_outlives_this_object = false;
-  _languageObs = i18n::LanguageChanged.Connect(*this, &UiBase::Translate);
+  observers.Connect(i18n::LanguageChanged, *this, &UiBase::Translate);
+  observers.Connect(ToggleUserInterface,   *this, &UiBase::UserInterfaceToggled);
+  is_visible = false;
 }
 
 UiBase::~UiBase()
 {
-  if (_root)
+  if (root)
   {
-    std::for_each(_listeners.begin(), _listeners.end(), [this](const Listener& listener)
+    std::for_each(listeners.begin(), listeners.end(), [this](const Listener& listener)
     {
-      Rocket::Core::Element* elem = _root->GetElementById(listener.elem.c_str());
+      Rocket::Core::Element* elem = root->GetElementById(listener.elem.c_str());
       
       if (elem)
         elem->RemoveEventListener(listener.event.c_str(), &(listener.instance));
     });
     if (!root_outlives_this_object)
     {
-      _root->Hide();
-      _root->RemoveReference();
-      _root = 0;
+      root->Hide();
+      root->RemoveReference();
+      root = 0;
     }
   }
-  i18n::LanguageChanged.Disconnect(_languageObs);
 }
 
 void UiBase::ToggleEventListener(bool toggle_on, const std::string& id, const std::string& event, RocketListener& listener)
 {
-  if (_root)
+  if (root)
   {
-    Rocket::Core::Element* element = _root->GetElementById(id.c_str());
+    Rocket::Core::Element* element = root->GetElementById(id.c_str());
 
     if (element)
     {
       Listener             registered(element, event, listener);
-      auto                 it      = std::find(_listeners.begin(), _listeners.end(), registered);
+      auto                 it      = std::find(listeners.begin(), listeners.end(), registered);
 
       if (toggle_on)
       {
-        if (it == _listeners.end())
-          _listeners.push_back(registered);
+        if (it == listeners.end())
+          listeners.push_back(registered);
         else
           element->RemoveEventListener(event.c_str(), &listener);
         element->AddEventListener(event.c_str(), &listener);
@@ -67,8 +70,8 @@ void UiBase::ToggleEventListener(bool toggle_on, const std::string& id, const st
       else
       {
         element->RemoveEventListener(event.c_str(), &listener);
-        if (it != _listeners.end())
-          _listeners.erase(it);
+        if (it != listeners.end())
+          listeners.erase(it);
       }
     }
     else
@@ -100,15 +103,27 @@ void UiBase::RecursiveTranslate(Core::Element* root)
 
 void UiBase::Translate(void)
 {
-  if (_root)
-    RecursiveTranslate(_root);
+  if (root)
+    RecursiveTranslate(root);
+}
+
+void UiBase::UserInterfaceToggled(bool toggle_on)
+{
+  if (root)
+  {
+    if (toggle_on && is_visible)
+      root->Show();
+    else
+      root->Hide();
+  }
 }
 
 void UiBase::Show(void)
 {
-  if (_root)
+  if (root)
   {
-    _root->Show();
+    is_visible = true;
+    root->Show();
     VisibilityToggled.Emit(true);
     VisibilityToggledOn.Emit();
     if (MouseCursor::Get() != 0 && MouseCursor::Get() != this)
@@ -118,21 +133,22 @@ void UiBase::Show(void)
 
 void UiBase::Hide(void)
 {
-  if (_root)
+  if (root)
   {
-    _root->Hide();
-    _root->PushToBack();
+    is_visible = false;
+    root->Hide();
+    root->PushToBack();
     VisibilityToggled.Emit(false);
     VisibilityToggledOff.Emit();
   }
 }
 bool UiBase::IsVisible(void) const
 {
-  return (_root && _root->IsVisible());
+  return (root && root->IsVisible());
 }
 
 void UiBase::SetModal(bool modal)
 {
-  if (_root)
-    _root->Show(modal ? Rocket::Core::ElementDocument::MODAL : Rocket::Core::ElementDocument::NONE);
+  if (root)
+    root->Show(modal ? Rocket::Core::ElementDocument::MODAL : Rocket::Core::ElementDocument::NONE);
 }

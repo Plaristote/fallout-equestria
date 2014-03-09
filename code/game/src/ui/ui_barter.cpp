@@ -5,16 +5,16 @@ using namespace std;
 
 UiBarter::UiBarter(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* player, ObjectCharacter* other) : UiBase(window, context), _inventory_player(player->GetInventory()), _inventory_other(other->GetInventory())
 {
-  _root            = context->LoadDocument("data/barter.rml");
+  root            = context->LoadDocument("data/barter.rml");
   _quantity_picker = 0;
   _stats_player    = player->GetStatController();
   _stats_other     = other->GetStatController();
-  if (_root)
+  if (root)
   {
-    Rocket::Core::Element* eInvLooter   = _root->GetElementById("self-inventory");
-    Rocket::Core::Element* eInvLooted   = _root->GetElementById("other-inventory");
-    Rocket::Core::Element* eStackPlayer = _root->GetElementById("stack-player");
-    Rocket::Core::Element* eStackOther  = _root->GetElementById("stack-other");
+    Rocket::Core::Element* eInvLooter   = root->GetElementById("self-inventory");
+    Rocket::Core::Element* eInvLooted   = root->GetElementById("other-inventory");
+    Rocket::Core::Element* eStackPlayer = root->GetElementById("stack-player");
+    Rocket::Core::Element* eStackOther  = root->GetElementById("stack-other");
 
     ToggleEventListener(true, "button_done", "click", EventMakeDeal);
     ToggleEventListener(true, "button_quit", "click", EventBarterEnd);
@@ -39,7 +39,7 @@ UiBarter::UiBarter(WindowFramework* window, Rocket::Core::Context* context, Obje
     ObjectSelected.Connect(*this, &UiBarter::SwapObjects);
     _stack_player.ContentChanged.Connect(*this, &UiBarter::UpdateInterface);
     _stack_other.ContentChanged.Connect (*this, &UiBarter::UpdateInterface);
-    _root->Show();    
+    root->Show();    
   }
 }
 
@@ -77,8 +77,8 @@ int  UiBarter::GetStackValue(Inventory::Content& content, StatController* stats_
 
 void UiBarter::UpdateInterface(void)
 {
-  Rocket::Core::Element* value_player = _root->GetElementById("value-player");
-  Rocket::Core::Element* value_other  = _root->GetElementById("value-other");
+  Rocket::Core::Element* value_player = root->GetElementById("value-player");
+  Rocket::Core::Element* value_other  = root->GetElementById("value-other");
 
   if (value_player)
     UpdateInterfaceSide(value_player, _stack_player.GetContent(), _stats_player, _stats_other);
@@ -137,7 +137,7 @@ bool UiBarter::SwapFunctor(InventoryObject* object, Inventory& from, Inventory& 
     if (from.ContainsHowMany(object->GetName()) > 1)
     {
       if (_quantity_picker) delete _quantity_picker;
-      _quantity_picker = new UiObjectQuantityPicker(_window, _context, from, object);
+      _quantity_picker = new UiObjectQuantityPicker(window, context, from, object);
       _quantity_picker->SetModal(true);
       _quantity_picker->QuantityPicked.Connect(swap_callback);
       _quantity_picker->Observer.Connect(VisibilityToggledOff, *_quantity_picker, &UiBase::Hide);

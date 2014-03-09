@@ -5,14 +5,14 @@ using namespace std;
 
 UiEquipMode::UiEquipMode(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
-  _root        = context->LoadDocument("data/dialog_equiped_mode.rml");
+  root        = context->LoadDocument("data/dialog_equiped_mode.rml");
   root_choices = 0;
-  if (_root)
+  if (root)
   {
-    root_choices = _root->GetElementById("dialog-actions");
+    root_choices = root->GetElementById("dialog-actions");
     ToggleEventListener(true, "cancel", "click", CancelClicked);
     CancelClicked.EventReceived.Connect(*this, &UiEquipMode::CallbackCancel);
-    _root->Show();
+    root->Show();
   }
 }
 
@@ -24,8 +24,8 @@ UiEquipMode::~UiEquipMode()
 
 void UiEquipMode::Destroy(void)
 {
-  if (_root)
-    _root->Hide();
+  if (root)
+    root->Hide();
 }
 
 void UiEquipMode::ListenButtons(bool activate)

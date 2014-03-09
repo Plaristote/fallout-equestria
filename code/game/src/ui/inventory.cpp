@@ -7,7 +7,7 @@ void GameInventory::ListenDropables(bool activate)
 {
   Core::ElementList elements;
 
-  _root->GetElementsByTagName(elements, "itemslot");
+  root->GetElementsByTagName(elements, "itemslot");
   std::for_each(elements.begin(), elements.end(), [this, activate](Rocket::Core::Element* element)
   {
     Rocket::Core::Element* to_listen = element->GetChild(0);
@@ -24,13 +24,13 @@ void GameInventory::ListenDropables(bool activate)
 
 GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
 {
-  if ((_root = context->LoadDocument("data/inventory.rml")) != 0)
+  if ((root = context->LoadDocument("data/inventory.rml")) != 0)
   {
-    Core::Element*         itemListContainer = _root->GetElementById("body-inventory-items");
+    Core::Element*         itemListContainer = root->GetElementById("body-inventory-items");
 
     for (unsigned short i = 0 ; i < 200 ; ++i)
     {
-      Rocket::Core::Element* item = _root->CreateElement("invitem");
+      Rocket::Core::Element* item = root->CreateElement("invitem");
 
       item->SetInnerRML("<img src=\"item.png\" class='inventory-item' />");
       itemListContainer->AppendChild(item);
@@ -46,7 +46,7 @@ GameInventory::GameInventory(WindowFramework* window, Rocket::Core::Context* con
     DropEvent.EventReceived.Connect          (*this, &GameInventory::CallbackDropEvent);
 
     Translate();
-    _root->Show();
+    root->Show();
   }
   _inventoryView.ObjectSelected.Connect(*this, &GameInventory::SetSelectedObject);
   _selectedObject = 0;
@@ -116,7 +116,7 @@ void GameInventory::SetEquipedItem(unsigned short slot, InventoryObject* item)
   elem_id << "eq" << (slot + 1) << "-equiped";
   if (_inventory)
   {
-    Rocket::Core::Element* element = _root->GetElementById(elem_id.str().c_str());
+    Rocket::Core::Element* element = root->GetElementById(elem_id.str().c_str());
 
     if (element)
     {
@@ -144,7 +144,7 @@ void GameInventory::SetEquipedItem(unsigned short slot, InventoryObject* item)
 
 void GameInventory::SetInventory(Inventory& inventory)
 {
-  Core::Element* itemListContainer = _root->GetElementById("body-inventory-items");
+  Core::Element* itemListContainer = root->GetElementById("body-inventory-items");
 
   if (itemListContainer)
   {
@@ -164,7 +164,7 @@ void GameInventory::UpdateInventory(void)
 
 void GameInventory::UpdateInventoryCapacity(void)
 {
-  Core::Element* capacity = _root->GetElementById("inventory-capacity");
+  Core::Element* capacity = root->GetElementById("inventory-capacity");
   
   if (capacity)
   {
@@ -177,7 +177,7 @@ void GameInventory::UpdateInventoryCapacity(void)
 
 void GameInventory::SetSelectedObject(InventoryObject* inventory)
 {
-  Core::Element* itemDescription = _root->GetElementById("item-description");
+  Core::Element* itemDescription = root->GetElementById("item-description");
 
   _selectedObject = inventory;
   if (itemDescription)

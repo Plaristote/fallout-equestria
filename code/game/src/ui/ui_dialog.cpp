@@ -6,22 +6,22 @@ using namespace std;
 
 UiDialog::UiDialog(WindowFramework* w, Rocket::Core::Context* c): UiBase(w, c)
 {
-  _root = c->LoadDocument("data/ui_dialog.rml");
-  if (_root)
-    _button_container = _root->GetElementById("button-container");
+  root = c->LoadDocument("data/ui_dialog.rml");
+  if (root)
+    _button_container = root->GetElementById("button-container");
   else
     _button_container = 0;
 }
 
 UiDialog::~UiDialog(void)
 {
-  if (_root)
+  if (root)
   {
     for_each(_buttons.begin(), _buttons.end(), [this](Button& button)
     {
       Rocket::Core::Element* element;
       
-      element = _root->GetElementById(button.id.c_str());
+      element = root->GetElementById(button.id.c_str());
       element->RemoveEventListener("click", &button.listener);
     });
     _buttons.clear();
@@ -30,9 +30,9 @@ UiDialog::~UiDialog(void)
 
 void UiDialog::SetMessage(const string& message)
 {
-  if (_root)
+  if (root)
   {
-    Rocket::Core::Element* container = _root->GetElementById("message-container");
+    Rocket::Core::Element* container = root->GetElementById("message-container");
 
     container->SetAttribute("i18n", Rocket::Core::String(message.c_str()));
     container->SetInnerRML(i18n::T(message).c_str());
