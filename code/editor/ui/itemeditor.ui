@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>716</width>
-    <height>702</height>
+    <height>705</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -263,150 +263,31 @@
       <item row="2" column="0" colspan="5">
        <widget class="QWidget" name="actionWidget" native="true">
         <layout class="QGridLayout" name="gridLayout_3">
-         <item row="7" column="1">
-          <widget class="QLabel" name="label_8">
-           <property name="text">
-            <string>Chances of success</string>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="1">
-          <widget class="QLabel" name="label_22">
-           <property name="text">
-            <string>Can use</string>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="2" colspan="2">
-          <widget class="QLineEdit" name="actionHookCanUse">
-           <property name="placeholderText">
-            <string>Determines if the object is not out of ammo, broken, etc...</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="2" colspan="2">
-          <widget class="QLineEdit" name="actionHookHitChances">
-           <property name="placeholderText">
-            <string>Optional. Returns a success rate.</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="2">
-          <widget class="QSpinBox" name="actionDamage">
-           <property name="maximum">
-            <number>999</number>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="0">
-          <widget class="QCheckBox" name="actionHasHookDoors">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="2" colspan="2">
-          <widget class="QLineEdit" name="actionHookUse">
-           <property name="placeholderText">
-            <string>Untargeted use</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2" colspan="2">
-          <widget class="QCheckBox" name="actionCombat">
-           <property name="text">
-            <string>Can only be performed during combat</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0" colspan="2">
-          <widget class="QLabel" name="label_13">
-           <property name="text">
-            <string>Damage range</string>
-           </property>
-          </widget>
-         </item>
          <item row="13" column="0">
-          <widget class="QCheckBox" name="actionHasHookWeapon">
+          <widget class="QCheckBox" name="actionHasHookOthers">
            <property name="text">
             <string/>
            </property>
           </widget>
          </item>
-         <item row="11" column="1">
-          <widget class="QLabel" name="label_19">
+         <item row="13" column="2" colspan="2">
+          <widget class="QLineEdit" name="actionHookOthers">
+           <property name="placeholderText">
+            <string>Targeted on any object not handled by other hooks</string>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="2" colspan="2">
+          <widget class="QLineEdit" name="actionHookCharacters">
+           <property name="placeholderText">
+            <string>Targeted on characters</string>
+           </property>
+          </widget>
+         </item>
+         <item row="14" column="1">
+          <widget class="QLabel" name="label_21">
            <property name="text">
-            <string>Doors</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="2" colspan="2">
-          <widget class="QSpinBox" name="actionApCost">
-           <property name="maximum">
-            <number>99</number>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="3">
-          <widget class="QSpinBox" name="actionDamageMax">
-           <property name="maximum">
-            <number>999</number>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2" colspan="2">
-          <widget class="QCheckBox" name="actionTargeted">
-           <property name="text">
-            <string>Needs to be targeted to something</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="2" colspan="2">
-          <widget class="QSpinBox" name="actionRange">
-           <property name="maximum">
-            <number>999</number>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0" colspan="2">
-          <widget class="QLabel" name="label_14">
-           <property name="text">
-            <string>Targeted</string>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="0">
-          <widget class="QCheckBox" name="actionHasHookUse">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="1">
-          <widget class="QLabel" name="label_15">
-           <property name="text">
-            <string>Use</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0" colspan="2">
-          <widget class="QLabel" name="label_10">
-           <property name="text">
-            <string>Combat</string>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="1">
-          <widget class="QLabel" name="label_18">
-           <property name="text">
-            <string>Characers</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0" colspan="2">
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>Action Points</string>
+            <string>As a weapon</string>
            </property>
           </widget>
          </item>
@@ -417,17 +298,80 @@
            </property>
           </widget>
          </item>
-         <item row="10" column="2" colspan="2">
-          <widget class="QLineEdit" name="actionHookCharacters">
-           <property name="placeholderText">
-            <string>Targeted on characters</string>
+         <item row="12" column="0">
+          <widget class="QCheckBox" name="actionHasHookDoors">
+           <property name="text">
+            <string/>
            </property>
           </widget>
          </item>
-         <item row="10" column="0">
-          <widget class="QCheckBox" name="actionHasHookCharacters">
+         <item row="12" column="2" colspan="2">
+          <widget class="QLineEdit" name="actionHookDoors">
+           <property name="placeholderText">
+            <string>Targeted on doors</string>
+           </property>
+          </widget>
+         </item>
+         <item row="14" column="2" colspan="2">
+          <widget class="QLineEdit" name="actionHookWeapon">
+           <property name="placeholderText">
+            <string>Targeted on a character in combat mode</string>
+           </property>
+          </widget>
+         </item>
+         <item row="13" column="1">
+          <widget class="QLabel" name="label_20">
            <property name="text">
-            <string/>
+            <string>Others</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="1">
+          <widget class="QLabel" name="label_8">
+           <property name="text">
+            <string>Chances of success</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="2" colspan="2">
+          <widget class="QLineEdit" name="actionHookCanUse">
+           <property name="placeholderText">
+            <string>Determines if the object is not out of ammo, broken, etc...</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0" colspan="2">
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>Action Points</string>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="1">
+          <widget class="QLabel" name="label_18">
+           <property name="text">
+            <string>Characers</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2" colspan="2">
+          <widget class="QCheckBox" name="actionCombat">
+           <property name="text">
+            <string>Can only be performed during combat</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="2">
+          <widget class="QLabel" name="label_10">
+           <property name="text">
+            <string>Combat</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="2">
+          <widget class="QLabel" name="label_14">
+           <property name="text">
+            <string>Targeted</string>
            </property>
           </widget>
          </item>
@@ -438,45 +382,108 @@
            </property>
           </widget>
          </item>
-         <item row="11" column="2" colspan="2">
-          <widget class="QLineEdit" name="actionHookDoors">
+         <item row="10" column="2" colspan="2">
+          <widget class="QLineEdit" name="actionHookUse">
            <property name="placeholderText">
-            <string>Targeted on doors</string>
+            <string>Untargeted use</string>
            </property>
           </widget>
          </item>
-         <item row="12" column="2" colspan="2">
-          <widget class="QLineEdit" name="actionHookOthers">
-           <property name="placeholderText">
-            <string>Targeted on any object not handled by other hooks</string>
-           </property>
-          </widget>
-         </item>
-         <item row="12" column="0">
-          <widget class="QCheckBox" name="actionHasHookOthers">
+         <item row="11" column="0">
+          <widget class="QCheckBox" name="actionHasHookCharacters">
            <property name="text">
             <string/>
            </property>
           </widget>
          </item>
-         <item row="13" column="1">
-          <widget class="QLabel" name="label_21">
+         <item row="2" column="0" colspan="2">
+          <widget class="QLabel" name="label_23">
            <property name="text">
-            <string>As a weapon</string>
+            <string>Skill</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="3">
+          <widget class="QSpinBox" name="actionDamageMax">
+           <property name="maximum">
+            <number>999</number>
            </property>
           </widget>
          </item>
          <item row="12" column="1">
-          <widget class="QLabel" name="label_20">
+          <widget class="QLabel" name="label_19">
            <property name="text">
-            <string>Others</string>
+            <string>Doors</string>
            </property>
           </widget>
          </item>
-         <item row="13" column="2" colspan="2">
-          <widget class="QLineEdit" name="actionHookWeapon">
+         <item row="5" column="0" colspan="2">
+          <widget class="QLabel" name="label_13">
+           <property name="text">
+            <string>Damage range</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2" colspan="2">
+          <widget class="QSpinBox" name="actionApCost">
+           <property name="maximum">
+            <number>99</number>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="1">
+          <widget class="QLabel" name="label_22">
+           <property name="text">
+            <string>Can use</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="2" colspan="2">
+          <widget class="QSpinBox" name="actionRange">
+           <property name="maximum">
+            <number>999</number>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="0">
+          <widget class="QCheckBox" name="actionHasHookUse">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2" colspan="2">
+          <widget class="QCheckBox" name="actionTargeted">
+           <property name="text">
+            <string>Needs to be targeted to something</string>
+           </property>
+          </widget>
+         </item>
+         <item row="14" column="0">
+          <widget class="QCheckBox" name="actionHasHookWeapon">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="2">
+          <widget class="QSpinBox" name="actionDamage">
+           <property name="maximum">
+            <number>999</number>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="1">
+          <widget class="QLabel" name="label_15">
+           <property name="text">
+            <string>Use</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="2" colspan="2">
+          <widget class="QLineEdit" name="actionHookHitChances">
            <property name="placeholderText">
-            <string>Targeted on a character in combat mode</string>
+            <string>Optional. Returns a success rate.</string>
            </property>
           </widget>
          </item>
@@ -487,10 +494,17 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0" colspan="2">
-          <widget class="QLabel" name="label_23">
+         <item row="8" column="2" colspan="2">
+          <widget class="QLineEdit" name="actionHookActionPointCost">
+           <property name="placeholderText">
+            <string>Optional. Returns action point cost for a given character.</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="1">
+          <widget class="QLabel" name="label_16">
            <property name="text">
-            <string>Skill</string>
+            <string>Action Point cost</string>
            </property>
           </widget>
          </item>

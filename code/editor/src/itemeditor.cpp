@@ -60,6 +60,7 @@ ItemEditor::ItemEditor(QWidget *parent) :
     connect(ui->actionHookOthers,        SIGNAL(textEdited(QString)), SLOT(UpdateData()));
     connect(ui->actionHookUse,           SIGNAL(textEdited(QString)), SLOT(UpdateData()));
     connect(ui->actionHookWeapon,        SIGNAL(textEdited(QString)), SLOT(UpdateData()));
+    connect(ui->actionHookActionPointCost, SIGNAL(textEdited(QString)), SLOT(UpdateData()));
     connect(ui->selectScript,            SIGNAL(clicked()),           SLOT(SelectScript()));
     connect(ui->selectModel,             SIGNAL(clicked()),           SLOT(SelectModel()));
     connect(ui->selectTexture,           SIGNAL(clicked()),           SLOT(SelectTexture()));
@@ -254,15 +255,16 @@ void ItemEditor::UpdateData(void)
     {
       Data action = item["actions"][actionName.toStdString()];
 
-      action["type"]           = ui->actionSkill->text().toStdString();
-      action["ap-cost"]        = ui->actionApCost->value();
-      action["range"]          = ui->actionRange->value();
-      action["combat"]         = (ui->actionCombat->isChecked()   ? "1" : "0");
-      action["targeted"]       = (ui->actionTargeted->isChecked() ? "1" : "0");
-      action["damage"]         = ui->actionDamage->value();
-      action["damage-max"]     = ui->actionDamageMax->value();
-      action["hookCanUse"]     = ui->actionHookCanUse->text().toStdString();
-      action["hookHitChances"] = ui->actionHookHitChances->text().toStdString();
+      action["type"]             = ui->actionSkill->text().toStdString();
+      action["ap-cost"]          = ui->actionApCost->value();
+      action["range"]            = ui->actionRange->value();
+      action["combat"]           = (ui->actionCombat->isChecked()   ? "1" : "0");
+      action["targeted"]         = (ui->actionTargeted->isChecked() ? "1" : "0");
+      action["damage"]           = ui->actionDamage->value();
+      action["damage-max"]       = ui->actionDamageMax->value();
+      action["hookCanUse"]       = ui->actionHookCanUse->text().toStdString();
+      action["hookHitChances"]   = ui->actionHookHitChances->text().toStdString();
+      action["hookActionPoints"] = ui->actionHookActionPointCost->text().toStdString();
 
       auto hookFunctor = [](Data action, QCheckBox* checkbox, QLineEdit* edit, const std::string& hook)
       {
@@ -348,6 +350,7 @@ void ItemEditor::SelectAction(QString key)
       ui->actionSkill->setText(currentAction["type"].Value().c_str());
       ui->actionHookCanUse->setText(currentAction["hookCanUse"].Value().c_str());
       ui->actionHookHitChances->setText(currentAction["hookHitChances"].Value().c_str());
+      ui->actionHookActionPointCost->setText(currentAction["hookActionPoints"].Value().c_str());
 
       ui->actionHasHookUse->setChecked(!(currentAction["hookUse"].Nil()));
       if (ui->actionHasHookUse->isChecked())

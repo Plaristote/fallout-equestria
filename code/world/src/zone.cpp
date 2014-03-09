@@ -36,9 +36,6 @@ void Zone::Unserialize(World* world, Utils::Packet& packet)
   packet >> destinations;
   packet >> waypointsId;
   
-  auto begin = waypointsId.begin();
-  auto end   = waypointsId.end();
-  
   for (auto it = waypointsId.begin() ; it != waypointsId.end() ; ++it)
   {
     Waypoint* waypoint = world->GetWaypointFromId(*it);
