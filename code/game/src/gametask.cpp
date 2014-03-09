@@ -113,18 +113,11 @@ void GameTask::RunLevel(void)
   {
     Level::Exit  exit      = level->GetExit();
 
-    if (level->IsPersistent())
-    {
-      SaveGame();
-      ExitLevel();
-    }
-    else
-    {
-      ExitLevel();
-      SaveGame();
-    }
+    ExitLevel();
     if (!(exit.ToWorldmap()))
       OpenLevel(exit.level, exit.zone);
+    else
+      SaveGame();
   }
   if (!level && world_map)
     world_map->Show();
@@ -283,6 +276,8 @@ void GameTask::OpenLevel(const std::string& level_name, const std::string& entry
 void GameTask::ExitLevel()
 {
   level->RemovePartyFromLevel(*player_party);
+  if (level->IsPersistent())
+    SaveLevel(level, save_path + "/" + level->GetName() + ".blob");
   quest_manager->Finalize();
   delete level;
   level = 0;

@@ -41,8 +41,8 @@ ItemEditor::ItemEditor(QWidget *parent) :
     connect(ui->itemTexture,             SIGNAL(textEdited(QString)), SLOT(UpdateData()));
     connect(ui->itemScale,               SIGNAL(valueChanged(double)),SLOT(UpdateData()));
     connect(ui->itemScript,              SIGNAL(textEdited(QString)), SLOT(UpdateData()));
-    connect(ui->itemAmmoMaximum,         SIGNAL(textEdited(QString)), SLOT(UpdateData()));
-    connect(ui->itemAmmo,                SIGNAL(valueChanged(int)),   SLOT(UpdateData()));
+    connect(ui->itemAmmoMaximum,         SIGNAL(valueChanged(QString)), SLOT(UpdateData()));
+    connect(ui->itemAmmo,                SIGNAL(textEdited(QString)),  SLOT(UpdateData()));
     connect(ui->actionHookCanUse,        SIGNAL(textEdited(QString)), SLOT(UpdateData()));
     connect(ui->actionHookHitChances,    SIGNAL(textEdited(QString)), SLOT(UpdateData()));
     connect(ui->actionSkill,             SIGNAL(textEdited(QString)), SLOT(UpdateData()));
