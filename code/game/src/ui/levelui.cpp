@@ -128,6 +128,7 @@ InteractMenu*      LevelUi::OpenInteractMenu(InstanceDynamicObject* object)
 {
   InteractMenu* ui_interact_menu = new InteractMenu(window, GetContext(), *object);
 
+  ui_interact_menu->Done.Connect(*this, &LevelUi::CloseRunningUi<UiItInteractMenu>);
   SetUi<UiItInteractMenu>(ui_interact_menu);
   return (ui_interact_menu);
 }

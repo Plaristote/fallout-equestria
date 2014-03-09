@@ -550,7 +550,8 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(itemClass, "bool   Use(Character@, string)",                        asFUNCTION(ScriptApi::Item::Use),                asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(itemClass, "int    GetActionPointCost(Character@, string)",         asFUNCTION(ScriptApi::Item::GetActionPointCost), asCALL_CDECL_OBJFIRST);
 
-
+  engine->RegisterObjectMethod(partyClass, "void   SetName(string)",     asMETHOD(Party,SetName), asCALL_THISCALL);
+  engine->RegisterObjectMethod(partyClass, "string GetName()",           asMETHOD(Party,GetName), asCALL_THISCALL);
   engine->RegisterObjectMethod(partyClass, "void Join(Data)",            asMETHODPR(Party,Join,(Data),void), asCALL_THISCALL);
   engine->RegisterObjectMethod(partyClass, "void Join(Character@)",      asMETHODPR(Party,Join,(ObjectCharacter*),void), asCALL_THISCALL);
   engine->RegisterObjectMethod(partyClass, "void Leave(Character@)",     asMETHODPR(Party,Leave,(ObjectCharacter*),void), asCALL_THISCALL);

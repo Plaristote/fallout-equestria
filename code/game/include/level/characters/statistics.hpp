@@ -33,7 +33,6 @@ protected:
 
   StatController*    controller;
 private:
-  bool               TryToLoadSavedCharacterSheet(void);
   bool               TryToLoadCharacterSheet(void);
   bool               TryToLoadFromFile(const std::string& path);
   bool               TryToLoadFromString(const std::string& json);

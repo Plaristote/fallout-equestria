@@ -8,13 +8,14 @@ extern unsigned int blob_revision;
 /*
  * Serialization
  */
-void DynamicObject::UnSerialize(World* world, Utils::Packet& packet)
+void DynamicObject::Unserialize(Utils::Packet& packet)
 {
-  int  iType;
-  char iLocked;
-  int  iWaypoint;
+  World* world = World::LoadingWorld;
+  int    iType;
+  char   iLocked;
+  int    iWaypoint;
 
-  MapObject::UnSerialize(world, packet);
+  MapObject::Unserialize(packet);
   packet >> iType >> interactions;
   type = (Type)iType;
 

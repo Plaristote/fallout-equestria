@@ -12,7 +12,7 @@ struct World;
 struct MapObject;
 struct DynamicObject;
 
-struct WorldLight
+struct WorldLight : public Utils::Serializable
 {
   enum Type
   {
@@ -36,6 +36,8 @@ struct WorldLight
 
   WorldLight(NodePath parent) : parent(parent), parent_i(0) {}
 
+  WorldLight() : parent_i(0) {}
+  
   void   SetEnabled(bool);
   void   Destroy(void);
 
@@ -106,8 +108,8 @@ struct WorldLight
 
   bool operator==(const std::string& comp) { return (name == comp); }
 
-  void UnSerialize(World*, Utils::Packet& packet);
-  void Serialize(Utils::Packet& packet);
+  void Unserialize(Utils::Packet& packet);
+  void Serialize(Utils::Packet& packet) const;
 
   void ReparentTo(World* world);
   void ReparentTo(DynamicObject* object);

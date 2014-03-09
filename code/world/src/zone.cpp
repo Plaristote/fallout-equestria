@@ -28,8 +28,9 @@ void Zone::Serialize(Utils::Packet& packet) const
   packet << waypointsId;
 }
 
-void Zone::Unserialize(World* world, Utils::Packet& packet)
+void Zone::Unserialize(Utils::Packet& packet)
 {
+  World*    world = World::LoadingWorld;
   list<int> waypointsId;
   
   packet >> name;

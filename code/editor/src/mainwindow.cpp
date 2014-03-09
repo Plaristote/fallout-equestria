@@ -313,12 +313,13 @@ void MainWindow::Paste(Utils::Packet& packet)
    int                   object_count;
    QMap<QString,QString> name_map;
 
+   World::LoadingWorld = world; // Sets a context for unserialized objects to plug into
    packet >> object_count;
    for (int i = 0 ; i < object_count ; ++i)
    {
        MapObject object;
 
-       object.UnSerialize(world, packet);
+       packet >> object;
        object.nodePath.set_collide_mask(CollideMask(ColMask::Object));
 
        QString old_name = QString::fromStdString(object.nodePath.get_name());
@@ -348,6 +349,7 @@ void MainWindow::Paste(Utils::Packet& packet)
    }
    world->UpdateMapTree();
    ui->treeWidget->SetWorld(world);
+   World::LoadingWorld = 0;
 }
 
 void MainWindow::AddCharsheet()

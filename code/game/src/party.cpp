@@ -78,9 +78,9 @@ void Party::Member::SaveCharacter(ObjectCharacter* character)
 void Party::Member::LinkCharacter(ObjectCharacter* character)
 {
   character->ForceStatController(statistics);
+  character->SetMetabolism(0);
   character->SetInventory(inventory);
   character->GetTaskSet().Unserialize(task_set);
-  character->SetMetabolism(0);
 }
 
 void Party::Member::UnlinkCharacter(ObjectCharacter* character)
@@ -101,7 +101,7 @@ void Party::Member::Serialize(Utils::Packet& packet)
   task_set.Serialize(packet);
   packet << statistics_json;
   inventory->SaveInventory(&object);
-  object.Serialize(packet);
+  packet << object;
   metabolism->Serialize(packet);
 }
 
@@ -112,7 +112,7 @@ void Party::Member::Unserialize(Utils::Packet& packet)
   task_set.Clear();
   task_set.Unserialize(packet);
   packet >> statistics_json;
-  object.UnSerialize(0, packet);
+  packet >> object;
   statistics_datatree = DataTree::Factory::StringJSON(statistics_json);
   statistics          = new StatController(statistics_datatree);
   metabolism          = new Metabolism(statistics);
@@ -186,10 +186,14 @@ void Party::Leave(ObjectCharacter* character)
 
 bool Party::IsInParty(ObjectCharacter* compare_to) const
 {
-  auto member = find_if(members.begin(), members.end(), [compare_to](Member* member)
-  { return (member->GetStatController() == compare_to->GetStatController()); });
-  
-  return (member != members.end());
+  if (compare_to)
+  {
+    auto member = find_if(members.begin(), members.end(), [compare_to](Member* member)
+    { return (member->GetStatController() == compare_to->GetStatController()); });
+    
+    return (member != members.end());
+  }
+  return (false);
 }
 
 Party::Member* Party::GetMember(const std::string& name) const

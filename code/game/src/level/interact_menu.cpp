@@ -131,6 +131,7 @@ void InteractMenu::ButtonClicked(Rocket::Core::Event& event)
     {
       _listeners[i]->signal->Emit(_listeners[i]->instance);
       _done = true;
+      Done.Emit();
       break ;
     }
   }

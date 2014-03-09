@@ -84,8 +84,9 @@ void MapObject::SetName(const std::string& name)
 /*
  * Serialization
  */
-void MapObject::UnSerialize(World* world, Utils::Packet& packet)
+void MapObject::Unserialize(Utils::Packet& packet)
 {
+  World* world = World::LoadingWorld;
   float  posX,   posY,   posZ;
   float  rotX,   rotY,   rotZ;
   float  scaleX, scaleY, scaleZ;

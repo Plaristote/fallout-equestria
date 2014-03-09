@@ -6,6 +6,7 @@
 using namespace std;
 
 unsigned int          blob_revision = 7;
+World*                World::LoadingWorld = 0;
 
 World::World(WindowFramework* window)
 {
@@ -169,7 +170,7 @@ void World::FloorResize(int newSize)
   size_t currentSize = floors.size();
 
   floors.resize(newSize);
-  for (size_t it = currentSize ; it < newSize ; ++it)
+  for (int it = currentSize ; it < newSize ; ++it)
   {
     std::stringstream stream;
 
@@ -566,6 +567,7 @@ void           World::SetDynamicObjectsVisible(bool v)
  */
 void           World::UnSerialize(Utils::Packet& packet)
 {
+  LoadingWorld = this;
   if (blob_revision >= 1)
     packet >> blob_revision;
   cout << "Blob revision is  " << blob_revision << endl;
@@ -607,7 +609,7 @@ void           World::UnSerialize(Utils::Packet& packet)
       MapObject     object;
       unsigned char floor;
 
-      object.UnSerialize(this, packet);
+      packet >> object;
       floor        = object.floor;
       object.floor = (floor == 0 ? 1 : 0); // This has to be done, or MapObjectChangeFloor won't execute
       MapObjectChangeFloor(object, floor);
@@ -637,7 +639,7 @@ void           World::UnSerialize(Utils::Packet& packet)
       DynamicObject object;
       unsigned char floor;
 
-      object.UnSerialize(this, packet);
+      packet >> object;
       floor        = object.floor;
       object.floor = (floor == 0 ? 1 : 0);
       DynamicObjectChangeFloor(object, floor);
@@ -648,6 +650,9 @@ void           World::UnSerialize(Utils::Packet& packet)
 
     cout << "Unserialize lights" << endl;
   // Lights
+  if (blob_revision >= 7)
+    packet >> lights;
+  else
   {
     int size;
 
@@ -656,25 +661,14 @@ void           World::UnSerialize(Utils::Packet& packet)
     {
       WorldLight light(window->get_render());
 
-      light.UnSerialize(this, packet);
+      light.Unserialize(packet);
       lights.push_back(light);
     }
   }
 
   cout << "Unserialize zones" << endl;
-  if (blob_revision > 7)
-  {
-    int size;
-    
-    packet >> size;
-    for (int it = 0 ; it < size ; ++it)
-    {
-      Zone           zone;
-      
-      zone.Unserialize(this, packet);
-      zones.push_back(zone);
-    }
-  }
+  if (blob_revision >= 7)
+    packet >> zones;
   else // Revisions < 7 used EntryZone and ExitZone types
   {
     // ExitZones
@@ -732,7 +726,7 @@ void           World::UnSerialize(Utils::Packet& packet)
     }
   } // End compatibility with Revision < 7
 
-    cout << "Unserialize sunlight" << endl;
+  cout << "Unserialize sunlight" << endl;
   {
     char serialize_sunlight_enabled;
 
@@ -769,6 +763,7 @@ void           World::UnSerialize(Utils::Packet& packet)
 #else
   for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light, ColMask::Object | ColMask::DynObject); });
 #endif
+  LoadingWorld = 0;
 }
 
 void           World::UpdateMapTree(void)
@@ -853,7 +848,7 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
   }
 # endif
 
-  packet << (unsigned int)6; // #blob revision
+  packet << (unsigned int)7; // #blob revision
 
   // Waypoints
   {
@@ -916,30 +911,10 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
   }
 
   // WorldLights
-  {
-    int size = lights.size();
-
-    packet << size;
-    WorldLights::iterator it  = lights.begin();
-    WorldLights::iterator end = lights.end();
-
-    for (; it != end ; ++it) { (*it).Serialize(packet); }
-  }
+  packet << lights;
 
   // Zones
-  {
-    Zones::iterator it   = zones.begin();
-    Zones::iterator end  = zones.end();
-    int             size = zones.size();
-    
-    packet << size;
-    for (; it != end ; ++it)
-    {
-      Zone& zone = *it;
-      
-      zone.Serialize(packet);
-    }
-  }
+  packet << zones;
 
   {
     char serialize_sunlight_enabled = sunlight_enabled;

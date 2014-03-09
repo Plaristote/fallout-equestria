@@ -152,10 +152,15 @@ bool GameTask::SaveGame()
 
 void GameTask::Cleanup(void)
 {
-  if (player_party)  delete player_party;
   if (quest_manager) delete quest_manager;
-  if (level)         delete level;
+  if (level)
+  {
+    if (player_party)
+      level->RemovePartyFromLevel(*player_party);
+    delete level;
+  }
   if (world_map)     delete world_map;
+  if (player_party)  delete player_party;
   time_manager.ClearTasks(0);
 }
 

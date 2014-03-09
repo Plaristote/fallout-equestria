@@ -63,7 +63,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   if (world->sunlight_enabled)
     InitializeSun();
 
-  LPoint3 upperLeft, upperRight, bottomLeft;
+  LPoint3 upperLeft(0,0,0), upperRight(0,0,0), bottomLeft(0,0,0);
   cout << "Level Loading Step #7" << endl;
   world->GetWaypointLimits(0, upperRight, upperLeft, bottomLeft);
   camera.SetLimits((bottomLeft.get_x() - 50) * 1.25, (bottomLeft.get_y() - 50) * 1.25, (upperRight.get_x() + 50) * 1.25, (upperRight.get_y() + 50) * 1.25);
@@ -156,7 +156,8 @@ Level::~Level()
   {
     AlertUi::NewAlert.Emit(std::string("Script crashed during Level destruction: ") + exception.what());
   }
-  
+
+  obs.DisconnectAll();
   player.UnsetPlayer();
   
   for_each(parties.begin(), parties.end(), [](Party* party)
@@ -169,13 +170,12 @@ Level::~Level()
   window->get_render().clear_light();
 
   time_manager.ClearTasks(TASK_LVL_CITY);
-  obs.DisconnectAll();
   projectiles.CleanUp();
   ForEach(objects,     [](InstanceDynamicObject* obj) { delete obj;        });
   ForEach(parties,     [](Party* party)               { delete party;      });
-  zones.UnregisterAllZones();
   CurrentLevel = 0;
   if (sunlight) delete sunlight;
+  zones.UnregisterAllZones();
   if (world)    delete world;
 }
 
@@ -467,6 +467,8 @@ AsyncTask::DoneStatus Level::do_task(void)
   if (use_fog_of_war == false)
     RefreshCharactersVisibility();
 
+  if (GetPlayer() == 0)
+    return (AsyncTask::DS_cont);
   camera.SlideToHeight(GetPlayer()->GetDynamicObject()->nodePath.get_z());
   camera.Run(elapsedTime);  
 

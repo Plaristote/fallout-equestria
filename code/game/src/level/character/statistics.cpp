@@ -8,7 +8,7 @@ CharacterStatistics::CharacterStatistics(Level* level, DynamicObject* object): U
 {
   character_sheet_name = object->charsheet;
   cout << "Trying to load " << object->charsheet << endl;
-  if (!(TryToLoadSavedCharacterSheet() || TryToLoadCharacterSheet()))
+  if (character_sheet_name != "" || !(TryToLoadCharacterSheet()))
     GenerateCharacterSheet();
   if (controller)
     metabolism = new Metabolism(controller);
@@ -16,16 +16,7 @@ CharacterStatistics::CharacterStatistics(Level* level, DynamicObject* object): U
 
 CharacterStatistics::~CharacterStatistics(void)
 {
-  if (metabolism)
-    delete metabolism;
   Cleanup();
-}
-
-bool CharacterStatistics::TryToLoadSavedCharacterSheet(void)
-{
-  string savepath = OptionsManager::Get()["savepath"].Value();
-
-  return (TryToLoadFromFile(savepath + "/" + character_sheet_name + ".json"));
 }
 
 bool CharacterStatistics::TryToLoadCharacterSheet(void)
@@ -38,6 +29,7 @@ bool CharacterStatistics::TryToLoadFromFile(const string& path)
   data_tree = DataTree::Factory::JSON(path);
   if (data_tree)
   {
+    cout << "Loading stat sheet from file for character " << GetDynamicObject()->name << endl;
     controller = new StatController(data_tree);
     return (true);
   }
@@ -49,6 +41,7 @@ bool CharacterStatistics::TryToLoadFromString(const string& json)
   data_tree = DataTree::Factory::JSON(json);
   if (data_tree)
   {
+    cout << "Loading statsheet from string for character " << GetDynamicObject()->name << endl;
     controller = new StatController(data_tree);
     return (true);
   }
@@ -57,18 +50,35 @@ bool CharacterStatistics::TryToLoadFromString(const string& json)
 
 void CharacterStatistics::GenerateCharacterSheet(void)
 {
+  cout << "Generating stat sheet for character " << GetDynamicObject()->name << endl;
   data_tree  = new DataTree;
   controller = new StatController(data_tree);
+  {
+    Data default_data(data_tree);
+
+    default_data["Name"]                        = GetDynamicObject()->name;
+    default_data["Special"]["STR"]              = 5;
+    default_data["Special"]["PER"]              = 5;
+    default_data["Special"]["END"]              = 5;
+    default_data["Special"]["CHA"]              = 5;
+    default_data["Special"]["INT"]              = 5;
+    default_data["Special"]["AGI"]              = 5;
+    default_data["Special"]["LUC"]              = 5;
+    default_data["Statistics"]["Hit Points"]    = 15;
+    default_data["Statistics"]["Action Points"] = 5;
+  }
 }
 
 void CharacterStatistics::Cleanup(void)
 {
   if (data_tree != 0)
   {
+    if (metabolism) delete metabolism;
     delete controller;
     delete data_tree;
     data_tree  = 0;
     controller = 0;
+    metabolism = 0;
   }
 }
 
@@ -83,12 +93,12 @@ void CharacterStatistics::ForceStatController(StatController* controller)
 
 short CharacterStatistics::GetMaxHitPoints(void) const
 {
-  return (controller->GetData()["Statistics"]["Hit Points"]);
+  return (controller->GetData()["Statistics"]["Hit Points"].Or(0));
 }
 
 short CharacterStatistics::GetHitPoints(void) const
 {
-  return (controller->GetData()["Variables"]["Hit Points"]);
+  return (controller->GetData()["Variables"]["Hit Points"].Or(GetMaxHitPoints()));
 }
 
 void CharacterStatistics::SetHitPoints(short value)
@@ -122,13 +132,16 @@ void CharacterStatistics::Unserialize(Utils::Packet& packet)
   char        has_metabolism;
 
   packet >> character_sheet_name >> json >> has_metabolism;
-  if (has_metabolism)
-    metabolism->Unserialize(packet);
-  Pathfinding::User::Unserialize(packet);
   {
     Cleanup();
     if (!(TryToLoadFromString(json)))
       GenerateCharacterSheet();
     RefreshStatistics();
   }
+  if (has_metabolism)
+  {
+    metabolism = new Metabolism(controller);
+    metabolism->Unserialize(packet);
+  }
+  Pathfinding::User::Unserialize(packet);
 }

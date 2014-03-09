@@ -3,7 +3,7 @@
 
 #include "waypoint.hpp"
 
-struct Zone
+struct Zone : public Utils::Serializable
 {
   bool operator==(const std::string& comp)     const { return (name == comp); }
 
@@ -15,7 +15,7 @@ struct Zone
   void DelDestination(const std::string& name)       { destinations.erase(std::find(destinations.begin(), destinations.end(), name));            }
   
   void Serialize(Utils::Packet& packet) const;
-  void Unserialize(World* world, Utils::Packet& packet);
+  void Unserialize(Utils::Packet& packet);
 
   std::string              name;
   std::list<Waypoint*>     waypoints;

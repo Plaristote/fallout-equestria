@@ -51,8 +51,11 @@ void UiEquipMode::Initialize(void)
     {
       unsigned short       mode     = variable->Get<unsigned short>();
 
-      EquipModeSelected.Emit(mode);
-      Closed.Emit();
+      if (variable->GetInto<unsigned short>(mode))
+      {
+        EquipModeSelected.Emit(mode);
+        Closed.Emit();
+      }
     }
   });
 }

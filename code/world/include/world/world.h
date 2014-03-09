@@ -47,6 +47,7 @@ LPoint3f operator*(LPoint3f,LPoint3f);
 
 struct World
 {
+    static World*    LoadingWorld;
 #ifndef GAME_EDITOR
     typedef std::vector<Waypoint>    Waypoints;
 #else

@@ -106,14 +106,16 @@ void WorldLight::Destroy(void)
 /*
  * Serialization
  */
-void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
+void WorldLight::Unserialize(Utils::Packet& packet)
 {
+  World*    world = World::LoadingWorld;
   float     r, g, b, a;
   float     pos_x, pos_y, pos_z;
   float     hpr_x, hpr_y, hpr_z;
   string    parent_name;
   char      tmp_enabled, _type, _ptype;
 
+  parent = world->window->get_render();
   packet >> name >> tmp_enabled >> zoneSize;
   packet >> _type >> _ptype;
   cout << "[World] Loading light " << name << endl;
@@ -159,7 +161,7 @@ void WorldLight::UnSerialize(World* world, Utils::Packet& packet)
 #endif
 }
 
-void WorldLight::Serialize(Utils::Packet& packet)
+void WorldLight::Serialize(Utils::Packet& packet) const
 {
   LColor     color  = light->get_color();
   char       _type  = type;

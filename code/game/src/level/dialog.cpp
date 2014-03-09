@@ -108,10 +108,13 @@ DialogController::DialogController(WindowFramework* window, Rocket::Core::Contex
 {
   _character = character;
   AnswerSelected.EventReceived.Connect(*this, &DialogController::ExecuteAnswer);
-  _script.asDefineMethod("HookInit", "string HookInit()");
+  _script.asDefineMethod("HookInit", "string HookInit(Character@)");
   try
   {
-    string npc_line = *(string*)(_script.Call("HookInit"));
+    string                              npc_line;
+    AngelScript::Type<ObjectCharacter*> self(character);
+
+    npc_line = *(string*)(_script.Call("HookInit", 1, &self));
 
     SetCurrentNode(npc_line);
     BarterOpened.EventReceived.Connect(*this, &DialogController::OpenBarter);

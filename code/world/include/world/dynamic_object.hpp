@@ -10,7 +10,7 @@ struct DynamicObject : public MapObject
   {
   }
 
-  void UnSerialize(World*, Utils::Packet& packet);
+  void Unserialize(Utils::Packet& packet);
   void Serialize(Utils::Packet& packet) const;
 
   enum Type

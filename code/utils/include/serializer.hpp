@@ -128,7 +128,12 @@ public:
     T*	    copy;
 
     if (TypeToCode<T>::TypeCode == 0)
-      throw SerializeUnknownType(this);
+    {
+      if (std::is_base_of<Utils::Serializable, T>::value)
+        return (this->operator<< <Utils::Serializable>((const Utils::Serializable&)i));
+      else
+        throw SerializeUnknownType(this);
+    }
     newSize += sizeof(T) + sizeof(char);
     realloc(newSize);
     typeCode = reinterpret_cast<char*>((long)buffer + sizeBuffer);
@@ -140,13 +145,25 @@ public:
     return (*this);
   }
 
-  template<typename T> Packet&	operator<<(std::list<T>& tehList)
+  template<typename T> Packet&	operator<<(const std::list<T>& tehList)
   {
     SerializeArray(tehList);
     return (*this);
   }
 
-  template<typename T> Packet&	operator<<(std::vector<T>& tehList)
+  template<typename T> Packet&	operator<<(const std::vector<T>& tehList)
+  {
+    SerializeArray(tehList);
+    return (*this);
+  }
+  
+  template<typename T> Packet&  operator<<(std::list<T>& tehList)
+  {
+    SerializeArray(tehList);
+    return (*this);
+  }
+
+  template<typename T> Packet&  operator<<(std::vector<T>& tehList)
   {
     SerializeArray(tehList);
     return (*this);
@@ -218,8 +235,8 @@ public:
 private:
   template<typename T> void	SerializeArray(T& tehList)
   {
-    typename T::iterator current = tehList.begin();
-    typename T::iterator end     = tehList.end();
+    typename T::const_iterator current = tehList.begin();
+    typename T::const_iterator end     = tehList.end();
     int                  newSize = sizeBuffer;
     char*                typeCode;
     std::int32_t*        sizeArray;
@@ -268,7 +285,7 @@ private:
   struct Packet::SelectUnserializer<false, true> { template<typename T> static void Func(Utils::Packet& packet, T& v) { v.Unserialize(packet); } };
 
   template<>
-  struct Packet::SelectUnserializer<false, false> { template<typename T> static void Func(Utils::Packet& packet, T& v) { std::cout << "[Boots][Serializer] Trying to unserialize an unknown type" << std::endl; } };
+  struct Packet::SelectUnserializer<false, false> { template<typename T> static void Func(Utils::Packet& packet, T& v) { throw UnserializeUnknownType(&packet, TypeToCode<T>::TypeCode, 0); } };
 
   template<> Packet& Packet::operator<< <std::string>(const std::string& str);
   template<> Packet& Packet::operator<< <std::string>(std::string& str);

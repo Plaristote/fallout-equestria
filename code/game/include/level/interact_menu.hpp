@@ -9,6 +9,8 @@ class InteractMenu : public UiBase
 public:
   InteractMenu(WindowFramework* window, Rocket::Core::Context* context, InstanceDynamicObject& object);
   ~InteractMenu();
+
+  Sync::Signal<void> Done;
 private:
   void ButtonClicked(Rocket::Core::Event&);
   void ButtonHovered(Rocket::Core::Event&);

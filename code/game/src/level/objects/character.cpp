@@ -84,19 +84,13 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
   // Script
   if (object->script == "")
     object->script = "general_pony";
+
   {
     string prefixPath  = "scripts/ai/";
 
     script = new AngelScript::Object(prefixPath + object->script + ".as");
     skill_target.Initialize(prefixPath + object->script + ".as", script->GetContext());
     SetupScript(script);
-
-    const char* default_weapons[] = { "DefaultWeapon1", "DefaultWeapon2" };
-    for (unsigned short i = 0 ; i < 2 ; ++i)
-    {
-      if (script->IsDefined(default_weapons[i]))
-        defEquiped[i] = *(string*)(script->Call(default_weapons[i]));
-    }
   }
   
   // Inventory
@@ -107,7 +101,14 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
   defEquiped[1]    = DEFAULT_WEAPON_2;
   active_object    = 0;
   active_object_it = 0;
-  
+
+  const char* default_weapons[] = { "DefaultWeapon1", "DefaultWeapon2" };
+  for (unsigned short i = 0 ; i < 2 ; ++i)
+  {
+    if (script->IsDefined(default_weapons[i]))
+      defEquiped[i] = *(string*)(script->Call(default_weapons[i]));
+  }
+
   for (int i = 0 ; i < 2 ; ++i)
   {
     if (items[defEquiped[i]].Nil())
@@ -115,6 +116,7 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
     _equiped[i].default_ = new InventoryObject(items[defEquiped[i]]);
     _equiped[i].equiped  = _equiped[i].default_;
     _equiped[i].equiped->SetEquiped(this, true);
+    _equiped[i].mode     = EquipedMouth;
     _inventory->AddObject(_equiped[i].equiped);
   }
   

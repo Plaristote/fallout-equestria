@@ -9,7 +9,7 @@
 struct Waypoint;
 struct World;
 
-struct MapObject
+struct MapObject : public Utils::Serializable
 {
   typedef std::vector<Waypoint*> Waypoints;
 
@@ -37,9 +37,9 @@ struct MapObject
   void          SetFloor(unsigned char floor);
   void          ReparentTo(MapObject* object);
 
-  void          UnSerialize(World* world, Utils::Packet& packet);
   void          UnserializeWaypoints(World*, Utils::Packet& packet);
-  void          Serialize(Utils::Packet& packet) const;
+  virtual void  Unserialize(Utils::Packet& packet);
+  virtual void  Serialize(Utils::Packet& packet) const;
   static void   InitializeTree(World* world);
   void          InitializeCollider(Collider type, LPoint3f position, LPoint3f scale, LPoint3f hpr);
 };
