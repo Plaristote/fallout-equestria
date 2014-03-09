@@ -1994,7 +1994,6 @@ void MainWindow::SaveMap()
 
         world->Serialize(packet, [self](const std::string& label, float percentage)
         { self->CallbackUpdateProgressBar(label, percentage); });
-        packet.PrintContent();
         file.write(packet.raw(), packet.size());
         file.close();
       }
