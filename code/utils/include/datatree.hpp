@@ -80,14 +80,14 @@ public:
   template<typename T>
   T Or(const T& var) const
   {
-    return (Nil() ? var : (T)(*this));
+    return (Nil() ? var : ConvertTo<T>());
   }
 
   // WARNING Does not work with MSVC
   template<typename T>
   T operator||(const T& var)
   {
-    return (Nil() ? var : (T)(*this));
+    return (Or(var));
   }
 
   template<typename T>
@@ -101,15 +101,21 @@ public:
   }
 
   template<typename T>
-  operator T() const
+  T ConvertTo() const
   {
     std::stringstream stream;
     T                 out;
-
+    
     if (_data)
       stream << _data->value;
     stream >> out;
     return (out);
+  }
+
+  template<typename T>
+  operator T() const
+  {
+    return (ConvertTo<T>());
   }
 
   /*! \brief Sets the DataBranch to nil, thus removing it cleanly when Data is destroyed */

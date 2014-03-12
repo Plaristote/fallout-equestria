@@ -60,8 +60,10 @@ void Actions::UseWeaponOn::TargetDied()
 
   if (controller)
   {
+    string        race       = stats["Race"].Or(string("Unknown"));
+    
     controller->AddExperience(xp_reward || DEFAULT_XP_REWARD);
-    controller->AddKill(stats["Race"].Value());
+    controller->AddKill(race);
   }
   enemy_died = true;
 }

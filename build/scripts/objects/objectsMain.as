@@ -111,6 +111,8 @@ float ComputeBaseDamage(float min_damage, float max_damage)
 {
   int rounded_damage_range = ceil(max_damage - min_damage);
 
+  if (rounded_damage_range <= 0)
+    rounded_damage_range = 1;
   return (min_damage + (Random() % rounded_damage_range));
 }
 
@@ -118,9 +120,8 @@ float ComputeDamage(Item@ item, string action, Character@ user, Character@ targe
 {
   Data  statistics = user.GetStatistics();
   float min_damage, max_damage;
-  float damage;
+  float damage     = 0;
 
-  Cout("Bite");
   if (@item == null)
   {
     max_damage = statistics["Statistics"]["Melee Damage"].AsInt();
@@ -133,14 +134,10 @@ float ComputeDamage(Item@ item, string action, Character@ user, Character@ targe
     max_damage = item_data["damage-max"].AsInt();
     min_damage = item_data["damage"].AsInt();
   }
-  Cout("Bite2");
   damage = ComputeBaseDamage(min_damage, max_damage);
-  Cout("Bite3");
   damage = ComputeDamageResistance(item, action, target, damage);
-  Cout("Bite4");
   if (ComputeIfCritical(user, critical_roll))
     damage = ComputeCriticalDamage(damage, critical_roll);
-  Cout("Bite5");
   return (damage);
 }
 

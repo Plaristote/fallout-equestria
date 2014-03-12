@@ -313,7 +313,8 @@ void MapTreeWidget::ProbeWorld(const std::string& parent_name, QTreeWidgetItem* 
   {
     if (object.parent == parent_name)
     {
-      std::string      name = object.nodePath.get_name();
+
+      std::string      name = object.name;
       QTreeWidgetItem* new_item;
 
       if (parent != 0)

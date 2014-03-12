@@ -111,6 +111,7 @@ void StatController::RunMetabolism(void)
 
 void StatController::AddKill(const string& race)
 {
+  if (race == "")
   _model.AddKill(race);
   if (_view)
     _view->SetFieldValue("Kills", race, _model.GetKills(race));

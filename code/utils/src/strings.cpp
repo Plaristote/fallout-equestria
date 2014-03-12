@@ -40,7 +40,7 @@ string merge_strings(const list<string>& array, char c = ' ')
 
 string str_strip(const string& str)
 {
-  unsigned short w_begin, w_end;
+  unsigned short w_begin = 0, w_end = 0;
   bool           got_begin = false;
 
   for (unsigned short i = 0 ; i < str.size() ; ++i)
