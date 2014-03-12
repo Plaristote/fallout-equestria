@@ -28,6 +28,7 @@ namespace Pathfinding
     virtual void              ProcessCollisions(void);
     void                      UnprocessCollisions(void);
     virtual Pathfinding::Path GetPathTowardsObject(Pathfinding::Collider* character);
+    virtual bool              CanGoThrough(Collider*)        const { return (!HasOccupiedWaypoint()); }
     virtual bool              HasOccupiedWaypoint(void)      const { return (waypoint_occupied != 0); }
     unsigned int              GetOccupiedWaypointAsInt(void) const { return (waypoint_occupied ? waypoint_occupied->id : 0);  }
     Waypoint*                 GetOccupiedWaypoint(void)      const { return (waypoint_occupied);      }

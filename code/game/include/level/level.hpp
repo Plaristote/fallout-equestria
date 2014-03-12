@@ -143,6 +143,7 @@ public:
   void               SetName(const std::string& name) { level_name = name;   }
   const std::string& GetName(void) const              { return (level_name); }
   bool               IsWaypointOccupied(unsigned int id) const;
+  bool               CanGoThroughWaypoint(InstanceDynamicObject* object, unsigned int id) const;
   ISampleInstance*   PlaySound(const std::string& name);
 
   void               InsertProjectile(Projectile* projectile) { projectiles.push_back(projectile); }

@@ -28,6 +28,7 @@ public:
   ~ObjectDoor();
 
   bool               HasOccupiedWaypoint(void) const;
+  bool               CanGoThrough(InstanceDynamicObject*) const;
   
   void               ProcessCollisions(void);
   void               UnprocessCollision(void);
@@ -40,7 +41,6 @@ public:
   
 private:
   void               InitializePassageWay(void);
-  bool               CanGoThrough(InstanceDynamicObject*);
   void               GoingThrough(InstanceDynamicObject*);
 
   Zones::PassageWay* passage_way;

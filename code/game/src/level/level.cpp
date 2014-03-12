@@ -571,6 +571,24 @@ void                   Level::ProcessAllCollisions(void)
   ForEach(characters, [](ObjectCharacter*       object) { object->ProcessCollisions(); });
 }
 
+bool Level::CanGoThroughWaypoint(InstanceDynamicObject* object, unsigned int id) const
+{
+  InstanceObjects::const_iterator it_object;
+  Characters::const_iterator      it_character;
+
+  for (it_object = objects.begin() ; it_object != objects.end() ; ++it_object)
+  {
+    if (*it_object != object    && id == ((*it_object)->GetOccupiedWaypointAsInt())    && !(*it_object)->CanGoThrough(object))
+      return (false);
+  }
+  for (it_character = characters.begin() ; it_character != characters.end() ; ++it_character)
+  {
+    if (*it_character == object && id == ((*it_character)->GetOccupiedWaypointAsInt()) && !(*it_character)->CanGoThrough(object))
+      return (false);
+  }
+  return (true);
+}
+
 bool Level::IsWaypointOccupied(unsigned int id) const
 {
   InstanceObjects::const_iterator it_object;
@@ -579,7 +597,9 @@ bool Level::IsWaypointOccupied(unsigned int id) const
   for (it_object = objects.begin() ; it_object != objects.end() ; ++it_object)
   {
     if ((*it_object)->HasOccupiedWaypoint() && id == ((*it_object)->GetOccupiedWaypointAsInt()))
+    {
       return (true);
+    }
   }
   for (it_character = characters.begin() ; it_character != characters.end() ; ++it_character)
   {

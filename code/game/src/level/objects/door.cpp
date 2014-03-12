@@ -72,12 +72,19 @@ void ObjectDoor::InitializePassageWay(void)
   passage_way->ObjectGoingThrough.Connect(*this, &ObjectDoor::GoingThrough);
 }
 
-bool ObjectDoor::CanGoThrough(InstanceDynamicObject* object)
+bool ObjectDoor::CanGoThrough(InstanceDynamicObject* object) const
 {
   if (collision_enabled)
   {
     if (_closed)
-      return (object != _level->GetPlayer());
+    {
+      if (object == _level->GetPlayer())
+        return (false);
+      else
+      {
+        return (_object->locked);
+      }
+    }
   }
   return (true);
 }

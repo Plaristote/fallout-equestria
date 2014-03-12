@@ -66,7 +66,7 @@ namespace Zones
     }
 
     Observer*                InitializeObserver(Waypoint*);
-
+    Observer*                FindObserver(Waypoint* waypoint) const;
     Level&                   level;
     std::vector<Controller*> zones;
     std::vector<Observer*>   observers;
