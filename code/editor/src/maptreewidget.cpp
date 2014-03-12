@@ -274,9 +274,9 @@ void MapTreeWidget::DelItem(QString name)
 
           for (; it != world->objects.end() ; ++it)
           {
-            if (it->parent == object->nodePath.get_name())
+            if (it->parent == object->name)
             {
-              auto widget = map.find(QString::fromStdString(it->nodePath.get_name()));
+              auto widget = map.find(QString::fromStdString(it->name));
 
               if (widget != map.end())
                 ReparentTo(*widget, parent_widget == map.end() ? nullptr : *parent_widget);
@@ -311,9 +311,8 @@ void MapTreeWidget::ProbeWorld(const std::string& parent_name, QTreeWidgetItem* 
 
   std::function<void(MapObject&)> functor = [this, parent_name, parent, &type](MapObject& object)
   {
-    if (object.parent == parent_name)
+    if (!object.nodePath.is_empty() && object.parent == parent_name)
     {
-
       std::string      name = object.name;
       QTreeWidgetItem* new_item;
 
@@ -335,7 +334,7 @@ void MapTreeWidget::ProbeWorld(const std::string& parent_name, QTreeWidgetItem* 
   std::for_each(world->lights.begin(), world->lights.end(), [this, parent_name, parent](WorldLight& light)
   {
     if ((light.Parent() == 0 && parent_name == "") ||
-        (light.Parent() != 0 && light.Parent()->nodePath.get_name() == parent_name))
+        (light.Parent() != 0 && light.Parent()->name == parent_name))
     {
       QTreeWidgetItem* new_item;
 

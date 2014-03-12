@@ -116,7 +116,8 @@ void MapObject::Unserialize(Utils::Packet& packet)
         if (texture)
           render.set_texture(texture);
       }
-      render.set_name(name);
+      render.set_name("render-" + name);
+      nodePath.set_name(name);
       nodePath.set_hpr(rotX, rotY, rotZ);
       nodePath.set_scale(scaleX, scaleY, scaleZ);
       nodePath.set_pos(posX, posY, posZ);
