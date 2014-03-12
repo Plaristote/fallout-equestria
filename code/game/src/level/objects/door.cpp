@@ -21,6 +21,12 @@ ObjectDoor::~ObjectDoor()
   }
 }
 
+bool ObjectDoor::HasOccupiedWaypoint(void) const
+{
+  return (collision_enabled && _closed);
+}
+
+
 void ObjectDoor::ProcessCollisions(void)
 {
   collision_enabled = true;
@@ -44,6 +50,7 @@ void ObjectDoor::InitializePassageWay(void)
     {
       to_observe.push_back(arc.to);
     });
+    to_observe.push_back(waypoint_occupied);
   }
 
   // From disconnected list
@@ -58,6 +65,8 @@ void ObjectDoor::InitializePassageWay(void)
     if (find(to_observe.begin(), to_observe.end(), waypoint_to)   == to_observe.end())
       to_observe.push_back(waypoint_to);
   });
+  cout << "ObjectDoor observing " << to_observe.size() << " waypoints" << endl;
+  for_each(to_observe.begin(), to_observe.end(), [this](Waypoint* wp) { wp->nodePath.show(); });
   passage_way = zone_manager.RegisterPassageway(to_observe);
   passage_way->CanGoThrough = [this](InstanceDynamicObject* object) -> bool { return (CanGoThrough(object)); };
   passage_way->ObjectGoingThrough.Connect(*this, &ObjectDoor::GoingThrough);
@@ -86,7 +95,7 @@ void ObjectDoor::SetOpened(bool set_open)
   _closed = !set_open;
 }
 
-void ObjectDoor::CallbackActionUse(InstanceDynamicObject* object)
+void ObjectDoor::ActionUse(InstanceDynamicObject* object)
 {
   if (!IsLocked())
   {

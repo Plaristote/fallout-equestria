@@ -29,7 +29,7 @@ void Zones::Manager::RegisterZone(Zone& zone)
 
   zones.push_back(controller);  
   controller->SetManager(this);
-  InitializeZoneObservers(*controller);
+  InitializeObservers(*controller, controller->zone.waypoints);
 }
 
 Zones::PassageWay* Zones::Manager::RegisterPassageway(const std::vector<Waypoint*>& waypoints)
@@ -39,7 +39,7 @@ Zones::PassageWay* Zones::Manager::RegisterPassageway(const std::vector<Waypoint
   passage_way->waypoints          = waypoints;
   passage_way->CanGoThrough       = [](InstanceDynamicObject*) -> bool { return (true); };
   passage_ways.push_back(passage_way);
-  InitializePassagewayObservers(*passage_way);
+  InitializeObservers(*passage_way, passage_way->waypoints);
   return (passage_way);
 }
 
@@ -67,32 +67,6 @@ Zones::Observer* Zones::Manager::InitializeObserver(Waypoint* waypoint)
     observers.push_back(observer);
   }
   return (observer);
-}
-
-void Zones::Manager::InitializeZoneObservers(Controller& entry)
-{
-  auto     it     = entry.zone.waypoints.begin();
-  auto     end    = entry.zone.waypoints.end();
-
-  for (; it != end ; ++it)
-  {
-    Observer* observer = InitializeObserver(*it);
-
-    observer->AddObserver(&entry);
-  }
-}
-
-void Zones::Manager::InitializePassagewayObservers(PassageWay& entry)
-{
-  auto it  = entry.waypoints.begin();
-  auto end = entry.waypoints.end();
-  
-  for (; it != end ; ++it)
-  {
-    Observer* observer = InitializeObserver(*it);
-
-    observer->AddObserver(&entry);
-  }
 }
 
 void Zones::Manager::UnregisterZone(const string& name)

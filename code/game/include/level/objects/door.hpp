@@ -27,7 +27,7 @@ public:
   ObjectDoor(Level* level, DynamicObject* object);  
   ~ObjectDoor();
 
-  bool               HasOccupiedWaypoint(void) const { return (false);        }
+  bool               HasOccupiedWaypoint(void) const;
   
   void               ProcessCollisions(void);
   void               UnprocessCollision(void);
@@ -36,7 +36,7 @@ public:
   void               Close(void) { SetOpened(false); }
   void               SetOpened(bool set_open);
 
-  void               CallbackActionUse(InstanceDynamicObject* object);
+  void               ActionUse(InstanceDynamicObject* object);
   
 private:
   void               InitializePassageWay(void);

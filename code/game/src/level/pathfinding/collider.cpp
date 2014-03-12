@@ -39,6 +39,9 @@ Path Collider::GetPathTowardsObject(Collider* character)
     ProcessCollisions();
     character->ProcessCollisions();
   }
+  else
+    cout << "No waypoint"<<endl;
+  cout << path.ContainsValidPath() << " VZLID PZTH" << endl;
   return (path);
 }
 

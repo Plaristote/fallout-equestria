@@ -51,10 +51,21 @@ namespace Zones
     void                     InsertObjectInZone(InstanceDynamicObject*, const std::string&);
 
   private:
-    void                     InitializeZoneObservers(Controller&);
-    void                     InitializePassagewayObservers(PassageWay&);
+    template<typename CLIENT, typename ARRAY>
+    void                     InitializeObservers(CLIENT& entry, ARRAY& waypoints)
+    {
+      auto it  = waypoints.begin();
+      auto end = waypoints.end();
+      
+      for (; it != end ; ++it)
+      {
+        Observer* observer = InitializeObserver(*it);
+
+        observer->AddObserver(&entry);
+      }
+    }
+
     Observer*                InitializeObserver(Waypoint*);
-    Observer*                FindObserver(Waypoint* waypoint) const;
 
     Level&                   level;
     std::vector<Controller*> zones;

@@ -206,7 +206,7 @@ void Pathfinding::User::RunNextMovement(float elapsedTime)
 
   // If the next waypoint is already occupied by someone else,
   // do not swap waypoints: instead, find another path.
-  if (GetOccupiedWaypointAsInt() != wp->id && _level->IsWaypointOccupied(wp->id))
+  if (GetOccupiedWaypointAsInt() != wp->id && _level->GetZoneManager().CanGoThrough(this, wp))
   {
     cout << "Waypoint occupied. Not by me." << endl;
     FindNewWayOrAbort();
