@@ -7,8 +7,8 @@ using namespace Interactions;
 
 Actions::UseSkillOn::UseSkillOn(ObjectCharacter* user, InstanceDynamicObject* target, const std::string& skill) : ActionRunner(user), skill(skill)
 {
-  SetAnimationName("use");
   SetActionPointCost(AP_COST_USE);
+  SetAnimationName("use");
   SetTargetType(user != target ? ActionRunner::Object : ActionRunner::Self);
   SetTarget(target);
 }

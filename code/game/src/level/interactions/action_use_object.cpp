@@ -5,16 +5,16 @@
 using namespace std;
 using namespace Interactions;
 
+Actions::UseObject::UseObject(ObjectCharacter* character, InventoryObject* object, unsigned char actionIt) : ActionRunner(character), item(object), action_it(actionIt)
+{
+  SetActionPointCost(item->GetActionPointCost(character, action_it));
+  SetAnimationName("use");
+  SetTargetType(ActionRunner::Self);
+}
+
 void Actions::UseObject::RunAction()
 {
   item->Use(GetUser(), action_it);
-}
-
-Actions::UseObject::UseObject(ObjectCharacter* character, InventoryObject* object, unsigned char actionIt) : ActionRunner(character), item(object), action_it(actionIt)
-{
-  SetActionPointCost(AP_COST_USE);
-  SetAnimationName("use");
-  SetTargetType(ActionRunner::Self);
 }
 
 void Actions::UseObjectOn::RunAction()
@@ -24,10 +24,10 @@ void Actions::UseObjectOn::RunAction()
 
 Actions::UseObjectOn::UseObjectOn(ObjectCharacter* character, InstanceDynamicObject* target, InventoryObject* item, unsigned char action_it) : ActionRunner(character), item(item), action_it(action_it)
 {
-  SetTarget(target);
+  SetActionPointCost(item->GetActionPointCost(character, action_it));
   SetAnimationName("use");
-  SetActionPointCost(AP_COST_USE);
   SetTargetType(ActionRunner::Object);
+  SetTarget(target);
 }
 
 ActionRunner* Actions::UseObject::Factory(ObjectCharacter* user, InventoryObject* item, unsigned char action_it)
