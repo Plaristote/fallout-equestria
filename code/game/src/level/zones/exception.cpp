@@ -6,7 +6,7 @@ using namespace Zones;
 
 const char* ZoneException::what() const throw()
 {
-  return (std::string("[Zone][" + zone_name + "] Exception thrown: " + message).c_str());
+  return (message.c_str());
 }
 
 void ZoneException::Display()

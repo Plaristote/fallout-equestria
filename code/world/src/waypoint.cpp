@@ -57,22 +57,23 @@ bool                Waypoint::operator==(const Waypoint& other) const
   return (nodePath == other.nodePath);
 }
 
-bool                Waypoint::operator==(const Waypoint* other) const { return (*this == *other); }
-
-Waypoint::Arcs::iterator Waypoint::ConnectUnsafe(Waypoint* other)
+bool                Waypoint::operator==(const Waypoint* other) const
 {
-  arcs.push_back(Arc(this, other));
-  return (--(arcs.end()));
+  return (*this == *other);
 }
 
-Waypoint::Arcs::iterator Waypoint::Connect(Waypoint* other)
+Waypoint::Arcs::iterator Waypoint::Connect(Waypoint* other, ArcObserver* observer)
 {
   Arcs::iterator  it = find(arcs.begin(), arcs.end(), other);
 
   if (it == arcs.end())
   {
-    arcs.push_back(Arc(this, other));
-    other->arcs.push_back(Arc(other, this));
+    Arc arc_from(this, other);
+    Arc arc_to(other, this);
+
+    arc_from.observer = arc_to.observer = observer;
+    arcs.push_back(arc_from);
+    other->arcs.push_back(arc_to);
     return (--(arcs.end()));
   }
   return (it);
@@ -266,7 +267,7 @@ void Waypoint::WithdrawArc(Waypoint* other)
   }
 }
 
-void Waypoint::UnwithdrawArc(Waypoint* other, ArcObserver* observer)
+void Waypoint::UnwithdrawArc(Waypoint* other)
 {
   ArcsWithdrawed::iterator it, end;
 
@@ -285,11 +286,7 @@ void Waypoint::UnwithdrawArc(Waypoint* other, ArcObserver* observer)
         if (!withdrawable)
           break ;
         if (withdrawable && withdrawable->second == 0)
-        {
-          list<Waypoint::Arc>::iterator it = Connect(arc.to);
-
-          it->observer = observer;
-        }
+          Connect(arc.to, withdrawable->first.observer);
       }
       break ;
     }

@@ -17,13 +17,9 @@ bool Pathfinding::Path::FindPath(Waypoint* from, Waypoint* to)
   astar.SetStartAndGoalStates(*from, *to);
   while ((state = astar.SearchStep()) == AstarPathfinding<Waypoint>::Searching && max_iterations++ < 250);
 
-  if (state == AstarPathfinding<Waypoint>::Succeeded)
-  {
+  contains_valid_path = state == AstarPathfinding<Waypoint>::Succeeded;
+  if (contains_valid_path)
     waypoints = astar.GetSolution();
-    contains_valid_path = true;
-  }
-  else
-    contains_valid_path = false;
   return (contains_valid_path);
 }
 

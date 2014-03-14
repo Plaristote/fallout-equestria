@@ -10,23 +10,17 @@ namespace Pathfinding
 {
   class Collider
   {
-    struct WithdrawedArc
-    {
-      WithdrawedArc(Waypoint* first, Waypoint* second, Waypoint::ArcObserver* observer) : first(first), second(second), observer(observer) {}
-      Waypoint              *first, *second;
-      Waypoint::ArcObserver *observer;
-    };
-    
+    typedef std::pair<Waypoint*,Waypoint*>  WithdrawedArc;
     typedef std::list<WithdrawedArc>        WithdrawedArcs;
 
   public:
-    Collider() : waypoint_occupied(0)
+    Collider() : waypoint_occupied(0), collision_processed(false)
     {}
 
     virtual NodePath          GetNodePath()                  const = 0;
 
     virtual void              ProcessCollisions(void);
-    void                      UnprocessCollisions(void);
+    virtual void              UnprocessCollisions(void);
     virtual Pathfinding::Path GetPathTowardsObject(Pathfinding::Collider* character);
     virtual bool              CanGoThrough(Collider*)        const { return (!HasOccupiedWaypoint()); }
     virtual bool              HasOccupiedWaypoint(void)      const { return (waypoint_occupied != 0); }
@@ -44,6 +38,7 @@ namespace Pathfinding
   private:
     Waypoint*                               waypoint_occupied;
     WithdrawedArcs                          withdrawed_arcs;
+    bool                                    collision_processed;
   };
 }
 

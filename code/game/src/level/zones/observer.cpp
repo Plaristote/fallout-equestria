@@ -32,7 +32,7 @@ bool Zones::Observer::CanGoThrough(Waypoint* from, Waypoint* to, void* _object)
 {
   InstanceDynamicObject* object         = reinterpret_cast<InstanceDynamicObject*>(_object);
   bool                   can_go_through = true;
-  
+
   for_each(passage_ways.begin(), passage_ways.end(), [from, to, object, &can_go_through](PassageWay* entry)
   {
     if (entry->ConnectsWaypoints(from, to))

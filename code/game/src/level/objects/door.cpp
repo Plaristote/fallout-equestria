@@ -23,16 +23,15 @@ ObjectDoor::~ObjectDoor()
 
 bool ObjectDoor::HasOccupiedWaypoint(void) const
 {
-  return (collision_enabled && _closed);
+  return (collision_enabled && Collider::HasOccupiedWaypoint());
 }
-
 
 void ObjectDoor::ProcessCollisions(void)
 {
   collision_enabled = true;
 }
 
-void ObjectDoor::UnprocessCollision(void)
+void ObjectDoor::UnprocessCollisions(void)
 {
   collision_enabled = false;
 }
@@ -45,13 +44,7 @@ void ObjectDoor::InitializePassageWay(void)
 
   // From occupied waypoint, if one was specified  
   if (waypoint_occupied)
-  {
-    for_each(waypoint_occupied->arcs.begin(), waypoint_occupied->arcs.end(), [this, &to_observe](const Waypoint::Arc& arc)
-    {
-      to_observe.push_back(arc.to);
-    });
     to_observe.push_back(waypoint_occupied);
-  }
 
   // From disconnected list
   for_each(_object->lockedArcs.begin(), _object->lockedArcs.end(), [this, &to_observe](const std::pair<int, int>& waypoint_ids)
@@ -65,7 +58,6 @@ void ObjectDoor::InitializePassageWay(void)
     if (find(to_observe.begin(), to_observe.end(), waypoint_to)   == to_observe.end())
       to_observe.push_back(waypoint_to);
   });
-  cout << "ObjectDoor observing " << to_observe.size() << " waypoints" << endl;
   for_each(to_observe.begin(), to_observe.end(), [this](Waypoint* wp) { wp->nodePath.show(); });
   passage_way = zone_manager.RegisterPassageway(to_observe);
   passage_way->CanGoThrough = [this](InstanceDynamicObject* object) -> bool { return (CanGoThrough(object)); };
@@ -91,7 +83,7 @@ bool ObjectDoor::CanGoThrough(InstanceDynamicObject* object) const
 
 void ObjectDoor::GoingThrough(InstanceDynamicObject* object)
 {
-  if (collision_enabled)
+  if (collision_enabled && _closed)
     Open();
 }
 

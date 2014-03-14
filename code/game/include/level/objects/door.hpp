@@ -31,7 +31,7 @@ public:
   bool               CanGoThrough(InstanceDynamicObject*) const;
   
   void               ProcessCollisions(void);
-  void               UnprocessCollision(void);
+  void               UnprocessCollisions(void);
   
   void               Open(void)  { SetOpened(true);  }
   void               Close(void) { SetOpened(false); }

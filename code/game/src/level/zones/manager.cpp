@@ -34,12 +34,22 @@ void Zones::Manager::RegisterZone(Zone& zone)
 
 Zones::PassageWay* Zones::Manager::RegisterPassageway(const std::vector<Waypoint*>& waypoints)
 {
-  PassageWay* passage_way = new PassageWay;
-  
+  PassageWay*       passage_way = new PassageWay;
+  vector<Waypoint*> to_observe  = waypoints;
+
+  for (auto it = waypoints.begin() ; it != waypoints.end() ; ++it)
+  {
+    Waypoint* target_waypoint = *it;
+
+    for_each(target_waypoint->arcs.begin(), target_waypoint->arcs.end(), [&to_observe](const Waypoint::Arc& arc)
+    {
+      to_observe.push_back(arc.to);
+    });
+  }
   passage_way->waypoints          = waypoints;
   passage_way->CanGoThrough       = [](InstanceDynamicObject*) -> bool { return (true); };
   passage_ways.push_back(passage_way);
-  InitializeObservers(*passage_way, passage_way->waypoints);
+  InitializeObservers(*passage_way, to_observe);
   return (passage_way);
 }
 

@@ -56,9 +56,10 @@ namespace Pathfinding
     void                     RunMovement    (float elapsed_time);
     void                     RunRotate      (float elapsed_time);
     void                     RunNextMovement(float elapsed_time);
+    void                     SetNextWaypoint(void);
     void                     MovePathForward(void);
     void                     FindNewWayOrAbort(void);
-    void                     GoThroughNextWaypoint(void);
+    bool                     GoThroughNextWaypoint(void);
     LPoint3                  GetDistanceToNextWaypoint(void) const;
     bool                     HasReachedTarget(void);
     void                     TriggerDestinationReached(void);

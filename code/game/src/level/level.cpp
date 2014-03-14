@@ -210,6 +210,7 @@ void Level::InsertCharacter(ObjectCharacter* character)
 {
   character->GetFieldOfView().SetIntervalDurationInSeconds(3);
   character->GetFieldOfView().Launch();
+  character->ProcessCollisions();
   characters.push_back(character);
 }
 
@@ -257,7 +258,10 @@ void Level::InsertDynamicObject(DynamicObject& object)
   }
   cout << "Added an instance => " << instance << endl;
   if (instance != 0)
+  {
     objects.push_back(instance);
+    instance->ProcessCollisions();
+  }
 }
 
 void Level::InitializeSun(void)
@@ -480,12 +484,7 @@ AsyncTask::DoneStatus Level::do_task(void)
 
   mouse_hint.Run();
 
-  std::function<void (InstanceDynamicObject*)> run_object = [elapsedTime](InstanceDynamicObject* obj)
-  {
-    obj->Run(elapsedTime);
-    obj->UnprocessCollisions();
-    obj->ProcessCollisions();
-  };
+  std::function<void (InstanceDynamicObject*)> run_object = [elapsedTime](InstanceDynamicObject* obj) { obj->Run(elapsedTime); };
   switch (level_state)
   {
     case Fight:

@@ -100,13 +100,6 @@ void                Pathfinding::User::GoTo(Waypoint* waypoint)
   ReachedDestination.DisconnectAll();
   UnprocessCollisions();
   current_user = this;
-  if (path.Size() > 0)
-  {
-    // TODO this shouldn't do anything. might be related to why characters bump into each others
-    //cout << "SETTING START FROM FOR SOME REASON" << endl;
-    start_from = _level->GetWorld()->GetWaypointFromId(path.Front().id);
-  }
-  path.Clear();
   if (start_from && waypoint)
   {
     if (!(path.FindPath(start_from, waypoint)))
@@ -114,7 +107,7 @@ void                Pathfinding::User::GoTo(Waypoint* waypoint)
       if (_level->GetPlayer() == this)
         _level->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("No path."));
     }
-    else
+    else if (path.Size() > 1)
       StartRunAnimation();
   }
   else
@@ -133,7 +126,7 @@ void                Pathfinding::User::GoTo(InstanceDynamicObject* object, int m
   if (path.ContainsValidPath())
     StartRunAnimation();
   else if (_level->GetPlayer() == this)
-    _level->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("No path."));
+    _level->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("Can't reach."));
 }
 
 void Pathfinding::User::StartRunAnimation()
@@ -173,19 +166,24 @@ void Pathfinding::User::MovePathForward(void)
 {
   if (HasReachedTarget())
     path.Clear();
-  else
-  {
-    do { path.StripFirstWaypointFromList(); }
-    while (path.Size() > 0 && path.Front().id == GetOccupiedWaypointAsInt());
-  }
 }
 
-void Pathfinding::User::GoThroughNextWaypoint(void)
+bool Pathfinding::User::GoThroughNextWaypoint(void)
 {
   Waypoint::Arc* arc;
-  
+
   UnprocessCollisions();
   {
+    Pathfinding::Path path_tester;
+
+    /*ObjectCharacter* character = _level->GetCharacter("SecurityChief");
+    cout << "Chief withdrawed arcs " << character->withdrawed_arcs.begin()->first->id << ", " << path.Front().id << endl;
+    auto w = GetOccupiedWaypoint()->GetWithdrawable(_level->GetWorld()->GetWaypointFromId(path.Front().id));
+    if (w)
+      cout << "Withdrawable: " << w->first.from->id << " has " << w->second << " withdrawers" << endl;
+    else
+      cout << "No withdrawable (should never happen)" << endl;*/
+
     arc = GetOccupiedWaypoint()->GetArcTo(path.Front().id);
     if (arc && arc->CanGoThrough(this))
       arc->GoingThrough(this);
@@ -195,40 +193,50 @@ void Pathfinding::User::GoThroughNextWaypoint(void)
   ProcessCollisions();
   if (!arc)
     FindNewWayOrAbort();
+  return (arc != 0);
+}
+
+void Pathfinding::User::SetNextWaypoint(void)
+{
+  Waypoint* wp = _level->GetWorld()->GetWaypointFromId(path.Front().id);
+
+  while (wp == GetOccupiedWaypoint())
+  {
+    path.StripFirstWaypointFromList();
+    if (path.Size() == 0)
+      return ;
+    wp = _level->GetWorld()->GetWaypointFromId(path.Front().id);
+  }
+  if (GoThroughNextWaypoint())
+  {
+    MovePathForward();
+    SetOccupiedWaypoint(wp);
+    MovedFor1ActionPoint.Emit();
+  }
 }
 
 void Pathfinding::User::RunNextMovement(float elapsedTime)
 {
-  Waypoint* wp = _level->GetWorld()->GetWaypointFromId(path.Front().id);
-
-  if (wp != GetOccupiedWaypoint())
-    MovedFor1ActionPoint.Emit();
-
-  // If the next waypoint is already occupied by someone else,
-  // do not swap waypoints: instead, find another path.
-  if (GetOccupiedWaypointAsInt() != wp->id && !(_level->CanGoThroughWaypoint(this, wp->id)))
+  SetNextWaypoint();
+  if (path.Size() > 0)
   {
-    cout << "Waypoint occupied. Not by me." << endl;
-    FindNewWayOrAbort();
     if (path_visible)
       path.CreateDisplay();
-    return ;
   }
-  SetOccupiedWaypoint(wp);
-  MovePathForward();
-  if (path.Size() > 0)
-    GoThroughNextWaypoint();
   else
+  {
+    cout << "Destination reached" << endl;
     TriggerDestinationReached();
-  if (path_visible)
-    path.CreateDisplay();
+  }
 }
 
 void Pathfinding::User::TriggerDestinationReached(void)
 {
+  cout << "Trigger destination reached" << endl;
   path.Clear();
   ReachedDestination.Emit();
   ReachedDestination.DisconnectAll();
+  PlayIdleAnimation();
 }
 
 LPoint3             Pathfinding::User::GetDistanceToNextWaypoint(void) const

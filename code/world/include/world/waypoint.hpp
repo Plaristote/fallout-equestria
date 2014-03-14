@@ -23,7 +23,7 @@ struct Waypoint
     {
         Arc(Waypoint* from, Waypoint* to);
         Arc(const Arc&);
-    ~Arc();
+       ~Arc();
 
         bool operator==(Waypoint* other) { return (to == other); }
         void UpdateDirection(void);
@@ -52,8 +52,8 @@ struct Waypoint
     NodePath               nodePath;
     std::list<WorldLight*> lights;
 
-    void WithdrawArc(Waypoint* other);
-    void UnwithdrawArc(Waypoint* other, ArcObserver* observer);
+    void                            WithdrawArc(Waypoint* other);
+    void                            UnwithdrawArc(Waypoint* other);
     std::pair<Arc, unsigned short>* GetWithdrawable(Waypoint* other);
     Waypoint*                       GetRandomWaypoint(void) const;
 
@@ -65,8 +65,7 @@ struct Waypoint
     bool                 operator==(unsigned int id)       const { return (this->id == id); }
     bool                 operator<(const Waypoint& other)  const { return (id < other.id); }
     bool                 operator>(const Waypoint& other)  const { return (id > other.id); }
-    Arcs::iterator       ConnectUnsafe(Waypoint* other);
-    Arcs::iterator       Connect(Waypoint* other);
+    Arcs::iterator       Connect(Waypoint* other, ArcObserver* observer = 0);
     Arcs::iterator       Disconnect(Waypoint* other);
     void                 DisconnectAll(void);
     Arc*                 GetArcTo(unsigned int id);
