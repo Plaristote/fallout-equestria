@@ -111,13 +111,17 @@ void GameTask::RunLevel(void)
 {
   if (level && level->do_task() == AsyncTask::DS_done)
   {
+    SetupLoadingScreen();
     Level::Exit  exit      = level->GetExit();
 
     ExitLevel();
     if (!(exit.ToWorldmap()))
       OpenLevel(exit.level, exit.zone);
     else
+    {
       SaveGame();
+      RemoveLoadingScreen();
+    }
   }
   if (!level && world_map)
     world_map->Show();

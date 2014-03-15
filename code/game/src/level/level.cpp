@@ -676,8 +676,10 @@ void Level::Serialize(Utils::Packet& packet)
   BackupInventoriesToDynamicObjects();
   UnprocessAllCollisions();
   {
+    LoadingScreen::AppendText("Recording topology...");
     GetWorld()->Serialize(packet);
-    packet << (char)(level_state);
+    packet << (char)(combat.GetCurrentCharacter() != 0 ? State::Fight : State::Normal);
+    LoadingScreen::AppendText("Recording demographic data...");
     for_each(objects.begin(),    objects.end(),    [&packet](InstanceDynamicObject* object) { object->Serialize(packet);    });
     for_each(characters.begin(), characters.end(), [&packet](ObjectCharacter* character)    { character->Serialize(packet); });
     combat.Serialize(packet);
