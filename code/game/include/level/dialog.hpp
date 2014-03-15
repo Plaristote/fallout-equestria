@@ -30,7 +30,6 @@ public:
 
   ~DialogModel()
   {
-    if (_tree) delete _tree;
   }
 
   void               SetCurrentNpcLine(const std::string& id);  

@@ -10,7 +10,7 @@ MouseCursor::MouseCursor(WindowFramework* window, Rocket::Core::Context* context
   root   = context->CreateDocument();
   if (root)
   {
-    root->SetInnerRML("<img id='mouse-cursor' src='textures/cursor-interaction.png' /><span id='mouse-hint'></span>");
+    root->SetInnerRML("<img id='mouse-cursor' style='width:31px;height:32px' src='textures/cursor-interaction.png' /><span id='mouse-hint'></span>");
     _cursor = root->GetElementById("mouse-cursor");
     _hint   = root->GetElementById("mouse-hint");
     if (_cursor)

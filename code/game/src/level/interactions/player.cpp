@@ -37,11 +37,8 @@ void Interactions::Player::ActionBarter(ObjectCharacter* character)
 void Interactions::Player::ActionTalkTo(InstanceDynamicObject* object)
 {
   if (level.GetState() == Level::Fight)
-  {
     level.GetLevelUi().GetMainBar().AppendToConsole(i18n::T("Can't talk during fight."));
-    return ;
-  }
-  if ((player->HasLineOfSight(object)) && player->GetPathDistance(object) <= 3)
+  else if ((player->HasLineOfSight(object)) && player->GetPathDistance(object) <= 3)
   {
     // Player must look at its target
     player->LookAt(object);
@@ -57,7 +54,7 @@ void Interactions::Player::ActionTalkTo(InstanceDynamicObject* object)
   else
   {
     player->GoTo(object, 3);
-    if (player->GetPath().Size() > 1)
+    if (player->IsMoving())
       player->ReachedDestination.Connect([this, object]() { ActionTalkTo(object); });
     else
       level.GetLevelUi().GetMainBar().AppendToConsole(i18n::T("No line of sight"));
