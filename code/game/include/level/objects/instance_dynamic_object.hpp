@@ -10,7 +10,7 @@
 # include "observatory.hpp"
 # include "world/world.h"
 # include "level/pathfinding/collider.hpp"
-#include <level/pathfinding/path.hpp>
+# include "level/pathfinding/path.hpp"
 # include "level/inventory.hpp"
 # include "animatedobject.hpp"
 # include "level/skill_target.hpp"
@@ -28,6 +28,7 @@ static inline double round(double val)
 
 class Level;
 class ObjectCharacter;
+class ISampleInstance;
 
 class InstanceDynamicObject : public virtual Pathfinding::Collider, public AnimatedObject, public Interactions::Target
 {
@@ -52,6 +53,7 @@ public:
   Data                      GetDataStore(void)                  const { return (data_store);                           }
 
   void                      AddTextBox(const std::string& text, unsigned short r, unsigned short g, unsigned short b, float timeout = 5.f);
+  ISampleInstance*          PlaySound(const std::string& name);
   
   template<class C>
   C*                        Get(void)

@@ -1,4 +1,4 @@
-#include "level/mouse.hpp"
+#include "level/mouse/mouse.hpp"
 #include "world/world.h"
 #include <mousecursor.hpp>
 #include <timer.hpp>
@@ -68,7 +68,7 @@ void Mouse::SetMouseState(char i)
       texture = "textures/cursor-action.png";
       break ;
     case 'i':
-      texture = "textures/cursor-interaction.png";
+      texture = "textures/cursor-interaction-none.png";
       break ;
     case 't':
       texture = "textures/cursor-target.png";
@@ -155,7 +155,8 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
 
     if (_hovering.waypoint_ptr && _hovering.hasWaypoint)
       _hovering.waypoint_ptr->SetSelected(false);
-    _hovering.hasWaypoint = false;
+    _hovering.hasWaypoint  = false;
+    _hovering.waypoint_ptr = 0;
     for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
     {
       CollisionEntry* entry      = collisionHandlerQueue->get_entry(i);
@@ -199,6 +200,7 @@ void Mouse::Run(void)
       _collisionHandlerQueue->sort_entries();
       //_hovering.Reset();
       _hovering.hasDynObject = false;
+      _hovering.dynObject    = NodePath();
       for (int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; ++i)
       {
         CollisionEntry* entry = _collisionHandlerQueue->get_entry(i);

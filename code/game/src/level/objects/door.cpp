@@ -94,14 +94,36 @@ void ObjectDoor::SetOpened(bool set_open)
   _closed = !set_open;
 }
 
+bool ObjectDoor::IsWayBlocked(void)
+{
+  bool is_way_blocked;
+  
+  UnprocessCollisions();
+  is_way_blocked = _level->IsWaypointOccupied(GetOccupiedWaypointAsInt());
+  ProcessCollisions();
+  return (is_way_blocked);
+}
+
 void ObjectDoor::ActionUse(InstanceDynamicObject* object)
 {
   if (!IsLocked())
   {
-    AnimationEndForObject.DisconnectAll();
-    AnimationEndForObject.Connect([this](AnimatedObject*) { _closed = !_closed; });
-    PlayAnimation(_closed ? "open" : "close");
+    if (_closed || !IsWayBlocked())
+    {
+      string action = _closed ? "open" : "close";
+
+      AnimationEndForObject.DisconnectAll();
+      AnimationEndForObject.Connect([this](AnimatedObject*) { _closed = !_closed; });
+      PlayAnimation(action);
+      PlaySound(GetDynamicObject()->sound_pack + '/' + action);
+    }
+    else if (_level->GetPlayer() == object)
+      _level->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("Something's in the way."));
   }
   else
-    _level->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("It's locked"));
+  {
+    PlaySound(GetDynamicObject()->sound_pack + "/locked");
+    if (_level->GetPlayer() == object)
+      _level->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("It's locked."));
+  }
 }

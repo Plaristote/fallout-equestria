@@ -1,5 +1,6 @@
 #include "ui/ui_barter.hpp"
 #include "level/objects/character.hpp"
+#include "level/level.hpp"
 
 using namespace std;
 
@@ -156,7 +157,7 @@ void UiBarter::SwapObjects(InventoryObject* object)
   if (SwapFunctor(object, _stack_other, _inventory_other))   return ;
   if (SwapFunctor(object, _inventory_other, _stack_other))   return ;
 }
-#include "level/level.hpp"
+
 void UiBarter::MakeDeal(Rocket::Core::Event& event)
 {
   cout << "Make deal" << endl;
