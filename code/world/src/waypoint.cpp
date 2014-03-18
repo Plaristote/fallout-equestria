@@ -14,16 +14,15 @@ namespace Pathfinding
 
 Waypoint::Waypoint(NodePath root)
 {
-  selected = false;
-  nodePath = root;
+  floor         = 0;
+  selected      = false;
+  nodePath      = root;
   //nodePath.set_collide_mask(CollideMask(ColMask::Waypoint));
   nodePath.set_scale(2.f);
   nodePath.show();
 
   nodePath.set_transparency(TransparencyAttrib::M_alpha);
   nodePath.set_color(0, 0, 0, 0.5);
-
-  floor    = 0;
 }
 
 bool                Waypoint::Arc::CanGoThrough(void* object)

@@ -17,7 +17,12 @@ struct MouseHovering
   MouseHovering(void) : hasWaypoint(false), hasDynObject(false), waypoint_ptr(0) {}
   
   void Reset(void)
-  { hasWaypoint = hasDynObject = false; waypoint_ptr = 0; }
+  {
+    dynObject    = NodePath();
+    waypoint     = NodePath();
+    hasWaypoint  = hasDynObject = false;
+    waypoint_ptr = 0;
+  }
   
   void SetWaypoint(NodePath np)
   {

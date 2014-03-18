@@ -1,4 +1,4 @@
-#include "level/mouse_events.hpp"
+#include "level/mouse/mouse_events.hpp"
 #include "level/level.hpp"
 #include "options.hpp"
 

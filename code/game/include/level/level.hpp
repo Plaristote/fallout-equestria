@@ -14,7 +14,7 @@
 # include "time_manager.hpp"
 # include "datatree.hpp"
 # include "level_camera.hpp"
-# include "mouse.hpp"
+# include "mouse/mouse.hpp"
 # include "interact_menu.hpp"
 
 # include "dataengine.hpp"
@@ -37,14 +37,14 @@
 # include "script_zone.hpp"
 # include "executor.hpp"
 
-# include "mouse_hint.hpp"
+# include "mouse/mouse_hint.hpp"
 # include "visibility_halo.hpp"
 # include "floors.hpp"
 # include "characters/object_outline.hpp"
 # include "path_preview.hpp"
 # include "zones/manager.hpp"
 # include "equip_modes.hpp"
-# include "mouse_events.hpp"
+# include "mouse/mouse_events.hpp"
 # include "level/interactions.hpp"
 # include "level/combat.hpp"
 # include "level/player.hpp"
@@ -99,6 +99,7 @@ public:
   void                    SetInterrupted(bool);
   
   // World Interactions
+  WindowFramework*       GetWindow(void)         { return (window); }
   World*                 GetWorld(void)          { return (world); }
   LevelUi&               GetLevelUi(void)        { return (level_ui); }
   MouseEvents&           GetMouse(void)          { return (mouse); }
@@ -165,7 +166,6 @@ private:
   WindowFramework*      window;
   DataEngine*           data_engine;
   LevelCamera           camera;
-  MouseEvents           mouse;
   Timer                 timer;
   TimeManager&          time_manager;
   MainScript            main_script;
@@ -173,7 +173,7 @@ private:
   bool                  is_persistent;
 
   LevelUi               level_ui;
-  MouseHint             mouse_hint;
+  MouseHint             mouse;
   Player                player;
   World*                world;
   ParticleSystemManager particle_manager;

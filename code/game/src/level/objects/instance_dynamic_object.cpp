@@ -31,6 +31,11 @@ void InstanceDynamicObject::AddTextBox(const std::string& text, unsigned short r
   _level->GetChatterManager().PushTextBox(this, text, r, g, b, timeout);
 }
 
+ISampleInstance* InstanceDynamicObject::PlaySound(const string& name)
+{
+  return (_level->PlaySound(_object->sound_pack + '/' + name));
+}
+
 void InstanceDynamicObject::Unserialize(Utils::Packet& packet)
 {
   char hasWaypoint;

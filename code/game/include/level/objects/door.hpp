@@ -42,6 +42,7 @@ public:
 private:
   void               InitializePassageWay(void);
   void               GoingThrough(InstanceDynamicObject*);
+  bool               IsWayBlocked(void);
 
   Zones::PassageWay* passage_way;
   bool               collision_enabled;

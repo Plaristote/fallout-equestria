@@ -23,12 +23,11 @@ using namespace std;
 Level* Level::CurrentLevel = 0;
 Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : window(window),
   camera(*this, window, window->get_camera_group()),
-  mouse (*this, window),
   time_manager(tm),
   main_script(name),
   combat(*this, characters),
   level_ui(window, gameUi),
-  mouse_hint(*this, level_ui, mouse),
+  mouse(*this, level_ui),
   player(*this),
   chatter_manager(window),
   floors(*this),
@@ -280,6 +279,7 @@ void Level::SetAsPlayerParty(Party&)
     if (main_script.IsDefined("Initialize"))
       main_script.Call("Initialize");
     camera.SetConfigurationFromLevelState();
+    mouse.SetPlayer(GetPlayer());
     player_halo.SetTarget(GetPlayer());
   }
 }
@@ -482,7 +482,7 @@ AsyncTask::DoneStatus Level::do_task(void)
   camera.SlideToHeight(GetPlayer()->GetDynamicObject()->nodePath.get_z());
   camera.Run(elapsedTime);  
 
-  mouse_hint.Run();
+  mouse.Run(elapsedTime);
 
   std::function<void (InstanceDynamicObject*)> run_object = [elapsedTime](InstanceDynamicObject* obj) { obj->Run(elapsedTime); };
   switch (level_state)
@@ -524,7 +524,6 @@ AsyncTask::DoneStatus Level::do_task(void)
   floors.RunFadingEffect(elapsedTime);
   chatter_manager.Run(elapsedTime, camera.GetNodePath());
   particle_manager.do_particles(ClockObject::get_global_clock()->get_dt());
-  mouse.Run();
   timer.Restart();
   return (exit.ReadyForNextZone() ? AsyncTask::DS_done : AsyncTask::DS_cont);
 }
@@ -596,9 +595,7 @@ bool Level::IsWaypointOccupied(unsigned int id) const
   for (it_object = objects.begin() ; it_object != objects.end() ; ++it_object)
   {
     if ((*it_object)->HasOccupiedWaypoint() && id == ((*it_object)->GetOccupiedWaypointAsInt()))
-    {
       return (true);
-    }
   }
   for (it_character = characters.begin() ; it_character != characters.end() ; ++it_character)
   {
@@ -676,8 +673,10 @@ void Level::Serialize(Utils::Packet& packet)
   BackupInventoriesToDynamicObjects();
   UnprocessAllCollisions();
   {
+    LoadingScreen::AppendText("Recording topology...");
     GetWorld()->Serialize(packet);
-    packet << (char)(level_state);
+    packet << (char)(combat.GetCurrentCharacter() != 0 ? State::Fight : State::Normal);
+    LoadingScreen::AppendText("Recording demographic data...");
     for_each(objects.begin(),    objects.end(),    [&packet](InstanceDynamicObject* object) { object->Serialize(packet);    });
     for_each(characters.begin(), characters.end(), [&packet](ObjectCharacter* character)    { character->Serialize(packet); });
     combat.Serialize(packet);

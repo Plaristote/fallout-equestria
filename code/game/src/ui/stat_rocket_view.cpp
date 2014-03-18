@@ -13,7 +13,6 @@ StatViewRocket::~StatViewRocket()
   ToggleEventListener(false, "char-gender-edit-ok",    "click", EventGenderChanged);
   ToggleEventListener(false, "edit-value-cursor-plus", "click", ButtonUp);
   ToggleEventListener(false, "edit-value-cursor-less", "click", ButtonDown);
-  ToggleEventListener(false, "edit-value-cursor-less", "click", ButtonDown);
   ToggleEventListener(false, "special",                "click", EventSpecialClicked);
   ToggleEventListener(false, "body",                   "click", EventSkillClicked);
   ToggleEventListener(false, "char-name",              "click", EventGeneralClicked);

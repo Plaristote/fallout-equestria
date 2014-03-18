@@ -3,7 +3,7 @@
 
 # include "globals.hpp"
 # include "level/pathfinding/path.hpp"
-# include "level/mouse.hpp"
+# include "level/mouse/mouse.hpp"
 # include <panda3d/nodePathCollection.h>
 
 class InstanceDynamicObject;

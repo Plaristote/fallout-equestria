@@ -1,7 +1,7 @@
 #ifndef  MOUSE_EVENTS_HPP
 # define MOUSE_EVENTS_HPP
 
-# include "level/mouse.hpp"
+# include "mouse.hpp"
 
 class Level;
 class InstanceDynamicObject;
@@ -26,12 +26,13 @@ public:
   State              GetState(void) const { return (mouse_state); }
   void               SetCursorFromState(void);
   bool               IsHoveringUi(void) const;
+  
+private:
   void               MouseLeftClicked(void);
   void               MouseRightClicked(void);
   void               MouseWheelUp(void);
   void               MouseWheelDown(void);
 
-private:
   Level&             level;
   State              mouse_state;
 };

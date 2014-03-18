@@ -29,6 +29,7 @@ struct DynamicObject : public MapObject
   std::string dialog;
   // All
   std::string script;
+  std::string sound_pack;
   // Character
   std::string charsheet;
 

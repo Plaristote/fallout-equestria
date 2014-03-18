@@ -162,15 +162,16 @@ void MapObject::UnserializeWaypoints(World* world, Utils::Packet& packet)
   {
     for_each(waypoint_ids.begin(), waypoint_ids.end(), [this, world](int id)
     {
-      Waypoint* wp = world->GetWaypointFromId(id);
+      Waypoint* waypoint = world->GetWaypointFromId(id);
 
-      if (wp)
+      if (waypoint)
       {
-        wp->floor = this->floor;
-        waypoints.push_back(wp);
+        waypoint->floor       = this->floor;
+        waypoint->parent_path = this->nodePath;
+        waypoints.push_back(waypoint);
   #ifdef GAME_EDITOR
-        if (!(wp->nodePath.is_empty()))
-          wp->nodePath.reparent_to(waypoints_root);
+        if (!(waypoint->nodePath.is_empty()))
+          waypoint->nodePath.reparent_to(waypoints_root);
   #endif
       }
     });
