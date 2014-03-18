@@ -170,7 +170,6 @@ private:
   TimeManager&          time_manager;
   MainScript            main_script;
   State                 level_state;
-  Combat                combat;
   bool                  is_persistent;
 
   LevelUi               level_ui;
@@ -184,6 +183,7 @@ private:
   InstanceObjects       objects;
   Characters            characters;
   Parties               parties;
+  Combat                combat;
   VisibilityHalo        player_halo;
   Sunlight*             sunlight;
   Floors                floors;

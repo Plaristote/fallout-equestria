@@ -19,14 +19,10 @@ public:
 
   static std::string               T(const std::string& key);
   
-  static Data                      GetDialogs(void);
-  static Data                      GetStatistics(void);
-  
   static Sync::Signal<void> LanguageChanged;
 
 private:
-  DataTree*                        _dialogs;
-  DataTree*                        _statistics;
+  DataTree* current_language;
 };
 
 #endif

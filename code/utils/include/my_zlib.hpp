@@ -2,11 +2,12 @@
 # define MY_ZLIB_HPP
 
 # include <zlib.h>
-#include <string>
-#include <algorithm>
-#include <fstream>
-#include <serializer.hpp>
-#include <directory.hpp>
+# include <string>
+# include <algorithm>
+# include <functional>
+# include <fstream>
+# include <serializer.hpp>
+# include <directory.hpp>
 
 namespace Utils
 {

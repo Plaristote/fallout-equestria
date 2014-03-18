@@ -21,49 +21,20 @@ struct DialogAnswers
 class DialogModel
 {
 public:
-  DialogModel(const std::string& dialogId, Data l18n) : _l18n(l18n)
-  {
-    _tree = DataTree::Factory::JSON("data/dialogs/" + dialogId + ".json");
-    if (_tree)
-      _data = Data(_tree);
-  }
-
-  ~DialogModel()
-  {
-  }
+  DialogModel(const std::string& dialogId);
+  ~DialogModel();
 
   void               SetCurrentNpcLine(const std::string& id);  
-  const std::string  GetHookAvailable(const std::string& answerId)
-  {
-    return (_data[_currentNpcLine][answerId]["HookAvailable"].Value());
-  }
-
-  const std::string  GetExecuteMethod(const std::string& answerId)
-  {
-    return (_data[_currentNpcLine][answerId]["HookExecute"].Value());
-  }
-
-  const std::string  GetDefaultNextLine(const std::string& answerId)
-  {
-    return (_data[_currentNpcLine][answerId]["DefaultAnswer"].Value());
-  }
-
-  const std::string GetNpcLine(void)
-  {
-    std::string     key  = _data[_currentNpcLine]["npcLine"].Value();
-    Data            line = _l18n[key];
-
-    if (line.Nil())
-      return (key);
-    return (line.Value());
-  }
+  const std::string  GetHookAvailable(const std::string& answerId);
+  const std::string  GetExecuteMethod(const std::string& answerId);
+  const std::string  GetDefaultNextLine(const std::string& answerId);
+  const std::string GetNpcLine(void);
 
   DialogAnswers     GetDialogAnswers(void);
 
 private:
   DataTree*          _tree;
   Data               _data;
-  Data               _l18n;
   std::string        _currentNpcLine;
 };
 

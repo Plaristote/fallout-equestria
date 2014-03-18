@@ -115,7 +115,7 @@ UiBarter*          LevelUi::OpenUiBarter(ObjectCharacter* player, ObjectCharacte
 
 DialogController*  LevelUi::OpenUiDialog(ObjectCharacter* target)
 {
-  DialogController* ui_dialog = new DialogController(window, GetContext(), target, i18n::GetDialogs());
+  DialogController* ui_dialog = new DialogController(window, GetContext(), target, Data());
   
   GetMainBar().Hide();
   SetUi<UiItRunningDialog>(ui_dialog);

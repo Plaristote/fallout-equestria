@@ -11,18 +11,12 @@ Sync::Signal<void> i18n::LanguageChanged;
 i18n::i18n(const string& language)
 {
   cout << "[i18n] Language set to " << language << endl;
-  _dialogs    = DataTree::Factory::JSON("data/i18n/" + language + "/dialogs.json");
-  _statistics = DataTree::Factory::JSON("data/i18n/" + language + "/statistics.json");
-  if (!_dialogs)
-    cout << "[i18n] Dialogs can't be found for the " << language << " language." << endl;
-  if (!_statistics)
-    cout << "[i18n] Statistics can't be found for the " << language << " language." << endl;
+  current_language = DataTree::Factory::JSON("i18n/" + language + ".json");
 }
 
 i18n::~i18n()
 {
-  if (_dialogs)    delete _dialogs;
-  if (_statistics) delete _statistics;
+  if (current_language) delete current_language;
 }
 
 void i18n::Load(const string& language)
@@ -41,6 +35,7 @@ void i18n::Unload(void)
   }
 }
 
+// TODO update that to find the language files
 vector<string> i18n::LanguagesAvailable(void)
 {
   vector<string>            list;
@@ -59,33 +54,15 @@ vector<string> i18n::LanguagesAvailable(void)
   return (list);
 }
 
-Data i18n::GetDialogs(void)
+string i18n::T(const std::string& key)
 {
-  if (_self && _self->_dialogs)
-    return (Data(_self->_dialogs));
-  return (Data());
-}
-
-Data i18n::GetStatistics(void)
-{
-  if (_self && _self->_statistics)
-    return (Data(_self->_statistics));
-  return (Data());
-}
-
-string i18n::T(const std::string& str)
-{
-  if (_self && _self->_statistics && _self->_dialogs)
+  if (_self && _self->current_language)
   {
-    Data statistics(_self->_statistics);
-    Data dialogs(_self->_dialogs);
-    Data value;
+    Data translations(_self->current_language);
+    Data value = translations[key];
 
-    value   = statistics[str];
-    if (value.Nil())
-      value = dialogs[str];
-    if (!(value.Nil()))
+    if (value.NotNil())
       return (value.Value());
   }
-  return (str);
+  return (key);
 }

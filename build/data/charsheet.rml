@@ -90,10 +90,10 @@ body
 .statistics-datagrid{font-size: 75%;}
 
 .statistics-value,
-.skill-value
+.skill-value,
 {
   text-align: right;
-  float: left;
+  float: right;
 }
 		
 .statistics-key,	
@@ -101,6 +101,28 @@ body
 {
   float: left;
   text-align: left;
+}
+
+.skill-value, .kill-key, .skill-percent, .statistics-value, .statistics-key
+{
+  padding: 0;
+  margin: 0;
+}
+
+.skill-value
+{
+  width: 15%;
+}
+
+.skill-key
+{
+  width: 70%;
+}
+
+.skill-percent
+{
+  width: 4%;
+  float: right;
 }
 
 col{display: inline-block;}

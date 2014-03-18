@@ -2,6 +2,7 @@
 #include "level/objects/character.hpp"
 #include "ui/alert_ui.hpp"
 #include "ui/gameui.hpp"
+#include "i18n.hpp"
 
 using namespace Rocket;
 using namespace std;
@@ -104,7 +105,7 @@ void DialogView::CleanView(const DialogAnswers& answers)
 }
 
 // CONTROLLER
-DialogController::DialogController(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* character, Data l18n) : DialogView(window, context), _script("scripts/dialogs/" + character->GetDialog() + ".as"), _model(character->GetDialog(), l18n)
+DialogController::DialogController(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* character, Data l18n) : DialogView(window, context), _script("scripts/dialogs/" + character->GetDialog() + ".as"), _model(character->GetDialog())
 {
   _character = character;
   AnswerSelected.EventReceived.Connect(*this, &DialogController::ExecuteAnswer);
@@ -263,6 +264,42 @@ std::string DialogController::SolveStringVariables(const std::string& text)
 }
 
 // MODEL
+DialogModel::DialogModel(const std::string& dialogId)
+{
+  _tree = DataTree::Factory::JSON("data/dialogs/" + dialogId + ".json");
+  if (_tree)
+    _data = Data(_tree);
+}
+
+DialogModel::~DialogModel()
+{
+  _data = Data();
+  if (_tree)
+    delete _tree;
+}
+
+const std::string  DialogModel::GetHookAvailable(const std::string& answerId)
+{
+  return (_data[_currentNpcLine][answerId]["HookAvailable"].Value());
+}
+
+const std::string  DialogModel::GetExecuteMethod(const std::string& answerId)
+{
+  return (_data[_currentNpcLine][answerId]["HookExecute"].Value());
+}
+
+const std::string  DialogModel::GetDefaultNextLine(const std::string& answerId)
+{
+  return (_data[_currentNpcLine][answerId]["DefaultAnswer"].Value());
+}
+
+const std::string DialogModel::GetNpcLine(void)
+{
+  std::string     key  = _data[_currentNpcLine]["npcLine"].Value();
+
+  return (i18n::T(key));
+}
+
 DialogAnswers     DialogModel::GetDialogAnswers(void)
 {
   DialogAnswers   answers;
@@ -275,13 +312,12 @@ DialogAnswers     DialogModel::GetDialogAnswers(void)
     _data[_currentNpcLine].Output();
     for (; it != end ; ++it)
     {
+      DialogAnswers::KeyValue pair;
+
       if ((*it).Key() == "npcLine")
         continue ;
-      DialogAnswers::KeyValue pair;
-      Data                    line = _l18n[(*it).Key()];
-
       pair.first  = (*it).Key();
-      pair.second = (line.Nil() ? (*it).Key() : line.Value());
+      pair.second = i18n::T((*it).Key());
       answers.answers.push_back(pair);
     }
   }

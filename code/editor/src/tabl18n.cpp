@@ -20,7 +20,7 @@ DataTree* TabL18n::GetDefaultLanguage()
 
 void TabL18n::LoadAllLanguages()
 {
-    QDir        dir("data/l18n");
+    QDir        dir("data/i18n");
     QStringList fileList = dir.entryList();
     QRegExp     regexp("\\.json$");
 
@@ -42,7 +42,7 @@ void TabL18n::NewLanguage()
 
     if (str != "")
     {
-        QString   filepath = "data/l18n/" + str + ".json";
+        QString   filepath = "data/i18n/" + str + ".json";
         QFileInfo fileinfo(filepath);
 
         if (fileinfo.exists())
@@ -68,32 +68,32 @@ void TabL18n::NewLanguage()
 
 void TabL18n::LoadLanguage(QString filepath)
 {
-    DialogFiles::Iterator it  = languages.begin();
-    DialogFiles::Iterator end = languages.end();
+  DialogFiles::Iterator it  = languages.begin();
+  DialogFiles::Iterator end = languages.end();
 
-    for (; it != end ; ++it)
+  for (; it != end ; ++it)
+  {
+    if (it.key() == filepath)
     {
-        if (it.key() == filepath)
+      if (*it == 0)
+      {
+        *it = DataTree::Factory::JSON(filepath.toStdString());
+        if (*it == 0)
         {
-            if (*it == 0)
-            {
-              *it = DataTree::Factory::JSON(filepath.toStdString());
-              if (*it == 0)
-              {
-                QMessageBox::warning((QWidget*)parent(), "Fatal Error", "Corrupted language file. You broke it, you fix it dude.");
-                return ;
-              }
-            }
-            ui->languageEditor->LoadLanguage(*it);
-			lang_default = *it; //Make new language the default for the Dialogue editor
-            break ;
+          QMessageBox::warning((QWidget*)parent(), "Fatal Error", "Corrupted language file. You broke it, you fix it dude.");
+          return ;
         }
+      }
+      lang_default = *it; //Make new language the default for the Dialogue editor
+      ui->languageEditor->LoadLanguage(*it);
+      break ;
     }
+  }
 }
 
 void TabL18n::SwapLanguage(QListWidgetItem* item)
 {
-    QString filepath = "data/l18n/" + item->text() + ".json";
+    QString filepath = "data/i18n/" + item->text() + ".json";
 
     LoadLanguage(filepath);
 }
@@ -110,7 +110,7 @@ void TabL18n::RemoveLanguage()
         ret = QMessageBox::warning((QWidget*)parent(), "Remove Language", message, QMessageBox::Yes, QMessageBox::No);
         if (ret == QMessageBox::Yes)
         {
-            QString path = "data/l18n/" + item->text() + ".json";
+            QString path = "data/i18n/" + item->text() + ".json";
             QFile  file(path);
 
             if (file.remove())

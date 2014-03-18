@@ -29,8 +29,6 @@ StatViewRocket::StatViewRocket(WindowFramework* window, Rocket::Core::Context* c
 
   if (root)
   {
-    _i18n = i18n::GetStatistics();
-    
     _perks_dialog.PerkSelected.Connect(UpdatePerkDescription, &Sync::Signal<void (const std::string&)>::Emit);
 
     ToggleEventListener(true, "continue", "click", DoneButton);
@@ -586,9 +584,9 @@ void StatViewRocket::SetTraits(list<string> traits)
       string details = "data-details-type='traits' data-details-value='" + underscore(trait) + "'";
       
       create_rml  << "<div class='traits-row'><button id='" << underscore(trait) << "' class='small_button'>&nbsp;</button>";
-      create_rml  << "<span class='text-trait' id='trait-" << underscore(trait) << "' " << details << " >" << _i18n[trait].Value() << "</span><br /></div>";
+      create_rml  << "<span class='text-trait' id='trait-" << underscore(trait) << "' " << details << " >" << i18n::T(trait) << "</span><br /></div>";
       display_rml << "<span class='text-trait' id='display-trait-" << underscore(trait) << "' " << details << "  style='display:none;'>";
-      display_rml << _i18n[trait].Value() << "</span><br />";
+      display_rml << i18n::T(trait) << "</span><br />";
     });
     if (create_element)  create_element->SetInnerRML(create_rml.str().c_str());
     if (display_element) display_element->SetInnerRML(display_rml.str().c_str());
@@ -636,17 +634,17 @@ void StatViewRocket::SetCategoryFields(const std::string& category, const std::v
         else if (category == "Statistics")
         {
           rml << "<datagrid  class='statistics-datagrid'>\n";
-          rml << "  <col width='80%'><span class='statistics-key' " << details_data << ">" << _i18n[keys[i]].Value() << "</span></col>\n";
+          rml << "  <col width='80%'><span class='statistics-key' " << details_data << ">" << i18n::T(keys[i]) << "</span></col>\n";
           rml << "  <col width='15%'><span class='statistics-value' id='statistics-value-" << underscored << "'></span></col>\n";
           rml << "</datagrid>\n\n";
         }
         else if (category == "Skills")
         {
-          rml << "<datagrid id='skill-datagrid-" << underscored << "' class='skill-datagrid' data-type='Skills' data-key='" << keys[i] << "'>\n";
-          rml << "  <col width='70%'><span class='skill-key' " << details_data << ">" << _i18n[keys[i]].Value() << "</span></col>\n";
-          rml << "  <col width='20%'><span class='skill-value' id='skills-value-" << underscored << "'>0</span></col>\n";
-          rml << "  <col width='5%'><span>%</span></col>";
-          rml << "</datagrid>\n\n";
+          rml << "<div id='skill-datagrid-" << underscored << "' class='skill-datagrid' data-type='Skills' data-key='" << keys[i] << "'>\n";
+          rml << "  <div class='skill-key' " << details_data << ">" << i18n::T(keys[i]) << "</div>\n";
+          rml << "  <div class='skill-percent'>%</div>";
+          rml << "  <div class='skill-value' id='skills-value-" << underscored << "'>0</div>\n";
+          rml << "</div>\n\n";
         }
       }
       element->SetInnerRML(rml.str().c_str());

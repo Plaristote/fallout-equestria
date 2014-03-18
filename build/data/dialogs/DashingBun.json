@@ -1,0 +1,129 @@
+{
+"quest-start": {
+  "npcLine": 10069,
+  "10070": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+,
+  "10071": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "quest-refuse-help"
+  }
+
+}
+,
+"quest-accept-help": {
+  "npcLine": 10072,
+  "10073": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "quest-tale"
+  }
+,
+  "10074": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "quest-tale"
+  }
+,
+  "10075": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "quest-tale"
+  }
+
+}
+,
+"quest-tale": {
+  "10080": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "quest-mission-1"
+  }
+,
+  "npcLine": 10076,
+  "10077": {
+    "HookAvailable": "CheckHowDidYouEscape",
+    "HookExecute": "",
+    "DefaultAnswer": "quest-tale-escape"
+  }
+,
+  "10078": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "quest-mission-1"
+  }
+,
+  "10079": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "quest-refuse-help"
+  }
+
+}
+,
+"quest-mission-1": {
+  "npcLine": 10081,
+  "10082": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "quest-refuse-help"
+  }
+,
+  "10083": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+
+}
+,
+"quest-tale-escape": {
+  "npcLine": 10084,
+  "10086": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": "quest-mission-1"
+  }
+,
+  "10085": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+
+}
+,
+"quest-refuse-help": {
+  "npcLine": 10087,
+  "10089": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+,
+  "10090": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+,
+  "10091": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+,
+  "10088": {
+    "HookAvailable": "",
+    "HookExecute": "",
+    "DefaultAnswer": ""
+  }
+
+}
+
+
+}

@@ -66,7 +66,6 @@ public:
   void SetDetails(const std::string& icon, const std::string& title, const std::string& text);
 
 private:
-  Data           _i18n;
   PerksDialog    _perks_dialog;
   RocketListener CancelButton;
   RocketListener DoneButton;

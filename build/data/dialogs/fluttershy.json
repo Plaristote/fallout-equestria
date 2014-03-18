@@ -59,16 +59,16 @@
 ,
 "TestD": {
   "npcLine": 10006,
-  "10008": {
-    "HookAvailable": "A",
-    "HookExecute": "B",
-    "DefaultAnswer": "death"
-  }
-,
   "10009": {
     "HookAvailable": "",
     "HookExecute": "",
     "DefaultAnswer": "GGGG"
+  }
+,
+  "10008": {
+    "HookAvailable": "A",
+    "HookExecute": "B",
+    "DefaultAnswer": "death"
   }
 
 }
