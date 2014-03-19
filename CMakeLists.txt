@@ -15,7 +15,8 @@ link_directories(3rd_parties/lib)
 
 if(UNIX)
   if(CMAKE_COMPILER_IS_GNUCC)
-    set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -Wno-deprecated-declarations -pedantic")
+    set(CMAKE_CXX_FLAGS       "-std=c++0x -Wall -Wno-deprecated-declarations -pedantic")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
   endif()
 endif()
 
