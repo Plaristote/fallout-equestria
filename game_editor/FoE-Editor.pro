@@ -18,7 +18,6 @@ unix:QMAKE_CXXFLAGS += -std=c++0x
 win32:QMAKE_CFLAGS_RELEASE  = -O2 -MD -zi
 win32:QMAKE_LFLAGS_RELEASE  = /INCREMENTAL:NO /DEBUG
 
-
 CONFIG(debug, debug|releqse) {
   unix:QMAKE_CXXFLAGS_DEBUG += -fsanitize=address
 }
