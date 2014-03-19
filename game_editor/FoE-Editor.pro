@@ -20,6 +20,7 @@ win32:QMAKE_LFLAGS_RELEASE  = /INCREMENTAL:NO /DEBUG
 
 CONFIG(debug, debug|releqse) {
   unix:QMAKE_CXXFLAGS_DEBUG += -fsanitize=address
+  unix:LIBS += -lasan
 }
 
 win32:LIBS +=  ../3rd_parties/lib/libp3framework.lib \
