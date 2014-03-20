@@ -3,7 +3,6 @@
 
 #include <panda3d/cmath.h>
 #include <QMainWindow>
-#include "qpandaapplication.h"
 #include <QTreeWidgetItem>
 #include "dialognewscript.h"
 #include <QFile>
@@ -37,7 +36,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     
 public:
-    explicit MainWindow(QPandaApplication* app, QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
     void closeEvent(QCloseEvent*);
@@ -179,7 +178,6 @@ private slots:
     void LevelListUpdated(void);
 
 private:
-    QPandaApplication&       _app;
     WindowFramework*         _window;
     Ui::MainWindow*          ui;
     TabScript                tabScript;

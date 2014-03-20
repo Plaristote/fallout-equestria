@@ -11,9 +11,13 @@
 
 #define PANDA_TAB 1
 
-extern PandaFramework framework;
-
 QString objectTypes[] = { "NPC", "Shelf", "Locker", "Door" };
+QString strScriptCategories[N_SCRIPT_CAT] = {
+    "Artificial Intelligence", "Buffs", "Dialogues", "Levels", "Objects", "Pipbuck Apps", "Quests"
+};
+QString pathScriptCategories[N_SCRIPT_CAT] = {
+    "ai", "buffs", "dialogs", "level", "objects", "pipbuck", "quests"
+};
 
 struct PandaTask : public AsyncTask
 {
@@ -69,15 +73,7 @@ struct PandaTask : public AsyncTask
 
 PandaTask my_task;
 
-QString strScriptCategories[N_SCRIPT_CAT] = {
-    "Artificial Intelligence", "Buffs", "Dialogues", "Levels", "Objects", "Pipbuck Apps", "Quests"
-};
-
-QString pathScriptCategories[N_SCRIPT_CAT] = {
-    "ai", "buffs", "dialogs", "level", "objects", "pipbuck", "quests"
-};
-
-MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(parent), _app(*app), ui(new Ui::MainWindow), tabScript(this, ui), tabDialog(this, ui), tabL18n(this, ui), splashScreen(this), wizardObject(this), dialogObject(this)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), tabScript(this, ui), tabDialog(this, ui), tabL18n(this, ui), splashScreen(this), wizardObject(this), dialogObject(this)
 {
     QIcon iconScript("icons/script.png");
     QIcon iconItems("icons/item.png");
@@ -144,12 +140,12 @@ MainWindow::MainWindow(QPandaApplication* app, QWidget *parent) : QMainWindow(pa
 
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(CurrentTabChanged(int)));
 
-    connect(&splashScreen, SIGNAL(rejected()), app,  SLOT(Terminate()));
-    connect(&splashScreen, SIGNAL(rejected()), app,  SLOT(quit()));
+    /*connect(&splashScreen, SIGNAL(rejected()), app,  SLOT(Terminate()));
+    connect(&splashScreen, SIGNAL(rejected()), app,  SLOT(quit()));*/
     connect(&splashScreen, SIGNAL(accepted()), this, SLOT(LoadProject()));
 
     connect(ui->widget, SIGNAL(Initialized()), this, SLOT(PandaInitialized()));
-    connect(this,       SIGNAL(Closed()),      app,  SLOT(Terminate()));
+    //connect(this,       SIGNAL(Closed()),      app,  SLOT(Terminate()));
 
     for (short i = 0 ; i < N_SCRIPT_CAT ; ++i)
     {
@@ -247,7 +243,7 @@ void MainWindow::SetFreeCamera(bool value)
 
 void MainWindow::CurrentTabChanged(int ntab)
 {
-    _app.SetPandaEnabled(ntab == PANDA_TAB); // The first tab is the only one using Panda3D
+    //_app.SetPandaEnabled(ntab == PANDA_TAB); // The first tab is the only one using Panda3D
 }
 
 void MainWindow::CopyClicked()
@@ -424,7 +420,7 @@ void MainWindow::LoadProject()
         QStringList pathToCheck;
         bool        creatingPath = false;
 
-        pathToCheck << "maps/" << "data/" << "scripts/" << "data/l18n" << "data/dialogs";
+        pathToCheck << "maps/" << "data/" << "scripts/" << "data/i18n" << "data/dialogs";
         for (short i = 0 ; i < 3 ; ++i)
           pathToCheck << ("scripts/" + pathScriptCategories[i]);
         foreach (QString path, pathToCheck)
@@ -508,8 +504,8 @@ void MainWindow::FilterInit()
 {
     if (ui->scriptSearch->text() == "Search...")
         ui->scriptSearch->setText("");
-    /*if (ui->dialogSearch->text() == "Search...")
-        ui->dialogSearch->setText("");*/
+    //if (ui->dialogSearch->text() == "Search...")
+    //    ui->dialogSearch->setText("");
 }
 
 void MainWindow::CameraMoveBottom()

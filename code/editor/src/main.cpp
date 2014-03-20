@@ -16,26 +16,27 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("Shinygami");
     QCoreApplication::setOrganizationDomain("plaristote.franceserv.fr");
     QCoreApplication::setApplicationName("Fallout Equestria Editor");
-    QPandaApplication app(argc, argv);
+    QApplication      app(argc, argv);
+    QPandaApplication panda(app, argc, argv);
     int               ret;
 
     {
       QSettings       settings;
-      MainWindow      w(&app);
+      MainWindow      window;
 
       // Loading window parameters
       settings.beginGroup("MainWindow");
-      w.resize(settings.value("size", QSize(400, 400)).toSize());
-      w.move(settings.value("pos", QPoint(50, 50)).toPoint());
+      window.resize(settings.value("size", QSize(400, 400)).toSize());
+      window.move(settings.value("pos", QPoint(50, 50)).toPoint());
       settings.endGroup();
       // Executing app
-      w.show();
-      w.splashScreen.open();
+      window.show();
+      window.splashScreen.open();
       ret = app.exec();
       // Savinf window parameters
       settings.beginGroup("MainWindow");
-      settings.setValue("size", w.size());
-      settings.setValue("pos", w.pos());
+      settings.setValue("size", window.size());
+      settings.setValue("pos",  window.pos());
       settings.endGroup();
     }
     return (ret);

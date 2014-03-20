@@ -7,11 +7,11 @@
 # include <panda3d/pandaFramework.h>
 # include <panda3d/pandaSystem.h>
 
-class QPandaApplication : public QApplication
+class QPandaApplication : public QObject
 {
     Q_OBJECT
 public:
-    QPandaApplication(int argc, char **argv);
+    QPandaApplication(QApplication& application, int argc, char **argv);
     ~QPandaApplication();
 
     static PandaFramework& Framework(void) { return (*_framework); }
@@ -26,6 +26,7 @@ public slots:
     void                   DisablePanda(void) { SetPandaEnabled(false); }
 
 private:
+    QApplication&          application;
     static bool            _continue;
     static PandaFramework* _framework;
     static QTimer          _timer;
