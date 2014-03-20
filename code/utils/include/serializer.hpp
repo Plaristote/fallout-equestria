@@ -37,12 +37,13 @@ public:
   {
   public:
     Exception(Packet* packet);
-    
+    ~Exception() throw() {}
+
     const char* what(void) const throw()
     {
       return (message.c_str());
     }
-    
+
     Packet*            GetPacket(void)      const { return (packet); }
     unsigned int       ThrownAtOffset(void) const { return (offset); }
     unsigned int       PacketSize(void)     const { return (size);   }

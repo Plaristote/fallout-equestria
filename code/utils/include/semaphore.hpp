@@ -1,7 +1,7 @@
 #ifndef  SEMAPHORE_HPP
 # define SEMAPHORE_HPP
 
-# ifdef __linux__
+# if defined(__linux__) or defined(__llvm__)
 #  include <semaphore.h>
 #  include <thread>
 # endif
@@ -16,13 +16,12 @@ namespace Sync
 {
   class Semaphore
   {
-  # ifdef __linux__
-    typedef sem_t           Handle;
-    typedef std::thread::id ThreadId;
-  # endif
   # ifdef _WIN32
     typedef HANDLE Handle;
     typedef DWORD  ThreadId;
+  # else
+    typedef sem_t           Handle;
+    typedef std::thread::id ThreadId;
   # endif
   public:
     class Lock

@@ -42,6 +42,7 @@ float my_sqrt(const float x);
 # endif
 
 // Twilidoc cannot see Panda3D's PT macro.
+# include <panda3d/pointerTo.h>
 # ifndef PT
 #  define PT(PTTYPE) PointerTo< PTTYPE >
 # endif

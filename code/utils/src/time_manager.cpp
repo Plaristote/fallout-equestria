@@ -9,8 +9,12 @@ void TimeManager::AddElapsedSeconds(float s)
   fseconds += s;
   if (fseconds >= 1.f)
   {
+#ifdef __llvm__
+    float floored = ::floor(fseconds);
+#else
     float floored = std::floor(fseconds);
-    
+#endif
+
     AddElapsedTime(floored);
     fseconds -= floored;
   }

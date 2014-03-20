@@ -98,7 +98,7 @@ void Interactions::Target::SetInteractionsFromDynamicObject(DynamicObject* objec
 void Interactions::Target::AddInteraction(const std::string& name, Interactions::Trigger& trigger)
 {
   DelInteraction(name);
-  interactions.push_back(Interactions::Interaction(name, reinterpret_cast<InstanceDynamicObject*>(this), &trigger));
+  interactions.push_back(Interactions::Interaction(name, static_cast<InstanceDynamicObject*>(this), &trigger));
 }
 
 void Interactions::Target::DelInteraction(const std::string& name)

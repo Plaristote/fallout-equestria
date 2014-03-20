@@ -92,7 +92,7 @@ void Projectile::Run(float elapsed_time)
     LPoint3f objective    = target.get_pos(node_path.get_parent());
     LPoint3f position     = node_path.get_pos();
     LPoint3f distance     = position - objective;
-    float    max_distance = max(max(abs(distance.get_x()), abs(distance.get_y())), abs(distance.get_z()));
+    float    max_distance = max(max(abs((long)distance.get_x()), abs((long)distance.get_y())), abs((long)distance.get_z()));
     LPoint3f movement;
 
     if (max_distance <= speed)

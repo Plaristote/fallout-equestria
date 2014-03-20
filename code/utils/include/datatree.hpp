@@ -51,6 +51,11 @@ public:
   Data         operator[](const std::string& key);
   const Data   operator[](const std::string& key) const;
   Data         operator[](unsigned int it);
+#ifdef __llvm__ // LLVM doesn't implicitly build std::string from const char* with operator overloads
+  Data         operator[](const char* key)       { return (operator[](std::string(key)));   }
+  const Data   operator[](const char* key) const { return (operator[](std::string(key)));   }
+  Data         operator[](int it)                { return (operator[]((unsigned int)(it))); }
+#endif
 
   std::string  Key(void)   const { return (_data ? _data->key             : ""); }
   std::string  Value(void) const { return (_data ? _data->value           : ""); }

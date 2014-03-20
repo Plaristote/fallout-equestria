@@ -393,12 +393,20 @@ namespace asUtils
   
   int ceil(float value)
   {
+#ifdef __llvm__
+    return (::ceil(value));
+#else
     return (std::ceil(value));
+#endif
   }
   
   int floor(float value)
   {
+#ifdef __llvm__
+    return (::floor(value));
+#else
     return (std::floor(value));
+#endif
   }
 }
 
