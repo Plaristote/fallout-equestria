@@ -96,32 +96,25 @@ body
   float: right;
 }
 		
-.statistics-key,	
-.skill-key
+.statistics-key, .skill-key, .kills-key, .reputation-key
 {
   float: left;
   text-align: left;
+  width: 70%;
 }
 
-.skill-value, .kill-key, .skill-percent, .statistics-value, .statistics-key
+.skill-value, .kills-key, .skill-percent, .statistics-value, .skill-value, .reputation-value
 {
   padding: 0;
   margin: 0;
-}
-
-.skill-value
-{
+  float: right;
+  text-align: right;
   width: 15%;
-}
-
-.skill-key
-{
-  width: 70%;
 }
 
 .skill-percent
 {
-  width: 4%;
+  width: 4% !important;
   float: right;
 }
 
@@ -287,9 +280,10 @@ tabset panels panel
   left: 5%;
 }
 
-.text-trait{float: left;}
-
-.traits-row{width: 48%;}
+#panel-traits .text-trait
+{
+  float: left;
+}
 
 .party-member img
 {
@@ -456,19 +450,21 @@ tabset panels panel
 		    
     		<p id="char-bottom-box" class="  place-beneath ">
 		     <tabset>
-		      <tab id="tab-perks" class="tab-tab">Perks</tab>
-		      <panel id="panel-perks" class="console-bg">Nada</panel>
-		
-		      <tab id="tab-traits" class="tab-tab">Traits</tab>
-		      <panel id="panel-traits" class="console-bg">
-			<div id="panel-traits-create"></div>
-			<div id="panel-traits-default"></div>
+		      <tab id="tab-perks" class="tab-tab" style="float:left;">Perks</tab>
+		      <panel id="panel-perks" class="console-bg">
+      			<div id="panel-traits-default"></div>
+      			<div id="panel-perks-list"></div>
 		      </panel>
 
-		      <tab id="tab-reputation" class="tab-tab">Reputation</tab>
+		      <tab id="tab-traits" class="tab-tab" style="float:left;">Traits</tab>
+		      <panel id="panel-traits" class="console-bg">
+			<div id="panel-traits-create"></div>
+		      </panel>
+
+		      <tab id="tab-reputation" class="tab-tab" style="float:left;">Reputation</tab>
 		      <panel class="console-bg">Nothing</panel>
 		
-		      <tab id="tab-kills" class="tab-tab">Kills</tab>
+		      <tab id="tab-kills" class="tab-tab" style="float:left;">Kills</tab>
 		      <panel id="panel-kills" class="console-bg"></panel>
 		     </tabset>
 		    </p>

@@ -330,6 +330,11 @@ void StatViewRocket::SetEditMode(EditMode mode)
   Core::Element* perks          = root->GetElementById("panel-perks");
   Core::Element* statistics     = root->GetElementById("statistics");
 
+  Core::Element* tab_traits     = root->GetElementById("tab-traits");
+  Core::Element* tab_perks      = root->GetElementById("tab-perks");
+  Core::Element* tab_reputation = root->GetElementById("tab-reputation");
+  Core::Element* tab_kills      = root->GetElementById("tab-kills");
+
   Core::Element* name   = root->GetElementById("char-name");
   Core::Element* age    = root->GetElementById("char-age");
   Core::Element* gender = root->GetElementById("char-gender");
@@ -346,6 +351,12 @@ void StatViewRocket::SetEditMode(EditMode mode)
 
   if (perks)      perks->AddEventListener        ("click", &EventPerkClicked);
   if (statistics) statistics->AddEventListener   ("click", &EventStatisticClicked);
+
+  if (tab_traits)     tab_traits->SetProperty    ("display", mode == Create ? "block" : "none");
+  if (tab_perks)      tab_perks->SetProperty     ("display", mode != Create ? "block" : "none");
+  if (tab_reputation) tab_reputation->SetProperty("display", mode != Create ? "block" : "none");
+  if (tab_kills)      tab_kills->SetProperty     ("display", mode != Create ? "block" : "none");
+
   switch (mode)
   {
     case Create:
@@ -427,10 +438,10 @@ void StatViewRocket::SetFieldValue(const std::string& category, const std::strin
       if ((element = root->GetElementById("panel-kills")))
       {
         element->GetInnerRML(old_rml);
-        rml << "<datagrid>";
-        rml << "<col width='80%'><span class='kills-key' i18n='" << key << "'>" << i18n::T(key) << "</span></col>";
-        rml << "<col width='20%'><span class='kills-value' id='" << strId << "'>" << value << "</span></col>";
-        rml << "</datagrid>";
+        rml << "<div>";
+        rml << "<div class='kills-key' i18n='" << key << "'>" << i18n::T(key) << "</div>";
+        rml << "<div class='kills-value' id='" << strId << "'>" << value << "</div>";
+        rml << "</div>";
         element->SetInnerRML(old_rml + rml.str().c_str());
       }
     }
@@ -442,10 +453,10 @@ void StatViewRocket::SetFieldValue(const std::string& category, const std::strin
       if ((element = root->GetElementById("panel-reputation")))
       {
         element->GetInnerRML(old_rml);
-        rml << "<datagrid>";
-        rml << "<col width='80%'><span class='reputation-key' i18n='" << key << "'>" << i18n::T(key) << "</span></col>";
-        rml << "<col width='20%'><span class='reputation-value' id='" << strId << "'>" << i18n::T(value) << "</span></col>";
-        rml << "</datagrid>";
+        rml << "<div>";
+        rml << "<div class='reputation-key' i18n='" << key << "'>" << i18n::T(key) << "</div>";
+        rml << "<div class='reputation-value' id='" << strId << "'>" << i18n::T(value) << "</div>";
+        rml << "</div>";
         element->SetInnerRML(old_rml + rml.str().c_str());
       }
     }
@@ -528,9 +539,11 @@ void StatViewRocket::TraitClicked(Core::Event& event)
   
   if (element && _editMode == StatView::Create)
   {
-    string trait = humanize(element->GetId().CString());
+    string trait_key  = element->GetId().CString();
+    string trait_name = humanize(trait_key);
 
-    TraitToggled.Emit(trait);
+    TraitToggled.Emit(trait_name);
+    UpdateDetails.Emit("traits", trait_key);
   }
 }
 
@@ -552,7 +565,7 @@ void StatViewRocket::SetTraitActive(const string& trait, bool active)
   {
     // Create Traits Interface
     {
-      string         elem_id = "text-" + underscore(trait);
+      string         elem_id = "trait-" + underscore(trait);
       Core::Element* elem    = root->GetElementById(elem_id.c_str());
 
       if (elem)
@@ -583,9 +596,8 @@ void StatViewRocket::SetTraits(list<string> traits)
       string details = "data-details-type='traits' data-details-value='" + underscore(trait) + "'";
       
       create_rml  << "<div class='traits-row'><button id='" << underscore(trait) << "' class='small_button'>&nbsp;</button>";
-      create_rml  << "<span class='text-trait' id='trait-" << underscore(trait) << "' " << details << " >" << i18n::T(trait) << "</span><br /></div>";
-      display_rml << "<span class='text-trait' id='display-trait-" << underscore(trait) << "' " << details << "  style='display:none;'>";
-      display_rml << i18n::T(trait) << "</span><br />";
+      create_rml  << "<div class='text-trait' id='trait-" << underscore(trait) << "' " << details << " >" << i18n::T(trait) << "</div></div>";
+      display_rml << "<div class='text-trait' id='display-trait-" << underscore(trait) << "' " << details << '>' << display_rml << i18n::T(trait) << "</div>";
     });
     if (create_element)  create_element->SetInnerRML(create_rml.str().c_str());
     if (display_element) display_element->SetInnerRML(display_rml.str().c_str());
@@ -632,10 +644,10 @@ void StatViewRocket::SetCategoryFields(const std::string& category, const std::v
         }
         else if (category == "Statistics")
         {
-          rml << "<datagrid  class='statistics-datagrid'>\n";
-          rml << "  <col width='80%'><span class='statistics-key' " << details_data << ">" << i18n::T(keys[i]) << "</span></col>\n";
-          rml << "  <col width='15%'><span class='statistics-value' id='statistics-value-" << underscored << "'></span></col>\n";
-          rml << "</datagrid>\n\n";
+          rml << "<div  class='statistics-datagrid'>\n";
+          rml << "  <div class='statistics-key' " << details_data << ">" << i18n::T(keys[i]) << "</div>\n";
+          rml << "  <div class='statistics-value' id='statistics-value-" << underscored << "'></div>\n";
+          rml << "</dib>\n\n";
         }
         else if (category == "Skills")
         {
