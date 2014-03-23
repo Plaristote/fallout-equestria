@@ -187,8 +187,7 @@ void WorldMap::AddCityToList(Data cityData)
     stringstream   rml;
 
     rml << "<div class='city-entry'>";
-    rml << "<div class='city-button'><button id='city-" << cityData.Key() << "' data-city='" << cityData.Key() << "' class='simple-button city-button-button'> </button>";
-    rml << "<span class='city-name'>" << cityData.Key() << "</span></div>";
+    rml << "<button id='city-" << cityData.Key() << "' data-city='" << cityData.Key() << "' class='long_button city-button'>" << cityData.Key() << "</button>";
     rml << "</div>";
     innerRml = innerRml + Rocket::Core::String(rml.str().c_str());
 
@@ -394,10 +393,12 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
   _dataEngine["worldmap"]["pos-y"] = _current_pos_y;
   if (_cursor)
   {
+    float height = _cursor->GetProperty("height")->Get<float>();
+    float width  = _cursor->GetProperty("width")->Get<float>();
     stringstream str_x, str_y;
 
-    str_x << _current_pos_x << "px";
-    str_y << _current_pos_y << "px";
+    str_x << (_current_pos_x - (width / 2)) << "px";
+    str_y << (_current_pos_y - (height))    << "px";
     _cursor->SetProperty("left", str_x.str().c_str());
     _cursor->SetProperty("top",  str_y.str().c_str());
   }

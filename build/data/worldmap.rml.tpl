@@ -13,22 +13,57 @@
 
 #map-frame
 {
-  width:      60%;
+  width:      80%;
   height:     100%;
-  overflow: auto;
+  overflow:   auto;
+  float:      left;
+}
+
+#map-side{
+  width: 20%;
+  height: 100%;
+  float: right;
+}
+
+#map-side .block-first
+{
+  width:    100%;
+  height:   20%;
+  padding-bottom: 20%;
+}
+
+#map-side .block-second
+{
+  width:    100%;
+  height:   80%;
 }
 
 #clock-frame
 {
-  width:    100%;
-  height:   20%;
-  
+  padding-top: 25%;
+  margin: auto;
+  vertical-align: middle;
+  padding-left: 5%;
+}
+
+#clock-frame .console-value
+{
+  padding: 5px 5px 5px 5px;
+  float: left;
+  width: 25%;
+  text-align: center;
+  vertical-align: middle;
+}
+
+#city-container
+{
+  padding-top: 100px;
+  margin: auto;
 }
 
 #city-list
 {
-  width:    100%;
-  height:   80%;
+  text-align: center;
 }
 
 #main-bar
@@ -40,24 +75,39 @@
 #party-cursor
 {
   position: absolute;
-  top: 0px;
-  left: 0px;
-  height:   10px;
-  width:    10px;
-  background-color: red;
+  top:      0px;
+  left:     0px;
+  height:   12px;
+  width:    24px;
   z-index:  998;
+  background-decorator: image;
+  background-image-src: worldmap-cursor.png;
 }
 
-.city-name
+#party-cursor:hover
 {
-  margin-left:    5px;
-  padding-left:   5px;
-  padding-top:    20px;
-  background-color: blue;
-  color: white;
-  text-align: center;
-  font-size: 20px;
+  background-image-src: worldmap-cursor-hover.png;
 }
+
+#party-cursor:active
+{
+  background-image-src: worldmap-cursor-active.png;
+}
+
+.city-entry
+{
+  width: 90%;
+  margin-left: 5%;
+  min-height: 50px;
+}
+
+.city-button
+{
+  width: 100%;
+  height: 100%;
+  padding: 10px 10px 10px 10px;
+}
+
 .universal_button{
 	width: 20%;
 	padding-left: 4%;
@@ -69,11 +119,9 @@
 
 	
 }
-#map-side{
-	width: 32%;
-	height: 100%;
-}
+
 #rest{
+  float: left;
 	height: 20%;
 	width: 100%;
 }
@@ -85,25 +133,30 @@
 
   <body id="body">
     
-	  <div id="main" class="  place-beneath">
+	  <div id="main" class="place-beneath">
 	
-	    <div id="map-frame" class="  place-next-to">
-	      <div id="party-cursor">-</div>
+	    <div id="map-frame">
+	      <div id="party-cursor"></div>
 	      <p id="pworldmap">
 	        #{RML}
 	      </p>
 	    </div>
-		 <div id="map-side" class="  place-next-to">
-		    <div id="clock-frame" class="window-background place-beneath">
-		      <span class="console-value" id="clock-year">0000</span> <span class="console-value" id="clock-month">01</span> <span id="clock-day" class="console-value">01</span>
-		    </div>
+		  <div id="map-side">
+				<div class="block-first window-background">
+					<div id="clock-frame">
+						<div class="console-value" id="clock-year">0000</div> <div class="console-value" id="clock-month">01</div> <div id="clock-day" class="console-value">01</div>
+					</div>
+			 </div>
 		
-		    <div id="city-list" class="window-background place-beneath">
-		      City list
+			<div class="block-second window-background">
+		    <div id="city-container">
+		      <div id="city-list">
+		      </div>
 		    </div>
 		  </div>
 	  </div>
-	  <div id="rest" class="  place-beneath window-background">
+	  </div>
+	  <div id="rest" class="window-background">
 	    <div id="main-bar" class="   place-beneath">
 	      <button id="button-inventory" class="universal_button" i18n="Inventory">Inventory</button>
 	      <button id="button-character" class="universal_button" i18n="Character">Character</button>
@@ -113,7 +166,6 @@
 		 <div id="quest-locator" class="console-bg   place-beneath">
 				 Placeholder for quest tracer
 		 </div>
-	  </div>
 
   </body>
 </rml>

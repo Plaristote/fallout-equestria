@@ -189,6 +189,32 @@ button.button_menu:active,
   background-center-image:       hud.png 209px 37px  368px 54px;
 }
 
+.long_button:hover
+{
+  background-top-left-image:     hud.png 204px 60px  209px 65px;
+  background-top-right-image:    hud.png 368px 60px  373px 65px;
+  background-top-image:          hud.png 210px 60px  368px 65px;
+  background-bottom-left-image:  hud.png 204px 82px  209px 87px;
+  background-bottom-right-image: hud.png 368px 82px  373px 87px;
+  background-bottom-image:       hud.png 210px 82px  368px 87px;
+  background-left-image:         hud.png 204px 66px  209px 82px;
+  background-right-image:        hud.png 368px 66px  373px 82px;
+  background-center-image:       hud.png 209px 65px  368px 82px;
+}
+
+.long_button:active
+{
+  background-top-left-image:     hud.png 204px 88px  209px 93px;
+  background-top-right-image:    hud.png 368px 88px  373px 93px;
+  background-top-image:          hud.png 210px 88px  368px 93px;
+  background-bottom-left-image:  hud.png 204px 110px  209px 115px;
+  background-bottom-right-image: hud.png 368px 110px  373px 115px;
+  background-bottom-image:       hud.png 210px 110px  368px 115px;
+  background-left-image:         hud.png 204px 92px  209px 110px;
+  background-right-image:        hud.png 368px 92px  373px 110px;
+  background-center-image:       hud.png 209px 93px  368px 110px;
+}
+
 
 /*####### SOMETHING_BUTTON (a placeholder button) ######*/
 
