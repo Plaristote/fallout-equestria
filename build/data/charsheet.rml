@@ -292,7 +292,7 @@ tabset panels panel
 }
 		</style>
 	</head>
-<body id="body" template="tplmainbar">
+<body id="body" template="tplmainbar" class="window-background">
    
 	<p id="general-data" class="  place-beneath">
 	<p id="char-name" class="blocks long_button">Twilight</p>

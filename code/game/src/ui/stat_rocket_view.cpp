@@ -647,7 +647,7 @@ void StatViewRocket::SetCategoryFields(const std::string& category, const std::v
           rml << "<div  class='statistics-datagrid'>\n";
           rml << "  <div class='statistics-key' " << details_data << ">" << i18n::T(keys[i]) << "</div>\n";
           rml << "  <div class='statistics-value' id='statistics-value-" << underscored << "'></div>\n";
-          rml << "</dib>\n\n";
+          rml << "</div>\n\n";
         }
         else if (category == "Skills")
         {
