@@ -177,6 +177,8 @@ button.button_menu:active,
 /*####### LONG_BUTTON ######*/
 .long_button
 {
+  font-family: JH_Fallout;
+  font-size:   12px;
   background-decorator:          tiled-box;
   background-top-left-image:     hud.png 204px 32px  209px 37px;
   background-top-right-image:    hud.png 368px 32px  373px 37px;
@@ -646,6 +648,8 @@ scrollbarhorizontal sliderarrowinc
 
 .console-value
 {
+  font-family: JH_Fallout;
+  font-size:   8px;
   background-decorator:          tiled-box;
   background-top-left-image:     hud.png 126px 0px  136px 10px;
   background-top-right-image:    hud.png 193px 0px  203px 10px;

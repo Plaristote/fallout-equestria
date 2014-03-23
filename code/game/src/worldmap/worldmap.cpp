@@ -313,7 +313,7 @@ void WorldMap::OpenCitySplash(const std::string& cityname)
   {
     try
     {
-      _city_splash = new CitySplash(city, window, context);
+      _city_splash = new CitySplash(city, window, context, root);
       _city_splash->Canceled.Connect(*this, &WorldMap::CloseCitySplash);
       _city_splash->EntryZonePicked.Connect([this, cityname](std::string zone)
       {

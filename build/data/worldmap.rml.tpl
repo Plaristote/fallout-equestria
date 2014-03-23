@@ -11,12 +11,17 @@
   height: 80%;
 }
 
-#map-frame
+#map-frame, #city-splash
 {
   width:      80%;
   height:     100%;
   overflow:   auto;
   float:      left;
+}
+
+#city-splash
+{
+  display: none;
 }
 
 #map-side{
@@ -55,13 +60,18 @@
   vertical-align: middle;
 }
 
-#city-container
+#city-container, #entry-zone-container
 {
   padding-top: 100px;
   margin: auto;
 }
 
-#city-list
+#entry-zone-container
+{
+  display: none;
+}
+
+#city-list, #entry-zones
 {
   text-align: center;
 }
@@ -70,6 +80,11 @@
 {
   width:  100%;
   height: 20%;
+}
+
+#main-bar button
+{
+  max-width: 150px;
 }
 
 #party-cursor
@@ -94,14 +109,14 @@
   background-image-src: worldmap-cursor-active.png;
 }
 
-.city-entry
+.city-entry, .zone-entry
 {
   width: 90%;
   margin-left: 5%;
   min-height: 50px;
 }
 
-.city-button
+.city-button, .zone-button
 {
   width: 100%;
   height: 100%;
@@ -133,39 +148,54 @@
 
   <body id="body">
     
-	  <div id="main" class="place-beneath">
-	
-	    <div id="map-frame">
-	      <div id="party-cursor"></div>
-	      <p id="pworldmap">
-	        #{RML}
-	      </p>
-	    </div>
-		  <div id="map-side">
-				<div class="block-first window-background">
-					<div id="clock-frame">
-						<div class="console-value" id="clock-year">0000</div> <div class="console-value" id="clock-month">01</div> <div id="clock-day" class="console-value">01</div>
-					</div>
-			 </div>
-		
-			<div class="block-second window-background">
-		    <div id="city-container">
-		      <div id="city-list">
-		      </div>
-		    </div>
-		  </div>
-	  </div>
-	  </div>
-	  <div id="rest" class="window-background">
-	    <div id="main-bar" class="   place-beneath">
-	      <button id="button-inventory" class="universal_button" i18n="Inventory">Inventory</button>
-	      <button id="button-character" class="universal_button" i18n="Character">Character</button>
-	      <button id="button-pipbuck"  class="universal_button" i18n="Pipbuck">Pipbuck</button>
-	      <button id="button-menu"     class="universal_button" i18n="Menu">Menu</button>
-	    </div>
-		 <div id="quest-locator" class="console-bg   place-beneath">
-				 Placeholder for quest tracer
-		 </div>
+    <div id="main" class="place-beneath">
+      <div id="map-frame">
+        <div id="party-cursor"></div>
+        <p id="pworldmap">
+          #{RML}
+        </p>
+      </div>
+      
+      <div id="city-splash">
+        <img id="city-splash-image" style="width:100%;height:100%;" />
+      </div>
+      
+      <div id="map-side">
+        <div class="block-first window-background">
+          <div id="clock-frame">
+            <div class="console-value" id="clock-year">0000</div> <div class="console-value" id="clock-month">01</div> <div id="clock-day" class="console-value">01</div>
+          </div>
+        </div>
+        
+        <div class="block-second window-background">
+          <div id="city-container">
+            <div id="city-list">
+            </div>
+          </div>
+          
+          <div id="entry-zone-container">
+            <div id="entry-zones">
+            </div>
+              <button class="universal_button" id="button-cancel" style="position:relative;bottom:20px;width:80%;margin:auto;">
+                Back to map
+              </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="rest" class="window-background">
+      <div id="main-bar" class="   place-beneath">
+        <button id="button-inventory" class="universal_button" i18n="Inventory">Inventory</button>
+        <button id="button-character" class="universal_button" i18n="Character">Character</button>
+        <button id="button-pipbuck"  class="universal_button" i18n="Pipbuck">Pipbuck</button>
+        <button id="button-menu"     class="universal_button" i18n="Menu">Menu</button>
+      </div>
+
+      <div id="quest-locator" class="console-bg   place-beneath">
+        Placeholder for quest tracer
+      </div>
+    </div>
 
   </body>
 </rml>

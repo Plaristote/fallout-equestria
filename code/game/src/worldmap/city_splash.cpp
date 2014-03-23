@@ -3,15 +3,14 @@
 
 using namespace std;
 
-CitySplash::CitySplash(Data data, WindowFramework* window, Rocket::Core::Context* context) : UiBase(window, context)
+CitySplash::CitySplash(Data data, WindowFramework* window, Rocket::Core::Context* context, Rocket::Core::ElementDocument* root) : UiBase(window, context)
 {
-  root = context->LoadDocument("data/city_splash.rml");
-  if (!root)
-    throw 0;
+  this->root                = root;
+  root_outlives_this_object = true;
 
-  Rocket::Core::Element* splash      = root->GetElementById("splash");
+  Rocket::Core::Element* splash      = root->GetElementById("city-splash-image");
   Data                   entry_zones = data["zones"];
-  Rocket::Core::Element* zoneroot   = root->GetElementById("zones");
+  Rocket::Core::Element* zoneroot   = root->GetElementById("entry-zones");
 
   if (splash)
   {
@@ -29,11 +28,12 @@ CitySplash::CitySplash(Data data, WindowFramework* window, Rocket::Core::Context
         stringstream         stream;
         std::string          zone_name = "zone-" + underscore(zone.Key());
 
-        stream << "<div class='zone-button' id='" << zone_name << "'>";
-        stream << zone.Key();
+        stream << "<div class='zone-entry'>";
+        stream <<   "<button class='long_button zone-button' id='" << zone_name << "'>";
+        stream <<     zone.Key();
+        stream <<   "</button>";
         stream << "</div>";
-        zoneroot->GetInnerRML(rml);
-        rml += stream.str().c_str();
+        rml = stream.str().c_str();
         zoneroot->SetInnerRML(rml);
         {
           RocketListener* listener = new RocketListener;
@@ -60,6 +60,42 @@ CitySplash::~CitySplash()
 
     ToggleEventListener(false, name, "click", *listener.second);
   });
+}
+
+void CitySplash::Show(void)
+{
+  SetSplashVisible(true);
+  SetZonePickerVisible(true);
+}
+
+void CitySplash::Hide(void)
+{
+  SetSplashVisible(false);
+  SetZonePickerVisible(false);
+}
+
+void CitySplash::SetSplashVisible(bool visible)
+{
+  Rocket::Core::Element* map_frame   = root->GetElementById("map-frame");
+  Rocket::Core::Element* city_splash = root->GetElementById("city-splash");
+  
+  if (map_frame && city_splash)
+  {
+    map_frame->SetProperty  ("display", visible ? "none"  : "block");
+    city_splash->SetProperty("display", visible ? "block" : "none");
+  }
+}
+
+void CitySplash::SetZonePickerVisible(bool visible)
+{
+  Rocket::Core::Element* city_list = root->GetElementById("city-container");
+  Rocket::Core::Element* zone_list = root->GetElementById("entry-zone-container");
+  
+  if (city_list && zone_list)
+  {
+    city_list->SetProperty("display", visible ? "none"  : "block");
+    zone_list->SetProperty("display", visible ? "block" : "none");
+  }
 }
 
 void CitySplash::ZonePicked(Rocket::Core::Event& event)

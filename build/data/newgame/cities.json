@@ -3,7 +3,11 @@
   "visible": 1,
   "pos_x": 94,
   "pos_y": 102,
-  "radius": 20
+  "radius": 20,
+  "splashscreen": "cities/Stable.png",
+  "zones": {
+    "worldmap", 1
+  }
 }
 ,
 "random-desert-1": {
