@@ -17,7 +17,7 @@ if(CMAKE_COMPILER_IS_GNUCC)
   set(CMAKE_CXX_FLAGS "-std=c++0x -Wall -Wno-deprecated-declarations -pedantic")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
 elseif(APPLE)
-  set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
+  set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -m32")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
 endif()
 
@@ -41,6 +41,11 @@ if(UNIX)
   add_executable(game ${sourceFiles})
 else()
   add_executable(game ${sourceFiles} ressource.rc)
+endif()
+
+# Panda3D only supports 32bit on Mac OSX
+if(APPLE)
+  set_target_properties(game PROPERTIES COMPILE_FLAGS "-arch i386" LINK_FLAGS "-arch i386")
 endif()
 
 if(UNIX)
