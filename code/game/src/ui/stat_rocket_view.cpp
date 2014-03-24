@@ -594,10 +594,10 @@ void StatViewRocket::SetTraits(list<string> traits)
     for_each(traits.begin(), traits.end(), [this, &create_rml, &display_rml](const string trait)
     {
       string details = "data-details-type='traits' data-details-value='" + underscore(trait) + "'";
-      
+
       create_rml  << "<div class='traits-row'><button id='" << underscore(trait) << "' class='small_button'>&nbsp;</button>";
       create_rml  << "<div class='text-trait' id='trait-" << underscore(trait) << "' " << details << " >" << i18n::T(trait) << "</div></div>";
-      display_rml << "<div class='text-trait' id='display-trait-" << underscore(trait) << "' " << details << '>' << display_rml << i18n::T(trait) << "</div>";
+      display_rml << "<div class='text-trait' id='display-trait-" << underscore(trait) << "' " << details << '>' << i18n::T(trait) << "</div>";
     });
     if (create_element)  create_element->SetInnerRML(create_rml.str().c_str());
     if (display_element) display_element->SetInnerRML(display_rml.str().c_str());
