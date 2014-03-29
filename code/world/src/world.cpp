@@ -1026,4 +1026,3 @@ void World::CompileDoors(ProgressCallback progress_callback)
     progress_callback("Compiling Doors: ", (float)i / waypoints.size() * 100.f);
   }
 }
-

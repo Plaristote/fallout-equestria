@@ -14,10 +14,10 @@ public:
 
   void                   Initialize(WindowFramework*, World*);
   void                   SetTarget(InstanceDynamicObject* t);
+  static bool            IsObjectCuttable(const MapObject& object);
   
 private:
   void                   MarkCuttableObjects(World*);
-  bool                   IsObjectCuttable(const MapObject& object) const;
 
   InstanceDynamicObject* target;
   NodePath               halo;

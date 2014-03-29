@@ -177,6 +177,7 @@ x --> Preparing a Windows building environment to get Windows nightly builds
 ~ --> Preparing Debian packages
 x --> Preparing RPM packages
 x --> Implementing collision shapes for MapObjects
+~ --> Optimize FPS by smartly flattening MapObjects together
 x --> Fixing line of sight performance by checking level's geometry using only CollisionNode
 x --> Fixing dialog interface being so ugly
 x --> Fixing Rocket's drag and drop causing crashes

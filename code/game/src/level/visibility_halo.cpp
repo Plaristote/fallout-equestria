@@ -27,7 +27,7 @@ void VisibilityHalo::MarkCuttableObjects(World* world)
   });
 }
 
-bool VisibilityHalo::IsObjectCuttable(const MapObject &object) const
+bool VisibilityHalo::IsObjectCuttable(const MapObject &object)
 {
   string name       = object.nodePath.get_name();
   string patterns[] = { "Wall", "wall", "Ceiling", "ceiling" };

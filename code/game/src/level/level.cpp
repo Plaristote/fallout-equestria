@@ -5,6 +5,7 @@
 #include "level/objects/door.hpp"
 #include "level/objects/shelf.hpp"
 #include <level/objects/locker.hpp>
+#include <level/world_flatten.hpp>
 #include <i18n.hpp>
 
 #include "ui/alert_ui.hpp"
@@ -80,6 +81,13 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   world->SetWaypointsVisible(false);
   
   player_halo.Initialize(window, world);
+  
+  LoadingScreen::AppendText("Flattening objects...");
+  {
+    WorldFlattener flattener(*world);
+    
+    flattener.Flatten();
+  }
 
   /*
    * DIVIDE AND CONQUER WAYPOINTS
