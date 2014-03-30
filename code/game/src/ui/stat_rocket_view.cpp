@@ -626,8 +626,6 @@ void StatViewRocket::SetCategoryFields(const std::string& category, const std::v
 
     if (element)
     {
-      unsigned short topX = 0;
-
       for (unsigned int i = 0 ; i < keys.size() ; ++i)
       {
         string underscored  = underscore(keys[i]);
@@ -635,12 +633,13 @@ void StatViewRocket::SetCategoryFields(const std::string& category, const std::v
 
         if (category == "Special")
         {
-          rml << "<p class='special-group' data-type='Special' data-key='" << keys[i] << "' style='top: " << topX << "px;'>\n";
-          rml << "  <p class='special-key' " << details_data << ">" << keys[i] << "</p>\n";
-          rml << "  <p class='special-value console-value' id='special-value-" << underscored << "'>0</p>\n";
-          rml << "  <p class='special-commt console-value' id='special-commt-" << underscored << "'>Great</p>\n";
-          rml << "</p>\n\n";
-          topX += 40;
+          rml << "<div class='special-group' data-type='Special' data-key='" << keys[i] << "' style='height:"<< (100.f / keys.size()) <<"%;'>\n";
+          rml << "  <div class='special-key' " << details_data << ">" << keys[i] << "</div>\n";
+          rml << "  <div class='special-value console-value' id='special-value-" << underscored << "'>0</div>\n";
+          rml << "  <div class='special-commt console-value' id='special-commt-" << underscored << "'>Great</div>\n";
+          rml << "  <div class='edit-cursor-placeholder'></div>\n";
+          rml << "</div>\n\n";
+          cout << rml.str() << endl;
         }
         else if (category == "Statistics")
         {
