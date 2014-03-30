@@ -119,12 +119,15 @@ void MusicManager::Run(void)
     volume_change = _current_music->getVolume()  != _volume_goal;
     is_valid      = true;
 #endif
-    if (volume_change)
-      FadeVolume(elapsed_time);
-    if (not_playing && is_valid)
-      PlayNext();
-    else if (_fading_out)
-      FadeOut(elapsed_time);
+    if (is_valid)
+    {
+      if (volume_change)
+        FadeVolume(elapsed_time);
+      if (not_playing)
+        PlayNext();
+      else if (_fading_out)
+        FadeOut(elapsed_time);
+    }
     _timer.Restart();
   }
 }
