@@ -55,29 +55,30 @@ Mouse::~Mouse()
   events->remove_hook("wheel_up",   &Mouse::CallbackWheelUp,   (void*)this);
   events->remove_hook("wheel_down", &Mouse::CallbackWheelDown, (void*)this);
   
-  MouseCursor::Get()->SetCursorTexture("textures/cursor-interaction.png");
+  MouseCursor::Get()->SetCursorType("cursor-interaction");
 }
 
 void Mouse::SetMouseState(char i)
 {
-  std::string texture;
+  std::string type;
   
   switch (i)
   {
     case 'a':
-      texture = "textures/cursor-action.png";
+      type = "cursor-action";
       break ;
     case 'i':
-      texture = "textures/cursor-interaction-none.png";
+      type = "cursor-interaction-none";
       break ;
     case 't':
-      texture = "textures/cursor-target.png";
+      type = "cursor-target";
       break ;
     default:
+      type = "cursor-interaction";
       break ;
   }
   if (MouseCursor::Get())
-    MouseCursor::Get()->SetCursorTexture(texture);
+    MouseCursor::Get()->SetCursorType(type);
 }
 
 std::string NodePathFullName(NodePath nodepath, NodePath root)

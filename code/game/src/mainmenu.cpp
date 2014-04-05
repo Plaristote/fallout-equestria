@@ -94,15 +94,13 @@ void MainMenu::DisplayAlerts(void)
 
 AsyncTask::DoneStatus MainMenu::do_task()
 {
-  static unsigned int fps = 0;
-  static Timer        timer;
-  MusicManager* mm = MusicManager::Get();
+  MusicManager* music_manager = MusicManager::Get();
 
   if (_alerts.size() > 0)
     DisplayAlerts();
   else
   {
-    if (mm) { mm->Run(); }
+    if (music_manager) { music_manager->Run(); }
     if (createLevelPlz) AsyncCreateLevel();
     if (_levelTask)
     {
@@ -126,19 +124,10 @@ AsyncTask::DoneStatus MainMenu::do_task()
       _need_garbage_collect = false;
     }
   }
-  if (!quitGamePlz)
-    _mouseCursor.Update();
-  else
+  if (quitGamePlz)
     framework->close_framework();
   SoundManager::GarbageCollectAll();
   Executor::Run(); // Executor does not have any specific application. It just executes lambdas collected here and there.
-  fps++;
-  if (timer.GetElapsedTime() > 1.f)
-  {
-    //std::cout << ":::: Frames per seconds: " << fps << std::endl;
-    fps = 0;
-    timer.Restart();
-  }
   return (quitGamePlz ? AsyncTask::DS_exit : AsyncTask::DS_cont);
 }
 

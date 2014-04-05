@@ -1,0 +1,63 @@
+<rml>
+  <head>
+    <title>Mouse Cursor</title>
+    <style>
+      #mouse
+      {
+        overflow: visible;
+      }
+
+      #mouse-cursor
+      {
+        position: relative;
+      }
+
+      #mouse-hint
+      {
+        position: relative;
+        top:  30px;
+        left: 30px;
+        font-family: JH_Fallout;
+        color: white;
+        outline-font-effect: outline;
+        outline-width: 1px;
+        outline-colour: black;
+      }
+
+      .cursor-interaction
+      {
+        width: 50px; height: 50px;
+      }
+      
+      .cursor-interaction-none
+      {
+        width: 50px; height: 50px;
+        top: -2px; left: -2px;
+      }
+      
+      .cursor-interaction-available
+      {
+        width: 50px; height: 50px;
+        top: -2px; left: -2px;
+      }
+      
+      .cursor-move
+      {
+        width: 50px; height: 50px;
+        top: -25px; left: -25px;
+      }
+      
+      .cursor-target
+      {
+        width: 50px; height: 50px;
+        top: -25px; left: -25px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="mouse">
+      <img id="mouse-cursor" class="cursor-interaction" src="../textures/cursor-interaction.png" />
+      <span id="mouse-hint"></span>
+    </div>
+  </body>
+</rml>
