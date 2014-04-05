@@ -28,6 +28,8 @@ class FieldOfView : public ScheduledTask
 
 public:
   FieldOfView(Level& level, ObjectCharacter& character);
+  ~FieldOfView(void);
+  
   void                 SetIntervalDurationFromStatistics(void);
 
   bool                 IsDetected(const ObjectCharacter*) const;

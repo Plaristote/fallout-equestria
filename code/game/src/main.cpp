@@ -42,10 +42,10 @@ int main(int argc, char *argv[])
     ConfigPage*      config = load_prc_file("config.prc");
 
     cout << "[FoE] Loading configuration" << endl;
-#ifdef PSTAT_ENABLED
+# ifdef PSTAT_ENABLED
     if (!(PStatClient::connect("localhost", 5185))) // Initialize client for profiling collector
       cout << "[FoE] Can't connect to PStat client" << endl;
-#endif
+# endif
     cout << "[FoE] Opening Panda3D Framework" << endl;
     panda_framework.open_framework(argc, argv);
     cout << "[FoE] Setting window's title" << endl;
@@ -90,4 +90,3 @@ int main(int argc, char *argv[])
   return (0);
 }
 #endif
-

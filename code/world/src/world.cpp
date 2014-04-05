@@ -216,12 +216,9 @@ MapObject* World::AddMapObject(const string &name, const string &model, const st
 
 void World::ObjectChangeFloor(MapObject& object, unsigned char floor, unsigned short type)
 {
-  if (floor != object.floor)
-  {
-    if (floors.size() <= floor) FloorResize(floor + 1);
-    object.nodePath.reparent_to(floors[floor].get_child(type));
-    object.floor = floor;
-  }
+  if (floors.size() <= floor) FloorResize(floor + 1);
+  object.nodePath.reparent_to(floors[floor].get_child(type));
+  object.floor = floor;
 }
 
 void World::MapObjectChangeFloor(MapObject& object, unsigned char floor)
@@ -314,6 +311,8 @@ void World::ReparentObject(MapObject* object, const std::string& name)
 // DYNAMIC OBJECTS
 DynamicObject* World::InsertDynamicObject(DynamicObject& object)
 {
+  cout << "INSERTING OBJECT " << object.name << " with model " << object.strModel << " and texture " << object.strTexture << endl;
+  cout << "Its floor is " << object.floor << endl;
   object.waypoint = 0;
   object.nodePath = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + object.strModel);
   if (object.nodePath.is_empty())
@@ -329,6 +328,7 @@ DynamicObject* World::InsertDynamicObject(DynamicObject& object)
   }
   object.nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
   dynamicObjects.insert(dynamicObjects.begin(), object);
+  DynamicObjectChangeFloor(*dynamicObjects.begin(), object.floor);
   return (&(*dynamicObjects.begin()));
 }
 
@@ -501,13 +501,12 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
 
 void World::DynamicObjectSetWaypoint(DynamicObject& object, Waypoint& waypoint)
 {
-  object.waypoint = &waypoint;
-  if (object.waypoint->floor != waypoint.floor)
+  if (object.waypoint == 0 || object.waypoint->floor != waypoint.floor)
   {
-    if (floors.size() > waypoint.floor)
-      object.nodePath.set_alpha_scale(floors[waypoint.floor].get_color_scale().get_w());
     DynamicObjectChangeFloor(object, waypoint.floor);
+    object.nodePath.set_alpha_scale(floors[waypoint.floor].get_color_scale().get_w());
   }
+  object.waypoint = &waypoint;
 }
 
 void World::SetWaypointsVisible(bool v)

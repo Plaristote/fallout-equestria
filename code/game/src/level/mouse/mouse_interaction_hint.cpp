@@ -13,9 +13,9 @@ MouseInteractionHint::MouseInteractionHint(Level& level): MouseTargetHint(level)
 
 void MouseInteractionHint::SetInteractionCursor(const std::string& type)
 {
-  const string texture_path = "textures/cursor-interaction-" + type + ".png";
+  const string texture_path = "cursor-interaction-" + type;
 
-  MouseCursor::Get()->SetCursorTexture(texture_path);
+  MouseCursor::Get()->SetCursorType(texture_path);
 }
 
 void MouseInteractionHint::SetHoveredObject(NodePath object_path)
@@ -48,7 +48,7 @@ void MouseInteractionHint::SetHoveredObject(InstanceDynamicObject* _object)
   float distance      = player->GetDistance(_object);
   float field_of_view = GetFieldOfViewRadius();
 
-  if (distance <= field_of_view)
+  if (distance <= field_of_view && _object->GetInteractions().size() > 0)
     SetInteractionCursor("available");
   else
     SetInteractionCursor("none");

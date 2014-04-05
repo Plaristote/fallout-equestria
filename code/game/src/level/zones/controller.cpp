@@ -86,11 +86,9 @@ void Zones::Controller::InsertObjectOnWaypoint(InstanceDynamicObject* object, Wa
   NodePath         nodepath       = object->GetNodePath();
   DynamicObject&   dynamic_object = *object->GetDynamicObject();
   World*           world          = manager->level.GetWorld();
-  
+
   world->DynamicObjectSetWaypoint(dynamic_object, *waypoint);
-  dynamic_object.floor = -1;
   object->SetOccupiedWaypoint(waypoint);
-  world->DynamicObjectChangeFloor(dynamic_object, waypoint->floor);
   object->GetNodePath().set_pos(waypoint->nodePath.get_pos());
   if (character)
   {

@@ -84,9 +84,9 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   
   LoadingScreen::AppendText("Flattening objects...");
   {
-    WorldFlattener flattener(*world);
+    //WorldFlattener flattener(*world);
     
-    flattener.Flatten();
+    //flattener.Flatten();
   }
 
   /*
@@ -184,6 +184,7 @@ Level::~Level()
 
   time_manager.ClearTasks(TASK_LVL_CITY);
   projectiles.CleanUp();
+  ForEach(characters,  [](ObjectCharacter* obj)       { delete obj;        });
   ForEach(objects,     [](InstanceDynamicObject* obj) { delete obj;        });
   ForEach(parties,     [](Party* party)               { delete party;      });
   CurrentLevel = 0;
@@ -489,7 +490,6 @@ AsyncTask::DoneStatus Level::do_task(void)
     return (AsyncTask::DS_cont);
   camera.SlideToHeight(GetPlayer()->GetDynamicObject()->nodePath.get_z());
   camera.Run(elapsedTime);  
-
   mouse.Run(elapsedTime);
 
   std::function<void (InstanceDynamicObject*)> run_object = [elapsedTime](InstanceDynamicObject* obj) { obj->Run(elapsedTime); };
@@ -703,5 +703,4 @@ void Level::Unserialize(Utils::Packet& packet)
   for_each(characters.begin(), characters.end(), [&packet](ObjectCharacter* character)    { character->Unserialize(packet); });
   cout << "characters unserialized" << endl;
   combat.Unserialize(packet);
-  cout << "bite" << endl;
 }

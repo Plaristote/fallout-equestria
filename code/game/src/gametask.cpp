@@ -133,6 +133,7 @@ AsyncTask::DoneStatus GameTask::do_task()
     return (AsyncTask::DS_done);
   _signals.ExecuteRecordedCalls();
 
+  time_manager.ExecuteTasks();
   if (player_stats && (int)(player_stats->GetData()["Variables"]["Hit Points"]) <= 0)
     GameOver();
   if (level)
@@ -140,7 +141,6 @@ AsyncTask::DoneStatus GameTask::do_task()
   else if (world_map)
     world_map->Run();
   pipbuck.Run();
-  time_manager.ExecuteTasks();
   return (AsyncTask::DS_cont);
 }
 
