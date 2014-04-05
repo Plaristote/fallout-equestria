@@ -256,12 +256,6 @@ tabset panels panel
   height: 85%;
 }
 
-#placeholder
-{
-  width: 100%;
-  height: 80%;
-}
-
 .form-options
 {
   text-align: center;
@@ -312,6 +306,36 @@ tabset panels panel
 .input-text
 {
   height: 32px;
+}
+
+#details-container
+{
+  width: 100%;
+  height: 80%;
+}
+
+#details-icon
+{
+  float: right;
+  width: 40%;
+  padding-top: 15%;
+}
+
+#details-icon img
+{
+  width: 100%;
+}
+
+#details-title
+{
+  text-decoration: underline;
+  font-size: 40px;
+  font-family: Fallout;
+}
+
+#details-text
+{
+  text-align: left;
 }
 		</style>
 	</head>
@@ -500,15 +524,15 @@ tabset panels panel
 		
 		      
 	 </div>
-    <p id="char-botom-side" >
-      <p id="placeholder" class="paper">
-        <div id="details-icon" style="float:right;"></div>
-        <div id="details-title"></div>
-        <div id="details-text"></div>
-      </p>
+    <div id="char-botom-side" >
+      <div id="details-container" class="paper">
+        <div id="details-icon"></div>
+        <p id="details-title"></p>
+        <p id="details-text"></p>
+      </div>
 		<button id="continue" i18n="Confirm" class="universal_button">Done</button>
 		<button id="cancel"   i18n="Close" class="universal_button">Cancel</button> 
-    </p>
+    </div>
    </div>
    <div id="team-panel" class="console-bg place-next-to">
      Character list
