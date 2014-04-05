@@ -27,17 +27,10 @@ void VisibilityHalo::MarkCuttableObjects(World* world)
   });
 }
 
+// TODO remove this
 bool VisibilityHalo::IsObjectCuttable(const MapObject &object)
 {
-  string name       = object.nodePath.get_name();
-  string patterns[] = { "Wall", "wall", "Ceiling", "ceiling" };
-
-  for (unsigned short i = 0 ; i < 4 ; ++i)
-  {
-    if (starts_with(name, patterns[i]))
-      return (true);
-  }
-  return (false);
+  return (object.IsCuttable());
 }
 
 void VisibilityHalo::Initialize(WindowFramework* window, World* world)

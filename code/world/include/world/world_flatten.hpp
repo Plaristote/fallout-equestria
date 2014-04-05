@@ -3,6 +3,7 @@
 
 # include "globals.hpp"
 # include "world/world.h"
+# include "world/flatten_map.hpp"
 # include <list>
 
 struct WorldFlattener
@@ -86,6 +87,7 @@ private:
   }
 
   World&                  world;
+  FlattenMap              flatten_map;
   std::list<BranchGroup>  floor_groups;
   std::list<TextureGroup> texture_groups;
   std::list<WallGroup>    wall_groups;

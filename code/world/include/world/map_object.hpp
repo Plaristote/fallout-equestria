@@ -42,6 +42,8 @@ struct MapObject : public Utils::Serializable
   virtual void  Serialize(Utils::Packet& packet) const;
   static void   InitializeTree(World* world);
   void          InitializeCollider(Collider type, LPoint3f position, LPoint3f scale, LPoint3f hpr);
+  
+  bool          IsCuttable(void) const;
 };
 
 
