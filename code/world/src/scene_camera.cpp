@@ -129,7 +129,9 @@ void SceneCamera::Run(float elapsedTime)
     return ;
   collector.set_level(2);
   collector.start();
-  if (_scrollEnabled)
+  if (_centeringCamera || _followingNodePath)
+    RunFollow(elapsedTime);
+  else if (_scrollEnabled)
     RunScroll(elapsedTime);
   if (_destHeight != _camera.get_z())
     RunSlideHeight(elapsedTime);
@@ -152,8 +154,6 @@ void SceneCamera::Run(float elapsedTime)
 
     _camera.set_hpr(_currentHpr);
   }
-  if (_centeringCamera || _followingNodePath)
-    RunFollow(elapsedTime);
   collector.stop();
 }
 
