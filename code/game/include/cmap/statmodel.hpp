@@ -32,7 +32,7 @@ public:
   std::string    GetGender(void) const             { return (_statsheet["Gender"].Value()); }
 
   void           AddKill(const std::string&);
-  unsigned int   GetKills(const std::string& race) const { return (_statsheet["Kills"][race]); }
+  unsigned int   GetKills(const std::string& race) const { return (_statsheet["Kills"][race].Or(0)); }
 
   bool           AddPerk(const std::string& perk);
   Data           GetPerk(const std::string& perk);
@@ -75,10 +75,10 @@ public:
   void           SetCurrentHp(short hp);
   void           SetArmorClass(unsigned short ac)   { _statsheet["Variables"]["Armor Class"]   = ac;    }
   void           SetActionPoints(unsigned short ap) { _statsheet["Variables"]["Action Points"] = ap;    }
-  short          GetCurrentHp(void)      const      { return (_statsheet["Variables"]["Hit Points"]);   }
-  short          GetMaxHp(void)          const      { return (_statsheet["Statistics"]["Hit Points"]);  }
-  unsigned short GetArmorClass(void)     const      { return (_statsheet["Variables"]["Armor Class"]);  }
-  unsigned short GetBaseArmorClass(void) const      { return (_statsheet["Statistics"]["Armor Class"]); }
+  short          GetCurrentHp(void)      const      { return (_statsheet["Variables"]["Hit Points"].Or(GetMaxHp()));            }
+  short          GetMaxHp(void)          const      { return (_statsheet["Statistics"]["Hit Points"].Or(1));                    }
+  unsigned short GetArmorClass(void)     const      { return (_statsheet["Variables"]["Armor Class"].Or(GetBaseArmorClass()));  }
+  unsigned short GetBaseArmorClass(void) const      { return (_statsheet["Statistics"]["Armor Class"].Or(1));                   }
 
   int            GetReputation(const std::string& faction) const;
   void           AddReputation(const std::string& faction, int amount);
