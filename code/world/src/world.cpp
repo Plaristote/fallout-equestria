@@ -501,13 +501,13 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
 
 void World::DynamicObjectSetWaypoint(DynamicObject& object, Waypoint& waypoint)
 {
-  object.waypoint = &waypoint;
-  if (object.waypoint->floor != waypoint.floor)
+  if (object.waypoint == 0 || object.waypoint->floor != waypoint.floor)
   {
     if (floors.size() > waypoint.floor)
       object.nodePath.set_alpha_scale(floors[waypoint.floor].get_color_scale().get_w());
     DynamicObjectChangeFloor(object, waypoint.floor);
   }
+  object.waypoint = &waypoint;
 }
 
 void World::SetWaypointsVisible(bool v)

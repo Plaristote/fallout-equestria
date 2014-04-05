@@ -4,7 +4,7 @@
 #include <panda3d/load_prc_file.h>
 #include <panda3d/graphicsStateGuardianBase.h>
 #include <panda3d/pStatClient.h>
-//#define PSTAT_ENABLED
+#define PSTAT_ENABLED
 
 #include "mainmenu.hpp"
 #include "options.hpp"
