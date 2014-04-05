@@ -168,7 +168,7 @@ std::pair<MapObject*, MapObject*> WorldFlattener::SmallestCombination(const std:
 {
   auto                        first  = objects.begin();
   auto                        end    = objects.end();
-  pair<MapObject*,MapObject*> best_pair(0, 0);
+  pair<MapObject*,MapObject*> best_pair(nullptr, nullptr);
   float                       smallest_value = -1;
 
   for (; first != end ; ++first)
