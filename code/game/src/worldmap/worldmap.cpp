@@ -301,7 +301,7 @@ void WorldMap::CityClicked(Rocket::Core::Event& event)
 void WorldMap::CloseCitySplash(void)
 {
   _city_splash->Hide();
-  Executor::ExecuteLater([this](void) { delete _city_splash; });
+  Executor::ExecuteLater([this](void) { delete _city_splash; _city_splash = 0; });
 }
 
 void WorldMap::OpenCitySplash(const std::string& cityname)
@@ -324,7 +324,7 @@ void WorldMap::OpenCitySplash(const std::string& cityname)
     }
     catch (...)
     {
-      if (_city_splash) { delete _city_splash; }
+      if (_city_splash) { delete _city_splash; _city_splash = 0; }
       AlertUi::NewAlert.Emit("Could not load splashscreen for the place named '" + cityname + '\'');
     }
   }

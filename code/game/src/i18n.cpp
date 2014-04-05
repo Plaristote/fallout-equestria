@@ -11,7 +11,7 @@ Sync::Signal<void> i18n::LanguageChanged;
 i18n::i18n(const string& language)
 {
   cout << "[i18n] Language set to " << language << endl;
-  current_language = DataTree::Factory::JSON("i18n/" + language + ".json");
+  current_language = DataTree::Factory::JSON("data/i18n/" + language + ".json");
 }
 
 i18n::~i18n()
@@ -32,10 +32,10 @@ void i18n::Unload(void)
   {
     cout << "[i18n] Unloaded current language" << endl;
     delete _self;
+    _self = 0;
   }
 }
 
-// TODO update that to find the language files
 vector<string> i18n::LanguagesAvailable(void)
 {
   vector<string>            list;
@@ -47,8 +47,13 @@ vector<string> i18n::LanguagesAvailable(void)
     
     for_each(files.begin(), files.end(), [&list](const Dirent& file)
     {
-      if (file.d_type == DT_DIR && file.d_name[0] != '.')
-	list.push_back(file.d_name);
+      if (file.d_type == DT_REG)
+      {
+        string language_name(file.d_name);
+        
+        language_name = language_name.substr(0, language_name.size() - 5); // where 5 is '.json'
+	list.push_back(language_name);
+      }
     });
   }
   return (list);

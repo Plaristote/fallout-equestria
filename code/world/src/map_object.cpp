@@ -222,3 +222,16 @@ void MapObject::Serialize(Utils::Packet& packet) const
     }
   } // #Revision4/5
 }
+
+bool MapObject::IsCuttable(void) const
+{
+  string name       = nodePath.get_name();
+  string patterns[] = { "Wall", "wall", "Ceiling", "ceiling" };
+
+  for (unsigned short i = 0 ; i < 4 ; ++i)
+  {
+    if (starts_with(name, patterns[i]))
+      return (true);
+  }
+  return (false);
+}

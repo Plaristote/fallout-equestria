@@ -11,3 +11,5 @@ load-display pandadx9
 aux-display pandadx8
 aux-display tinydisplay
 aux-display pandagl
+
+transform-cache 0

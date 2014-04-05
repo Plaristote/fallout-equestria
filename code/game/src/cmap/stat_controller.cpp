@@ -267,7 +267,7 @@ void StatController::SetView(StatView* view)
   });
   _viewObservers.Connect(_view->UpdateDetails, [this](const string& type, const string& title)
   {
-    _view->SetDetails("pipbuck/boy/" + underscore(title) + ".png", i18n::T(type + '-' + title + "-desc"), i18n::T(title));
+    _view->SetDetails("pipbuck/boy/" + underscore(title) + ".png", i18n::T(title), i18n::T(type + '-' + title + "-desc"));
   });
 
   Data affinities = _model.GetSkillAffinities();

@@ -1,6 +1,17 @@
 {
 "You can't wait while fighting": "You can't wait while fighting",
 
+"str": "Strength",
+"per": "Perception",
+"end": "Endurance",
+"cha": "Charisma",
+"int": "Intelligence",
+"agi": "Agility",
+"luc": "Luck",
+
+"special-int-desc": "Intelligence gives you the ability not to sound like a complete idiot to other people. It also makes you more versed in the fields of science, medicine and repairs.",
+"special-luc-desc": "Twitchy-tails, floppy ears, or just random luck: lucky ponies manage to get out of the unexpected with less scratches than others.",
+
 "Bloody Mess":        "Bloody Mess",
 "Bruiser":            "Bruiser",
 "Finessse":           "Finessse",

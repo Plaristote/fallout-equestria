@@ -1,5 +1,4 @@
-#include "level/world_flatten.hpp"
-#include "level/visibility_halo.hpp"
+#include "world/world_flatten.hpp"
 
 using namespace std;
 
@@ -68,6 +67,8 @@ void WorldFlattener::Flatten(void)
   MakeFloorGroups();
   MakeTextureGroups(floor_groups);
   MakeTextureGroups(wall_groups);
+  flatten_map.OutputFlattenMap();
+  flatten_map.FlattenWorld(world);
 }
 
 void WorldFlattener::FindChildForObject(BranchGroup& group, MapObject* parent)
@@ -79,7 +80,7 @@ void WorldFlattener::FindChildForObject(BranchGroup& group, MapObject* parent)
   {
     MapObject& object = *it;
 
-    if (VisibilityHalo::IsObjectCuttable(object))
+    if (object.render.is_empty() || object.IsCuttable())
       continue ;
     if (it->parent == parent->name &&
         (find(group.objects.begin(), group.objects.end(), &object) == group.objects.end()))
@@ -108,12 +109,12 @@ void WorldFlattener::MakeFloorGroups(void)
       floor_groups.push_back(group);
     }
   }
-
+  
   for (it = world.objects.begin() ; it != end ; ++it)
   {
     MapObject&  object = *it;
 
-    if (VisibilityHalo::IsObjectCuttable(object))
+    if (object.IsCuttable())
     {
       WallGroup& group = RequireGroup(wall_groups, object.floor);
 
@@ -122,6 +123,26 @@ void WorldFlattener::MakeFloorGroups(void)
     }
   }
   
+  for_each(floor_groups.begin(), floor_groups.end(), [](BranchGroup& group)
+  {
+    cout << "[GROUP] " << group.root << endl;
+    for_each(group.objects.begin(), group.objects.end(), [](MapObject* object)
+    {
+      cout << object->name << endl;
+    });
+    cout << endl;
+  });
+  
+  for_each(wall_groups.begin(), wall_groups.end(), [](WallGroup& group)
+  {
+    cout << "[GROUP] " << group.root << endl;
+    for_each(group.objects.begin(), group.objects.end(), [](MapObject* object)
+    {
+      cout << object->name << endl;
+    });
+    cout << endl;
+  });
+
   cout << "Regular groups: " << floor_groups.size() << ", wall groups: " << wall_groups.size() << endl;
 }
 
@@ -196,7 +217,7 @@ void WorldFlattener::FlattenObjects(MapObject* first, MapObject* second)
   NodePath target            = first->render;
   LPoint3f relative_position = second->nodePath.get_pos(target);
   LPoint3f relative_hpr      = second->nodePath.get_hpr(target);
-  
+
   second->render.reparent_to(target);
   second->render.set_pos(relative_position);
   second->render.set_hpr(relative_hpr);
@@ -226,7 +247,7 @@ void WorldFlattener::MakeZoneGroups(WorldFlattener::TextureGroup& group)
       cout << "Combined area for " << smallest_combination.first->name << ", " << smallest_combination.second->name << " is " << size << endl;
       if (size > max_size)
         break ;
-      FlattenObjects(smallest_combination.first, smallest_combination.second);
+      flatten_map.AddToGroup(smallest_combination.first->name, smallest_combination.second->name);
       list.remove(smallest_combination.second);
     }
   } while (list.size() > 1);

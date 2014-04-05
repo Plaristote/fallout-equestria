@@ -12,6 +12,10 @@ FieldOfView::FieldOfView(Level& level, ObjectCharacter& character) : level(level
   SetAsRepetitiveTask(true);
 }
 
+FieldOfView::~FieldOfView(void)
+{
+}
+
 void FieldOfView::SetIntervalDurationFromStatistics(void)
 {
   unsigned short        duration   = 3;

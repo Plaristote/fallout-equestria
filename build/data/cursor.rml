@@ -56,7 +56,7 @@
   </head>
   <body>
     <div id="mouse">
-      <img id="mouse-cursor" class="cursor-interaction" src="../textures/cursor-interaction.png" />
+      <img id="mouse-cursor" class="cursor-interaction" src="cursors/cursor-interaction.png" />
       <span id="mouse-hint"></span>
     </div>
   </body>
