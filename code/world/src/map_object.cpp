@@ -225,6 +225,7 @@ void MapObject::Serialize(Utils::Packet& packet) const
 
 bool MapObject::IsCuttable(void) const
 {
+#ifndef GAME_EDITOR
   string name       = nodePath.get_name();
   string patterns[] = { "Wall", "wall", "Ceiling", "ceiling" };
 
@@ -233,5 +234,6 @@ bool MapObject::IsCuttable(void) const
     if (starts_with(name, patterns[i]))
       return (true);
   }
+#endif
   return (false);
 }

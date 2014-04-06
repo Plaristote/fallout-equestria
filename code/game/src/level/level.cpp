@@ -27,10 +27,10 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   time_manager(tm),
   main_script(name),
   level_ui(window, gameUi),
-  combat(*this, characters),
   mouse(*this, level_ui),
   player(*this),
   chatter_manager(window),
+  combat(*this, characters),
   floors(*this),
   zones(*this)
 {
