@@ -102,6 +102,7 @@ void Combat::FinalizeCharacterTurn(ObjectCharacter* character)
 {
   character->ConvertRemainingActionPointsToArmorClass();
   character->PlayAnimation("idle");
+  character->MovedFor1ActionPoint.DisconnectAll();
 }
 
 void Combat::InitializeCharacterTurn(ObjectCharacter* character)
@@ -113,6 +114,7 @@ void Combat::InitializeCharacterTurn(ObjectCharacter* character)
     NextTurn();
     return ;
   }
+  character->MovedFor1ActionPoint.Connect([character]() { character->UseActionPoints(1); });
 }
 
 void Combat::FinishFightForCharacter(ObjectCharacter* character)

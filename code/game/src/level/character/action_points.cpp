@@ -33,7 +33,6 @@ void CharacterActionPoints::RefreshActionPoints(void)
 
 bool CharacterActionPoints::UseActionPoints(unsigned short amount)
 {
-  return (true);
   Data variables     = controller->GetData()["Variables"];
   Data action_points = variables["Action Points"];
 

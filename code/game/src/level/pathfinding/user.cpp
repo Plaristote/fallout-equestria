@@ -174,16 +174,6 @@ bool Pathfinding::User::GoThroughNextWaypoint(void)
 
   UnprocessCollisions();
   {
-    Pathfinding::Path path_tester;
-
-    /*ObjectCharacter* character = _level->GetCharacter("SecurityChief");
-    cout << "Chief withdrawed arcs " << character->withdrawed_arcs.begin()->first->id << ", " << path.Front().id << endl;
-    auto w = GetOccupiedWaypoint()->GetWithdrawable(_level->GetWorld()->GetWaypointFromId(path.Front().id));
-    if (w)
-      cout << "Withdrawable: " << w->first.from->id << " has " << w->second << " withdrawers" << endl;
-    else
-      cout << "No withdrawable (should never happen)" << endl;*/
-
     arc = GetOccupiedWaypoint()->GetArcTo(path.Front().id);
     if (arc && arc->CanGoThrough(this))
       arc->GoingThrough(this);
