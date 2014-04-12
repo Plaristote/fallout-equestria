@@ -83,6 +83,7 @@ void Actions::UseWeaponOn::TargetAnimate()
 
 void Actions::UseWeaponOn::FireProjectile()
 {
+  cout << "FIRING PROJECTILE!" << endl;
   Data                   projectile_data = action["animations"]["projectiles"]["attack"];
   NodePath               destination, weapon_node;
   InstanceDynamicObject* target = GetObjectTarget();

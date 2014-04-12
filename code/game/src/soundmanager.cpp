@@ -76,7 +76,7 @@ ISampleInstance* SoundManager::CreateInstance(const std::string& key)
   
   if (it != _sounds.end())
   {
-    cout << "NewInstance" << endl;
+    cout << "NewInstance of " << key << endl;
     ISampleInstance* instance = it->sample->NewInstance();
 
     instance->SetVolume(_volume);

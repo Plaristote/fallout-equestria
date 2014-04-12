@@ -69,6 +69,26 @@ InventoryObject::~InventoryObject()
 {
 }
 
+void InventoryObject::ResetFromFixture(void)
+{
+  DataTree* objects = DataTree::Factory::JSON("data/objects.json");
+
+  if (objects)
+  {
+    {
+      Data item_index(objects);
+      Data item_data = item_index[GetName()];
+
+      if (item_data.NotNil())
+      {
+        for_each(begin(), end(), [](Data value) { value.Remove(); });
+        Duplicate(item_data);
+      }
+    }
+    delete objects;
+  }
+}
+
 bool InventoryObject::IsGroupableWith(const InventoryObject* other) const
 {
   return (GetName() == other->GetName());
@@ -246,17 +266,23 @@ int               InventoryObject::HitSuccessRate(ObjectCharacter* user, ObjectC
 
 unsigned short    InventoryObject::GetActionPointCost(ObjectCharacter* user, unsigned char use_type)
 {
-  AngelScript::Object hooks = _actionHooks[use_type];
-
-  if (hooks.IsDefined("ActionPointCost"))
+  if (_actionHooks.size() > use_type)
   {
-    AngelScript::Type<InventoryObject*> this_param(this);
-    AngelScript::Type<ObjectCharacter*> user_param(user);
-    AngelScript::Type<int>              use_type_param(use_type);
+    AngelScript::Object hooks = _actionHooks[use_type];
 
-    return ((int)hooks.Call("ActionPointCost", 3, &this_param, &user_param, &use_type_param));
+    if (hooks.IsDefined("ActionPointCost"))
+    {
+      AngelScript::Type<InventoryObject*> this_param(this);
+      AngelScript::Type<ObjectCharacter*> user_param(user);
+      AngelScript::Type<int>              use_type_param(use_type);
+
+      return ((int)hooks.Call("ActionPointCost", 3, &this_param, &user_param, &use_type_param));
+    }
+    return ((*this)["actions"][use_type]["ap-cost"]);
   }
-  return ((*this)["actions"][use_type]["ap-cost"]);
+  else
+    cout << "No action '" << (int)use_type << "' for item " << GetName() << endl;
+  return (2);
 }
 
 bool InventoryObject::UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target, unsigned char useType)
@@ -672,4 +698,12 @@ void                   Inventory::SetEquipedItem(const std::string& type_slot, u
   slot.object = object;
   slot.empty  = object == 0;
   EquipedItem.Emit(type_slot, it_slot, object);
+}
+
+void Inventory::ResetItemsFromFixtures()
+{
+  for_each(_content.begin(), _content.end(), [](InventoryObject* object)
+  {
+    object->ResetFromFixture();
+  });
 }

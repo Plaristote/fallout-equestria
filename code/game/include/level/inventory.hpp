@@ -52,6 +52,8 @@ public:
   bool              IsGroupableWith(const InventoryObject*) const;
   bool              IsHidden(void)  const { return ((*this)["hidden"] == 1); }
 
+  void              ResetFromFixture(void);
+
 private:
   template<class C>
   bool              ExecuteHook(const std::string& hook, ObjectCharacter* user, C* target, unsigned char actionIt);
@@ -136,6 +138,8 @@ public:
   unsigned short     GetCapacity(void)      const      { return (_capacity);      }
   void               SetCapacity(unsigned short value) { _capacity = value;       }
   bool               CanCarry(InventoryObject*, unsigned short quantity = 1);
+
+  void               ResetItemsFromFixtures(void);
   
   Sync::Signal<void> ContentChanged;
 

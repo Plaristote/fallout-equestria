@@ -95,7 +95,7 @@ namespace AngelScript
     TYPE* instance;
   };
 
-  class Object
+  class Object : public Sync::ObserverHandler
   {
     struct Function
     {
@@ -108,6 +108,7 @@ namespace AngelScript
     Object(const std::string& filepath);
     Object(asIScriptContext* context, const std::string& filepath);
     Object(asIScriptContext* context, asIScriptModule* module);
+    Object(const Object& copy);
     ~Object();
     
     Sync::Signal<void>    ObjectDestroyed;

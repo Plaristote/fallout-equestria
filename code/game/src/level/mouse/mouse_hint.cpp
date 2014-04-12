@@ -19,10 +19,12 @@ void MouseHint::Run(float elapsed_time)
         MouseZoneHint::SetHoveredWaypoint(Hovering().waypoint_ptr);
         break ;
       case MouseEvents::MouseTarget:
-        MouseTargetHint::SetHoveredObject(Hovering().dynObject);
+        if (!Hovering().dynObject.is_empty())
+          MouseTargetHint::SetHoveredObject(Hovering().dynObject);
         break ;
       case MouseEvents::MouseInteraction:
-        MouseInteractionHint::SetHoveredObject(Hovering().dynObject);
+        if (!Hovering().dynObject.is_empty())
+          MouseInteractionHint::SetHoveredObject(Hovering().dynObject);
         break ;
       default:
         ClearHint();

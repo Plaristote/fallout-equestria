@@ -107,6 +107,7 @@ void Combat::FinalizeCharacterTurn(ObjectCharacter* character)
 
 void Combat::InitializeCharacterTurn(ObjectCharacter* character)
 {
+  cout << "Starting turn for character " << character->GetName() << endl;
   character->GetFieldOfView().RunCheck();
   character->RefreshActionPoints();
   if (character->GetActionPoints() == 0)

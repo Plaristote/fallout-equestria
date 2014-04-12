@@ -560,6 +560,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(inventoryClass, "void  DelObject(Item@)",   asMETHOD(Inventory,DelObject), asCALL_THISCALL);
   engine->RegisterObjectMethod(inventoryClass, "Item@ GetObject(string)",  asMETHODPR(Inventory,GetObject, (const string&), InventoryObject*), asCALL_THISCALL);
   engine->RegisterObjectMethod(inventoryClass, "int   ContainsHowMany(string) const", asMETHOD(Inventory,ContainsHowMany), asCALL_THISCALL);
+  engine->RegisterObjectMethod(inventoryClass, "void ResetFromFixtures()", asMETHOD(Inventory,ResetItemsFromFixtures), asCALL_THISCALL);
 
   engine->RegisterObjectMethod(itemClass, "string GetName() const",                                asMETHOD(InventoryObject,GetName),               asCALL_THISCALL);
   engine->RegisterObjectMethod(itemClass, "Data   AsData()",                                       asFUNCTION(asUtils::ItemAsData),                 asCALL_CDECL_OBJFIRST);

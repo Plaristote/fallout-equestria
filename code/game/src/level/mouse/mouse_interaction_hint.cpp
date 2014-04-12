@@ -20,6 +20,7 @@ void MouseInteractionHint::SetInteractionCursor(const std::string& type)
 
 void MouseInteractionHint::SetHoveredObject(NodePath object_path)
 {
+  cout << "Debug1" << endl;
   InstanceDynamicObject* object = level.FindObjectFromNode(object_path);
 
   if (player && object && object->GetInteractions().size() > 0)
@@ -32,7 +33,11 @@ void MouseInteractionHint::SetHoveredObject(NodePath object_path)
       SetHoveredObject(object);
   }
   else
+    {
+      cout << "Debug1.5" << endl;
     SetInteractionCursor("none");
+    }
+  cout << "Debug2" << endl;
 }
 
 void MouseInteractionHint::SetHoveredCharacter(ObjectCharacter* character)

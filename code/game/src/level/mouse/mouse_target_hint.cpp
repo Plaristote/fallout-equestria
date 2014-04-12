@@ -12,7 +12,7 @@ MouseTargetHint::MouseTargetHint(Level& level) : MouseZoneHint(level), level(lev
 void MouseTargetHint::SetHoveredObject(NodePath object_path)
 {
   InstanceDynamicObject* object = level.FindObjectFromNode(object_path);
-  
+
   if (object)
     SuccessRateHint(object);
   else

@@ -443,7 +443,7 @@ void ObjectCharacter::Run(float elapsedTime)
     }
     else if (state == Level::Fight)
     {
-      if (GetHitPoints() <= 0 || GetActionPoints() == 0)
+      if (GetHitPoints() <= 0 || GetActionPoints() == 0 || (this != _level->GetPlayer() && !script->IsDefined("combat")))
 	_level->GetCombat().NextTurn();
       else if (!(IsMoving()) && script->IsDefined("combat")) // TODO replace with something more appropriate
       {
@@ -458,6 +458,8 @@ void ObjectCharacter::Run(float elapsedTime)
           cout << "Character " << GetName() << " is stalling" << endl;
           _level->GetCombat().NextTurn();
         }
+        else
+          cout << "Character " << GetName() << " is playing" << endl;
       }
     }
   }

@@ -67,6 +67,15 @@ AngelScript::Object::Object(asIScriptContext* context, asIScriptModule* module) 
   required_module = required_context = false;
 }
 
+AngelScript::Object::Object(const Object &copy) : filepath(copy.filepath),
+  context(copy.context),
+  module(copy.module),
+  functions(copy.functions),
+  shared_ptr(copy.shared_ptr)
+{
+  required_context = required_module = false;
+}
+
 AngelScript::Object::~Object()
 {
   ObjectDestroyed.Emit();
