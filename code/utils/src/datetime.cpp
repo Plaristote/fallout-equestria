@@ -224,3 +224,55 @@ void DateTime::Unserialize(Utils::Packet& packet)
 {
   packet >> year >> month >> day >> hour >> minute >> second;
 }
+
+static float ComputeLengthOfDay(unsigned char day)
+{
+  float         length_of_day;
+
+  // 83 (débuts des longs jours)
+  // 261 (fin des longs jours)
+  // longs jours: 172
+  // courts jourts: 193
+
+  if (day > 83 && day < 261)
+  {
+    static unsigned char summer_solstice = 172;
+
+    day -= 83;
+    if (day > summer_solstice)
+      length_of_day = (15 - ((day - summer_solstice) / 86.f) * 3);
+    else
+      length_of_day = (15 - ((summer_solstice - day) / 86.f) * 3);
+  }
+  else
+  {
+    static unsigned char winter_solstice = 359 - 261;
+
+    if (day > 0 && day < 83)
+      day += 365;
+    day -= 261;
+    if (day > winter_solstice)
+      length_of_day = (9 + ((day - winter_solstice) / 96.5f) * 3);
+    else
+      length_of_day = (9 + ((winter_solstice - day) / 96.5f) * 3);
+  }
+  return (length_of_day);
+}
+
+DateTime::DayLength DateTime::GetDayLength() const
+{
+  static DayLength day_lengths[357];
+  unsigned char    day = GetDay();
+
+  if (day <= 356)
+  {
+    if (day_lengths[day].length != 0)
+    {
+      day_lengths[day].length = ComputeLengthOfDay(day);
+      day_lengths[day].begin  = 14 - day_lengths[day].length / 2;
+      day_lengths[day].end    = 14 + day_lengths[day].length / 2;
+    }
+    return (day_lengths[day]);
+  }
+  return (day_lengths[0]);
+}

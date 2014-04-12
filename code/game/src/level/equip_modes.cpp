@@ -29,14 +29,17 @@ void EquipModes::Foreach(function<void (unsigned char, const string&)> callback)
 
 void EquipModes::SearchForUserOnItemWithSlot(ObjectCharacter* user, InventoryObject* item, const string& slot)
 {
-  Data          equip_modes(tree_equip_modes);
-  unsigned char counter = 0;
-
-  Clear();
-  for_each(equip_modes.begin(), equip_modes.end(), [this, user, item, slot, &counter](Data equip_mode)
+  if (tree_equip_modes)
   {
-    if (item->CanWeild(user, slot, counter))
-      modes.insert(std::pair<unsigned char, string>(counter, equip_mode.Value()));
-    counter++;
-  });
+    Data          equip_modes(tree_equip_modes);
+    unsigned char counter = 0;
+
+    Clear();
+    for_each(equip_modes.begin(), equip_modes.end(), [this, user, item, slot, &counter](Data equip_mode)
+    {
+      if (item->CanWeild(user, slot, counter))
+        modes.insert(std::pair<unsigned char, string>(counter, equip_mode.Value()));
+      counter++;
+    });
+  }
 }

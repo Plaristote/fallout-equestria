@@ -41,9 +41,11 @@ GameOptions::GameOptions(WindowFramework* window, Core::Context* context) : UiBa
     {
       stringstream rml;
 
-      for_each(languages.begin(), languages.end(), [&rml](string language)
+      for_each(languages.begin(), languages.end(), [&rml, current_language](string language)
       {
 	rml << "<option id='language-" << language << "' value='" << language << "'";
+	if (current_language == language)
+	  rml << " selected";
 	rml << ">" << language << "</option>\n";
       });
       language_select->SetInnerRML(rml.str().c_str());

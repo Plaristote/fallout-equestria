@@ -17,7 +17,8 @@ public:
 
   PT(RocketRegion)       GetRocketRegion(void)    const { return (_rocket);   }
   WindowFramework*       GetWindowFramework(void) const { return (_window);   }
-  GameOptions&           GetOptions(void)               { return (*_options); }
+  GameOptions&           GetOptions(void)         const { return (*_options); }
+  GameConsole&           GetConsole(void)         const { return (*_console); }
 
 private:
   WindowFramework*       _window;

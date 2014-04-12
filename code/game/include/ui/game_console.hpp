@@ -17,9 +17,6 @@ public:
 
   static GameConsole* GConsole;
 
-  void Show(void) { _root->Show(); }
-  void Hide(void) { _root->Hide(); }
-
   static GameConsole& Get();
 
   static void WriteOn(const std::string& string);
@@ -30,21 +27,23 @@ public:
   static void Toggle(const Event*, void* data)
   {
     GameConsole* console = reinterpret_cast<GameConsole*>(data);
-    (console->_root->IsVisible() ? console->Hide() : console->Show());
+    console->IsVisible() ? console->Hide() : console->Show();
   }
 
-  RocketListener         ConsoleKeyUp;
+  RocketListener         ConsoleKeyUp, ExecuteButton;
+
+  Sync::Signal<void (std::string)> CommandToExecute;
 
 private:
   void KeyUp(Rocket::Core::Event&);
   void Execute(Rocket::Core::Event&);
+  void ExecuteString(std::string);
   void Output(const std::string str);
 
-  std::vector<std::string>      _history;
-  vector<std::string>::iterator _histIter;
+  std::vector<std::string>       _history;
+  vector<std::string>::iterator  _histIter;
 
   WindowFramework*               _window;
-  Rocket::Core::ElementDocument* _root;
   Rocket::Core::Element*         _input;
   std::string                    _currentLine;
   asIScriptContext*              _script_context;

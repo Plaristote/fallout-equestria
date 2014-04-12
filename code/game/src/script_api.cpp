@@ -360,6 +360,17 @@ namespace asUtils
   {
     level->GetLevelUi().GetMainBar().AppendToConsole(message);
   }
+
+  namespace LevelUtils
+  {
+    void SunlightNearFar(Level* level, float a, float b)
+    {
+      Sunlight* sunlight = level->GetSunlight();
+
+      if (sunlight)
+        sunlight->SetNearFar(a, b);
+    }
+  }
   
   namespace Combat
   {
@@ -662,10 +673,11 @@ void AngelScriptInitialize(void)
 
   const char* cameraClass = "Camera";
   engine->RegisterObjectType(cameraClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(cameraClass, "void CenterOn(DynamicObject@)", asMETHOD(LevelCamera,CenterOnObject), asCALL_THISCALL);
-  engine->RegisterObjectMethod(cameraClass, "void Follow(DynamicObject@)",   asMETHOD(LevelCamera,FollowObject),   asCALL_THISCALL);
-  engine->RegisterObjectMethod(cameraClass, "void StopFollowing()",          asMETHOD(LevelCamera,StopFollowingNodePath), asCALL_THISCALL);
-  
+  engine->RegisterObjectMethod(cameraClass, "void CenterOn(DynamicObject@)",   asMETHOD(LevelCamera,CenterOnObject), asCALL_THISCALL);
+  engine->RegisterObjectMethod(cameraClass, "void Follow(DynamicObject@)",     asMETHOD(LevelCamera,FollowObject),   asCALL_THISCALL);
+  engine->RegisterObjectMethod(cameraClass, "void StopFollowing()",            asMETHOD(LevelCamera,StopFollowingNodePath), asCALL_THISCALL);
+  engine->RegisterObjectMethod(cameraClass, "void SetEnabledTrackaball(bool)", asMETHOD(SceneCamera,SetEnabledTrackball), asCALL_THISCALL);
+
   const char* zoneManagerClass = "ZoneManager";
   engine->RegisterObjectType(zoneManagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectMethod(zoneManagerClass, "bool ZoneExists(string)", asMETHOD(Zones::Manager,ZoneExists), asCALL_THISCALL);
@@ -688,6 +700,8 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(levelClass, "void           StopFight()",                           asFUNCTION(asUtils::Combat::StopFight), asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(levelClass, "void           NextTurn()",                            asFUNCTION(asUtils::Combat::NextTurn),  asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(levelClass, "Sound@         PlaySound(string)",                     asMETHOD(Level,PlaySound),              asCALL_THISCALL);
+
+  engine->RegisterObjectMethod(levelClass, "void SunlightSetNearFar(float, float)", asFUNCTION(asUtils::LevelUtils::SunlightNearFar), asCALL_CDECL_OBJFIRST);
 
   const char* worldmapClass = "WorldMap";
   engine->RegisterObjectType(worldmapClass, 0, asOBJ_REF | asOBJ_NOCOUNT);

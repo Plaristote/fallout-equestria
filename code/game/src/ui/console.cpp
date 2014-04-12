@@ -72,14 +72,18 @@ GameConsole::GameConsole(WindowFramework* window, Rocket::Core::Context* context
   //
   // Load Interface
   //
-  _root  = context->LoadDocument("data/console.rml");
-  if (_root)
+  root  = context->LoadDocument("data/console.rml");
+  if (root)
   {
     cout << "[UI] Console is ready" << endl;
+    _input = root->GetElementById("console_input");
     ToggleEventListener(true, "console_input", "keyup", ConsoleKeyUp);
+    ToggleEventListener(true, "execute", "click", ExecuteButton);
     ConsoleKeyUp.EventReceived.Connect(*this, &GameConsole::KeyUp);
-    Translate();
+    ExecuteButton.EventReceived.Connect(*this, &GameConsole::Execute);
   }
+  CommandToExecute.Connect(*this, &GameConsole::ExecuteString);
+  CommandToExecute.SetDirect(false);
 }
 
 GameConsole::~GameConsole()
@@ -88,36 +92,42 @@ GameConsole::~GameConsole()
     _script_context->Release();
   Script::Engine::ScriptError.Disconnect(_observerError);
   ToggleEventListener(false, "console_input", "keyup", ConsoleKeyUp);
+  ToggleEventListener(false, "execute", "click", ExecuteButton);
+}
+
+void GameConsole::ExecuteString(std::string command)
+{
+  if (_script_context)
+  {
+    stringstream stream;
+
+    int ret = ::ExecuteString(Script::Engine::Get(), command.c_str(), 0, _script_context);
+    if (ret == asEXECUTION_ABORTED || ret == asEXECUTION_EXCEPTION)
+    {
+      stream << "<span class='console-as-error'>[AngelScript]</span> ";
+      if (ret == asEXECUTION_ABORTED)
+        stream << "Execution Aborted";
+      else if (ret == asEXECUTION_EXCEPTION)
+        stream << "NullPointer error";
+      Output(stream.str());
+    }
+  }
+  else
+    Output("No script context available.");
 }
 
 void GameConsole::Execute(Rocket::Core::Event&)
 {
+  cout << "GameConsole::Execute" << endl;
   Rocket::Controls::ElementFormControl* control = reinterpret_cast<Rocket::Controls::ElementFormControl*>(_input);
-  Rocket::Core::String string = control->GetValue();
+  Rocket::Core::String                  string  = control ? control->GetValue() : Rocket::Core::String("");
 
   if (string != "")
   {
     _history.push_back(string.CString());
     ArrayToJson(_history, "data/history_console.json");
     _histIter= _history.end();
-
-    if (_script_context)
-    {
-      stringstream stream;
-
-      _currentLine = string.CString();
-      int ret = ExecuteString(Script::Engine::Get(), _currentLine.c_str(), 0, _script_context);
-      if (ret == asEXECUTION_ABORTED || ret == asEXECUTION_EXCEPTION)
-      {
-	stream << "<span class='console-as-error'>[AngelScript]</span> ";
-        if (ret == asEXECUTION_ABORTED)
-	  stream << "Execution Aborted";
-	else if (ret == asEXECUTION_EXCEPTION)
-	  stream << "NullPointer error";
-        Output(stream.str());
-      }
-    }
-    _currentLine = "";
+    CommandToExecute.Emit(string.CString());
     control->SetValue("");
   }
 }
@@ -129,7 +139,7 @@ void GameConsole::WriteOn(const std::string& str)
 
 void GameConsole::Output(const std::string str)
 {
-  Rocket::Core::Element* element = _root->GetElementById("console_output");
+  Rocket::Core::Element* element = root->GetElementById("console_output");
   Rocket::Core::String   string;
 
   element->GetInnerRML(string);

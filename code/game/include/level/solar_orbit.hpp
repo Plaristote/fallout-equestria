@@ -10,6 +10,7 @@ class SolarOrbit
 public:
   void     SetPosition(float x, float y) { this->cx = x; this->cy = y; }
   void     SetRadius(float radius)       { this->radius = radius;      }
+  float    GetRadius(void) const         { return (radius);            }
 
   LPoint3f GetPosition(void) const
   {

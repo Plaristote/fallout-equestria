@@ -127,6 +127,8 @@ AsyncTask::DoneStatus MainMenu::do_task()
   if (quitGamePlz)
     framework->close_framework();
   SoundManager::GarbageCollectAll();
+  OptionsManager::Updated.ExecuteRecordedCalls();
+  _generalUi.GetConsole().CommandToExecute.ExecuteRecordedCalls();
   Executor::Run(); // Executor does not have any specific application. It just executes lambdas collected here and there.
   return (quitGamePlz ? AsyncTask::DS_exit : AsyncTask::DS_cont);
 }

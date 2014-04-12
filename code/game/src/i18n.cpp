@@ -50,9 +50,10 @@ vector<string> i18n::LanguagesAvailable(void)
       if (file.d_type == DT_REG)
       {
         string language_name(file.d_name);
-        
+
         language_name = language_name.substr(0, language_name.size() - 5); // where 5 is '.json'
 	list.push_back(language_name);
+	cout << "[i18n] Found language " << language_name << endl;
       }
     });
   }

@@ -101,6 +101,7 @@ public:
   // World Interactions
   WindowFramework*       GetWindow(void)         { return (window); }
   World*                 GetWorld(void)          { return (world); }
+  Sunlight*              GetSunlight(void)       { return (sunlight); }
   LevelUi&               GetLevelUi(void)        { return (level_ui); }
   MouseEvents&           GetMouse(void)          { return (mouse); }
   Floors&                GetFloors(void)         { return (floors); }

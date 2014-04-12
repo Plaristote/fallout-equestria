@@ -3,6 +3,7 @@
 #include <panda3d/pandaFramework.h>
 
 DataTree*              OptionsManager::_data = 0;
+Sync::Signal<void>     OptionsManager::Updated;
 extern PandaFramework* framework;
 
 void OptionsManager::Initialize(void)
@@ -12,6 +13,7 @@ void OptionsManager::Initialize(void)
     _data = DataTree::Factory::JSON("conf.json");
     if (!_data)
       _data = new DataTree;
+    Updated.SetDirect(false);
     Refresh();
   }
 }
@@ -62,7 +64,7 @@ void OptionsManager::Refresh(void)
       framework->get_window(0)->get_graphics_window()->request_properties(props);
     }
 
-    // Saving changes
+    Updated.Emit();
     DataTree::Writers::JSON(_data, "conf.json");
   }
 }
