@@ -440,7 +440,9 @@ void ObjectCharacter::Run(float elapsedTime)
     }
     else if (state == Level::Fight && !(IsBusy()))
     {
-      if (GetHitPoints() <= 0 || GetActionPoints() == 0 || (this != _level->GetPlayer() && !script->IsDefined("combat")))
+      bool idle_during_fights = (this != _level->GetPlayer() && !script->IsDefined("combat"));
+
+      if (GetHitPoints() <= 0 || GetActionPoints() == 0 || idle_during_fights)
 	_level->GetCombat().NextTurn();
       else if (script->IsDefined("combat"))
       {

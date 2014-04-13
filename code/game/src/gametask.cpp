@@ -72,6 +72,7 @@ void                  GameTask::SaveClicked(Rocket::Core::Event&)
     {
       signals.remove(&ui_save_->SaveToSlot);
       signals.remove(&ui_save_->Done);
+      delete ui_save_;
     });
   });
   ui_save->EraseSlot.Connect (*this, &GameTask::EraseSlot);
@@ -81,8 +82,25 @@ void                  GameTask::LoadClicked(Rocket::Core::Event&)
 {
   UiLoad* ui_load = game_ui.OpenLoadingInterface(save_path);
 
+  _signals.push_back(&ui_load->LoadSlot);
+  _signals.push_back(&ui_load->Done);
+  ui_load->LoadSlot.SetDirect(false);
   ui_load->LoadSlot.Connect (*this, &GameTask::LoadSlot);
   ui_load->EraseSlot.Connect(*this, &GameTask::EraseSlot);
+  ui_load->Done.SetDirect(false);
+  ui_load->Done.Connect([this, ui_load]()
+  {
+    Sync::Signals& signals  = _signals;
+    UiLoad*        ui_load_ = ui_load;
+
+    // This lambda will be called in the signals object. The cleanup must be run later.
+    Executor::ExecuteLater([&signals, ui_load_]()
+    {
+      signals.remove(&ui_load_->LoadSlot);
+      signals.remove(&ui_load_->Done);
+      delete ui_load_;
+    });
+  });
 }
 
 void                  GameTask::GameOver(void)
@@ -109,7 +127,7 @@ void                  GameTask::Exit(Rocket::Core::Event&)
 
 void GameTask::RunLevel(void)
 {
-  if (level && level->do_task() == AsyncTask::DS_done)
+  if (level->do_task() == AsyncTask::DS_done)
   {
     SetupLoadingScreen();
     Level::Exit  exit      = level->GetExit();
@@ -188,6 +206,10 @@ void GameTask::Cleanup(void)
   }
   if (world_map)     delete world_map;
   if (player_party)  delete player_party;
+  quest_manager = 0;
+  level         = 0;
+  world_map     = 0;
+  player_party  = 0;
   time_manager.ClearTasks(0);
 }
 

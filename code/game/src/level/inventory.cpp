@@ -251,16 +251,21 @@ bool              InventoryObject::CanUse(ObjectCharacter* user, InstanceDynamic
 
 int               InventoryObject::HitSuccessRate(ObjectCharacter* user, ObjectCharacter* target, unsigned char use_type)
 {
-  AngelScript::Object& hooks = _actionHooks[use_type];
-
-  if (hooks.IsDefined("HitChances"))
+  if (_actionHooks.size() > use_type)
   {
-    AngelScript::Type<InventoryObject*> this_param(this);
-    AngelScript::Type<ObjectCharacter*> user_param(user);
-    AngelScript::Type<ObjectCharacter*> target_param(target);
+    AngelScript::Object& hooks = _actionHooks[use_type];
 
-    return (hooks.Call("HitChances", 3, &this_param, &user_param, &target_param));
+    if (hooks.IsDefined("HitChances"))
+    {
+      AngelScript::Type<InventoryObject*> this_param(this);
+      AngelScript::Type<ObjectCharacter*> user_param(user);
+      AngelScript::Type<ObjectCharacter*> target_param(target);
+
+      return (hooks.Call("HitChances", 3, &this_param, &user_param, &target_param));
+    }
   }
+  else
+    cout << "[HitSuccessRate] No action '" << (int)use_type << "' for item " << GetName() << endl;
   return (0);
 }
 
@@ -281,7 +286,7 @@ unsigned short    InventoryObject::GetActionPointCost(ObjectCharacter* user, uns
     return ((*this)["actions"][use_type]["ap-cost"]);
   }
   else
-    cout << "No action '" << (int)use_type << "' for item " << GetName() << endl;
+    cout << "[GetActionPointCost] No action '" << (int)use_type << "' for item " << GetName() << endl;
   return (2);
 }
 
@@ -292,19 +297,22 @@ bool InventoryObject::UseAsWeapon(ObjectCharacter* user, ObjectCharacter* target
 
 bool InventoryObject::UseOn(ObjectCharacter* user, InstanceDynamicObject* target, unsigned char useType)
 {
-  ObjectCharacter*     charTarget;
-  Lockable*            lockTarget;
-  AngelScript::Object& hooks = _actionHooks[useType];
+  if (_actionHooks.size() > useType)
+  {
+    ObjectCharacter*     charTarget;
+    Lockable*            lockTarget;
+    AngelScript::Object& hooks = _actionHooks[useType];
 
-  if (hooks.IsDefined("UseOnCharacter") && (charTarget = target->Get<ObjectCharacter>()) != 0)
-    return (ExecuteHook("UseOnCharacter", user, charTarget, useType));
-  if (hooks.IsDefined("UseOnDoor")      &&
-     (((lockTarget = target->Get<ObjectDoor>()) != 0) ||
-       (lockTarget = target->Get<ObjectLocker>()) != 0))
-    return (ExecuteHook("UseOnDoor", user, lockTarget, useType));
-  if (hooks.IsDefined("UseOnOthers"))
-    return (ExecuteHook("UseOnOthers", user, target, useType));
-  Level::CurrentLevel->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("That does nothing"));
+    if (hooks.IsDefined("UseOnCharacter") && (charTarget = target->Get<ObjectCharacter>()) != 0)
+      return (ExecuteHook("UseOnCharacter", user, charTarget, useType));
+    if (hooks.IsDefined("UseOnDoor")      &&
+       (((lockTarget = target->Get<ObjectDoor>()) != 0) ||
+         (lockTarget = target->Get<ObjectLocker>()) != 0))
+      return (ExecuteHook("UseOnDoor", user, lockTarget, useType));
+    if (hooks.IsDefined("UseOnOthers"))
+      return (ExecuteHook("UseOnOthers", user, target, useType));
+    Level::CurrentLevel->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("That does nothing"));
+  }
   return (false);
 }
 

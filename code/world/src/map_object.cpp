@@ -38,11 +38,9 @@ void MapObject::InitializeCollider(Collider type, LPoint3f position, LPoint3f sc
     return ;
   case MODEL:
   case BOX:
-      cout << "Creationg box collision" << endl;
       solid_ptr = new CollisionBox(LPoint3f(0, 0, 0), 1, 1, 1);
       break ;
   case SPHERE:
-      cout << "Creating collision sphere" << endl;
       solid_ptr = new CollisionSphere(LPoint3(0, 0, 0), 1);
       break ;
   }

@@ -61,9 +61,9 @@ UiLoad* GameUi::OpenLoadingInterface(const string& savepath)
   ui_load_game = new UiLoad(window, _rocket->get_context(), savepath);
   ui_load_game->Done.Connect([this](void)
   {
-    UiLoad* to_garbage_collect = ui_load_game;
+    /*UiLoad* to_garbage_collect = ui_load_game;
     
-    Executor::ExecuteLater([to_garbage_collect]() { delete to_garbage_collect; });
+    Executor::ExecuteLater([to_garbage_collect]() { delete to_garbage_collect; });*/
     ui_load_game = 0;
   });
   ui_load_game->Show();
@@ -77,9 +77,9 @@ UiSave* GameUi::OpenSavingInterface(const string& savepath)
   ui_save_game = new UiSave(window, _rocket->get_context(), savepath);
   ui_save_game->Done.Connect([this](void)
   {
-    UiSave* to_garbage_collect = ui_save_game;
+    /*UiSave* to_garbage_collect = ui_save_game;
     
-    Executor::ExecuteLater([to_garbage_collect]() { delete to_garbage_collect; });
+    Executor::ExecuteLater([to_garbage_collect]() { delete to_garbage_collect; });*/
     ui_save_game = 0;
   });
   ui_save_game->Show();
