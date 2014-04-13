@@ -186,9 +186,12 @@ void Sunlight::SetSunlightPositionFromTime()
   DateTime            current_time = time_manager.GetDateTime();
   DateTime::DayLength day_length   = current_time.GetDayLength();
   float               hour         = current_time.GetHour() + (current_time.GetMinute() / 60.f);
+  bool                night        = hour < day_length.begin || hour >= day_length.end;
   float               step         = hour + (hour >= day_length.end ? -day_length.end : (hour < day_length.begin ? 24 - day_length.end : -day_length.begin));
-  step = hour >= day_length.begin && hour < day_length.end ? 12 - step : step;
-  float               angle        = (180.f/ 12) * step;
+  float               total_steps  = night ? 24 - day_length.length : day_length.length;
+  step = !night ? 12 - step : step;
+  //cout << "Step at " << hour << ": " << step << " because day length is " << day_length.begin << "/" << day_length.end << endl;
+  float               angle        = (180.f/ total_steps) * step;
   LPoint2f            position     = solar_orbit.PointAtAngle(angle * 3.14159265f / 180.f);
 
   //cout << "SunLightPosition: " << position.get_x() << ',' << position.get_y() << endl;

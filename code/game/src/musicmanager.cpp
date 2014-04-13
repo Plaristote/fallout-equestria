@@ -1,4 +1,5 @@
 #include "musicmanager.hpp"
+#include "options.hpp"
 
 using namespace std;
 
@@ -23,6 +24,8 @@ MusicManager::MusicManager()
   _current_music = 0;
   _next_music    = 0;
 #endif
+  Connect(OptionsManager::Updated, *this, &MusicManager::SetVolumeToDefault);
+  SetVolumeToDefault();
 }
 
 MusicManager::~MusicManager()
@@ -198,4 +201,11 @@ void MusicManager::SetVolume(float volume)
 {
   _volume_ref  = volume;
   _volume_goal = volume;
+}
+
+void MusicManager::SetVolumeToDefault()
+{
+  float volume = OptionsManager::Get()["music"]["volume"].Or(5.f);
+
+  SetVolume(volume);
 }

@@ -225,6 +225,16 @@ void DateTime::Unserialize(Utils::Packet& packet)
   packet >> year >> month >> day >> hour >> minute >> second;
 }
 
+unsigned short DateTime::GetDayOfTheYear() const
+{
+  unsigned short result = 0;
+  unsigned short month_it;
+
+  for (month_it = 1 ; month_it < month ; month_it++)
+    result += days_per_months(month_it, year);
+  return (result + day);
+}
+
 static float ComputeLengthOfDay(unsigned char day)
 {
   float         length_of_day;
@@ -240,9 +250,9 @@ static float ComputeLengthOfDay(unsigned char day)
 
     day -= 83;
     if (day > summer_solstice)
-      length_of_day = (15 - ((day - summer_solstice) / 86.f) * 3);
+      length_of_day = (18 - ((day - summer_solstice) / 86.f) * 3);
     else
-      length_of_day = (15 - ((summer_solstice - day) / 86.f) * 3);
+      length_of_day = (18 - ((summer_solstice - day) / 86.f) * 3);
   }
   else
   {
@@ -262,11 +272,11 @@ static float ComputeLengthOfDay(unsigned char day)
 DateTime::DayLength DateTime::GetDayLength() const
 {
   static DayLength day_lengths[357];
-  unsigned char    day = GetDay();
+  unsigned char    day = GetDayOfTheYear();
 
   if (day <= 356)
   {
-    if (day_lengths[day].length != 0)
+    if (day_lengths[day].length == 0)
     {
       day_lengths[day].length = ComputeLengthOfDay(day);
       day_lengths[day].begin  = 14 - day_lengths[day].length / 2;

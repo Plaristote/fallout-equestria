@@ -11,6 +11,7 @@
 # include <string>
 # include "datatree.hpp"
 # include "timer.hpp"
+# include "observatory.hpp"
 
 # ifdef AUDIO_BACKEND_PANDA3D
 #  include <panda3d/audioManager.h>
@@ -19,7 +20,7 @@
 #  include <SFML/Audio.hpp>
 # endif
 
-class MusicManager
+class MusicManager : public Sync::ObserverHandler
 {
   static MusicManager* _global_ptr;
 
@@ -36,6 +37,7 @@ public:
   void                 PlayNext(void);
   void                 Run(void);
   void                 SetVolume(float volume);
+  void                 SetVolumeToDefault(void);
 
 private:
   void                 FadeOut(float elapsed_time);

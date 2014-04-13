@@ -94,6 +94,7 @@ public:
   Seconds         GetTimeOfTheWeek(void)  const;
   Seconds         GetTimeOfTheMonth(void) const;
   unsigned short  GetDayOfTheWeek(void)   const;
+  unsigned short  GetDayOfTheYear(void)   const;
 
   static unsigned short days_per_months(unsigned short month, unsigned short year = 1);
 
