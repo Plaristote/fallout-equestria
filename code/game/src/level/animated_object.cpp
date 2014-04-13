@@ -61,7 +61,7 @@ void                      AnimatedObject::TaskAnimation(void)
       _anim->play();
     else
     {
-      cout << this << " - Animation ended naturally" << endl;
+      //cout << this << " - Animation ended naturally" << endl;
       AnimationEnd.Emit();
       AnimationEndForObject.Emit(this);
       AnimationEndForObject.DisconnectAll();
@@ -72,7 +72,7 @@ void                      AnimatedObject::TaskAnimation(void)
 
 void                      AnimatedObject::PlayIdleAnimation(void)
 {
-  cout << this << " - PlayIdleAnimation" << endl;
+  //cout << this << " - PlayIdleAnimation" << endl;
   MapAnims::iterator     it   = _mapAnims.find("idle");
   AnimControl*           anim = (it != _mapAnims.end() ? it->second : 0);
 

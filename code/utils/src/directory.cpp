@@ -1,5 +1,14 @@
 #include "directory.hpp"
 
+#ifndef _WIN32
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <unistd.h>
+#else
+# include <io.h>
+# include <Shlwapi.h>
+#endif
+
 using namespace std;
 
 bool Filesystem::FileContent(const string& filepath, string& out)
@@ -80,6 +89,18 @@ bool Directory::MakeDir(const string& str)
   return (mkdir(str.c_str() , S_IRWXU | S_IRWXG | S_IRWXO) == 0);
 }
 
+bool Directory::Exists(const string &str)
+{
+  struct stat st;
+
+  if (stat(str.c_str(), &st) == 0)
+  {
+    if (S_ISDIR(st.st_mode))
+      return (true);
+  }
+  return (false);
+}
+
 bool Directory::RemoveDir(const string& str)
 {
   return (rmdir(str.c_str()) == 0);
@@ -105,7 +126,6 @@ bool Directory::OpenDir(const string& str)
 }
 
 #else // WINDOWS
-# include <io.h>
 
 bool Filesystem::FileExists(const string& file)
 {
@@ -115,6 +135,13 @@ bool Filesystem::FileExists(const string& file)
 bool Directory::MakeDir(const string& str)
 {
   return ((CreateDirectory(str.c_str(), NULL)) != 0);
+}
+
+bool Directory::Exists(const string& str)
+{
+  DWORD ftyp = GetFileAttributesA(str.c_str());
+
+  return ((ftyp & FILE_ATTRIBUTE_DIRECTORY) != 0);
 }
 
 bool Directory::RemoveDir(const string& str)

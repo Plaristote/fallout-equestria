@@ -38,7 +38,7 @@ bool CharacterStatistics::TryToLoadFromFile(const string& path)
 
 bool CharacterStatistics::TryToLoadFromString(const string& json)
 {
-  data_tree = DataTree::Factory::JSON(json);
+  data_tree = DataTree::Factory::StringJSON(json);
   if (data_tree)
   {
     cout << "Loading statsheet from string for character " << GetDynamicObject()->name << endl;

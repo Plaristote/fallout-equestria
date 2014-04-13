@@ -140,7 +140,6 @@ void MouseEvents::MouseLeftClicked(void)
       {
         InstanceDynamicObject* dynObject = level.FindObjectFromNode(hovering.dynObject);
 
-        std::cout << "HasDynObject" << std::endl;
         if (dynObject)
           TargetPicked.Emit(dynObject);
       }

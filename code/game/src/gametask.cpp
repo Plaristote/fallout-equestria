@@ -304,11 +304,16 @@ void GameTask::SaveToSlot(unsigned char slot)
 {
   if (SaveGame())
   {
-    std::stringstream stream;
+    if (!Directory::Exists(save_path + "/slots") && !Directory::MakeDir(save_path + "/slots"))
+      AlertUi::NewAlert.Emit("Failed to save: cannot access directory " + save_path + "/slots");
+    else
+    {
+      std::stringstream stream;
 
-    stream << save_path << "/slots/slot-" << (int)slot;
-    EraseSlot(slot);
-    CompressSave(stream.str());
+      stream << save_path << "/slots/slot-" << (int)slot;
+      EraseSlot(slot);
+      CompressSave(stream.str());
+    }
   }
 }
 
@@ -446,7 +451,7 @@ void GameTask::LoadLevel(LoadLevelParams params)
 
 void GameTask::SetLevelEncounter(const Encounter& encounter)
 {
-  OpenLevel(encounter.GetMapName());
+  OpenLevel(encounter.GetMapName(), "worldmap");
   if (level)
   {
     world_map->Hide();

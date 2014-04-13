@@ -145,7 +145,6 @@ ActionRunner* Actions::UseWeaponOn::Factory(ObjectCharacter* user, ObjectCharact
     ConsoleWrite(user, "No line of sight");
   else
   {
-    cout << "Bite" << endl;
     runner = new UseWeaponOn(user, target, item, action_it);
     runner->Run();
   }

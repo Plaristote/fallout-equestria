@@ -429,23 +429,20 @@ void ObjectCharacter::Run(float elapsedTime)
 
     if (_fading_in || _fading_off)
       Fading();
-    if (state == Level::Normal && GetHitPoints() > 0)
+    if (state == Level::Normal && GetHitPoints() > 0 && script->IsDefined("main"))
     {
-      if (script->IsDefined("main"))
-      {
-        collector_ai.start();
-        AngelScript::Type<ObjectCharacter*> self(this);
-        AngelScript::Type<float>            p_time(elapsedTime);
+      collector_ai.start();
+      AngelScript::Type<ObjectCharacter*> self(this);
+      AngelScript::Type<float>            p_time(elapsedTime);
         
-        script->Call("main", 2, &self, &p_time);
-        collector_ai.stop();
-      }
+      script->Call("main", 2, &self, &p_time);
+      collector_ai.stop();
     }
-    else if (state == Level::Fight)
+    else if (state == Level::Fight && !(IsBusy()))
     {
       if (GetHitPoints() <= 0 || GetActionPoints() == 0 || (this != _level->GetPlayer() && !script->IsDefined("combat")))
 	_level->GetCombat().NextTurn();
-      else if (!(IsMoving()) && script->IsDefined("combat")) // TODO replace with something more appropriate
+      else if (script->IsDefined("combat"))
       {
         collector_ai.start();
         AngelScript::Type<ObjectCharacter*> self(this);
@@ -465,6 +462,11 @@ void ObjectCharacter::Run(float elapsedTime)
   }
   Pathfinding::User::Run(elapsedTime);
   //profile.Profile("Level:Characters:AI");
+}
+
+bool ObjectCharacter::IsBusy(void) const
+{
+  return (!(IsMoving()) && PlayingAnimationName() != "idle");
 }
 
 /*
@@ -634,24 +636,26 @@ void     ObjectCharacter::SetFaction(unsigned int flag)
   _faction = diplomacy.GetFaction(flag);
 }
 
-void     ObjectCharacter::SetAsEnemy(const ObjectCharacter* other, bool enemy)
+void     ObjectCharacter::SetAsEnemy(ObjectCharacter* other, bool enemy)
 {
-  cout << "SetAsEnemy" << endl;
+  cout << "SetAsEnemy: " << GetName() << " -> " << other->GetName() << endl;
   if (_faction && other->GetFaction() != 0)
   {
     WorldDiplomacy& diplomacy = GameTask::CurrentGameTask->GetDiplomacy();
 
+    cout << "Factions are now enemies: " << GetFactionName() << " -> " << other->GetFactionName() << endl;
     diplomacy.SetAsEnemy(enemy, _faction->flag, other->GetFaction());
   }
-  else
+  else if (other->GetFaction() != 0)
   {
     cout << "Using self enemy mask: " << other->GetFactionName() << ':' << other->GetFaction() << endl;
     if (enemy)
       _self_enemyMask |= other->GetFaction();
     else if (_self_enemyMask & other->GetFaction())
       _self_enemyMask -= other->GetFaction();
-    cout << "Self enemy mask: " << _self_enemyMask << endl;
   }
+  else if (GetFaction() != 0)
+    other->SetAsEnemy(this, enemy);
 }
 
 bool     ObjectCharacter::IsEnemy(const ObjectCharacter* other) const

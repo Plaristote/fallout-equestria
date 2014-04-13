@@ -164,6 +164,13 @@ namespace ScriptApi
       return (0);
     }
 
+    static int            GetActionFromName(InventoryObject* item, const std::string& name)
+    {
+      if (item)
+        return (GetUseIteratorForType(*item, name));
+      return (0);
+    }
+
     static bool           UseAsWeapon(InventoryObject* item, ObjectCharacter* user, ObjectCharacter* target, const std::string& use_type)
     {
       if (item)
@@ -569,6 +576,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(itemClass, "bool   UseOn(Character@, DynamicObject@, string)",      asFUNCTION(ScriptApi::Item::UseOn),              asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(itemClass, "bool   Use(Character@, string)",                        asFUNCTION(ScriptApi::Item::Use),                asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(itemClass, "int    GetActionPointCost(Character@, string)",         asFUNCTION(ScriptApi::Item::GetActionPointCost), asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(itemClass, "int    GetActionFromName(string)",                      asFUNCTION(ScriptApi::Item::GetActionFromName),  asCALL_CDECL_OBJFIRST);
 
   engine->RegisterObjectMethod(partyClass, "void   SetName(string)",     asMETHOD(Party,SetName), asCALL_THISCALL);
   engine->RegisterObjectMethod(partyClass, "string GetName()",           asMETHOD(Party,GetName), asCALL_THISCALL);
@@ -634,11 +642,12 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "Special@ GetStatController()",             asMETHODPR(ObjectCharacter,GetStatController,() const,StatController*), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void   SetFurtive(bool)",                  asMETHOD(ObjectCharacter,SetFurtive),        asCALL_THISCALL);
 
-  engine->RegisterGlobalFunction("void Use(Character@, DynamicObject@)",                asFUNCTION(Interactions::Actions::Use::Factory),         asCALL_CDECL);
-  engine->RegisterGlobalFunction("void UseObjectOn(Character@, DynamicObject@, Item@)", asFUNCTION(Interactions::Actions::UseObjectOn::Factory), asCALL_CDECL);
-  engine->RegisterGlobalFunction("void UseSpellOn(Character@, DynamicObject@, string)", asFUNCTION(Interactions::Actions::UseSpellOn::Factory),  asCALL_CDECL);
-  engine->RegisterGlobalFunction("void UseSkillOn(Character@, DynamicObject@, string)", asFUNCTION(Interactions::Actions::UseSkillOn::Factory),  asCALL_CDECL);
-  engine->RegisterGlobalFunction("void UseWeapon(Character@, Character@, Item@, int)",  asFUNCTION(Interactions::Actions::UseWeaponOn::Factory), asCALL_CDECL);
+  engine->RegisterGlobalFunction("void Use(Character@, DynamicObject@)",                     asFUNCTION(Interactions::Actions::Use::Factory),         asCALL_CDECL);
+  engine->RegisterGlobalFunction("void UseObject(Character@, Item@, int)",                   asFUNCTION(Interactions::Actions::UseObject::Factory),   asCALL_CDECL);
+  engine->RegisterGlobalFunction("void UseObjectOn(Character@, DynamicObject@, Item@, int)", asFUNCTION(Interactions::Actions::UseObjectOn::Factory), asCALL_CDECL);
+  engine->RegisterGlobalFunction("void UseSpellOn(Character@, DynamicObject@, string)",      asFUNCTION(Interactions::Actions::UseSpellOn::Factory),  asCALL_CDECL);
+  engine->RegisterGlobalFunction("void UseSkillOn(Character@, DynamicObject@, string)",      asFUNCTION(Interactions::Actions::UseSkillOn::Factory),  asCALL_CDECL);
+  engine->RegisterGlobalFunction("void UseWeapon(Character@, Character@, Item@, int)",       asFUNCTION(Interactions::Actions::UseWeaponOn::Factory), asCALL_CDECL);
 
   engine->RegisterObjectMethod(doorClass, "void   Open()",       asMETHOD(ObjectDoor,Open),         asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "void   Close()",      asMETHOD(ObjectDoor,Close),        asCALL_THISCALL);

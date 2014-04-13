@@ -51,6 +51,7 @@ public:
   
   static bool        MakeDir(const std::string& str);
   static bool        RemoveDir(const std::string& str);
+  static bool        Exists(const std::string& str);
   bool               OpenDir(const std::string& str);
 
   const std::string& Path(void)       const { return (_dirName); }

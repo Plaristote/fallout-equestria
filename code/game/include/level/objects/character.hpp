@@ -37,6 +37,7 @@ public:
   bool                     HasLineOfSight(InstanceDynamicObject* object);
   bool                     IsPlayer(void) const;
   bool                     IsInterrupted(void) const  { return (AnimationEndForObject.ObserverCount() > 0); }
+  bool                     IsBusy(void) const;
   Inventory&               GetInventory(void)         { return (*_inventory);           }
   const Inventory&         GetInventory(void) const   { return (*_inventory); }
   const std::string        GetFactionName(void) const { return (_faction ? _faction->name : ""); }
@@ -63,7 +64,7 @@ public:
   const FieldOfView&       GetFieldOfView(void) const { return (field_of_view); }
   void                     SetFaction(const std::string&);
   void                     SetFaction(unsigned int flag);
-  void                     SetAsEnemy(const ObjectCharacter*, bool);
+  void                     SetAsEnemy(ObjectCharacter*, bool);
   bool                     IsEnemy(const ObjectCharacter*) const;
   bool                     IsAlly(const ObjectCharacter*)  const;
   

@@ -31,6 +31,9 @@ public:
   void                      PlayIdleAnimation(void);
   void                      StopAnimationLoop(void) { _animLoop = false; }
 
+  bool                      IsPlayingAnimation(void)   const { return (_anim != 0); }
+  std::string               PlayingAnimationName(void) const { return (_anim == 0 ? "idle" : _anim->get_name()); }
+
   /**
    * @brief ... Triggered when a not looping animation ends.
    **/
