@@ -21,6 +21,7 @@ bool CanWeild(Item@ item, Character@ user, string slot, int mode)
 
 bool ShotgunShoot(Item@ item, Character@ user, Character@ target)
 {
+  Cout("Shooting shotgun");
   return (Shoot(item, user, target));
 }
 

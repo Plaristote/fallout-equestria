@@ -223,9 +223,12 @@ void combat(Character@ self)
       if (@weapon != null)
       {
         if (!is_weapon_loaded(weapon))
-          weapon.Use(self, "reload");
+          UseObject(self, weapon, weapon.GetActionFromName("reload"));
         else
-          weapon.UseWeaponOn(self, currentTarget, get_best_offensive_action(self, currentTarget, weapon));
+        {
+          Cout("-> Civilian using weapon");
+          UseWeapon(self, currentTarget, weapon, weapon.GetActionFromName(get_best_offensive_action(self, currentTarget, weapon)));
+        }
       }
       else
         go_to_target(self);

@@ -43,13 +43,24 @@ int ShootSuccessChance(Item@ item, Character@ user, Character@ target)
   float  range       = action["range"].AsFloat();
   float  distance    = user.GetDistance(target.AsObject());
   string type        = action["type"].AsString();
-  int    skill       = user.GetStatistics()["Skills"][type].AsInt();
-  int    armor_class = target.GetStatistics()["Variables"]["Armor Class"].AsInt();
+  Data   skill_data  = user.GetStatistics()["Skills"][type];
+  Data   armor_data  = target.GetStatistics()["Variables"]["Armor Class"];
   int    precision   = 0;
-
-  if (range < distance)
-    return (0);
+  int    skill;
+  int    armor_class;
+  
+  if (skill_data.Nil())
+    skill = 100;
   else
+    skill = skill_data.AsInt();
+  if (armor_data.Nil())
+    armor_data = target.GetStatistics()["Statistics"]["Armor Class"];
+  if (armor_data.Nil())
+    armor_class = 0;
+  else
+    armor_class = armor_data.AsInt();
+
+  if (range >= distance)
   {
     if (!(action["precision"].Nil()))
       precision        = action["precision"].AsInt();
@@ -66,6 +77,9 @@ int ShootSuccessChance(Item@ item, Character@ user, Character@ target)
       hit_chances = 0;
     return (hit_chances);
   }
+  else
+    Cout("Out of range");
+  return (0);
 }
 
 int GetCharacterResistance(Character@ character, string attack_type)
@@ -93,7 +107,12 @@ float ComputeDamageResistance(Item@ item, string action_name, Character@ target,
   int    armor_resistance;
 
   if (@item != null)
-    damage_type    = item.AsData()["actions"][action_name]["damage_type"].AsString();
+  {
+    Data damage_type_data = item.AsData()["actions"][action_name]["damage_type"];
+    
+    if (damage_type_data.NotNil())
+      damage_type = damage_type_data.AsString();
+  }
   armor_resistance = GetCharacterResistance(target, damage_type);
   damage           = damage - (damage / 100 * resistance_modifier);
   damage           = damage - (damage / 100 * armor_resistance);
@@ -129,10 +148,18 @@ float ComputeDamage(Item@ item, string action, Character@ user, Character@ targe
   }
   else
   {
-    Data item_data = item.AsData();
+    Data item_data  = item.AsData();
+    Data damage_max = item_data["damage-max"];
+    Data damage_min = item_data["damage"];
 
-    max_damage = item_data["damage-max"].AsInt();
-    min_damage = item_data["damage"].AsInt();
+    if (damage_max.Nil())
+      damage_max = statistics["Statistics"]["Melee Damage"];
+    if (damage_min.Nil())
+      damage_min = statistics["Statistics"]["Melee Damage"];
+    max_damage = damage_max.Nil() ? 10 : damage_max.AsInt();
+    min_damage = damage_min.Nil() ? 10 : damage_min.AsInt();
+    Cout("Max Damage: " + max_damage);
+    Cout("Min Damage: " + min_damage);
   }
   damage = ComputeBaseDamage(min_damage, max_damage);
   damage = ComputeDamageResistance(item, action, target, damage);
@@ -168,10 +195,11 @@ int DamageCalculation(Item@ item, string action_name, Character@ user, Character
 
 bool Shoot(Item@ item, Character@ user, Character@ target)
 {
-  Data  item_data = item.AsData();
-  Data  action    = item_data["actions"]["Shoot"];
-  float range     = action["range"].AsFloat();
-  float distance  = user.GetDistance(target.AsObject());
+  Data   item_data = item.AsData();
+  Data   action    = item_data["actions"]["Shoot"];
+  float  range     = action["range"].AsFloat();
+  float  distance  = user.GetDistance(target.AsObject());
+  string user_name = user.GetName() == "self" ? "You" : user.GetName();
 
   if (distance > range)
     level.AppendToConsole("Out of range");
@@ -192,9 +220,9 @@ bool Shoot(Item@ item, Character@ user, Character@ target)
 
       target.SetHitPoints(target.GetHitPoints() - damage);
       if (is_critical)
-        level.AppendToConsole("You critically hit " + target.GetName() + " for " + damage + " Hit Points.");
+        level.AppendToConsole(user_name + " critically hit " + target.GetName() + " for " + damage + " Hit Points.");
       else
-        level.AppendToConsole("You hit " + target.GetName() + " for " + damage + " Hit Points.");
+        level.AppendToConsole(user_name + " hit " + target.GetName() + " for " + damage + " Hit Points.");
       return (true);
     }
     else

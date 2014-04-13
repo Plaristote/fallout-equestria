@@ -6,6 +6,7 @@ bool ProcessAttack(Item@ item, string action, string hit_sound, Character@ user,
   Data   action_data   = item_data["actions"][action];
   string message;
   bool   success       = false;
+  string user_name     = user.GetName() == "self" ? "You" : user.GetName();
 
   if (UnarmedSuccessChance(item, user, target) >= Random() % 100)
   {
@@ -14,7 +15,7 @@ bool ProcessAttack(Item@ item, string action, string hit_sound, Character@ user,
     int  damage        = ComputeDamage(item, action, user, target, critical_roll);
 
     success            = true;
-    message            = user.GetName() + " hit " + target.GetName();
+    message            = user_name + " hit " + target.GetName();
     if (critical)
       message         += " critically";
     message           += " for " + damage + " hit points";
@@ -23,7 +24,7 @@ bool ProcessAttack(Item@ item, string action, string hit_sound, Character@ user,
   }
   else
   {
-    message = user.GetName() + " tried to hit " + target.GetName() + " and missed.";
+    message = user_name + " tried to hit " + target.GetName() + " and missed.";
     level.PlaySound("hoof2hoof/miss");
   }
   level.AppendToConsole(message);
