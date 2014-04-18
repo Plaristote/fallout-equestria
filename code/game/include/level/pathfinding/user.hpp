@@ -38,15 +38,15 @@ namespace Pathfinding
     void                     LookAt(LVecBase3);
     void                     LookAt(InstanceDynamicObject*);
 
-    bool                     IsMoving(void) const { return (path.Size() > 0); }
+    bool                     IsMoving(void) const;
     Pathfinding::Path&       GetPath(void)        { return (path);            }
     const Pathfinding::Path& GetPath(void)  const { return (path);            }
 
     virtual void             Serialize(Utils::Packet&);
     virtual void             Unserialize(Utils::Packet&);
 
-  protected:
     void                     StartRunAnimation();
+  protected:
     void                     SetMovementAnimation(const std::string& name) { movement_animation = name;  }
     void                     SetMovementSpeed(float speed)                 { movement_speed     = speed; }
     

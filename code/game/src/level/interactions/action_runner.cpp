@@ -80,10 +80,10 @@ void Interactions::ActionRunner::ReachTarget(void)
 {
   if (user->GetDistance(target.object) > range * 10 || !user->HasLineOfSight(target.object))
   {
+    user->ReachedDestination.DisconnectAll();
+    observers.Connect(user->ReachedDestination, *this, &Interactions::ActionRunner::PlayAnimation);
     user->GoTo(target.object, range);
-    if (user->IsMoving())
-      observers.Connect(user->ReachedDestination, *this, &Interactions::ActionRunner::PlayAnimation);
-    else
+    if (!user->IsMoving())
       PlayAnimation();
   }
   else

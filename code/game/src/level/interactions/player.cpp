@@ -53,10 +53,10 @@ void Interactions::Player::ActionTalkTo(InstanceDynamicObject* object)
   }
   else
   {
+    player->ReachedDestination.DisconnectAll();
+    player->ReachedDestination.Connect([this, object]() { ActionTalkTo(object); });
     player->GoTo(object, 3);
-    if (player->IsMoving())
-      player->ReachedDestination.Connect([this, object]() { ActionTalkTo(object); });
-    else
+    if (!player->IsMoving())
       level.GetLevelUi().GetMainBar().AppendToConsole(i18n::T("No line of sight"));
   }
 }

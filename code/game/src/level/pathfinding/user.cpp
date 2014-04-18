@@ -119,14 +119,22 @@ void                Pathfinding::User::GoTo(Waypoint* waypoint)
 
 void                Pathfinding::User::GoTo(InstanceDynamicObject* object, int min_distance)
 {
-  ReachedDestination.DisconnectAll();
   current_target.object       = object;
   current_target.min_distance = min_distance;
   path                        = object->GetPathTowardsObject(this);
   if (path.ContainsValidPath())
-    StartRunAnimation();
-  else if (_level->GetPlayer() == this)
-    _level->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("Can't reach."));
+  {
+    if (path.Size() > 0)
+      StartRunAnimation();
+    else
+      TriggerDestinationReached();
+  }
+  else
+  {
+    ReachedDestination.DisconnectAll();
+    if (_level->GetPlayer() == this)
+      _level->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("Can't reach."));
+  }
 }
 
 void Pathfinding::User::StartRunAnimation()
@@ -140,6 +148,8 @@ void Pathfinding::User::TruncatePath(unsigned short max_size)
   if ((path.Size() > 0) && path.Front().id == GetOccupiedWaypointAsInt())
     max_size++;
   path.Truncate(max_size);
+  if (ReachedDestination.ObserverCount() > 0 && !IsMoving())
+    PlayIdleAnimation();
 }
 
 bool                Pathfinding::User::HasReachedTarget(void)
@@ -165,7 +175,12 @@ void Pathfinding::User::FindNewWayOrAbort(void)
 void Pathfinding::User::MovePathForward(void)
 {
   if (HasReachedTarget())
+  {
+    cout << "HasReachedTarget (" << current_target.min_distance << '/' << path.Size() << ')' << endl;
     path.Clear();
+  }
+  else
+    cout << "Hasn't reached target " << path.Size() << endl;
 }
 
 bool Pathfinding::User::GoThroughNextWaypoint(void)
@@ -192,13 +207,18 @@ void Pathfinding::User::SetNextWaypoint(void)
 
   while (wp == GetOccupiedWaypoint())
   {
+    cout << "Stripping useless waypoint" << endl;
+    if (wp)
+      _object->nodePath.set_pos(wp->nodePath.get_pos());
     path.StripFirstWaypointFromList();
+    MovePathForward();
     if (path.Size() == 0)
       return ;
     wp = _level->GetWorld()->GetWaypointFromId(path.Front().id);
   }
   if (GoThroughNextWaypoint())
   {
+    cout << "Going through next waypoint: " << path.Front().id << " from " << GetOccupiedWaypoint()->id << endl;
     MovePathForward();
     SetOccupiedWaypoint(wp);
     MovedFor1ActionPoint.Emit();
@@ -207,6 +227,7 @@ void Pathfinding::User::SetNextWaypoint(void)
 
 void Pathfinding::User::RunNextMovement(float elapsedTime)
 {
+  //cout << "Path size left: " << path.Size() << endl;
   SetNextWaypoint();
   if (path.Size() > 0)
   {
@@ -235,10 +256,15 @@ LPoint3             Pathfinding::User::GetDistanceToNextWaypoint(void) const
   LPoint3         current_position = _object->nodePath.get_pos();
   LPoint3         objective        = next_waypoint.nodePath.get_pos();
   LPoint3         waypoint_size    = NodePathSize(next_waypoint.nodePath);
-  float           height_objective = ((objective.get_z() - waypoint_size.get_z()) + 0.25) + (GetSize().get_z() / 2);
+  float           height_objective = ((objective.get_z() - waypoint_size.get_z())) + (GetSize().get_z() / 2);
 
   objective.set_z(height_objective);
   return (current_position - objective);
+}
+
+bool                Pathfinding::User::IsMoving(void) const
+{
+  return (path.Size() > 0);
 }
 
 void                Pathfinding::User::RunMovement(float elapsedTime)

@@ -1,5 +1,6 @@
 #include "level/combat.hpp"
-#include <level/level.hpp>
+#include "level/level.hpp"
+#include "options.hpp"
 #define WORLDTIME_TURN          10
 
 using namespace std;
@@ -116,6 +117,13 @@ void Combat::InitializeCharacterTurn(ObjectCharacter* character)
     return ;
   }
   character->MovedFor1ActionPoint.Connect([character]() { character->UseActionPoints(1); });
+  if (character->IsMoving())
+  {
+    if (character->IsPlayer() && OptionsManager::Get()["reset-movement-after-turn"].Value() != "1")
+      character->StartRunAnimation();
+    else
+      character->TruncatePath(0);
+  }
 }
 
 void Combat::FinishFightForCharacter(ObjectCharacter* character)

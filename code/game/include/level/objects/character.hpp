@@ -33,6 +33,9 @@ public:
   bool                     HasOccupiedWaypoint(void) const { return (IsAlive() && Pathfinding::Collider::HasOccupiedWaypoint()); }
 
   void                     Run(float elapsedTime);
+  void                     RunFade(float elapsedTime);
+  void                     RunRegularBehaviour(float elapsedTime);
+  void                     RunCombatBehaviour(float elapsedTime);
   float                    GetDistance(const InstanceDynamicObject* object) const;
   bool                     HasLineOfSight(InstanceDynamicObject* object);
   bool                     IsPlayer(void) const;

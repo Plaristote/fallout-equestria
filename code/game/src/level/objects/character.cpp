@@ -380,6 +380,12 @@ void ObjectCharacter::ItemNextUseType(unsigned short it)
   }
 }
 
+void ObjectCharacter::RunFade(float) // TODO must use elapsedTime in ObjectCharacter::Fading
+{
+  if (_fading_in || _fading_off)
+    Fading();
+}
+
 void ObjectCharacter::Fading(void)
 {
   LColor color = GetNodePath().get_color();
@@ -419,56 +425,74 @@ void ObjectCharacter::Fading(void)
 
 void ObjectCharacter::Run(float elapsedTime)
 {
-  PStatCollector collector_ai("Level:Characters:AI");
-  Timer profile;
-  
+  //Timer profile;
+  Level::State state = _level->GetState();
+
+  Pathfinding::User::Run(elapsedTime);
+  RunFade(elapsedTime);
   field_of_view.MarkForUpdate();
   if (!(IsInterrupted()))
   {
-    Level::State state = _level->GetState();
-
-    if (_fading_in || _fading_off)
-      Fading();
     if (state == Level::Normal && GetHitPoints() > 0 && script->IsDefined("main"))
+      RunRegularBehaviour(elapsedTime);
+    else if (state == Level::Fight)
+      RunCombatBehaviour(elapsedTime);
+  }
+  //profile.Profile("Level:Characters:AI");
+}
+
+void ObjectCharacter::RunRegularBehaviour(float elapsedTime)
+{
+  PStatCollector                      collector_ai("Level:Characters:AI");
+  AngelScript::Type<ObjectCharacter*> self(this);
+  AngelScript::Type<float>            p_time(elapsedTime);
+
+  collector_ai.start();
+  script->Call("main", 2, &self, &p_time);
+  collector_ai.stop();
+}
+
+void ObjectCharacter::RunCombatBehaviour(float)
+{
+  if (IsMoving() && GetActionPoints() == 0)
+  {
+    NodePath waypoint_nodepath = GetOccupiedWaypoint()->nodePath;
+    NodePath nodepath          = GetDynamicObject()->nodePath;
+
+    if (nodepath.get_x() == waypoint_nodepath.get_x() && nodepath.get_y() == waypoint_nodepath.get_y())
+      _level->GetCombat().NextTurn();
+  }
+  else if (!IsBusy())
     {
-      collector_ai.start();
-      AngelScript::Type<ObjectCharacter*> self(this);
-      AngelScript::Type<float>            p_time(elapsedTime);
-        
-      script->Call("main", 2, &self, &p_time);
-      collector_ai.stop();
-    }
-    else if (state == Level::Fight && !(IsBusy()))
-    {
-      bool idle_during_fights = (this != _level->GetPlayer() && !script->IsDefined("combat"));
+      PStatCollector collector_ai("Level:Characters:AI");
+      bool           idle_during_fights = (this != _level->GetPlayer() && !script->IsDefined("combat"));
 
       if (GetHitPoints() <= 0 || GetActionPoints() == 0 || idle_during_fights)
-	_level->GetCombat().NextTurn();
+        _level->GetCombat().NextTurn();
       else if (script->IsDefined("combat"))
       {
-        collector_ai.start();
         AngelScript::Type<ObjectCharacter*> self(this);
         unsigned int                        ap_before = GetActionPoints();
 
+        collector_ai.start();
         script->Call("combat", 1, &self);
         collector_ai.stop();
-        if (ap_before == GetActionPoints() && !IsInterrupted() && !IsMoving()) // If stalled, skip turn
+        if (ap_before == GetActionPoints() && !IsBusy()) // If stalled, skip turn
         {
           cout << "Character " << GetName() << " is stalling" << endl;
           _level->GetCombat().NextTurn();
         }
+        else if (IsMoving())
+          cout << "Character " << GetName() << " is moving" << endl;
         else
           cout << "Character " << GetName() << " is playing" << endl;
       }
     }
-  }
-  Pathfinding::User::Run(elapsedTime);
-  //profile.Profile("Level:Characters:AI");
 }
 
 bool ObjectCharacter::IsBusy(void) const
 {
-  return (!(IsMoving()) && PlayingAnimationName() != "idle");
+  return (IsMoving() || PlayingAnimationName() != "idle");
 }
 
 /*
