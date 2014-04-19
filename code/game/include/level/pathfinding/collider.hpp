@@ -3,6 +3,7 @@
 
 # include "world/waypoint.hpp"
 # include "path.hpp"
+# include "observatory.hpp"
 
 class Level;
 
@@ -29,6 +30,8 @@ namespace Pathfinding
     void                      SetOccupiedWaypoint(Waypoint* wp);
     Waypoint*                 GetClosestWaypointFrom (Collider* from, bool looking_for_closest = true);
     Waypoint*                 GetFarthestWaypointFrom(Collider* from) { return (GetClosestWaypointFrom(from, false)); }
+
+    Sync::Signal<void (unsigned char)> ChangedFloor;
 
   protected:
     void                      WithdrawAllArcs(Waypoint* waypoint);

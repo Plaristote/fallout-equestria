@@ -61,6 +61,7 @@ void Zones::Controller::ExitingZone(InstanceDynamicObject* object)
 
 void Zones::Controller::InsertObject(InstanceDynamicObject* object)
 {
+  cout << "<InsertObject name='" << object->GetName() << "'>" << endl;
   auto it      = zone.waypoints.begin();
   auto end     = zone.waypoints.end();
   bool success = false;
@@ -69,6 +70,7 @@ void Zones::Controller::InsertObject(InstanceDynamicObject* object)
   {
     if (!(manager->level.IsWaypointOccupied((*it)->id)))
     {
+      cout << "  <Waypoint id='" << (*it)->id << "' />" <<endl;
       InsertObjectOnWaypoint(object, *it);
       success  = true;
       break ;
@@ -78,6 +80,7 @@ void Zones::Controller::InsertObject(InstanceDynamicObject* object)
     InsertResident(object);
   else
     throw ZoneIsFull(zone.name, "Failed to insert " + object->GetName() + " into zone.");
+  cout << "</InsertObject>" << endl;
 }
 
 void Zones::Controller::InsertObjectOnWaypoint(InstanceDynamicObject* object, Waypoint* waypoint)

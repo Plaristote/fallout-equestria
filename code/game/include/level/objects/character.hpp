@@ -9,12 +9,12 @@
 # include "level/diplomacy.hpp"
 # include "level/characters/line_of_sight.hpp"
 # include "level/characters/field_of_view.hpp"
-# include "level/characters/action_points.hpp"
+# include "level/characters/visibility.hpp"
 # include "level/interactions/action_runner.hpp"
 # include <panda3d/character.h>
 # include <panda3d/pointLight.h>
 
-class ObjectCharacter : public CharacterActionPoints
+class ObjectCharacter : public CharacterVisibility
 {
   friend class Interactions::ActionRunner;
 public:
@@ -33,7 +33,6 @@ public:
   bool                     HasOccupiedWaypoint(void) const { return (IsAlive() && Pathfinding::Collider::HasOccupiedWaypoint()); }
 
   void                     Run(float elapsedTime);
-  void                     RunFade(float elapsedTime);
   void                     RunRegularBehaviour(float elapsedTime);
   void                     RunCombatBehaviour(float elapsedTime);
   float                    GetDistance(const InstanceDynamicObject* object) const;
@@ -47,7 +46,6 @@ public:
   unsigned int             GetFaction(void) const     { return (_faction ? _faction->flag : 0);  }
     
   void                     SetFurtive(bool do_set);
-  void                     SetVisible(bool do_set);
   void                     AddFlag(unsigned char flag)       { _flags |= flag; }
   void                     DelFlag(unsigned char flag)       { if (HasFlag(flag)) { _flags -= flag; } }
   bool                     HasFlag(unsigned char flag) const { return ((_flags & flag) != 0); }
@@ -86,7 +84,6 @@ private:
   void                     SetupScript(AngelScript::Object*);
   void                     RefreshStatistics(void);
   void                     RunDeath(void);
-  void                     Fading(void);
   
   void                     RequestCharacter(ObjectCharacter*, ObjectCharacter*, const std::string& func);
   
@@ -97,7 +94,6 @@ private:
   const WorldDiplomacy::Faction* _faction;
   unsigned int                   _self_enemyMask;
   unsigned char                  _flags;
-  bool                           _fading_off, _fading_in;
   LineOfSight                    line_of_sight;
   FieldOfView                    field_of_view;
   AngelScript::Object*           script;
@@ -122,9 +118,6 @@ private:
 
   Inventory*                _inventory;
   ItemEquiped               _equiped[2];
-
-  
-  // Script
 };
 
 template<> struct ObjectType2Code<ObjectCharacter> { enum { Type = ObjectTypes::Character }; };

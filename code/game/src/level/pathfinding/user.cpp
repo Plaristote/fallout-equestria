@@ -175,12 +175,7 @@ void Pathfinding::User::FindNewWayOrAbort(void)
 void Pathfinding::User::MovePathForward(void)
 {
   if (HasReachedTarget())
-  {
-    cout << "HasReachedTarget (" << current_target.min_distance << '/' << path.Size() << ')' << endl;
     path.Clear();
-  }
-  else
-    cout << "Hasn't reached target " << path.Size() << endl;
 }
 
 bool Pathfinding::User::GoThroughNextWaypoint(void)
@@ -203,13 +198,11 @@ bool Pathfinding::User::GoThroughNextWaypoint(void)
 
 void Pathfinding::User::SetNextWaypoint(void)
 {
-  Waypoint* wp = _level->GetWorld()->GetWaypointFromId(path.Front().id);
+  Waypoint* wp            = _level->GetWorld()->GetWaypointFromId(path.Front().id);
+  Waypoint* last_occupied = GetOccupiedWaypoint();
 
-  while (wp == GetOccupiedWaypoint())
+  while (wp == last_occupied)
   {
-    cout << "Stripping useless waypoint" << endl;
-    //if (wp)
-    //  _object->nodePath.set_pos(wp->nodePath.get_pos());
     path.StripFirstWaypointFromList();
     MovePathForward();
     if (path.Size() == 0)
@@ -218,16 +211,26 @@ void Pathfinding::User::SetNextWaypoint(void)
   }
   if (GoThroughNextWaypoint())
   {
-    cout << "Going through next waypoint: " << path.Front().id << " from " << GetOccupiedWaypoint()->id << endl;
-    MovePathForward();
-    SetOccupiedWaypoint(wp);
-    MovedFor1ActionPoint.Emit();
+    // Check if the character has been teleported by ZoneManager
+    if (last_occupied == GetOccupiedWaypoint())
+    {
+      MovePathForward();
+      SetOccupiedWaypoint(wp);
+      MovedFor1ActionPoint.Emit();
+    }
+    // If teleported, re-compute the path from the newly occupied waypoint.
+    else if (path.Size() > 0)
+    {
+      cout << "Penis ?" << endl;
+      GoTo(_level->GetWorld()->GetWaypointFromId(path.Last().id));
+    }
+    else
+      cout << "Hello ?" << endl;
   }
 }
 
 void Pathfinding::User::RunNextMovement(float elapsedTime)
 {
-  //cout << "Path size left: " << path.Size() << endl;
   SetNextWaypoint();
   if (path.Size() > 0)
   {

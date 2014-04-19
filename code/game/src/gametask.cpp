@@ -136,10 +136,8 @@ void GameTask::RunLevel(void)
     if (!(exit.ToWorldmap()))
       OpenLevel(exit.level, exit.zone);
     else
-    {
-      SaveGame();
       RemoveLoadingScreen();
-    }
+    SaveGame();
   }
   if (!level && world_map)
     world_map->Show();
@@ -249,11 +247,13 @@ bool GameTask::LoadGame()
   try
   {
     Data current_level;
+    Data loading_level;
 
     LoadDataEngine();
     LoadPlayerData();
     LoadWorldMap();
-    current_level = data_engine["system"]["current-level"];
+    loading_level = data_engine["system"]["loading-level"];
+    current_level = loading_level.Nil() ? data_engine["system"]["current-level"] : loading_level["level-name"];
     LoadingScreen::SetBackground(current_level);
     if (!(current_level.Nil()) && current_level.Value() != "0")
     {
@@ -261,7 +261,7 @@ bool GameTask::LoadGame()
       
       params.name       = current_level.Value();
       params.path       = save_path + '/' + params.name + ".blob";
-      params.entry_zone = "";
+      params.entry_zone = loading_level.Nil() ? "" : loading_level["entry-zone"].Value();
       params.isSaveFile = true;
       SyncLoadLevel.Emit(params);
       world_map->Hide();
@@ -271,6 +271,7 @@ bool GameTask::LoadGame()
       world_map->Show();
       RemoveLoadingScreen();
     }
+    loading_level.Remove();
     time_manager.AddRepetitiveTask(TASK_LVL_WORLDMAP, DateTime::Days(1))->Interval.Connect(*player_stats, &StatController::RunMetabolism);
   }
   catch (LoadingException exception)
@@ -288,6 +289,8 @@ void GameTask::OpenLevel(const std::string& level_name, const std::string& entry
   std::string     filename = level_name + ".blob";
   LoadLevelParams params;
 
+  data_engine["system"]["loading-level"]["level-name"] = level_name;
+  data_engine["system"]["loading-level"]["entry-zone"] = entry_zone;
   params.name       = level_name;
   params.entry_zone = entry_zone;
   params.isSaveFile = Filesystem::FileExists(save_path + '/' + filename);
@@ -429,6 +432,7 @@ void GameTask::LoadLevelFromPacket(LoadLevelParams params, Utils::Packet& packet
   level->obs.Connect(pipbuck.VisibilityToggled, level->GetLevelUi().InterfaceOpened, &Sync::Signal<void (bool)>::Emit);
   quest_manager->Initialize(level);
   world_map->Hide();
+  data_engine["system"]["loading-level"].Remove();
 }
 
 void GameTask::LoadLevel(LoadLevelParams params)

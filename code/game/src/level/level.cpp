@@ -292,6 +292,12 @@ void Level::SetAsPlayerParty(Party&)
     camera.SetConfigurationFromLevelState();
     mouse.SetPlayer(GetPlayer());
     player_halo.SetTarget(GetPlayer());
+    GetPlayer()->ChangedFloor.DisconnectAll();
+    GetPlayer()->ChangedFloor.Connect([this](unsigned char new_floor)
+    {
+      cout << "<event name='ChangedFloor' data-floor='"<<(int)new_floor<<"' />" << endl;
+      floors.SetCurrentFloor(new_floor);
+    });
   }
 }
 
@@ -322,6 +328,7 @@ void Level::MatchPartyToExistingCharacters(Party& party)
   RunForPartyMembers(party, [](Party::Member* member, ObjectCharacter* character)
   {
     member->LinkCharacter(character);
+    character->TeleportTo(character->GetOccupiedWaypoint());
   });
   if (party.GetName() == "player")
     SetAsPlayerParty(party);
