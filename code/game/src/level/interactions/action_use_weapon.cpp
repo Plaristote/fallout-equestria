@@ -54,6 +54,7 @@ void Actions::UseWeaponOn::RunAction()
 
 void Actions::UseWeaponOn::TargetDied()
 {
+  cout << "Target died" << endl;
   StatController* controller = GetUser()->GetStatController();
   Data            stats      = GetObjectTarget()->Get<ObjectCharacter>()->GetStatistics();
   Data            xp_reward  = stats["Variable"]["XpReward"];
@@ -66,6 +67,7 @@ void Actions::UseWeaponOn::TargetDied()
     controller->AddKill(race);
   }
   enemy_died = true;
+  cout << "/Target Died" << endl;
 }
 
 void Actions::UseWeaponOn::TargetAnimate()

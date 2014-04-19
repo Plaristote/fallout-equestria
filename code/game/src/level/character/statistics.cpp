@@ -91,6 +91,12 @@ void CharacterStatistics::ForceStatController(StatController* controller)
   RefreshStatistics();
 }
 
+void  CharacterStatistics::RefreshStatistics()
+{
+  if (controller)
+    controller->Died.DisconnectAll();
+}
+
 short CharacterStatistics::GetMaxHitPoints(void) const
 {
   return (controller->GetData()["Statistics"]["Hit Points"].Or(0));

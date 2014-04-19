@@ -639,7 +639,6 @@ void StatViewRocket::SetCategoryFields(const std::string& category, const std::v
           rml << "  <div class='special-commt console-value' id='special-commt-" << underscored << "'>Great</div>\n";
           rml << "  <div class='edit-cursor-placeholder'></div>\n";
           rml << "</div>\n\n";
-          cout << rml.str() << endl;
         }
         else if (category == "Statistics")
         {

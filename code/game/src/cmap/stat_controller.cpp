@@ -294,7 +294,11 @@ void StatController::SetCurrentHp(short hp)
     _view->SetInformation("char-state-hp-id-value", hp);
   HpChanged.Emit(hp);
   if (hp <= 0)
+  {
+    cout << "Statcontroller::Died::Emit (" << Died.ObserverCount() << " obervers)" << endl;
     Died.Emit();
+    cout << "StatController::SetCurrentHp Over" << endl;
+  }
 }
 
 void StatController::SetMaxHp(short hp)

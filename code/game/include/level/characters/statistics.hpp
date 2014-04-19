@@ -29,7 +29,7 @@ public:
   virtual void       Unserialize(Utils::Packet&);
   
 protected:
-  virtual void       RefreshStatistics(void) {}
+  virtual void       RefreshStatistics(void);
 
   StatController*    controller;
 private:

@@ -232,14 +232,15 @@ void ObjectCharacter::RefreshStatistics(void)
 {
   Data statistics = GetStatistics();
   
+  CharacterStatistics::RefreshStatistics();
   _inventory->SetCapacity(statistics["Statistics"]["Carry Weight"]);
   field_of_view.SetIntervalDurationFromStatistics();
   if (statistics["Faction"].NotNil())
     SetFaction(statistics["Faction"].Value());
   else
     _faction = 0;
+
   GetStatController()->Died.Connect(*this, &ObjectCharacter::RunDeath);
-  CharacterStatistics::RefreshStatistics();
 }
 
 void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& name, InstanceDynamicObject* target)
@@ -427,8 +428,10 @@ void ObjectCharacter::RunCombatBehaviour(float)
         AngelScript::Type<ObjectCharacter*> self(this);
         unsigned int                        ap_before = GetActionPoints();
 
+        cout << "Calling AI" << endl;
         collector_ai.start();
         script->Call("combat", 1, &self);
+        cout << "End Calling AI" << endl;
         collector_ai.stop();
         if (ap_before == GetActionPoints() && !IsBusy()) // If stalled, skip turn
         {
@@ -496,15 +499,21 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
 
 void                ObjectCharacter::RunDeath()
 {
+  cout << "Running death" << endl;
+  cout << "- unequipping items" << endl;
   UnequipItem(0);
   UnequipItem(1);
+  cout << "- clearing interactions" << endl;
   ClearInteractions();
+  cout << "- adding looting interaction" << endl;
   AddInteraction("use", _level->GetInteractions().Use);
 
   GetNodePath().set_hpr(0, 0, 90);
   UnprocessCollisions();
+  cout << "- etting hit points if superior to 0" << endl;
   if (GetHitPoints() > 0)
     SetHitPoints(0);
+  cout << "Death ran" << endl;
 }
 
 bool ObjectCharacter::IsPlayer(void) const
