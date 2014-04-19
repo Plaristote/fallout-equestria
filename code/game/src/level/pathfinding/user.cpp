@@ -310,7 +310,9 @@ void                Pathfinding::User::RunMovement(float elapsedTime)
     speed.set_z(max_speed * axis_speed.get_z() * dirZ);
 
     dest = _object->nodePath.get_pos() - speed;
-    
+
+    cout << "look at z: " << dest.get_z() << endl;
+
     LookAt(dest);
     _object->nodePath.set_pos(dest);
   }

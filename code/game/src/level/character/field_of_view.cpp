@@ -141,6 +141,8 @@ void FieldOfView::DetectCharacters()
         SetCharacterDetected(*checking_character);
       else if (character.HasLineOfSight(checking_character) && CheckIfEnemyIsDetected(*checking_character))
       {
+        if (character.IsPlayer())
+          cout << "SetDetected: " << checking_character->GetName() << endl;
         if (character.IsEnemy(checking_character))
           SetEnemyDetected(*checking_character);
         else
@@ -224,7 +226,11 @@ void FieldOfView::LoseTrackOfCharacters(std::list<Entry>& entries)
   {
     character->time_to_live--;
     if (character->time_to_live < 0)
+    {
+      if (this->character.IsPlayer())
+        cout << "Lost track of " << character->character->GetName() << endl;
       character = entries.erase(character);
+    }
     else
       character++;
   }

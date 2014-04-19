@@ -22,6 +22,7 @@ void Player::InitializePlayer(void)
   level.GetPlayerHalo().SetTarget(player);
   level.GetTargetOutliner().UsePerspectiveOfCharacter(player);
   player->GetFieldOfView().Launch();
+  player->SetVisible(true);
 }
 
 void Player::InitializeInteractions(void)

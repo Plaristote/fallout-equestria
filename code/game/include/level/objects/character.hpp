@@ -47,7 +47,7 @@ public:
   unsigned int             GetFaction(void) const     { return (_faction ? _faction->flag : 0);  }
     
   void                     SetFurtive(bool do_set);
-  void                     SetVisible(bool do_set)           { _fading_in = do_set == true; _fading_off = !_fading_in; }
+  void                     SetVisible(bool do_set);
   void                     AddFlag(unsigned char flag)       { _flags |= flag; }
   void                     DelFlag(unsigned char flag)       { if (HasFlag(flag)) { _flags -= flag; } }
   bool                     HasFlag(unsigned char flag) const { return ((_flags & flag) != 0); }
