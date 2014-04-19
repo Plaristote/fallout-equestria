@@ -216,15 +216,7 @@ void Level::RefreshCharactersVisibility(void)
 
 void Level::InsertCharacter(ObjectCharacter* character)
 {
-  NodePath  node_path = character->GetNodePath();
-  Waypoint* waypoint  = character->GetOccupiedWaypoint();
-
-  if (waypoint)
-  {
-    node_path.set_x(waypoint->nodePath.get_x());
-    node_path.set_y(waypoint->nodePath.get_y());
-    node_path.set_z(waypoint->nodePath.get_z() - NodePathSize(waypoint->nodePath).get_z() + character->GetSize().get_z() / 2);
-  }
+  character->TeleportTo(character->GetOccupiedWaypoint());
   character->PlayIdleAnimation();
   character->GetFieldOfView().SetIntervalDurationInSeconds(3);
   character->GetFieldOfView().Launch();

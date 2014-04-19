@@ -82,7 +82,7 @@ void                Pathfinding::User::TeleportTo(Waypoint* waypoint)
   {
     LPoint3  wp_size  = NodePathSize(waypoint->nodePath);
     LPoint3f position = waypoint->nodePath.get_pos();
-    float    z        = (position.get_z() - wp_size.get_z()) + 0.25;
+    float    z        = (position.get_z() - wp_size.get_z()) + 1;
 
     position.set_z(z + (GetSize().get_z() / 2));
     GetNodePath().set_pos(position);
@@ -208,8 +208,8 @@ void Pathfinding::User::SetNextWaypoint(void)
   while (wp == GetOccupiedWaypoint())
   {
     cout << "Stripping useless waypoint" << endl;
-    if (wp)
-      _object->nodePath.set_pos(wp->nodePath.get_pos());
+    //if (wp)
+    //  _object->nodePath.set_pos(wp->nodePath.get_pos());
     path.StripFirstWaypointFromList();
     MovePathForward();
     if (path.Size() == 0)
@@ -256,7 +256,7 @@ LPoint3             Pathfinding::User::GetDistanceToNextWaypoint(void) const
   LPoint3         current_position = _object->nodePath.get_pos();
   LPoint3         objective        = next_waypoint.nodePath.get_pos();
   LPoint3         waypoint_size    = NodePathSize(next_waypoint.nodePath);
-  float           height_objective = ((objective.get_z() - waypoint_size.get_z())) + (GetSize().get_z() / 2);
+  float           height_objective = ((objective.get_z() - waypoint_size.get_z()) + 1) + (GetSize().get_z() / 2);
 
   objective.set_z(height_objective);
   return (current_position - objective);
@@ -311,8 +311,6 @@ void                Pathfinding::User::RunMovement(float elapsedTime)
 
     dest = _object->nodePath.get_pos() - speed;
 
-    cout << "look at z: " << dest.get_z() << endl;
-
     LookAt(dest);
     _object->nodePath.set_pos(dest);
   }
@@ -346,17 +344,17 @@ void                Pathfinding::User::RunRotate(float elapsedTime)
 
 void                Pathfinding::User::LookAt(LVecBase3 pos)
 {
-   LVecBase3 rot;
-   float     backup;
+   LVecBase3 rot, backup;
 
-   backup = _object->nodePath.get_hpr().get_x();
+   backup = _object->nodePath.get_hpr();
    _object->nodePath.look_at(pos);
    rot = _object->nodePath.get_hpr();
    rot.set_x(rot.get_x() - 180);
    rot.set_y(-rot.get_y());
    rotation_goal = rot.get_x();
-   rot.set_x(backup);
-   //rotating      = true;
+   rot.set_x(backup.get_x());
+   if (pos.get_y() == _object->nodePath.get_y())
+     rot.set_y(backup.get_y());
    _object->nodePath.set_hpr(rot);
 }
 
