@@ -104,6 +104,7 @@ void Combat::FinalizeCharacterTurn(ObjectCharacter* character)
   character->ConvertRemainingActionPointsToArmorClass();
   character->PlayAnimation("idle");
   character->MovedFor1ActionPoint.DisconnectAll();
+  character->GetPath().Hide();
 }
 
 void Combat::InitializeCharacterTurn(ObjectCharacter* character)

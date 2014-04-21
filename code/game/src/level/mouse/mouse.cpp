@@ -106,6 +106,18 @@ LPoint2f Mouse::GetPosition(void) const
   return (LPoint2f(0.f, 0.f));
 }
 
+void Mouse::Move(float x, float y)
+{
+  if (_window->get_graphics_window())
+  {
+    LPoint2f position = GetPosition();
+
+    position.set_x(position.get_x() + x);
+    position.set_y(position.get_y() + y);
+    _window->get_graphics_window()->move_pointer(0, x, y);
+  }
+}
+
 LPoint2f Mouse::GetPositionRatio(void) const
 {
   LPoint2f position = GetPosition();
@@ -121,7 +133,7 @@ LPoint2f Mouse::GetPositionRatio(void) const
   return (position);
 }
 
-void Mouse::ClosestWaypoint(World* world, short currentFloor)
+void Mouse::ClosestWaypoint(World* world, short current_floor)
 {
   //if (_mouseWatcher->has_mouse())
   {
@@ -151,6 +163,7 @@ void Mouse::ClosestWaypoint(World* world, short currentFloor)
 
     collisionTraverser.add_collider(pickerPath, collisionHandlerQueue);
     collisionTraverser.traverse(_window->get_render());
+    //collisionTraverser.traverse(world->floors[current_floor]);
 
     collisionHandlerQueue->sort_entries();
 

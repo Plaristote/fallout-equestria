@@ -66,7 +66,8 @@ void MapObject::ReparentTo(MapObject* object)
   if (object)
   {
     parent = object->nodePath.get_name();
-    floor  = object->floor;
+    if (object->floor != floor)
+      SetFloor(object->floor);
     nodePath.reparent_to(object->nodePath);
   }
   else

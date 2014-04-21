@@ -48,6 +48,7 @@ struct Waypoint
 
   unsigned int           id;
   unsigned char          floor;
+  unsigned char          floor_above;
   Arcs                   arcs;
   ArcsWithdrawed         arcs_withdrawed;
   NodePath               nodePath;

@@ -190,6 +190,7 @@ struct World
     void           Serialize(Utils::Packet& packet, std::function<void (const std::string&, float)> progress_callback = [](const std::string&, float){});
 
     void           UpdateMapTree(void);
+    void           CompileWaypointsFloorAbove(void);
     void           CompileWaypoints(ProgressCallback);
     void           CompileDoors(ProgressCallback);
 

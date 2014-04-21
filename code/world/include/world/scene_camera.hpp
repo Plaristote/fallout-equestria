@@ -8,6 +8,9 @@
 # include <panda3d/collisionHandlerQueue.h>
 # include <panda3d/collisionTraverser.h>
 # include "is_game_editor.h"
+# ifndef GAME_EDITOR
+#  include "observatory.hpp"
+# endif
 
 enum
 {
@@ -51,6 +54,10 @@ public:
   }
 
   NodePath         GetNodePath(void) const { return (_camera); }
+
+# ifndef GAME_EDITOR
+  Sync::Signal<void> CameraMoved;
+# endif
 
 private:
   void             RunScroll(float elapsedTime);

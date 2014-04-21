@@ -54,6 +54,7 @@ public:
   const MouseHovering&      Hovering(void) const { return (_hovering); }
   LPoint2f                  GetPosition(void) const;
   LPoint2f                  GetPositionRatio(void) const;
+  void                      Move(float x, float y);
   
   void                      SetMouseState(char);
   

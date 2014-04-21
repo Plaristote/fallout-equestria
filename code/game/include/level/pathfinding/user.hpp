@@ -18,6 +18,10 @@ namespace Pathfinding
       InstanceDynamicObject* object;
       unsigned short         min_distance;
     };
+
+    //typedef Pathfinding::Path Path;
+    typedef PathPreview       Path;
+
   public:
     Sync::Signal<void>       ReachedDestination;
     Sync::Signal<void>       MovedFor1ActionPoint;
@@ -39,8 +43,8 @@ namespace Pathfinding
     void                     LookAt(InstanceDynamicObject*);
 
     bool                     IsMoving(void) const;
-    Pathfinding::Path&       GetPath(void)        { return (path);            }
-    const Pathfinding::Path& GetPath(void)  const { return (path);            }
+    Path&                    GetPath(void)        { return (path);            }
+    const Path&              GetPath(void)  const { return (path);            }
 
     virtual void             Serialize(Utils::Packet&);
     virtual void             Unserialize(Utils::Packet&);
@@ -64,8 +68,7 @@ namespace Pathfinding
     bool                     HasReachedTarget(void);
     void                     TriggerDestinationReached(void);
     
-    PathPreview              path;
-    //Pathfinding::Path        path;
+    Path                     path;
     std::string              movement_animation;
     float                    movement_speed;
     Destination              current_target;

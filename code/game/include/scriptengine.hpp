@@ -157,8 +157,8 @@ namespace Script
       engine->RegisterObjectMethod(className.c_str(), (typeName + " opAssign(" + ritType + ")").c_str(), asFUNCTION(StdList<T>::asRIterator::Assign), asCALL_CDECL_OBJFIRST);
     }
 
-    static void Constructor(void* memory) { new(memory) StdList();            }
-    static void Destructor (void* memory) { ((StdList*)memory)->~StdList(); }
+    static void Constructor(void* memory) { new(memory) StdList();                          }
+    static void Destructor (void* memory) { if (memory) { ((StdList*)memory)->~StdList(); } }
 
     ~StdList() {}
     

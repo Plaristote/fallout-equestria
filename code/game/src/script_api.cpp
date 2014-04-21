@@ -130,7 +130,8 @@ namespace ScriptApi
       {
         Waypoint* waypoint = character->GetClosestWaypointFrom(object);
         
-        character->GoTo(waypoint);
+        if (waypoint && waypoint != character->GetOccupiedWaypoint())
+          character->GoTo(waypoint);
       }
     }
     
@@ -139,12 +140,27 @@ namespace ScriptApi
       if (character && object)
       {
         Waypoint* waypoint = character->GetFarthestWaypointFrom(object);
-        
-        character->GoTo(waypoint);
+
+        if (waypoint && waypoint != character->GetOccupiedWaypoint())
+          character->GoTo(waypoint);
       }
     }
 
   private:
+  };
+
+  class Inventory
+  {
+  public:
+    static int GetItemCount(::Inventory* inventory)
+    {
+      return (inventory->GetContent().Size());
+    }
+
+    static InventoryObject* opIndex(::Inventory* inventory, int i)
+    {
+      return (inventory->GetContent()[i]);
+    }
   };
   
   class Item
@@ -208,7 +224,7 @@ namespace ScriptApi
       return (0);
     }
   };
-  
+
   class RocketUi : public UiBase
   {
     struct EventListener : public RocketListener
@@ -563,14 +579,21 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectType(shelfClass,     0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(partyClass,     0, asOBJ_REF | asOBJ_NOCOUNT);
 
-  engine->RegisterObjectMethod(inventoryClass, "void  AddObject(string)",  asMETHODPR(Inventory,AddObject, (const string&), InventoryObject*), asCALL_THISCALL);
-  engine->RegisterObjectMethod(inventoryClass, "void  DelObject(Item@)",   asMETHOD(Inventory,DelObject), asCALL_THISCALL);
-  engine->RegisterObjectMethod(inventoryClass, "Item@ GetObject(string)",  asMETHODPR(Inventory,GetObject, (const string&), InventoryObject*), asCALL_THISCALL);
-  engine->RegisterObjectMethod(inventoryClass, "int   ContainsHowMany(string) const", asMETHOD(Inventory,ContainsHowMany), asCALL_THISCALL);
-  engine->RegisterObjectMethod(inventoryClass, "void ResetFromFixtures()", asMETHOD(Inventory,ResetItemsFromFixtures), asCALL_THISCALL);
+  Script::StdList<string>::Register(engine, "ItemList", "Item@");
+  engine->RegisterObjectMethod(inventoryClass, "void      AddObject(string)",             asMETHODPR(Inventory,AddObject, (const string&), InventoryObject*), asCALL_THISCALL);
+  engine->RegisterObjectMethod(inventoryClass, "void      DelObject(Item@)",              asMETHOD(Inventory,DelObject),                                      asCALL_THISCALL);
+  engine->RegisterObjectMethod(inventoryClass, "Item@     GetObject(string)",             asMETHODPR(Inventory,GetObject, (const string&), InventoryObject*), asCALL_THISCALL);
+  engine->RegisterObjectMethod(inventoryClass, "int       ContainsHowMany(string) const", asMETHOD(Inventory,ContainsHowMany),                                asCALL_THISCALL);
+  engine->RegisterObjectMethod(inventoryClass, "void      ResetFromFixtures()",           asMETHOD(Inventory,ResetItemsFromFixtures),                         asCALL_THISCALL);
+  engine->RegisterObjectMethod(inventoryClass, "int       GetItemCount() const",          asFUNCTION(ScriptApi::Inventory::GetItemCount), asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(inventoryClass, "Item@     opIndex(int)",                  asFUNCTION(ScriptApi::Inventory::opIndex),      asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(inventoryClass, "ItemList  GetContent()",                  asMETHODPR(Inventory,GetContent, (void), Script::StdList<InventoryObject*>&), asCALL_THISCALL);
+  engine->RegisterObjectMethod(inventoryClass, "Item@     GetEquipedItem(string, int)",   asMETHOD(Inventory,GetEquipedItem), asCALL_THISCALL);
+  engine->RegisterObjectMethod(inventoryClass, "void      SetEquipedItem(string, int, Item@, string)", asMETHODPR(Inventory,SetEquipedItem, (const string&, unsigned int, InventoryObject*, const string&), void), asCALL_THISCALL);
 
   engine->RegisterObjectMethod(itemClass, "string GetName() const",                                asMETHOD(InventoryObject,GetName),               asCALL_THISCALL);
   engine->RegisterObjectMethod(itemClass, "Data   AsData()",                                       asFUNCTION(asUtils::ItemAsData),                 asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(itemClass, "bool   IsWeapon() const",                               asMETHOD(InventoryObject,IsWeapon),              asCALL_THISCALL);
   engine->RegisterObjectMethod(itemClass, "int    HitSuccessRate(Character@, Character@, string)", asFUNCTION(ScriptApi::Item::HitSuccessRate),     asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(itemClass, "bool   UseWeaponOn(Character@, Character@, string)",    asFUNCTION(ScriptApi::Item::UseAsWeapon),        asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(itemClass, "bool   UseOn(Character@, DynamicObject@, string)",      asFUNCTION(ScriptApi::Item::UseOn),              asCALL_CDECL_OBJFIRST);

@@ -84,9 +84,9 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   
   LoadingScreen::AppendText("Flattening objects...");
   {
-    //WorldFlattener flattener(*world);
+    WorldFlattener flattener(*world);
     
-    //flattener.Flatten();
+    flattener.Flatten();
   }
 
   /*

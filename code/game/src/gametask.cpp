@@ -262,7 +262,9 @@ bool GameTask::LoadGame()
       params.name       = current_level.Value();
       params.path       = save_path + '/' + params.name + ".blob";
       params.entry_zone = loading_level.Nil() ? "" : loading_level["entry-zone"].Value();
-      params.isSaveFile = true;
+      params.isSaveFile = loading_level.Nil() || Filesystem::FileExists(params.path);
+      if (params.isSaveFile == false)
+        params.path     = "maps/" + params.name + ".blob";
       SyncLoadLevel.Emit(params);
       world_map->Hide();
     }

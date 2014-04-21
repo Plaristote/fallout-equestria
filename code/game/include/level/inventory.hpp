@@ -51,6 +51,7 @@ public:
   bool              IsEquiped(void) const { return (_equiped); }
   bool              IsGroupableWith(const InventoryObject*) const;
   bool              IsHidden(void)  const { return ((*this)["hidden"] == 1); }
+  bool              IsWeapon(void)  const;
 
   void              ResetFromFixture(void);
 
@@ -76,7 +77,7 @@ private:
 class Inventory
 {
 public:
-  typedef std::list<InventoryObject*> Content;
+  typedef Script::StdList<InventoryObject*> Content;
 
   struct Slot
   {
@@ -152,6 +153,7 @@ public:
   bool               SlotHasEquipedItem(const std::string& type_slot, unsigned int slot = 0) const;
   unsigned char      GetEquipedMode(const std::string& type_slot, unsigned int slot = 0) const;
   InventoryObject*   GetEquipedItem(const std::string& type_slot, unsigned int slot = 0);
+  void               SetEquipedItem(const std::string& type_slot, unsigned int slot, InventoryObject* object, const std::string& equip_mode);
   void               SetEquipedItem(const std::string& type_slot, unsigned int slot, InventoryObject* object, unsigned char equip_mode = 0);
   void               SetEquipedItem(const std::string& type_slot, InventoryObject* object, unsigned char equip_mode = 0)
   {

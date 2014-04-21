@@ -2,10 +2,12 @@
 #include <panda3d/collisionHandlerQueue.h>
 #include <panda3d/collisionBox.h>
 #include <panda3d/collisionSphere.h>
+#include <panda3d/collisionRay.h>
+#define CURRENT_BLOB_REVISION 8
 
 using namespace std;
 
-unsigned int          blob_revision = 7;
+unsigned int          blob_revision = CURRENT_BLOB_REVISION;
 World*                World::LoadingWorld = 0;
 
 World::World(WindowFramework* window)
@@ -779,6 +781,8 @@ void           World::UnSerialize(Utils::Packet& packet)
     });
   }
 #endif
+  if (blob_revision < 8)
+    CompileWaypointsFloorAbove();
 
     cout << "Compiling lights" << endl;
   // Post-loading stuff
@@ -870,9 +874,11 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
     else
       ++it;
   }
+
+  CompileWaypointsFloorAbove();
 # endif
 
-  packet << (unsigned int)7; // #blob revision
+  packet << (unsigned int)CURRENT_BLOB_REVISION; // #blob revision
 
   // Waypoints
   {
@@ -948,6 +954,62 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
 }
 
 // MAP COMPILING
+void           World::CompileWaypointsFloorAbove()
+{
+  for_each(waypoints.begin(), waypoints.end(), [this](Waypoint& waypoint)
+  {
+    PT(CollisionRay)          pickerRay;
+    PT(CollisionNode)         pickerNode;
+    NodePath                  pickerPath;
+    CollisionTraverser        collisionTraverser;
+    PT(CollisionHandlerQueue) collisionHandlerQueue = new CollisionHandlerQueue();
+
+    pickerNode   = new CollisionNode("isInsideBuildingRay");
+    pickerPath   = window->get_render().attach_new_node(pickerNode);
+    pickerRay    = new CollisionRay();
+    pickerNode->add_solid(pickerRay);
+    pickerNode->set_from_collide_mask(CollideMask(ColMask::FovBlocker));
+
+    pickerPath.set_pos(waypoint.nodePath.get_pos());
+    pickerPath.set_hpr(0, 0, 0);
+    pickerRay->set_direction(0, 0, 10);
+
+    collisionTraverser.add_collider(pickerPath, collisionHandlerQueue);
+    collisionTraverser.traverse(floors_node);
+
+    collisionHandlerQueue->sort_entries();
+
+    waypoint.floor_above = waypoint.floor; // In case there's nothing above...
+
+    for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
+    {
+      CollisionEntry* entry  = collisionHandlerQueue->get_entry(i);
+      MapObject*      object = GetMapObjectFromNodePath(entry->get_into_node_path());
+
+      if (!object)
+      {
+        DynamicObject* dynamic_object = GetDynamicObjectFromNodePath(entry->get_into_node_path());
+
+        switch (dynamic_object->type)
+        {
+          case DynamicObject::Shelf:
+          case DynamicObject::Door:
+          case DynamicObject::Locker:
+            object = dynamic_object;
+          default:
+            break ;
+        }
+      }
+      if (object && object->floor >= waypoint.floor)
+      {
+        waypoint.floor_above = object->floor;
+        break ;
+      }
+    }
+    pickerPath.detach_node();
+  });
+}
+
 void           World::CompileWaypoints(ProgressCallback progress_callback)
 {
     unsigned int        i   = 0;

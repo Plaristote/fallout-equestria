@@ -115,9 +115,20 @@ void Floors::HidingFloor::Run(float elapsedTime)
 
 bool Floors::IsInsideBuilding(unsigned char& floor)
 {
+  Waypoint* waypoint = level.GetPlayer()->GetOccupiedWaypoint();
+
+  cout << "Is inside building, floor " << (int)waypoint->floor << ", above " << (int)floor << endl;
+  if (waypoint->floor_above != waypoint->floor)
+  {
+    floor = waypoint->floor_above;
+    return (true);
+  }
+  return (false);
+/*
+
   //Timer profile;
-  World&                    world                 = *level.GetWorld();
   bool                      isInsideBuilding      = false;
+  World&                    world                 = *level.GetWorld();
   PT(CollisionRay)          pickerRay;
   PT(CollisionNode)         pickerNode;
   NodePath                  pickerPath;
@@ -160,5 +171,5 @@ bool Floors::IsInsideBuilding(unsigned char& floor)
   }
   pickerPath.detach_node();
   //profile.Profile("[Level::IsInsideBuilding]");
-  return (isInsideBuilding);
+  return (isInsideBuilding);*/
 }

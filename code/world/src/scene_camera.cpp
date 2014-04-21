@@ -239,6 +239,9 @@ void SceneCamera::RunScroll(float elapsedTime)
     if      (_camera.get_y() > _maxPosY) { _camera.set_y(_maxPosY); }
     else if (_camera.get_y() < _minPosY) { _camera.set_y(_minPosY); }
   }
+#ifndef GAME_EDITOR
+  CameraMoved.Emit();
+#endif
 }
 
 /*
@@ -265,6 +268,9 @@ void SceneCamera::CenterCameraInstant(LPoint3f pos)
     _camera.set_x(_camera.get_x() + 25 - (_camera_height - 50) * 0.85);
     _camera.set_y(_camera.get_y() + 40 - (_camera_height - 50) * 1);
   }
+#ifndef GAME_EDITOR
+  CameraMoved.Emit();
+#endif
 }
 
 void SceneCamera::CenterCameraOn(NodePath np)
@@ -344,6 +350,10 @@ void SceneCamera::RunFollow(float elapsedTime)
   if (ABS(dist.get_z()) < ABS(camSpeed.get_z()))
     dest.set_z(_objectivePos.get_z());
   _camera.set_pos(dest);
+#ifndef GAME_EDITOR
+  CameraMoved.Emit();
+#endif
+
   if (dest == _objectivePos)
     _centeringCamera = false;
 }

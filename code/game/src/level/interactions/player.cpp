@@ -82,13 +82,14 @@ void Interactions::Player::ActionTargetUse(short unsigned int it)
       mouse.TargetPicked.Connect([this, item, action, action_it](InstanceDynamicObject* object)
       {
         ObjectCharacter* character = object->Get<ObjectCharacter>();
+        ActionRunner*    runner    = 0;
 
-        cout << character << " pointer to character" << endl;
-        action.Output();
         if (character != 0 && action["combat"].Value() == "1")
-          Interactions::Actions::UseWeaponOn::Factory(player, character, item, action_it);
+          runner = Interactions::Actions::UseWeaponOn::Factory(player, character, item, action_it);
         else
-          Interactions::Actions::UseObjectOn::Factory(player, object,    item, action_it);
+          runner = Interactions::Actions::UseObjectOn::Factory(player, object,    item, action_it);
+        if (runner)
+          level.GetMouse().SetState(MouseEvents::MouseAction);
       });
     }
     else

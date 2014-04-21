@@ -94,6 +94,24 @@ bool InventoryObject::IsGroupableWith(const InventoryObject* other) const
   return (GetName() == other->GetName());
 }
 
+bool InventoryObject::IsWeapon(void) const
+{
+  Data actions = (*this)["actions"];
+
+  if (actions.NotNil())
+  {
+    auto it  = actions.begin();
+    auto end = actions.end();
+
+    for (; it != end ; ++it)
+    {
+      if ((*it)["combat"] == 1)
+        return (true);
+    }
+  }
+  return (false);
+}
+
 void InventoryObject::SetEquiped(ObjectCharacter* character, bool set)
 {
   if (_equiped != set && _object.IsDefined("SetEquiped"))
@@ -680,6 +698,26 @@ bool                   Inventory::SlotHasEquipedItem(const std::string& type_slo
   catch (...)
   {
     return (false);
+  }
+}
+
+void                   Inventory::SetEquipedItem(const string &type_slot, unsigned int slot, InventoryObject *object, const string &equip_mode)
+{
+  if (Level::CurrentLevel)
+  {
+    bool          found_equip_mode = false;
+    unsigned char equip_mode_it;
+
+    Level::CurrentLevel->GetEquipModes().Foreach([&found_equip_mode, &equip_mode_it, equip_mode](unsigned char it, const std::string it_name)
+    {
+      if (it_name == equip_mode)
+      {
+        equip_mode_it    = it;
+        found_equip_mode = true;
+      }
+    });
+    if (found_equip_mode)
+      SetEquipedItem(type_slot, slot, object, equip_mode_it);
   }
 }
 
