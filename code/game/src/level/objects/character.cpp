@@ -123,6 +123,16 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
   string anims[] = { "idle", "walk", "run", "use" };
   for (unsigned int i = 0; i<GET_ARRAY_SIZE(anims); i++)
     LoadAnimation(anims[i]);
+
+  // FLOORS
+  ChangedFloor.Connect([this](unsigned char floor)
+  {
+    World* world = _level->GetWorld();
+
+    GetNodePath().reparent_to(world->floors[floor]);
+  });
+  if (HasOccupiedWaypoint())
+    ChangedFloor.Emit(GetOccupiedWaypoint()->floor);
 }
 
 void ObjectCharacter::SetupScript(AngelScript::Object* script)

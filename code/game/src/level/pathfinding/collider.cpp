@@ -64,7 +64,7 @@ void      Collider::SetOccupiedWaypoint(Waypoint* wp)
 #ifndef GAME_EDITOR
   if (wp != waypoint_occupied)
   {
-    if (waypoint_occupied && wp && waypoint_occupied->floor != wp->floor)
+    if ((!waypoint_occupied && wp) || (wp && waypoint_occupied && waypoint_occupied->floor != wp->floor))
       ChangedFloor.Emit(wp->floor);
     collision_processed = false;
     if (waypoint_occupied)

@@ -16,8 +16,8 @@ InstanceDynamicObject::InstanceDynamicObject(Level* level, DynamicObject* object
   data_store            = new DataTree;
   idle_size             = NodePathSize(object->nodePath);
   waypoint_disconnected = object->lockedArcs;
-  SetOccupiedWaypoint(object->waypoint);
   SetModelNameFromPath(object->strModel);
+  SetOccupiedWaypoint(object->waypoint);
 }
 
 InstanceDynamicObject::~InstanceDynamicObject()

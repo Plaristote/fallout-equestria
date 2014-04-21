@@ -250,11 +250,11 @@ bool GameTask::LoadGame()
     Data loading_level;
 
     LoadDataEngine();
+    LoadingScreen::SetBackground(data_engine["system"]["current-level"].Value());
     LoadPlayerData();
     LoadWorldMap();
     loading_level = data_engine["system"]["loading-level"];
     current_level = loading_level.Nil() ? data_engine["system"]["current-level"] : loading_level["level-name"];
-    LoadingScreen::SetBackground(current_level);
     if (!(current_level.Nil()) && current_level.Value() != "0")
     {
       LoadLevelParams params;
