@@ -1,7 +1,7 @@
 #ifndef  SEMAPHORE_HPP
 # define SEMAPHORE_HPP
 
-# if defined(__linux__) or defined(__llvm__)
+# if defined(__GNUC__) or defined(__llvm__)
 #  include <semaphore.h>
 #  include <thread>
 # endif
