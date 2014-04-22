@@ -100,7 +100,6 @@ void StatController::RunMetabolism(void)
 
     stream << _model.GetStatistic("Healing Rate");
     stream >> hp;
-    cout << "Healing Rate => " << hp << endl;
     stream_hp << _model.GetStatistic("Hit Points");
     stream_hp >> max_hp;
     hp = (int)(_model.GetAll()["Variables"]["Hit Points"]) + hp;

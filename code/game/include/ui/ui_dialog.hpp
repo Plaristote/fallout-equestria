@@ -23,6 +23,8 @@ public:
   void                   SetMessage(const std::string& message);
   void                   AddChoice(const std::string& name, std::function<void (Rocket::Core::Event&)> callback);
 
+  Sync::Signal<void>     Done;
+
 private:
   void                   PickedChoice(Rocket::Core::Event&);
   

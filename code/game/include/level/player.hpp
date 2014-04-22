@@ -6,10 +6,11 @@
 class Player : public Interactions::Player
 {
 public:
-  Player(Level& level) : Interactions::Player(level) {}
+  Player(Level& level) : Interactions::Player(level), player(0) {}
   
-  void SetPlayer(ObjectCharacter* character);
-  void UnsetPlayer(void);
+  void             SetPlayer(ObjectCharacter* character);
+  ObjectCharacter* GetPlayer(void) const;
+  void             UnsetPlayer(void);
 
 private:
   void InitializeInventoryUi(void);
@@ -22,6 +23,7 @@ private:
   void EquipItemForQuickUse(const std::string& target, unsigned int slot, InventoryObject* object);
   void UnequipItem(const std::string& target, unsigned int slot);
 
+  ObjectCharacter*      player;
   Sync::ObserverHandler obs;
 };
 

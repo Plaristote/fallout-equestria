@@ -12,13 +12,21 @@ void EncounterSpawn::LoadFromDataEngine(DataEngine& data_engine)
 {
   Data spawn_data = data_engine["random-encounters"][GetName()];
   
+  spawn_data.Output();
   for (unsigned int i = 0 ; i < spawn_data.Count() ; ++i)
   {
     Data         character = spawn_data[i];
-    stringstream unique_name;
+    unsigned int clones    = 0;
+    unsigned int quantity  = character["quantity"].Or(1);
 
-    unique_name << GetName() << "-" << i;
-    character["name"] = unique_name.str();
-    Join(character);
+    for (; clones < quantity ; ++clones)
+    {
+      stringstream unique_name;
+
+      unique_name << GetName() << '-' << i << '-' << clones;
+      character["object_name"] = unique_name.str();
+      character["name"]        = character.Key();
+      Join(character);
+    }
   }
 }

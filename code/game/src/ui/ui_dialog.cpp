@@ -19,10 +19,7 @@ UiDialog::~UiDialog(void)
   {
     for_each(_buttons.begin(), _buttons.end(), [this](Button& button)
     {
-      Rocket::Core::Element* element;
-      
-      element = root->GetElementById(button.id.c_str());
-      element->RemoveEventListener("click", &button.listener);
+      ToggleEventListener(false, button.id.c_str(), "click", button.listener);
     });
     _buttons.clear();
   }
@@ -47,6 +44,10 @@ void UiDialog::AddChoice(const string& name, std::function<void (Rocket::Core::E
     stringstream         rml_stream;
     stringstream         id_stream;
 
+    for_each(_buttons.begin(), _buttons.end(), [this](Button& button)
+    {
+      ToggleEventListener(false, button.id.c_str(), "click", button.listener);
+    });
     _button_container->GetInnerRML(rml);
     id_stream  << "button-" << underscore(name);
     rml_stream << rml.CString();
@@ -58,18 +59,15 @@ void UiDialog::AddChoice(const string& name, std::function<void (Rocket::Core::E
     _buttons.rbegin()->listener.EventReceived.Connect(*this, &UiDialog::PickedChoice);
     for_each(_buttons.begin(), _buttons.end(), [this](Button& button)
     {
-      Rocket::Core::Element* element;
-
-      element       = _button_container->GetElementById(button.id.c_str());
-      element->AddEventListener("click", &button.listener);
+      ToggleEventListener(true, button.id.c_str(), "click", button.listener);
     });
   }
 }
 
 void UiDialog::PickedChoice(Rocket::Core::Event&)
 {
+  SetModal(false);
   Hide();
-#ifndef _WIN32 // WINBUG001: There's what appears to be double deletion at this point...
   Executor::ExecuteLater([this](void) { delete this; });
-#endif
+  Done.Emit();
 }

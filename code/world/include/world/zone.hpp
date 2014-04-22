@@ -19,6 +19,7 @@ struct Zone : public Utils::Serializable
 
   std::string              name;
   std::list<Waypoint*>     waypoints;
+  std::list<int>           waypoints_ids;
   std::vector<std::string> destinations;
 };
 

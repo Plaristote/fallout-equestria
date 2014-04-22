@@ -4,6 +4,7 @@
 #include <dices.hpp>
 #include "ui/alert_ui.hpp"
 #include "ui/loading_screen.hpp"
+#include "scheduled_task.hpp"
 
 using namespace std;
 using namespace Rocket;
@@ -48,7 +49,8 @@ void WorldMap::Save(const string& savepath)
   DataTree::Writers::JSON(_mapTree, "saves/map.json");
 }
 
-WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, TimeManager& tm) : UiBase(window, gameUi->GetContext()), _dataEngine(de), _timeManager(tm), _gameUi(*gameUi)
+WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, TimeManager& tm) : UiBase(window, gameUi->GetContext()),
+  _dataEngine(de), _timeManager(tm), _gameUi(*gameUi), _task(this)
 {
   _city_splash   = 0;
   _interrupted   = false;
@@ -57,6 +59,9 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, Time
   
   _mapTree = DataTree::Factory::JSON("saves/map.json");
   MapTileGenerator(_mapTree);
+
+  _task.SetAsHourlyTask(DateTime::Minutes(1));
+  _task.Launch();
 
   if (root)
   {
@@ -223,7 +228,7 @@ void WorldMap::UpdateClock(void)
   Core::Element* elem_month   = root->GetElementById("clock-month");
   Core::Element* elem_day     = root->GetElementById("clock-day");
   DateTime       current_time = _timeManager.GetDateTime();
-  
+
   if (elem_year)
   {
     stringstream str;
@@ -377,7 +382,7 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
   int   current_case_x, current_case_y;
   GetCurrentCase(current_case_x, current_case_y);
   Data  case_data     = GetCaseData(current_case_x, current_case_y);
-  float movementTime  = elapsedTime * 50;
+  float movementTime  = elapsedTime * 25;
   float caseSpeed     = case_data["movement-speed"].Nil() ? 1.f : case_data["movement-speed"];
   float movementSpeed = movementTime * (caseSpeed >= 0.1f ? caseSpeed : 1);
   float a             = _current_pos_x - _goal_x;
@@ -414,28 +419,8 @@ void WorldMap::UpdatePartyCursor(float elapsedTime)
       SetCityVisible(city);
   }
 
-  // Update the clock
-  DateTime       current_time   = _timeManager.GetDateTime();
-  unsigned short lastHour       = current_time.GetHour();
-  unsigned short lastDay        = current_time.GetDay();
-  unsigned short elapsedHours   = movementTime;
-  unsigned short elapsedMinutes = (((movementTime * 100) - (elapsedHours * 100)) / 100) * 60;
-  _timeManager.AddElapsedTime(DateTime::Hours(elapsedHours) + DateTime::Minutes(elapsedMinutes));
-  if (lastDay != current_time.GetDay())
-    UpdateClock();
-  if (lastHour != current_time.GetHour())
-  {
-    string which_city;
-    
-    UpdateClock();
-    if (!(IsPartyInCity(which_city)) && Dices::Throw(92) < 3)
-    {
-      int x, y;
+  _timeManager.AddElapsedTime(DateTime::Minutes(movementTime * 25));
 
-      GetCurrentCase(x, y);
-      RequestRandomEncounter.Emit(x, y, true);
-    }
-  }
 }
 
 Core::Element* WorldMap::GetCaseAt(int x, int y) const
@@ -654,4 +639,24 @@ void WorldMap::SetInterrupted(bool set)
   _interrupted = set;
   if (!set)
     _timer.Restart();
+}
+
+void WorldMap::Task::Run(void)
+{
+  worldmap->UpdateClock();
+  if (worldmap->IsVisible())
+    CheckIfEncounter();
+}
+
+void WorldMap::Task::CheckIfEncounter(void)
+{
+  string which_city;
+
+  if (!(worldmap->IsPartyInCity(which_city)) && Dices::Throw(100) < 3)
+  {
+    int x, y;
+
+    worldmap->GetCurrentCase(x, y);
+    worldmap->RequestRandomEncounter.Emit(x, y, true);
+  }
 }

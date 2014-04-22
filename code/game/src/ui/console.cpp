@@ -149,7 +149,6 @@ void GameConsole::Output(const std::string str)
 
 void GameConsole::KeyUp(Rocket::Core::Event& event)
 {
-  cout << "Some event" << endl;
   if (event == "keyup") {
           Rocket::Controls::ElementFormControl* control = reinterpret_cast<Rocket::Controls::ElementFormControl*>(_input);
           int keyId= event.GetParameter<int>("key_identifier", 0);

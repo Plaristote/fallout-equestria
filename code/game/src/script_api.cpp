@@ -347,9 +347,9 @@ namespace asData
   bool        opEqualsFloat(Data* obj, float f)                   { return (obj->operator==(f));       }
   bool        opEqualsString(Data* obj, const std::string& str)   { return (obj->Value() == str);      }
 
-  std::string getAsString(Data* obj)                              { return (obj ? obj->Value() : "");  }
-  int         getAsInt(Data* obj)                                 { return (obj ? (int)*obj   : 0);    }
-  float       getAsFloat(Data* obj)                               { return (obj ? (float)*obj : 0.f);  }
+  std::string getAsString(Data* obj)                              { return (obj && obj->NotNil() ? obj->Value() : "");  }
+  int         getAsInt(Data* obj)                                 { return (obj && obj->NotNil() ? (int)*obj   : 0);    }
+  float       getAsFloat(Data* obj)                               { return (obj && obj->NotNil() ? (float)*obj : 0.f);  }
 }
 
 namespace asUtils
@@ -709,7 +709,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(cameraClass, "void CenterOn(DynamicObject@)",   asMETHOD(LevelCamera,CenterOnObject), asCALL_THISCALL);
   engine->RegisterObjectMethod(cameraClass, "void Follow(DynamicObject@)",     asMETHOD(LevelCamera,FollowObject),   asCALL_THISCALL);
   engine->RegisterObjectMethod(cameraClass, "void StopFollowing()",            asMETHOD(LevelCamera,StopFollowingNodePath), asCALL_THISCALL);
-  engine->RegisterObjectMethod(cameraClass, "void SetEnabledTrackaball(bool)", asMETHOD(SceneCamera,SetEnabledTrackball), asCALL_THISCALL);
+  engine->RegisterObjectMethod(cameraClass, "void SetEnabledTrackball(bool)",  asMETHOD(SceneCamera,SetEnabledTrackball), asCALL_THISCALL);
 
   const char* zoneManagerClass = "ZoneManager";
   engine->RegisterObjectType(zoneManagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);

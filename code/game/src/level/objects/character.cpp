@@ -198,7 +198,7 @@ void ObjectCharacter::SetInventory(Inventory* inventory)
 
     if (_inventory) delete _inventory;
     _inventory = inventory;
-    _obs_handler.Connect(_inventory->ContentChanged, *this, &ObjectCharacter::RefreshEquipment);
+    /*_obs_handler.Connect(_inventory->ContentChanged, *this, &ObjectCharacter::RefreshEquipment);
     _obs_handler.Connect(_inventory->EquipedItem,    [this](const string& target, unsigned short int slot, InventoryObject* object)
     {
       if (target == "equiped")
@@ -212,7 +212,7 @@ void ObjectCharacter::SetInventory(Inventory* inventory)
       {
         UnequipItem(slot);
       }
-    });
+    });*/
     _inventory->InitializeSlots();
     _inventory->SetCapacity(statistics["Statistics"]["Carry Weight"]);
   }
@@ -235,7 +235,10 @@ void ObjectCharacter::SetFurtive(bool do_set)
 ObjectCharacter::~ObjectCharacter()
 {
   if (current_action)
+  {
     delete current_action;
+    current_action = 0;
+  }
 }
 
 void ObjectCharacter::RefreshStatistics(void)

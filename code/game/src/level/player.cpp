@@ -10,11 +10,17 @@ void Player::UnsetPlayer(void)
 
 void Player::SetPlayer(ObjectCharacter* character)
 {
+  player = character;
   Interactions::Player::SetPlayer(character);
   InitializeInteractions();
   InitializeInventoryUi();
   InitializeMainBar();
   InitializePlayer();
+}
+
+ObjectCharacter* Player::GetPlayer() const
+{
+  return (player);
 }
 
 void Player::InitializePlayer(void)

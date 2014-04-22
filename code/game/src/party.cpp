@@ -21,19 +21,22 @@ Party::Member::Member(Data data)
 {
   const std::string path = "data/charsheets/" + data["name"].Value() + ".json";
 
+  cout << ">> character joining: " << endl;
+  data.Output();
   statistics_datatree = DataTree::Factory::JSON(path);
   if (statistics_datatree)
     statistics        = new StatController(statistics_datatree);
   metabolism          = new Metabolism(statistics);
   object.type         = DynamicObject::Character;
   object.collider     = MapObject::MODEL;
-  object.name         = data["name"].Value();
+  object.name         = data["object_name"].Or(data["name"].Value());
   object.script       = data["script"].Value();
   object.charsheet    = data["name"].Value();
   object.dialog       = data["dialog"].Value();
-  object.interactions = (int)(data["interactions"]);
+  object.interactions = data["interactions"].NotNil() ? (int)(data["interactions"]) : Interactions::UseObject | Interactions::UseSkill | Interactions::UseSpell | Interactions::LookAt | Interactions::TalkTo;
   object.strModel     = data["model"].Value();
   object.strTexture   = data["texture"].Value();
+  object.waypoint     = 0;
   inventory           = new Inventory;
   TaskSet(0).Serialize(task_set);
 }
@@ -146,10 +149,13 @@ Party::Party(const string& savepath, const string& name) : name(name)
 
 Party::~Party()
 {
+  cout << "Deleting party " << GetName() << endl;
   for_each(members.begin(), members.end(), [](Member* member)
   {
     delete member;
+    cout << "Member deleted" << endl;
   });
+  cout << "All members deleted" << endl;
 }
 
 void Party::Join(ObjectCharacter* character)

@@ -6,6 +6,7 @@
 # include "worldmap/city_splash.hpp"
 # include "time_manager.hpp"
 # include "timer.hpp"
+# include "scheduled_task.hpp"
 # include <fstream>
 
 class WorldMap : public UiBase
@@ -25,6 +26,21 @@ class WorldMap : public UiBase
   typedef std::vector<Rocket::Core::Element*> Cases;
 
 public:
+  class Task : public ScheduledTask
+  {
+  public:
+    Task(WorldMap* worldmap) : worldmap(worldmap) {}
+
+    void Run();
+
+  private:
+    void CheckIfEncounter();
+
+    WorldMap* worldmap;
+  };
+
+  friend class WorldMap::Task;
+
   static WorldMap* CurrentWorldMap;
 
   WorldMap(WindowFramework*, GameUi*, DataEngine&, TimeManager&);
@@ -80,6 +96,7 @@ private:
   TimeManager&           _timeManager;
   GameUi&                _gameUi;
   Timer                  _timer;
+  Task                   _task;
   bool                   _interrupted;
 
   int                    _size_x,  _size_y;

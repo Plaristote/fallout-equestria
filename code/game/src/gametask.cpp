@@ -469,42 +469,53 @@ void GameTask::LoadLevel(LoadLevelParams params)
   }
   else
     AlertUi::NewAlert.Emit("Failed to open map file '" + params.path + '\'');
+  RemoveLoadingScreen();
   if (success == false)
   {
     if (level) { delete level; level = 0; }
     world_map->Show();
   }
-  RemoveLoadingScreen();
 }
 
 void GameTask::SetLevelEncounter(const Encounter& encounter)
 {
   OpenLevel(encounter.GetMapName(), "worldmap");
-  if (level)
+  SyncLoadLevel.Connect([this, encounter](LoadLevelParams)
   {
-    world_map->Hide();
-    level->SetPersistent(encounter.IsSpecial());
-
-    // Make a city out of the special encounter
-    if (encounter.IsSpecial())
+    if (level)
     {
-      float x, y;
+      world_map->Hide();
+      level->SetPersistent(encounter.IsSpecial());
 
-      world_map->GetCurrentPosition(x, y);
-      world_map->AddCity(encounter.GetMapName(), x, y, 10);
-      world_map->SetCityVisible(encounter.GetMapName());
+      // Make a city out of the special encounter
+      if (encounter.IsSpecial())
+      {
+        float x, y;
+
+        world_map->GetCurrentPosition(x, y);
+        world_map->AddCity(encounter.GetMapName(), x, y, 10);
+        world_map->SetCityVisible(encounter.GetMapName());
+      }
+      // Spawn encounter if it contains people/critters
+      else if (encounter.IsEvent())
+      {
+        EncounterSpawn* spawn = new EncounterSpawn(encounter.GetEncounterName());
+        stringstream    entry_zone;
+
+        entry_zone << "spawn_" << 1;
+        spawn->LoadFromDataEngine(data_engine);
+        level->InsertParty(*spawn, entry_zone.str());
+      }
     }
-    // Spawn encounter if it contains people/critters
-    else if (encounter.IsEvent())
+
+    auto& _SyncLoadLevel = SyncLoadLevel;
+    auto* self           = this;
+    Executor::ExecuteLater([&_SyncLoadLevel, self]()
     {
-      EncounterSpawn* spawn = new EncounterSpawn(encounter.GetEncounterName());
-      stringstream    entry_zone;
-
-      entry_zone << "spawn_" << 1;
-      spawn->LoadFromDataEngine(data_engine);
-      level->InsertParty(*spawn, entry_zone.str());
-    }
-  }
+      _SyncLoadLevel.DisconnectAll();
+      _SyncLoadLevel.Connect(*self, &GameTask::LoadLevel);
+    });
+  });
 }
 
 void GameTask::MakeEncounter(int x, int y, bool is_event)

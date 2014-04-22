@@ -117,7 +117,6 @@ bool Floors::IsInsideBuilding(unsigned char& floor)
 {
   Waypoint* waypoint = level.GetPlayer()->GetOccupiedWaypoint();
 
-  cout << "Is inside building, floor " << (int)waypoint->floor << ", above " << (int)floor << endl;
   if (waypoint->floor_above != waypoint->floor)
   {
     floor = waypoint->floor_above;

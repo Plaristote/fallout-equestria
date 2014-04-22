@@ -171,9 +171,17 @@ void CharsheetEditor::Compile(void)
     QProcess    process(this);
     QStringList args;
 
+    cout << "Compiling using binary: " << working_directory.toStdString() << "/fallout-equestria-rpg.exe" << endl;
     args << "--compile-statsheet" << name;
     process.setWorkingDirectory(working_directory);
+#ifdef _WIN32
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert("Path", "..\\Panda3D-1.9.0\\bin;" + env.value("Path"));
+    process.setProcessEnvironment(env);
+    process.start("./game.exe", args);
+#else
     process.start("./game", args);
+#endif
     if (process.waitForFinished())
     {
       if (process.exitCode() == 0)

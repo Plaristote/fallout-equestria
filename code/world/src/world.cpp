@@ -744,7 +744,10 @@ void           World::UnSerialize(Utils::Packet& packet)
           Waypoint* wp = GetWaypointFromId(*begin);
 
           if (wp)
+          {
             zone.waypoints.push_back(wp);
+            zone.waypoints_ids.push_back(wp->id);
+          }
         }
         zones.push_back(zone);
       }

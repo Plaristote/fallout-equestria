@@ -61,17 +61,17 @@ void Zones::Controller::ExitingZone(InstanceDynamicObject* object)
 
 void Zones::Controller::InsertObject(InstanceDynamicObject* object)
 {
-  cout << "<InsertObject name='" << object->GetName() << "'>" << endl;
-  auto it      = zone.waypoints.begin();
-  auto end     = zone.waypoints.end();
+  auto it      = zone.waypoints_ids.begin();
+  auto end     = zone.waypoints_ids.end();
   bool success = false;
 
   for (; it != end ; ++it)
   {
-    if (!(manager->level.IsWaypointOccupied((*it)->id)))
+    Waypoint* waypoint = manager->level.GetWorld()->GetWaypointFromId(*it);
+
+    if (!(manager->level.IsWaypointOccupied((*it))))
     {
-      cout << "  <Waypoint id='" << (*it)->id << "' />" <<endl;
-      InsertObjectOnWaypoint(object, *it);
+      InsertObjectOnWaypoint(object, waypoint);
       success  = true;
       break ;
     }
@@ -80,7 +80,6 @@ void Zones::Controller::InsertObject(InstanceDynamicObject* object)
     InsertResident(object);
   else
     throw ZoneIsFull(zone.name, "Failed to insert " + object->GetName() + " into zone.");
-  cout << "</InsertObject>" << endl;
 }
 
 void Zones::Controller::InsertObjectOnWaypoint(InstanceDynamicObject* object, Waypoint* waypoint)
@@ -160,9 +159,9 @@ void Zones::Controller::DisableZone(void)
 
 bool Zones::Controller::IsInZone(Waypoint* waypoint) const
 {
-  auto      match    = find(zone.waypoints.begin(), zone.waypoints.end(), waypoint);
-  
-  return (match != zone.waypoints.end());
+  auto      match    = find(zone.waypoints_ids.begin(), zone.waypoints_ids.end(), waypoint->id);
+
+  return (match != zone.waypoints_ids.end());
 }
 
 bool Zones::Controller::IsInZone(InstanceDynamicObject* object) const

@@ -186,7 +186,6 @@ Level::~Level()
   projectiles.CleanUp();
   ForEach(characters,  [](ObjectCharacter* obj)       { delete obj;        });
   ForEach(objects,     [](InstanceDynamicObject* obj) { delete obj;        });
-  ForEach(parties,     [](Party* party)               { delete party;      });
   CurrentLevel = 0;
   if (sunlight) delete sunlight;
   zones.UnregisterAllZones();
@@ -284,16 +283,18 @@ void Level::InitializeSun(void)
 
 void Level::SetAsPlayerParty(Party&)
 {
-  if (GetPlayer() != 0)
+  if (characters.size() > 0)
   {
-    player.SetPlayer(GetPlayer());
+    ObjectCharacter* character = characters.front();
+
+    player.SetPlayer(character);
     if (main_script.IsDefined("Initialize"))
       main_script.Call("Initialize");
     camera.SetConfigurationFromLevelState();
-    mouse.SetPlayer(GetPlayer());
-    player_halo.SetTarget(GetPlayer());
-    GetPlayer()->ChangedFloor.DisconnectAll();
-    GetPlayer()->ChangedFloor.Connect([this](unsigned char new_floor)
+    mouse.SetPlayer(character);
+    player_halo.SetTarget(character);
+    character->ChangedFloor.DisconnectAll();
+    character->ChangedFloor.Connect([this](unsigned char new_floor)
     {
       cout << "<event name='ChangedFloor' data-floor='"<<(int)new_floor<<"' />" << endl;
       floors.SetCurrentFloor(new_floor);
@@ -321,6 +322,7 @@ void Level::InsertParty(Party& party, const std::string& zone_name)
   if (party.GetName() == "player")
     SetAsPlayerParty(party);
   parties.push_back(&party);
+  cout << ">>>>>>>>>>>> Insert party size " << parties.size() << endl;
 }
 
 void Level::MatchPartyToExistingCharacters(Party& party)
@@ -351,6 +353,7 @@ void Level::RemovePartyFromLevel(Party& party)
     world->DeleteDynamicObject(world_object);
   });
   parties.remove(&party);
+  cout << ">>>>>>>>>>>>>> Party size: " << parties.size() << endl;
 }
 
 void Level::RunForPartyMembers(Party& party, function<void (Party::Member*,ObjectCharacter*)> callback)
@@ -452,9 +455,7 @@ ObjectCharacter* Level::GetCharacter(const DynamicObject* object)
 
 ObjectCharacter* Level::GetPlayer(void)
 {
-  if (characters.size() == 0)
-    return (0);
-  return (characters.front());
+  return (player.GetPlayer());
 }
 
 void Level::SetState(State state)
@@ -489,7 +490,10 @@ AsyncTask::DoneStatus Level::do_task(void)
   if (level_ui.GetContext()->GetHoverElement() == level_ui.GetContext()->GetRootElement())
     mouse.SetCursorFromState();
   else
+  {
+    //cout << "hovering: " << level_ui.GetContext()->GetHoverElement()->GetInnerRML().CString() << endl;
     mouse.SetMouseState('i');
+  }
 
   bool use_fog_of_war = false;
   if (use_fog_of_war == false)
