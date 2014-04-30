@@ -384,6 +384,12 @@ namespace asUtils
     level->GetLevelUi().GetMainBar().AppendToConsole(message);
   }
 
+  void ActionUse(InstanceDynamicObject* obj, InstanceDynamicObject* user)
+  {
+    if (obj != 0)
+      obj->ActionUse(user);
+  }
+
   namespace LevelUtils
   {
     void SunlightNearFar(Level* level, float a, float b)
@@ -620,9 +626,11 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass,      "Data GetDataStore()",                           asMETHOD(ObjectCharacter,GetDataStore),       asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass,      "Data GetDataStore()",                           asMETHOD(ObjectDoor,GetDataStore),            asCALL_THISCALL);
   engine->RegisterObjectMethod(shelfClass,     "Data GetDataStore()",                           asMETHOD(ObjectShelf,GetDataStore),           asCALL_THISCALL);
-  
-  engine->RegisterObjectMethod(dynObjectClass, "void Use(Character@)",                          asMETHOD(Interactions::Target,ActionUse), asCALL_THISCALL);
-  engine->RegisterObjectMethod(charClass,      "void Use(Character@)",                          asMETHOD(ObjectCharacter,ActionUse), asCALL_THISCALL);
+
+  engine->RegisterObjectMethod(dynObjectClass, "void Use(DynamicObject@)",                          asFUNCTION(asUtils::ActionUse), asCALL_CDECL_OBJFIRST);
+  engine->RegisterObjectMethod(charClass,      "void Use(DynamicObject@)",                          asFUNCTION(asUtils::ActionUse), asCALL_CDECL_OBJFIRST);
+  //engine->RegisterObjectMethod(dynObjectClass, "void Use(DynamicObject@)",                          asMETHOD(Interactions::Target,ActionUse), asCALL_THISCALL);
+  //engine->RegisterObjectMethod(charClass,      "void Use(DynamicObject@)",                          asMETHOD(ObjectCharacter,ActionUse), asCALL_THISCALL);
   engine->RegisterObjectMethod(dynObjectClass, "void TalkTo(Character@)",                       asMETHOD(Interactions::Target,ActionTalkTo), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass,      "void TalkTo(Character@)",                       asMETHOD(ObjectCharacter,ActionTalkTo), asCALL_THISCALL);
 

@@ -38,6 +38,7 @@ void Interactions::Target::ActionLookAt(InstanceDynamicObject* user)
 
 void Interactions::Target::ActionUse(InstanceDynamicObject* user)
 {
+  cout << "ActionUse instancedynamicobject" << endl;
   if (script && script->IsDefined("Use"))
   {
     AngelScript::Type<ObjectCharacter*> param((ObjectCharacter*)(user));

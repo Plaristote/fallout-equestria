@@ -181,6 +181,7 @@ void ObjectCharacter::ActionTalkTo(ObjectCharacter* user)
 
 void ObjectCharacter::ActionUse(InstanceDynamicObject* user)
 {
+  cout << "ActionUse character" << endl;
   if (user == _level->GetPlayer())
   {
     if (IsAlive())

@@ -17,7 +17,7 @@ void Actions::UseSkillOn::RunAction()
 {
   InstanceDynamicObject* target = GetObjectTarget();
   
-  if (target != 0)
+  if (GetUser() != 0 && target != 0)
     target->ActionUseSkill(GetUser(), skill);
 }
 

@@ -24,6 +24,9 @@ void SkillTarget::Initialize(const std::string& filepath, asIScriptContext* cont
 
 void SkillTarget::UseSkill(ObjectCharacter* user, std::string skill)
 {
+  cout << "UseSkill called" << endl;
+  if (script == 0)
+    cout << "Script not initialized" << endl;
   if (script != 0 && script->IsDefined("UseSkill"))
   {
     AngelScript::Type<InstanceDynamicObject*> param_self(self);
@@ -35,5 +38,7 @@ void SkillTarget::UseSkill(ObjectCharacter* user, std::string skill)
     if (has_effect)
       return ;
   }
+  else
+    cout << "No 'UseSkill' script for " << self->GetName() << endl;
   user->ThatDoesNothing(user);
 }

@@ -1,6 +1,11 @@
 #include "world/world.h"
 #include "world/map_object.hpp"
 #include "serializer.hpp"
+#ifdef GAME_EDITOR
+# include "qpandaapplication.h"
+#else
+  extern PandaFramework* framework;
+#endif
 
 using namespace std;
 
@@ -81,6 +86,39 @@ void MapObject::SetName(const std::string& name)
     nodePath.set_name(name);
 }
 
+void MapObject::SetModel(const std::string& model)
+{
+#ifdef GAME_EDITOR
+  PandaFramework& panda_framework = QPandaApplication::Framework();
+#else
+  PandaFramework& panda_framework = *framework;
+#endif
+
+  if (!(render.is_empty()))
+    render.remove_node();
+  strModel = model;
+  render   = panda_framework.get_window(0)->load_model(panda_framework.get_models(), MODEL_ROOT + strModel);
+  render.set_name("render-" + nodePath.get_name());
+  render.reparent_to(nodePath);
+  if (!(render.is_empty()))
+    SetTexture(strTexture);
+  else
+    std::cerr << "[MapObject][SetModel] Could not load model " << strModel << " for object '" << name << '\'' << std::endl;
+}
+
+void MapObject::SetTexture(const std::string& new_texture)
+{
+  strTexture = new_texture;
+  if (!(render.is_empty()) && strTexture != "")
+  {
+    texture    = TexturePool::load_texture(TEXT_ROOT + strTexture);
+    if (texture)
+      render.set_texture(texture);
+    else
+      std::cerr << "[MapObject][SetTexture] Could not load texture " << strTexture << " for object '" << name << '\'' << std::endl;
+  }
+}
+
 /*
  * Serialization
  */
@@ -97,32 +135,20 @@ void MapObject::Unserialize(Utils::Packet& packet)
   if (blob_revision >= 1)
     packet >> parent;
 
+  if (name == "")
+    name = "name-not-found";
+
   if (world)
   {
     nodePath   = world->window->get_render().attach_new_node(name);
-    render     = world->window->load_model(world->window->get_panda_framework()->get_models(), MODEL_ROOT + strModel);
-    render.reparent_to(nodePath);
-    if (render.is_empty())
-    {
-      std::cerr << "[World][Unserialize] Could not load model " << strModel << " for object '" << name << '\'' << std::endl;
-    }
-    else
-    {
-      nodePath.set_depth_offset(1);
-      nodePath.set_two_sided(false);
-      if (strTexture != "")
-      {
-        texture    = TexturePool::load_texture(TEXT_ROOT + strTexture);
-        if (texture)
-          render.set_texture(texture);
-      }
-      render.set_name("render-" + name);
-      nodePath.set_name(name);
-      nodePath.set_hpr(rotX, rotY, rotZ);
-      nodePath.set_scale(scaleX, scaleY, scaleZ);
-      nodePath.set_pos(posX, posY, posZ);
-      waypoints_root = nodePath.attach_new_node("waypoints");
-    }
+    nodePath.set_name(name);
+    SetModel(strModel);
+    nodePath.set_depth_offset(1);
+    nodePath.set_two_sided(false);
+    nodePath.set_hpr(rotX, rotY, rotZ);
+    nodePath.set_scale(scaleX, scaleY, scaleZ);
+    nodePath.set_pos(posX, posY, posZ);
+    waypoints_root = nodePath.attach_new_node("waypoints");
   }
 
   if (blob_revision >= 2)

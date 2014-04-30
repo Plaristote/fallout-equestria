@@ -14,6 +14,7 @@ Actions::UseObject::UseObject(ObjectCharacter* character, InventoryObject* objec
 
 void Actions::UseObject::RunAction()
 {
+  cout << "RunAction UseObject" << endl;
   item->Use(GetUser(), action_it);
 }
 
@@ -32,6 +33,7 @@ Actions::UseObjectOn::UseObjectOn(ObjectCharacter* character, InstanceDynamicObj
 
 ActionRunner* Actions::UseObject::Factory(ObjectCharacter* user, InventoryObject* item, unsigned char action_it)
 {
+  cout << "ActionFactory UseObject" << endl;
   Interactions::ActionRunner* runner = new UseObject(user, item, action_it);
 
   runner->Run();  

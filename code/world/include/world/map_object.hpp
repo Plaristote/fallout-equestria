@@ -34,6 +34,8 @@ struct MapObject : public Utils::Serializable
   Collider      collider;
 
   void          SetName(const std::string&);
+  void          SetModel(const std::string&);
+  void          SetTexture(const std::string&);
   void          SetFloor(unsigned char floor);
   void          ReparentTo(MapObject* object);
 

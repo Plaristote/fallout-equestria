@@ -24,6 +24,7 @@
 #include "tabl18n.h"
 #include "serializer.hpp"
 #include "dialogsavemap.h"
+#include <QMenu>
 
 namespace Ui {
 class MainWindow;
@@ -64,7 +65,7 @@ public slots:
     void PandaButtonRelease(QMouseEvent*);
 
 private slots:
-	void SetDefaultLocalization(void);
+    void SetDefaultLocalization(void);
     void PandaInitialized(void);
     void LoadProject(void);
     void FilterInit(void);
@@ -103,6 +104,7 @@ private slots:
     void WaypointSelDelete(void);
     void WaypointHovered(NodePath);
     void WaypointSelect(Waypoint*);
+    void WaypointClone(void);
     void UpdateSelection(void);
     void WaypointDiscardSelection(void);
     void WaypointSyncTerrain(void);
@@ -119,57 +121,25 @@ private slots:
 
     // OBJECTS
     void ObjectAdd(void);
+    void DeleteSelection(void);
 
     // MAPOBJECTS
     void MapObjectWizard(void);
     void MapObjectAdd(void);
-    void MapObjectDelete(void);
     void MapObjectHovered(NodePath);
-    void MapObjectNameChanged(QString);
-    void MapObjectUpdateX(void);
-    void MapObjectUpdateY(void);
-    void MapObjectUpdateZ(void);
-    void MapObjectRotationX(void);
-    void MapObjectRotationY(void);
-    void MapObjectRotationZ(void);
-    void MapObjectScaleX(void);
-    void MapObjectScaleY(void);
-    void MapObjectScaleZ(void);
-    void MapObjectColliderUpdatePos(void);
-    void MapObjectColliderUpdateType(void);
-    void MapObjectFloor(void);
     void MapObjectFocus(MapObject*);
     void MapObjectGenerateWaypoints(void);
-    void UpdateColliderDisplay(void);
 
     // DYNAMICOBJECTS
-    void DynamicObjectVisible(void);
     void DynamicObjectWizard(void);
     void DynamicObjectAdd(void);
-    void DynamicObjectDelete(void);
     void DynamicObjectHovered(NodePath);
-    void DynamicObjectNameChanged(QString);
-    void DynamicObjectUpdateX(void);
-    void DynamicObjectUpdateY(void);
-    void DynamicObjectUpdateZ(void);
-    void DynamicObjectRotationX(void);
-    void DynamicObjectRotationY(void);
-    void DynamicObjectRotationZ(void);
-    void DynamicObjectScaleX(void);
-    void DynamicObjectScaleY(void);
-    void DynamicObjectScaleZ(void);
     void DynamicObjectSetWaypoint(void);
     void DynamicObjectFocus(DynamicObject*);
 
     // LIGHTS
-    void LightVisible(void);
-    void LightSetEnabled(void);
-    void LightSetDisabled(void);
     void LightSelected(void);
     void LightAdd(void);
-    void LightDelete(void);
-    void LightUpdatePosition(void);
-    void LightUpdateType(void);
     void LightCompile(void);
     void LightFocus(WorldLight*);
 
@@ -200,6 +170,7 @@ private:
     DialogSaveMap            dialogSaveMap;
     bool                     save_map_use_thread;
 
+    QMenu                    level_add_object_menu;
     WizardObject             wizardObject;
 
     bool                     wizardMapObject;

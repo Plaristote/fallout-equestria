@@ -190,6 +190,7 @@ MapObject* World::AddMapObject(const string &name, const string &model, const st
   MapObject object;
   string    model2 = model;
 
+  object.name       = name;
   object.strModel   = model;
   object.strTexture = texture;
   object.nodePath   = window->get_render().attach_new_node(name);
@@ -339,6 +340,7 @@ DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type t
   DynamicObject  object;
   DynamicObject* ptr;
 
+  object.name         = name;
   object.type         = type;
   object.interactions = 0;
   object.strModel     = model;
@@ -469,6 +471,10 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
   colNode->set_into_collide_mask(colmask);
   colNode->set_from_collide_mask(colmask);
   traverser.traverse(floors_node);
+
+  cout << "Waypoint count:   " << waypoints.size() << endl;
+  cout << "Light collisions: " << handlerQueue->get_num_entries() << endl;
+
   for (unsigned short i = 0 ; i < handlerQueue->get_num_entries() ; ++i)
   {
     NodePath        node  = handlerQueue->get_entry(i)->get_into_node_path();
@@ -484,6 +490,9 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
       waypoint->lights.push_back(light);
     else if (object || dynObject)
     {
+      if (dynObject != 0)
+        object = dynObject;
+      cout << "Enlightening object " << object->name << endl;
       list<NodePath>::iterator alreadyRegistered;
 
       node = (object ? object->nodePath : dynObject->nodePath);
@@ -784,8 +793,11 @@ void           World::UnSerialize(Utils::Packet& packet)
     });
   }
 #endif
-  if (blob_revision < 8)
+
+#ifndef GAME_EDITOR
+  //if (blob_revision < 8)
     CompileWaypointsFloorAbove();
+#endif
 
     cout << "Compiling lights" << endl;
   // Post-loading stuff

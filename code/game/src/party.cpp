@@ -38,6 +38,8 @@ Party::Member::Member(Data data)
   object.strTexture   = data["texture"].Value();
   object.waypoint     = 0;
   inventory           = new Inventory;
+  if (data["inventory"].NotNil())
+    inventory->LoadInventory(data["inventory"]);
   TaskSet(0).Serialize(task_set);
 }
 

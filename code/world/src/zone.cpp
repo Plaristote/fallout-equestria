@@ -22,7 +22,7 @@ void Zone::Serialize(Utils::Packet& packet) const
   auto           wpEnd = waypoints.end();
 
   for (; wpIt != wpEnd ; ++wpIt)
-    waypointsId.push_back((*wpIt)->id);
+    waypoints_ids.push_back((*wpIt)->id);
 #endif
   packet << name;
   packet << destinations;

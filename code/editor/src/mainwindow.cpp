@@ -109,7 +109,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->waypointSelDelete->setIcon(iconDelete);
     waypointSelX = waypointSelY = waypointSelZ = 0;
 
-    ui->objectRemove->setIcon(iconDelete);
+    ui->objectAddButton->setIcon(iconAdd);
+    ui->objectDeleteButton->setIcon(iconDelete);
 
     ui->tabWidget->setTabIcon(0, iconLevel);
     ui->tabWidget->setTabIcon(1, iconWorldmap);
@@ -129,8 +130,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->scriptClose->setIcon(iconClose);
     ui->languageNew->setIcon(iconAdd);
     ui->languageDelete->setIcon(iconDelete);
-    ui->mapNewObject->setIcon(iconAdd);
-    ui->objectEdit->setIcon(iconEdit);
     ui->saveMap->setIcon(iconSave);
 
     ui->progressBar->hide();
@@ -213,10 +212,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect(ui->waypointPicker,       SIGNAL(clicked(bool)),                               SLOT(TerrainPickerPicked(bool)));
     connect(ui->waypointZoneSelector, SIGNAL(clicked(bool)),                               SLOT(TerrainSelectorPicked(bool)));
-    connect(ui->displayColliders,     SIGNAL(clicked()),                                   SLOT(UpdateColliderDisplay()));
     connect(ui->itemEditor,           SIGNAL(ItemListChanged(QStringList)), &dialogObject, SLOT(SetObjectList(QStringList)));
 
     connect(ui->dialogList, SIGNAL(currentIndexChanged(QString)), &tabDialog, SLOT(LoadDialog(QString)));
+
+    ui->worldObjectWidget->SetDialogObject(&dialogObject);
+    connect(ui->worldObjectWidget, SIGNAL(RenameObject(QString,QString)), ui->treeWidget, SLOT(Rename(QString,QString)));
 }
 
 MainWindow::~MainWindow()
@@ -331,7 +332,8 @@ void MainWindow::Paste(Utils::Packet& packet)
        } while ((world->GetMapObjectFromName(name.toStdString()) != 0) ||
                 (world->GetDynamicObjectFromName(name.toStdString()) != 0) ||
                 (world->GetLightByName(name.toStdString()) != 0));
-       object.nodePath.set_name(name.toStdString());
+       object.name = name.toStdString();
+       object.nodePath.set_name(object.name);
        name_map.insert(old_name, name);
 
        {
@@ -675,8 +677,6 @@ void MainWindow::LightFocus(WorldLight* light)
     LPoint3f relative_pos = light->symbol.get_pos(_window->get_render());
 
     // TODO Focus the light in the interface too
-    ui->map_tabs->setCurrentIndex(MAP_TABS_OBJECTS);
-    ui->object_tabs->setCurrentIndex(OBJECT_TABS_LIGHTS);
     my_task.camera->CenterCameraInstant(relative_pos);
     my_task.camera->SlideToHeight(relative_pos.get_z());
   }
@@ -690,8 +690,6 @@ void MainWindow::MapObjectFocus(MapObject* mapobject)
 
     mapobjectHovered = mapobject;
     MapObjectSelect();
-    ui->map_tabs->setCurrentIndex(MAP_TABS_OBJECTS);
-    ui->object_tabs->setCurrentIndex(OBJECT_TABS_MAP_OBJECTS);
     my_task.camera->CenterCameraInstant(relative_pos);
     my_task.camera->SlideToHeight(relative_pos.get_z());
   }
@@ -705,8 +703,6 @@ void MainWindow::DynamicObjectFocus(DynamicObject* dynamic_object)
 
     dynamicObjectHovered = dynamic_object;
     DynamicObjectSelect();
-    ui->map_tabs->setCurrentIndex(MAP_TABS_OBJECTS);
-    ui->object_tabs->setCurrentIndex(OBJECT_TABS_DYNAMIC_OBJECTS);
     my_task.camera->CenterCameraInstant(relative_pos);
     my_task.camera->SlideToHeight(relative_pos.get_z());
   }
@@ -757,7 +753,7 @@ void MainWindow::PandaInitialized()
      connect(ui->waypointSelY,       SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateSelY()));
      connect(ui->waypointSelZ,       SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateSelZ()));
      connect(ui->waypointSelDelete,  SIGNAL(clicked()),            this, SLOT(WaypointSelDelete()));
-
+     connect(ui->waypointClone,      SIGNAL(clicked()),            this, SLOT(WaypointClone()));
 
      connect(ui->waypointDiscardSelection, SIGNAL(clicked()), this, SLOT(WaypointDiscardSelection()));
 
@@ -774,78 +770,21 @@ void MainWindow::PandaInitialized()
 // MAPOBJECTS
      mapobjectSelected = 0;
      mapobjectHovered  = 0;
-     connect(ui->mapNewObject, SIGNAL(clicked()), this, SLOT(MapObjectWizard()));
-     //connect(ui->objectEdit, SIGNAL(clicked()), &dialogObject, SLOT(open()));
-     //connect(&dialogObject, SIGNAL(accepted()), this, SLOT(EditObject()));
-
-     connect(ui->objectRemove, SIGNAL(clicked()), this, SLOT(MapObjectDelete()));
-     connect(ui->objectPosX, SIGNAL(valueChanged(double)), this, SLOT(MapObjectUpdateX()));
-     connect(ui->objectPosY, SIGNAL(valueChanged(double)), this, SLOT(MapObjectUpdateY()));
-     connect(ui->objectPosZ, SIGNAL(valueChanged(double)), this, SLOT(MapObjectUpdateZ()));
-     connect(ui->objectRotationX, SIGNAL(valueChanged(double)), this, SLOT(MapObjectRotationX()));
-     connect(ui->objectRotationY, SIGNAL(valueChanged(double)), this, SLOT(MapObjectRotationY()));
-     connect(ui->objectRotationZ, SIGNAL(valueChanged(double)), this, SLOT(MapObjectRotationZ()));
-     connect(ui->objectScaleX, SIGNAL(valueChanged(double)), this, SLOT(MapObjectScaleX()));
-     connect(ui->objectScaleY, SIGNAL(valueChanged(double)), this, SLOT(MapObjectScaleY()));
-     connect(ui->objectScaleZ, SIGNAL(valueChanged(double)), this, SLOT(MapObjectScaleZ()));
-     connect(ui->objectName, SIGNAL(textChanged(QString)), this, SLOT(MapObjectNameChanged(QString)));
-     connect(ui->objectFloor, SIGNAL(valueChanged(int)), this, SLOT(MapObjectFloor()));
-
-     connect(ui->collider_type,    SIGNAL(currentIndexChanged(int)), this, SLOT(MapObjectColliderUpdateType()));
-     connect(ui->collider_pos_x,   SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
-     connect(ui->collider_pos_y,   SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
-     connect(ui->collider_pos_z,   SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
-     connect(ui->collider_hpr_x,   SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
-     connect(ui->collider_hpr_y,   SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
-     connect(ui->collider_hpr_z,   SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
-     connect(ui->collider_scale_x, SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
-     connect(ui->collider_scale_y, SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
-     connect(ui->collider_scale_z, SIGNAL(valueChanged(double)), this, SLOT(MapObjectColliderUpdatePos()));
 
 // DYNAMICOBJECTS
+     ui->objectAddButton->setMenu(&level_add_object_menu);
+     level_add_object_menu.addAction("Map Object",     this, SLOT(MapObjectWizard()));
+     level_add_object_menu.addAction("Dynamic Object", this, SLOT(DynamicObjectWizard()));
+     level_add_object_menu.addAction("Light",          this, SLOT(LightAdd()));
+
+     connect(ui->objectDeleteButton, SIGNAL(clicked()), this, SLOT(DeleteSelection()));
+
      dynamicObjectSelected = 0;
      dynamicObjectHovered  = 0;
-     connect(ui->interObjVisible, SIGNAL(toggled(bool)),     this, SLOT(DynamicObjectVisible()));
-     connect(ui->interObjAdd,  SIGNAL(clicked()),            this, SLOT(DynamicObjectWizard()));
-     connect(ui->interObjName, SIGNAL(textChanged(QString)), this, SLOT(DynamicObjectNameChanged(QString)));
-     connect(ui->interObjEdit, SIGNAL(clicked()), &dialogObject,   SLOT(open()));
-     connect(ui->interObjRemove, SIGNAL(clicked()),          this, SLOT(DynamicObjectDelete()));
-     connect(ui->interObjWaypoint, SIGNAL(clicked()),        this, SLOT(DynamicObjectSetWaypoint()));
-
-     connect(ui->interObjPosX, SIGNAL(valueChanged(double)), this, SLOT(DynamicObjectUpdateX()));
-     connect(ui->interObjPosY, SIGNAL(valueChanged(double)), this, SLOT(DynamicObjectUpdateY()));
-     connect(ui->interObjPosZ, SIGNAL(valueChanged(double)), this, SLOT(DynamicObjectUpdateZ()));
-     connect(ui->interObjRotX, SIGNAL(valueChanged(double)), this, SLOT(DynamicObjectRotationX()));
-     connect(ui->interObjRotY, SIGNAL(valueChanged(double)), this, SLOT(DynamicObjectRotationY()));
-     connect(ui->interObjRotZ, SIGNAL(valueChanged(double)), this, SLOT(DynamicObjectRotationZ()));
-     connect(ui->interObjScaleX, SIGNAL(valueChanged(double)), this, SLOT(DynamicObjectScaleX()));
-     connect(ui->interObjScaleY, SIGNAL(valueChanged(double)), this, SLOT(DynamicObjectScaleY()));
-     connect(ui->interObjScaleZ, SIGNAL(valueChanged(double)), this, SLOT(DynamicObjectScaleZ()));
 
 // LIGHTS
      lightSelected      = 0;
      lightIgnoreChanges = false;
-     connect(ui->lightsAdd,         SIGNAL(clicked()),                this, SLOT(LightAdd()));
-     connect(ui->lightsDel,         SIGNAL(clicked()),                this, SLOT(LightDelete()));
-     connect(ui->lightCompile,      SIGNAL(clicked()),                this, SLOT(LightCompile()));
-     connect(ui->lightsSelect,      SIGNAL(currentIndexChanged(int)), this, SLOT(LightSelected()));
-     connect(ui->lightTypesList,    SIGNAL(currentIndexChanged(int)), this, SLOT(LightUpdateType()));
-     connect(ui->lightColorR,       SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
-     connect(ui->lightColorG,       SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
-     connect(ui->lightColorB,       SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
-     connect(ui->lightColorA,       SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
-     connect(ui->lightPosX,         SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
-     connect(ui->lightPosY,         SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
-     connect(ui->lightPosZ,         SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
-     connect(ui->lightRotX,         SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
-     connect(ui->lightRotY,         SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
-     connect(ui->lightRotZ,         SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
-     connect(ui->lightAttenuationA, SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
-     connect(ui->lightAttenuationB, SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
-     connect(ui->lightAttenuationC, SIGNAL(valueChanged(double)),     this, SLOT(LightUpdatePosition()));
-     connect(ui->lightsVisible,     SIGNAL(toggled(bool)),            this, SLOT(LightVisible()));
-     connect(ui->lightSetEnabled,   SIGNAL(toggled(bool)),            this, SLOT(LightSetEnabled()));
-     connect(ui->lightSetDisabled,  SIGNAL(toggled(bool)),            this, SLOT(LightSetDisabled()));
 
      connect(my_task.mouse,      SIGNAL(WaypointHovered(NodePath)), this, SLOT(WaypointHovered(NodePath)));
      connect(my_task.mouse,      SIGNAL(ObjectHovered(NodePath)),   this, SLOT(MapObjectHovered(NodePath)));
@@ -905,177 +844,16 @@ void MainWindow::DynamicObjectAdd()
     DynamicObjectSelect();
 }
 
-void MainWindow::DynamicObjectDelete()
-{
-    if (dynamicObjectSelected)
-    {
-      DynamicObject* toDel = dynamicObjectSelected;
-
-      dynamicObjectHovered  = 0;
-      DynamicObjectSelect();
-      //ui->treeWidget->DelObject(toDel);
-      world->DeleteDynamicObject(toDel);
-      ui->treeWidget->SetWorld(world);
-    }
-}
-
 void MainWindow::DynamicObjectHovered(NodePath np)
 {
-    if (ui->interObjVisible->isChecked())
-    {
-      dynamicObjectHovered = world->GetDynamicObjectFromNodePath(np);
-    }
+  dynamicObjectHovered = world->GetDynamicObjectFromNodePath(np);
 }
 
 void MainWindow::DynamicObjectSelect()
 {
-    ui->interObjEditor->setEnabled(dynamicObjectHovered != 0);
     dynamicObjectSelected = dynamicObjectHovered;
     if (dynamicObjectHovered)
-    {
-        LVecBase3 pos, hpr, scale;
-        NodePath  np = dynamicObjectHovered->nodePath;
-
-        pos   = np.get_pos();
-        hpr   = np.get_hpr();
-        scale = np.get_scale();
-        ui->interObjName->setText(QString::fromStdString(np.get_name()));
-        ui->interObjPosX->setValue(pos.get_x());
-        ui->interObjPosY->setValue(pos.get_y());
-        ui->interObjPosZ->setValue(pos.get_z());
-        ui->interObjRotX->setValue(hpr.get_x());
-        ui->interObjRotY->setValue(hpr.get_y());
-        ui->interObjRotZ->setValue(hpr.get_z());
-        ui->interObjScaleX->setValue(scale.get_x());
-        ui->interObjScaleY->setValue(scale.get_y());
-        ui->interObjScaleZ->setValue(scale.get_z());
-        dialogObject.SetCurrentObject(dynamicObjectSelected);
-        ui->interObjEditor->setEnabled(true);
-    }
-    else
-        ui->interObjEditor->setEnabled(false);
-}
-
-void MainWindow::DynamicObjectNameChanged(QString name)
-{
-    if (dynamicObjectSelected)
-    {
-      ui->treeWidget->Rename(QString::fromStdString(dynamicObjectSelected->nodePath.get_name()), name);
-      dynamicObjectSelected->nodePath.set_name(name.toStdString());
-    }
-}
-
-void MainWindow::DynamicObjectUpdateX()
-{
-    if (dynamicObjectSelected)
-    {
-        NodePath  np  = dynamicObjectSelected->nodePath;
-        LVecBase3 pos = np.get_pos();
-
-        pos.set_x(ui->interObjPosX->value());
-        np.set_pos(pos);
-    }
-}
-
-void MainWindow::DynamicObjectUpdateY()
-{
-    if (dynamicObjectSelected)
-    {
-        NodePath  np  = dynamicObjectSelected->nodePath;
-        LVecBase3 pos = np.get_pos();
-
-        pos.set_y(ui->interObjPosY->value());
-        np.set_pos(pos);
-    }
-}
-
-void MainWindow::DynamicObjectUpdateZ()
-{
-    if (dynamicObjectSelected)
-    {
-        NodePath  np  = dynamicObjectSelected->nodePath;
-        LVecBase3 pos = np.get_pos();
-
-        pos.set_z(ui->interObjPosZ->value());
-        np.set_pos(pos);
-    }
-}
-
-void MainWindow::DynamicObjectRotationX()
-{
-    if (dynamicObjectSelected)
-    {
-        NodePath  np  = dynamicObjectSelected->nodePath;
-        LVecBase3 hpr = np.get_hpr();
-
-        hpr.set_x(ui->interObjRotX->value());
-        np.set_hpr(hpr);
-    }
-}
-
-void MainWindow::DynamicObjectRotationY()
-{
-    if (dynamicObjectSelected)
-    {
-        NodePath  np  = dynamicObjectSelected->nodePath;
-        LVecBase3 hpr = np.get_hpr();
-
-        hpr.set_y(ui->interObjRotY->value());
-        np.set_hpr(hpr);
-    }
-}
-
-void MainWindow::DynamicObjectRotationZ()
-{
-    if (dynamicObjectSelected)
-    {
-        NodePath  np  = dynamicObjectSelected->nodePath;
-        LVecBase3 hpr = np.get_hpr();
-
-        hpr.set_z(ui->interObjRotZ->value());
-        np.set_hpr(hpr);
-    }
-}
-
-void MainWindow::DynamicObjectScaleX()
-{
-    if (dynamicObjectSelected)
-    {
-        NodePath  np    = dynamicObjectSelected->nodePath;
-        LVecBase3 scale = np.get_scale();
-
-        scale.set_x(ui->interObjScaleX->value());
-        np.set_scale(scale);
-    }
-}
-
-void MainWindow::DynamicObjectScaleY()
-{
-    if (dynamicObjectSelected)
-    {
-        NodePath  np    = dynamicObjectSelected->nodePath;
-        LVecBase3 scale = np.get_scale();
-
-        scale.set_y(ui->interObjScaleY->value());
-        np.set_scale(scale);
-    }
-}
-
-void MainWindow::DynamicObjectScaleZ()
-{
-    if (dynamicObjectSelected)
-    {
-        NodePath  np    = dynamicObjectSelected->nodePath;
-        LVecBase3 scale = np.get_scale();
-
-        scale.set_z(ui->interObjScaleZ->value());
-        np.set_scale(scale);
-    }
-}
-
-void MainWindow::DynamicObjectVisible()
-{
-    world->SetDynamicObjectsVisible(ui->interObjVisible->isChecked());
+      ui->worldObjectWidget->SetSelection(dynamicObjectSelected);
 }
 
 void MainWindow::MapObjectWizard()
@@ -1102,18 +880,13 @@ void MainWindow::MapObjectAdd()
     MapObjectSelect();
 }
 
-void MainWindow::MapObjectDelete()
+void MainWindow::DeleteSelection()
 {
-    if (mapobjectSelected)
-    {
-      MapObject* toDel = mapobjectSelected;
-
-      mapobjectHovered  = 0;
-      MapObjectSelect();
-      //ui->treeWidget->DelObject(toDel);
-      world->DeleteMapObject(toDel);
-      ui->treeWidget->SetWorld(world);
-    }
+  dynamicObjectSelected = dynamicObjectHovered = 0;
+  mapobjectSelected = mapobjectHovered = 0;
+  lightSelected = 0;
+  ui->worldObjectWidget->DeleteSelection();
+  ui->treeWidget->SetWorld(world);
 }
 
 void MainWindow::MapObjectHovered(NodePath path)
@@ -1140,32 +913,6 @@ void MainWindow::MapObjectGenerateWaypoints(void)
   }
 }
 
-void MainWindow::MapObjectFloor()
-{
-    if (mapobjectSelected)
-      world->MapObjectChangeFloor(*mapobjectSelected, ui->objectFloor->value());
-}
-
-void MainWindow::MapObjectNameChanged(QString name)
-{
-    if (mapobjectSelected)
-    {
-      ui->treeWidget->Rename(QString::fromStdString(mapobjectSelected->nodePath.get_name()), name);
-      mapobjectSelected->nodePath.set_name(name.toStdString());
-    }
-}
-
-void MainWindow::UpdateColliderDisplay(void)
-{
-  if (mapobjectSelected && !mapobjectSelected->collision_node.is_empty())
-  {
-    if (ui->displayColliders->isChecked())
-      mapobjectSelected->collision_node.show();
-    else
-      mapobjectSelected->collision_node.hide();
-  }
-}
-
 void MainWindow::MapObjectSelect()
 {
     if (mapobjectSelected && mapobjectSelected->collider != MapObject::NONE)
@@ -1175,172 +922,9 @@ void MainWindow::MapObjectSelect()
     {
       ui->treeWidget->SetItemFocused(mapobjectHovered);
       ui->waypointVisible->setChecked(!(mapobjectHovered->waypoints_root.is_hidden()));
-      ui->objectFloor->setValue(mapobjectHovered->floor);
-      ui->objectScaleX->setValue(mapobjectHovered->nodePath.get_scale().get_x());
-      ui->objectScaleY->setValue(mapobjectHovered->nodePath.get_scale().get_y());
-      ui->objectScaleZ->setValue(mapobjectHovered->nodePath.get_scale().get_z());
-      ui->objectPosX->setValue(mapobjectHovered->nodePath.get_x());
-      ui->objectPosY->setValue(mapobjectHovered->nodePath.get_y());
-      ui->objectPosZ->setValue(mapobjectHovered->nodePath.get_z());
-      ui->objectRotationX->setValue(mapobjectHovered->nodePath.get_hpr().get_x());
-      ui->objectRotationY->setValue(mapobjectHovered->nodePath.get_hpr().get_y());
-      ui->objectRotationZ->setValue(mapobjectHovered->nodePath.get_hpr().get_z());
-      ui->objectName->setText(QString::fromStdString(mapobjectHovered->nodePath.get_name()));
-      ui->objectEditor->setEnabled(true);
-      ui->objectName->setEnabled(true);
-
-      bool display_colliders = ui->displayColliders->isChecked();
-
-      ui->collider_type->setCurrentIndex((int)mapobjectHovered->collider);
-      ui->collider_position->setEnabled(mapobjectHovered->collider != MapObject::NONE);
-      ui->collider_pos_x->setValue(mapobjectHovered->collision_node.get_pos().get_x());
-      ui->collider_pos_y->setValue(mapobjectHovered->collision_node.get_pos().get_y());
-      ui->collider_pos_z->setValue(mapobjectHovered->collision_node.get_pos().get_z());
-      ui->collider_hpr_x->setValue(mapobjectHovered->collision_node.get_hpr().get_x());
-      ui->collider_hpr_y->setValue(mapobjectHovered->collision_node.get_hpr().get_y());
-      ui->collider_hpr_z->setValue(mapobjectHovered->collision_node.get_hpr().get_z());
-      ui->collider_scale_x->setValue(mapobjectHovered->collision_node.get_scale().get_x());
-      ui->collider_scale_y->setValue(mapobjectHovered->collision_node.get_scale().get_y());
-      ui->collider_scale_z->setValue(mapobjectHovered->collision_node.get_scale().get_z());
-      ui->collider_group->setEnabled(true);
-      ui->collider_type->setEnabled(true);
-      ui->displayColliders->setChecked(display_colliders);
-      if (ui->displayColliders->isChecked())
-        mapobjectHovered->collision_node.show();
+      ui->worldObjectWidget->SetSelection(mapobjectHovered);
     }
-    else
-      ui->objectEditor->setEnabled(false);
     mapobjectSelected = mapobjectHovered;
-}
-
-void MainWindow::MapObjectColliderUpdatePos()
-{
-  if (mapobjectSelected && mapobjectSelected->collider != MapObject::NONE)
-  {
-    LPoint3f position(ui->collider_pos_x->value(),   ui->collider_pos_y->value(),   ui->collider_pos_z->value());
-    LPoint3f hpr     (ui->collider_hpr_x->value(),   ui->collider_hpr_y->value(),   ui->collider_hpr_z->value());
-    LPoint3f scale   (ui->collider_scale_x->value(), ui->collider_scale_y->value(), ui->collider_scale_z->value());
-
-    mapobjectSelected->collision_node.set_pos(position);
-    mapobjectSelected->collision_node.set_hpr(hpr);
-    mapobjectSelected->collision_node.set_scale(scale);
-  }
-  ui->displayColliders->setChecked(true);
-  UpdateColliderDisplay();
-}
-
-void MainWindow::MapObjectColliderUpdateType()
-{
-  if (mapobjectSelected)
-  {
-    if (mapobjectSelected->collider != MapObject::NONE)
-      mapobjectSelected->collision_node.remove_node();
-    mapobjectSelected->collider = (MapObject::Collider)ui->collider_type->currentIndex();
-    ui->collider_position->setEnabled(mapobjectSelected->collider != MapObject::NONE);
-    mapobjectSelected->InitializeCollider(mapobjectSelected->collider, LPoint3f(0, 0, 0), LPoint3f(1, 1, 1), LPoint3f(0, 0, 0));
-    {
-      LPoint3f scale = NodePathSize(mapobjectSelected->render) / 2;
-      LPoint3f min_point, max_point;
-
-      mapobjectSelected->render.calc_tight_bounds(min_point, max_point);
-      ui->collider_pos_x->setValue((std::abs(max_point.get_x()) - std::abs(min_point.get_x())) / 2 * (max_point.get_x() < 0 ? -1 : 1));
-      ui->collider_pos_y->setValue((std::abs(max_point.get_y()) - std::abs(min_point.get_y())) / 2 * (max_point.get_y() < 0 ? -1 : 1));
-      ui->collider_pos_z->setValue((std::abs(max_point.get_z()) - std::abs(min_point.get_z())) / 2 * (max_point.get_z() < 0 ? -1 : 1));
-      std::cout << "MinPoint = " << min_point.get_x() << ',' << min_point.get_y() << ',' << min_point.get_z() << std::endl;
-      std::cout << "MaxPoint = " << max_point.get_x() << ',' << max_point.get_y() << ',' << max_point.get_z() << std::endl;
-      ui->collider_scale_x->setValue(scale.get_x());
-      ui->collider_scale_y->setValue(scale.get_y());
-      ui->collider_scale_z->setValue(scale.get_z());
-    }
-    MapObjectColliderUpdatePos();
-    mapobjectSelected->collision_node.show();
-  }
-  ui->displayColliders->setChecked(true);
-  UpdateColliderDisplay();
-}
-
-void MainWindow::MapObjectUpdateX()
-{
-    if (mapobjectSelected)
-      mapobjectSelected->nodePath.set_x(ui->objectPosX->value());
-}
-
-void MainWindow::MapObjectUpdateY()
-{
-    if (mapobjectSelected)
-      mapobjectSelected->nodePath.set_y(ui->objectPosY->value());
-}
-
-void MainWindow::MapObjectUpdateZ()
-{
-    if (mapobjectSelected)
-      mapobjectSelected->nodePath.set_z(ui->objectPosZ->value());
-}
-
-void MainWindow::MapObjectRotationX()
-{
-    if (mapobjectSelected)
-    {
-      LVecBase3 hpr = mapobjectSelected->nodePath.get_hpr();
-
-      hpr.set_x(ui->objectRotationX->value());
-      mapobjectSelected->nodePath.set_hpr(hpr);
-    }
-}
-
-void MainWindow::MapObjectRotationY()
-{
-    if (mapobjectSelected)
-    {
-      LVecBase3 hpr = mapobjectSelected->nodePath.get_hpr();
-
-      hpr.set_y(ui->objectRotationY->value());
-      mapobjectSelected->nodePath.set_hpr(hpr);
-    }
-}
-
-void MainWindow::MapObjectRotationZ()
-{
-    if (mapobjectSelected)
-    {
-      LVecBase3 hpr = mapobjectSelected->nodePath.get_hpr();
-
-      hpr.set_z(ui->objectRotationZ->value());
-      mapobjectSelected->nodePath.set_hpr(hpr);
-    }
-}
-
-void MainWindow::MapObjectScaleX()
-{
-    if (mapobjectSelected)
-    {
-      LVecBase3 scale = mapobjectSelected->nodePath.get_scale();
-
-      scale.set_x(ui->objectScaleX->value());
-      mapobjectSelected->nodePath.set_scale(scale);
-    }
-}
-
-void MainWindow::MapObjectScaleY()
-{
-    if (mapobjectSelected)
-    {
-      LVecBase3 scale = mapobjectSelected->nodePath.get_scale();
-
-      scale.set_y(ui->objectScaleY->value());
-      mapobjectSelected->nodePath.set_scale(scale);
-    }
-}
-
-void MainWindow::MapObjectScaleZ()
-{
-    if (mapobjectSelected)
-    {
-      LVecBase3 scale = mapobjectSelected->nodePath.get_scale();
-
-      scale.set_z(ui->objectScaleZ->value());
-      mapobjectSelected->nodePath.set_scale(scale);
-    }
 }
 
 void MainWindow::WaypointConnect()
@@ -1455,6 +1039,24 @@ void MainWindow::WaypointSelect(Waypoint* waypoint)
       waypointsSelection.push_back(waypoint);
     }
     UpdateSelection();
+}
+
+void MainWindow::WaypointClone(void)
+{
+  if (waypointSelected != 0)
+  {
+    NodePath   waypoint_root = waypointSelected->nodePath.get_parent();
+    MapObject* map_object    = world->GetMapObjectFromNodePath(waypoint_root.get_parent());
+
+    if (map_object)
+    {
+      LPoint3f  position = waypointSelected->nodePath.get_pos(world->window->get_render());
+      Waypoint* waypoint = world->AddWayPoint(position.get_x(), position.get_y(), position.get_z());
+
+      waypoint->nodePath.reparent_to(map_object->waypoints_root);
+      waypoint->nodePath.set_pos(world->window->get_render(), position);
+    }
+  }
 }
 
 void MainWindow::WaypointUpdateSelX()
@@ -1671,10 +1273,6 @@ void MainWindow::LoadMap(const QString& path)
         ui->zoneList->clear();
         ForEach(world->zones,  [_ui](Zone& zone)  { _ui->zoneList->addItem(zone.name.c_str());  });
 
-        ui->lightsSelect->clear();
-        ui->lightFrame->setEnabled(false);
-        ForEach(world->lights,     [_ui](WorldLight& l)   { _ui->lightsSelect->addItem(l.name.c_str());     });
-
         for (int i = 0 ; i < ui->listMap->count() ; ++i)
         {
           if (ui->listMap->itemText(i) == levelName)
@@ -1685,6 +1283,7 @@ void MainWindow::LoadMap(const QString& path)
         }
 
         dialogObject.SetWorld(world);
+        ui->worldObjectWidget->SetWorld(world);
         std::cout << "Finished Loading Map" << std::endl;
       }
     });
@@ -1756,119 +1355,15 @@ void MainWindow::LightCompile(void)
       world->CompileLight(lightSelected);
 }
 
-void MainWindow::LightVisible(void)
-{
-    if (ui->lightsVisible->isChecked())
-      world->lightSymbols.show();
-    else
-      world->lightSymbols.hide();
-}
-
-void MainWindow::LightSetDisabled()
-{
-  if (ui->lightSetDisabled->isChecked())
-  {
-    ui->lightSetEnabled->setChecked(false);
-    if (lightSelected)
-      lightSelected->SetEnabled(false);
-  }
-}
-
-void MainWindow::LightSetEnabled()
-{
-  if (ui->lightSetEnabled->isChecked())
-  {
-    ui->lightSetDisabled->setChecked(false);
-    if (lightSelected)
-      lightSelected->SetEnabled(true);
-  }
-}
-
 void MainWindow::LightSelected(void)
 {
-    QString     name  = ui->lightsSelect->currentText();
-    WorldLight* light = world->GetLightByName(name.toStdString());
+    QTreeWidgetItem* list_item = ui->treeWidget->currentItem();
+    QString          name      = list_item ? list_item->text(0) : "";
+    WorldLight*      light     = world->GetLightByName(name.toStdString());
 
     if (light)
-    {
-        NodePath np = light->nodePath;
-
-        lightIgnoreChanges = true;
-        ui->lightTypesList->setCurrentIndex((int)light->type);
-        ui->lightPosX->setValue(np.get_x());
-        ui->lightPosY->setValue(np.get_y());
-        ui->lightPosZ->setValue(np.get_z());
-        ui->lightRotX->setValue(np.get_hpr().get_x());
-        ui->lightRotY->setValue(np.get_hpr().get_y());
-        ui->lightRotZ->setValue(np.get_hpr().get_z());
-
-        LColor color = light->GetColor();
-        ui->lightColorR->setValue(color.get_x());
-        ui->lightColorG->setValue(color.get_y());
-        ui->lightColorB->setValue(color.get_z());
-        ui->lightColorA->setValue(0.f);
-
-        if (light->type == WorldLight::Point || light->type == WorldLight::Spot)
-        {
-          ui->lightAttenuationA->setValue(light->GetAttenuation().get_x());
-          ui->lightAttenuationB->setValue(light->GetAttenuation().get_y());
-          ui->lightAttenuationC->setValue(light->GetAttenuation().get_z());
-          ui->lightAttenuation->show();
-        }
-        else
-          ui->lightAttenuation->hide();
-
-        if (light->type == WorldLight::Point || light->type == WorldLight::Ambient)
-          ui->lightRot->hide();
-        else
-          ui->lightRot->show();
-
-        ui->lightRadius->setValue(light->zoneSize);
-
-        lightIgnoreChanges = false;
-        ui->lightFrame->setEnabled(true);
-    }
-    else
-        ui->lightFrame->setEnabled(false);
+      ui->worldObjectWidget->SetSelection(light);
     lightSelected = light;
-}
-
-void MainWindow::LightUpdateType(void)
-{
-    WorldLight::Type type = (WorldLight::Type)ui->lightTypesList->currentIndex();
-    QString          name = ui->lightsSelect->currentText();
-
-    if (lightIgnoreChanges || lightSelected == 0) return ;
-    if (lightSelected->type != type)
-    {
-        world->DeleteLight(lightSelected->name);
-        world->AddLight(type, name.toStdString());
-        lightSelected = world->GetLightByName(name.toStdString());
-        LightUpdatePosition();
-        ui->lightAttenuation->setVisible(lightSelected->type == WorldLight::Point || lightSelected->type == WorldLight::Spot);
-        ui->lightRot->setVisible(!(lightSelected->type == WorldLight::Point || lightSelected->type == WorldLight::Ambient));
-    }
-}
-
-void MainWindow::LightUpdatePosition(void)
-{
-    NodePath np;
-
-    if (lightIgnoreChanges || lightSelected == 0) return ;
-    np = lightSelected->nodePath;
-    LPoint3 pos(ui->lightPosX->value(), ui->lightPosY->value(), ui->lightPosZ->value());
-    lightSelected->SetPosition(pos);
-    np.set_hpr(ui->lightRotX->value(),
-               ui->lightRotY->value(),
-               ui->lightRotZ->value());
-    lightSelected->SetColor(ui->lightColorR->value(),
-                            ui->lightColorG->value(),
-                            ui->lightColorB->value(),
-                            ui->lightColorA->value());
-    lightSelected->SetAttenuation(ui->lightAttenuationA->value(),
-                                  ui->lightAttenuationB->value(),
-                                  ui->lightAttenuationC->value());
-    lightSelected->zoneSize = ui->lightRadius->value();
 }
 
 void MainWindow::LightAdd(void)
@@ -1878,23 +1373,7 @@ void MainWindow::LightAdd(void)
     if (name != "")
     {
         world->AddLight(WorldLight::Directional, name.toStdString());
-        ui->lightsSelect->addItem(name);
-        ui->lightsSelect->setCurrentIndex(ui->lightsSelect->count() - 1);
         ui->treeWidget->AddWorldLight(world->GetLightByName(name.toStdString()));
-    }
-}
-
-void MainWindow::LightDelete(void)
-{
-    if (lightSelected)
-    {
-        int index = ui->lightsSelect->currentIndex();
-
-        world->DeleteLight(lightSelected->name);
-        //ui->treeWidget->DelLight(lightSelected);
-        lightSelected = 0;
-        ui->lightsSelect->removeItem(index);
-        ui->treeWidget->SetWorld(world);
     }
 }
 

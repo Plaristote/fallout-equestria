@@ -15,6 +15,7 @@ WaypointGenerator::WaypointGenerator(World* world, MapObject* object, LPoint4 ma
   spacingy = spacing.get_y();
   sizex    = (size.get_x() - (margin.get_x() + margin.get_z())) / spacingx + 1;
   sizey    = (size.get_y() - (margin.get_y() + margin.get_w())) / spacingy + 1;
+
   if (corner_origin)
   {
     initPosX = -(margin.get_x() - size.get_x());
@@ -26,6 +27,13 @@ WaypointGenerator::WaypointGenerator(World* world, MapObject* object, LPoint4 ma
   {
     initPosX = margin.get_x() - (size.get_x() / 2);
     initPosY = margin.get_y() - (size.get_y() / 2);
+  }
+  if (!(object->collision_node.is_empty()))
+  {
+    LPoint3f collision_node_pos = object->collision_node.get_pos();
+
+    initPosX -= collision_node_pos.get_x();
+    initPosY -= collision_node_pos.get_y();
   }
   initPosZ = size.get_z() + 50.f;
 }

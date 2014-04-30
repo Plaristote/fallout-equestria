@@ -122,4 +122,6 @@ void Interactions::ActionRunner::ConsoleWrite(ObjectCharacter* user, const strin
 {
   if (user->IsPlayer())
     user->_level->GetLevelUi().GetMainBar().AppendToConsole(message);
+  else
+    cout << "[Character][" << user->GetName() << "] " << message;
 }
