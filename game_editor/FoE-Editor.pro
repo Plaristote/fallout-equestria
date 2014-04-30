@@ -83,7 +83,8 @@ SOURCES += main.cpp\
            map_object.cpp \
            dynamic_object.cpp \
            zone.cpp \
-           light.cpp
+           light.cpp \
+    worldobjectwidget.cpp
 
 
 HEADERS  += globals.hpp \
@@ -125,7 +126,8 @@ HEADERS  += globals.hpp \
             world/waypoint.hpp \
             world/zone.hpp \
             world/scene_camera.hpp \
-            divide_and_conquer.hpp
+            divide_and_conquer.hpp \
+    worldobjectwidget.h
 
 FORMS    += mainwindow.ui \
             dialognewscript.ui \
@@ -143,4 +145,5 @@ FORMS    += mainwindow.ui \
             selectableresource.ui \
             charsheeteditor.ui \
             formkeyvalue.ui \
-            citysplashdialog.ui
+            citysplashdialog.ui \
+    worldobjectwidget.ui
