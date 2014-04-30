@@ -475,7 +475,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
   cout << "Waypoint count:   " << waypoints.size() << endl;
   cout << "Light collisions: " << handlerQueue->get_num_entries() << endl;
 
-  for (unsigned short i = 0 ; i < handlerQueue->get_num_entries() ; ++i)
+  for (unsigned short i = 0 ; i < handlerQueue->get_num_entries() && i < 1000 ; ++i)
   {
     NodePath        node  = handlerQueue->get_entry(i)->get_into_node_path();
 

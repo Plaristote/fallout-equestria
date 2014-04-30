@@ -1282,6 +1282,7 @@ void MainWindow::LoadMap(const QString& path)
           }
         }
 
+        my_task.mouse->SetWorld(world);
         dialogObject.SetWorld(world);
         ui->worldObjectWidget->SetWorld(world);
         std::cout << "Finished Loading Map" << std::endl;

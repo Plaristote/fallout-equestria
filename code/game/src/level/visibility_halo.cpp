@@ -47,7 +47,7 @@ void VisibilityHalo::Initialize(WindowFramework* window, World* world)
     halo.reparent_to(window->get_render());
     node        = halo.node();
     node->set_attrib(attribute);
-    node->set_attrib(ColorBlendAttrib::make(ColorBlendAttrib::M_add));
+    //node->set_attrib(ColorBlendAttrib::make(ColorBlendAttrib::M_add));
     MarkCuttableObjects(world);
   }
 }

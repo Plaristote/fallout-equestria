@@ -54,6 +54,8 @@ public slots:
   void UpdateLightColor();
   void UpdateLightZoneSize();
 
+  void FocusCurrentObject();
+
 signals:
   void RenameObject(QString old_name, QString new_name);
 

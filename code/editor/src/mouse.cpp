@@ -15,6 +15,7 @@ Mouse::Mouse(WindowFramework* window, QObject *parent) : QObject(parent), _windo
   _pickerNode->add_solid(_pickerRay);
   _collisionHandlerQueue = new CollisionHandlerQueue();
   _collisionTraverser.add_collider(_pickerPath, _collisionHandlerQueue);
+  _world = 0;
 }
 
 LPoint2f Mouse::GetPosition(void) const
@@ -64,28 +65,46 @@ void Mouse::GetWaypointHoveredAt(LPoint2f cursorPos, NodePath wp_base)
   }
 }
 
+bool Mouse::IsObjectVisible(const MapObject* object) const
+{
+  if (object)
+    return (!(object->nodePath.is_hidden()) &&
+            !(object->render.is_hidden()));
+  return (false);
+}
+
 void Mouse::GetHoveredAt(LPoint2f cursorPos)
 {
-  _pickerNode->set_from_collide_mask(CollideMask(ColMask::DynObject | ColMask::Object));
-  _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
-  _collisionTraverser.traverse(_window->get_render());
-  _collisionHandlerQueue->sort_entries();
-  for (int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; ++i)
+  if (_world)
   {
-    CollisionEntry* entry = _collisionHandlerQueue->get_entry(i);
-    NodePath into         = entry->get_into_node_path();
-
-    switch (into.get_collide_mask().get_word())
+    _pickerNode->set_from_collide_mask(CollideMask(ColMask::DynObject | ColMask::Object));
+    _pickerRay->set_from_lens(_window->get_camera(0), cursorPos.get_x(), cursorPos.get_y());
+    _collisionTraverser.traverse(_window->get_render());
+    _collisionHandlerQueue->sort_entries();
+    for (int i = 0 ; i < _collisionHandlerQueue->get_num_entries() ; ++i)
     {
-    case ColMask::DynObject:
-        emit UnitHovered(into);
+      CollisionEntry* entry = _collisionHandlerQueue->get_entry(i);
+      NodePath into         = entry->get_into_node_path();
+
+      switch (into.get_collide_mask().get_word())
+      {
+      case ColMask::DynObject:
+        if (IsObjectVisible(_world->GetDynamicObjectFromNodePath(into)))
+        {
+          emit UnitHovered(into);
+          return ;
+        }
         break ;
-    case (ColMask::Object | ColMask::WpPlane):
-    case ColMask::Object:
-        emit ObjectHovered(into);
+      case (ColMask::Object | ColMask::WpPlane):
+      case ColMask::Object:
+        if (IsObjectVisible(_world->GetMapObjectFromNodePath(into)))
+        {
+          emit ObjectHovered(into);
+          return ;
+        }
         break ;
+      }
     }
-    break ;
   }
 }
 

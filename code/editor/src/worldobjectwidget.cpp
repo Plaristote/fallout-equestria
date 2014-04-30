@@ -58,6 +58,7 @@ WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
   connect(ui->selectTexture, SIGNAL(clicked()), this, SLOT(PickTexture()));
   connect(ui->objectModel,   SIGNAL(textChanged(QString)), this, SLOT(UpdateRender()));
   connect(ui->objectTexture, SIGNAL(textChanged(QString)), this, SLOT(UpdateRender()));
+  connect(ui->objectFocus,   SIGNAL(clicked()), this, SLOT(FocusCurrentObject()));
 }
 
 WorldObjectWidget::~WorldObjectWidget()
@@ -441,5 +442,26 @@ void WorldObjectWidget::UpdateRender()
       selection.object->SetModel(new_model);
     if (object->strTexture != new_texture)
       selection.object->SetTexture(new_texture);
+  }
+}
+
+void WorldObjectWidget::FocusCurrentObject()
+{
+  if (selection_type > 0 && selection_type < 3)
+  {
+    NodePath selected_nodepath = selection.object->nodePath;
+    auto     functor = [this, selected_nodepath](MapObject& object)
+    {
+      NodePath nodePath = object.nodePath;
+
+      if (nodePath != selected_nodepath &&
+          !(selected_nodepath.is_ancestor_of(nodePath)))
+        object.render.hide();
+      else
+        object.render.show();
+    };
+
+    for_each(world->objects.begin(), world->objects.end(), functor);
+    for_each(world->dynamicObjects.begin(), world->dynamicObjects.end(), functor);
   }
 }

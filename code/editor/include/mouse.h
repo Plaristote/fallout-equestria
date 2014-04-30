@@ -9,11 +9,16 @@
 # include <panda3d/collisionTraverser.h>
 # include <QObject>
 
+struct World;
+struct MapObject;
+
 class Mouse : public QObject
 {
     Q_OBJECT
 public:
     explicit Mouse(WindowFramework* window, QObject *parent = 0);
+
+    void                      SetWorld(World* world) { _world = world; }
 
     void                      Run(void);
     LPoint2f                  GetPosition(void) const;
@@ -27,7 +32,10 @@ signals:
     void ObjectHovered(NodePath);
 
   private:
+    bool                      IsObjectVisible(const MapObject*) const;
+
     WindowFramework*          _window;
+    World*                    _world;
     NodePath                  _camera;
     LPoint2f                  _lastMousePos;
     PT(MouseWatcher)          _mouseWatcher;
