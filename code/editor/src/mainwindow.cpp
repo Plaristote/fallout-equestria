@@ -204,8 +204,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect(ui->freeCamera, SIGNAL(toggled(bool)), this, SLOT(SetFreeCamera(bool)));
 
-    connect(ui->copy,  SIGNAL(clicked()), this, SLOT(CopyClicked()));
-    connect(ui->paste, SIGNAL(clicked()), this, SLOT(PasteClicked()));
+    connect(ui->worldObjectWidget, SIGNAL(CopyRequested()),  this, SLOT(CopyClicked()));
+    connect(ui->worldObjectWidget, SIGNAL(PasteRequested()), this, SLOT(PasteClicked()));
 
     ui->treeWidget->header()->hide();
     ui->scriptList->header()->hide();
@@ -319,16 +319,25 @@ void MainWindow::Paste(Utils::Packet& packet)
        packet >> object;
        object.nodePath.set_collide_mask(CollideMask(ColMask::Object));
 
-       QString old_name = QString::fromStdString(object.nodePath.get_name());
+       QString old_name  = QString::fromStdString(object.nodePath.get_name());
+       QString base_name = old_name;
        QString name;
        unsigned short ii = 0;
+
+       // remove_number_from_name
+       {
+         QRegExp regexp("#[0-9]+$");
+
+         if (base_name.contains(regexp))
+           base_name = base_name.replace(regexp, "");
+       }
 
        // Change the object's name,
        // Change the object's parent name if relevant
        do
        {
          ++ii;
-         name = old_name + '#' + QString::number(ii);
+         name = base_name + '#' + QString::number(ii);
        } while ((world->GetMapObjectFromName(name.toStdString()) != 0) ||
                 (world->GetDynamicObjectFromName(name.toStdString()) != 0) ||
                 (world->GetLightByName(name.toStdString()) != 0));
@@ -341,6 +350,13 @@ void MainWindow::Paste(Utils::Packet& packet)
 
          if (parent_it != name_map.end())
            object.parent = parent_it->toStdString();
+         else
+         {
+           MapObject* selection = ui->worldObjectWidget->GetSelectedObject();
+
+           if (selection)
+             object.parent = selection->name;
+         }
        }
 
        world->objects.push_back(object);
@@ -773,9 +789,9 @@ void MainWindow::PandaInitialized()
 
 // DYNAMICOBJECTS
      ui->objectAddButton->setMenu(&level_add_object_menu);
-     level_add_object_menu.addAction("Map Object",     this, SLOT(MapObjectWizard()));
-     level_add_object_menu.addAction("Dynamic Object", this, SLOT(DynamicObjectWizard()));
-     level_add_object_menu.addAction("Light",          this, SLOT(LightAdd()));
+     level_add_object_menu.addAction(QIcon("icons/tree-map-object.png"), "Map Object",     this, SLOT(MapObjectWizard()));
+     level_add_object_menu.addAction(QIcon("icons/tree-dyn-object.png"), "Dynamic Object", this, SLOT(DynamicObjectWizard()));
+     level_add_object_menu.addAction(QIcon("icons/tree-light.png"),      "Light",          this, SLOT(LightAdd()));
 
      connect(ui->objectDeleteButton, SIGNAL(clicked()), this, SLOT(DeleteSelection()));
 

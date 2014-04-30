@@ -32,6 +32,8 @@ public:
   void SetSelection(DynamicObject*);
   void SetSelection(WorldLight*);
 
+  MapObject* GetSelectedObject(void) const;
+
 public slots:
   void UnsetSelection();
   void DeleteSelection();
@@ -58,6 +60,8 @@ public slots:
 
 signals:
   void RenameObject(QString old_name, QString new_name);
+  void CopyRequested();
+  void PasteRequested();
 
 private:
   void InitializeMapObject(MapObject*);

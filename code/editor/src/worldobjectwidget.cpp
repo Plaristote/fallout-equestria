@@ -2,6 +2,7 @@
 #include "ui_worldobjectwidget.h"
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QKeySequence>
 #include "selectableresource.h"
 
 WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
@@ -59,11 +60,20 @@ WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
   connect(ui->objectModel,   SIGNAL(textChanged(QString)), this, SLOT(UpdateRender()));
   connect(ui->objectTexture, SIGNAL(textChanged(QString)), this, SLOT(UpdateRender()));
   connect(ui->objectFocus,   SIGNAL(clicked()), this, SLOT(FocusCurrentObject()));
+
+  ui->actionsButton->setMenu(&action_menu);
+  action_menu.addAction("Copy",  this, SIGNAL(CopyRequested()),  QKeySequence::Copy);
+  action_menu.addAction("Paste", this, SIGNAL(PasteRequested()), QKeySequence::Paste);
 }
 
 WorldObjectWidget::~WorldObjectWidget()
 {
   delete ui;
+}
+
+MapObject* WorldObjectWidget::GetSelectedObject(void) const
+{
+  return (selection_type > 0 && selection_type < 3 ? selection.object : 0);
 }
 
 void WorldObjectWidget::SetDialogObject(DialogObject* dialog)

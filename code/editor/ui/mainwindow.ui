@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>843</width>
-    <height>594</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -148,19 +148,15 @@
                  </property>
                 </widget>
                </item>
-               <item row="4" column="0">
-                <widget class="QPushButton" name="copy">
-                 <property name="text">
-                  <string>Copy</string>
-                 </property>
-                </widget>
-               </item>
                <item row="1" column="1">
                 <widget class="QPushButton" name="objectDeleteButton">
                  <property name="text">
                   <string>Delete</string>
                  </property>
                 </widget>
+               </item>
+               <item row="3" column="0" colspan="2">
+                <widget class="WorldObjectWidget" name="worldObjectWidget" native="true"/>
                </item>
                <item row="0" column="0" colspan="2">
                 <widget class="MapTreeWidget" name="treeWidget">
@@ -185,16 +181,6 @@
                   </property>
                  </column>
                 </widget>
-               </item>
-               <item row="4" column="1">
-                <widget class="QPushButton" name="paste">
-                 <property name="text">
-                  <string>Paste</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0" colspan="2">
-                <widget class="WorldObjectWidget" name="worldObjectWidget" native="true"/>
                </item>
               </layout>
              </widget>
