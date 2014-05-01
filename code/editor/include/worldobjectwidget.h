@@ -61,10 +61,15 @@ public slots:
 
   void FocusCurrentObject();
 
+  void SelectCurrentWaypoint();
+  void SetCurrentWaypoint();
+
 signals:
   void RenameObject(QString old_name, QString new_name);
   void CopyRequested();
   void PasteRequested();
+  void WaypointSetOnObjectRequested(DynamicObject*);
+  void SelectWaypointFromObject(DynamicObject*);
 
 private:
   void InitializeMapObject(MapObject*);

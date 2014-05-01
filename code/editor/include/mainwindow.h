@@ -135,8 +135,9 @@ private slots:
     void DynamicObjectWizard(void);
     void DynamicObjectAdd(void);
     void DynamicObjectHovered(NodePath);
-    void DynamicObjectSetWaypoint(void);
+    void DynamicObjectSetWaypoint(DynamicObject*);
     void DynamicObjectFocus(DynamicObject*);
+    void SelectWaypointFromObject(DynamicObject*);
 
     // LIGHTS
     void LightAdd(void);

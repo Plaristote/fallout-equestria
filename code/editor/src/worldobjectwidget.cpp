@@ -72,6 +72,10 @@ WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
   connect(ui->objectTexture, SIGNAL(textChanged(QString)), this, SLOT(UpdateRender()));
   connect(ui->objectFocus,   SIGNAL(clicked()), this, SLOT(FocusCurrentObject()));
 
+  // Waypoint
+  connect(ui->setCurrentWaypoint, SIGNAL(clicked()), this, SLOT(SetCurrentWaypoint()));
+  connect(ui->selectCurrentWaypoint, SIGNAL(clicked()), this, SLOT(SelectCurrentWaypoint()));
+
   ui->actionsButton->setMenu(&action_menu);
   action_menu.addAction("Copy",  this, SIGNAL(CopyRequested()),  QKeySequence::Copy);
   action_menu.addAction("Paste", this, SIGNAL(PasteRequested()), QKeySequence::Paste);
@@ -292,9 +296,10 @@ void WorldObjectWidget::InitializeMapObject(MapObject* object)
   ui->objectFloor->setValue(object->floor);
 }
 
-void WorldObjectWidget::InitializeDynamicObject(DynamicObject*)
+void WorldObjectWidget::InitializeDynamicObject(DynamicObject* object)
 {
   ui->tabWidget->addTab(ui->behaviourTab, "Behaviour");
+  ui->selectCurrentWaypoint->setEnabled(object->waypoint != 0);
 }
 
 void WorldObjectWidget::InitializeRender(MapObject* object)
@@ -538,4 +543,21 @@ void WorldObjectWidget::FocusCurrentObject()
     for_each(world->objects.begin(), world->objects.end(), functor);
     for_each(world->dynamicObjects.begin(), world->dynamicObjects.end(), functor);
   }
+}
+
+void WorldObjectWidget::SetCurrentWaypoint()
+{
+  if (selection_type == 2)
+  {
+    DynamicObject* object = selection.dynamic_object;
+
+    WaypointSetOnObjectRequested(object);
+    ui->selectCurrentWaypoint->setEnabled(object->waypoint != 0);
+  }
+}
+
+void WorldObjectWidget::SelectCurrentWaypoint()
+{
+  if (selection_type == 2)
+    SelectWaypointFromObject(selection.dynamic_object);
 }

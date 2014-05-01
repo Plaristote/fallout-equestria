@@ -209,6 +209,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect(ui->worldObjectWidget, SIGNAL(CopyRequested()),  this, SLOT(CopyClicked()));
     connect(ui->worldObjectWidget, SIGNAL(PasteRequested()), this, SLOT(PasteClicked()));
+    connect(ui->worldObjectWidget, SIGNAL(SelectWaypointFromObject(DynamicObject*)), this, SLOT(SelectWaypointFromObject(DynamicObject*)));
+    connect(ui->worldObjectWidget, SIGNAL(WaypointSetOnObjectRequested(DynamicObject*)), this, SLOT(DynamicObjectSetWaypoint(DynamicObject*)));
 
     ui->treeWidget->header()->hide();
     ui->scriptList->header()->hide();
@@ -837,10 +839,16 @@ void MainWindow::ObjectAdd()
       MapObjectAdd();
 }
 
-void MainWindow::DynamicObjectSetWaypoint()
+void MainWindow::DynamicObjectSetWaypoint(DynamicObject* object)
 {
-    if (dynamicObjectSelected)
-      world->DynamicObjectSetWaypoint(*dynamicObjectSelected, *waypointSelected);
+  if (object && waypointSelected)
+    world->DynamicObjectSetWaypoint(*object, *waypointSelected);
+}
+
+void MainWindow::SelectWaypointFromObject(DynamicObject* object)
+{
+  if (object->waypoint != 0)
+    WaypointSelect(object->waypoint);
 }
 
 void MainWindow::DynamicObjectWizard()
