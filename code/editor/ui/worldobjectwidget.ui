@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>359</width>
-    <height>382</height>
+    <height>434</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,41 +37,109 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="lightTab">
       <attribute name="title">
        <string>Light</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_15">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>20</height>
-          </size>
+       <item row="6" column="0" colspan="4">
+        <widget class="QGroupBox" name="shadowCasting">
+         <property name="title">
+          <string>Shadow Casting</string>
          </property>
-         <property name="text">
-          <string>Radius</string>
+         <layout class="QGridLayout" name="gridLayout_7">
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="shadowNear">
+            <property name="maximum">
+             <number>9999</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QSpinBox" name="shadowFar">
+            <property name="maximum">
+             <number>9999</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="2">
+           <widget class="QSpinBox" name="shadowFilmSize">
+            <property name="maximum">
+             <number>9999</number>
+            </property>
+            <property name="singleStep">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_16">
+            <property name="text">
+             <string>Film size</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_19">
+            <property name="text">
+             <string>Near/Far</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_18">
+            <property name="text">
+             <string>Buffer size</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="shadowBufferSizeX">
+            <property name="maximum">
+             <number>9999</number>
+            </property>
+            <property name="singleStep">
+             <number>256</number>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QSpinBox" name="shadowBufferSizeY">
+            <property name="maximum">
+             <number>9999</number>
+            </property>
+            <property name="singleStep">
+             <number>256</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QDoubleSpinBox" name="lightAttenuationA">
+         <property name="singleStep">
+          <double>0.010000000000000</double>
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_13">
-         <property name="text">
-          <string>Type</string>
+       <item row="4" column="1">
+        <widget class="QDoubleSpinBox" name="lightColorR">
+         <property name="maximum">
+          <double>255.000000000000000</double>
          </property>
         </widget>
        </item>
-       <item row="2" column="1" colspan="5">
+       <item row="2" column="1" colspan="3">
         <widget class="QDoubleSpinBox" name="lightRadius">
          <property name="maximum">
           <double>500.000000000000000</double>
          </property>
         </widget>
        </item>
-       <item row="1" column="1" colspan="5">
+       <item row="1" column="1" colspan="3">
         <widget class="QComboBox" name="lightTypesList">
          <item>
           <property name="text">
@@ -95,34 +163,79 @@
          </item>
         </widget>
        </item>
-       <item row="0" column="0" colspan="3">
+       <item row="10" column="0">
+        <widget class="Line" name="line_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QDoubleSpinBox" name="lightAttenuationC">
+         <property name="singleStep">
+          <double>0.010000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0" colspan="4">
+        <widget class="QPushButton" name="lightCompile">
+         <property name="text">
+          <string>Apply changes</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QDoubleSpinBox" name="lightAttenuationB">
+         <property name="singleStep">
+          <double>0.010000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0" colspan="2">
         <widget class="QRadioButton" name="lightSetEnabled">
          <property name="text">
           <string>On</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="labelAttenuation">
-         <property name="text">
-          <string>Attenuation</string>
+       <item row="4" column="2">
+        <widget class="QDoubleSpinBox" name="lightColorG">
+         <property name="maximum">
+          <double>255.000000000000000</double>
          </property>
         </widget>
        </item>
-       <item row="0" column="3" colspan="3">
+       <item row="8" column="0" colspan="4">
+        <widget class="QCheckBox" name="showLightRadius">
+         <property name="text">
+          <string>Show radius</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="2" colspan="2">
         <widget class="QRadioButton" name="lightSetDisabled">
          <property name="text">
           <string>Off</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QDoubleSpinBox" name="lightAttenuationA"/>
-       </item>
-       <item row="4" column="1">
-        <widget class="QDoubleSpinBox" name="lightColorR">
+       <item row="4" column="3">
+        <widget class="QDoubleSpinBox" name="lightColorB">
          <property name="maximum">
           <double>255.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>Type</string>
          </property>
         </widget>
        </item>
@@ -139,43 +252,37 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="4">
-        <widget class="QDoubleSpinBox" name="lightColorB">
-         <property name="maximum">
-          <double>255.000000000000000</double>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_15">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>20</height>
+          </size>
          </property>
-        </widget>
-       </item>
-       <item row="4" column="2" colspan="2">
-        <widget class="QDoubleSpinBox" name="lightColorG">
-         <property name="maximum">
-          <double>255.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0" colspan="6">
-        <widget class="QPushButton" name="lightCompile">
          <property name="text">
-          <string>Apply changes</string>
+          <string>Radius</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="2" colspan="2">
-        <widget class="QDoubleSpinBox" name="lightAttenuationB"/>
-       </item>
-       <item row="3" column="4">
-        <widget class="QDoubleSpinBox" name="lightAttenuationC"/>
-       </item>
-       <item row="6" column="0">
-        <widget class="Line" name="line_2">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+       <item row="3" column="0">
+        <widget class="QLabel" name="labelAttenuation">
+         <property name="text">
+          <string>Attenuation</string>
          </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_20">
+         <property name="text">
+          <string>Priority</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1" colspan="3">
+        <widget class="QSpinBox" name="lightPriority">
+         <property name="maximum">
+          <number>512</number>
          </property>
         </widget>
        </item>
@@ -470,9 +577,6 @@
          </property>
         </widget>
        </item>
-       <item row="7" column="0" colspan="3">
-        <widget class="QSpinBox" name="objectFloor"/>
-       </item>
        <item row="8" column="1">
         <widget class="Line" name="line_3">
          <property name="sizePolicy">
@@ -483,6 +587,16 @@
          </property>
          <property name="orientation">
           <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QSpinBox" name="objectFloor"/>
+       </item>
+       <item row="7" column="1" colspan="2">
+        <widget class="QCheckBox" name="inheritsFloor">
+         <property name="text">
+          <string>Inherits from parent</string>
          </property>
         </widget>
        </item>

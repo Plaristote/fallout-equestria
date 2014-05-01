@@ -54,6 +54,7 @@ void MapObject::InitializeCollider(Collider type, LPoint3f position, LPoint3f sc
   collision_node.set_pos(position);
   collision_node.set_scale(scale);
   collision_node.set_hpr(hpr);
+  collision_node.set_collide_mask(CollideMask(ColMask::FovBlocker));
   node_ptr->add_solid(solid_ptr);
 }
 
@@ -99,6 +100,8 @@ void MapObject::SetModel(const std::string& model)
   strModel = model;
   render   = panda_framework.get_window(0)->load_model(panda_framework.get_models(), MODEL_ROOT + strModel);
   render.set_name("render-" + nodePath.get_name());
+  //SetCollideMaskOnSingleNodepath(render, ColMask::Render);
+  render.set_collide_mask(CollideMask(ColMask::Render));
   render.reparent_to(nodePath);
   if (!(render.is_empty()))
     SetTexture(strTexture);

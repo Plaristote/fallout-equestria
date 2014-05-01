@@ -38,8 +38,11 @@ struct WorldLight : public Utils::Serializable
 
   WorldLight() : parent_i(0) {}
   
+  void   Initialize(void);
+  void   InitializeShadowCaster(void);
   void   SetEnabled(bool);
   void   Destroy(void);
+  bool   CastsShadows(void) const { return (type == Point || type == Spot); }
 
   LColor GetColor(void) const
   {
@@ -101,9 +104,6 @@ struct WorldLight : public Utils::Serializable
   void   SetPosition(LPoint3 position)
   {
       nodePath.set_pos(position);
-#ifdef GAME_EDITOR
-      symbol.set_pos(position);
-#endif
   }
 
   bool operator==(const std::string& comp) { return (name == comp); }
@@ -120,21 +120,42 @@ struct WorldLight : public Utils::Serializable
       return (parent_i);
   }
 
-  std::string name;
-  NodePath    nodePath;
-  Type        type;
-  ParentType  parent_type;
-  PT(Light)   light;
-  Lens*       lens;
-  float       zoneSize;
-  bool        enabled;
+  std::string   name;
+  NodePath      nodePath;
+  Type          type;
+  ParentType    parent_type;
+  PT(Light)     light;
+  Lens*         lens;
+  float         zoneSize;
+  unsigned char priority;
+  bool          enabled;
+
+  struct ShadowSettings : public Utils::Serializable
+  {
+    ShadowSettings()
+    {
+      buffer_size[0] = 8192;
+      buffer_size[1] = 8192;
+      distance_near  = 10.f;
+      distance_far   = 10.f;
+      film_size      = 1024;
+    }
+
+    void Serialize(Utils::Packet&) const;
+    void Unserialize(Utils::Packet&);
+
+    unsigned int buffer_size[2];
+    float        distance_near, distance_far;
+    unsigned int film_size;
+  };
+
+  ShadowSettings shadow_settings;
 
   std::list<NodePath> enlightened;
 #ifdef GAME_EDITOR
   NodePath    symbol;
 #endif
 private:
-  void Initialize(void);
   NodePath    parent;
   MapObject*  parent_i;
 };

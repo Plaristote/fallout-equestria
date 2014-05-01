@@ -692,9 +692,9 @@ void MainWindow::LightFocus(WorldLight* light)
   {
     LPoint3f relative_pos = light->symbol.get_pos(_window->get_render());
 
-    // TODO Focus the light in the interface too
     my_task.camera->CenterCameraInstant(relative_pos);
     my_task.camera->SlideToHeight(relative_pos.get_z());
+    ui->worldObjectWidget->SetSelection(light);
   }
 }
 
@@ -1364,23 +1364,6 @@ void MainWindow::ZoneChanged(QString string)
       ForEach(zone->waypoints, [this](Waypoint* wp) { this->WaypointSelect(wp); });
     }
   }
-}
-
-void MainWindow::LightCompile(void)
-{
-    if (lightSelected != 0)
-      world->CompileLight(lightSelected);
-}
-
-void MainWindow::LightSelected(void)
-{
-    QTreeWidgetItem* list_item = ui->treeWidget->currentItem();
-    QString          name      = list_item ? list_item->text(0) : "";
-    WorldLight*      light     = world->GetLightByName(name.toStdString());
-
-    if (light)
-      ui->worldObjectWidget->SetSelection(light);
-    lightSelected = light;
 }
 
 void MainWindow::LightAdd(void)

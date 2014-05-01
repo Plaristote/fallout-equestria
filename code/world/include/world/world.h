@@ -182,7 +182,7 @@ struct World
     void           AddLight(WorldLight::Type, const std::string&, DynamicObject* parent);
     void           DeleteLight(const std::string&);
     WorldLight*    GetLightByName(const std::string&);
-    void           CompileLight(WorldLight*, unsigned char = ColMask::Object | ColMask::DynObject);
+    void           CompileLight(WorldLight*, unsigned char = ColMask::Render);
 
     typedef std::function<void (const std::string&, float)> ProgressCallback;
 

@@ -49,12 +49,15 @@ public slots:
   void UpdateColliderGeometry();
   void UpdateColliderDisplay();
 
+  void LightCompile();
   void LightSetEnabled(bool);
   void LightSetDisabled(bool);
   void UpdateLightType();
   void UpdateLightAttenuation();
   void UpdateLightColor();
   void UpdateLightZoneSize();
+  void UpdateLightPriority();
+  void UpdateShadowCaster();
 
   void FocusCurrentObject();
 
@@ -66,6 +69,7 @@ signals:
 private:
   void InitializeMapObject(MapObject*);
   void InitializeDynamicObject(DynamicObject*);
+  void InitializeShadowCaster(WorldLight*);
   void InitializeLightAttenuation(WorldLight*);
   void InitializeGeometry(NodePath);
   void InitializeCollider(MapObject*);

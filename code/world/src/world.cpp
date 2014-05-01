@@ -3,7 +3,7 @@
 #include <panda3d/collisionBox.h>
 #include <panda3d/collisionSphere.h>
 #include <panda3d/collisionRay.h>
-#define CURRENT_BLOB_REVISION 8
+#define CURRENT_BLOB_REVISION 9
 
 using namespace std;
 
@@ -434,6 +434,15 @@ WorldLight* World::GetLightByName(const std::string& name)
   return (0);
 }
 
+string get_nodepath_path(NodePath np)
+{
+  NodePath parent = np.get_parent();
+
+  if (parent.is_empty())
+    return (np.get_name());
+  return (get_nodepath_path(parent) + '/' + np.get_name());
+}
+
 void        World::CompileLight(WorldLight* light, unsigned char colmask)
 {
   PT(CollisionSphere)       colSphere = new CollisionSphere(light->nodePath.get_x(),
@@ -473,14 +482,24 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
   traverser.traverse(floors_node);
 
   cout << "Waypoint count:   " << waypoints.size() << endl;
-  cout << "Light collisions: " << handlerQueue->get_num_entries() << endl;
+  cout << "Light '" << light->name << "' collisions: " << handlerQueue->get_num_entries() << endl;
+  handlerQueue->output(cout);
 
-  for (unsigned short i = 0 ; i < handlerQueue->get_num_entries() && i < 1000 ; ++i)
+  string last_path;
+
+  for (unsigned int i = 0 ; i < handlerQueue->get_num_entries() ; ++i)
   {
     NodePath        node  = handlerQueue->get_entry(i)->get_into_node_path();
 
     if (node.is_empty())
       continue ;
+
+    { // Avoid doublons
+      string current_path = get_nodepath_path(node);
+      if (current_path == last_path)
+        continue ;
+      last_path = current_path;
+    }
 
     Waypoint*      waypoint  = (colmask & ColMask::Waypoint ? GetWaypointFromNodePath(node) : 0);
     MapObject*     object    = (!waypoint && (colmask & ColMask::Object) ? GetMapObjectFromNodePath(node) : 0);
@@ -500,7 +519,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
       if (alreadyRegistered == light->enlightened.end())
       {
         light->enlightened.push_back(node);
-        node.set_light(light->nodePath, 7);
+        node.set_light(light->nodePath, light->priority);
       }
     }
   }
@@ -802,7 +821,7 @@ void           World::UnSerialize(Utils::Packet& packet)
     cout << "Compiling lights" << endl;
   // Post-loading stuff
 #ifndef GAME_EDITOR
-  for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light, ColMask::Object | ColMask::Waypoint | ColMask::DynObject); });
+  for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light, ColMask::Object | ColMask::DynObject | ColMask::Waypoint); });
 #else
   for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light, ColMask::Object | ColMask::DynObject); });
 #endif

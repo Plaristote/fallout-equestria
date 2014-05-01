@@ -28,7 +28,7 @@ WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
   connect(ui->objectScaleX,      SIGNAL(valueChanged(double)), this, SLOT(UpdateGeometry()));
   connect(ui->objectScaleY,      SIGNAL(valueChanged(double)), this, SLOT(UpdateGeometry()));
   connect(ui->objectScaleZ,      SIGNAL(valueChanged(double)), this, SLOT(UpdateGeometry()));
-  connect(ui->objectFloor,       SIGNAL(valueChanged(double)), this, SLOT(UpdateFloor()));
+  connect(ui->objectFloor,       SIGNAL(valueChanged(int)),    this, SLOT(UpdateFloor()));
 
   // Collider
   connect(ui->displayColliders,  SIGNAL(toggled(bool)),            this, SLOT(UpdateColliderDisplay()));
@@ -52,7 +52,17 @@ WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
   connect(ui->lightAttenuationA, SIGNAL(valueChanged(double)),  this, SLOT(UpdateLightAttenuation()));
   connect(ui->lightAttenuationB, SIGNAL(valueChanged(double)),  this, SLOT(UpdateLightAttenuation()));
   connect(ui->lightAttenuationC, SIGNAL(valueChanged(double)),  this, SLOT(UpdateLightAttenuation()));
-  connect(ui->lightTypesList,    SIGNAL(currentIndexChanged()), this, SLOT(UpdateLightType()));
+  connect(ui->lightTypesList,    SIGNAL(currentIndexChanged(int)), this, SLOT(UpdateLightType()));
+  connect(ui->lightRadius,       SIGNAL(valueChanged(double)),  this, SLOT(UpdateLightZoneSize()));
+  connect(ui->lightCompile,      SIGNAL(clicked()),             this, SLOT(LightCompile()));
+  connect(ui->lightPriority,     SIGNAL(valueChanged(int)),     this, SLOT(UpdateLightPriority()));
+
+  // Light -> Shadow caster
+  connect(ui->shadowFilmSize,    SIGNAL(valueChanged(int)),     this, SLOT(UpdateShadowCaster()));
+  connect(ui->shadowNear,        SIGNAL(valueChanged(int)),     this, SLOT(UpdateShadowCaster()));
+  connect(ui->shadowFar,         SIGNAL(valueChanged(int)),     this, SLOT(UpdateShadowCaster()));
+  connect(ui->shadowBufferSizeX, SIGNAL(valueChanged(int)),     this, SLOT(UpdateShadowCaster()));
+  connect(ui->shadowBufferSizeY, SIGNAL(valueChanged(int)),     this, SLOT(UpdateShadowCaster()));
 
   // Render
   connect(ui->selectModel,   SIGNAL(clicked()), this, SLOT(PickModel()));
@@ -69,6 +79,12 @@ WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
 WorldObjectWidget::~WorldObjectWidget()
 {
   delete ui;
+}
+
+void WorldObjectWidget::LightCompile(void)
+{
+  if (selection_type == 3)
+    world->CompileLight(selection.light, ColMask::Object | ColMask::DynObject);
 }
 
 MapObject* WorldObjectWidget::GetSelectedObject(void) const
@@ -143,8 +159,11 @@ void WorldObjectWidget::SetSelection(WorldLight* light)
     ui->lightColorB->setValue(color.get_z());
   }
 
+  ui->lightTypesList->setCurrentIndex((int)light->type);
+  InitializeShadowCaster(light);
   InitializeLightAttenuation(light);
   ui->lightRadius->setValue(light->zoneSize);
+  ui->lightPriority->setValue(light->priority);
   ui->objectName->setEnabled(true);
   ui->objectName->setText(QString::fromStdString(light->name));
   selection.light = light;
@@ -161,15 +180,56 @@ void WorldObjectWidget::UpdateLightType(void)
 
     if (type != light->type)
     {
+      cout << "Updating light type" << endl;
       std::string name = light->name;
 
-      world->DeleteLight(name);
-      world->AddLight(type, name);
-      selection.light = world->GetLightByName(name);
-      UpdateGeometry();
+      light->Destroy();
+      light->type = type;
+      light->Initialize();
+      UpdateLightColor();
+      UpdateLightAttenuation();
       InitializeLightAttenuation(light);
+      InitializeShadowCaster(light);
     }
+    else
+      cout << "Light type is already " << (int)type << endl;
   }
+}
+
+void WorldObjectWidget::InitializeShadowCaster(WorldLight* light)
+{
+  if (light->type == WorldLight::Point || light->type == WorldLight::Spot)
+  {
+    ui->shadowCasting->show();
+    ui->shadowFilmSize->setValue(light->shadow_settings.film_size);
+    ui->shadowBufferSizeX->setValue(light->shadow_settings.buffer_size[0]);
+    ui->shadowBufferSizeX->setValue(light->shadow_settings.buffer_size[1]);
+    ui->shadowNear->setValue(light->shadow_settings.distance_near);
+    ui->shadowFar->setValue(light->shadow_settings.distance_far);
+  }
+  else
+    ui->shadowCasting->hide();
+}
+
+void WorldObjectWidget::UpdateShadowCaster()
+{
+  if (selection_type == 3)
+  {
+    WorldLight* light = selection.light;
+
+    light->shadow_settings.film_size      = ui->shadowFilmSize->value();
+    light->shadow_settings.buffer_size[0] = ui->shadowBufferSizeX->value();
+    light->shadow_settings.buffer_size[1] = ui->shadowBufferSizeX->value();
+    light->shadow_settings.distance_near  = ui->shadowNear->value();
+    light->shadow_settings.distance_far   = ui->shadowFar->value();
+    light->InitializeShadowCaster();
+  }
+}
+
+void WorldObjectWidget::UpdateLightPriority()
+{
+  if (selection_type == 3)
+    selection.light->priority = ui->lightPriority->value();
 }
 
 void WorldObjectWidget::InitializeLightAttenuation(WorldLight* light)

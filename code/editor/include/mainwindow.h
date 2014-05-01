@@ -138,9 +138,7 @@ private slots:
     void DynamicObjectFocus(DynamicObject*);
 
     // LIGHTS
-    void LightSelected(void);
     void LightAdd(void);
-    void LightCompile(void);
     void LightFocus(WorldLight*);
 
     void SelectWaypointZone(float from_x, float from_y, float to_x, float to_y);

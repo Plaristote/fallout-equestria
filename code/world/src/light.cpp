@@ -2,6 +2,9 @@
 #include "world/light.hpp"
 #include "world/map_object.hpp"
 #include "world/dynamic_object.hpp"
+#ifdef GAME_EDITOR
+# include "qpandaapplication.h"
+#endif
 
 using namespace std;
 
@@ -16,7 +19,6 @@ void WorldLight::Initialize(void)
     {
       PT(PointLight) pLight = new PointLight(name);
 
-      pLight->set_shadow_caster(true, 12, 12);
       light    = pLight;
       nodePath = parent.attach_new_node(pLight);
     }
@@ -46,12 +48,40 @@ void WorldLight::Initialize(void)
     }
       break ;
   }
+  InitializeShadowCaster();
 #ifdef GAME_EDITOR
-/*  if (!(World::model_sphere.is_empty()))
-    World::model_sphere.instance_to(symbol);
-  else
-    cout << "The horror ! Model spehre is unavailable" << endl;*/
+  {
+    WindowFramework* window = QPandaApplication::Framework().get_window(0);
+
+    symbol = window->load_model(QPandaApplication::Framework().get_models(), std::string(MODEL_ROOT) + "misc/sphere.egg.pz");
+    symbol.reparent_to(nodePath);
+  }
 #endif
+}
+
+void WorldLight::InitializeShadowCaster()
+{
+  switch (type)
+  {
+    case Point:
+    {
+      PT(PointLight) point_light = reinterpret_cast<PointLight*>(light.p());
+
+      point_light->set_shadow_caster(true, shadow_settings.buffer_size[0], shadow_settings.buffer_size[1]);
+      point_light->get_lens()->set_near_far(shadow_settings.distance_near, shadow_settings.distance_far);
+      point_light->get_lens()->set_film_size(shadow_settings.film_size);
+    }
+    case Spot:
+    {
+      PT(Spotlight) spot_light = reinterpret_cast<Spotlight*>(light.p());
+
+      spot_light->set_shadow_caster(true, shadow_settings.buffer_size[0], shadow_settings.buffer_size[1]);
+      spot_light->get_lens()->set_near_far(shadow_settings.distance_near, shadow_settings.distance_far);
+      spot_light->get_lens()->set_film_size(shadow_settings.film_size);
+    }
+    default:
+      break ;
+  }
 }
 
 void WorldLight::ReparentTo(World* world)
@@ -59,10 +89,6 @@ void WorldLight::ReparentTo(World* world)
   parent_type = Type_None;
   parent_i    = 0;
   nodePath.reparent_to(world->rootLights);
-#ifdef GAME_EDITOR
-  //symbol.reparent_to(world->lightSymbols);
-  nodePath.reparent_to(world->rootLights);
-#endif
 }
 
 void WorldLight::ReparentTo(DynamicObject* object)
@@ -77,9 +103,6 @@ void WorldLight::ReparentTo(MapObject* object)
   parent      = object->nodePath;
   parent_i    = object;
   nodePath.reparent_to(parent);
-#ifdef GAME_EDITOR
-  symbol.reparent_to(parent);
-#endif
 }
 
 
@@ -96,6 +119,7 @@ void WorldLight::SetEnabled(bool set_enabled)
 
 void WorldLight::Destroy(void)
 {
+  cout << "WorldLightDestroy??" << endl;
   SetEnabled(false);
   nodePath.detach_node();
 #ifdef GAME_EDITOR
@@ -124,6 +148,10 @@ void WorldLight::Unserialize(Utils::Packet& packet)
   parent_type = (WorldLight::ParentType)_ptype;
   if (parent_type != Type_None)
     packet >> parent_name;
+  if (blob_revision >= 9)
+    packet >> priority;
+  else
+    priority = 7;
   packet >> r >> g >> b >> a;
   packet >> pos_x >> pos_y >> pos_z;
   packet >> hpr_x >> hpr_y >> hpr_z;
@@ -148,6 +176,9 @@ void WorldLight::Unserialize(Utils::Packet& packet)
 
     packet >> attenuation[0] >> attenuation[1] >> attenuation[2];
     SetAttenuation(attenuation[0], attenuation[1], attenuation[2]);
+
+    if (CastsShadows())
+      packet >> shadow_settings;
   }
   SetColor(r, g, b, a);
   if (!(nodePath.is_empty()))
@@ -155,10 +186,20 @@ void WorldLight::Unserialize(Utils::Packet& packet)
     nodePath.set_pos(LVecBase3(pos_x, pos_y, pos_z));
     nodePath.set_hpr(LVecBase3(hpr_x, hpr_y, hpr_z));
   }
-#ifdef GAME_EDITOR
-  if (!(symbol.is_empty()))
-    symbol.reparent_to(world->lightSymbols);
-#endif
+}
+
+void WorldLight::ShadowSettings::Serialize(Utils::Packet& packet) const
+{
+  packet >> buffer_size[0] >> buffer_size[1];
+  packet >> distance_near >> distance_far;
+  packet >> film_size;
+}
+
+void WorldLight::ShadowSettings::Unserialize(Utils::Packet& packet)
+{
+  packet << buffer_size[0] << buffer_size[1];
+  packet << distance_near << distance_far;
+  packet << film_size;
 }
 
 void WorldLight::Serialize(Utils::Packet& packet) const
@@ -171,8 +212,11 @@ void WorldLight::Serialize(Utils::Packet& packet) const
   packet << name << (char)enabled << zoneSize << _type << _ptype;
   if (parent_i)
     packet << parent_i->nodePath.get_name();
+  packet << priority;
   packet << (float)color.get_x() << (float)color.get_y() << (float)color.get_z() << (float)color.get_w();
   packet << (float)nodePath.get_x() << (float)nodePath.get_y() << (float)nodePath.get_z();
   packet << (float)nodePath.get_hpr().get_x() << (float)nodePath.get_hpr().get_y() << (float)nodePath.get_hpr().get_z();
   packet << (float)attenuation.get_x() << (float)attenuation.get_y() << (float)attenuation.get_z();
+  if (CastsShadows())
+    packet << shadow_settings;
 }
