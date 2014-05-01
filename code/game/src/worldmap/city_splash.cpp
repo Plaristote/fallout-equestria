@@ -20,28 +20,32 @@ CitySplash::CitySplash(Data data, WindowFramework* window, Rocket::Core::Context
   }
   if (zoneroot)
   {
-    for_each(entry_zones.begin(), entry_zones.end(), [this, zoneroot](Data zone)
+    stringstream stream;
+
+    for_each(entry_zones.begin(), entry_zones.end(), [this, zoneroot, &stream](Data zone)
     {
       if (zone == '1')
       {
-        Rocket::Core::String rml;
-        stringstream         stream;
-        std::string          zone_name = "zone-" + underscore(zone.Key());
+        std::string zone_name = "zone-" + underscore(zone.Key());
 
         stream << "<div class='zone-entry'>";
         stream <<   "<button class='long_button zone-button' id='" << zone_name << "'>";
         stream <<     zone.Key();
         stream <<   "</button>";
         stream << "</div>";
-        rml = stream.str().c_str();
-        zoneroot->SetInnerRML(rml);
-        {
-          RocketListener* listener = new RocketListener;
+      }
+    });
+    zoneroot->SetInnerRML(stream.str().c_str());
+    for_each(entry_zones.begin(), entry_zones.end(), [this, zoneroot](Data zone)
+    {
+      if (zone == '1')
+      {
+        std::string     zone_name = "zone-" + underscore(zone.Key());
+        RocketListener* listener  = new RocketListener;
 
-          ToggleEventListener(true, zone_name, "click", *listener);
-          listener->EventReceived.Connect(*this, &CitySplash::ZonePicked);
-          zone_listeners.insert(CitySplash::ZoneListeners::value_type(zone.Key(), listener));
-        }
+        ToggleEventListener(true, zone_name, "click", *listener);
+        listener->EventReceived.Connect(*this, &CitySplash::ZonePicked);
+        zone_listeners.insert(CitySplash::ZoneListeners::value_type(zone.Key(), listener));
       }
     });
   }
