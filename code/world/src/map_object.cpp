@@ -60,18 +60,32 @@ void MapObject::InitializeCollider(Collider type, LPoint3f position, LPoint3f sc
 
 void MapObject::SetFloor(unsigned char floor)
 {
-  std::for_each(waypoints.begin(), waypoints.end(), [floor](Waypoint* waypoint)
+  for_each(waypoints.begin(), waypoints.end(), [floor](Waypoint* waypoint)
   {
      waypoint->floor = floor;
+  });
+  for_each(children.begin(), children.end(), [floor](MapObject* child)
+  {
+    if (child->inherits_floor)
+      child->SetFloor(floor);
   });
   this->floor = floor;
 }
 
+MapObject::~MapObject()
+{
+  ReparentTo(0);
+}
+
 void MapObject::ReparentTo(MapObject* object)
 {
+  if (parent_object)
+    parent_object->children.erase(find(parent_object->children.begin(), parent_object->children.end(), this));
+  parent_object   = object;
   if (object)
   {
-    parent = object->nodePath.get_name();
+    parent        = object->nodePath.get_name();
+    object->children.push_back(this);
     if (object->floor != floor)
       SetFloor(object->floor);
     nodePath.reparent_to(object->nodePath);
@@ -131,12 +145,16 @@ void MapObject::Unserialize(Utils::Packet& packet)
   float  posX,   posY,   posZ;
   float  rotX,   rotY,   rotZ;
   float  scaleX, scaleY, scaleZ;
+  char   inherits_floor = true;
 
   packet >> name >> strModel >> strTexture;
   packet >> posX >> posY >> posZ >> rotX >> rotY >> rotZ >> scaleX >> scaleY >> scaleZ;
   packet >> floor;
   if (blob_revision >= 1)
     packet >> parent;
+  if (blob_revision >= 10)
+    packet >> inherits_floor;
+  this->inherits_floor = inherits_floor;
 
   if (name == "")
     name = "name-not-found";
@@ -226,6 +244,7 @@ void MapObject::Serialize(Utils::Packet& packet) const
   packet << posX << posY << posZ << rotX << rotY << rotZ << scaleX << scaleY << scaleZ;
   packet << floor;
   packet << parent; // Revision #1
+  packet << (char)inherits_floor;
   {
     std::vector<int> waypoint_ids;
 

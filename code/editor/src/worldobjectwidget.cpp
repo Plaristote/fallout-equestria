@@ -29,6 +29,7 @@ WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
   connect(ui->objectScaleY,      SIGNAL(valueChanged(double)), this, SLOT(UpdateGeometry()));
   connect(ui->objectScaleZ,      SIGNAL(valueChanged(double)), this, SLOT(UpdateGeometry()));
   connect(ui->objectFloor,       SIGNAL(valueChanged(int)),    this, SLOT(UpdateFloor()));
+  connect(ui->inheritsFloor,     SIGNAL(toggled(bool)),        this, SLOT(UpdateFloor()));
 
   // Collider
   connect(ui->displayColliders,  SIGNAL(toggled(bool)),            this, SLOT(UpdateColliderDisplay()));
@@ -284,6 +285,7 @@ void WorldObjectWidget::InitializeMapObject(MapObject* object)
 {
   ui->objectName->setEnabled(true);
   ui->objectName->setText(QString::fromStdString(object->name));
+  ui->inheritsFloor->setChecked(object->inherits_floor);
   InitializeGeometry(object->nodePath);
   InitializeCollider(object);
   InitializeRender(object);
@@ -437,8 +439,10 @@ void WorldObjectWidget::UpdateFloor()
 {
   if (selection_type > 0 && selection_type < 3)
   {
-    selection.object->floor = ui->objectFloor->value();
+    selection.object->inherits_floor = ui->inheritsFloor->isChecked();
+    selection.object->floor          = ui->objectFloor->value();
   }
+  ui->objectFloor->setEnabled(!ui->inheritsFloor->isChecked());
 }
 
 void WorldObjectWidget::LightSetDisabled(bool disabled)

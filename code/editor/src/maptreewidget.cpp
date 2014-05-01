@@ -3,6 +3,7 @@
 #include <QMimeData>
 #include "world/world.h"
 #include <QTreeWidgetItemIterator>
+#include <QApplication>
 
 using namespace std;
 
@@ -131,23 +132,29 @@ void MapTreeWidget::ReparentTo(QTreeWidgetItem* current, QTreeWidgetItem* parent
   {
     ItemType    type           = GetType(clone);
     std::string name           = clone->text(0).toStdString();
+    bool        keep_absolute_position = QApplication::keyboardModifiers() & Qt::ShiftModifier;
 
     if (type == ItemMapObject || type == ItemDynamicObject)
     {
        MapObject*  tmp_map_object = 0;
+       LPoint3f    absolute_position;
 
        if (type == ItemMapObject)
          tmp_map_object = world->GetMapObjectFromName(name);
        else
          tmp_map_object = world->GetDynamicObjectFromName(name);
+       absolute_position = tmp_map_object->nodePath.get_pos(world->window->get_render());
        if (parent == 0)
          world->ReparentObject(tmp_map_object, 0);
        else
          world->ReparentObject(tmp_map_object, parent->text(0).toStdString());
+       if (keep_absolute_position)
+         tmp_map_object->nodePath.set_pos(world->window->get_render(), absolute_position);
     }
     else if (type == ItemLight)
     {
-      WorldLight* light = world->GetLightByName(name);
+      WorldLight* light             = world->GetLightByName(name);
+      LPoint3f    absolute_position = light->nodePath.get_pos(world->window->get_render());
 
       switch (parent_type)
       {
@@ -162,6 +169,8 @@ void MapTreeWidget::ReparentTo(QTreeWidgetItem* current, QTreeWidgetItem* parent
         light->ReparentTo(world->GetDynamicObjectFromName(parent->text(0).toStdString()));
         break ;
       }
+      if (keep_absolute_position)
+        light->nodePath.set_pos(world->window->get_render(), absolute_position);
     }
   }
 }

@@ -27,15 +27,17 @@ struct PandaTask : public AsyncTask
   SceneCamera*     camera;
   Mouse*           mouse;
   QElapsedTimer    timer;
+  bool             camera_locked;
 
-  PandaTask() : window(0), camera(0), mouse(0) { }
+  PandaTask() : window(0), camera(0), mouse(0), camera_locked(false) { }
 
   DoneStatus do_task(void)
   {
     float elapsedTime = timer.elapsed();
 
     elapsedTime /= 1000;
-    camera->SetEnabledScroll(dynamic_cast<MouseWatcher*>(window->get_mouse().node())->has_mouse());
+    camera_locked = camera_locked || !(dynamic_cast<MouseWatcher*>(window->get_mouse().node())->has_mouse());
+    camera->SetCameraLocked(camera_locked);
     camera->Run(elapsedTime);
     mouse->Run();
     timer.start();
@@ -203,6 +205,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->treeWidget, SIGNAL(FocusLight(WorldLight*)),            this, SLOT(LightFocus(WorldLight*)));
 
     connect(ui->freeCamera, SIGNAL(toggled(bool)), this, SLOT(SetFreeCamera(bool)));
+    connect(ui->lockCamera, SIGNAL(toggled(bool)), this, SLOT(SetCameraLocked(bool)));
 
     connect(ui->worldObjectWidget, SIGNAL(CopyRequested()),  this, SLOT(CopyClicked()));
     connect(ui->worldObjectWidget, SIGNAL(PasteRequested()), this, SLOT(PasteClicked()));
@@ -240,6 +243,11 @@ void MainWindow::SetFreeCamera(bool value)
 {
   if (my_task.camera != 0)
     my_task.camera->SetEnabledTrackball(value);
+}
+
+void MainWindow::SetCameraLocked(bool value)
+{
+  my_task.camera_locked = value;
 }
 
 void MainWindow::CurrentTabChanged(int ntab)
@@ -733,9 +741,7 @@ extern float editor_camera_height;
 
 void MainWindow::UpdateCameraZoom(int value)
 {
-  editor_camera_height -= value;
-  if (editor_camera_height < 10)
-    editor_camera_height = 10;
+  editor_camera_height -= (value / 2);
   my_task.camera->RefreshCameraHeight();
 }
 
@@ -789,9 +795,9 @@ void MainWindow::PandaInitialized()
 
 // DYNAMICOBJECTS
      ui->objectAddButton->setMenu(&level_add_object_menu);
-     level_add_object_menu.addAction(QIcon("icons/tree-map-object.png"), "Map Object",     this, SLOT(MapObjectWizard()));
-     level_add_object_menu.addAction(QIcon("icons/tree-dyn-object.png"), "Dynamic Object", this, SLOT(DynamicObjectWizard()));
-     level_add_object_menu.addAction(QIcon("icons/tree-light.png"),      "Light",          this, SLOT(LightAdd()));
+     level_add_object_menu.addAction(ui->treeWidget->icon_map_object, "Map Object",     this, SLOT(MapObjectWizard()));
+     level_add_object_menu.addAction(ui->treeWidget->icon_dyn_object, "Dynamic Object", this, SLOT(DynamicObjectWizard()));
+     level_add_object_menu.addAction(ui->treeWidget->icon_light,      "Light",          this, SLOT(LightAdd()));
 
      connect(ui->objectDeleteButton, SIGNAL(clicked()), this, SLOT(DeleteSelection()));
 

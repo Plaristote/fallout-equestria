@@ -11,7 +11,8 @@ struct World;
 
 struct MapObject : public Utils::Serializable
 {
-  typedef std::vector<Waypoint*> Waypoints;
+  typedef std::vector<Waypoint*>  Waypoints;
+  typedef std::vector<MapObject*> Children;
 
   enum Collider
   {
@@ -21,9 +22,13 @@ struct MapObject : public Utils::Serializable
     SPHERE
   };
 
+  MapObject() : parent_object(0) {}
+  virtual ~MapObject();
+
   NodePath      nodePath, render, collision_node;
   PT(Texture)   texture;
   unsigned char floor;
+  bool          inherits_floor;
   Waypoints     waypoints;
   NodePath      waypoints_root;
 
@@ -32,6 +37,8 @@ struct MapObject : public Utils::Serializable
   std::string   strTexture;
   std::string   parent;
   Collider      collider;
+  Children      children;
+  MapObject*    parent_object;
 
   void          SetName(const std::string&);
   void          SetModel(const std::string&);

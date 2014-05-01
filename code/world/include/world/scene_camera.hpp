@@ -28,6 +28,7 @@ public:
 
   void             Run(float elapsedTime);
   void             SetEnabledScroll(bool set);
+  void             SetCameraLocked(bool set);
   void             SetEnabledTrackball(bool set);
 
   void             SwapCameraView(void);

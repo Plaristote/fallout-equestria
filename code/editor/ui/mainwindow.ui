@@ -107,6 +107,13 @@
              </property>
             </widget>
            </item>
+           <item row="0" column="0">
+            <widget class="QCheckBox" name="lockCamera">
+             <property name="text">
+              <string>Lock camera</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>

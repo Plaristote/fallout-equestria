@@ -48,7 +48,6 @@ protected:
 
 private:
     World* world;
-    QIcon icon_map_object, icon_dyn_object, icon_light;
 
     void             ProbeWorld(const std::string& parent_name, QTreeWidgetItem* item);
     void             SetItemIcon(QTreeWidgetItem*, ItemType t);
@@ -60,6 +59,7 @@ private:
 
 public:
     QMap<QString, QTreeWidgetItem*> map;
+    QIcon icon_map_object, icon_dyn_object, icon_light;
 };
 
 #endif // MAPTREEWIDGET_H

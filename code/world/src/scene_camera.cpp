@@ -42,6 +42,18 @@ void SceneCamera::SetEnabledScroll(bool set)
   _scrollEnabled = set;
 }
 
+void SceneCamera::SetCameraLocked(bool set)
+{
+  if (_useTrackball)
+  {
+    if (!set)
+      _trackball.reparent_to(_window->get_mouse());
+    else
+      _trackball.detach_node();
+  }
+  SetEnabledScroll(!set);
+}
+
 void SceneCamera::SetEnabledTrackball(bool set)
 {
   SetEnabledScroll(!set);

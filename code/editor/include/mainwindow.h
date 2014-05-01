@@ -75,6 +75,7 @@ private slots:
     void UpdateProgressBar(QString label, float value);
     void DisplayError(QString title, QString message);
     void SetFreeCamera(bool);
+    void SetCameraLocked(bool);
     void UpdateCameraZoom(int);
     void CopyClicked(void);
     void PasteClicked(void);

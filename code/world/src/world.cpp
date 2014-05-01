@@ -3,7 +3,7 @@
 #include <panda3d/collisionBox.h>
 #include <panda3d/collisionSphere.h>
 #include <panda3d/collisionRay.h>
-#define CURRENT_BLOB_REVISION 9
+#define CURRENT_BLOB_REVISION 10
 
 using namespace std;
 
@@ -591,29 +591,6 @@ void           World::SetDynamicObjectsVisible(bool v)
   }
 }
 
-void SetObjectFloors(World* world)
-{
-  auto it  = world->objects.begin();
-  auto end = world->objects.end();
-  
-  for(; it != end ; ++it)
-  {
-    MapObject&   object   = *it;
-    unsigned int floor_it = 0;
-
-    for(; floor_it < world->floors.size() ; ++floor_it)
-    {
-      NodePath floor = world->floors[floor_it];
-      
-      if (floor.is_ancestor_of(object.nodePath))
-      {
-        object.floor = floor_it;
-        break ;
-      }
-    }
-  }
-}
-
 /*
  * World
  */
@@ -795,7 +772,6 @@ void           World::UnSerialize(Utils::Packet& packet)
    * Solving branching relations between MapObjects
    */
   UpdateMapTree();
-  SetObjectFloors(this);
 
 #ifdef GAME_EDITOR
   if (blob_revision >= 6)
