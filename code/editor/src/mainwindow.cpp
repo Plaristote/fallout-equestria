@@ -1249,6 +1249,7 @@ void MainWindow::LoadMap(const QString& path)
     dynamicObjectSelected = 0;
     dynamicObjectHovered  = 0;
     waypointsSelection.clear();
+    ui->worldObjectWidget->UnsetSelection();
 
     FunctorThread&  thread   = *FunctorThread::Create([this](void)
     {
