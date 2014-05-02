@@ -1,6 +1,7 @@
 #ifndef WORLDOBJECTWIDGET_H
 # define WORLDOBJECTWIDGET_H
 
+# include "globals.hpp"
 # include <QWidget>
 # include <QMenu>
 # include "world/world.h"

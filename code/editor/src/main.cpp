@@ -13,11 +13,11 @@
 int main(int argc, char *argv[])
 {
     qDebug("Fallout Equestria Game Editor");
+    QPandaApplication panda(argc, argv);
     QCoreApplication::setOrganizationName("Shinygami");
     QCoreApplication::setOrganizationDomain("plaristote.franceserv.fr");
     QCoreApplication::setApplicationName("Fallout Equestria Editor");
     QApplication      app(argc, argv);
-    QPandaApplication panda(app, argc, argv);
     int               ret;
 
     {
