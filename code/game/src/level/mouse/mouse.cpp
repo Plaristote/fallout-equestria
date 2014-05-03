@@ -179,7 +179,7 @@ void Mouse::ClosestWaypoint(World* world, short current_floor)
       LPoint3         pos;
       static LPoint3  spheresize = NodePathSize(world->model_sphere);
 
-      if (!map_object)
+      if (!map_object || map_object->nodePath.is_hidden())
         continue ;
       pos = entry->get_surface_point(world->window->get_render()) - spheresize;
       _hovering.waypoint_ptr = world->waypoint_graph.GetClosest(pos);

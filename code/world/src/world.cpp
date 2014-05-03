@@ -479,11 +479,23 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
   // Detecting the new collisions with colmask, and setting the light
   colNode->set_into_collide_mask(colmask);
   colNode->set_from_collide_mask(colmask);
-  traverser.traverse(floors_node);
+  traverser.traverse(window->get_render());
 
   cout << "Waypoint count:   " << waypoints.size() << endl;
   cout << "Light '" << light->name << "' collisions: " << handlerQueue->get_num_entries() << endl;
   handlerQueue->output(cout);
+
+  if (colmask & ColMask::Waypoint)
+  {
+    auto it  = waypoints.begin();
+    auto end = waypoints.end();
+
+    for (; it != end ; ++it)
+    {
+      if (it->GetDistanceEstimate(light->nodePath.get_pos()) <= light->zoneSize)
+        it->lights.push_back(light);
+    }
+  }
 
   string last_path;
 
@@ -514,7 +526,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
       cout << "Enlightening object " << object->name << endl;
       list<NodePath>::iterator alreadyRegistered;
 
-      node = (object ? object->nodePath : dynObject->nodePath);
+      node = (object ? object->render : dynObject->render);
       alreadyRegistered = find(light->enlightened.begin(), light->enlightened.end(), node);
       if (alreadyRegistered == light->enlightened.end())
       {

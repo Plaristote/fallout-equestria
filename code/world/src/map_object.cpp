@@ -214,7 +214,7 @@ void MapObject::UnserializeWaypoints(World* world, Utils::Packet& packet)
       if (waypoint)
       {
         waypoint->floor       = this->floor;
-        waypoint->parent_path = this->nodePath;
+        waypoint->parent_path = this->render;
         waypoints.push_back(waypoint);
   #ifdef GAME_EDITOR
         if (!(waypoint->nodePath.is_empty()))

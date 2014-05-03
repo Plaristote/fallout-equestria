@@ -83,6 +83,7 @@ struct Waypoint
   // Pathfinding features
   float                GoalDistanceEstimate(const Waypoint& goal) const { return (GetDistanceEstimate(goal)); }
   float                GetDistanceEstimate(const Waypoint& other) const;
+  float                GetDistanceEstimate(const LPoint3f other) const;
   std::list<Waypoint*> GetSuccessors(Waypoint* parent);
   float                GetCost(Waypoint&) { return (1.f); }
   // Divide and conquer

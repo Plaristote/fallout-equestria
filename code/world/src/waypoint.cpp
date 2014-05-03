@@ -123,8 +123,14 @@ Waypoint::Arc*      Waypoint::GetArcTo(unsigned int id)
 
 float               Waypoint::GetDistanceEstimate(const Waypoint& other) const
 {
-  LPoint3 pos_1  = nodePath.get_pos();
   LPoint3 pos_2  = other.nodePath.get_pos();
+
+  return (GetDistanceEstimate(pos_2));
+}
+
+float               Waypoint::GetDistanceEstimate(const LPoint3f pos_2) const
+{
+  LPoint3 pos_1  = nodePath.get_pos();
   float   dist_x = pos_1.get_x() - pos_2.get_x();
   float   dist_y = pos_1.get_y() - pos_2.get_y();
 
