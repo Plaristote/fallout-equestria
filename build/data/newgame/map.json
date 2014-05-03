@@ -10,13 +10,9 @@
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
-
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -26,6 +22,10 @@
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
+,
+    "type-encounters": [
+"bandits"    
+]
 
   }
 , {
@@ -33,6 +33,22 @@
     "movement-speed": 0.7,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
+]
+
+  }
+, {
+    "visibility": 0,
+    "movement-speed": 0.7,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -42,13 +58,9 @@
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
-
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -57,6 +69,22 @@
     "movement-speed": 1,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
+]
+
+  }
+, {
+    "visibility": 0,
+    "movement-speed": 1,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -173,6 +201,10 @@
     "movement-speed": 0.7,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -198,13 +230,9 @@
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -214,6 +242,10 @@
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
+,
+    "type-encounters": [
+"bandits"    
+]
 
   }
 , {
@@ -221,6 +253,22 @@
     "movement-speed": 1,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
+]
+
+  }
+, {
+    "visibility": 2,
+    "movement-speed": 1,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -337,6 +385,10 @@
     "movement-speed": 0.7,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -362,6 +414,10 @@
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
+,
+    "type-encounters": [
+"bandits"    
+]
 
   }
 , {
@@ -385,6 +441,10 @@
     "movement-speed": 1,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -501,6 +561,10 @@
     "movement-speed": 0.7,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -510,6 +574,10 @@
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
+,
+    "type-encounters": [
+"bandits"    
+]
 
   }
 , {
@@ -518,6 +586,10 @@
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
+,
+    "type-encounters": [
+"bandits"    
+]
 
   }
 , {
@@ -525,6 +597,10 @@
     "movement-speed": 0.7,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -550,6 +626,10 @@
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
+,
+    "type-encounters": [
+"bandits"    
+]
 
   }
 , {
@@ -666,12 +746,9 @@
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -679,6 +756,21 @@
     "visibility": 0,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
+]
+
+  }
+, {
+    "visibility": 0,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -688,21 +780,9 @@
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -712,306 +792,152 @@
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
 , {
     "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
+    "movement-speed": 1,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
 ,
     "type-encounters": [
-"timberwolves"    
+"bandits"    
 ]
 
   }
 , {
     "visibility": 2,
+    "movement-speed": 1,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
 ,
     "type-encounters": [
-"timberwolves"    
+"bandits"    
+]
+
+  }
+, {
+    "visibility": 0,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
 ]
 
   }
 , {
     "visibility": 2,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+
+  }
+, {
+    "visibility": 0,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+
+  }
+, {
+    "visibility": 0,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+
+  }
+, {
+    "visibility": 0,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+
+  }
+, {
+    "visibility": 0,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
 ,
     "type-encounters": [
-"timberwolves"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"timberwolves"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 2
-  }
-, {
-    "visibility": 2
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
-    "type-encounters": [
-"timberwolves"    
+"bandits"    
 ]
 
   }
@@ -1022,7 +948,7 @@
 ]
 ,
     "type-encounters": [
-"timberwolves"    
+"bandits"    
 ]
 
   }
@@ -1033,7 +959,7 @@
 ]
 ,
     "type-encounters": [
-"timberwolves"    
+"bandits"    
 ]
 
   }
@@ -1044,7 +970,40 @@
 ]
 ,
     "type-encounters": [
-"timberwolves"    
+"bandits"    
+]
+
+  }
+, {
+    "visibility": 2,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
+]
+
+  }
+, {
+    "visibility": 2,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
+]
+
+  }
+, {
+    "visibility": 2,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -1063,14 +1022,28 @@
 
   }
 , {
-    "visibility": 2,
+    "visibility": 0,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
 
   }
 , {
-    "visibility": 2,
+    "visibility": 0,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+
+  }
+, {
+    "visibility": 0,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+
+  }
+, {
+    "visibility": 0,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
@@ -1143,50 +1116,23 @@
     "visibility": 0
   }
 , {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 2
-  }
-, {
-    "visibility": 2
-  }
-, {
     "visibility": 0,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
     "type-encounters": [
-"timberwolves"    
+"bandits"    
 ]
 
   }
 , {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
+    "visibility": 2,
     "type-encounters": [
-"timberwolves"    
+"bandits"    
 ]
 
   }
 , {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
+    "visibility": 2,
     "type-encounters": [
-"timberwolves"    
+"bandits"    
 ]
 
   }
@@ -1197,7 +1143,18 @@
 ]
 ,
     "type-encounters": [
-"timberwolves"    
+"bandits"    
+]
+
+  }
+, {
+    "visibility": 0,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -1205,6 +1162,21 @@
     "visibility": 2,
     "map-encounters": [
 "random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
+]
+
+  }
+, {
+    "visibility": 2,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+,
+    "type-encounters": [
+"bandits"    
 ]
 
   }
@@ -1228,6 +1200,16 @@
 "random-desert-1", "desert-01", "desert-merchant"    
 ]
 
+  }
+, {
+    "visibility": 2,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+
+  }
+, {
+    "visibility": 0
   }
 , {
     "visibility": 0
@@ -1308,6 +1290,144 @@
     "visibility": 2
   }
 , {
+    "visibility": 0,
+    "map-encounters": [
+"random-desert-1"    
+]
+,
+    "type-encounters": ""
+  }
+, {
+    "visibility": 0,
+    "map-encounters": [
+"random-desert-1"    
+]
+,
+    "type-encounters": ""
+  }
+, {
+    "visibility": 0,
+    "map-encounters": [
+"random-desert-1"    
+]
+,
+    "type-encounters": ""
+  }
+, {
+    "visibility": 2,
+    "map-encounters": [
+"random-desert-1"    
+]
+,
+    "type-encounters": ""
+  }
+, {
+    "visibility": 2,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+
+  }
+, {
+    "visibility": 0,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+
+  }
+, {
+    "visibility": 2,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+
+  }
+, {
+    "visibility": 2,
+    "map-encounters": [
+"random-desert-1", "desert-01", "desert-merchant"    
+]
+
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 0
+  }
+, {
+    "visibility": 2
+  }
+, {
+    "visibility": 2
+  }
+, {
     "visibility": 0
   }
 , {
@@ -1316,10 +1436,7 @@
 "random-desert-1"    
 ]
 ,
-    "type-encounters": [
-"timberwolves"    
-]
-
+    "type-encounters": ""
   }
 , {
     "visibility": 0,
@@ -1327,10 +1444,7 @@
 "random-desert-1"    
 ]
 ,
-    "type-encounters": [
-"timberwolves"    
-]
-
+    "type-encounters": ""
   }
 , {
     "visibility": 0,
@@ -1338,10 +1452,7 @@
 "random-desert-1"    
 ]
 ,
-    "type-encounters": [
-"timberwolves"    
-]
-
+    "type-encounters": ""
   }
 , {
     "visibility": 0,
@@ -1349,10 +1460,7 @@
 "random-desert-1"    
 ]
 ,
-    "type-encounters": [
-"timberwolves"    
-]
-
+    "type-encounters": ""
   }
 , {
     "visibility": 2,

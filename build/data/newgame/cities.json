@@ -1,12 +1,14 @@
 {
-"bunker": {
+"stable": {
   "visible": 1,
   "pos_x": 94,
   "pos_y": 102,
   "radius": 20,
   "splashscreen": "cities/Stable.png",
   "zones": {
-    "worldmap": 1
+    "bunker/worldmap": 1,
+    "cantina-entry": 1,
+    "living-quarter-entry": 1
   }
 }
 ,

@@ -140,7 +140,14 @@
       "hookHitChanges": "ShootSuccessChance",
       "hookWeapon": "Shoot",
       "hookCanUse": "CanUse",
-      "hookHitChances": "ShootSuccessChance"
+      "hookHitChances": "ShootSuccessChance",
+      "animations": {
+        "projectiles": {
+          "attack": {
+            "light": { "red": 100, "green": 200, "blue": 125 }
+          }
+        }
+      }
     }
 ,
     "Reload": {

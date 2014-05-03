@@ -2,11 +2,10 @@
 "hooves": {
   "script": {
     "file": "objectsUnarmed.as"
-  }
-,
+  },
   "hidden": 1,
   "actions": {
-    "hooves": {
+    "Punch": {
       "ap-cost": 3,
       "combat": 1,
       "range": 10,
@@ -14,12 +13,9 @@
       "hookWeapon": "HoovesHit",
       "hookHitChances": "UnarmedSuccessChance"
     }
-
-  }
-,
+  },
   "ammo": ""
-}
-,
+},
 "buck": {
   "icon": "buck.png",
   "script": {
@@ -28,7 +24,7 @@
 ,
   "hidden": 1,
   "actions": {
-    "buck": {
+    "Buck": {
       "ap-cost": 4,
       "combat": 1,
       "range": 15,
@@ -139,7 +135,15 @@
       "hookHitChanges": "ShootSuccessChance",
       "hookWeapon": "Shoot",
       "hookCanUse": "CanUse",
-      "hookHitChances": "ShootSuccessChance"
+      "hookHitChances": "ShootSuccessChance",
+      "animations": {
+        "projectiles": {
+          "attack": {
+            "light": { "red": 100, "green": 200, "blue": 125 },
+            "timeout": 3
+          }
+        }
+      }
     }
 ,
     "Reload": {

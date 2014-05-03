@@ -308,7 +308,7 @@ void WorldMap::CloseCitySplash(void)
   _city_splash->Hide();
   Executor::ExecuteLater([this](void) { delete _city_splash; _city_splash = 0; });
 }
-
+list<string> split(const std::string& str, char c);
 void WorldMap::OpenCitySplash(const std::string& cityname)
 {
   Data      cities(_cityTree);
@@ -323,7 +323,11 @@ void WorldMap::OpenCitySplash(const std::string& cityname)
       _city_splash->EntryZonePicked.Connect([this, cityname](std::string zone)
       {
         CloseCitySplash();
-        GoToCityZone.Emit(cityname, zone);
+        list<string> parts = split(zone, '/');
+        if (parts.size() == 2)
+          GoToCityZone.Emit(*parts.begin(), *parts.rbegin());
+        else
+          GoToCityZone.Emit(cityname, zone);
       });
       _city_splash->Show();
     }

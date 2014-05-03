@@ -153,8 +153,9 @@ Newly refreshed and woken up, not to mention fearing for my skin, I ran to my ba
 }
 ,
 "random-encounters": {
-  "timberwolves": {
-    "timberwolf": 10
+  "bandits": {
+    "Bandit": 3,
+    "Bandit Sharpshooter": 2
   }
 
 }
