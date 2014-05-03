@@ -1261,6 +1261,7 @@ void MainWindow::LoadMap(const QString& path)
     dynamicObjectSelected = 0;
     dynamicObjectHovered  = 0;
     waypointsSelection.clear();
+    ui->worldObjectWidget->UnsetSelection();
 
     FunctorThread&  thread   = *FunctorThread::Create([this](void)
     {
@@ -1296,6 +1297,7 @@ void MainWindow::LoadMap(const QString& path)
         }
         catch (const Utils::Packet::Exception& exception)
         {
+          world = 0;
           QMessageBox::warning(this, "Fatal Error", QString("Map file seems corrupted. Unserializer said: ") + exception.what());
         }
         delete   packet;

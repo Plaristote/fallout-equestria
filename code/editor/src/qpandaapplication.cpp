@@ -5,7 +5,7 @@ bool            QPandaApplication::_continue;
 bool            QPandaApplication::_panda_enabled;
 QTimer          QPandaApplication::_timer;
 
-QPandaApplication::QPandaApplication(QApplication& application, int argc, char **argv) : application(application)
+QPandaApplication::QPandaApplication(int argc, char **argv)
 {
   _framework     = new PandaFramework;
   _framework->open_framework(argc, argv);

@@ -11,7 +11,7 @@ class QPandaApplication : public QObject
 {
     Q_OBJECT
 public:
-    QPandaApplication(QApplication& application, int argc, char **argv);
+    QPandaApplication(int argc, char **argv);
     ~QPandaApplication();
 
     static PandaFramework& Framework(void) { return (*_framework); }
@@ -26,7 +26,6 @@ public slots:
     void                   DisablePanda(void) { SetPandaEnabled(false); }
 
 private:
-    QApplication&          application;
     static bool            _continue;
     static PandaFramework* _framework;
     static QTimer          _timer;
