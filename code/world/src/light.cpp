@@ -190,16 +190,16 @@ void WorldLight::Unserialize(Utils::Packet& packet)
 
 void WorldLight::ShadowSettings::Serialize(Utils::Packet& packet) const
 {
-  packet >> buffer_size[0] >> buffer_size[1];
-  packet >> distance_near >> distance_far;
-  packet >> film_size;
+  packet << buffer_size[0] << buffer_size[1];
+  packet << distance_near << distance_far;
+  packet << film_size;
 }
 
 void WorldLight::ShadowSettings::Unserialize(Utils::Packet& packet)
 {
-  packet << buffer_size[0] << buffer_size[1];
-  packet << distance_near << distance_far;
-  packet << film_size;
+  packet >> buffer_size[0] >> buffer_size[1];
+  packet >> distance_near >> distance_far;
+  packet >> film_size;
 }
 
 void WorldLight::Serialize(Utils::Packet& packet) const

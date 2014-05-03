@@ -534,7 +534,7 @@ AsyncTask::DoneStatus Level::do_task(void)
       break ;
   }
   zones.Refresh();
-  
+
   if (main_script.IsDefined("Run"))
   {
     AngelScript::Type<float> param_time(elapsedTime);

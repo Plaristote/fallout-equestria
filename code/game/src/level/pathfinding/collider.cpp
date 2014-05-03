@@ -75,7 +75,6 @@ void      Collider::SetOccupiedWaypoint(Waypoint* wp)
 
       for (; it != end ; ++it)
         np.set_light_off((*it)->light->as_node());
-      //waypoint_occupied->nodePath.hide();
     }
     waypoint_occupied = wp;
     if (wp)
@@ -85,9 +84,12 @@ void      Collider::SetOccupiedWaypoint(Waypoint* wp)
       NodePath np  = GetNodePath();
 
       for (; it != end ; ++it)
+      {
+        cout << "Setting light " << (*it)->nodePath.get_name() << endl;
         np.set_light((*it)->light->as_node());
-      //waypoint_occupied->nodePath.reparent_to(Level::CurrentLevel->GetWorld()->window->get_render());
-      //waypoint_occupied->nodePath.show();
+      }
+//      waypoint_occupied->nodePath.reparent_to(Level::CurrentLevel->GetWorld()->window->get_render());
+//      waypoint_occupied->nodePath.show();
     }
   }
 #else

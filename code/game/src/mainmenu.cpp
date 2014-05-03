@@ -94,13 +94,13 @@ void MainMenu::DisplayAlerts(void)
 
 AsyncTask::DoneStatus MainMenu::do_task()
 {
-  MusicManager* music_manager = MusicManager::Get();
+  //MusicManager* music_manager = MusicManager::Get();
 
   if (_alerts.size() > 0)
     DisplayAlerts();
   else
   {
-    if (music_manager) { music_manager->Run(); }
+    //if (music_manager) { music_manager->Run(); }
     if (createLevelPlz) AsyncCreateLevel();
     if (_levelTask)
     {

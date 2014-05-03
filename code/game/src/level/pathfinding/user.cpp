@@ -220,12 +220,7 @@ void Pathfinding::User::SetNextWaypoint(void)
     }
     // If teleported, re-compute the path from the newly occupied waypoint.
     else if (path.Size() > 0)
-    {
-      cout << "Penis ?" << endl;
       GoTo(_level->GetWorld()->GetWaypointFromId(path.Last().id));
-    }
-    else
-      cout << "Hello ?" << endl;
   }
 }
 
@@ -279,10 +274,16 @@ void                Pathfinding::User::RunMovement(float elapsedTime)
   int               dirX, dirY, dirZ;
 
   max_speed   = movement_speed * elapsedTime;
-  if (distance.get_x() == 0 && distance.get_y() == 0 && distance.get_z() == 0)
+  if (std::abs(distance.get_x()) < 0.01 && (std::abs(distance.get_y()) < 0.01) && std::abs(distance.get_z()) < 0.01)
+  {
+    //cout << "run next movement" << endl;
     RunNextMovement(elapsedTime);
+  }
   else
   {
+    LPoint3f target = path.Front().nodePath.get_pos();
+      //cout << "run movement" << endl;
+      //cout << distance.get_x() << ", " << distance.get_y() << ", " << distance.get_z() << endl;
     dirX = dirY = dirZ = 1;
     if (distance.get_x() < 0)
     {
@@ -315,7 +316,9 @@ void                Pathfinding::User::RunMovement(float elapsedTime)
     dest = _object->nodePath.get_pos() - speed;
 
     LookAt(dest);
+    //cout << "Before: " << _object->nodePath.get_x() << ", " << _object->nodePath.get_y() << ", " << _object->nodePath.get_z() << endl;
     _object->nodePath.set_pos(dest);
+    //cout << "After: " << _object->nodePath.get_x() << ", " << _object->nodePath.get_y() << ", " << _object->nodePath.get_z() << endl;
   }
 }
 

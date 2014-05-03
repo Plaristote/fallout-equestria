@@ -21,8 +21,12 @@ void Zone::Serialize(Utils::Packet& packet) const
   auto           wpIt  = waypoints.begin();
   auto           wpEnd = waypoints.end();
 
+  waypoints_ids.clear();
   for (; wpIt != wpEnd ; ++wpIt)
-    waypoints_ids.push_back((*wpIt)->id);
+  {
+    if ((find(waypoints_ids.begin(), waypoints_ids.end(), (*wpIt)->id)) == waypoints_ids.end())
+      waypoints_ids.push_back((*wpIt)->id);
+  }
 #endif
   packet << name;
   packet << destinations;
@@ -37,13 +41,19 @@ void Zone::Unserialize(Utils::Packet& packet)
   packet >> destinations;
   packet >> waypoints_ids;
   
-  for (auto it = waypoints_ids.begin() ; it != waypoints_ids.end() ; ++it)
+  for (auto it = waypoints_ids.begin() ; it != waypoints_ids.end() ;)
   {
     Waypoint* waypoint = world->GetWaypointFromId(*it);
     
-    if (waypoint)
+    if (waypoint && ((find(waypoints.begin(), waypoints.end(), waypoint) == waypoints.end())))
+    {
       waypoints.push_back(waypoint);
+      ++it;
+    }
+    else
+      it = waypoints_ids.erase(it);
   }
+
 }
 
 

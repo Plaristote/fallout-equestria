@@ -15,7 +15,7 @@ namespace Pathfinding
 Waypoint::Waypoint(NodePath root)
 {
   floor         = 0;
-  floor_above   = 0;
+  floor_above   = suggested_floor_above = 0;
   selected      = false;
   nodePath      = root;
   //nodePath.set_collide_mask(CollideMask(ColMask::Waypoint));
@@ -334,6 +334,8 @@ void Waypoint::Unserialize(Utils::Packet &packet)
   packet >> floor;
   if (blob_revision > 7)
     packet >> floor_above;
+  if (blob_revision > 9)
+    packet >> suggested_floor_above;
   packet >> tmpArcs;
   nodePath.set_pos(posx, posy, posz);
 }
@@ -381,6 +383,6 @@ void Waypoint::Serialize(World* world, Utils::Packet &packet)
 
   packet << id;
   packet << posx << posy << posz;
-  packet << floor << floor_above;
+  packet << floor << floor_above << suggested_floor_above;
   packet << arcs;
 }

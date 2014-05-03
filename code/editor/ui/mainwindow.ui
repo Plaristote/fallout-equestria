@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>843</width>
-    <height>600</height>
+    <height>648</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,9 +41,6 @@
         <string>Level Designer</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="1">
-         <widget class="QComboBox" name="listMap"/>
-        </item>
         <item row="1" column="1" colspan="2">
          <widget class="QProgressBar" name="progressBar">
           <property name="enabled">
@@ -65,6 +62,9 @@
            <string>%p%</string>
           </property>
          </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="listMap"/>
         </item>
         <item row="4" column="2">
          <widget class="QWidget" name="widget_2" native="true">
@@ -196,6 +196,60 @@
                <string>Terrain</string>
               </attribute>
               <layout class="QGridLayout" name="gridLayout_9">
+               <item row="1" column="1">
+                <widget class="QPushButton" name="waypointDiscardSelection">
+                 <property name="text">
+                  <string>Discard Selection</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QPushButton" name="waypointPicker">
+                 <property name="text">
+                  <string>Picker</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="6" column="0">
+                <widget class="Line" name="line">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QPushButton" name="waypointZoneSelector">
+                 <property name="text">
+                  <string>Zone selection</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0" colspan="2">
+                <widget class="QPushButton" name="waypointGenerateObject">
+                 <property name="text">
+                  <string>Generate for current object</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QCheckBox" name="waypointVisible">
+                 <property name="text">
+                  <string>Visible</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
                <item row="3" column="0" colspan="2">
                 <widget class="QFrame" name="waypointEditor">
                  <property name="frameShape">
@@ -205,7 +259,41 @@
                   <enum>QFrame::Raised</enum>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_8">
-                  <item row="9" column="2">
+                  <item row="9" column="0">
+                   <widget class="QLabel" name="label">
+                    <property name="text">
+                     <string>Move</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="11" column="0" colspan="3">
+                   <widget class="QPushButton" name="waypointClone">
+                    <property name="text">
+                     <string>Clone last selected waypoint</string>
+                    </property>
+                    <property name="flat">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0" colspan="3">
+                   <widget class="QLineEdit" name="waypointSelection">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="0" colspan="3">
+                   <widget class="QPushButton" name="waypointDisconnect">
+                    <property name="text">
+                     <string>Disconnect</string>
+                    </property>
+                    <property name="flat">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="10" column="2">
                    <widget class="QDoubleSpinBox" name="waypointSelZ">
                     <property name="minimum">
                      <double>-999.000000000000000</double>
@@ -215,7 +303,7 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="9" column="0">
+                  <item row="10" column="0">
                    <widget class="QDoubleSpinBox" name="waypointSelX">
                     <property name="minimum">
                      <double>-999.000000000000000</double>
@@ -234,27 +322,7 @@
                      <string>Remove</string>
                     </property>
                     <property name="flat">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="0" colspan="3">
-                   <widget class="QPushButton" name="waypointConnect">
-                    <property name="text">
-                     <string>Connect</string>
-                    </property>
-                    <property name="flat">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="9" column="1">
-                   <widget class="QDoubleSpinBox" name="waypointSelY">
-                    <property name="minimum">
-                     <double>-999.000000000000000</double>
-                    </property>
-                    <property name="maximum">
-                     <double>999.000000000000000</double>
+                     <bool>false</bool>
                     </property>
                    </widget>
                   </item>
@@ -265,88 +333,34 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="5" column="0" colspan="3">
-                   <widget class="QPushButton" name="waypointDisconnect">
+                  <item row="4" column="0" colspan="3">
+                   <widget class="QPushButton" name="waypointConnect">
                     <property name="text">
-                     <string>Disconnect</string>
+                     <string>Connect</string>
                     </property>
                     <property name="flat">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="0" colspan="3">
-                   <widget class="QLineEdit" name="waypointSelection">
-                    <property name="enabled">
                      <bool>false</bool>
                     </property>
                    </widget>
                   </item>
-                  <item row="8" column="0" colspan="3">
-                   <widget class="QPushButton" name="waypointClone">
-                    <property name="text">
-                     <string>Clone last selected waypoint</string>
+                  <item row="10" column="1">
+                   <widget class="QDoubleSpinBox" name="waypointSelY">
+                    <property name="minimum">
+                     <double>-999.000000000000000</double>
                     </property>
-                    <property name="flat">
-                     <bool>true</bool>
+                    <property name="maximum">
+                     <double>999.000000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="12" column="0" colspan="3">
+                   <widget class="QPushButton" name="forceFloorAbove">
+                    <property name="text">
+                     <string>Force floor above</string>
                     </property>
                    </widget>
                   </item>
                  </layout>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QPushButton" name="waypointPicker">
-                 <property name="text">
-                  <string>Picker</string>
-                 </property>
-                 <property name="checkable">
-                  <bool>true</bool>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QPushButton" name="waypointDiscardSelection">
-                 <property name="text">
-                  <string>Discard Selection</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QPushButton" name="waypointZoneSelector">
-                 <property name="text">
-                  <string>Zone selection</string>
-                 </property>
-                 <property name="checkable">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QCheckBox" name="waypointVisible">
-                 <property name="text">
-                  <string>Visible</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="0" colspan="2">
-                <widget class="QPushButton" name="waypointGenerateObject">
-                 <property name="text">
-                  <string>Generate for current object</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="0">
-                <widget class="Line" name="line">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
                 </widget>
                </item>
               </layout>
@@ -418,6 +432,23 @@
           </layout>
          </widget>
         </item>
+        <item row="2" column="1" rowspan="10">
+         <widget class="QPandaWidget" name="widget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <layout class="QGridLayout" name="gridLayout"/>
+         </widget>
+        </item>
         <item row="0" column="2">
          <widget class="QWidget" name="widget_3" native="true">
           <layout class="QHBoxLayout" name="horizontalLayout">
@@ -436,23 +467,6 @@
             </widget>
            </item>
           </layout>
-         </widget>
-        </item>
-        <item row="2" column="1" rowspan="10">
-         <widget class="QPandaWidget" name="widget" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-          <layout class="QGridLayout" name="gridLayout"/>
          </widget>
         </item>
        </layout>

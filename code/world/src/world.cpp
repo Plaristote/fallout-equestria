@@ -897,6 +897,7 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
     unsigned int        id  = 0;
     int                 size;
 
+    cout << "Serializing " << waypoints.size() << " waypoints." << endl;
     while (it != end)
     {
       if ((*it).arcs.size() == 0)
@@ -914,6 +915,7 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
     (*it).Serialize(this, packet);
   }
 
+  unsigned int progress_object = 0;
   // MapObjects
   {
     MapObjects::iterator it  = objects.begin();
@@ -924,7 +926,11 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
       if (it->nodePath.is_empty())
         it = objects.erase(it);
       else
+      {
         ++it;
+        ++progress_object;
+      }
+      progress_callback("Serializing object: ", (float)progress_object / (objects.size() + dynamicObjects.size()) * 100);
     }
     packet << ((int)objects.size());
     for (it = objects.begin() ; it != end ; ++it) { (*it).Serialize(packet); }
@@ -944,16 +950,22 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
       if (it->nodePath.is_empty())
         it = dynamicObjects.erase(it);
       else
+      {
         ++it;
+        ++progress_object;
+      }
+      progress_callback("Serializing object: ", (float)progress_object / (objects.size() + dynamicObjects.size()) * 100);
     }
     packet << ((int)dynamicObjects.size());
     for (it = dynamicObjects.begin() ; it != end ; ++it) { (*it).Serialize(packet); }
   }
 
   // WorldLights
+  progress_callback("Serializing lights", 50);
   packet << lights;
 
   // Zones
+  progress_callback("Serializing zones", 99);
   packet << zones;
 
   {
@@ -961,6 +973,7 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
 
     packet << serialize_sunlight_enabled;
   }
+  progress_callback("Done serializing", 100);
 }
 
 // MAP COMPILING
@@ -989,7 +1002,7 @@ void           World::CompileWaypointsFloorAbove()
 
     collisionHandlerQueue->sort_entries();
 
-    waypoint.floor_above = waypoint.floor; // In case there's nothing above...
+    waypoint.floor_above = waypoint.floor;
 
     for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
     {
@@ -1010,12 +1023,12 @@ void           World::CompileWaypointsFloorAbove()
             break ;
         }
       }
-      if (object && object->floor >= waypoint.floor)
-      {
+      if (object && object->floor > waypoint.floor)
         waypoint.floor_above = object->floor;
-        break ;
-      }
     }
+    if (waypoint.suggested_floor_above > waypoint.floor &&
+        (waypoint.floor_above > waypoint.suggested_floor_above || waypoint.floor_above == waypoint.floor))
+      waypoint.floor_above = waypoint.suggested_floor_above;
     pickerPath.detach_node();
   });
 }

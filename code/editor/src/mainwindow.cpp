@@ -778,6 +778,7 @@ void MainWindow::PandaInitialized()
      connect(ui->waypointSelZ,       SIGNAL(valueChanged(double)), this, SLOT(WaypointUpdateSelZ()));
      connect(ui->waypointSelDelete,  SIGNAL(clicked()),            this, SLOT(WaypointSelDelete()));
      connect(ui->waypointClone,      SIGNAL(clicked()),            this, SLOT(WaypointClone()));
+     connect(ui->forceFloorAbove,    SIGNAL(clicked()),            this, SLOT(WaypointForceFloorAbove()));
 
      connect(ui->waypointDiscardSelection, SIGNAL(clicked()), this, SLOT(WaypointDiscardSelection()));
 
@@ -1071,6 +1072,16 @@ void MainWindow::WaypointSelect(Waypoint* waypoint)
     UpdateSelection();
 }
 
+void MainWindow::WaypointForceFloorAbove(void)
+{
+  unsigned int suggested_floor_above = QInputDialog::getInt(this, "Suggest above floor", "Floor");
+
+  for_each(waypointsSelection.begin(), waypointsSelection.end(), [suggested_floor_above](Waypoint* waypoint)
+  {
+    waypoint->suggested_floor_above = suggested_floor_above;
+  });
+}
+
 void MainWindow::WaypointClone(void)
 {
   if (waypointSelected != 0)
@@ -1085,6 +1096,7 @@ void MainWindow::WaypointClone(void)
 
       waypoint->nodePath.reparent_to(map_object->waypoints_root);
       waypoint->nodePath.set_pos(world->window->get_render(), position);
+      map_object->waypoints.push_back(waypoint);
     }
   }
 }
@@ -1475,7 +1487,6 @@ void MainWindow::SaveMap()
       std::ofstream file;
       std::string   path = (QDir::currentPath() + "/maps/" + levelName + ".blob").toStdString();
 
-      file.open(path.c_str(),ios::binary);
       if (world)
       {
         Utils::Packet packet;
@@ -1483,6 +1494,7 @@ void MainWindow::SaveMap()
 
         world->Serialize(packet, [self](const std::string& label, float percentage)
         { self->CallbackUpdateProgressBar(label, percentage); });
+        file.open(path.c_str(),ios::binary);
         file.write(packet.raw(), packet.size());
         file.close();
       }
