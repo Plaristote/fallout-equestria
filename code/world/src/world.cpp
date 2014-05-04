@@ -648,24 +648,8 @@ void           World::UnSerialize(Utils::Packet& packet)
     for (int it = 0 ; it < size ; ++it)
     {
       MapObject     object;
-      unsigned char floor;
 
       packet >> object;
-      floor        = object.floor;
-      object.floor = (floor == 0 ? 1 : 0); // This has to be done, or MapObjectChangeFloor won't execute
-      MapObjectChangeFloor(object, floor);
-      {
-        int flag     = ColMask::Object;
-        int col_flag = ColMask::FovBlocker;
-
-        if (object.waypoints.size() > 0)
-          flag     |= ColMask::WpPlane;
-        if (object.collider == MapObject::MODEL)
-          col_flag |= ColMask::CheckCollisionOnModel;
-        object.nodePath.clear_model_nodes();
-        object.nodePath.set_collide_mask(CollideMask(flag));
-        object.collision_node.set_collide_mask(CollideMask(col_flag));
-      }
       objects.push_back(object);
     }
   }

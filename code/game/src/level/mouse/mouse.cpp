@@ -137,6 +137,8 @@ void Mouse::ClosestWaypoint(World* world, short current_floor)
 {
   //if (_mouseWatcher->has_mouse())
   {
+    Timer test;
+
     PStatCollector collector("Level:Mouse:FindWaypoint"); collector.start();
     PT(CollisionRay)          pickerRay;
     PT(CollisionNode)         pickerNode;
@@ -173,6 +175,9 @@ void Mouse::ClosestWaypoint(World* world, short current_floor)
     _hovering.waypoint_ptr = 0;
     for (int i = 0 ; i < collisionHandlerQueue->get_num_entries() ; ++i)
     {
+      CollisionTraverser        model_traverser;
+      PT(CollisionHandlerQueue) handler_queue = new CollisionHandlerQueue();
+
       CollisionEntry* entry      = collisionHandlerQueue->get_entry(i);
       NodePath        np         = entry->get_into_node_path();
       MapObject*      map_object = world->GetMapObjectFromNodePath(np);
@@ -181,6 +186,18 @@ void Mouse::ClosestWaypoint(World* world, short current_floor)
 
       if (!map_object || map_object->nodePath.is_hidden())
         continue ;
+      if (map_object->collider == MapObject::MODEL)
+      {
+        CollideMask initial_collide_mask = map_object->render.get_collide_mask();
+
+        map_object->render.set_collide_mask(initial_collide_mask | CollideMask(ColMask::WpPlane));
+        model_traverser.add_collider(pickerPath, handler_queue);
+        model_traverser.traverse(map_object->render);
+        map_object->render.set_collide_mask(initial_collide_mask);
+        if (handler_queue->get_num_entries() == 0)
+          continue ;
+        entry = handler_queue->get_entry(0);
+      }
       pos = entry->get_surface_point(world->window->get_render()) - spheresize;
       _hovering.waypoint_ptr = world->waypoint_graph.GetClosest(pos);
       if (_hovering.waypoint_ptr)
@@ -193,6 +210,7 @@ void Mouse::ClosestWaypoint(World* world, short current_floor)
 
     // Detaching seems to be causing some memory issues.
     //pickerPath.detach_node();
+    test.Profile("Closest waypoint");
     collector.stop();
   }
 }

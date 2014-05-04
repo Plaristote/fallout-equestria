@@ -81,9 +81,12 @@ bool LineOfSight::DoesRayTraverseModel(NodePath model) const
   {
     CollisionTraverser        model_traverser;
     PT(CollisionHandlerQueue) handler_queue = new CollisionHandlerQueue();
-    
+    CollideMask               initial_collide_mask = map_object->render.get_collide_mask();
+
+    map_object->render.set_collide_mask(initial_collide_mask | CollideMask(ColMask::FovBlocker));
     model_traverser.add_collider(collision_nodepath, handler_queue);
     model_traverser.traverse(map_object->render);
+    map_object->render.set_collide_mask(initial_collide_mask);
     if (handler_queue->get_num_entries() > 0)
       return (false);
   }

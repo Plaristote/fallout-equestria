@@ -170,6 +170,7 @@ void MapObject::Unserialize(Utils::Packet& packet)
     nodePath.set_scale(scaleX, scaleY, scaleZ);
     nodePath.set_pos(posX, posY, posZ);
     waypoints_root = nodePath.attach_new_node("waypoints");
+    world->MapObjectChangeFloor(*this, floor);
   }
 
   if (blob_revision >= 2)
@@ -198,6 +199,8 @@ void MapObject::Unserialize(Utils::Packet& packet)
     collider = MODEL;
     InitializeCollider(collider, LPoint3f(0, 0, 0), scale, LPoint3f(0, 0, 0));
   }
+
+  InitializeCollideMask();
 }
 
 void MapObject::UnserializeWaypoints(World* world, Utils::Packet& packet)
@@ -268,6 +271,19 @@ void MapObject::Serialize(Utils::Packet& packet) const
       packet << posX << posY << posZ << rotX << rotY << rotZ << scaleX << scaleY << scaleZ;
     }
   } // #Revision4/5
+}
+
+void MapObject::InitializeCollideMask(void)
+{
+  int flag     = ColMask::Object;
+  int col_flag = ColMask::FovBlocker;
+
+  if (collider == MapObject::MODEL)
+    col_flag |= ColMask::CheckCollisionOnModel;
+  if (waypoints.size() > 0)
+    col_flag |= ColMask::WpPlane;
+  nodePath.set_collide_mask(flag);
+  collision_node.set_collide_mask(col_flag);
 }
 
 bool MapObject::IsCuttable(void) const
