@@ -420,9 +420,12 @@ bool GameTask::SaveLevel(Level* level, const std::string& name)
   return (true);
 }
 
+extern bool world_is_game_save;
+
 void GameTask::LoadLevelFromPacket(LoadLevelParams params, Utils::Packet& packet)
 {
   LoadingScreen::AppendText("Entering " + params.name);
+  world_is_game_save = params.isSaveFile;
   level = new Level(params.name, window, game_ui, packet, time_manager);
   if (params.isSaveFile)
     level->Unserialize(packet);

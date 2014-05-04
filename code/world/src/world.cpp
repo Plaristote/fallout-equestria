@@ -9,6 +9,9 @@ using namespace std;
 
 unsigned int          blob_revision = CURRENT_BLOB_REVISION;
 World*                World::LoadingWorld = 0;
+#ifndef GAME_EDITOR
+bool                  world_is_game_save = false;
+#endif
 
 World::World(WindowFramework* window)
 {
@@ -832,9 +835,12 @@ void           World::UpdateMapTree(void)
               LPoint3f current_hpr = it->nodePath.get_hpr(window->get_render());
               LPoint3f current_scale = it->nodePath.get_scale(window->get_render());
               MapObjectChangeFloor((*it), it->floor);
-              it->nodePath.set_pos(window->get_render(), current_pos);
-              it->nodePath.set_hpr(window->get_render(), current_hpr);
-              it->nodePath.set_scale(window->get_render(), current_scale);
+              if (!world_is_game_save)
+              {
+                it->nodePath.set_pos(window->get_render(), current_pos);
+                it->nodePath.set_hpr(window->get_render(), current_hpr);
+                it->nodePath.set_scale(window->get_render(), current_scale);
+              }
             }
 #endif
           }
