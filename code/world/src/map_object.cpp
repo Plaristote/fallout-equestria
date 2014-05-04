@@ -275,7 +275,7 @@ void MapObject::Serialize(Utils::Packet& packet) const
 
 void MapObject::InitializeCollideMask(void)
 {
-  int flag     = ColMask::Object;
+  int flag     = GetObjectCollideMask();
   int col_flag = ColMask::FovBlocker;
 
   if (collider == MapObject::MODEL)

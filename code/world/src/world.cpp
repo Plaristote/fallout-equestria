@@ -3,7 +3,7 @@
 #include <panda3d/collisionBox.h>
 #include <panda3d/collisionSphere.h>
 #include <panda3d/collisionRay.h>
-#define CURRENT_BLOB_REVISION 10
+#define CURRENT_BLOB_REVISION 11
 
 using namespace std;
 
@@ -641,6 +641,7 @@ void           World::UnSerialize(Utils::Packet& packet)
 
     cout << "Unserialize map objects" << endl;
   // MapObjects
+  if (blob_revision < 11)
   {
     int size;
 
@@ -653,9 +654,12 @@ void           World::UnSerialize(Utils::Packet& packet)
       objects.push_back(object);
     }
   }
+  else
+    packet >> objects;
 
     cout << "Unserialize dynamic objects" << endl;
   // DynamicObjects
+  if (blob_revision < 11)
   {
     int size;
 
@@ -673,6 +677,8 @@ void           World::UnSerialize(Utils::Packet& packet)
       dynamicObjects.push_back(object);
     }
   }
+  else
+    packet >> dynamicObjects;
 
     cout << "Unserialize lights" << endl;
   // Lights
@@ -912,8 +918,9 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
   }
 
   unsigned int progress_object = 0;
+  packet << objects;
   // MapObjects
-  {
+  /*{
     MapObjects::iterator it  = objects.begin();
     MapObjects::iterator end = objects.end();
 
@@ -930,14 +937,15 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
     }
     packet << ((int)objects.size());
     for (it = objects.begin() ; it != end ; ++it) { (*it).Serialize(packet); }
-  }
+  }*/
 #ifdef GAME_EDITOR
   if (do_compile_doors)
     CompileDoors(progress_callback);
 #endif
 
   // DynamicObjects
-  {
+  packet << dynamicObjects;
+  /*{
     DynamicObjects::iterator it  = dynamicObjects.begin();
     DynamicObjects::iterator end = dynamicObjects.end();
 
@@ -954,7 +962,7 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
     }
     packet << ((int)dynamicObjects.size());
     for (it = dynamicObjects.begin() ; it != end ; ++it) { (*it).Serialize(packet); }
-  }
+  }*/
 
   // WorldLights
   progress_callback("Serializing lights", 50);

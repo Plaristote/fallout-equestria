@@ -5,6 +5,7 @@
 # include <panda3d/pandaFramework.h>
 # include <vector>
 # include "serializer.hpp"
+# include "colmask.hpp"
 
 struct Waypoint;
 struct World;
@@ -52,6 +53,7 @@ struct MapObject : public Utils::Serializable
   static void   InitializeTree(World* world);
   void          InitializeCollider(Collider type, LPoint3f position, LPoint3f scale, LPoint3f hpr);
   void          InitializeCollideMask();
+  virtual int   GetObjectCollideMask() { return (ColMask::Object); }
   
   bool          IsCuttable(void) const;
 };
