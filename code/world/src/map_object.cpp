@@ -141,12 +141,12 @@ void MapObject::SetTexture(const std::string& new_texture)
  */
 void MapObject::Unserialize(Utils::Packet& packet)
 {
-  World* world = World::LoadingWorld;
   float  posX,   posY,   posZ;
   float  rotX,   rotY,   rotZ;
   float  scaleX, scaleY, scaleZ;
   char   inherits_floor = true;
 
+  world = World::LoadingWorld;
   packet >> name >> strModel >> strTexture;
   packet >> posX >> posY >> posZ >> rotX >> rotY >> rotZ >> scaleX >> scaleY >> scaleZ;
   packet >> floor;

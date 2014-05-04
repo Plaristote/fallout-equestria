@@ -823,7 +823,21 @@ void           World::UpdateMapTree(void)
         if (it->parent == solving_for)
         {
           if (solving_for != "" && !parent.is_empty())
+          {
             it->nodePath.reparent_to(parent);
+#ifndef GAME_EDITOR
+            if (!it->inherits_floor)
+            {
+              LPoint3f current_pos = it->nodePath.get_pos(window->get_render());
+              LPoint3f current_hpr = it->nodePath.get_hpr(window->get_render());
+              LPoint3f current_scale = it->nodePath.get_scale(window->get_render());
+              MapObjectChangeFloor((*it), it->floor);
+              it->nodePath.set_pos(window->get_render(), current_pos);
+              it->nodePath.set_hpr(window->get_render(), current_hpr);
+              it->nodePath.set_scale(window->get_render(), current_scale);
+            }
+#endif
+          }
           else
           {
             if (floors.size() <= it->floor)

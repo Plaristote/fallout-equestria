@@ -23,7 +23,7 @@ struct MapObject : public Utils::Serializable
     SPHERE
   };
 
-  MapObject() : parent_object(0) {}
+  MapObject() : parent_object(0), world(0) {}
   virtual ~MapObject();
 
   NodePath      nodePath, render, collision_node;
@@ -40,6 +40,7 @@ struct MapObject : public Utils::Serializable
   Collider      collider;
   Children      children;
   MapObject*    parent_object;
+  World*        world;
 
   void          SetName(const std::string&);
   void          SetModel(const std::string&);
