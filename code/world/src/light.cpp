@@ -186,6 +186,11 @@ void WorldLight::Unserialize(Utils::Packet& packet)
     nodePath.set_pos(LVecBase3(pos_x, pos_y, pos_z));
     nodePath.set_hpr(LVecBase3(hpr_x, hpr_y, hpr_z));
   }
+  if (blob_revision >= 12)
+  {
+    collider.parent = nodePath;
+    packet >> collider;
+  }
 }
 
 void WorldLight::ShadowSettings::Serialize(Utils::Packet& packet) const
@@ -219,4 +224,5 @@ void WorldLight::Serialize(Utils::Packet& packet) const
   packet << (float)attenuation.get_x() << (float)attenuation.get_y() << (float)attenuation.get_z();
   if (CastsShadows())
     packet << shadow_settings;
+  packet << collider;
 }

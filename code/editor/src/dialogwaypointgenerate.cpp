@@ -28,9 +28,9 @@ WaypointGenerator::WaypointGenerator(World* world, MapObject* object, LPoint4 ma
     initPosX = margin.get_x() - (size.get_x() / 2);
     initPosY = margin.get_y() - (size.get_y() / 2);
   }
-  if (!(object->collision_node.is_empty()))
+  if (!(object->collider.node.is_empty()))
   {
-    LPoint3f collision_node_pos = object->collision_node.get_pos();
+    LPoint3f collision_node_pos = object->collider.node.get_pos();
 
     initPosX -= collision_node_pos.get_x();
     initPosY -= collision_node_pos.get_y();

@@ -3,7 +3,7 @@
 #include <panda3d/collisionBox.h>
 #include <panda3d/collisionSphere.h>
 #include <panda3d/collisionRay.h>
-#define CURRENT_BLOB_REVISION 11
+#define CURRENT_BLOB_REVISION 12
 
 using namespace std;
 
@@ -212,9 +212,9 @@ MapObject* World::AddMapObject(const string &name, const string &model, const st
   {
     LPoint3f scale = NodePathSize(object.render) / 2;
 
-    object.InitializeCollider(MapObject::MODEL, LPoint3f(), scale, LPoint3f());
-    object.nodePath.set_collide_mask(CollideMask(ColMask::Object));
-    object.collision_node.set_collide_mask(CollideMask(ColMask::FovBlocker));
+    object.collider.parent = object.nodePath;
+    object.collider.InitializeCollider(Collider::MODEL, LPoint3f(0,0,0), scale, LPoint3f(0,0,0));
+    object.InitializeCollideMask();
   }
   objects.push_back(object);
   return (&(*(--(objects.end()))));
@@ -286,7 +286,7 @@ MapObject* World::GetMapObjectFromCollisionNode(NodePath path)
   {
     MapObject& object = *it;
 
-    if (!(object.collision_node.is_empty()) && object.collision_node.is_ancestor_of(path))
+    if (!(object.collider.node.is_empty()) && object.collider.node.is_ancestor_of(path))
       return (&object);
   }
   return (0);
@@ -937,60 +937,12 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
     (*it).Serialize(this, packet);
   }
 
-  unsigned int progress_object = 0;
-  packet << objects;
-  // MapObjects
-  /*{
-    MapObjects::iterator it  = objects.begin();
-    MapObjects::iterator end = objects.end();
-
-    while (it != end)
-    {
-      if (it->nodePath.is_empty())
-        it = objects.erase(it);
-      else
-      {
-        ++it;
-        ++progress_object;
-      }
-      progress_callback("Serializing object: ", (float)progress_object / (objects.size() + dynamicObjects.size()) * 100);
-    }
-    packet << ((int)objects.size());
-    for (it = objects.begin() ; it != end ; ++it) { (*it).Serialize(packet); }
-  }*/
 #ifdef GAME_EDITOR
   if (do_compile_doors)
     CompileDoors(progress_callback);
 #endif
 
-  // DynamicObjects
-  packet << dynamicObjects;
-  /*{
-    DynamicObjects::iterator it  = dynamicObjects.begin();
-    DynamicObjects::iterator end = dynamicObjects.end();
-
-    while (it != end)
-    {
-      if (it->nodePath.is_empty())
-        it = dynamicObjects.erase(it);
-      else
-      {
-        ++it;
-        ++progress_object;
-      }
-      progress_callback("Serializing object: ", (float)progress_object / (objects.size() + dynamicObjects.size()) * 100);
-    }
-    packet << ((int)dynamicObjects.size());
-    for (it = dynamicObjects.begin() ; it != end ; ++it) { (*it).Serialize(packet); }
-  }*/
-
-  // WorldLights
-  progress_callback("Serializing lights", 50);
-  packet << lights;
-
-  // Zones
-  progress_callback("Serializing zones", 99);
-  packet << zones;
+  packet << objects << dynamicObjects << lights << zones;
 
   {
     char serialize_sunlight_enabled = sunlight_enabled;

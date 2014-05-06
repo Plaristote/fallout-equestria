@@ -30,34 +30,6 @@ void MapObject::InitializeTree(World *world)
   for_each(world->dynamicObjects.begin(), world->dynamicObjects.begin(), [find_parents](DynamicObject& object) { find_parents(object); });
 }
 
-void MapObject::InitializeCollider(Collider type, LPoint3f position, LPoint3f scale, LPoint3f hpr)
-{
-  PT(CollisionNode)  node_ptr;
-  PT(CollisionSolid) solid_ptr;
-
-  collider = type;
-  switch (type)
-  {
-  default:
-  case NONE:
-    return ;
-  case MODEL:
-  case BOX:
-      solid_ptr = new CollisionBox(LPoint3f(0, 0, 0), 1, 1, 1);
-      break ;
-  case SPHERE:
-      solid_ptr = new CollisionSphere(LPoint3(0, 0, 0), 1);
-      break ;
-  }
-  node_ptr       = new CollisionNode("collision_node");
-  collision_node = nodePath.attach_new_node(node_ptr);
-  collision_node.set_pos(position);
-  collision_node.set_scale(scale);
-  collision_node.set_hpr(hpr);
-  collision_node.set_collide_mask(CollideMask(ColMask::FovBlocker));
-  node_ptr->add_solid(solid_ptr);
-}
-
 void MapObject::SetFloor(unsigned char floor)
 {
   for_each(waypoints.begin(), waypoints.end(), [floor](Waypoint* waypoint)
@@ -177,27 +149,15 @@ void MapObject::Unserialize(Utils::Packet& packet)
     UnserializeWaypoints(world, packet);
   if (blob_revision >= 4)
   {
-    unsigned char _collider;
-
-    packet >> _collider;
-    if (_collider != NONE && (blob_revision >= 5 || _collider != MODEL))
-      packet >> posX >> posY >> posZ >> rotX >> rotY >> rotZ >> scaleX >> scaleY >> scaleZ;
-    else if (_collider == MODEL)
-    {
-      LPoint3f scale = NodePathSize(render) / 2;
-
-      scaleX = scale.get_x();
-      scaleY = scale.get_y();
-      scaleZ = scale.get_z();
-    }
-    InitializeCollider((Collider)_collider, LPoint3f(posX, posY, posZ), LPoint3f(scaleX, scaleY, scaleZ), LPoint3f(rotX, rotY, rotZ));
+    collider.parent = nodePath;
+    packet >> collider;
   }
   else
   {
     LPoint3f scale = NodePathSize(render) / 2;
 
-    collider = MODEL;
-    InitializeCollider(collider, LPoint3f(0, 0, 0), scale, LPoint3f(0, 0, 0));
+    collider.parent = nodePath;
+    collider.InitializeCollider(Collider::MODEL, LPoint3f(0, 0, 0), scale, LPoint3f(0, 0, 0));
   }
 
   InitializeCollideMask();
@@ -258,19 +218,64 @@ void MapObject::Serialize(Utils::Packet& packet) const
     });
     packet << waypoint_ids;
   } // #Revision2
+  packet << collider;
+}
+
+void Collider::Serialize(Utils::Packet& packet) const
+{
+  float         posX,   posY,   posZ;
+  float         rotX,   rotY,   rotZ;
+  float         scaleX, scaleY, scaleZ;
+  unsigned char _collider = (unsigned char)type;
+
+  packet << _collider;
+  if (type != NONE)
   {
-    unsigned char _collider = (unsigned char)collider;
+    posX = node.get_pos().get_x(); rotX = node.get_hpr().get_x(); scaleX = node.get_scale().get_x();
+    posY = node.get_pos().get_y(); rotY = node.get_hpr().get_y(); scaleY = node.get_scale().get_y();
+    posZ = node.get_pos().get_z(); rotZ = node.get_hpr().get_z(); scaleZ = node.get_scale().get_z();
+    packet << posX << posY << posZ << rotX << rotY << rotZ << scaleX << scaleY << scaleZ;
+  }
+}
 
-    packet << _collider;
-    if (collider != NONE)
-    {
-      posX = collision_node.get_pos().get_x(); rotX = collision_node.get_hpr().get_x(); scaleX = collision_node.get_scale().get_x();
-      posY = collision_node.get_pos().get_y(); rotY = collision_node.get_hpr().get_y(); scaleY = collision_node.get_scale().get_y();
-      posZ = collision_node.get_pos().get_z(); rotZ = collision_node.get_hpr().get_z(); scaleZ = collision_node.get_scale().get_z();
+void Collider::Unserialize(Utils::Packet& packet)
+{
+  float         posX,   posY,   posZ;
+  float         rotX,   rotY,   rotZ;
+  float         scaleX, scaleY, scaleZ;
+  unsigned char _collider;
 
-      packet << posX << posY << posZ << rotX << rotY << rotZ << scaleX << scaleY << scaleZ;
-    }
-  } // #Revision4/5
+  packet >> _collider;
+  if (_collider != NONE)
+    packet >> posX >> posY >> posZ >> rotX >> rotY >> rotZ >> scaleX >> scaleY >> scaleZ;
+  InitializeCollider((Type)_collider, LPoint3f(posX, posY, posZ), LPoint3f(scaleX, scaleY, scaleZ), LPoint3f(rotX, rotY, rotZ));
+}
+
+void Collider::InitializeCollider(Type type, LPoint3f position, LPoint3f scale, LPoint3f hpr)
+{
+  PT(CollisionNode)  node_ptr;
+  PT(CollisionSolid) solid_ptr;
+
+  this->type = type;
+  switch (type)
+  {
+  default:
+  case NONE:
+    return ;
+  case MODEL:
+  case BOX:
+      solid_ptr = new CollisionBox(LPoint3f(0, 0, 0), 1, 1, 1);
+      break ;
+  case SPHERE:
+      solid_ptr = new CollisionSphere(LPoint3(0, 0, 0), 1);
+      break ;
+  }
+  node_ptr = new CollisionNode("collision_node");
+  node_ptr->add_solid(solid_ptr);
+  node     = parent.attach_new_node(node_ptr);
+  node.set_pos(position);
+  node.set_scale(scale);
+  node.set_hpr(hpr);
 }
 
 void MapObject::InitializeCollideMask(void)
@@ -278,12 +283,12 @@ void MapObject::InitializeCollideMask(void)
   int flag     = GetObjectCollideMask();
   int col_flag = ColMask::FovBlocker;
 
-  if (collider == MapObject::MODEL)
+  if (collider.type == Collider::MODEL)
     col_flag |= ColMask::CheckCollisionOnModel;
   if (waypoints.size() > 0)
     col_flag |= ColMask::WpPlane;
   nodePath.set_collide_mask(flag);
-  collision_node.set_collide_mask(col_flag);
+  collider.node.set_collide_mask(col_flag);
 }
 
 bool MapObject::IsCuttable(void) const

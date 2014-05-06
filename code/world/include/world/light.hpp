@@ -7,6 +7,7 @@
 # include <panda3d/ambientLight.h>
 # include <panda3d/spotlight.h>
 # include "serializer.hpp"
+# include "collider.hpp"
 
 struct World;
 struct MapObject;
@@ -150,6 +151,7 @@ struct WorldLight : public Utils::Serializable
   };
 
   ShadowSettings shadow_settings;
+  Collider       collider;
 
   std::list<NodePath> enlightened;
 #ifdef GAME_EDITOR

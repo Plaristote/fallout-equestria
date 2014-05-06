@@ -126,7 +126,9 @@ void WorldObjectWidget::DeleteSelection()
 void WorldObjectWidget::UnsetSelection()
 {
   if (selection_type > 0 && selection_type < 3)
-    selection.object->collision_node.hide();
+    selection.object->collider.node.hide();
+  else if (selection_type == 3)
+    selection.light->collider.node.hide();
   selection_type = 0;
   while (ui->tabWidget->count())
     ui->tabWidget->removeTab(0);
@@ -174,6 +176,7 @@ void WorldObjectWidget::SetSelection(WorldLight* light)
   selection.light = light;
   selection_type  = 3;
   ui->tabWidget->addTab(ui->lightTab, "Light");
+  InitializeCollider(light->collider);
 }
 
 void WorldObjectWidget::UpdateLightType(void)
@@ -291,7 +294,7 @@ void WorldObjectWidget::InitializeMapObject(MapObject* object)
   ui->objectName->setText(QString::fromStdString(object->name));
   ui->inheritsFloor->setChecked(object->inherits_floor);
   InitializeGeometry(object->nodePath);
-  InitializeCollider(object);
+  InitializeCollider(object->collider);
   InitializeRender(object);
   ui->objectFloor->setValue(object->floor);
 }
@@ -323,24 +326,24 @@ void WorldObjectWidget::InitializeGeometry(NodePath nodePath)
   ui->objectScaleZ->setValue(nodePath.get_scale().get_z());
 }
 
-void WorldObjectWidget::InitializeCollider(MapObject* object)
+void WorldObjectWidget::InitializeCollider(Collider& collider)
 {
-  NodePath collider = object->collision_node;
+  NodePath node = collider.node;
 
   ui->tabWidget->addTab(ui->colliderTab, "Collider");
-  ui->collider_type->setCurrentIndex((int)object->collider);
-  ui->collider_position->setEnabled(object->collider != MapObject::NONE);
-  ui->collider_pos_x->setValue(collider.get_x());
-  ui->collider_pos_y->setValue(collider.get_y());
-  ui->collider_pos_z->setValue(collider.get_z());
-  ui->collider_hpr_x->setValue(collider.get_hpr().get_x());
-  ui->collider_hpr_y->setValue(collider.get_hpr().get_y());
-  ui->collider_hpr_z->setValue(collider.get_hpr().get_z());
-  ui->collider_scale_x->setValue(collider.get_scale().get_x());
-  ui->collider_scale_y->setValue(collider.get_scale().get_y());
-  ui->collider_scale_z->setValue(collider.get_scale().get_z());
+  ui->collider_type->setCurrentIndex((int)collider.type);
+  ui->collider_position->setEnabled(collider.type != Collider::NONE);
+  ui->collider_pos_x->setValue(node.get_x());
+  ui->collider_pos_y->setValue(node.get_y());
+  ui->collider_pos_z->setValue(node.get_z());
+  ui->collider_hpr_x->setValue(node.get_hpr().get_x());
+  ui->collider_hpr_y->setValue(node.get_hpr().get_y());
+  ui->collider_hpr_z->setValue(node.get_hpr().get_z());
+  ui->collider_scale_x->setValue(node.get_scale().get_x());
+  ui->collider_scale_y->setValue(node.get_scale().get_y());
+  ui->collider_scale_z->setValue(node.get_scale().get_z());
   if (ui->displayColliders->isChecked())
-    collider.show();
+    node.show();
 }
 
 void WorldObjectWidget::UpdateName(QString name)
@@ -365,16 +368,21 @@ void WorldObjectWidget::UpdateName(QString name)
 
 void WorldObjectWidget::UpdateColliderGeometry()
 {
+  Collider* collider = 0;
+
   if (selection_type > 0 && selection_type < 3)
+    collider = &selection.object->collider;
+  else if (selection_type == 3)
+    collider = &selection.light->collider;
+  if (collider)
   {
-    MapObject* object = selection.object;
     LPoint3f   position(ui->collider_pos_x->value(), ui->collider_pos_y->value(), ui->collider_pos_z->value());
     LPoint3f   hpr     (ui->collider_hpr_x->value(), ui->collider_hpr_y->value(), ui->collider_hpr_z->value());
     LPoint3f   scale   (ui->collider_scale_x->value(), ui->collider_scale_y->value(), ui->collider_scale_z->value());
 
-    object->collision_node.set_pos(position);
-    object->collision_node.set_hpr(hpr);
-    object->collision_node.set_scale(scale);
+    collider->node.set_pos(position);
+    collider->node.set_hpr(hpr);
+    collider->node.set_scale(scale);
     ui->displayColliders->setChecked(true);
   }
   UpdateColliderDisplay();
@@ -382,20 +390,33 @@ void WorldObjectWidget::UpdateColliderGeometry()
 
 void WorldObjectWidget::UpdateColliderType()
 {
+  Collider* collider = 0;
+  NodePath  parent;
+
   if (selection_type > 0 && selection_type < 3)
   {
-    MapObject* object = selection.object;
-
-    if (object->collider != MapObject::NONE)
-      object->collision_node.remove_node();
-    object->collider = (MapObject::Collider)ui->collider_type->currentIndex();
-    ui->collider_position->setEnabled(object->collider != MapObject::NONE);
-    object->InitializeCollider(object->collider, LPoint3f(0, 0, 0), LPoint3f(1, 1, 1), LPoint3f(0, 0, 0));
+    collider = &selection.object->collider;
+    parent   = selection.object->nodePath;
+  }
+  else if (selection_type == 3)
+  {
+    collider = &selection.light->collider;
+    parent   = selection.light->symbol;
+  }
+  if (collider)
+  {
+    if (collider->type != Collider::NONE)
+      collider->node.remove_node();
+    collider->type = (Collider::Type)ui->collider_type->currentIndex();
+    ui->collider_position->setEnabled(collider->type != Collider::NONE);
+    collider->parent = parent;
+    collider->InitializeCollider(collider->type, LPoint3f(0, 0, 0), LPoint3f(1, 1, 1), LPoint3f(0, 0, 0));
+    if (selection_type > 0 && selection_type < 3)
     {
-      LPoint3f scale = NodePathSize(object->render) / 2;
+      LPoint3f scale = NodePathSize(selection.object->render) / 2;
       LPoint3f min_point, max_point;
 
-      object->render.calc_tight_bounds(min_point, max_point);
+      selection.object->render.calc_tight_bounds(min_point, max_point);
       ui->collider_pos_x->setValue((std::abs(max_point.get_x()) - std::abs(min_point.get_x())) / 2 * (max_point.get_x() < 0 ? -1 : 1));
       ui->collider_pos_y->setValue((std::abs(max_point.get_y()) - std::abs(min_point.get_y())) / 2 * (max_point.get_y() < 0 ? -1 : 1));
       ui->collider_pos_z->setValue((std::abs(max_point.get_z()) - std::abs(min_point.get_z())) / 2 * (max_point.get_z() < 0 ? -1 : 1));
@@ -409,12 +430,18 @@ void WorldObjectWidget::UpdateColliderType()
 
 void WorldObjectWidget::UpdateColliderDisplay()
 {
+  Collider* collider = 0;
+
   if (selection_type > 0 && selection_type < 3)
+    collider = &selection.object->collider;
+  else if (selection_type == 3)
+    collider = &selection.light->collider;
+  if (collider)
   {
     if (ui->displayColliders->isChecked())
-      selection.object->collision_node.show();
+      collider->node.show();
     else
-      selection.object->collision_node.hide();
+      collider->node.hide();
   }
 }
 

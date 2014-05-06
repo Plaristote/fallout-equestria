@@ -6,6 +6,7 @@
 # include <vector>
 # include "serializer.hpp"
 # include "colmask.hpp"
+# include "collider.hpp"
 
 struct Waypoint;
 struct World;
@@ -15,18 +16,10 @@ struct MapObject : public Utils::Serializable
   typedef std::vector<Waypoint*>  Waypoints;
   typedef std::vector<MapObject*> Children;
 
-  enum Collider
-  {
-    NONE,
-    MODEL,
-    BOX,
-    SPHERE
-  };
-
   MapObject() : parent_object(0), world(0) {}
   virtual ~MapObject();
 
-  NodePath      nodePath, render, collision_node;
+  NodePath      nodePath, render;
   PT(Texture)   texture;
   unsigned char floor;
   bool          inherits_floor;
@@ -52,7 +45,6 @@ struct MapObject : public Utils::Serializable
   virtual void  Unserialize(Utils::Packet& packet);
   virtual void  Serialize(Utils::Packet& packet) const;
   static void   InitializeTree(World* world);
-  void          InitializeCollider(Collider type, LPoint3f position, LPoint3f scale, LPoint3f hpr);
   void          InitializeCollideMask();
   virtual int   GetObjectCollideMask() { return (ColMask::Object); }
   

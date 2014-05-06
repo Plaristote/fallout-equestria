@@ -78,7 +78,7 @@ private:
   void InitializeShadowCaster(WorldLight*);
   void InitializeLightAttenuation(WorldLight*);
   void InitializeGeometry(NodePath);
-  void InitializeCollider(MapObject*);
+  void InitializeCollider(Collider&);
   void InitializeRender(MapObject*);
 
   Ui::WorldObjectWidget *ui;

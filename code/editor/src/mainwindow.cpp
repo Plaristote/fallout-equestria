@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 #include "qpandaapplication.h"
 #include <QInputDialog>
-
+#include <panda3d/collisionRay.h>
 #include "world/scene_camera.hpp"
 #include "mouse.h"
 #include <QElapsedTimer>
@@ -946,16 +946,16 @@ void MainWindow::MapObjectGenerateWaypoints(void)
 
 void MainWindow::MapObjectSelect()
 {
-    if (mapobjectSelected && mapobjectSelected->collider != MapObject::NONE)
-      mapobjectSelected->collision_node.hide();
-    mapobjectSelected = 0;
-    if (mapobjectHovered)
-    {
-      ui->treeWidget->SetItemFocused(mapobjectHovered);
-      ui->waypointVisible->setChecked(!(mapobjectHovered->waypoints_root.is_hidden()));
-      ui->worldObjectWidget->SetSelection(mapobjectHovered);
-    }
-    mapobjectSelected = mapobjectHovered;
+  if (mapobjectSelected && mapobjectSelected->collider.type != Collider::NONE)
+    mapobjectSelected->collider.node.hide();
+  mapobjectSelected = 0;
+  if (mapobjectHovered)
+  {
+    ui->treeWidget->SetItemFocused(mapobjectHovered);
+    ui->waypointVisible->setChecked(!(mapobjectHovered->waypoints_root.is_hidden()));
+    ui->worldObjectWidget->SetSelection(mapobjectHovered);
+  }
+  mapobjectSelected = mapobjectHovered;
 }
 
 void MainWindow::WaypointConnect()
@@ -1161,7 +1161,6 @@ void MainWindow::WaypointDiscardSelection(void)
       WaypointSelect(waypointsSelection.front());
 }
 
-#include <panda3d/collisionRay.h>
 void MainWindow::WaypointSyncTerrain(void)
 {
   ui->tabLevelDesigner->setEnabled(false);

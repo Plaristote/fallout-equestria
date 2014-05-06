@@ -18,7 +18,7 @@ Waypoint::Waypoint(NodePath root)
   floor_above   = suggested_floor_above = 0;
   selected      = false;
   nodePath      = root;
-  //nodePath.set_collide_mask(CollideMask(ColMask::Waypoint));
+  nodePath.set_collide_mask(CollideMask(ColMask::Waypoint));
   nodePath.set_scale(2.f);
   nodePath.show();
 
