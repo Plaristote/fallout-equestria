@@ -3,7 +3,7 @@
 using namespace std;
 using namespace Pathfinding;
 
-void      Collider::ProcessCollisions(void)
+void      Pathfinding::Collider::ProcessCollisions(void)
 {
   if (collision_processed == false && waypoint_occupied != 0)
   {
@@ -12,7 +12,7 @@ void      Collider::ProcessCollisions(void)
   }
 }
 
-void      Collider::UnprocessCollisions(void)
+void      Pathfinding::Collider::UnprocessCollisions(void)
 {
   collision_processed = false;
   std::for_each(withdrawed_arcs.begin(), withdrawed_arcs.end(), [this](WithdrawedArc& arcs)
@@ -25,7 +25,7 @@ void      Collider::UnprocessCollisions(void)
   withdrawed_arcs.clear();
 }
 
-Path      Collider::GetPathTowardsObject(Collider* character)
+Path      Pathfinding::Collider::GetPathTowardsObject(Collider* character)
 {
   Pathfinding::Path path;
 
@@ -44,7 +44,7 @@ Path      Collider::GetPathTowardsObject(Collider* character)
   return (path);
 }
 
-void      Collider::WithdrawAllArcs(Waypoint* waypoint)
+void      Pathfinding::Collider::WithdrawAllArcs(Waypoint* waypoint)
 {
   for_each(waypoint->arcs_withdrawed.begin(), waypoint->arcs_withdrawed.end(), [this, waypoint](std::pair<Waypoint::Arc, unsigned short>& withdrawable)
   {
@@ -52,14 +52,14 @@ void      Collider::WithdrawAllArcs(Waypoint* waypoint)
   });
 }
 
-void      Collider::WithdrawArc(Waypoint* first, Waypoint* second)
+void      Pathfinding::Collider::WithdrawArc(Waypoint* first, Waypoint* second)
 {
   first->WithdrawArc(second);
   second->WithdrawArc(first);
   withdrawed_arcs.push_back(WithdrawedArc(first, second));
 }
 
-void      Collider::SetOccupiedWaypoint(Waypoint* wp)
+void      Pathfinding::Collider::SetOccupiedWaypoint(Waypoint* wp)
 {
 #ifndef GAME_EDITOR
   if (wp != waypoint_occupied)
@@ -97,7 +97,7 @@ void      Collider::SetOccupiedWaypoint(Waypoint* wp)
 #endif
 }
 
-Waypoint* Collider::GetClosestWaypointFrom(Collider* object, bool closest)
+Waypoint* Pathfinding::Collider::GetClosestWaypointFrom(Collider* object, bool closest)
 {
   Waypoint* self  = GetOccupiedWaypoint();
   Waypoint* other = object->GetOccupiedWaypoint();

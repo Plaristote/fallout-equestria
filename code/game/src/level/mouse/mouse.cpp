@@ -186,7 +186,7 @@ void Mouse::ClosestWaypoint(World* world, short current_floor)
 
       if (!map_object || map_object->nodePath.is_hidden())
         continue ;
-      if (map_object->collider == MapObject::MODEL)
+      if (map_object->collider.type == Collider::MODEL)
       {
         CollideMask initial_collide_mask = map_object->render.get_collide_mask();
 
