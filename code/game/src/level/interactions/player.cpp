@@ -63,14 +63,15 @@ void Interactions::Player::ActionTalkTo(InstanceDynamicObject* object)
 
 void Interactions::Player::ActionTargetUse(short unsigned int it)
 {
-  MouseEvents&     mouse     = level.GetMouse();
-  InventoryObject* item      = player->GetEquipedItem(it);
-  unsigned char    action_it = player->GetequipedAction(it);
-  
+  MouseEvents&                  mouse        = level.GetMouse();
+  ObjectCharacter::EquipedItem* equiped_item = player->GetEquipment().GetEquipedItem("equiped", it);
+
   std::cout << "ActionTargetUse" << std::endl;
-  if (item)
+  if (equiped_item && equiped_item->item)
   {
-    Data action = (*item)["actions"][action_it];
+    InventoryObject* item      = equiped_item->item;
+    unsigned short   action_it = equiped_item->current_action;
+    Data             action    = (*item)["actions"][action_it];
 
     player->active_object    = item;
     player->active_object_it = action_it;
@@ -104,7 +105,7 @@ void Interactions::Player::ActionUse(InstanceDynamicObject* object)
 
 void Interactions::Player::ActionLookAt(InstanceDynamicObject* object)
 {
-  // TODO Implement LookAt action
+  object->ActionLookAt(player);
 }
 
 void Interactions::Player::ActionUseObjectOn(InstanceDynamicObject* target)
@@ -197,11 +198,13 @@ void Interactions::Player::ActionEquipObject(const std::string& target, unsigned
     ActionEquipForQuickUse(slot, object);
   else
   {
+    cout << "Trying to equip " << object->GetName() << " in slot " << target << endl;
   }
 }
 
 void Interactions::Player::ActionDropObject(InventoryObject* object)
 {
+  cout << "ActionDropObject" << endl;
   Interactions::Actions::DropObject::Factory(player, object);
 }
 

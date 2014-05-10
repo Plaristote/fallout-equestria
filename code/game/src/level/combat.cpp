@@ -117,7 +117,10 @@ void Combat::InitializeCharacterTurn(ObjectCharacter* character)
     NextTurn();
     return ;
   }
-  character->MovedFor1ActionPoint.Connect([character]() { character->UseActionPoints(1); });
+  character->MovedFor1ActionPoint.Connect([this, character]()
+  {
+    character->UseActionPoints(1);
+  });
   if (character->IsMoving())
   {
     if (character->IsPlayer() && OptionsManager::Get()["reset-movement-after-turn"].Value() != "1")

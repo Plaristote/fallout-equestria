@@ -11,7 +11,7 @@ Interactions::Target::Target(Level* level, DynamicObject* object) : skill_target
 void Interactions::Target::SetupScript(AngelScript::Object* script)
 {
   this->script = script;
-  script->asDefineMethod("LookAt", "void look_at(Character@)");
+  script->asDefineMethod("LookAt", "bool look_at(Character@)");
   script->asDefineMethod("Use",    "void use(Character@)");
   script->asDefineMethod("TalkTo", "bool talk_to(Character@)");
 }
@@ -23,16 +23,24 @@ void Interactions::Target::ActionUseSkill(ObjectCharacter* user, const std::stri
 
 void Interactions::Target::ActionLookAt(InstanceDynamicObject* user)
 {
+  cout << "ActionLookAt" << endl;
   if (IsPlayer(user))
   {
+    bool script_success = false;
+
     if (script && script->IsDefined("LookAt"))
     {
       AngelScript::Type<ObjectCharacter*> param((ObjectCharacter*)(user));
-      
-      script->Call("LookAt", 1, &param);
+
+      script_success = script->Call("LookAt", 1, &param);
     }
-    else
-      DisplayMessage(i18n::T("You see ") + i18n::T(GetName()));
+    if (!script_success)
+    {
+      if (user->Get<ObjectCharacter>())
+        DisplayMessage(i18n::T("You see ") + i18n::T(user->Get<ObjectCharacter>()->GetStatistics()["Name"].Value()));
+      else
+        DisplayMessage(i18n::T("You see ") + i18n::T(GetName()));
+    }
   }
 }
 
@@ -86,14 +94,14 @@ void Interactions::Target::SetInteractionsFromDynamicObject(DynamicObject* objec
     interactions.push_back(Interaction("talk_to",    self, &player_interactions.TalkTo));
   if (object->interactions & Interactions::Use)
     interactions.push_back(Interaction("use",        self, &player_interactions.Use));
+  if (object->interactions & Interactions::LookAt)
+    interactions.push_back(Interaction("look",       self, &player_interactions.LookAt));
   if (object->interactions & Interactions::UseObject)
     interactions.push_back(Interaction("use_object", self, &player_interactions.UseObjectOn));
   if (object->interactions & Interactions::UseSkill)
     interactions.push_back(Interaction("use_skill",  self, &player_interactions.UseSkillOn));
   if (object->interactions & Interactions::UseSpell)
     interactions.push_back(Interaction("use_magic",  self, &player_interactions.UseSpellOn));
-  if (object->interactions & Interactions::LookAt)
-    interactions.push_back(Interaction("use_magic",  self, &player_interactions.LookAt));
 }
 
 void Interactions::Target::AddInteraction(const std::string& name, Interactions::Trigger& trigger)

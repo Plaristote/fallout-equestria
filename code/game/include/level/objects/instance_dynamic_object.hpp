@@ -42,7 +42,7 @@ public:
   virtual void              Run(float elapsedTime)                    { TaskAnimation();                               }
   bool                      operator==(NodePath np)             const { return (_object->nodePath.is_ancestor_of(np)); }
   bool                      operator==(const std::string& name) const { return (GetName() == name);                    }
-  std::string               GetName(void)                       const { return (_object->name);                        }
+  virtual std::string       GetName(void)                       const { return (_object->name);                        }
   Level*                    GetLevel(void)                      const { return (_level);                               }
   NodePath                  GetNodePath(void)                   const { return (_object->nodePath);                    }
   LPoint3                   GetSize(void)                       const { return (idle_size);                            }

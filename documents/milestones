@@ -192,9 +192,9 @@ x --> Cleaning up Level class
 x --> Cleaning up GameTask class
 
 ~ -> Implementing a complete game demo
-~ --> Implementing new combat AI
+x --> Implementing new combat AI
 ~ --> Implement new objects scripts
-  --> Design level for the demo
+~ --> Design level for the demo
   --> Implement dialogs for the demo
   --> Implement quests for the demo
 

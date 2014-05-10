@@ -394,8 +394,8 @@ void Level::SetPlayerInventory(Inventory* inventory)
   else
   {  player->SetInventory(inventory);       }
   level_ui.GetInventory().SetInventory(*inventory);
-  player->EquipedItemChanged.Emit(0, player->GetEquipedItem(0));
-  player->EquipedItemChanged.Emit(1, player->GetEquipedItem(1));
+  player->EquipedItemChanged.Emit(0, player->GetEquipment().GetEquipedItem("equiped", 0)->item);
+  player->EquipedItemChanged.Emit(1, player->GetEquipment().GetEquipedItem("equiped", 1)->item);
 }
 
 InstanceDynamicObject* Level::GetObject(const string& name)
@@ -519,9 +519,18 @@ AsyncTask::DoneStatus Level::do_task(void)
         ObjectCharacter* combat_character = combat.GetCurrentCharacter();
 
         if (combat_character)
+        {
           run_object(combat_character);
-        if (mouse.Hovering().hasWaypoint && mouse.GetState() == MouseEvents::MouseAction)
-          hovered_path.DisplayHoveredPath(GetPlayer(), mouse);
+          if (combat_character == GetPlayer() && mouse.Hovering().hasWaypoint && mouse.GetState() == MouseEvents::MouseAction)
+            hovered_path.DisplayHoveredPath(GetPlayer(), mouse);
+        }
+        if (level_state != Fight)
+          hovered_path.Hide();
+        else if (combat_character != combat.GetCurrentCharacter())
+        {
+          combat_character->UnprocessCollisions();
+          combat_character->ProcessCollisions();
+        }
       }
       break ;
     case Normal:

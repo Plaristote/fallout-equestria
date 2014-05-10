@@ -23,6 +23,7 @@ void EquipModes::Foreach(function<void (unsigned char, const string&)> callback)
   auto it  = modes.begin();
   auto end = modes.end();
   
+  cout << "Mode count: " << modes.size() << endl;
   for (; it != end ; ++it)
     callback(it->first, it->second);
 }
@@ -37,9 +38,23 @@ void EquipModes::SearchForUserOnItemWithSlot(ObjectCharacter* user, InventoryObj
     Clear();
     for_each(equip_modes.begin(), equip_modes.end(), [this, user, item, slot, &counter](Data equip_mode)
     {
-      if (item->CanWeild(user, slot, counter))
+      if (!item || item->CanWeild(user, slot, counter))
         modes.insert(std::pair<unsigned char, string>(counter, equip_mode.Value()));
       counter++;
     });
   }
+}
+
+string EquipModes::GetNameForMode(unsigned char mode)
+{
+  unsigned int it = mode;
+
+  if (tree_equip_modes)
+  {
+    Data equip_modes(tree_equip_modes);
+
+    if (equip_modes.Count() > it)
+      return (equip_modes[it].Value());
+  }
+  return ("");
 }

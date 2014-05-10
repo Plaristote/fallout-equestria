@@ -50,8 +50,13 @@ void Player::InitializeInventoryUi(void)
 
   for (unsigned short it = 0 ; it < 2 ; ++it) // For every equiped item slot
   {
-    level_ui.GetMainBar().SetEquipedItem  (it, player->GetEquipedItem(it));
-    level_ui.GetInventory().SetEquipedItem(it, player->GetEquipedItem(it));
+    ObjectCharacter::EquipedItem* equiped_item = player->GetEquipment().GetEquipedItem("equiped", it);
+
+    if (equiped_item && equiped_item->item)
+    {
+      level_ui.GetMainBar().SetEquipedItem  (it, equiped_item->item);
+      level_ui.GetInventory().SetEquipedItem(it, equiped_item->item);
+    }
   }
 }
 
@@ -111,6 +116,5 @@ void Player::EquipItemForQuickUse(const std::string& target, unsigned int slot, 
 
 void Player::UnequipItem(const std::string& target, unsigned int slot)
 {
-  if (target == "equiped")
-    player->UnequipItem(slot);
+  player->GetInventory().SetEquipedItem(target, slot, 0);
 }

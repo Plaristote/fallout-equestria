@@ -142,7 +142,30 @@ namespace AngelScript
 
     struct ReturnType
     {
-      ReturnType(asIScriptContext* context) : context(context) {}
+      ReturnType(asIScriptContext* context, bool has_previous_context) : context(context), pop_context_on_release(has_previous_context)
+      {
+        reference_count  = new int;
+        *reference_count = 1;
+      }
+
+      ReturnType(const ReturnType& copy)
+      {
+        context                = copy.context;
+        pop_context_on_release = copy.pop_context_on_release;
+        reference_count        = copy.reference_count;
+        *reference_count      += 1;
+      }
+
+      ~ReturnType()
+      {
+        *reference_count -= 1;
+        if (*reference_count == 0)
+        {
+          if (pop_context_on_release)
+            context->PopState();
+          delete reference_count;
+        }
+      }
 
       template<typename TYPE>
       operator TYPE() const
@@ -158,9 +181,11 @@ namespace AngelScript
 
     protected:
       asIScriptContext* context;
+      bool              pop_context_on_release;
+      int*              reference_count;
     };
 
-    ReturnType Call(const std::string& name, unsigned int argc = 0, ...);
+    ReturnType Call(const std::string name, unsigned int argc = 0, ...);
   private:
     const std::string       filepath;
     asIScriptContext*       context;

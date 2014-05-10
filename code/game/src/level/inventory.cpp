@@ -23,7 +23,7 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts
   if (data["mode-magic"].Nil())
     (*this)["mode-magic"] = "1";
 
-  _equiped = false;
+  _equiped = (*this)["equiped"].NotNil();
 
   Data script = data["script"];
 
@@ -398,7 +398,9 @@ void Inventory::LoadInventory(DynamicObject* object)
       Data    item_data(dataTree);
 
       data.second = data.second > 9999 ? 1 : data.second; // Do not let object quantity go above 9999
-      item_data.SetKey(item_data["Name"]);
+      item_data.SetKey(item_data["Name"].Or(item_data["type"].Value()));
+      if (item_data["icon"].Nil())
+        item_data.Duplicate(objectTree[item_data.Key()]);
       cout << "Loading " << data.second << " instances of " << item_data.Key() << endl;
       for (int i = 0 ; i < data.second ; ++i)
         LoadItemFromData(item_data);
@@ -638,67 +640,50 @@ code \
 return_type name parameters \
 code
 
-Inventory::Slot& Inventory::GetItemSlot(const std::string& type_slot, unsigned int slot)
+DECLARE_GETTER(Inventory::Slot&,Inventory::GetItemSlot,(const std::string& type_slot, unsigned int slot),
 {
-  auto it = std::find(_slots.begin(), _slots.end(), type_slot);
+ auto it = std::find(_slots.begin(), _slots.end(), type_slot);
 
-  if (it == _slots.end())
-  {
-    _slots.push_back(Slots(type_slot));
-    return (GetItemSlot(type_slot, slot));
-  }
-  /*if (slot >= it->size())
-    it->resize(slot + 1);*/
-  {
-    Inventory::Slot& obj = (*it)[slot];
+ if (it == _slots.end())
+ {
+   _slots.push_back(Slots(type_slot));
+   return (GetItemSlot(type_slot, slot));
+ }
+ else
+ {
+   Inventory::Slot& obj = (*it)[slot];
 
-    return (obj);
-  }
-}
-
-const Inventory::Slot& Inventory::GetConstItemSlot(const std::string& type_slot, unsigned int slot) const
-{
-  auto it = std::find(_slots.begin(), _slots.end(), type_slot);
-
-  if (it == _slots.end())
-    throw std::domain_error("Item slot not found");
-  return ((*it)[slot]);
-}
+   return (obj);
+ }
+})
 
 InventoryObject*       Inventory::GetEquipedItem(const std::string& type_slot, unsigned int slot)
 {
-  try
-  {
-    return (GetConstItemSlot(type_slot, slot).object);
-  }
-  catch (const std::domain_error&)
-  {
-    return (0);
-  }
+  return (GetItemSlot(type_slot, slot).object);
 }
 
 unsigned char          Inventory::GetEquipedMode(const std::string& type_slot, unsigned int slot) const
 {
-  try
+  return (GetItemSlot(type_slot, slot).mode);
+}
+
+void                   Inventory::UnequipAllItems()
+{
+  auto it  = _slots.begin();
+  auto end = _slots.end();
+
+  for (; it != end ; ++it)
   {
-    return (GetConstItemSlot(type_slot, slot).mode);
-  }
-  catch (...)
-  {
-    return (0);
+    Inventory::Slots& slots = *it;
+
+    for (unsigned int i = 0 ; i < slots.SlotCount() ; ++i)
+      SetEquipedItem(slots.GetName(), i, 0, 0);
   }
 }
 
 bool                   Inventory::SlotHasEquipedItem(const std::string& type_slot, unsigned int slot) const
 {
-  try
-  {
-    return (!(GetConstItemSlot(type_slot, slot).empty));
-  }
-  catch (...)
-  {
-    return (false);
-  }
+  return (!(GetItemSlot(type_slot, slot).empty));
 }
 
 void                   Inventory::SetEquipedItem(const string &type_slot, unsigned int slot, InventoryObject *object, const string &equip_mode)
@@ -708,6 +693,7 @@ void                   Inventory::SetEquipedItem(const string &type_slot, unsign
     bool          found_equip_mode = false;
     unsigned char equip_mode_it;
 
+    Level::CurrentLevel->GetEquipModes().SearchForUserOnItemWithSlot(0, 0, type_slot);
     Level::CurrentLevel->GetEquipModes().Foreach([&found_equip_mode, &equip_mode_it, equip_mode](unsigned char it, const std::string it_name)
     {
       if (it_name == equip_mode)
@@ -719,6 +705,8 @@ void                   Inventory::SetEquipedItem(const string &type_slot, unsign
     if (found_equip_mode)
       SetEquipedItem(type_slot, slot, object, equip_mode_it);
   }
+  else
+    cout << "[Inventory] Can't call SetEquipedItem without a running level" << endl;
 }
 
 void                   Inventory::SetEquipedItem(const std::string& type_slot, unsigned int it_slot, InventoryObject* object, unsigned char equip_mode)
@@ -727,10 +715,12 @@ void                   Inventory::SetEquipedItem(const std::string& type_slot, u
 
   if (slot.object)
   {
-    Data data = *slot.object;
+    InventoryObject* currently_equiped = slot.object;
+    Data             data              = *currently_equiped;
 
+    slot.object = 0;
+    UnequipedItem.Emit(currently_equiped);
     data["equiped"].Remove();
-    UnequipedItem.Emit(type_slot, it_slot, slot.object);
   }
   if (object)
   {
@@ -743,7 +733,9 @@ void                   Inventory::SetEquipedItem(const std::string& type_slot, u
   slot.mode   = equip_mode;
   slot.object = object;
   slot.empty  = object == 0;
-  EquipedItem.Emit(type_slot, it_slot, object);
+  if (object)
+    EquipedItem.Emit(object);
+  ContentChanged.Emit();
 }
 
 void Inventory::ResetItemsFromFixtures()

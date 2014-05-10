@@ -84,7 +84,8 @@ SOURCES += main.cpp\
            dynamic_object.cpp \
            zone.cpp \
            light.cpp \
-    worldobjectwidget.cpp
+    worldobjectwidget.cpp \
+    inventoryeditor.cpp
 
 
 HEADERS  += globals.hpp \
@@ -127,7 +128,8 @@ HEADERS  += globals.hpp \
             world/zone.hpp \
             world/scene_camera.hpp \
             divide_and_conquer.hpp \
-    worldobjectwidget.h
+    worldobjectwidget.h \
+    inventoryeditor.h
 
 FORMS    += mainwindow.ui \
             dialognewscript.ui \
@@ -146,4 +148,5 @@ FORMS    += mainwindow.ui \
             charsheeteditor.ui \
             formkeyvalue.ui \
             citysplashdialog.ui \
-    worldobjectwidget.ui
+    worldobjectwidget.ui \
+    inventoryeditor.ui

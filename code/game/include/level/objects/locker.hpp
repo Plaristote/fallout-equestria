@@ -10,7 +10,7 @@ public:
   ObjectLocker(Level* level, DynamicObject* object);
   ~ObjectLocker();
 
-  virtual void CallbackActionUse(InstanceDynamicObject*);
+  virtual void ActionUse(InstanceDynamicObject*);
   string       GetKeyName() const { return (_object->key); }
 
 private:

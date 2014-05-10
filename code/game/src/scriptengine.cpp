@@ -93,9 +93,14 @@ void AngelScript::Object::Initialize(void)
     Script::ModuleManager::Release(module);
   if (filepath[filepath.size() - 1] != '/' && Filesystem::FileExists(filepath))
   {
-    module          = Script::ModuleManager::Require(filepath, filepath);
-    required_module = true;
+    module            = Script::ModuleManager::Require(filepath, filepath);
+    if (module)
+      required_module = true;
+    else
+      cout << "[AngelScript] Failed to load script " << filepath << endl;
   }
+  else
+    cout << "[AngelScript] Script " << filepath << " does not exist." << endl;
   std::for_each(functions.begin(), functions.end(), [this](Functions::value_type& item)
   {
     item.second.function = 0;
@@ -114,6 +119,8 @@ void AngelScript::Object::asDefineMethod(const std::string& name, const std::str
 {
   auto     existing = functions.find(name);
 
+  if (module == 0)
+    cout << "[AngelScript] Cannot load method, module isn't loaded" << endl;
   if (existing == functions.end() && declaration != "")
   {
     Function function;
@@ -122,6 +129,8 @@ void AngelScript::Object::asDefineMethod(const std::string& name, const std::str
       function.function = module->GetFunctionByDecl(declaration.c_str());
     else
       function.function = 0;
+    if (function.function == 0)
+      cout << "[AngelScript] Cannot load method " << declaration << endl;
     function.signature  = declaration;
     if (function.function || !module)
       functions.insert(Functions::value_type(name, function));
@@ -132,14 +141,18 @@ void AngelScript::Object::asDefineMethod(const std::string& name, const std::str
       existing->second.signature = declaration;
     if (module)
       existing->second.function  = module->GetFunctionByDecl(existing->second.signature.c_str());
+    if (existing->second.function == 0)
+      cout << "[AngelScript] Cannot load method " << declaration << endl;
   }
 }
 
-AngelScript::Object::ReturnType AngelScript::Object::Call(const std::string& name, unsigned int argc, ...)
+AngelScript::Object::ReturnType AngelScript::Object::Call(const std::string name, unsigned int argc, ...)
 {
   ContextLock context_lock(context, module, this);
   va_list     ap;
-  auto        it = functions.find(name);
+  auto        it                 = functions.find(name);
+  bool        has_previous_state = context->GetState() != 0;
+  int         execution_result;
 
   if (!context || !module)
     throw AngelScript::Exception(AngelScript::Exception::UnloadableFunction, name);
@@ -151,6 +164,8 @@ AngelScript::Object::ReturnType AngelScript::Object::Call(const std::string& nam
     if (!(it->second.function))
       throw AngelScript::Exception(AngelScript::Exception::UnloadableFunction, name);
   }
+  if (has_previous_state)
+    context->PushState();
   context->Prepare(it->second.function);
   va_start(ap, argc);
   for (unsigned short i = 0 ; argc > i ; ++i)
@@ -181,7 +196,10 @@ AngelScript::Object::ReturnType AngelScript::Object::Call(const std::string& nam
     }
   }
   va_end(ap);
-  switch (context->Execute())
+  execution_result = context->Execute();
+  if (has_previous_state && execution_result != asEXECUTION_FINISHED)
+    context->PopState();
+  switch (execution_result)
   {
     case asCONTEXT_NOT_PREPARED:
       throw AngelScript::Exception(AngelScript::Exception::InternalError, name); 
@@ -192,7 +210,7 @@ AngelScript::Object::ReturnType AngelScript::Object::Call(const std::string& nam
     case asEXECUTION_FINISHED:
       break ;
   }
-  return (ReturnType(context));
+  return (ReturnType(context, has_previous_state));
 }
 
 /*

@@ -7,14 +7,23 @@
     <x>0</x>
     <y>0</y>
     <width>716</width>
-    <height>705</height>
+    <height>804</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item row="1" column="5">
@@ -34,7 +43,16 @@
    <item row="1" column="0" rowspan="6">
     <widget class="QWidget" name="widget" native="true">
      <layout class="QGridLayout" name="gridLayout_4">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item row="0" column="0">
@@ -72,105 +90,42 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_5">
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>3D Scale</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Weight</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>3D Texture</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="label_9">
-        <property name="text">
-         <string>Visible</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
+      <item row="9" column="1">
        <widget class="QLabel" name="label">
         <property name="text">
          <string>Ammunitions</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_3">
+      <item row="7" column="1">
+       <widget class="QLabel" name="label_9">
         <property name="text">
-         <string>3D Model</string>
+         <string>Visible</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
+      <item row="8" column="1">
        <widget class="QLabel" name="label_7">
         <property name="text">
          <string>Script File</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
-       <widget class="QLineEdit" name="itemScript">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="itemModel">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
+      <item row="0" column="1">
        <widget class="QLabel" name="label_2">
         <property name="text">
          <string>Icon</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="0">
+      <item row="10" column="1">
        <widget class="QLabel" name="Maximumammo">
         <property name="text">
-         <string>Maximum ammo</string>
+         <string>Max ammo</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="2">
-       <widget class="QToolButton" name="selectScript">
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1" colspan="2">
-       <widget class="QLineEdit" name="itemAmmo">
-        <property name="placeholderText">
-         <string>Separate with a comma...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1" colspan="2">
-       <widget class="QSpinBox" name="itemAmmoMaximum">
-        <property name="maximum">
-         <number>9999</number>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1" colspan="2">
+      <item row="7" column="2" colspan="2">
        <widget class="QCheckBox" name="itemHidden">
         <property name="text">
          <string>Can be seen in the inventory</string>
@@ -180,39 +135,131 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="1" colspan="2">
-       <widget class="QSpinBox" name="itemWeight">
-        <property name="maximum">
-         <number>999</number>
+      <item row="0" column="4" rowspan="5" colspan="2">
+       <widget class="QLabel" name="iconLabel">
+        <property name="minimumSize">
+         <size>
+          <width>128</width>
+          <height>128</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>128</width>
+          <height>128</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;No icon&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1" colspan="2">
-       <widget class="QDoubleSpinBox" name="itemScale"/>
+      <item row="1" column="1">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>3D Model</string>
+        </property>
+       </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="itemTexture">
+      <item row="1" column="2">
+       <widget class="QLineEdit" name="itemModel">
         <property name="enabled">
          <bool>false</bool>
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <widget class="QToolButton" name="selectTexture">
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
+      <item row="1" column="3">
        <widget class="QToolButton" name="selectModel">
         <property name="text">
          <string>...</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1" colspan="2">
+      <item row="8" column="5">
+       <widget class="QToolButton" name="selectScript">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="2" colspan="3">
+       <widget class="QLineEdit" name="itemScript">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="2" colspan="4">
+       <widget class="QLineEdit" name="itemAmmo">
+        <property name="placeholderText">
+         <string>Separate with a comma...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="2" colspan="4">
+       <widget class="QSpinBox" name="itemAmmoMaximum">
+        <property name="maximum">
+         <number>9999</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>3D Texture</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLineEdit" name="itemTexture">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QToolButton" name="selectTexture">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>3D Scale</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2" colspan="2">
+       <widget class="QDoubleSpinBox" name="itemScale"/>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Weight</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2" colspan="2">
+       <widget class="QSpinBox" name="itemWeight">
+        <property name="maximum">
+         <number>999</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
        <widget class="QLineEdit" name="itemIcon"/>
+      </item>
+      <item row="0" column="3">
+       <widget class="QToolButton" name="selectIcon">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -343,7 +390,7 @@
          <item row="3" column="0" colspan="2">
           <widget class="QLabel" name="label_11">
            <property name="text">
-            <string>Action Points</string>
+            <string>Default action point cost</string>
            </property>
           </widget>
          </item>
@@ -420,7 +467,7 @@
          <item row="5" column="0" colspan="2">
           <widget class="QLabel" name="label_13">
            <property name="text">
-            <string>Damage range</string>
+            <string>Damage range (lowest/highest)</string>
            </property>
           </widget>
          </item>

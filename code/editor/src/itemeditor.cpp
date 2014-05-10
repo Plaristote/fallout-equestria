@@ -34,7 +34,6 @@ ItemEditor::ItemEditor(QWidget *parent) :
     connect(ui->itemSearch, SIGNAL(textChanged(QString)),         this, SLOT(SearchItem(QString)));
     connect(ui->itemList,   SIGNAL(currentTextChanged(QString)),  this, SLOT(SelectItem(QString)));
     connect(ui->actionList, SIGNAL(currentIndexChanged(QString)), this, SLOT(SelectAction(QString)));
-
     connect(ui->itemHidden,              SIGNAL(clicked()),           SLOT(UpdateData()));
     connect(ui->itemIcon,                SIGNAL(textEdited(QString)), SLOT(UpdateData()));
     connect(ui->itemModel,               SIGNAL(textEdited(QString)), SLOT(UpdateData()));
@@ -61,9 +60,10 @@ ItemEditor::ItemEditor(QWidget *parent) :
     connect(ui->actionHookUse,           SIGNAL(textEdited(QString)), SLOT(UpdateData()));
     connect(ui->actionHookWeapon,        SIGNAL(textEdited(QString)), SLOT(UpdateData()));
     connect(ui->actionHookActionPointCost, SIGNAL(textEdited(QString)), SLOT(UpdateData()));
-    connect(ui->selectScript,            SIGNAL(clicked()),           SLOT(SelectScript()));
-    connect(ui->selectModel,             SIGNAL(clicked()),           SLOT(SelectModel()));
-    connect(ui->selectTexture,           SIGNAL(clicked()),           SLOT(SelectTexture()));
+    connect(ui->selectScript,              SIGNAL(clicked()),           SLOT(SelectScript()));
+    connect(ui->selectModel,               SIGNAL(clicked()),           SLOT(SelectModel()));
+    connect(ui->selectTexture,             SIGNAL(clicked()),           SLOT(SelectTexture()));
+    connect(ui->selectIcon,                SIGNAL(clicked()),           SLOT(SelectIcon()));
 }
 
 ItemEditor::~ItemEditor()
@@ -115,6 +115,7 @@ void ItemEditor::SelectModel(void)
   }
   relative_path = path.remove(0, base_path.length());
   ui->itemModel->setText(relative_path);
+  UpdateData();
 }
 
 void ItemEditor::SelectTexture(void)
@@ -138,6 +139,31 @@ void ItemEditor::SelectTexture(void)
   }
   relative_path = path.remove(0, base_path.length());
   ui->itemTexture->setText(relative_path);
+  UpdateData();
+}
+
+void ItemEditor::SelectIcon(void)
+{
+  QString   filter    = "Images (*.png *.jpg *.bmp)";
+  QString   base_path = QDir::currentPath() + "/textures/itemIcons/";
+  QString   path = QFileDialog::getOpenFileName(this, "Select an icon", base_path, filter);
+  QFileInfo info(path);
+  QString   relative_path;
+
+  if (!(info.exists()))
+    return ;
+  if (!(path.startsWith(base_path))) // Needs to be moved
+  {
+    if (!(QFile::copy(path, base_path + info.fileName())))
+    {
+      QMessageBox::warning(this, "Error", "Couldn't copy file to the project directory.");
+      return ;
+    }
+    path = base_path + info.fileName();
+  }
+  relative_path = path.remove(0, base_path.length());
+  ui->itemIcon->setText(relative_path);
+  UpdateData();
 }
 
 void ItemEditor::SelectScript(void)
@@ -145,6 +171,7 @@ void ItemEditor::SelectScript(void)
   SelectableResource::ObjectScript().SelectResource([this](QString name)
   {
     ui->itemScript->setText(name + ".as");
+    UpdateData();
   });
 }
 
@@ -236,6 +263,7 @@ void ItemEditor::UpdateData(void)
 
     // Generalties
     item["icon"]            = ui->itemIcon->text().toStdString();
+    ui->iconLabel->setText("<div align='center'><img src='textures/itemIcons/" + QString::fromStdString(item["icon"].Value()) + "'/></div>");
     item["model"]           = ui->itemModel->text().toStdString();
     item["texture"]         = ui->itemTexture->text().toStdString();
     item["scale"]           = ui->itemScale->value();
@@ -292,6 +320,7 @@ void ItemEditor::SelectItem(QString key)
         ui->frameAction->setEnabled(true);
         ui->labelCurrentItem->setText(key);
         ui->itemIcon->setText(item["icon"].Value().c_str());
+        ui->iconLabel->setText("<div align='center'><img src='textures/itemIcons/" + QString::fromStdString(item["icon"].Value()) + "'/></div>");
         ui->itemModel->setText(item["model"].Value().c_str());
         ui->itemTexture->setText(item["texture"].Value().c_str());
 

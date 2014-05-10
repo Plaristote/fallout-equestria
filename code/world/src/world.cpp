@@ -459,7 +459,16 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
   list<NodePath>::iterator  it            = light->enlightened.begin();
   list<NodePath>::iterator  end           = light->enlightened.end();
 
-  colNode->add_solid(colSphere);
+  if (light->collider.type == Collider::NONE)
+  {
+    colNode->add_solid(colSphere);
+    light->collider.node = colNp;
+    light->collider.node.reparent_to(light->nodePath);
+  }
+  else
+    colNp = light->collider.node;
+  colNode = reinterpret_cast<CollisionNode*>(light->collider.node.node());
+  cout << colNp.get_scale().get_x() << ", " << colNp.get_scale().get_y() << ", " << colNp.get_scale().get_z() << endl;
   traverser.add_collider(colNp, handlerQueue);
 
   // Reseting the objects corresponding to the collision mask
@@ -541,7 +550,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
 
   //cout << "Number of enlightened objects -> " << light->enlightened.size() << endl;
 
-  colNp.detach_node();
+  //colNp.detach_node();
 }
 
 void World::DynamicObjectSetWaypoint(DynamicObject& object, Waypoint& waypoint)

@@ -40,11 +40,8 @@ void InventoryView::UpdateView(void)
   for (count = 0 ; it != end ; ++it, ++count)
   {
     InventoryObject&  item = *(*it);
-    
-    //item["hidden"].Nil();
-    //item["hidden"].Value() != "1";
-    item.IsEquiped();
-    if ((item["hidden"].Nil() || item["hidden"].Value() != "1") && !(item.IsEquiped()))
+
+    if (!(item.IsHidden() || item.IsEquiped()))
     {
       std::stringstream stream;
       bool              notVisible = false;

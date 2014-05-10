@@ -12,7 +12,7 @@ ObjectShelf::ObjectShelf(Level* level, DynamicObject* object) : InstanceDynamicO
   _inventory.SetCapacity(450);
 }
 
-void ObjectShelf::CallbackActionUse(InstanceDynamicObject* object)
+void ObjectShelf::ActionUse(InstanceDynamicObject* object)
 {
   if (object == _level->GetPlayer())
     _level->GetInteractions().ActionLoot(&_inventory);

@@ -48,7 +48,7 @@ public:
   bool              CanUse(ObjectCharacter*, InstanceDynamicObject* target, unsigned int use_type);
   bool              CanWeild(ObjectCharacter*, std::string slot, unsigned char mode = 0);
   void              SetEquiped(ObjectCharacter*, bool set);
-  bool              IsEquiped(void) const { return (_equiped); }
+  bool              IsEquiped(void) const { return ((*this)["equiped"].NotNil()); }
   bool              IsGroupableWith(const InventoryObject*) const;
   bool              IsHidden(void)  const { return ((*this)["hidden"] == 1); }
   bool              IsWeapon(void)  const;
@@ -92,12 +92,12 @@ public:
   {
     Slots(const std::string& name) : name(name) {}
 
-	Slots&       operator=(const Slots& cpy)
-	{
-		name  = cpy.name;
-		slots = cpy.slots;
-		return (*this);
-	}
+    Slots&       operator=(const Slots& cpy)
+    {
+      name  = cpy.name;
+      slots = cpy.slots;
+      return (*this);
+    }
 
     bool        operator==(const std::string& name) const { return (this->name == name); }
     const Slot& operator[](unsigned int i)          const { return (slots[i]);           }
@@ -107,6 +107,9 @@ public:
         slots.resize(i + 1);
       return (slots[i]);
     }
+
+    std::string  GetName(void)   const { return (name); }
+    unsigned int SlotCount(void) const { return (slots.size()); }
 
   private:
     std::string       name;
@@ -148,7 +151,7 @@ public:
   // Slots
   //
   void               InitializeSlots(void);
-  const Slot&        GetConstItemSlot(const std::string& type_slot, unsigned int slot = 0) const;
+  const Slot&        GetItemSlot(const std::string& type_slot, unsigned int slot = 0) const;
   Slot&              GetItemSlot(const std::string& type_slot, unsigned int slot = 0);
   bool               SlotHasEquipedItem(const std::string& type_slot, unsigned int slot = 0) const;
   unsigned char      GetEquipedMode(const std::string& type_slot, unsigned int slot = 0) const;
@@ -159,15 +162,17 @@ public:
   {
     SetEquipedItem(type_slot, 0, object, equip_mode);
   }
+  void               UnequipAllItems(void);
+  void               ForeachSlot(std::function<void (Slots&)> callback) { std::for_each(_slots.begin(), _slots.end(), callback); }
 
-  Sync::Signal<void (const std::string&, unsigned int, InventoryObject*)> UnequipedItem;
-  Sync::Signal<void (const std::string&, unsigned int, InventoryObject*)> EquipedItem;
+  Sync::Signal<void (InventoryObject*)> UnequipedItem;
+  Sync::Signal<void (InventoryObject*)> EquipedItem;
 
 private:
-  Content            _content;
-  unsigned short     _currentWeight;
-  unsigned short     _capacity;
-  std::vector<Slots> _slots;
+  Content                    _content;
+  unsigned short             _currentWeight;
+  unsigned short             _capacity;
+  mutable std::vector<Slots> _slots;
 };
 
 #endif

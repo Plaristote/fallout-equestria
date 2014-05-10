@@ -158,6 +158,7 @@ void WorldObjectWidget::SetSelection(WorldLight* light)
 {
   UnsetSelection();
   InitializeGeometry(light->nodePath);
+  InitializeCollider(light->collider);
 
   {
     LColor color = light->GetColor();
@@ -176,7 +177,6 @@ void WorldObjectWidget::SetSelection(WorldLight* light)
   selection.light = light;
   selection_type  = 3;
   ui->tabWidget->addTab(ui->lightTab, "Light");
-  InitializeCollider(light->collider);
 }
 
 void WorldObjectWidget::UpdateLightType(void)
@@ -333,17 +333,20 @@ void WorldObjectWidget::InitializeCollider(Collider& collider)
   ui->tabWidget->addTab(ui->colliderTab, "Collider");
   ui->collider_type->setCurrentIndex((int)collider.type);
   ui->collider_position->setEnabled(collider.type != Collider::NONE);
-  ui->collider_pos_x->setValue(node.get_x());
-  ui->collider_pos_y->setValue(node.get_y());
-  ui->collider_pos_z->setValue(node.get_z());
-  ui->collider_hpr_x->setValue(node.get_hpr().get_x());
-  ui->collider_hpr_y->setValue(node.get_hpr().get_y());
-  ui->collider_hpr_z->setValue(node.get_hpr().get_z());
-  ui->collider_scale_x->setValue(node.get_scale().get_x());
-  ui->collider_scale_y->setValue(node.get_scale().get_y());
-  ui->collider_scale_z->setValue(node.get_scale().get_z());
-  if (ui->displayColliders->isChecked())
-    node.show();
+  if (collider.type != Collider::NONE)
+  {
+    ui->collider_pos_x->setValue(node.get_x());
+    ui->collider_pos_y->setValue(node.get_y());
+    ui->collider_pos_z->setValue(node.get_z());
+    ui->collider_hpr_x->setValue(node.get_hpr().get_x());
+    ui->collider_hpr_y->setValue(node.get_hpr().get_y());
+    ui->collider_hpr_z->setValue(node.get_hpr().get_z());
+    ui->collider_scale_x->setValue(node.get_scale().get_x());
+    ui->collider_scale_y->setValue(node.get_scale().get_y());
+    ui->collider_scale_z->setValue(node.get_scale().get_z());
+    if (ui->displayColliders->isChecked())
+      node.show();
+  }
 }
 
 void WorldObjectWidget::UpdateName(QString name)

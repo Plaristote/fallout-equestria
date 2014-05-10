@@ -98,6 +98,7 @@ void DialogObject::SetCurrentObject(DynamicObject* object)
     ui->interactionUseObject->setChecked(object->interactions & Interactions::UseObject);
     ui->interactionUseSkill->setChecked (object->interactions & Interactions::UseSkill);
     ui->interactionUseSpell->setChecked (object->interactions & Interactions::UseSpell);
+    ui->interactionLookAt->setChecked   (object->interactions & Interactions::LookAt);
 
     ui->doorKey->setText(QString::fromStdString(object->key));
     ui->doorLocked->setChecked(object->locked);
@@ -205,6 +206,7 @@ void DialogObject::Apply()
     interactionFlag |= (ui->interactionUseObject->isChecked() ? Interactions::UseObject : 0);
     interactionFlag |= (ui->interactionUseSkill->isChecked()  ? Interactions::UseSkill  : 0);
     interactionFlag |= (ui->interactionUseSpell->isChecked()  ? Interactions::UseSpell  : 0);
+    interactionFlag |= (ui->interactionLookAt->isChecked()    ? Interactions::LookAt    : 0);
 
     object->interactions = interactionFlag;
 

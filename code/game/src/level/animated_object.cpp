@@ -48,6 +48,7 @@ void                     AnimatedObject::PlayAnimation(const std::string& name, 
     PlayAnimation(ANIMATION_DEFAULT, loop);
   else
   {
+    cout << "ELSE!" << endl;
     AnimationEnd.Emit();
     AnimationEndForObject.Emit(this);
   }
@@ -61,11 +62,11 @@ void                      AnimatedObject::TaskAnimation(void)
       _anim->play();
     else
     {
-      //cout << this << " - Animation ended naturally" << endl;
+      _anim = 0;
       AnimationEnd.Emit();
       AnimationEndForObject.Emit(this);
-      AnimationEndForObject.DisconnectAll();
-      _anim = 0;
+      if (_anim == 0)
+        AnimationEndForObject.DisconnectAll();
     }
   }
 }

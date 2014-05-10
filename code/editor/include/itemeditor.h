@@ -37,6 +37,7 @@ private slots:
     void SelectScript(void);
     void SelectModel(void);
     void SelectTexture(void);
+    void SelectIcon(void);
 
 private:
     Ui::ItemEditor *ui;

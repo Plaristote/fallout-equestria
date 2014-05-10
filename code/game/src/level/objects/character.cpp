@@ -8,69 +8,23 @@
 #include <iterator>
 #include "gametask.hpp"
 
-#define DEFAULT_WEAPON_1 "hooves"
-#define DEFAULT_WEAPON_2 "buck"
-
 using namespace std;
 
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
   CharacterVisibility(level, object),
   line_of_sight(*level->GetWorld(), _window->get_render(), GetNodePath()),
-  field_of_view(*level, *this)
+  field_of_view(*level, *this), equipment(*this)
 {
-  Data     items      = GameTask::CurrentGameTask->GetItemIndex(); 
-  string   defEquiped[2];
-  NodePath body_node  = object->nodePath.find("**/+Character");
+  NodePath body_node   = object->nodePath.find("**/+Character");
+  Inventory* inventory = new Inventory;
 
-  _flags              = 0;
-  _inventory          = new Inventory;
-  _character          = dynamic_cast<Character*>(body_node.node());
-  current_action      = 0;
+  _type                = ObjectTypes::Character;
+  _inventory           = 0;
+  _flags               = 0;
+  _character           = dynamic_cast<Character*>(body_node.node());
+  current_action       = 0;
 
   SetMovementAnimation("run");
-
-  if (_character && _character->get_bundle(0))
-  {
-    PT(CharacterJointBundle) bodyBundle = _character->get_bundle(0);
-
-    //HAIL MICROSOFT
-    string listJoints[] = { "Horn", "Mouth", "BattleSaddle" };
-    for (unsigned int i = 0; i<GET_ARRAY_SIZE(listJoints); i++)
-    {
-      for (unsigned short it = 0 ; it < 2 ; ++it)
-      {
-        stringstream       jointName;
-        stringstream       npName;
-        PT(CharacterJoint) joint;
-        NodePath           tmp;
-
-        //jointName << "attach_"  << listJoints[i] << "_" << (it + 1);
-        //npName    << "equiped_" << listJoints[i] << "_" << (it + 1);
-        jointName << "Horn"; // TODO Get models with the proper joints
-        npName    << "equiped_" << listJoints[i] << "_" << (it + 1);
-        joint     = _character->find_joint(jointName.str());
-
-        if (joint)
-        {
-          tmp     = body_node.attach_new_node(npName.str());
-          bodyBundle->control_joint(jointName.str(), tmp.node());
-
-          if (listJoints[i] == "Horn")
-            _equiped[it].jointHorn         = tmp;
-          else if (listJoints[i] == "Mouth")
-            _equiped[it].jointMouth        = tmp;
-          else
-            _equiped[it].jointBattleSaddle = tmp;
-        }
-        else
-          cout << "/!\\ Joint " << jointName.str() << " doesn't exist for Character " << _object->nodePath.get_name() << endl;
-
-      }
-    }
-  }
-
-
-  _type         = ObjectTypes::Character;
 
   SetCollideMaskOnSingleNodepath(_object->nodePath, ColMask::DynObject | ColMask::FovTarget);
   _object->nodePath.set_collide_mask(ColMask::DynObject);
@@ -78,7 +32,6 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
   // Faction
   _faction        = 0;
   _self_enemyMask = 0;
-  RefreshStatistics();
   
   // Script
   if (object->script == "")
@@ -93,31 +46,10 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
   }
   
   // Inventory
-  _inventory->LoadInventory(_object);
+  inventory->LoadInventory(_object);
+  SetInventory(inventory);
 
-  // Equiped Items
-  defEquiped[0]    = DEFAULT_WEAPON_1;
-  defEquiped[1]    = DEFAULT_WEAPON_2;
-  active_object    = 0;
-  active_object_it = 0;
-
-  const char* default_weapons[] = { "DefaultWeapon1", "DefaultWeapon2" };
-  for (unsigned short i = 0 ; i < 2 ; ++i)
-  {
-    if (script->IsDefined(default_weapons[i]))
-      defEquiped[i] = *(string*)(script->Call(default_weapons[i]));
-  }
-
-  for (int i = 0 ; i < 2 ; ++i)
-  {
-    if (items[defEquiped[i]].Nil())
-      continue ;
-    _equiped[i].default_ = new InventoryObject(items[defEquiped[i]]);
-    _equiped[i].equiped  = _equiped[i].default_;
-    _equiped[i].equiped->SetEquiped(this, true);
-    _equiped[i].mode     = EquipedMouth;
-    _inventory->AddObject(_equiped[i].equiped);
-  }
+  RefreshStatistics();
   
   // Animations (HAIL MICROSOFT)
   string anims[] = { "idle", "walk", "run", "use" };
@@ -146,9 +78,9 @@ void ObjectCharacter::SetupScript(AngelScript::Object* script)
   script->asDefineMethod("SendMessage",          "void   ReceiveMessage(string)");
   script->asDefineMethod("Load",                 "void   Load(Serializer@)");
   script->asDefineMethod("Save",                 "void   Save(Serializer@)");
-  script->asDefineMethod("DefaultWeapon1",       "string default_weapon_1()");
-  script->asDefineMethod("DefaultWeapon2",       "string default_weapon_2()");
   Target::SetupScript(script);
+  if (!script->IsDefined("combat") && !IsPlayer())
+    cout << "NO COMBAT SCRIPT FOR " << GetName() << endl;
 }
 
 void ObjectCharacter::ActionTalkTo(ObjectCharacter* user)
@@ -197,25 +129,14 @@ void ObjectCharacter::SetInventory(Inventory* inventory)
   {
     Data statistics = GetStatistics();
 
-    if (_inventory) delete _inventory;
+    if (_inventory)
+    {
+      _inventory->UnequipAllItems();
+      delete _inventory;
+    }
     _inventory = inventory;
-    /*_obs_handler.Connect(_inventory->ContentChanged, *this, &ObjectCharacter::RefreshEquipment);
-    _obs_handler.Connect(_inventory->EquipedItem,    [this](const string& target, unsigned short int slot, InventoryObject* object)
-    {
-      if (target == "equiped")
-      {
-        SetEquipedItem(slot, object, (EquipedMode)_inventory->GetEquipedMode(target, slot));
-      }
-    });
-    _obs_handler.Connect(_inventory->UnequipedItem, [this](const string& target, unsigned short int slot, InventoryObject* object)
-    {
-      if (target == "unequiped")
-      {
-        UnequipItem(slot);
-      }
-    });*/
-    _inventory->InitializeSlots();
-    _inventory->SetCapacity(statistics["Statistics"]["Carry Weight"]);
+    equipment.SetInventory(inventory);
+    inventory->SetCapacity(statistics["Statistics"]["Carry Weight"]);
   }
 }
 
@@ -240,6 +161,11 @@ ObjectCharacter::~ObjectCharacter()
     delete current_action;
     current_action = 0;
   }
+  if (script)
+  {
+    delete script;
+    script = 0;
+  }
 }
 
 void ObjectCharacter::RefreshStatistics(void)
@@ -259,10 +185,12 @@ void ObjectCharacter::RefreshStatistics(void)
 
 void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& name, InstanceDynamicObject* target)
 {
-  if (_equiped[it].equiped)
+  EquipedItem* equiped_item = equipment.GetEquipedItem("equiped", it);
+
+  if (equiped_item && equiped_item->item)
   {
-    InventoryObject& item           = *(_equiped[it].equiped);
-    Data             animation      = item["actions"][_equiped[it].actionIt]["animations"];
+    InventoryObject& item           = *(equiped_item->item);
+    Data             animation      = item["actions"][equiped_item->current_action]["animations"];
     Data             playerAnim     = animation["player"][name];
     const string     playerAnimName = (playerAnim.Nil() ? ANIMATION_DEFAULT : playerAnim.Value());
 
@@ -271,125 +199,70 @@ void ObjectCharacter::PlayEquipedItemAnimation(unsigned short it, const string& 
     //
     if (playerAnim.NotNil())
     {
-      switch (_equiped[it].mode)
-      {
-        case EquipedBattleSaddle:
-          PlayAnimation("saddle-" + playerAnimName);
-        case EquipedMagic:
-          PlayAnimation("magic-" + playerAnimName);
-        case EquipedMouth:
-          PlayAnimation("mouth-" + playerAnimName);
-          break ;
-      }
+      EquipModes& equip_modes = GetLevel()->GetEquipModes();
+      string      anim_name   = equip_modes.GetNameForMode(equiped_item->slot->mode);
+
+      anim_name += '-' + playerAnimName;
+      PlayAnimation(anim_name);
     }
     else
       PlayAnimation(playerAnimName);
   }
 }
 
-InventoryObject* ObjectCharacter::GetEquipedItem(unsigned short it)
-{
-  return (_equiped[it].equiped);
-}
 
-NodePath ObjectCharacter::GetEquipedItemNode(unsigned short it)
+NodePath ObjectCharacter::Equipment::GetEquipedItemNode(const std::string& slot, unsigned short slot_number)
 {
-  if (_equiped[it].graphics)
-    return (_equiped[it].graphics->GetNodePath());
+  EquipedItem* equiped_item = GetEquipedItem(slot, slot_number);
+
+  if (equiped_item != 0 && equiped_item->render != 0)
+    return (equiped_item->render->GetNodePath());
   return (NodePath());
-}
-
-void ObjectCharacter::SetEquipedItem(unsigned short it, InventoryObject* item, EquipedMode mode)
-{
-  if (_equiped[it].equiped == item && _equiped[it].mode == mode)
-  {
-    cout << "Item " << item << " already equiped in this mode" << endl;
-    return ;
-  }
-  cout << "SetEquipedItem called" << endl;
-  // New system
-  //_inventory->SetEquipedItem("equiped", it, item, mode);
-
-  // Old system
-  if (_equiped[it].graphics)
-  {
-    delete _equiped[it].graphics;
-    _equiped[it].graphics = 0;
-  }
-  if (_equiped[it].equiped)
-    _equiped[it].equiped->SetEquiped(this, false);
-  _equiped[it].equiped  = item;
-  _equiped[it].mode     = mode;
-  _equiped[it].actionIt = 0;
-
-  if (!item)
-  {
-    if (_equiped[it].default_ == 0)
-      return ;
-    item = _equiped[it].default_;
-  }
-
-  _equiped[it].graphics = item->CreateEquipedModel(_level->GetWorld());
-  cout << "SetEquipedItem: Start" << endl;
-  if (_equiped[it].graphics)
-  {
-    NodePath itemParentNode;
-
-    cout << "SetEquipedItem: has graphics" << endl;
-    switch (mode)
-    {
-      case EquipedMouth:
-	itemParentNode = _equiped[it].jointMouth;
-	break ;
-      case EquipedMagic:
-	itemParentNode = _equiped[it].jointHorn;
-	break ;
-      case EquipedBattleSaddle:
-	itemParentNode = _equiped[it].jointBattleSaddle;
-	break ;
-    }
-    _equiped[it].graphics->GetNodePath().reparent_to(itemParentNode);
-    cout << "SetEquipedItem: done" << endl;
-  }
-  
-  item->SetEquiped(this, true);
-  EquipedItemChanged.Emit(it, item);
-  _inventory->ContentChanged.Emit();
 }
 
 void ObjectCharacter::RefreshEquipment(void)
 {
-  for (short i = 0 ; i < 2 ; ++i)
+  /*for (short i = 0 ; i < 2 ; ++i)
   {
     EquipedItemChanged.Emit      (i, _equiped[i].equiped);
     EquipedItemActionChanged.Emit(i, _equiped[i].equiped, _equiped[i].actionIt);
-  }
-}
-
-void ObjectCharacter::UnequipItem(unsigned short it)
-{
-  _inventory->SetEquipedItem("equiped", it, 0);
-  SetEquipedItem(it, _equiped[it].default_);
+  }*/
 }
 
 void ObjectCharacter::ItemNextUseType(unsigned short it)
 {
-  if (_equiped[it].equiped)
+  EquipedItem* equiped_item = equipment.GetEquipedItem("equiped", it);
+
+  if (equiped_item && equiped_item->item)
   {
-    Data             itemData   = *(_equiped[it].equiped);
+    cout << "Equiped item on slot " << it << " is " << equiped_item->item->GetName() << endl;
+    Data             itemData   = *(equiped_item->item);
     Data             actionData = itemData["actions"];
-    unsigned char    action     = _equiped[it].actionIt;
+    unsigned char    action     = equiped_item->current_action;
 
     if (!(actionData.Nil()))
     {
       if (actionData.Count() <= (unsigned int)action + 1)
-	_equiped[it].actionIt = 0;
+        equiped_item->current_action = 0;
       else
-	_equiped[it].actionIt++;
-      if (action != _equiped[it].actionIt)
-	EquipedItemActionChanged.Emit(it, _equiped[it].equiped, _equiped[it].actionIt);
+        equiped_item->current_action++;
+      if (action != equiped_item->current_action)
+        EquipedItemActionChanged.Emit(it, equiped_item->item, equiped_item->current_action);
     }
   }
+}
+
+bool ObjectCharacter::IsInterrupted() const
+{
+  if (HasOccupiedWaypoint())
+  {
+    LPoint3f target = GetOccupiedWaypoint()->nodePath.get_pos();
+    LPoint3f pos    = GetNodePath().get_pos();
+
+    if (target.get_x() != pos.get_x() && target.get_y() != pos.get_y())
+      return (true);
+  }
+  return (AnimationEndForObject.ObserverCount() > 0);
 }
 
 void ObjectCharacter::Run(float elapsedTime)
@@ -401,10 +274,19 @@ void ObjectCharacter::Run(float elapsedTime)
   field_of_view.MarkForUpdate();
   if (!(IsInterrupted()))
   {
-    if (state == Level::Normal && GetHitPoints() > 0 && script->IsDefined("main"))
-      RunRegularBehaviour(elapsedTime);
-    else if (state == Level::Fight)
-      RunCombatBehaviour(elapsedTime);
+    try
+    {
+      if (state == Level::Normal && GetHitPoints() > 0 && script->IsDefined("main"))
+        RunRegularBehaviour(elapsedTime);
+      else if (state == Level::Fight)
+        RunCombatBehaviour(elapsedTime);
+    }
+    catch (AngelScript::Exception exception)
+    {
+      GameConsole::Get().WriteOn("[Character][" + GetName() + "] " + exception.what());
+      if (state == Level::Fight)
+        _level->GetCombat().NextTurn();
+    }
   }
   //profile.Profile("Level:Characters:AI");
 }
@@ -515,8 +397,8 @@ void                ObjectCharacter::RunDeath()
 {
   cout << "Running death" << endl;
   cout << "- unequipping items" << endl;
-  UnequipItem(0);
-  UnequipItem(1);
+  if (_inventory)
+    _inventory->UnequipAllItems();
   cout << "- clearing interactions" << endl;
   ClearInteractions();
   cout << "- adding looting interaction" << endl;

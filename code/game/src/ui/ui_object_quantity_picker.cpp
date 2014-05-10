@@ -32,7 +32,7 @@ UiObjectQuantityPicker::UiObjectQuantityPicker(WindowFramework* window, Rocket::
     EventValueChanged.EventReceived.Connect([this](Rocket::Core::Event&) { SetQuantity(GetQuantity()); });
     EventCanceled.EventReceived.Connect(    [this](Rocket::Core::Event&) { Canceled.Emit();            });
     Canceled.Connect(*this, &UiBase::Hide);
-    root->Show(Rocket::Core::ElementDocument::MODAL);
+    SetModal(true);
   }
 }
 

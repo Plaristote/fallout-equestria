@@ -15,7 +15,7 @@ MusicManager::MusicManager()
     _data = Data(_data_tree);
 #ifdef AUDIO_BACKEND_PANDA3D
   _audio_manager = AudioManager::create_AudioManager();
-  _audio_manager->set_active(true);
+  _audio_manager->set_active(false);
   if (!(_audio_manager->is_valid()))
     cout << "[MusicManager][Fatal Errror] AudioManager isn't valid" << endl;
   _audio_manager->set_volume(1.0);

@@ -20,7 +20,7 @@ class ObjectCharacter : public CharacterVisibility
 public:
   ObjectCharacter(Level* level, DynamicObject* object);
   ~ObjectCharacter(void);
-  
+
   void                     Unserialize(Utils::Packet&);
   void                     Serialize(Utils::Packet&);
 
@@ -38,7 +38,7 @@ public:
   float                    GetDistance(const InstanceDynamicObject* object) const;
   bool                     HasLineOfSight(InstanceDynamicObject* object);
   bool                     IsPlayer(void) const;
-  bool                     IsInterrupted(void) const  { return (AnimationEndForObject.ObserverCount() > 0); }
+  bool                     IsInterrupted(void) const;
   bool                     IsBusy(void) const;
   Inventory&               GetInventory(void)         { return (*_inventory);           }
   const Inventory&         GetInventory(void) const   { return (*_inventory); }
@@ -52,11 +52,6 @@ public:
 
   void                     PlayEquipedItemAnimation(unsigned short it, const std::string& name, InstanceDynamicObject* target);
   void                     RefreshEquipment(void);
-  void                     SetEquipedItem(unsigned short it, InventoryObject* object, EquipedMode mode = EquipedMouth);
-  InventoryObject*         GetEquipedItem(unsigned short it);
-  NodePath                 GetEquipedItemNode(unsigned short it);
-  unsigned char            GetequipedAction(unsigned short it) const { return (_equiped[it].actionIt); }
-  void                     UnequipItem(unsigned short it);
   void                     ItemNextUseType(unsigned short it);
   Sync::Signal<void (unsigned short, InventoryObject*)>                EquipedItemChanged;
   Sync::Signal<void (unsigned short, InventoryObject*, unsigned char)> EquipedItemActionChanged;
@@ -68,7 +63,7 @@ public:
   void                     SetAsEnemy(ObjectCharacter*, bool);
   bool                     IsEnemy(const ObjectCharacter*) const;
   bool                     IsAlly(const ObjectCharacter*)  const;
-  
+
   Script::StdList<ObjectCharacter*> GetNearbyEnemies(void) const;
   Script::StdList<ObjectCharacter*> GetNearbyAllies(void)  const;
   
@@ -102,22 +97,46 @@ private:
   public:
     InventoryObject*             active_object;
     unsigned short               active_object_it;
-  private:
 
   // Inventory and Equiped Items
-  struct ItemEquiped
+  struct EquipedItem
   {
-    ItemEquiped(void) : actionIt(0), equiped(0), default_(0), graphics(0) {}
-    unsigned char                  actionIt;
-    EquipedMode                    mode;
-    InventoryObject*               equiped;
-    InventoryObject*               default_;
-    InventoryObject::EquipedModel* graphics;
-    NodePath                       jointHorn, jointBattleSaddle, jointMouth;
+    unsigned char                  current_action;
+    InventoryObject*               item;
+    Inventory::Slot*               slot;
+    InventoryObject::EquipedModel* render;
   };
 
+  struct Equipment : public Sync::ObserverHandler
+  {
+    Equipment(ObjectCharacter& self) : character(self), inventory(0) {}
+    ~Equipment();
+
+    void         SetInventory(Inventory* inventory);
+    void         EquipDefaultItemForSlot(const std::string& slot, unsigned short slot_number = 0);
+    void         EquipItem(InventoryObject* item);
+    void         UnequipItem(InventoryObject* item);
+    std::string  GetDefaultItemForSlot(const std::string& slot, unsigned short slot_number = 0);
+    NodePath     GetJointForSlot(const std::string& slot, unsigned short slot_number = 0);
+    EquipedItem* GetEquipedItem(InventoryObject* item);
+    EquipedItem* GetEquipedItem(const std::string& slot, unsigned short slot_number = 0);
+    NodePath     GetEquipedItemNode(const string &slot_type, unsigned short it);
+
+  private:
+    void         ClearSlot(const std::string& slot, unsigned short slot_number = 0);
+
+    ObjectCharacter&       character;
+    Inventory*             inventory;
+    std::list<EquipedItem> equiped_items;
+  };
+
+  friend struct Equipment;
+
+  Equipment&               GetEquipment(void) { return (equipment); }
+
+private:
   Inventory*                _inventory;
-  ItemEquiped               _equiped[2];
+  Equipment                 equipment;
 };
 
 template<> struct ObjectType2Code<ObjectCharacter> { enum { Type = ObjectTypes::Character }; };

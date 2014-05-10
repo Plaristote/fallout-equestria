@@ -137,8 +137,6 @@ void Mouse::ClosestWaypoint(World* world, short current_floor)
 {
   //if (_mouseWatcher->has_mouse())
   {
-    Timer test;
-
     PStatCollector collector("Level:Mouse:FindWaypoint"); collector.start();
     PT(CollisionRay)          pickerRay;
     PT(CollisionNode)         pickerNode;
@@ -210,7 +208,6 @@ void Mouse::ClosestWaypoint(World* world, short current_floor)
 
     // Detaching seems to be causing some memory issues.
     //pickerPath.detach_node();
-    test.Profile("Closest waypoint");
     collector.stop();
   }
 }

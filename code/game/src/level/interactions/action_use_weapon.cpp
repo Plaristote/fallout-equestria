@@ -93,7 +93,7 @@ void Actions::UseWeaponOn::FireProjectile()
   World*                 world = GetLevel()->GetWorld();
 
   destination = hit_success ? target->GetNodePath() : target->GetOccupiedWaypoint()->GetRandomWaypoint()->nodePath;
-  weapon_node = GetUser()->GetEquipedItemNode(equiped_it);
+  weapon_node = GetUser()->GetEquipment().GetEquipedItemNode("equiped", equiped_it);
   projectile  = new Projectile(world, weapon_node, destination, projectile_data);
   projectile->SetTimeout(projectile_data["timeout"] || 10);
   projectile->SetColor(255, 255, 0, 1);
@@ -114,7 +114,9 @@ void Actions::UseWeaponOn::FindEquipedIterator()
   equiped_it = 0;
   for (unsigned int i = 0 ; i < MAX_EQUIPED_SLOTS ; ++i)
   {
-    if (GetUser()->GetEquipedItem(i) == weapon)
+    ObjectCharacter::EquipedItem* equiped_item = GetUser()->GetEquipment().GetEquipedItem("equiped", i);
+
+    if (equiped_item && equiped_item->item == weapon)
     {
       equiped_it = i;
       break ;

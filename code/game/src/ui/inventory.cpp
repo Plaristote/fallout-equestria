@@ -183,7 +183,7 @@ void GameInventory::SetSelectedObject(InventoryObject* inventory)
   if (itemDescription)
   {
     if (_selectedObject == 0)
-      itemDescription->SetInnerRML("Seleccionar objeto");
+      itemDescription->SetInnerRML(i18n::T("Click on an object to get a description.").c_str());
     else
       itemDescription->SetInnerRML(_selectedObject->GetName().c_str());
   }

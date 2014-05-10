@@ -23,13 +23,13 @@ ObjectLocker::~ObjectLocker()
 void ObjectLocker::FuckYouMSVC(InstanceDynamicObject* object)
 {
   AnimationEndForObject.DisconnectAll();
-  ObjectShelf::CallbackActionUse(object);
+  ObjectShelf::ActionUse(object);
 }
 
-void ObjectLocker::CallbackActionUse(InstanceDynamicObject* object)
+void ObjectLocker::ActionUse(InstanceDynamicObject* object)
 {
   if (_closed == false)
-    ObjectShelf::CallbackActionUse(object);
+    ObjectShelf::ActionUse(object);
   else if (IsLocked())
     _level->GetLevelUi().GetMainBar().AppendToConsole(i18n::T("It's locked"));
   else

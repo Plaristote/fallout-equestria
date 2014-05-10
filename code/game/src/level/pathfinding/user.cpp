@@ -269,7 +269,7 @@ void                Pathfinding::User::RunMovement(float elapsedTime)
 {
   LPoint3           distance  = GetDistanceToNextWaypoint();
   float             max_speed;
-  float             max_distance;    
+  float             max_distance;
   LPoint3           speed, axis_speed, dest;
   int               dirX, dirY, dirZ;
 

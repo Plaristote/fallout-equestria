@@ -15,7 +15,7 @@ public:
 
   Inventory&   GetInventory(void)      { return (_inventory); }
 
-  virtual void CallbackActionUse(InstanceDynamicObject*);
+  virtual void ActionUse(InstanceDynamicObject*);
 private:
   Inventory   _inventory;
 };

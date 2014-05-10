@@ -83,8 +83,6 @@ void Interactions::ActionRunner::ReachTarget(void)
     user->ReachedDestination.DisconnectAll();
     observers.Connect(user->ReachedDestination, *this, &Interactions::ActionRunner::PlayAnimation);
     user->GoTo(target.object, range);
-    if (!user->IsMoving())
-      PlayAnimation();
   }
   else
     PlayAnimation();

@@ -86,6 +86,7 @@ void MapObject::SetModel(const std::string& model)
   strModel = model;
   render   = panda_framework.get_window(0)->load_model(panda_framework.get_models(), MODEL_ROOT + strModel);
   render.set_name("render-" + nodePath.get_name());
+  //render.set_shader_auto();
   //SetCollideMaskOnSingleNodepath(render, ColMask::Render);
   render.set_collide_mask(CollideMask(ColMask::Render));
   render.reparent_to(nodePath);

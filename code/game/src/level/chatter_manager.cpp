@@ -1,4 +1,5 @@
 #include "level/chatter_manager.hpp"
+#include <panda3d/depthTestAttrib.h>
 
 LPoint3 NodePathSize(NodePath np);
 
@@ -39,6 +40,7 @@ void ChatterManager::PushTextBox(InstanceDynamicObject* object, const string& te
     text_box.text_node = window->get_render().attach_new_node(text_node);
     text_box.timeout   = timeout;
     text_box.text_node.set_color(r, g, b);
+    text_box.text_node.set_attrib(DepthTestAttrib::make(DepthTestAttrib::M_always));
     SetTextOffset(text_box.parent, text_box.text_node);
     text_box.text_node.set_scale(2.f);
     text_boxes.push_back(text_box);

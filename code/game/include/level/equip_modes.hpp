@@ -14,9 +14,10 @@ public:
   EquipModes(void);
   ~EquipModes(void);
 
-  void SearchForUserOnItemWithSlot(ObjectCharacter* user, InventoryObject* item, const std::string& slot);
-  void Clear(void);
-  void Foreach(std::function<void (unsigned char, const std::string&)> callback);
+  void        SearchForUserOnItemWithSlot(ObjectCharacter* user, InventoryObject* item, const std::string& slot);
+  void        Clear(void);
+  void        Foreach(std::function<void (unsigned char, const std::string&)> callback);
+  std::string GetNameForMode(unsigned char mode);
 
   bool HasOptions(void) const { return (modes.size() > 0); }
   bool HasChoice(void)  const { return (modes.size() > 1); }

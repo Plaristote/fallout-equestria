@@ -191,6 +191,11 @@ void WorldLight::Unserialize(Utils::Packet& packet)
     collider.parent = nodePath;
     packet >> collider;
   }
+  else
+  {
+    collider.parent = nodePath;
+    collider.type   = Collider::NONE;
+  }
 }
 
 void WorldLight::ShadowSettings::Serialize(Utils::Packet& packet) const
