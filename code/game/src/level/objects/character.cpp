@@ -46,8 +46,18 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
   }
   
   // Inventory
-  inventory->LoadInventory(_object);
-  SetInventory(inventory);
+  {
+    Data statistics = GetStatistics();
+
+    if (statistics["Inventory"].NotNil())
+      inventory->LoadInventory(statistics["Inventory"]);
+    else
+    {
+      inventory->LoadInventory(_object);
+      statistics["Inventory"].Remove();
+    }
+    SetInventory(inventory);
+  }
 
   RefreshStatistics();
   
