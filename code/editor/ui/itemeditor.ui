@@ -70,7 +70,11 @@
        </widget>
       </item>
       <item row="1" column="0" colspan="2">
-       <widget class="QLineEdit" name="itemSearch"/>
+       <widget class="QLineEdit" name="itemSearch">
+        <property name="placeholderText">
+         <string>Search for an item...</string>
+        </property>
+       </widget>
       </item>
       <item row="2" column="0" colspan="2">
        <widget class="QListWidget" name="itemList"/>

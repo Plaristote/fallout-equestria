@@ -286,48 +286,43 @@ void DialogObject::SelectDialog()
   });
 }
 
+QString PickFile(QWidget* parent, QString title, QString filter, QString base_path)
+{
+  QString path      = QFileDialog::getOpenFileName(parent, title, base_path, filter);
+  QFileInfo info(path);
+  QString   relative_path;
+
+  if (!(info.exists()))
+    return ("");
+  if (!(path.startsWith(base_path)))
+  {
+    if (!(QFile::copy(path, base_path + info.fileName())))
+    {
+      QMessageBox::warning(parent, "Error", "Couldn't copy file to the project directory.");
+      return ("");
+    }
+    path = base_path + info.fileName();
+  }
+  relative_path = path.remove(0, base_path.length());
+  return (relative_path);
+}
+
 void DialogObject::SelectModel(void)
 {
-    QString filter    = "Panda3D Models (*.egg *.bam *.egg.pz *.bam.pz *.obj)";
-    QString base_path = QDir::currentPath() + "/models/";
-    QString path      = QFileDialog::getOpenFileName(this, "Select a model", base_path, filter);
-    QFileInfo info(path);
-    QString   relative_path;
+  QString filter    = "Panda3D Models (*.egg *.bam *.egg.pz *.bam.pz *.obj)";
+  QString base_path = QDir::currentPath() + "/models/";
+  QString result    = PickFile(this, "Select a model", filter, base_path);
 
-    if (!(info.exists()))
-      return ;
-    if (!(path.startsWith(base_path))) // Needs to be moved
-    {
-      if (!(QFile::copy(path, base_path + info.fileName())))
-      {
-        QMessageBox::warning(this, "Error", "Couldn't copy file to the project directory.");
-        return ;
-      }
-      path = base_path + info.fileName();
-    }
-    relative_path = path.remove(0, base_path.length());
-    ui->model->setText(relative_path);
+  if (result != "")
+    ui->model->setText(result);
 }
 
 void DialogObject::SelectTexture(void)
 {
     QString   filter    = "Images (*.png *.jpg *.bmp)";
     QString   base_path = QDir::currentPath() + "/textures/";
-    QString   path = QFileDialog::getOpenFileName(this, "Select a texture", base_path, filter);
-    QFileInfo info(path);
-    QString   relative_path;
+    QString   result    = PickFile(this, "Select a texture", filter, base_path);
 
-    if (!(info.exists()))
-      return ;
-    if (!(path.startsWith(base_path))) // Needs to be moved
-    {
-      if (!(QFile::copy(path, base_path + info.fileName())))
-      {
-        QMessageBox::warning(this, "Error", "Couldn't copy file to the project directory.");
-        return ;
-      }
-      path = base_path + info.fileName();
-    }
-    relative_path = path.remove(0, base_path.length());
-    ui->texture->setText(relative_path);
+  if (result != "");
+    ui->texture->setText(result);
 }

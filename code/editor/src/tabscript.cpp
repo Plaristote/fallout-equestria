@@ -24,15 +24,7 @@ void TabScript::FilterScript(QString string)
             QTreeWidgetItem* item = scriptCategories[i].child(ii);
             QString          text = item->text(0);
 
-            if (string == "")
-                item->setHidden(false);
-            else
-            {
-                if (text.contains(regexp))
-                    item->setHidden(false);
-                else
-                    item->setHidden(true);
-            }
+            item->setHidden(!(string == "" || text.contains(regexp)));
         }
     }
 }

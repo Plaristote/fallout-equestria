@@ -82,30 +82,20 @@ void NewGameTask::GeneratePlayerParty(void)
 {
   string       savepath = OptionsManager::Get()["savepath"].Value();
   PlayerParty  party;
-  DataTree     datatree;
 
-  {
-    Data       player_data(&datatree);
-
-    player_data["name"]         = "self";
-    player_data["interactions"] = (int)(Interactions::UseObject | Interactions::UseSkill | Interactions::UseSpell | Interactions::LookAt);
-    player_data["model"]        = "lpip.egg";
-    player_data["texture"]      = "characters/lpip.png";
-    party.Join(player_data);
-    GeneratePlayerInventory(party.GetMember("self")->GetInventory());
-  }
+  party.Join("self");
   party.SetName("player");
   party.Save(savepath);
 }
 
 void NewGameTask::GeneratePlayerInventory(Inventory* inventory)
 {
-  DataTree* inventory_data = DataTree::Factory::JSON("data/newgame/inventory.json");
+  /*DataTree* inventory_data = DataTree::Factory::JSON("data/newgame/inventory.json");
 
   if (inventory_data)
     inventory->LoadInventory(inventory_data);
   else
-    AlertUi::NewAlert.Emit("Your character's inventory failed to initialize.");
+    AlertUi::NewAlert.Emit("Your character's inventory failed to initialize.");*/
 }
 
 void NewGameTask::Done(void)

@@ -55,13 +55,8 @@ public:
   void                      AddTextBox(const std::string& text, unsigned short r, unsigned short g, unsigned short b, float timeout = 5.f);
   ISampleInstance*          PlaySound(const std::string& name);
   
-  template<class C>
-  C*                        Get(void)
-  {
-    if (ObjectType2Code<C>::Type == _type)
-      return (reinterpret_cast<C*>(this));
-    return (0);
-  }
+  template<class C> C*       Get(void)       { return (ObjectType2Code<C>::Type == _type ? reinterpret_cast<C*>(this) : 0);       }
+  template<class C> const C* Get(void) const { return (ObjectType2Code<C>::Type == _type ? reinterpret_cast<const C*>(this) : 0); }
 
 private:
   void                      SerializeDataStore(Utils::Packet&);

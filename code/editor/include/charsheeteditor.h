@@ -26,6 +26,13 @@ public slots:
 
 private slots:
     void UpdateDataTree(void);
+    void UpdateAppearence(void);
+    void UpdateBehaviour(void);
+
+    void SelectScript(void);
+    void SelectDialog(void);
+    void SelectModel(void);
+    void SelectTexture(void);
 
 private:
     Ui::CharsheetEditor *ui;

@@ -19,7 +19,7 @@ public:
   {
   public:
     Member(void);
-    Member(Data data);
+    Member(const std::string& name, const std::string& object_name = "");
     Member(ObjectCharacter* character);
     ~Member();
 
@@ -56,7 +56,7 @@ public:
   const std::string&     GetName(void)               const { return (name);     }
   
   void                   Join(ObjectCharacter*);
-  void                   Join(Data);
+  void                   Join(const std::string& name, const std::string& object_name = "");
   void                   Leave(ObjectCharacter*);
   bool                   IsInParty(ObjectCharacter*) const;
   const PartyMembers&    GetPartyMembers(void)       const { return (members); }

@@ -16,6 +16,7 @@ public:
 
     void AddResource(const QString& name);
     void DelResource(const QString& name);
+    void Clear(void);
     void SelectResource(std::function<void (QString)> callback);
 
 #define ADD_SELECTABLE_RESOURCE(name) \
@@ -32,6 +33,7 @@ public:
     ADD_SELECTABLE_RESOURCE(Encounters)
     ADD_SELECTABLE_RESOURCE(Dialogs)
     ADD_SELECTABLE_RESOURCE(ObjectScript)
+    ADD_SELECTABLE_RESOURCE(Items)
 
 private slots:
     void SearchList(void);

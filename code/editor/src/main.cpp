@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
       // Loading window parameters
       settings.beginGroup("MainWindow");
       window.resize(settings.value("size", QSize(400, 400)).toSize());
-      window.move(settings.value("pos", QPoint(50, 50)).toPoint());
+      //window.move(settings.value("pos", QPoint(50, 50)).toPoint());
       settings.endGroup();
       // Executing app
       window.show();

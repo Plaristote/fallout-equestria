@@ -4,6 +4,8 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QProcess>
+#include "qpandaapplication.h"
+#include "world/world.h"
 
 #include <iostream>
 using namespace std;
@@ -26,11 +28,128 @@ CharsheetEditor::CharsheetEditor(QWidget *parent) :
     special_widgets << SpecialWidget("INT", ui->intelligence);
     special_widgets << SpecialWidget("AGI", ui->agility);
     special_widgets << SpecialWidget("LUC", ui->luck);
+
+    connect(ui->model,   SIGNAL(textChanged(QString)), this, SLOT(UpdateAppearence()));
+    connect(ui->texture, SIGNAL(textChanged(QString)), this, SLOT(UpdateAppearence()));
+    connect(ui->script,  SIGNAL(textChanged(QString)), this, SLOT(UpdateBehaviour()));
+    connect(ui->dialog,  SIGNAL(textChanged(QString)), this, SLOT(UpdateBehaviour()));
+    connect(ui->interactionTalkTo,    SIGNAL(toggled(bool)), this, SLOT(UpdateBehaviour()));
+    connect(ui->interactionUse,       SIGNAL(toggled(bool)), this, SLOT(UpdateBehaviour()));
+    connect(ui->interactionUseObject, SIGNAL(toggled(bool)), this, SLOT(UpdateBehaviour()));
+    connect(ui->interactionUseSpell,  SIGNAL(toggled(bool)), this, SLOT(UpdateBehaviour()));
+    connect(ui->interactionUseSkill,  SIGNAL(toggled(bool)), this, SLOT(UpdateBehaviour()));
+    connect(ui->interactionLookAt,    SIGNAL(toggled(bool)), this, SLOT(UpdateBehaviour()));
+    connect(ui->pickScript,  SIGNAL(clicked()), this, SLOT(SelectScript()));
+    connect(ui->pickDialog,  SIGNAL(clicked()), this, SLOT(SelectDialog()));
+    connect(ui->pickModel,   SIGNAL(clicked()), this, SLOT(SelectModel()));
+    connect(ui->pickTexture, SIGNAL(clicked()), this, SLOT(SelectTexture()));
 }
 
 CharsheetEditor::~CharsheetEditor()
 {
     delete ui;
+}
+
+void CharsheetEditor::SelectScript()
+{
+  SelectableResource::AIs().SelectResource([this](QString name)
+  {
+    ui->script->setText(name);
+  });
+}
+
+void CharsheetEditor::SelectDialog()
+{
+  SelectableResource::Dialogs().SelectResource([this](QString name)
+  {
+    ui->dialog->setText(name);
+  });
+}
+
+QString PickFile(QWidget* parent, QString title, QString filter, QString base_path);
+
+void CharsheetEditor::SelectModel(void)
+{
+  QString filter    = "Panda3D Models (*.egg *.bam *.egg.pz *.bam.pz *.obj)";
+  QString base_path = QDir::currentPath() + "/models/";
+  QString result    = PickFile(this, "Select a model", filter, base_path);
+
+  if (result != "" && charsheet)
+  {
+    Data stats(charsheet);
+    ui->model->setText(result);
+    stats["Appearence"]["model"]   = result.toStdString();
+  }
+}
+
+void CharsheetEditor::SelectTexture(void)
+{
+  QString   filter    = "Images (*.png *.jpg *.bmp)";
+  QString   base_path = QDir::currentPath() + "/textures/";
+  QString   result    = PickFile(this, "Select a texture", filter, base_path);
+
+  if (result != "" && charsheet)
+  {
+    Data stats(charsheet);
+    ui->texture->setText(result);
+    stats["Appearence"]["texture"] = result.toStdString();
+  }
+}
+
+void CharsheetEditor::UpdateBehaviour(void)
+{
+  if (charsheet && this->isEnabled())
+  {
+    Data          stats(charsheet);
+    unsigned char interactionFlag = 0;
+
+    interactionFlag |= (ui->interactionTalkTo->isChecked()    ? Interactions::TalkTo    : 0);
+    interactionFlag |= (ui->interactionUse->isChecked()       ? Interactions::Use       : 0);
+    interactionFlag |= (ui->interactionUseObject->isChecked() ? Interactions::UseObject : 0);
+    interactionFlag |= (ui->interactionUseSkill->isChecked()  ? Interactions::UseSkill  : 0);
+    interactionFlag |= (ui->interactionUseSpell->isChecked()  ? Interactions::UseSpell  : 0);
+    interactionFlag |= (ui->interactionLookAt->isChecked()    ? Interactions::LookAt    : 0);
+    cout << "updating behaviour of " << stats["Name"].Value() << " to " << (int)interactionFlag << endl;
+    stats["Behaviour"]["interactions"] = (int)interactionFlag;
+    stats["Behaviour"]["script"]       = ui->script->text().toStdString();
+    stats["Behaviour"]["dialog"]       = ui->dialog->text().toStdString();
+  }
+}
+
+void CharsheetEditor::UpdateAppearence(void)
+{
+  if (charsheet)
+  {
+    /*Data             stats(charsheet);
+    QString          model_path      = ui->model->text();
+    QString          texture_path    = ui->texture->text();
+    WindowFramework* window          = ui->modelPreview->Window();
+    PandaFramework&  panda_framework = QPandaApplication::Framework();
+
+    window = panda_framework.get_window(0);
+    if (window && model_path != "")
+    {
+      NodePath    render = window->get_render();
+      NodePath    model  = render.get_child(0);
+      PT(Texture) texture;
+
+      window->setup_trackball();
+      //if (!model.is_empty())
+      //  model.detach_node();
+      model   = window->load_model(panda_framework.get_models(), MODEL_ROOT + model_path.toStdString());
+      if (texture_path != "")
+      {
+        texture = TexturePool::load_texture(TEXT_ROOT + texture_path.toStdString());
+        if (texture)
+          model.set_texture(texture);
+      }
+      model.reparent_to(render);
+      model.set_pos(0, 0, 0);
+      model.set_hpr(0, 0, 0);
+      model.set_scale(2, 2, 2);
+      model.show();
+    }*/
+  }
 }
 
 void CharsheetEditor::New(QString name)
@@ -69,6 +188,7 @@ void CharsheetEditor::Load(QString name)
     Data stats   = Charsheet()["Statistics"];
     Data skills  = Charsheet()["Skills"];
 
+    this->setEnabled(false);
     foreach(SpecialWidget item, special_widgets)
     {
       Data value = special[item.first.toStdString()];
@@ -81,6 +201,24 @@ void CharsheetEditor::Load(QString name)
     ui->faction->setText(QString::fromStdString(Charsheet()["Faction"].Value()));
     ui->hitPoints->setValue(Charsheet()["Variables"]["Hit Points"]);
     ui->level->setValue(Charsheet()["Variables"]["Level"]);
+
+    ui->model->setText  (QString::fromStdString(Charsheet()["Appearence"]["model"].Value()));
+    ui->texture->setText(QString::fromStdString(Charsheet()["Appearence"]["texture"].Value()));
+
+    ui->script->setText (QString::fromStdString(Charsheet()["Behaviour"]["script"].Value()));
+    ui->dialog->setText (QString::fromStdString(Charsheet()["Behaviour"]["dialog"].Value()));
+
+    ui->inventory->SetInventory(Charsheet()["Inventory"]);
+    {
+      int interactionFlag = Charsheet()["Behaviour"]["interactions"].Or(0);
+      cout << "interactionFlag of " << Charsheet()["Name"].Value() << ": " << interactionFlag << endl;
+      ui->interactionUse->setChecked      (interactionFlag & Interactions::Use);
+      ui->interactionTalkTo->setChecked   (interactionFlag & Interactions::TalkTo);
+      ui->interactionUseObject->setChecked(interactionFlag & Interactions::UseObject);
+      ui->interactionUseSkill->setChecked (interactionFlag & Interactions::UseSkill);
+      ui->interactionUseSpell->setChecked (interactionFlag & Interactions::UseSpell);
+      ui->interactionLookAt->setChecked   (interactionFlag & Interactions::LookAt);
+    }
 
     foreach(StatWidget widget, statistics_widgets)
       delete widget;
@@ -140,6 +278,7 @@ void CharsheetEditor::UpdateDataTree()
   data["Age"]     = ui->age->value();
   data["Race"]    = ui->race->text().toStdString();
   data["Faction"] = ui->faction->text().toStdString();
+  data["Gender"]  = ui->sex->currentIndex() == 0 ? "Male" : "Female";
   data["Variables"]["Hit Points"] = ui->hitPoints->value();
   data["Variables"]["Level"]      = ui->level->value();
 }

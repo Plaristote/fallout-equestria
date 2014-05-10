@@ -46,6 +46,12 @@ void SelectableResource::DelResource(const QString& name)
   }
 }
 
+void SelectableResource::Clear()
+{
+  resources.clear();
+  ui->list->clear();
+}
+
 void SelectableResource::SearchList()
 {
   QString to_search = ui->search->text();

@@ -195,6 +195,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(&this->waypointGenerate, SIGNAL(Generate()), this, SLOT(MapObjectGenerateWaypoints()));
     connect(ui->waypointGenerateObject, SIGNAL(clicked()), &this->waypointGenerate, SLOT(show()));
 
+    connect(ui->characterSearch, SIGNAL(textChanged(QString)), this, SLOT(FilterCharacters(QString)));
     connect(ui->charsheetList, SIGNAL(currentTextChanged(QString)), ui->charsheetEditor, SLOT(Load(QString)));
     connect(ui->charsheetAdd,  SIGNAL(clicked()),                   this,                SLOT(AddCharsheet()));
     connect(ui->charsheetDel,  SIGNAL(clicked()),                   this,                SLOT(DeleteCharsheet()));
@@ -229,6 +230,18 @@ MainWindow::~MainWindow()
 {
     AsyncTaskManager::get_global_ptr()->remove(&my_task);
     delete ui;
+}
+
+void MainWindow::FilterCharacters(QString string)
+{
+  QRegExp regexp(string);
+
+  for (short i = 0 ; i < ui->charsheetList->count() ; ++i)
+  {
+    QListWidgetItem* item = ui->charsheetList->item(i);
+
+    item->setHidden(!(string == "" || item->text().contains(regexp)));
+  }
 }
 
 void MainWindow::TerrainPickerPicked(bool set)

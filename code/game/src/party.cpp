@@ -17,29 +17,32 @@ Party::Member::Member(void) : statistics_datatree(0), statistics(0), metabolism(
   object.collider.type = Collider::MODEL;
 }
 
-Party::Member::Member(Data data)
+Party::Member::Member(const std::string& name, const std::string& object_name)
 {
-  const std::string path = "data/charsheets/" + data["name"].Value() + ".json";
+  const std::string path = "data/charsheets/" + name + ".json";
+  Data              data;
 
   cout << ">> character joining: " << endl;
-  data.Output();
   statistics_datatree = DataTree::Factory::JSON(path);
   if (statistics_datatree)
+  {
     statistics        = new StatController(statistics_datatree);
+    data              = Data(statistics_datatree);
+  }
   metabolism          = new Metabolism(statistics);
   object.type         = DynamicObject::Character;
   object.collider.type= Collider::MODEL;
-  object.name         = data["object_name"].Or(data["name"].Value());
-  object.script       = data["script"].Value();
-  object.charsheet    = data["name"].Value();
-  object.dialog       = data["dialog"].Value();
-  object.interactions = data["interactions"].NotNil() ? (int)(data["interactions"]) : Interactions::UseObject | Interactions::UseSkill | Interactions::UseSpell | Interactions::LookAt | Interactions::TalkTo;
-  object.strModel     = data["model"].Value();
-  object.strTexture   = data["texture"].Value();
+  object.name         = object_name == "" ? name : object_name;
+  object.charsheet    = name;
+  object.script       = data["Behaviour"]["script"].Value();
+  object.dialog       = data["Behaviour"]["dialog"].Value();
+  object.interactions = data["Behaviour"]["interactions"].NotNil() ? (int)(data["interactions"]) : Interactions::UseObject | Interactions::UseSkill | Interactions::UseSpell | Interactions::LookAt | Interactions::TalkTo;
+  object.strModel     = data["Appearance"]["model"].Value();
+  object.strTexture   = data["Appearance"]["texture"].Value();
   object.waypoint     = 0;
   inventory           = new Inventory;
-  if (data["inventory"].NotNil())
-    inventory->LoadInventory(data["inventory"]);
+  if (data["Inventory"].NotNil())
+    inventory->LoadInventory(data["Inventory"]);
   TaskSet(0).Serialize(task_set);
 }
 
@@ -171,9 +174,9 @@ void Party::Join(ObjectCharacter* character)
   }
 }
 
-void Party::Join(Data data)
+void Party::Join(const std::string& name, const std::string& object_name)
 {
-  Member* member = new Member(data);
+  Member* member = new Member(name, object_name);
   
   members.push_back(member);
   Updated.Emit();
@@ -286,7 +289,16 @@ Party* Party::NewPartyFromData(Data data)
   party->name = data["name"].Value();
   for_each(data["members"].begin(), data["members"].end(), [party](Data member_data)
   {
-    party->Join(member_data);
+    unsigned int count = member_data.Or(1);
+    unsigned int clones = 0;
+
+    for (; clones < count ; ++clones)
+    {
+      stringstream unique_name;
+
+      unique_name << "member-" << party->name << "-" << count;
+      party->Join(member_data.Key(), unique_name.str());
+    }
   });
   return (party);
 }

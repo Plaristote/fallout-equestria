@@ -79,8 +79,6 @@ void ObjectCharacter::SetupScript(AngelScript::Object* script)
   script->asDefineMethod("Load",                 "void   Load(Serializer@)");
   script->asDefineMethod("Save",                 "void   Save(Serializer@)");
   Target::SetupScript(script);
-  if (!script->IsDefined("combat") && !IsPlayer())
-    cout << "NO COMBAT SCRIPT FOR " << GetName() << endl;
 }
 
 void ObjectCharacter::ActionTalkTo(ObjectCharacter* user)

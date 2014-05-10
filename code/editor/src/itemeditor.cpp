@@ -195,9 +195,13 @@ void ItemEditor::LoadAllItems()
     Data::iterator it  = data.begin();
     Data::iterator end = data.end();
 
+    SelectableResource::Items().Clear();
     ui->itemList->clear();
     for (; it != end ; ++it)
+    {
       ui->itemList->addItem((*it).Key().c_str());
+      SelectableResource::Items().AddResource((*it).Key().c_str());
+    }
     ui->itemList->sortItems();
     ItemListChanged(GetItemList());
 }
@@ -207,7 +211,10 @@ void ItemEditor::ItemAdd(void)
     QString name = QInputDialog::getText(this, "New item", "Name");
 
     if (name != "")
+    {
       ui->itemList->addItem(name);
+      SelectableResource::Items().AddResource(name);
+    }
     ui->itemList->sortItems();
     ItemListChanged(GetItemList());
 }
@@ -217,6 +224,7 @@ void ItemEditor::ItemDelete(void)
     QListWidgetItem* listItem    = ui->itemList->currentItem();
     QString          currentItem = listItem->text();
 
+    SelectableResource::Items().DelResource(currentItem);
     Data(dataTree)[currentItem.toStdString()].Remove();
     ui->itemList->removeItemWidget(listItem);
     delete listItem;

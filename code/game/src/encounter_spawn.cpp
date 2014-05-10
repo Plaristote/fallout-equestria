@@ -15,18 +15,16 @@ void EncounterSpawn::LoadFromDataEngine(DataEngine& data_engine)
   spawn_data.Output();
   for (unsigned int i = 0 ; i < spawn_data.Count() ; ++i)
   {
-    Data         character = spawn_data[i];
+    std::string  name      = spawn_data[i].Key();
     unsigned int clones    = 0;
-    unsigned int quantity  = character["quantity"].Or(1);
+    unsigned int quantity  = spawn_data[i].Or(0);
 
     for (; clones < quantity ; ++clones)
     {
       stringstream unique_name;
 
       unique_name << GetName() << '-' << i << '-' << clones;
-      character["object_name"] = unique_name.str();
-      character["name"]        = character.Key();
-      Join(character);
+      Join(name, unique_name.str());
     }
   }
 }

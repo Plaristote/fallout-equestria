@@ -371,37 +371,24 @@ bool InventoryObject::ExecuteHook(const std::string& hook, ObjectCharacter* user
  */
 void Inventory::LoadItemFromData(Data item)
 {
-  InventoryObject* newObject    = new InventoryObject(item);
-  Data             equiped_data = item["equiped-save"];
+  InventoryObject* newObject     = new InventoryObject(item);
 
-  if (equiped_data.NotNil() && equiped_data.Count() > 0)
-  {
-    Data equiped = (*newObject)["equiped"];
-    Data source  = equiped_data[0];
-
-    equiped.Duplicate(source);
-    equiped.SetKey("equiped");
-    source.Remove();
-  }
   (*newObject)["quantity"].Remove();
-  (*newObject)["equiped-save"].Remove();
   AddObject(newObject);
+  if (item["equiped"].NotNil())
+    (*newObject)["equiped"].Duplicate(item["equiped"]);
 }
 
 void Inventory::LoadInventory(DynamicObject* object)
 {
-  std::for_each(object->inventory.begin(), object->inventory.end(), [this](std::pair<std::string, int> data)
+  std::for_each(object->inventory.begin(), object->inventory.end(), [this, &object](std::pair<std::string, int> data)
   {
-    Data      objectTree = GameTask::CurrentGameTask->GetItemIndex();
     DataTree* dataTree = DataTree::Factory::StringJSON(data.first);
     {
       Data    item_data(dataTree);
 
       data.second = data.second > 9999 ? 1 : data.second; // Do not let object quantity go above 9999
       item_data.SetKey(item_data["Name"].Or(item_data["type"].Value()));
-      if (item_data["icon"].Nil())
-        item_data.Duplicate(objectTree[item_data.Key()]);
-      cout << "Loading " << data.second << " instances of " << item_data.Key() << endl;
       for (int i = 0 ; i < data.second ; ++i)
         LoadItemFromData(item_data);
     }
@@ -412,14 +399,33 @@ void Inventory::LoadInventory(DynamicObject* object)
 
 void Inventory::LoadInventory(Data items)
 {
-  _content.clear();
-  for_each(items.begin(), items.end(), [this](Data item)
-  {
-    unsigned int     quantity;
+  Data      objectTree = GameTask::CurrentGameTask->GetItemIndex();
 
-    quantity = item["quantity"].NotNil() ? (unsigned int)item["quantity"] : 1;
-    for (unsigned short i = 0 ; i < quantity ; ++i)
-      LoadItemFromData(item);
+  _content.clear();
+  for_each(items.begin(), items.end(), [this, objectTree](Data item)
+  {
+    unsigned int quantity;
+    DataTree     new_item_tree;
+    {
+      Data       new_item(&new_item_tree);
+      Data       model = objectTree[item["Name"].Value()];
+
+      new_item.Duplicate(model);
+      new_item.SetKey(item["Name"]);
+      if (item["ammo"]["current"].NotNil())
+        new_item["ammo"]["current"] = item["ammo"]["current"].Value();
+      if (item["ammo"]["amount"].NotNil())
+        new_item["ammo"]["amount"]  = item["ammo"]["amount"].Or(0);
+      if (item["equiped"].NotNil())
+        new_item["equiped"].Duplicate(item["equiped"]);
+      quantity = item["quantity"].NotNil() ? (unsigned int)item["quantity"] : 1;
+      if (quantity > 9999) { quantity = 1; }
+      for (unsigned short i = 0 ; i < quantity ; ++i)
+      {
+        LoadItemFromData(new_item);
+        new_item["equiped"].Remove();
+      }
+    }
   });
   InitializeSlots();
 }
@@ -433,7 +439,7 @@ void Inventory::InitializeSlots(void)
     Data             slot = item["equiped"];
 
     if (slot.NotNil())
-      SetEquipedItem(slot["target"], slot["slot"], ptr, (unsigned short)slot["mode"]);
+      SetEquipedItem(slot["target"], slot["slot"], ptr, slot["mode"].Or(0));
   });
 }
 
@@ -449,81 +455,35 @@ void Inventory::SaveInventory(DynamicObject* object)
     InventoryObject&  item     = **it;
     bool              ignore   = true;
     int               quantity = 0;
-    std::vector<Data> equip_data;
 
-    for (; groupIt != end ; ++groupIt)
+    if (item["equiped"].Nil())
     {
-      if (groupIt == it && quantity == 0)
-        ignore = false;
-      if (item.IsGroupableWith(*groupIt))
-        quantity++;
-      if (item["equiped"].NotNil())
-        equip_data.push_back(item["equiped"]);
+      for (; groupIt != end ; ++groupIt)
+      {
+        if (groupIt == it)
+        {
+          if (quantity == 0)
+          {
+            ignore = false;
+            quantity = 1;
+          }
+          else
+            break ;
+        }
+        else if (item.IsGroupableWith(*groupIt) && (**groupIt)["equiped"].Nil())
+          quantity++;
+      }
     }
-    if (quantity == 0) quantity = 1;
+    else
+      ignore = false;
     if (!ignore)
     {
       std::string str;
 
+      if (quantity == 0) quantity = 1;
       item["Name"] = item.Key();
-      do
-      {
-        // Equiped items have unique data tagged to them, so they need
-        // to be saved in a separate container. Other items are saved once
-        if (equip_data.size() > 0)
-        {
-          item["equiped_save"]["new"].Duplicate(*equip_data.begin());
-          equip_data.erase(equip_data.begin());
-          DataTree::Writers::StringJSON(item, str);
-          item["equiped-save"].Remove();
-          object->inventory.push_back(std::pair<std::string, int>(str, 1));
-          quantity--;
-        }
-        else
-        {
-          DataTree::Writers::StringJSON(item, str);
-          object->inventory.push_back(std::pair<std::string, int>(str, quantity));
-        }
-      } while (equip_data.size() > 0);
-    }
-  }
-}
-
-void Inventory::SaveInventory(Data items)
-{
-  Content::iterator it  = _content.begin();
-  Content::iterator end = _content.end();
-
-  for (; it != end ; ++it)
-  {
-    Content::iterator groupIt  = _content.begin();
-    InventoryObject&  item     = **it;
-    bool              ignore   = true;
-    int               quantity = 0;
-    std::vector<Data> equip_data;
-
-    for (; groupIt != end ; ++groupIt)
-    {
-      if (groupIt == it && quantity == 0)
-	ignore = false;
-      if (item.IsGroupableWith(*groupIt))
-	quantity++;
-      if (item["equiped"].NotNil())
-        equip_data.push_back(item["equiped"]);
-    }
-    if (quantity == 0) quantity = 1;
-    if (!ignore)
-    {
-      for (unsigned int i = 0 ; i < equip_data.size() ; ++i)
-      {
-        item["equiped-save"]["new"].Duplicate(equip_data[i]);
-        item["equiped-save"]["new"].SetKey("");
-      }
-      item["quantity"] = quantity;
-      items[item.Key()].RemoveAllChildren();
-      items[item.Key()].Duplicate(item);
-      item["quantity"].Remove();
-      item["equiped-save"].Remove();
+      DataTree::Writers::StringJSON(item, str);
+      object->inventory.push_back(std::pair<std::string, int>(str, quantity));
     }
   }
 }

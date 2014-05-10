@@ -23,7 +23,6 @@ void Interactions::Target::ActionUseSkill(ObjectCharacter* user, const std::stri
 
 void Interactions::Target::ActionLookAt(InstanceDynamicObject* user)
 {
-  cout << "ActionLookAt" << endl;
   if (IsPlayer(user))
   {
     bool script_success = false;
@@ -36,8 +35,10 @@ void Interactions::Target::ActionLookAt(InstanceDynamicObject* user)
     }
     if (!script_success)
     {
-      if (user->Get<ObjectCharacter>())
-        DisplayMessage(i18n::T("You see ") + i18n::T(user->Get<ObjectCharacter>()->GetStatistics()["Name"].Value()));
+      const InstanceDynamicObject* self = (const InstanceDynamicObject*)this;
+
+      if (self->Get<const ObjectCharacter>())
+        DisplayMessage(i18n::T("You see ") + i18n::T(self->Get<const ObjectCharacter>()->GetStatController()->GetData()["Name"].Value()));
       else
         DisplayMessage(i18n::T("You see ") + i18n::T(GetName()));
     }

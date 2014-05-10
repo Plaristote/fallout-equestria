@@ -610,7 +610,7 @@ void AngelScriptInitialize(void)
 
   engine->RegisterObjectMethod(partyClass, "void   SetName(string)",     asMETHOD(Party,SetName), asCALL_THISCALL);
   engine->RegisterObjectMethod(partyClass, "string GetName()",           asMETHOD(Party,GetName), asCALL_THISCALL);
-  engine->RegisterObjectMethod(partyClass, "void Join(Data)",            asMETHODPR(Party,Join,(Data),void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(partyClass, "void Join(string)",  asMETHODPR(Party,Join,(const std::string&, const std::string&),void), asCALL_THISCALL);
   engine->RegisterObjectMethod(partyClass, "void Join(Character@)",      asMETHODPR(Party,Join,(ObjectCharacter*),void), asCALL_THISCALL);
   engine->RegisterObjectMethod(partyClass, "void Leave(Character@)",     asMETHODPR(Party,Leave,(ObjectCharacter*),void), asCALL_THISCALL);
   engine->RegisterObjectMethod(partyClass, "bool IsInParty(Character@)", asMETHOD(Party,IsInParty), asCALL_THISCALL);

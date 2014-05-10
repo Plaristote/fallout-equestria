@@ -79,6 +79,7 @@ private slots:
     void UpdateCameraZoom(int);
     void CopyClicked(void);
     void PasteClicked(void);
+    void FilterCharacters(QString);
 
     // CHARSHEETS
     void AddCharsheet(void);

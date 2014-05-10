@@ -283,10 +283,10 @@ void Level::InitializeSun(void)
 
 void Level::SetAsPlayerParty(Party&)
 {
-  if (characters.size() > 0)
-  {
-    ObjectCharacter* character = characters.front();
+  ObjectCharacter* character = GetCharacter("self");
 
+  if (character != 0)
+  {
     player.SetPlayer(character);
     if (main_script.IsDefined("Initialize"))
       main_script.Call("Initialize");
@@ -304,19 +304,30 @@ void Level::SetAsPlayerParty(Party&)
 
 void Level::InsertParty(Party& party, const std::string& zone_name)
 {
-  auto party_members = party.GetPartyMembers();
-  auto it            = party_members.rbegin();
-  auto end           = party_members.rend();
+  Party::PartyMembers& party_members = party.GetPartyMembers();
+  auto                 it            = party_members.begin();
+  auto                 end           = party_members.end();
   
-  for (; it != end ; ++it)
+  while (it != end)
   {
     Party::Member*   member         = *it;
     DynamicObject&   dynamic_object = member->GetDynamicObject();
     DynamicObject*   world_object   = world->InsertDynamicObject(dynamic_object);
-    ObjectCharacter* character      = new ObjectCharacter(this, world_object);
 
-    member->LinkCharacter(character);
-    characters.insert(characters.begin(), character);
+    if (world_object != 0)
+    {
+      ObjectCharacter* character      = new ObjectCharacter(this, world_object);
+
+      member->LinkCharacter(character);
+      characters.insert(characters.begin(), character);
+      ++it;
+    }
+    else
+    {
+      it  = party_members.erase(it);
+      end = party_members.end();
+      delete member;
+    }
   }
   GetZoneManager().InsertPartyInZone(party, zone_name);
   if (party.GetName() == "player")

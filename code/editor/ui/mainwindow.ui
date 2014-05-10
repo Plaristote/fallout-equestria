@@ -28,7 +28,7 @@
       </property>
       <widget class="QWidget" name="tabWorldmap">
        <attribute name="title">
-        <string>Worldmap Editor</string>
+        <string>Worldmap</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
@@ -473,7 +473,7 @@
       </widget>
       <widget class="QWidget" name="tabStatsheets">
        <attribute name="title">
-        <string>Statsheets</string>
+        <string>Characters</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_15">
         <item row="0" column="0">
@@ -506,7 +506,14 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="2" rowspan="2" colspan="3">
+        <item row="1" column="0" colspan="2">
+         <widget class="QLineEdit" name="characterSearch">
+          <property name="placeholderText">
+           <string>Search for a character...</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2" rowspan="4" colspan="3">
          <widget class="CharsheetEditor" name="charsheetEditor" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
@@ -540,7 +547,7 @@
       </widget>
       <widget class="QWidget" name="tabScriptEditor">
        <attribute name="title">
-        <string>Script Editor</string>
+        <string>Scripts</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="2" column="0" colspan="2">
@@ -555,7 +562,10 @@
         <item row="1" column="0" colspan="2">
          <widget class="QLineEdit" name="scriptSearch">
           <property name="text">
-           <string>Search...</string>
+           <string/>
+          </property>
+          <property name="placeholderText">
+           <string>Search a script...</string>
           </property>
          </widget>
         </item>
@@ -656,7 +666,7 @@
       </widget>
       <widget class="QWidget" name="itemTab">
        <attribute name="title">
-        <string>Item Editor</string>
+        <string>Items</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
@@ -666,7 +676,7 @@
       </widget>
       <widget class="QWidget" name="tabDialogEditor">
        <attribute name="title">
-        <string>Dialogue Editor</string>
+        <string>Dialogues</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="1" column="0" rowspan="2" colspan="5">
@@ -697,7 +707,7 @@
       </widget>
       <widget class="QWidget" name="tab">
        <attribute name="title">
-        <string>Internationalization</string>
+        <string>Translations</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="0">
