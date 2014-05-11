@@ -40,6 +40,8 @@ ObjectCharacter::EquipedItem* ObjectCharacter::Equipment::GetEquipedItem(const s
 
 void ObjectCharacter::Equipment::SetInventory(Inventory *inventory)
 {
+  if (this->inventory)
+    DisconnectAll();
   this->inventory = inventory;
   if (inventory)
   {

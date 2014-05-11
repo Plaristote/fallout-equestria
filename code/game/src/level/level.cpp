@@ -357,6 +357,7 @@ void Level::RemovePartyFromLevel(Party& party)
     auto           character_it = find(characters.begin(), characters.end(), character);
     DynamicObject* world_object = character->GetDynamicObject();
 
+    character->GetEquipment().SetInventory(0);
     member->SaveCharacter(character);
     character->UnprocessCollisions();
     delete character;

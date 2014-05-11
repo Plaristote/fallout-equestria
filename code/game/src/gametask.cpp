@@ -198,6 +198,7 @@ void GameTask::Cleanup(void)
   if (quest_manager) delete quest_manager;
   if (level)
   {
+      cout << "Dynamic object count: " << level->GetWorld()->dynamicObjects.size() << endl;
     if (player_party)
       level->RemovePartyFromLevel(*player_party);
     delete level;
