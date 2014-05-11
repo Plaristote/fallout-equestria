@@ -11,7 +11,7 @@ class SelectableResource : public QDialog
     Q_OBJECT
 
 public:
-    explicit SelectableResource(QWidget *parent = 0);
+    explicit SelectableResource(QWidget *parent = 0, QString name = "resource");
     ~SelectableResource();
 
     void AddResource(const QString& name);
@@ -22,7 +22,7 @@ public:
 #define ADD_SELECTABLE_RESOURCE(name) \
     static SelectableResource& name(void) \
     { \
-      static SelectableResource* ptr = new SelectableResource; \
+      static SelectableResource* ptr = new SelectableResource(0, #name); \
       \
       return (*ptr); \
     }

@@ -1,7 +1,7 @@
 #include "selectableresource.h"
 #include "ui_selectableresource.h"
 
-SelectableResource::SelectableResource(QWidget *parent) :
+SelectableResource::SelectableResource(QWidget *parent, QString name) :
     QDialog(parent),
     ui(new Ui::SelectableResource)
 {
@@ -11,6 +11,7 @@ SelectableResource::SelectableResource(QWidget *parent) :
     connect(ui->buttonBox, SIGNAL(accepted()),           this, SLOT(SelectedItem()));
     connect(ui->buttonBox, SIGNAL(rejected()),           this, SLOT(hide()));
     setModal(true);
+    setWindowTitle("Select " + name);
 }
 
 SelectableResource::~SelectableResource()
