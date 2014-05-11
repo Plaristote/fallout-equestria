@@ -168,8 +168,20 @@ void CharsheetEditor::New(QString name)
 
   if (!charsheet)
     charsheet = new DataTree;
-  DataTree::Writers::JSON(charsheet, path.toStdString());
+  this->name  = name;
+  {
+    Data special   = Data(charsheet)["Special"];
+    special["STR"] = 5;
+    special["PER"] = 5;
+    special["END"] = 5;
+    special["CHA"] = 5;
+    special["INT"] = 5;
+    special["AGI"] = 5;
+    special["LUC"] = 5;
+  }
   SelectableResource::Charsheets().AddResource(name);
+  DataTree::Writers::JSON(Charsheet(), path.toStdString());
+  Compile();
 }
 
 void CharsheetEditor::Delete()
@@ -320,7 +332,6 @@ void CharsheetEditor::Compile(void)
     QProcess    process(this);
     QStringList args;
 
-    cout << "Compiling using binary: " << working_directory.toStdString() << "/fallout-equestria-rpg.exe" << endl;
     args << "--compile-statsheet" << name;
     process.setWorkingDirectory(working_directory);
 #ifdef _WIN32
