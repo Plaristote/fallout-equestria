@@ -1,0 +1,91 @@
+{
+"Special": {
+  "STR": 5,
+  "PER": 7,
+  "END": 5,
+  "CHA": 4,
+  "INT": 6,
+  "AGI": 6,
+  "LUC": 6
+}
+,
+"Variables": {
+  "Hit Points": 42,
+  "Level": 4
+}
+,
+"Name": "Bandit Sharpshooter",
+"Age": 21,
+"Race": "Unicorn",
+"Faction": "Bandits",
+"Statistics": {
+  "Action Points": 6,
+  "Armor Class": 6,
+  "Bonus Damage": 0,
+  "Carry Weight": 150,
+  "Critical Chance": 6,
+  "Damage Resistance": 0,
+  "Healing Rate": 1,
+  "Hit Points": 42,
+  "Melee Damage": 1,
+  "Perk Rate": 3,
+  "Poison Resistance": 25,
+  "Radiation Resistance": 8,
+  "Skill Rate": 17
+}
+,
+"Skills": {
+  "Small Guns": 29,
+  "Big Guns": 17,
+  "Energy Guns": 18,
+  "Explosives": 23,
+  "Unarmed": 52,
+  "Lockpick": 85,
+  "Melee Weapons": 42,
+  "Medicine": 28,
+  "Repair": 25,
+  "Science": 24,
+  "Sneak": 23,
+  "Spellcasting": 43,
+  "Steal": 18,
+  "Barter": 16,
+  "Outdoorspony": 27,
+  "Speech": 26,
+  "Gambling": 28
+}
+,
+"Skill Points": "",
+"Statistics Modifiers": "",
+"Behaviour": {
+  "interactions": 54,
+  "script": "civilian",
+  "dialog": ""
+}
+,
+"Appearance": {
+  "model": "lpip.egg",
+  "texture": "characters/lpip.png"
+}
+,
+"Appearence": "",
+"Inventory": [
+{
+    "Name": "Shotgun",
+    "ammo": { "current": "ammoCaliber22", "amount": 2 },
+    "equiped": {
+      "target": "equiped",
+      "slot": 0,
+      "mode": 1
+    }
+
+  }
+, {
+    "Name": "ammoCaliber22",
+    "quantity": 42
+  }
+
+]
+,
+"Gender": "Male"
+
+}

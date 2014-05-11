@@ -1,0 +1,60 @@
+{
+"Special": {
+  "STR": 7,
+  "PER": 6,
+  "END": 6,
+  "CHA": 3,
+  "INT": 5,
+  "AGI": 7,
+  "LUC": 6
+}
+,
+"Variables": {
+  "Hit Points": 34,
+  "Level": 3
+}
+,
+"Name": "Bandit",
+"Age": 17,
+"Race": "Earth Pony",
+"Faction": "Bandits",
+"Statistics": {
+  "Action Points": 7,
+  "Armor Class": 7,
+  "Bonus Damage": 0,
+  "Carry Weight": 200,
+  "Critical Chance": 6,
+  "Damage Resistance": 0,
+  "Healing Rate": 2,
+  "Hit Points": 43,
+  "Melee Damage": 2,
+  "Perk Rate": 3,
+  "Poison Resistance": 30,
+  "Radiation Resistance": 10,
+  "Skill Rate": 15
+}
+,
+"Skills": {
+  "Small Guns": 33,
+  "Big Guns": 21,
+  "Energy Guns": 19,
+  "Explosives": 23,
+  "Unarmed": 75,
+  "Lockpick": 85,
+  "Melee Weapons": 90,
+  "Medicine": 26,
+  "Repair": 21,
+  "Science": 20,
+  "Sneak": 26,
+  "Spellcasting": 41,
+  "Steal": 21,
+  "Barter": 12,
+  "Outdoorspony": 27,
+  "Speech": 20,
+  "Gambling": 27
+}
+,
+"Skill Points": "",
+"Statistics Modifiers": ""
+
+}

@@ -1,77 +1,64 @@
 {
-"shielding spell": {
-  "graphics": {
-    "model": "sphere.obj",
-    "scale": 3
-  }
-,
-  "duration": 30,
-  "script": {
-    "source": "spell.as",
-    "hookBegin": "shieldBegin",
-    "hookEnd": "shieldEnd"
-  }
-
-}
-,
-"system": {
-  "current-level": 0
-}
-,
-"worldmap": {
-  "pos-x": 98,
-  "pos-y": 108
-}
-,
-"time": {
-  "seconds": 54,
-  "minutes": 48,
-  "hours": 16,
-  "days": 22,
-  "month": 8,
-  "year": 2472
-}
-,
-"Factions": {
-  "Player Party": {
-    "Enemies": ""
-  }
-,
-  "Test Town": {
-    "Enemies": ""
-  }
-
-}
-,
-"Pipbuck": {
-  "Apps": {
-    "clock": {
-      "type": 1,
-      "icon": "clock.png"
+  "shielding spell": {
+    "graphics": {
+      "model": "sphere.obj",
+      "scale": 3
+    },
+    "duration": 30,
+    "script": {
+      "source": "spell.as",
+      "hookBegin": "shieldBegin",
+      "hookEnd": "shieldEnd"
     }
-,
-    "helloworld": {
-      "type": 0,
-      "icon": "helloworld.png",
-      "src": "helloworld.as",
-      "hooks": {
-        "start": "start",
-        "exit": "exit",
-        "focused": "focused",
-        "unfocused": "unfocused",
-        "run_background": "daemon",
-        "run_focused": "main"
+  },
+  "system": {
+    "current-level": 0
+  },
+  "worldmap": {
+    "pos-x": 98,
+    "pos-y": 108
+  },
+  "time": {
+    "seconds": 54,
+    "minutes": 48,
+    "hours": 16,
+    "days": 22,
+    "month": 8,
+    "year": 2472
+  },
+  "Factions": {
+    "Player Party": {
+      "Enemies": ""
+    },
+    "Test Town": {
+      "Enemies": ""
+    }
+  },
+  "Pipbuck": {
+    "Apps": {
+      "clock": {
+        "type": 1,
+        "icon": "clock.png"
+      },
+      "helloworld": {
+        "type": 0,
+        "icon": "helloworld.png",
+        "src": "helloworld.as",
+        "hooks": {
+          "start": "start",
+          "exit": "exit",
+          "focused": "focused",
+          "unfocused": "unfocused",
+          "run_background": "daemon",
+          "run_focused": "main"
+        }
       }
-
-    }
-
-  }
-,
-  "Files": {
-    "firstfile": {
-      "type": "text",
-      "header": "First text file ever for the pipbuck",
-      "content": "Chapter One: Sustinex<br /><br />
+    },
+    "Files": {
+      "firstfile": {
+        "type": "text",
+        "header": "First text file ever for the pipbuck",
+        "content": "Chapter One: Sustinex<br /><br />
 
 
 \"Damn the torpedoes! Full speed ahead!\"-General Feckmane<br /><br />
@@ -140,29 +127,19 @@ Newly refreshed and woken up, not to mention fearing for my skin, I ran to my ba
 
 
 ?No... no... no... n-is that a thong? No... no... YES!?"
+      },
+      "secondfile": {
+        "type": "audio",
+        "header": "First audio file ever for the pipbuck",
+        "src": "audiofile"
+      }
     }
-,
-    "secondfile": {
-      "type": "audio",
-      "header": "First audio file ever for the pipbuck",
-      "src": "audiofile"
+  },
+  "random-encounters": {
+    "bandits": {
+      "Bandit": 3,
+      "Bandit Sharpshooter": 2
     }
-
-  }
-
-}
-,
-"random-encounters": {
-  "bandits": {
-    "Bandit": 3,
-    "Bandit Sharpshooter": 2
-  }
-
-}
-,
-"special-encounters": [
-"special-test"
-]
-
-
+  },
+  "special-encounters": ["special-test"]
 }

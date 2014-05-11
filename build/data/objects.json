@@ -9,7 +9,8 @@
       "ap-cost": 3,
       "combat": 1,
       "range": 10,
-      "damage": 5,
+      "damage": 3,
+      "damage-max": 5,
       "hookWeapon": "HoovesHit",
       "hookHitChances": "UnarmedSuccessChance"
     }
@@ -28,7 +29,8 @@
       "ap-cost": 4,
       "combat": 1,
       "range": 15,
-      "damage": 10,
+      "damage": 5,
+      "damage-max": 7,
       "hookWeapon": "BuckHit",
       "hookHitChances": "UnarmedSuccessChance"
     }

@@ -1,0 +1,93 @@
+{
+  "Special": {
+    "STR": 5,
+    "PER": 5,
+    "END": 5,
+    "CHA": 5,
+    "INT": 5,
+    "AGI": 5,
+    "LUC": 5
+  },
+  "Variables": {
+    "Hit Points": 35,
+    "Level": 1,
+    "Special Points": 5,
+    "Perks": 0,
+    "Traits": 2
+  },
+  "Appearance": {
+    "model": "lpip.egg",
+    "texture": "characters/lpip.png"
+  },
+  "Behaviour": {
+    "interactions": 54,
+    "script": "",
+    "dialog": ""
+  },
+  "Name": "",
+  "Age": 25,
+  "Race": "Unicorn",
+  "Faction": "",
+  "Gender": "Male",
+  "Statistics": {
+    "Action Points": 5,
+    "Armor Class": 5,
+    "Bonus Damage": 0,
+    "Carry Weight": 150,
+    "Critical Chance": 5,
+    "Damage Resistance": 0,
+    "Healing Rate": 1,
+    "Hit Points": 33,
+    "Melee Damage": 1,
+    "Perk Rate": 3,
+    "Poison Resistance": 25,
+    "Radiation Resistance": 8,
+    "Skill Rate": 15
+  },
+  "Skills": {
+    "Small Guns": 25,
+    "Big Guns": 15,
+    "Energy Guns": 15,
+    "Explosives": 20,
+    "Unarmed": 50,
+    "Lockpick": 70,
+    "Melee Weapons": 40,
+    "Medicine": 25,
+    "Repair": 20,
+    "Science": 20,
+    "Sneak": 20,
+    "Spellcasting": 40,
+    "Steal": 15,
+    "Barter": 20,
+    "Outdoorspony": 25,
+    "Speech": 30,
+    "Gambling": 25
+  },
+  "Skill Points": "",
+  "Statistics Modifiers": "",
+  "Inventory": [{
+      "Name": "Shotgun",
+      "ammo": ""
+    }, {
+      "Name": "ammoCaliber22",
+      "ammo": {
+        "current": ""
+      },
+      "quantity": 4
+    }, {
+      "Name": "sparkle-cola",
+      "ammo": ""
+    }, {
+      "Name": "healing-potion",
+      "ammo": {
+        "current": ""
+      },
+      "quantity": 2
+    }, {
+      "Name": "caps",
+      "ammo": {
+        "current": ""
+      },
+      "quantity": 72
+    }]
+}

@@ -5,16 +5,10 @@
   <style>
     #menu
     {
-      position:    absolute;
-      top:         0px;
-      left:        0px;
+      position: absolute;
+      top:      0px;
+      left:     0px;
       font-family: Delicious;
-      overflow-y:  auto;
-    }
-    
-    #menu scrollbarvertical
-    {
-      display: none;
     }
   </style>
 

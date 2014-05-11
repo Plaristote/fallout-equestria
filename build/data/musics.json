@@ -1,10 +1,10 @@
 {
   "mainmenu": {
-                "menu": "menu.ogg"
+                "menu": "menu.mp3"
               },
   "test": { "test": "test.ogg" },
-  "random-desert-1": { "desert-wind": "desert-wind.ogg" },
-  "special-test": { "desert-wind": "desert-wind.ogg" },
+  "random-desert-1": { "desert-wind": "desert-wind.mp3" },
+  "special-test": { "desert-wind": "desert-wind.mp3" },
   "pawnee": { "test": "test.ogg" },
-  "worldmap": { "highwayman": "worldmap.ogg" }
+  "worldmap": { "highwayman": "worldmap.mp3" }
 }

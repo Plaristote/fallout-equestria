@@ -56,7 +56,7 @@
       <div id="button-container">
         <button id="button-previous-profile"        class='control universal_button' i18n="Previous Character"   >Previous Character</button>
         <button id="button-next-profile"            class='control universal_button' i18n="Next Character"       >Next Character</button>
-        <button id="button-load-start-from-scratch" class='control universal_button' i18n="Create Character"     >Create Character</button>
+        <button id="button-start-from-scratch"      class='control universal_button' i18n="Create Character"     >Create Character</button>
         <button id="button-select-profile"          class='control universal_button' i18n="Select this character">Select this character</button>
         <button id="quit-button"                    class='control universal_button' i18n="Quit"                 >Quit</button>
        </div>

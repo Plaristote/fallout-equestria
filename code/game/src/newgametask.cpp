@@ -37,7 +37,6 @@ void NewGameTask::SelectProfile(const std::string& profile)
     _stat_view->SetEditMode(StatView::Create);
     _stat_controller->SetView(_stat_view);
     _stat_controller->ChangesCanceled.Connect(Cancel,    &Sync::Signal<void>::Emit);
-    //_stat_controller->ChangesAccepted.Connect(*this,     &NewGameTask::Done);
     _stat_controller->ChangesAccepted.Connect(StartGame, &Sync::Signal<void>::Emit);
     _stat_view->Show();
     _ui_new_game.Hide();

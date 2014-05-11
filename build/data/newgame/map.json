@@ -1,2218 +1,1247 @@
 {
-"size_x": 35,
-"size_y": 15,
-"tile_size_x": 50,
-"tile_size_y": 50,
-"tiles": [
-{
-    "visibility": 0,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 0.9,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 0.9,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 1.2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 1.2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 0.9,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 0.9,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 1.2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 1.2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 0.7,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "movement-speed": 1,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-,
-    "type-encounters": [
-"bandits"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 2
-  }
-, {
-    "visibility": 2
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
-    "type-encounters": ""
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
-    "type-encounters": ""
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
-    "type-encounters": ""
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
-    "type-encounters": ""
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 2
-  }
-, {
-    "visibility": 2
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
-    "type-encounters": ""
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
-    "type-encounters": ""
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
-    "type-encounters": ""
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1"    
-]
-,
-    "type-encounters": ""
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 2,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0,
-    "map-encounters": [
-"random-desert-1", "desert-01", "desert-merchant"    
-]
-
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-, {
-    "visibility": 0
-  }
-
-]
-
-
+  "size_x": 35,
+  "size_y": 15,
+  "tile_size_x": 50,
+  "tile_size_y": 50,
+  "tiles": [{
+      "visibility": 0,
+      "movement-speed": 0.7,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "movement-speed": 0.7,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "movement-speed": 0.7,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "movement-speed": 0.7,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "movement-speed": 1,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "movement-speed": 1,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "movement-speed": 1,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0,
+      "movement-speed": 0.7,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 0.9,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 0.7,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 0.7,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 1,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 1,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 1,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0,
+      "movement-speed": 0.7,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 0.9,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 0.7,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 0.7,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 1.2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 1.2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 1,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0,
+      "movement-speed": 0.7,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "movement-speed": 0.9,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 0.9,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 0.7,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 1.2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 1.2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 1,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0,
+      "movement-speed": 0.7,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 0.7,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 1,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "movement-speed": 1,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "movement-speed": 1,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0,
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"],
+      "type-encounters": ["bandits"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 2
+    }, {
+      "visibility": 2
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1"],
+      "type-encounters": ""
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1"],
+      "type-encounters": ""
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1"],
+      "type-encounters": ""
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1"],
+      "type-encounters": ""
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 2
+    }, {
+      "visibility": 2
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1"],
+      "type-encounters": ""
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1"],
+      "type-encounters": ""
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1"],
+      "type-encounters": ""
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1"],
+      "type-encounters": ""
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 2,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0,
+      "map-encounters": ["random-desert-1", "desert-01", "desert-merchant"]
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }, {
+      "visibility": 0
+    }]
 }

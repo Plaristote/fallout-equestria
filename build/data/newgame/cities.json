@@ -1,30 +1,26 @@
 {
-"stable": {
-  "visible": 1,
-  "pos_x": 94,
-  "pos_y": 102,
-  "radius": 20,
-  "splashscreen": "cities/Stable.png",
-  "zones": {
-    "bunker/worldmap": 1,
-    "cantina-entry": 1,
-    "living-quarter-entry": 1
+  "random-desert-1": {
+    "visible": 1,
+    "pos_x": 161,
+    "pos_y": 264,
+    "radius": 10
+  },
+  "pawnee": {
+    "radius": 30,
+    "pos_x": 242,
+    "pos_y": 149,
+    "visible": 1
+  },
+  "stable": {
+    "radius": 22,
+    "pos_x": 94,
+    "pos_y": 99,
+    "visible": 1,
+    "splashcreen": "cities/Stable.png",
+    "zones": {
+      "bunker/worldmap": 1,
+      "cantina-entry": 1,
+      "living-quarters-entry": 1
+    }
   }
-}
-,
-"random-desert-1": {
-  "visible": 1,
-  "pos_x": 161,
-  "pos_y": 264,
-  "radius": 10
-}
-,
-"pawnee": {
-  "radius": 30,
-  "pos_x": 242,
-  "pos_y": 149,
-  "visible": 1
-}
-
-
 }
