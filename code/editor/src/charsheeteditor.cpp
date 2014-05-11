@@ -1,3 +1,4 @@
+#include "globals.hpp"
 #include "charsheeteditor.h"
 #include "ui_charsheeteditor.h"
 #include "selectableresource.h"

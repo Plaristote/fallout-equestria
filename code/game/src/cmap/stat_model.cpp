@@ -109,7 +109,7 @@ void           StatModel::SetCurrentHp(short hp)
 
 unsigned short StatModel::GetLevel(void) const
 {
-  return (_statsheet["Variables"]["Level"]);
+  return (_statsheet["Variables"]["Level"].Or(1));
 }
 
 void           StatModel::LevelUp(void)
@@ -332,7 +332,7 @@ unsigned short StatModel::GetXpNextLevel(void)
     
     return ((int)(Call("XpNextLevel", 1, &param_stats)));
   }
-  return (0);
+  return (1);
 }
 
 int           StatModel::Action(const std::string& action, const std::string& fmt, ...)

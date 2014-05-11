@@ -27,8 +27,8 @@ public:
   void           SetRace(const std::string& race)  { _statsheet["Race"]   = race;           }
   std::string    GetRace(void) const               { return (_statsheet["Race"].Value());   }
   void           SetAge(unsigned short age)        { _statsheet["Age"]    = age;            }
-  unsigned short GetAge(void) const                { return (_statsheet["Age"]);            }
-  void           SetGender(const std::string& g)   { _statsheet["Gender"] = (g == "male" ? "Stallion" : "Mare"); }
+  unsigned short GetAge(void) const                { return (_statsheet["Age"].Or(25));     }
+  void           SetGender(const std::string& g)   { _statsheet["Gender"] = (g == "male" ? "Male" : "Female"); }
   std::string    GetGender(void) const             { return (_statsheet["Gender"].Value()); }
 
   void           AddKill(const std::string&);
@@ -53,9 +53,9 @@ public:
   
   std::string    SelectRandomEncounter(void);
   
-  unsigned short GetSpecialPoints(void)                const { return (_statsheet["Variables"]["Special Points"]); }
-  unsigned short GetSkillPoints(void)                  const { return (_statsheet["Variables"]["Skill Points"]);   }
-  unsigned short GetPerksPoints(void)                  const { return (_statsheet["Variables"]["Perks"]);          }
+  unsigned short GetSpecialPoints(void)                const { return (_statsheet["Variables"]["Special Points"].Or(0)); }
+  unsigned short GetSkillPoints(void)                  const { return (_statsheet["Variables"]["Skill Points"].Or(0));   }
+  unsigned short GetPerksPoints(void)                  const { return (_statsheet["Variables"]["Perks"].Or(0));          }
 
   std::list<std::string>   GetAvailablePerks(void);
   std::list<std::string>   GetAvailableTraits(void);
@@ -69,7 +69,7 @@ public:
   std::list<std::string>   GetUsableSpells(bool on_self = false);
 
   unsigned short GetXpNextLevel(void);
-  unsigned short GetExperience(void) const       { return (_statsheet["Variables"]["Experience"]); }
+  unsigned short GetExperience(void) const       { return (_statsheet["Variables"]["Experience"].Or(0)); }
   void           SetExperience(unsigned short e);
   void           LevelUp(void);
   void           SetCurrentHp(short hp);

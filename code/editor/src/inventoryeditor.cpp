@@ -1,3 +1,4 @@
+#include "globals.hpp"
 #include "inventoryeditor.h"
 #include "ui_inventoryeditor.h"
 #include "selectableresource.h"

@@ -133,6 +133,7 @@ void ObjectCharacter::ActionUse(InstanceDynamicObject* user)
 
 void ObjectCharacter::SetInventory(Inventory* inventory)
 {
+  equipment.SetInventory(0);
   if (inventory)
   {
     Data statistics = GetStatistics();
