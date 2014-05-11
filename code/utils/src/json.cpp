@@ -287,7 +287,7 @@ static std::string appendArray(Data data, unsigned short indent)
     Data::iterator it  = data.begin();
     Data::iterator end = data.end();
 
-    toWrite = "[\n";
+    toWrite = '[';
     while (it != end)
     {
         if ((*it).Nil())
@@ -300,9 +300,7 @@ static std::string appendArray(Data data, unsigned short indent)
         if (it  != end)
           toWrite += ", ";
     }
-    for (unsigned short iIndent = indent ; iIndent ; --iIndent)
-        toWrite += ' ';
-    toWrite += "\n]\n";
+    toWrite += ']';
     return (toWrite);
 }
 
@@ -312,7 +310,7 @@ static std::string appendObject(Data data, unsigned short indent)
     Data::iterator it  = data.begin();
     Data::iterator end = data.end();
 
-    toWrite = "{\n";
+    toWrite = '{';
     while (it != end)
     {
         if ((*it).Nil())
@@ -320,47 +318,25 @@ static std::string appendObject(Data data, unsigned short indent)
           ++it;
           continue ;
         }
+        toWrite += '\n';
         for (unsigned short iIndent = indent + 2 ; iIndent ; --iIndent)
             toWrite += ' ';
         toWrite += "\"" + (*it).Key() + "\": ";
         toWrite += appendValue(*it, indent + 2);
         ++it;
         if (it  != end)
-            toWrite += ",";
-        toWrite += "\n";
+          toWrite += ',';
     }
+    toWrite += '\n';
     for (unsigned short iIndent = indent ; iIndent ; --iIndent)
         toWrite += ' ';
-    toWrite += "}\n";
+    toWrite += '}';
     return (toWrite);
 }
 
 bool DataTree::Writers::StringJSON(Data data, string& str)
 {
-  std::string toWrite;
-
-  toWrite = "{\n";
-
-  Data::iterator it  = data.begin();
-  Data::iterator end = data.end();
-
-  while (it != end)
-  {
-      if ((*it).Nil())
-      {
-	++it;
-	continue ;
-      }
-      toWrite += "\"" + (*it).Key() + "\": ";
-      toWrite += appendValue(*it);
-      ++it;
-      if (it  != end)
-	  toWrite += ",";
-      toWrite += "\n";
-  }
-
-  toWrite += "\n}\n";
-  str = toWrite;
+  str = appendValue(data);
   return (true);
 }
 

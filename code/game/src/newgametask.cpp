@@ -46,7 +46,7 @@ void NewGameTask::SelectProfile(const std::string& profile)
 
 void NewGameTask::StartFromScratch(void)
 {
-  SelectProfile("null");
+  SelectProfile("empty-character");
 }
 
 void NewGameTask::ClearSaveDirectory(Directory& savedir)

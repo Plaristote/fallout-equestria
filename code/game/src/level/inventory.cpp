@@ -399,35 +399,43 @@ void Inventory::LoadInventory(DynamicObject* object)
 
 void Inventory::LoadInventory(Data items)
 {
-  Data      objectTree = GameTask::CurrentGameTask->GetItemIndex();
+  DataTree* item_index = DataTree::Factory::JSON("data/objects.json");
 
-  _content.clear();
-  for_each(items.begin(), items.end(), [this, objectTree](Data item)
+  if (item_index)
   {
-    unsigned int quantity;
-    DataTree     new_item_tree;
     {
-      Data       new_item(&new_item_tree);
-      Data       model = objectTree[item["Name"].Value()];
+      Data objectTree(item_index);
 
-      new_item.Duplicate(model);
-      new_item.SetKey(item["Name"]);
-      if (item["ammo"]["current"].NotNil())
-        new_item["ammo"]["current"] = item["ammo"]["current"].Value();
-      if (item["ammo"]["amount"].NotNil())
-        new_item["ammo"]["amount"]  = item["ammo"]["amount"].Or(0);
-      if (item["equiped"].NotNil())
-        new_item["equiped"].Duplicate(item["equiped"]);
-      quantity = item["quantity"].NotNil() ? (unsigned int)item["quantity"] : 1;
-      if (quantity > 9999) { quantity = 1; }
-      for (unsigned short i = 0 ; i < quantity ; ++i)
+      _content.clear();
+      for_each(items.begin(), items.end(), [this, objectTree](Data item)
       {
-        LoadItemFromData(new_item);
-        new_item["equiped"].Remove();
-      }
+        unsigned int quantity;
+        DataTree     new_item_tree;
+        {
+          Data       new_item(&new_item_tree);
+          Data       model = objectTree[item["Name"].Value()];
+
+          new_item.Duplicate(model);
+          new_item.SetKey(item["Name"]);
+          if (item["ammo"]["current"].NotNil())
+            new_item["ammo"]["current"] = item["ammo"]["current"].Value();
+          if (item["ammo"]["amount"].NotNil())
+            new_item["ammo"]["amount"]  = item["ammo"]["amount"].Or(0);
+          if (item["equiped"].NotNil())
+            new_item["equiped"].Duplicate(item["equiped"]);
+          quantity = item["quantity"].NotNil() ? (unsigned int)item["quantity"] : 1;
+          if (quantity > 9999) { quantity = 1; }
+          for (unsigned short i = 0 ; i < quantity ; ++i)
+          {
+            LoadItemFromData(new_item);
+            new_item["equiped"].Remove();
+          }
+        }
+      });
+      InitializeSlots();
     }
-  });
-  InitializeSlots();
+    delete item_index;
+  }
 }
 
 void Inventory::InitializeSlots(void)
