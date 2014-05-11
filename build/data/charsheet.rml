@@ -9,13 +9,13 @@ body
   width: 100%;
   height: 100%;
   font-family: JH_Fallout;
-  font-size:   9px;
+  font-size:   14px;
 }
 
 tab
 {
   font-family: Fallout;
-  font-size:   15px;
+  font-size:   30px;
 }
 
 #general-data
@@ -79,6 +79,7 @@ tab
   height:   38%;
   display: block;
   text-align: left;
+  padding: 2%;
 }
 			
 #statistics
@@ -88,28 +89,18 @@ tab
   height:    57%;
   width:     100%;
 }
-	
-.statistics-datagrid,		
-.skill-datagrid
+
+.statistics-datagrid, .skill-datagrid
 {
   display: block;
-  width: 100%;			
-}
-
-.statistics-datagrid{font-size: 75%;}
-
-.statistics-value,
-.skill-value,
-{
-  text-align: right;
-  float: right;
+  padding-left: 2%;
 }
 
 .statistics-key, .skill-key, .kills-key, .reputation-key
 {
   float: left;
   text-align: left;
-  width: 70%;
+  width: 60%;
 }
 
 .skill-value, .kills-value, .skill-percent, .statistics-value, .skill-value, .reputation-value
@@ -119,6 +110,8 @@ tab
   float: right;
   text-align: right;
   width: 15%;
+  margin-left: -5%;
+  margin-right: 5%;
 }
 
 .skill-percent
@@ -145,34 +138,46 @@ col{display: inline-block;}
 			
 #special
 {
-  overflow: auto;
   width:       100%;
-  height:      70%;
+  height:      80%;
   padding-top: 10%;
 }
-			
+
 .special-group
 {
-	height: 10%;
-	display: block;
-	width: 100%;
+  height: 14.28%;
+  display: block;
+  width: 100%;
 }
-			
+
 .special-key,
 .special-value
 {
+  float: left;
   display: inline-block;
   width: 20%;
+  padding-top: 5%;
+  padding-bottom: 5%;
   text-align: center;
   font-size: 85%;
 }
-			
+
 .special-commt
 {
+  float: left;
   display: inline-block;
-  width: 40%;
+  width: 30%;
+  padding-top: 5%;
+  padding-bottom: 5%;
   text-align: center;
   font-size: 85%;
+}
+
+.special-group .edit-cursor-placeholder
+{
+  float: left;
+  width: 10%;
+  height: 100%;
 }
 			
 #cancel,
@@ -185,15 +190,19 @@ col{display: inline-block;}
   height: 10%;
   font-size: 90%;
 }
-			
+
+#edit-value-cursor
+{
+  z-index: 99;
+  float: right;
+  max-width: 11%;
+}
+
 #edit-value-cursor-less,
 #edit-value-cursor-plus
 {
-  width:  20px;
-  height: 20px;
-  padding: 7px;
-  z-index: 99;
-  margin-left: 10%;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
 }
 			
 tabset
@@ -247,12 +256,6 @@ tabset panels panel
   height: 85%;
 }
 
-#placeholder
-{
-  width: 100%;
-  height: 80%;
-}
-
 .form-options
 {
   text-align: center;
@@ -299,6 +302,41 @@ tabset panels panel
   width:  64px;
   height: 64px;
 }
+
+.input-text
+{
+  height: 32px;
+}
+
+#details-container
+{
+  width: 100%;
+  height: 80%;
+}
+
+#details-icon
+{
+  float: right;
+  width: 40%;
+  padding-top: 15%;
+}
+
+#details-icon img
+{
+  width: 100%;
+}
+
+#details-title
+{
+  text-decoration: underline;
+  font-size: 40px;
+  font-family: Fallout;
+}
+
+#details-text
+{
+  text-align: left;
+}
 		</style>
 	</head>
 <body id="body" template="tplmainbar" class="window-background">
@@ -308,12 +346,12 @@ tabset panels panel
 	<p id="char-age" class="blocks long_button">16</p>
 	<p id="char-gender" class="blocks long_button">Mare</p>
 	<p id="char-name-edit" style="display: none;" class="something_button">
-		<input type="text" class="form-options console-bg char-value-position" id="char-name-value"  size="12" />
+		<input type="text" class="input-text form-options console-bg char-value-position" id="char-name-value"  size="12" />
 		<button class="francis form-options" id="char-name-edit-ok">Ok</button>
 	</p>
 			
 	<p id="char-age-edit" style="display: none;" class="something_button">
-		<input type="text" class="form-options console-bg char-value-position" id="char-age-value" maxlength="2" />
+		<input type="text" class="input-text form-options console-bg char-value-position" id="char-age-value" maxlength="2" />
 		<button class="francis form-options" id="char-age-edit-ok">Ok</button>
 	</p>
 	
@@ -326,8 +364,8 @@ tabset panels panel
 	</p>
 	</p>
 	<p id="edit-value-cursor">
-        <button id="edit-value-cursor-plus" class="console-bg">+</button>
-        <button id="edit-value-cursor-less" class="console-bg">-</button>
+        <div id="edit-value-cursor-plus" class="console-value">+</div>
+        <div id="edit-value-cursor-less" class="console-value">-</div>
     </p>
       <div id="stat-cols" class="  place-next-to" >
         
@@ -479,22 +517,22 @@ tabset panels panel
 		    </p>
 		</div>
     <div id="char-right-col" class="  place-next-to">
-    <div id="skills" class="  place-beneath console-bg" >
+    <div id="skills" class="  place-beneath console-bg"  style="padding-top:2%;">
 	      
 	      
 		  <p id="skill-points-title" i18n="Skill Points">Skill Points: <span id="skill-points">0</span></p>
 		
 		      
 	 </div>
-    <p id="char-botom-side" >
-      <p id="placeholder" class="paper">
-        <div id="details-icon" style="float:right;"></div>
-        <div id="details-title"></div>
-        <div id="details-text"></div>
-      </p>
+    <div id="char-botom-side" >
+      <div id="details-container" class="paper">
+        <div id="details-icon"></div>
+        <p id="details-title"></p>
+        <p id="details-text"></p>
+      </div>
 		<button id="continue" i18n="Confirm" class="universal_button">Done</button>
 		<button id="cancel"   i18n="Close" class="universal_button">Cancel</button> 
-    </p>
+    </div>
    </div>
    <div id="team-panel" class="console-bg place-next-to">
      Character list
