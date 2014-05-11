@@ -36,7 +36,11 @@ Party::Member::Member(const std::string& name, const std::string& object_name)
   object.charsheet    = name;
   object.script       = data["Behaviour"]["script"].Value();
   object.dialog       = data["Behaviour"]["dialog"].Value();
-  object.interactions = data["Behaviour"]["interactions"].NotNil() ? (int)(data["interactions"]) : Interactions::UseObject | Interactions::UseSkill | Interactions::UseSpell | Interactions::LookAt | Interactions::TalkTo;
+  object.interactions = (int)(data["Behaviour"]["interactions"].Or(Interactions::UseObject |
+                                                                   Interactions::UseSkill  |
+                                                                   Interactions::UseSpell  |
+                                                                   Interactions::LookAt    |
+                                                                   Interactions::TalkTo));
   object.strModel     = data["Appearance"]["model"].Value();
   object.strTexture   = data["Appearance"]["texture"].Value();
   object.waypoint     = 0;

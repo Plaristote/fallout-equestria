@@ -37,6 +37,7 @@ private:
 
   void        UpdateEquippedItemUi();
   QStringList GetAmmunitionsForItem(const std::string& item_name);
+  QString     GetIconForItem(const std::string& item_name);
 
   bool                disable_update;
   Data                inventory;

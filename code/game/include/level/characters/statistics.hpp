@@ -38,6 +38,7 @@ private:
   bool               TryToLoadFromString(const std::string& json);
   void               GenerateCharacterSheet(void);
   void               Cleanup(void);
+  void               CharacterFirstLoading(void);
 
   Metabolism*        metabolism;
   DataTree*          data_tree;

@@ -8,15 +8,36 @@ CharacterStatistics::CharacterStatistics(Level* level, DynamicObject* object): U
 {
   character_sheet_name = object->charsheet;
   cout << "Trying to load " << object->charsheet << endl;
-  if (character_sheet_name != "" || !(TryToLoadCharacterSheet()))
+  if (character_sheet_name == "" || !(TryToLoadCharacterSheet()))
     GenerateCharacterSheet();
   if (controller)
+  {
     metabolism = new Metabolism(controller);
+    CharacterFirstLoading();
+  }
 }
 
 CharacterStatistics::~CharacterStatistics(void)
 {
   Cleanup();
+}
+
+void CharacterStatistics::CharacterFirstLoading(void)
+{
+  Data behaviour = controller->GetData()["Behaviour"];
+  Data inventory = controller->GetData()["Inventory"];
+
+  if (behaviour.NotNil() && _object->interactions == 0)
+  {
+    _object->script       = behaviour["script"].Value();
+    _object->dialog       = behaviour["dialog"].Value();
+    _object->interactions = (int)behaviour["interactions"].Or(54);
+    SetInteractionsFromDynamicObject(_object);
+  }
+  else
+    _object->interactions = Interactions::LookAt;
+  behaviour.Remove();
+  inventory.Remove();
 }
 
 bool CharacterStatistics::TryToLoadCharacterSheet(void)

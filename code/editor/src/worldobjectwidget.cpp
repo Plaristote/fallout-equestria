@@ -76,6 +76,24 @@ WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
   connect(ui->setCurrentWaypoint, SIGNAL(clicked()), this, SLOT(SetCurrentWaypoint()));
   connect(ui->selectCurrentWaypoint, SIGNAL(clicked()), this, SLOT(SelectCurrentWaypoint()));
 
+  // Behaviour
+  connect(ui->objectTypeList,       SIGNAL(currentIndexChanged(int)), this, SLOT(UpdateBehaviour()));
+  connect(ui->character,            SIGNAL(textChanged(QString)),     this, SLOT(UpdateBehaviour()));
+  connect(ui->dialog,               SIGNAL(textChanged(QString)),     this, SLOT(UpdateBehaviour()));
+  connect(ui->script,               SIGNAL(textChanged(QString)),     this, SLOT(UpdateBehaviour()));
+  connect(ui->key,                  SIGNAL(textChanged(QString)),     this, SLOT(UpdateBehaviour()));
+  connect(ui->interactionUse,       SIGNAL(toggled(bool)),            this, SLOT(UpdateBehaviour()));
+  connect(ui->interactionUseSkill,  SIGNAL(toggled(bool)),            this, SLOT(UpdateBehaviour()));
+  connect(ui->interactionUseSpell,  SIGNAL(toggled(bool)),            this, SLOT(UpdateBehaviour()));
+  connect(ui->interactionUseObject, SIGNAL(toggled(bool)),            this, SLOT(UpdateBehaviour()));
+  connect(ui->interactionLookAt,    SIGNAL(toggled(bool)),            this, SLOT(UpdateBehaviour()));
+  connect(ui->interactionTalkTo,    SIGNAL(toggled(bool)),            this, SLOT(UpdateBehaviour()));
+  connect(ui->selectCharacter,      SIGNAL(clicked()),                this, SLOT(SelectCharacter()));
+  connect(ui->selectItem,           SIGNAL(clicked()),                this, SLOT(SelectItem()));
+  connect(ui->selectKey,            SIGNAL(clicked()),                this, SLOT(SelectKey()));
+  connect(ui->selectScript,         SIGNAL(clicked()),                this, SLOT(SelectScript()));
+  connect(ui->selectDialog,         SIGNAL(clicked()),                this, SLOT(SeletDialog()));
+
   ui->actionsButton->setMenu(&action_menu);
   action_menu.addAction("Copy",  this, SIGNAL(CopyRequested()),  QKeySequence::Copy);
   action_menu.addAction("Paste", this, SIGNAL(PasteRequested()), QKeySequence::Paste);
@@ -303,6 +321,161 @@ void WorldObjectWidget::InitializeDynamicObject(DynamicObject* object)
 {
   ui->tabWidget->addTab(ui->behaviourTab, "Behaviour");
   ui->selectCurrentWaypoint->setEnabled(object->waypoint != 0);
+  InitializeBehaviour(object);
+}
+
+void WorldObjectWidget::InitializeBehaviour(DynamicObject* object)
+{
+  ui->objectTypeList->setCurrentIndex(object->type);
+  ui->character->setText(object->charsheet.c_str());
+  ui->item->setText(object->charsheet.c_str());
+  ui->script->setText(object->script.c_str());
+  ui->dialog->setText(object->dialog.c_str());
+  ui->interactionUse->setChecked      (object->interactions & Interactions::Use);
+  ui->interactionUseObject->setChecked(object->interactions & Interactions::UseObject);
+  ui->interactionUseSkill->setChecked (object->interactions & Interactions::UseSkill);
+  ui->interactionUseSpell->setChecked (object->interactions & Interactions::UseSpell);
+  ui->interactionTalkTo->setChecked   (object->interactions & Interactions::TalkTo);
+  ui->interactionLookAt->setChecked   (object->interactions & Interactions::LookAt);
+}
+
+void WorldObjectWidget::UpdateBehaviour()
+{
+  QList<QWidget*> key_widgets;       key_widgets << ui->key << ui->labelKey << ui->selectKey;
+  QList<QWidget*> character_widgets; character_widgets << ui->labelCharacter << ui->character << ui->selectCharacter;
+  QList<QWidget*> item_widgets;      item_widgets << ui->labelItem << ui->item << ui->selectItem;
+  QList<QWidget*> inventory_widgets; inventory_widgets << ui->labelInventory << ui->inventory << ui->selectInventory;
+  auto            show_widgets = [this](QList<QWidget*> widgets, bool show)
+  { foreach (QWidget* widget, widgets) { widget->setVisible(show); } };
+
+  show_widgets(key_widgets, false);
+  show_widgets(character_widgets, false);
+  show_widgets(item_widgets, false);
+  show_widgets(inventory_widgets, true);
+  switch (ui->objectTypeList->currentIndex())
+  {
+    case DynamicObject::Door:
+      show_widgets(inventory_widgets, false);
+    case DynamicObject::Locker:
+      show_widgets(key_widgets, true);
+    case DynamicObject::Shelf:
+      ui->dynamicObject->show();
+      break ;
+    case DynamicObject::Item:
+      show_widgets(item_widgets, true);
+      ui->dynamicObject->hide();
+      break ;
+    case DynamicObject::Character:
+      show_widgets(character_widgets, true);
+      ui->dynamicObject->hide();
+      break ;
+  }
+  if (selection_type == 2)
+  {
+    DynamicObject* object = selection.dynamic_object;
+
+    object->type = (DynamicObject::Type)ui->objectTypeList->currentIndex();
+    switch (object->type)
+    {
+      case DynamicObject::Character:
+        object->charsheet    = ui->character->text().toStdString();
+        object->interactions = 0;
+        break ;
+      case DynamicObject::Item:
+        object->charsheet    = ui->item->text().toStdString();
+        object->interactions = Interactions::Use;
+        break ;
+      default:
+        object->key          = ui->key->text().toStdString();
+        object->script       = ui->script->text().toStdString();
+        object->dialog       = ui->dialog->text().toStdString();
+        object->interactions = (ui->interactionUse->isChecked() ? Interactions::Use : 0) +
+            (ui->interactionUseObject->isChecked() ? Interactions::UseObject : 0) +
+            (ui->interactionUseSkill->isChecked()  ? Interactions::UseSkill  : 0) +
+            (ui->interactionUseSpell->isChecked()  ? Interactions::UseSpell  : 0) +
+            (ui->interactionTalkTo->isChecked()    ? Interactions::TalkTo    : 0) +
+            (ui->interactionLookAt->isChecked()    ? Interactions::LookAt    : 0);
+        break ;
+    }
+  }
+}
+
+void WorldObjectWidget::SelectCharacter()
+{
+  SelectableResource::Charsheets().SelectResource([this](QString name)
+  {
+    DataTree* data_tree = DataTree::Factory::JSON("data/charsheets/" + name.toStdString() + ".json");
+
+    if (data_tree)
+    {
+      {
+        Data data(data_tree);
+
+        ui->character->setText(name);
+        if (data["Appearance"].NotNil())
+        {
+          ui->objectModel->setText  (data["Appearance"]["model"].Value().c_str());
+          ui->objectTexture->setText(data["Appearance"]["texture"].Value().c_str());
+        }
+      }
+      delete data_tree;
+    }
+  });
+}
+
+void WorldObjectWidget::SelectItem()
+{
+  SelectableResource::Items().SelectResource([this](QString name)
+  {
+    DataTree* data_tree = DataTree::Factory::JSON("data/objects.json");
+
+    if (data_tree)
+    {
+      {
+        Data data = Data(data_tree)[name.toStdString()];
+
+        if (data.NotNil())
+        {
+          std::string model   = data["model"].Value();
+          std::string texture = data["texture"].Value();
+
+          if (model != "")
+            ui->objectModel->setText(model.c_str());
+          ui->objectTexture->setText(texture.c_str());
+          ui->objectScaleX->setValue(data["scale"].Or(1.f));
+          ui->objectScaleY->setValue(data["scale"].Or(1.f));
+          ui->objectScaleZ->setValue(data["scale"].Or(1.f));
+          ui->item->setText(name);
+        }
+      }
+      delete data_tree;
+    }
+    // Update Render according to the selected item
+  });
+}
+
+void WorldObjectWidget::SelectKey()
+{
+  SelectableResource::Items().SelectResource([this](QString name)
+  {
+    ui->key->setText(name);
+  });
+}
+
+void WorldObjectWidget::SelectDialog()
+{
+  SelectableResource::Dialogs().SelectResource([this](QString name)
+  {
+    ui->dialog->setText(name);
+  });
+}
+
+void WorldObjectWidget::SelectScript()
+{
+  SelectableResource::AIs().SelectResource([this](QString name)
+  {
+    ui->script->setText(name);
+  });
 }
 
 void WorldObjectWidget::InitializeRender(MapObject* object)

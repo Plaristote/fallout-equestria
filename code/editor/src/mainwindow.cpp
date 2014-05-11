@@ -77,6 +77,7 @@ PandaTask my_task;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), tabScript(this, ui), tabDialog(this, ui), tabL18n(this, ui), splashScreen(this), wizardObject(this), dialogObject(this)
 {
+    QIcon iconCharacter("icons/character.png");
     QIcon iconScript("icons/script.png");
     QIcon iconItems("icons/item.png");
     QIcon iconDialogs("icons/dialogs.png");
@@ -116,7 +117,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->tabWidget->setTabIcon(0, iconLevel);
     ui->tabWidget->setTabIcon(1, iconWorldmap);
-    ui->tabWidget->setTabIcon(2, iconScript);
+    ui->tabWidget->setTabIcon(2, iconCharacter);
     ui->tabWidget->setTabIcon(3, iconScript);
     ui->tabWidget->setTabIcon(4, iconItems);
     ui->tabWidget->setTabIcon(5, iconDialogs);
@@ -814,6 +815,7 @@ void MainWindow::PandaInitialized()
      level_add_object_menu.addAction(ui->treeWidget->icon_map_object, "Map Object",     this, SLOT(MapObjectWizard()));
      level_add_object_menu.addAction(ui->treeWidget->icon_dyn_object, "Dynamic Object", this, SLOT(DynamicObjectWizard()));
      level_add_object_menu.addAction(ui->treeWidget->icon_light,      "Light",          this, SLOT(LightAdd()));
+     level_add_object_menu.addAction(                                 "Character", this, SLOT(CharacterAdd()));
 
      connect(ui->objectDeleteButton, SIGNAL(clicked()), this, SLOT(DeleteSelection()));
 
@@ -851,6 +853,35 @@ void MainWindow::ObjectAdd()
       DynamicObjectAdd();
     else if (wizardMapObject)
       MapObjectAdd();
+}
+
+void MainWindow::CharacterAdd()
+{
+  SelectableResource::Charsheets().SelectResource([this](QString name)
+  {
+    DataTree* charsheet = DataTree::Factory::JSON("data/charsheets/" + name.toStdString() + ".json");
+
+    if (charsheet)
+    {
+      {
+        Data    data(charsheet);
+        Data    appearance   = data["Appearance"];
+        QString unique_name  = QInputDialog::getText(this, "Add Character", "Unique name");
+
+        dynamicObjectHovered = world->AddDynamicObject(unique_name.toStdString(),
+                                                       DynamicObject::Character,
+                                                       appearance["model"].Value(),
+                                                       appearance["texture"].Value());
+        dynamicObjectHovered->charsheet    = name.toStdString();
+        dynamicObjectHovered->script       = data["Behaviour"]["script"].Value();
+        dynamicObjectHovered->dialog       = data["Behaviour"]["dialog"].Value();
+        dynamicObjectHovered->interactions = 0;
+        ui->treeWidget->AddDynamicObject(dynamicObjectHovered);
+        DynamicObjectSelect();
+      }
+      delete charsheet;
+    }
+  });
 }
 
 void MainWindow::DynamicObjectSetWaypoint(DynamicObject* object)

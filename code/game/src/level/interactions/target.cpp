@@ -91,6 +91,7 @@ void Interactions::Target::SetInteractionsFromDynamicObject(DynamicObject* objec
   Interactions::Player&  player_interactions = level->GetInteractions();
   InstanceDynamicObject* self                = (InstanceDynamicObject*)this;
 
+  ClearInteractions();
   if (object->interactions & Interactions::TalkTo)
     interactions.push_back(Interaction("talk_to",    self, &player_interactions.TalkTo));
   if (object->interactions & Interactions::Use)

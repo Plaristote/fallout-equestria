@@ -46,6 +46,13 @@ public slots:
   void PickModel();
   void PickTexture();
 
+  void UpdateBehaviour();
+  void SelectCharacter();
+  void SelectItem();
+  void SelectScript();
+  void SelectDialog();
+  void SelectKey();
+
   void UpdateColliderType();
   void UpdateColliderGeometry();
   void UpdateColliderDisplay();
@@ -75,6 +82,7 @@ signals:
 private:
   void InitializeMapObject(MapObject*);
   void InitializeDynamicObject(DynamicObject*);
+  void InitializeBehaviour(DynamicObject*);
   void InitializeShadowCaster(WorldLight*);
   void InitializeLightAttenuation(WorldLight*);
   void InitializeGeometry(NodePath);

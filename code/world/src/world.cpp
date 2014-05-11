@@ -197,15 +197,7 @@ MapObject* World::AddMapObject(const string &name, const string &model, const st
   object.strModel   = model;
   object.strTexture = texture;
   object.nodePath   = window->get_render().attach_new_node(name);
-  object.render     = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + model2);
-  object.render.reparent_to(object.nodePath);
-  if (texture != "")
-  {
-    object.texture    = TexturePool::load_texture(TEXT_ROOT + texture);
-    if (object.texture)
-      object.render.set_texture(object.texture);
-  }
-  object.render.set_name(name);
+  object.SetModel(model2);
   object.nodePath.set_pos(x, y, z);
   object.waypoints_root = object.nodePath.attach_new_node("waypoints");
   MapObjectChangeFloor(object, 0);
@@ -320,18 +312,10 @@ DynamicObject* World::InsertDynamicObject(DynamicObject& object)
   cout << "INSERTING OBJECT " << object.name << " with model " << object.strModel << " and texture " << object.strTexture << endl;
   cout << "Its floor is " << object.floor << endl;
   object.waypoint = 0;
-  object.nodePath = window->load_model(window->get_panda_framework()->get_models(), MODEL_ROOT + object.strModel);
-  if (object.nodePath.is_empty())
-  {
-    std::cerr << "[World::InsertDynamicObject] Could not load " << object.strModel << std::endl;
+  object.nodePath = window->get_render().attach_new_node(object.name);
+  object.SetModel(object.strModel);
+  if (object.render.is_empty())
     return (0);
-  }
-  if (object.strTexture != "")
-  {
-    object.texture    = TexturePool::load_texture(TEXT_ROOT + object.strTexture);
-    if (object.texture)
-      object.nodePath.set_texture(object.texture);
-  }
   object.nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
   dynamicObjects.insert(dynamicObjects.begin(), object);
   DynamicObjectChangeFloor(*dynamicObjects.begin(), object.floor);

@@ -9,7 +9,13 @@ InventoryEditor::InventoryEditor(QWidget *parent) :
   QWidget(parent),
   ui(new Ui::InventoryEditor)
 {
+  QIcon iconAdd("icons/add.png");
+  QIcon iconDelete("icons/delete.png");
+
   ui->setupUi(this);
+
+  ui->addItem->setIcon(iconAdd);
+  ui->deleteItem->setIcon(iconDelete);
 
   disable_update = false;
   connect(ui->addItem,              SIGNAL(clicked()),                this, SLOT(AddItem()));
@@ -52,6 +58,25 @@ QStringList InventoryEditor::GetAmmunitionsForItem(const std::string& item_name)
     delete objects_tree;
   }
   return (list);
+}
+
+QString InventoryEditor::GetIconForItem(const std::string& item_name)
+{
+  DataTree*   objects_tree = DataTree::Factory::JSON("data/objects.json");
+  QStringList list;
+
+  if (objects_tree)
+  {
+    {
+      Data objects(objects_tree);
+      Data item = objects[item_name];
+
+      if (item.NotNil())
+        return (item["icon"].Value().c_str());
+    }
+    delete objects_tree;
+  }
+  return ("default.png");
 }
 
 void InventoryEditor::SetInventory(Data data)
@@ -168,6 +193,7 @@ void InventoryEditor::SelectItem(void)
           ui->currentAmmunition->setCurrentIndex(ui->currentAmmunition->count() - 1);
       }
     }
+    ui->iconPreview->setText("<div align='center'><img src='textures/itemIcons/" + GetIconForItem(item["Name"]) + "' /></div>");
     ui->itemQuantity->setValue(item["quantity"].Or(0));
     ui->ammoCount->setValue(item["ammo"]["amount"].Or(0));
     disable_update = false;

@@ -140,6 +140,7 @@ private slots:
     void DynamicObjectSetWaypoint(DynamicObject*);
     void DynamicObjectFocus(DynamicObject*);
     void SelectWaypointFromObject(DynamicObject*);
+    void CharacterAdd(void);
 
     // LIGHTS
     void LightAdd(void);

@@ -14,9 +14,19 @@ CharsheetEditor::CharsheetEditor(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CharsheetEditor)
 {
+  QIcon iconAppearance("icons/appearance.png");
+  QIcon iconInventory("icons/item.png");
+  QIcon iconStatistics("icons/statistics.png");
+  QIcon iconBehaviour("icons/behaviour.png");
+
     ui->setupUi(this);
     this->setEnabled(false);
     charsheet = 0;
+
+    ui->tabWidget->setTabIcon(0, iconStatistics);
+    ui->tabWidget->setTabIcon(1, iconInventory);
+    ui->tabWidget->setTabIcon(2, iconAppearance);
+    ui->tabWidget->setTabIcon(3, iconBehaviour);
 
     ui->frameStatistics->layout()->setAlignment(Qt::AlignTop);
     ui->frameSkills->layout()->setAlignment(Qt::AlignTop);
@@ -78,7 +88,7 @@ void CharsheetEditor::SelectModel(void)
   {
     Data stats(charsheet);
     ui->model->setText(result);
-    stats["Appearence"]["model"]   = result.toStdString();
+    stats["Appearance"]["model"]   = result.toStdString();
   }
 }
 
@@ -92,7 +102,7 @@ void CharsheetEditor::SelectTexture(void)
   {
     Data stats(charsheet);
     ui->texture->setText(result);
-    stats["Appearence"]["texture"] = result.toStdString();
+    stats["Appearance"]["texture"] = result.toStdString();
   }
 }
 
@@ -202,8 +212,8 @@ void CharsheetEditor::Load(QString name)
     ui->hitPoints->setValue(Charsheet()["Variables"]["Hit Points"]);
     ui->level->setValue(Charsheet()["Variables"]["Level"]);
 
-    ui->model->setText  (QString::fromStdString(Charsheet()["Appearence"]["model"].Value()));
-    ui->texture->setText(QString::fromStdString(Charsheet()["Appearence"]["texture"].Value()));
+    ui->model->setText  (QString::fromStdString(Charsheet()["Appearance"]["model"].Value()));
+    ui->texture->setText(QString::fromStdString(Charsheet()["Appearance"]["texture"].Value()));
 
     ui->script->setText (QString::fromStdString(Charsheet()["Behaviour"]["script"].Value()));
     ui->dialog->setText (QString::fromStdString(Charsheet()["Behaviour"]["dialog"].Value()));
