@@ -19,6 +19,7 @@ public:
       ItemMapObject,
       ItemDynamicObject,
       ItemLight,
+      ItemCharacter,
       ItemUnknown
     };
 
@@ -59,7 +60,7 @@ private:
 
 public:
     QMap<QString, QTreeWidgetItem*> map;
-    QIcon icon_map_object, icon_dyn_object, icon_light;
+    QIcon icon_map_object, icon_dyn_object, icon_light, icon_character;
 };
 
 #endif // MAPTREEWIDGET_H

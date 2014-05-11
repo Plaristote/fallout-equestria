@@ -122,15 +122,19 @@ void Party::Member::Serialize(Utils::Packet& packet)
 void Party::Member::Unserialize(Utils::Packet& packet)
 {
   std::string statistics_json;
+  bool workaround_bool = false;
   
   task_set.Clear();
   task_set.Unserialize(packet);
   packet >> statistics_json;
+  try {
   packet >> object;
+  } catch (...) { workaround_bool = true; }
   object.type         = DynamicObject::Character;
   statistics_datatree = DataTree::Factory::StringJSON(statistics_json);
   statistics          = new StatController(statistics_datatree);
   metabolism          = new Metabolism(statistics);
+  if (!workaround_bool)
   metabolism->Unserialize(packet);
   inventory->LoadInventory(&object);
 }

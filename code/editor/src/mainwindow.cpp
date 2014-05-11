@@ -815,7 +815,7 @@ void MainWindow::PandaInitialized()
      level_add_object_menu.addAction(ui->treeWidget->icon_map_object, "Map Object",     this, SLOT(MapObjectWizard()));
      level_add_object_menu.addAction(ui->treeWidget->icon_dyn_object, "Dynamic Object", this, SLOT(DynamicObjectWizard()));
      level_add_object_menu.addAction(ui->treeWidget->icon_light,      "Light",          this, SLOT(LightAdd()));
-     level_add_object_menu.addAction(                                 "Character", this, SLOT(CharacterAdd()));
+     level_add_object_menu.addAction(ui->treeWidget->icon_character,  "Character",      this, SLOT(CharacterAdd()));
 
      connect(ui->objectDeleteButton, SIGNAL(clicked()), this, SLOT(DeleteSelection()));
 

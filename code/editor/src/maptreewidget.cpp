@@ -13,6 +13,7 @@ MapTreeWidget::MapTreeWidget(QWidget *parent) : QTreeWidget(parent)
   icon_map_object = QIcon("icons/tree-map-object.png");
   icon_dyn_object = QIcon("icons/tree-dyn-object.png");
   icon_light      = QIcon("icons/tree-light.png");
+  icon_character  = QIcon("icons/character.png");
 }
 
 void MapTreeWidget::ItemFocused()
@@ -30,6 +31,7 @@ void MapTreeWidget::ItemFocused()
       FocusObject(world->GetMapObjectFromName(name));
       break ;
     case ItemDynamicObject:
+    case ItemCharacter:
       FocusDynamicObject(world->GetDynamicObjectFromName(name));
       break ;
     case ItemLight:
@@ -76,11 +78,12 @@ MapTreeWidget::ItemType MapTreeWidget::GetType(QTreeWidgetItem* item) const
   if (item != 0)
   {
     std::string    name       = item->text(0).toStdString();
+    DynamicObject* dyn_object;
 
     if (world->GetMapObjectFromName(name) != 0)
       return (ItemMapObject);
-    if (world->GetDynamicObjectFromName(name) != 0)
-      return (ItemDynamicObject);
+    if ((dyn_object = world->GetDynamicObjectFromName(name)) != 0)
+      return (dyn_object->type == DynamicObject::Character ? ItemCharacter : ItemDynamicObject);
     if (world->GetLightByName(name) != 0)
       return (ItemLight);
   }
@@ -134,7 +137,8 @@ void MapTreeWidget::ReparentTo(QTreeWidgetItem* current, QTreeWidgetItem* parent
     std::string name           = clone->text(0).toStdString();
     bool        keep_absolute_position = QApplication::keyboardModifiers() & Qt::ShiftModifier;
 
-    if (type == ItemMapObject || type == ItemDynamicObject)
+    if ((type == ItemMapObject || type == ItemDynamicObject || type == ItemCharacter) &&
+        (parent_type != ItemCharacter))
     {
        MapObject*  tmp_map_object = 0;
        LPoint3f    absolute_position;
@@ -165,6 +169,7 @@ void MapTreeWidget::ReparentTo(QTreeWidgetItem* current, QTreeWidgetItem* parent
       case ItemMapObject:
         light->ReparentTo(world->GetMapObjectFromName(parent->text(0).toStdString()));
         break ;
+      case ItemCharacter:
       case ItemDynamicObject:
         light->ReparentTo(world->GetDynamicObjectFromName(parent->text(0).toStdString()));
         break ;
@@ -208,6 +213,9 @@ void MapTreeWidget::SetItemIcon(QTreeWidgetItem* item, ItemType type)
     break ;
   case ItemLight:
     item->setIcon(0, icon_light);
+    break ;
+  case ItemCharacter:
+    item->setIcon(0, icon_character);
     break ;
   case ItemUnknown:
     break ;
