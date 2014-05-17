@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>359</width>
-    <height>434</height>
+    <width>431</width>
+    <height>443</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,14 +43,155 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>6</number>
      </property>
      <widget class="QWidget" name="lightTab">
       <attribute name="title">
        <string>Light</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="6" column="0" colspan="4">
+       <item row="8" column="0" colspan="4">
+        <widget class="QPushButton" name="lightCompile">
+         <property name="text">
+          <string>Apply changes</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QDoubleSpinBox" name="lightAttenuationA">
+         <property name="singleStep">
+          <double>0.010000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QDoubleSpinBox" name="lightColorR">
+         <property name="maximum">
+          <double>255.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QDoubleSpinBox" name="lightAttenuationC">
+         <property name="singleStep">
+          <double>0.010000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="Line" name="line_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="MinimumExpanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QDoubleSpinBox" name="lightAttenuationB">
+         <property name="singleStep">
+          <double>0.010000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="3">
+        <widget class="QComboBox" name="lightTypesList">
+         <item>
+          <property name="text">
+           <string>Point Light</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Directional Light</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Ambient Light</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Spot Light</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QDoubleSpinBox" name="lightColorG">
+         <property name="maximum">
+          <double>255.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0" colspan="2">
+        <widget class="QRadioButton" name="lightSetEnabled">
+         <property name="text">
+          <string>On</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QDoubleSpinBox" name="lightColorB">
+         <property name="maximum">
+          <double>255.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="2" colspan="2">
+        <widget class="QRadioButton" name="lightSetDisabled">
+         <property name="text">
+          <string>Off</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="labelAttenuation">
+         <property name="text">
+          <string>Attenuation</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>Type</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1" colspan="3">
+        <widget class="QSpinBox" name="lightPriority">
+         <property name="maximum">
+          <number>512</number>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_14">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>RGB</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_20">
+         <property name="text">
+          <string>Priority</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="4">
         <widget class="QGroupBox" name="shadowCasting">
          <property name="title">
           <string>Shadow Casting</string>
@@ -124,173 +265,36 @@
          </layout>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QDoubleSpinBox" name="lightAttenuationA">
-         <property name="singleStep">
-          <double>0.010000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QDoubleSpinBox" name="lightColorR">
-         <property name="maximum">
-          <double>255.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1" colspan="3">
-        <widget class="QDoubleSpinBox" name="lightRadius">
-         <property name="maximum">
-          <double>500.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1" colspan="3">
-        <widget class="QComboBox" name="lightTypesList">
-         <item>
-          <property name="text">
-           <string>Point Light</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Directional Light</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Ambient Light</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Spot Light</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="10" column="0">
-        <widget class="Line" name="line_2">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="3">
-        <widget class="QDoubleSpinBox" name="lightAttenuationC">
-         <property name="singleStep">
-          <double>0.010000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="9" column="0" colspan="4">
-        <widget class="QPushButton" name="lightCompile">
+       <item row="7" column="0" colspan="4">
+        <widget class="QCheckBox" name="showFrustum">
          <property name="text">
-          <string>Apply changes</string>
+          <string>Show frustum</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="2">
-        <widget class="QDoubleSpinBox" name="lightAttenuationB">
-         <property name="singleStep">
-          <double>0.010000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0" colspan="2">
-        <widget class="QRadioButton" name="lightSetEnabled">
+      </layout>
+     </widget>
+     <widget class="QWidget" name="lightTargetsTab">
+      <attribute name="title">
+       <string>Light Targets</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_10">
+       <item row="0" column="0">
+        <widget class="QPushButton" name="addLightTarget">
          <property name="text">
-          <string>On</string>
+          <string>Add</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="2">
-        <widget class="QDoubleSpinBox" name="lightColorG">
-         <property name="maximum">
-          <double>255.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="0" colspan="4">
-        <widget class="QCheckBox" name="showLightRadius">
+       <item row="0" column="1">
+        <widget class="QPushButton" name="deleteLightTarget">
          <property name="text">
-          <string>Show radius</string>
+          <string>Delete</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="2" colspan="2">
-        <widget class="QRadioButton" name="lightSetDisabled">
-         <property name="text">
-          <string>Off</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="3">
-        <widget class="QDoubleSpinBox" name="lightColorB">
-         <property name="maximum">
-          <double>255.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_13">
-         <property name="text">
-          <string>Type</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_14">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>20</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>RGB</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_15">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>20</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Radius</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="labelAttenuation">
-         <property name="text">
-          <string>Attenuation</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="label_20">
-         <property name="text">
-          <string>Priority</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1" colspan="3">
-        <widget class="QSpinBox" name="lightPriority">
-         <property name="maximum">
-          <number>512</number>
-         </property>
-        </widget>
+       <item row="1" column="0" colspan="2">
+        <widget class="QListWidget" name="lightTargets"/>
        </item>
       </layout>
      </widget>
@@ -354,7 +358,101 @@
           <property name="rightMargin">
            <number>0</number>
           </property>
-          <item row="4" column="1" colspan="2">
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="script">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelInventory">
+            <property name="text">
+             <string>Inventory</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLineEdit" name="dialog">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="inventory">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Script</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QToolButton" name="selectInventory">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QToolButton" name="selectDialog">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QToolButton" name="selectScript">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_21">
+            <property name="text">
+             <string>Dialog</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QToolButton" name="selectKey">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelKey">
+            <property name="text">
+             <string>Key</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_22">
+            <property name="text">
+             <string>Interactions</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="key">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1" colspan="2">
            <widget class="QWidget" name="interactions" native="true">
             <layout class="QGridLayout" name="gridLayout_8">
              <property name="leftMargin">
@@ -417,97 +515,17 @@
             </layout>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="script">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="dialog">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelInventory">
-            <property name="text">
-             <string>Inventory</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="inventory">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QToolButton" name="selectInventory">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Script</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2">
-           <widget class="QToolButton" name="selectDialog">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QToolButton" name="selectScript">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_22">
-            <property name="text">
-             <string>Interactions</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_21">
-            <property name="text">
-             <string>Dialog</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="labelKey">
+           <widget class="QLabel" name="labelLocked">
             <property name="text">
-             <string>Key</string>
+             <string>Locked</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="key">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QToolButton" name="selectKey">
+          <item row="0" column="1" colspan="2">
+           <widget class="QCheckBox" name="doorLocked">
             <property name="text">
-             <string>...</string>
+             <string/>
             </property>
            </widget>
           </item>
@@ -993,6 +1011,47 @@
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="particleTab">
+      <attribute name="title">
+       <string>Render</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_11">
+       <item row="0" column="0">
+        <widget class="QLineEdit" name="particleEffectName">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QToolButton" name="selectParticleEffect">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QPushButton" name="showParticleEffect">
+         <property name="text">
+          <string>Show</string>
+         </property>
         </widget>
        </item>
       </layout>

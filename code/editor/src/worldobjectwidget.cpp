@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QKeySequence>
+#include <QInputDialog>
 #include "selectableresource.h"
 
 WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
@@ -54,9 +55,11 @@ WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
   connect(ui->lightAttenuationB, SIGNAL(valueChanged(double)),  this, SLOT(UpdateLightAttenuation()));
   connect(ui->lightAttenuationC, SIGNAL(valueChanged(double)),  this, SLOT(UpdateLightAttenuation()));
   connect(ui->lightTypesList,    SIGNAL(currentIndexChanged(int)), this, SLOT(UpdateLightType()));
-  connect(ui->lightRadius,       SIGNAL(valueChanged(double)),  this, SLOT(UpdateLightZoneSize()));
   connect(ui->lightCompile,      SIGNAL(clicked()),             this, SLOT(LightCompile()));
   connect(ui->lightPriority,     SIGNAL(valueChanged(int)),     this, SLOT(UpdateLightPriority()));
+  connect(ui->addLightTarget,    SIGNAL(clicked()),             this, SLOT(AddEnlightenedObject()));
+  connect(ui->deleteLightTarget, SIGNAL(clicked()),             this, SLOT(DeleteEnlightenedObject()));
+  connect(ui->showFrustum,       SIGNAL(toggled(bool)),         this, SLOT(LightShowFrustum(bool)));
 
   // Light -> Shadow caster
   connect(ui->shadowFilmSize,    SIGNAL(valueChanged(int)),     this, SLOT(UpdateShadowCaster()));
@@ -92,7 +95,12 @@ WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
   connect(ui->selectItem,           SIGNAL(clicked()),                this, SLOT(SelectItem()));
   connect(ui->selectKey,            SIGNAL(clicked()),                this, SLOT(SelectKey()));
   connect(ui->selectScript,         SIGNAL(clicked()),                this, SLOT(SelectScript()));
-  connect(ui->selectDialog,         SIGNAL(clicked()),                this, SLOT(SeletDialog()));
+  connect(ui->selectDialog,         SIGNAL(clicked()),                this, SLOT(SelectDialog()));
+
+  // Render Particles
+  connect(ui->particleEffectName,   SIGNAL(textChanged(QString)), this, SLOT(UpdateParticleEffect()));
+  connect(ui->showParticleEffect,   SIGNAL(clicked()),            this, SLOT(RestartParticleEffect()));
+  connect(ui->selectParticleEffect, SIGNAL(clicked()),            this, SLOT(SelectParticleEffect()));
 
   ui->actionsButton->setMenu(&action_menu);
   action_menu.addAction("Copy",  this, SIGNAL(CopyRequested()),  QKeySequence::Copy);
@@ -108,6 +116,48 @@ void WorldObjectWidget::LightCompile(void)
 {
   if (selection_type == 3)
     world->CompileLight(selection.light, ColMask::Object | ColMask::DynObject);
+}
+
+void WorldObjectWidget::AddEnlightenedObject(void)
+{
+  if (selection_type == 3)
+  {
+      std::string name = QInputDialog::getText(this, "Chose an object", "Name").toStdString();
+    auto        it = std::find(selection.light->enlightened_index.begin(), selection.light->enlightened_index.end(), name);
+
+    if (it == selection.light->enlightened_index.end())
+    {
+      MapObject* object = world->GetObjectFromName(name);
+
+      if (object)
+      {
+        object->nodePath.set_light(selection.light->nodePath, selection.light->priority);
+        ui->lightTargets->addItem(name.c_str());
+        selection.light->enlightened_index.push_back(name);
+      }
+    }
+  }
+}
+
+void WorldObjectWidget::DeleteEnlightenedObject(void)
+{
+  if (selection_type == 3)
+  {
+    QListWidgetItem* item   = ui->lightTargets->currentItem();
+
+    if (item != 0)
+    {
+      std::string      name   = item->text().toStdString();
+      MapObject*       object = world->GetObjectFromName(name);
+      auto             it     = std::find(selection.light->enlightened_index.begin(), selection.light->enlightened_index.end(), name);
+
+      if (object)
+        object->nodePath.set_light_off(selection.light->nodePath);
+      if (it != selection.light->enlightened_index.end())
+        selection.light->enlightened_index.erase(it);
+      delete item;
+    }
+  }
 }
 
 MapObject* WorldObjectWidget::GetSelectedObject(void) const
@@ -134,11 +184,15 @@ void WorldObjectWidget::DeleteSelection()
     case 3:
       world->DeleteLight(selection.light->name);
       break ;
+    case 4:
+      particle_system_manager.remove_particlesystem(selection.particle_object->GetParticleSystem());
+      world->DeleteParticleObject(selection.particle_object->GetName());
+      break ;
     default:
       return ;
   }
-  selection_type = 0;
   UnsetSelection();
+  selection_type = 0;
 }
 
 void WorldObjectWidget::UnsetSelection()
@@ -146,7 +200,13 @@ void WorldObjectWidget::UnsetSelection()
   if (selection_type > 0 && selection_type < 3)
     selection.object->collider.node.hide();
   else if (selection_type == 3)
+  {
     selection.light->collider.node.hide();
+    selection.light->SetFrustumVisible(false);
+    ui->showFrustum->setChecked(false);
+  }
+  else if (selection_type == 4)
+    particle_system_manager.remove_particlesystem(selection.particle_object->GetParticleSystem());
   selection_type = 0;
   while (ui->tabWidget->count())
     ui->tabWidget->removeTab(0);
@@ -172,6 +232,67 @@ void WorldObjectWidget::SetSelection(DynamicObject* object)
   dialog_object->SetCurrentObject(object);
 }
 
+void WorldObjectWidget::SetSelection(ParticleObject* object)
+{
+  UnsetSelection();
+  ui->particleEffectName->setText(object->GetParticleEffectName().c_str());
+  ui->objectName->setText(object->GetName().c_str());
+  selection.particle_object = object;
+  selection_type            = 4;
+  if (!(object->GetParticleSystem().is_null()))
+    particle_system_manager.attach_particlesystem(object->GetParticleSystem());
+  ui->tabWidget->addTab(ui->particleTab, "Render");
+}
+
+void WorldObjectWidget::RestartParticleEffect()
+{
+  UpdateParticleEffect();
+}
+
+void WorldObjectWidget::UpdateParticleEffect()
+{
+  if (selection_type == 4)
+  {
+    ParticleObject& object        = *selection.particle_object;
+    NodePath        render_parent = world->rootParticleObjects;
+
+    if (!object.GetParticleSystem().is_null())
+    {
+      render_parent = object.GetParticleSystem()->get_render_parent();
+      particle_system_manager.remove_particlesystem(object.GetParticleSystem());
+    }
+    object.SetParticleEffect(ui->particleEffectName->text().toStdString());
+    if (!object.GetParticleSystem().is_null())
+    {
+      object.GetParticleSystem()->set_render_parent(render_parent);
+      particle_system_manager.attach_particlesystem(object.GetParticleSystem());
+    }
+  }
+}
+
+void WorldObjectWidget::SelectParticleEffect()
+{
+  QString   filter    = "Particle efects (*.json)";
+  QString   base_path = QDir::currentPath() + "/data/particle-effects";
+  QString   path = QFileDialog::getOpenFileName(this, "Select a particle effect", base_path, filter);
+  QFileInfo info(path);
+  QString   relative_path;
+
+  if (!(info.exists()))
+    return ;
+  if (!(path.startsWith(base_path))) // Needs to be moved
+  {
+    if (!(QFile::copy(path, base_path + info.fileName())))
+    {
+      QMessageBox::warning(this, "Error", "Couldn't copy file to the project directory.");
+      return ;
+    }
+    path = base_path + info.fileName();
+  }
+  relative_path = path.remove(0, base_path.length());
+  ui->particleEffectName->setText(relative_path);
+}
+
 void WorldObjectWidget::SetSelection(WorldLight* light)
 {
   UnsetSelection();
@@ -185,16 +306,20 @@ void WorldObjectWidget::SetSelection(WorldLight* light)
     ui->lightColorB->setValue(color.get_z());
   }
 
+  ui->lightTargets->clear();
+  std::for_each(light->enlightened_index.begin(), light->enlightened_index.end(), [this](const std::string& name)
+  { ui->lightTargets->addItem(name.c_str()); });
+
   ui->lightTypesList->setCurrentIndex((int)light->type);
   InitializeShadowCaster(light);
   InitializeLightAttenuation(light);
-  ui->lightRadius->setValue(light->zoneSize);
   ui->lightPriority->setValue(light->priority);
   ui->objectName->setEnabled(true);
   ui->objectName->setText(QString::fromStdString(light->name));
   selection.light = light;
   selection_type  = 3;
-  ui->tabWidget->addTab(ui->lightTab, "Light");
+  ui->tabWidget->addTab(ui->lightTab,        "Light");
+  ui->tabWidget->addTab(ui->lightTargetsTab, "Light Targets");
 }
 
 void WorldObjectWidget::UpdateLightType(void)
@@ -224,17 +349,21 @@ void WorldObjectWidget::UpdateLightType(void)
 
 void WorldObjectWidget::InitializeShadowCaster(WorldLight* light)
 {
-  if (light->type == WorldLight::Point || light->type == WorldLight::Spot)
+  if (light->type == WorldLight::Point || light->type == WorldLight::Spot || light->type == WorldLight::Directional)
   {
     ui->shadowCasting->show();
     ui->shadowFilmSize->setValue(light->shadow_settings.film_size);
     ui->shadowBufferSizeX->setValue(light->shadow_settings.buffer_size[0]);
-    ui->shadowBufferSizeX->setValue(light->shadow_settings.buffer_size[1]);
+    ui->shadowBufferSizeY->setValue(light->shadow_settings.buffer_size[1]);
     ui->shadowNear->setValue(light->shadow_settings.distance_near);
     ui->shadowFar->setValue(light->shadow_settings.distance_far);
+    ui->showFrustum->setVisible(true);
   }
   else
+  {
     ui->shadowCasting->hide();
+    ui->showFrustum->setVisible(false);
+  }
 }
 
 void WorldObjectWidget::UpdateShadowCaster()
@@ -245,7 +374,7 @@ void WorldObjectWidget::UpdateShadowCaster()
 
     light->shadow_settings.film_size      = ui->shadowFilmSize->value();
     light->shadow_settings.buffer_size[0] = ui->shadowBufferSizeX->value();
-    light->shadow_settings.buffer_size[1] = ui->shadowBufferSizeX->value();
+    light->shadow_settings.buffer_size[1] = ui->shadowBufferSizeY->value();
     light->shadow_settings.distance_near  = ui->shadowNear->value();
     light->shadow_settings.distance_far   = ui->shadowFar->value();
     light->InitializeShadowCaster();
@@ -291,8 +420,6 @@ void WorldObjectWidget::UpdateLightAttenuation()
 
 void WorldObjectWidget::UpdateLightZoneSize()
 {
-  if (selection_type == 3)
-    selection.light->zoneSize = ui->lightRadius->value();
 }
 
 void WorldObjectWidget::UpdateLightColor()
@@ -539,6 +666,11 @@ void WorldObjectWidget::UpdateName(QString name)
       RenameObject(QString::fromStdString(selection.light->name), name);
       selection.light->name = name.toStdString();
     }
+    else if (selection_type == 4)
+    {
+      RenameObject(QString::fromStdString(selection.particle_object->GetName()), name);
+      selection.particle_object->SetName(name.toStdString());
+    }
   }
 }
 
@@ -651,6 +783,12 @@ void WorldObjectWidget::UpdateFloor()
     selection.object->floor          = ui->objectFloor->value();
   }
   ui->objectFloor->setEnabled(!ui->inheritsFloor->isChecked());
+}
+
+void WorldObjectWidget::LightShowFrustum(bool toggled)
+{
+  if (selection_type == 3)
+    selection.light->SetFrustumVisible(toggled);
 }
 
 void WorldObjectWidget::LightSetDisabled(bool disabled)

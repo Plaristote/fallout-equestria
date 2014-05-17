@@ -10,10 +10,11 @@ using namespace std;
 MapTreeWidget::MapTreeWidget(QWidget *parent) : QTreeWidget(parent)
 {
   connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(ItemFocused()));
-  icon_map_object = QIcon("icons/tree-map-object.png");
-  icon_dyn_object = QIcon("icons/tree-dyn-object.png");
-  icon_light      = QIcon("icons/tree-light.png");
-  icon_character  = QIcon("icons/character.png");
+  icon_map_object      = QIcon("icons/tree-map-object.png");
+  icon_dyn_object      = QIcon("icons/tree-dyn-object.png");
+  icon_particle_object = QIcon("icons/tree-particle-object.png");
+  icon_light           = QIcon("icons/tree-light.png");
+  icon_character       = QIcon("icons/character.png");
 }
 
 void MapTreeWidget::ItemFocused()
@@ -36,6 +37,9 @@ void MapTreeWidget::ItemFocused()
       break ;
     case ItemLight:
       FocusLight(world->GetLightByName(name));
+      break ;
+    case ItemParticleObject:
+      FocusParticleObject(world->GetParticleObjectByName(name));
       break ;
     case ItemUnknown:
       break ;
@@ -86,6 +90,8 @@ MapTreeWidget::ItemType MapTreeWidget::GetType(QTreeWidgetItem* item) const
       return (dyn_object->type == DynamicObject::Character ? ItemCharacter : ItemDynamicObject);
     if (world->GetLightByName(name) != 0)
       return (ItemLight);
+    if (world->GetParticleObjectByName(name) != 0)
+      return (ItemParticleObject);
   }
   return (ItemUnknown);
 }
@@ -177,6 +183,26 @@ void MapTreeWidget::ReparentTo(QTreeWidgetItem* current, QTreeWidgetItem* parent
       if (keep_absolute_position)
         light->nodePath.set_pos(world->window->get_render(), absolute_position);
     }
+    else if (type == ItemParticleObject)
+    {
+      ParticleObject* particle_object = world->GetParticleObjectByName(name);
+
+      switch (parent_type)
+      {
+      case ItemUnknown:
+      case ItemLight:
+      case ItemCharacter:
+        particle_object->ReparentTo((MapObject*)0);
+        particle_object->ParticleEffect::ReparentTo(world->rootParticleObjects);
+        break ;
+      case ItemMapObject:
+        particle_object->ReparentTo(world->GetMapObjectFromName(parent->text(0).toStdString()));
+        break ;
+      case ItemDynamicObject:
+        particle_object->ReparentTo(world->GetDynamicObjectFromName(parent->text(0).toStdString()));
+        break ;
+      }
+    }
   }
 }
 
@@ -210,6 +236,9 @@ void MapTreeWidget::SetItemIcon(QTreeWidgetItem* item, ItemType type)
     break ;
   case ItemDynamicObject:
     item->setIcon(0, icon_dyn_object);
+    break ;
+  case ItemParticleObject:
+    item->setIcon(0, icon_particle_object);
     break ;
   case ItemLight:
     item->setIcon(0, icon_light);
@@ -249,6 +278,16 @@ void MapTreeWidget::AddWorldLight(WorldLight* light)
 
   new_item->setText(0, name);
   SetItemIcon(new_item, ItemLight);
+  map.insert(name, new_item);
+}
+
+void MapTreeWidget::AddParticleObject(ParticleObject* particle_object)
+{
+  QTreeWidgetItem* new_item = new QTreeWidgetItem(this);
+  QString          name     = QString::fromStdString(particle_object->GetName());
+
+  new_item->setText(0, name);
+  SetItemIcon(new_item, ItemParticleObject);
   map.insert(name, new_item);
 }
 
@@ -363,6 +402,22 @@ void MapTreeWidget::ProbeWorld(const std::string& parent_name, QTreeWidgetItem* 
       SetItemIcon(new_item, ItemLight);
       InsertPair(QString::fromStdString(light.name), new_item);
     }
+  });
+  std::for_each(world->particleObjects.begin(), world->particleObjects.end(), [this, parent_name, parent](ParticleObject& object)
+  {
+      if ((object.parent_type == ParticleObject::NONE && parent_name == "") ||
+          (object.parent_type != ParticleObject::NONE && object.parent_name == parent_name))
+      {
+        QTreeWidgetItem* new_item;
+
+        if (parent != 0)
+          new_item = new QTreeWidgetItem(parent);
+        else
+          new_item = new QTreeWidgetItem(this);
+        new_item->setText(0, object.GetName().c_str());
+        SetItemIcon(new_item, ItemParticleObject);
+        InsertPair(object.GetName().c_str(), new_item);
+      }
   });
 }
 

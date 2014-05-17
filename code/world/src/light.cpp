@@ -10,6 +10,45 @@ using namespace std;
 
 extern unsigned int blob_revision;
 
+void WorldLight::SetFrustumVisible(bool set_visible)
+{
+  PT(Camera) camera;
+
+  switch (type)
+  {
+    case Point:
+    {
+      PT(PointLight) point_light = reinterpret_cast<PointLight*>(light.p());
+
+      camera = point_light;
+      break ;
+    }
+    case Directional:
+    {
+      PT(DirectionalLight) directional_light = reinterpret_cast<DirectionalLight*>(light.p());
+
+      camera = directional_light;
+      break ;
+    }
+    case Spot:
+    {
+      PT(Spotlight) spot_light = reinterpret_cast<Spotlight*>(light.p());
+
+      camera = spot_light;
+      break ;
+    }
+  }
+  if (!(camera.is_null()))
+  {
+    cout << "dafuck" << endl;
+    if (set_visible)
+      camera->show_frustum();
+    else
+      camera->hide_frustum();
+    cout << "lol wat" << endl;
+  }
+}
+
 void WorldLight::Initialize(void)
 {
   switch (type)
@@ -70,6 +109,14 @@ void WorldLight::InitializeShadowCaster()
       point_light->set_shadow_caster(true, shadow_settings.buffer_size[0], shadow_settings.buffer_size[1]);
       point_light->get_lens()->set_near_far(shadow_settings.distance_near, shadow_settings.distance_far);
       point_light->get_lens()->set_film_size(shadow_settings.film_size);
+    }
+    case Directional:
+    {
+      PT(DirectionalLight) directional_light = reinterpret_cast<DirectionalLight*>(light.p());
+
+      directional_light->set_shadow_caster(true, shadow_settings.buffer_size[0], shadow_settings.buffer_size[1]);
+      directional_light->get_lens()->set_near_far(shadow_settings.distance_near, shadow_settings.distance_far);
+      directional_light->get_lens()->set_film_size(shadow_settings.film_size);
     }
     case Spot:
     {
@@ -196,6 +243,8 @@ void WorldLight::Unserialize(Utils::Packet& packet)
     collider.parent = nodePath;
     collider.type   = Collider::NONE;
   }
+  if (blob_revision >= 12)
+    packet >> enlightened_index;
 }
 
 void WorldLight::ShadowSettings::Serialize(Utils::Packet& packet) const
@@ -230,4 +279,5 @@ void WorldLight::Serialize(Utils::Packet& packet) const
   if (CastsShadows())
     packet << shadow_settings;
   packet << collider;
+  packet << enlightened_index;
 }

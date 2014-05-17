@@ -51,6 +51,7 @@ void Sunlight::InitializeSun()
 
   NodePath sphere   = sunlight_nodepath.attach_new_node("sun-representation");
 
+  static_sunlight->show_frustum();
   world.model_sphere.copy_to(sphere);
   sphere.set_scale(10);
   sunlight_nodepath.reparent_to(sphere);

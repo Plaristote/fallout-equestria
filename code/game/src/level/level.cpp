@@ -74,9 +74,10 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   camera.SetLimits((bottomLeft.get_x() - 50) * 1.25, (bottomLeft.get_y() - 50) * 1.25, (upperRight.get_x() + 50) * 1.25, (upperRight.get_y() + 50) * 1.25);
 
   LoadingScreen::AppendText("Processing topology...");
-  ForEach(world->zones,          [this](Zone& zone)          { zones.RegisterZone(zone);  });
+  ForEach(world->zones,           [this](Zone& zone)          { zones.RegisterZone(zone);  });
   LoadingScreen::AppendText("Analyzing surrounding objects...");
-  ForEach(world->dynamicObjects, [this](DynamicObject& dobj) { InsertDynamicObject(dobj); });
+  ForEach(world->dynamicObjects,  [this](DynamicObject& dobj) { InsertDynamicObject(dobj); });
+  ForEach(world->particleObjects, [this](ParticleObject& obj) { if (!(obj.GetParticleSystem().is_null())) { particle_manager.attach_particlesystem(obj.GetParticleSystem()); } });
 
   world->SetWaypointsVisible(false);
   
@@ -154,7 +155,7 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
    * END DIVIDE AND CONQUER
    */
 
-  //window->get_render().set_shader_auto();
+  window->get_render().set_shader_auto();
 }
 
 Level::~Level()
@@ -545,11 +546,13 @@ AsyncTask::DoneStatus Level::do_task(void)
         }
       }
       break ;
+      particle_manager.do_particles(ClockObject::get_global_clock()->get_dt());
     case Normal:
       projectiles.Run(elapsedTime);
       time_manager.AddElapsedSeconds(elapsedTime);
       ForEach(objects,    run_object);
       ForEach(characters, run_object);
+      particle_manager.do_particles(ClockObject::get_global_clock()->get_dt());
       break ;
     case Interrupted:
       break ;
@@ -566,7 +569,6 @@ AsyncTask::DoneStatus Level::do_task(void)
   floors.SetCurrentFloorFromObject(GetPlayer());
   floors.RunFadingEffect(elapsedTime);
   chatter_manager.Run(elapsedTime, camera.GetNodePath());
-  particle_manager.do_particles(ClockObject::get_global_clock()->get_dt());
   timer.Restart();
   return (exit.ReadyForNextZone() ? AsyncTask::DS_done : AsyncTask::DS_cont);
 }

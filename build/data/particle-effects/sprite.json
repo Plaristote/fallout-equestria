@@ -1,0 +1,40 @@
+{
+  "pool-size":           100,
+  "birth-rate":          0.1,
+  "litter-size":         10,
+  "litter-spread":       0,
+  "local-velocity-flag": 1,
+  "grows-older":         1,
+  "lifespan":            3,
+  "active":              1,
+
+  "factory":         "point",
+  "lifespan-base":   0.5,
+  "lifespan-spread": 0,
+  "mass-base":       1,
+  "mass-spread":     0,
+  "terminal-velocity-base":   400,
+  "terminal-velocity-spread": 0,
+  
+  "emitter": {
+    "type":             "sphere-volume",
+    "radius":           15,
+    "amplitude":        9,
+    "amplitude-spread": 5,
+    "offset-force":           { "x": 1, "y": 0, "z": 0 },
+    "explicit-launch-vector": { "x": 1, "y": 0, "z": 0 },
+    "radiate-origin":         { "x": 0, "y": 0, "z": 0 }
+  },
+  
+  "renderer": {
+    "type":            "sprite",
+    "alpha-mode":      "in-out",
+    "initial-x-scale": 1,
+    "initial-y-scale": 1,
+    "final-x-scale":   1,
+    "final-y-scale":   1,
+    "width":           0.5,
+    "height":          0.5,
+    "texture":         "magic-particule.png"
+  }
+} 

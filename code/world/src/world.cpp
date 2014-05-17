@@ -3,7 +3,7 @@
 #include <panda3d/collisionBox.h>
 #include <panda3d/collisionSphere.h>
 #include <panda3d/collisionRay.h>
-#define CURRENT_BLOB_REVISION 12
+#define CURRENT_BLOB_REVISION 13
 
 using namespace std;
 
@@ -22,6 +22,7 @@ World::World(WindowFramework* window)
   rootMapObjects       = window->get_render().attach_new_node("mapobjects");
   rootDynamicObjects   = window->get_render().attach_new_node("dynamicobjects");
   rootLights           = window->get_render().attach_new_node("lights");
+  rootParticleObjects  = window->get_render().attach_new_node("particleObjects");
   sunlight_enabled     = false;
 #ifdef GAME_EDITOR
   lightSymbols         = window->get_render().attach_new_node("lightSymbols");
@@ -40,6 +41,11 @@ World::~World()
   ForEach(lights,         [](WorldLight& wl)    { wl.Destroy();              });
   debug_pathfinding.remove_node();
   floors_node.remove_node();
+}
+
+void World::WriteToBam(const string &name)
+{
+  window->get_render().write_bam_file(name);
 }
 
 Waypoint* World::AddWayPoint(float x, float y, float z)
@@ -259,6 +265,13 @@ void World::DeleteMapObject(MapObject* ptr)
   }
 }
 
+MapObject* World::GetObjectFromName(const string& name)
+{
+  MapObject* result = GetObjectFromName(name, objects);
+
+  return (result != 0 ? result : GetObjectFromName(name, dynamicObjects));
+}
+
 MapObject* World::GetMapObjectFromName(const string &name)
 {
   return (GetObjectFromName(name, objects));
@@ -411,12 +424,29 @@ void World::DeleteLight(const std::string& name)
   }
 }
 
+void World::DeleteParticleObject(const string& name)
+{
+  auto it = find(particleObjects.begin(), particleObjects.end(), name);
+
+  if (it != particleObjects.end())
+    particleObjects.erase(it);
+}
+
 WorldLight* World::GetLightByName(const std::string& name)
 {
   WorldLights::iterator it = std::find(lights.begin(), lights.end(), name);
 
   cout << "Getting light by name... light count: " << lights.size() << endl;
   if (it != lights.end())
+    return (&(*it));
+  return (0);
+}
+
+ParticleObject* World::GetParticleObjectByName(const string& name)
+{
+  auto it = std::find(particleObjects.begin(), particleObjects.end(), name);
+
+  if (it != particleObjects.end())
     return (&(*it));
   return (0);
 }
@@ -488,7 +518,7 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
 
     for (; it != end ; ++it)
     {
-      if (it->GetDistanceEstimate(light->nodePath.get_pos()) <= light->zoneSize)
+      if (it->GetDistanceEstimate(light->nodePath.get_pos()) <= light->collider.node.get_scale(window->get_render()).get_x())
         it->lights.push_back(light);
     }
   }
@@ -531,6 +561,17 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
       }
     }
   }
+
+  std::for_each(light->enlightened_index.begin(), light->enlightened_index.end(), [this, &light](const string& object_name)
+  {
+    MapObject* object = GetObjectFromName(object_name);
+
+    if (object)
+    {
+      light->enlightened.push_back(object->nodePath);
+      object->nodePath.set_light(light->nodePath, light->priority);
+    }
+  });
 
   //cout << "Number of enlightened objects -> " << light->enlightened.size() << endl;
 
@@ -693,6 +734,10 @@ void           World::UnSerialize(Utils::Packet& packet)
       lights.push_back(light);
     }
   }
+
+  cout << "Unserialize particle objects" << endl;
+  if (blob_revision >= 13)
+    packet >> particleObjects;
 
   cout << "Unserialize zones" << endl;
   if (blob_revision >= 7)
@@ -935,7 +980,7 @@ void           World::Serialize(Utils::Packet& packet, std::function<void (const
     CompileDoors(progress_callback);
 #endif
 
-  packet << objects << dynamicObjects << lights << zones;
+  packet << objects << dynamicObjects << lights << particleObjects << zones;
 
   {
     char serialize_sunlight_enabled = sunlight_enabled;

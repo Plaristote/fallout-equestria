@@ -711,6 +711,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(worldClass, "void   SetMapObjectsVisible(bool)",      asMETHOD(World,SetMapObjectsVisible),     asCALL_THISCALL);
   engine->RegisterObjectMethod(worldClass, "void   SetDynamicObjectsVisible(bool)",  asMETHOD(World,SetDynamicObjectsVisible), asCALL_THISCALL);  
   engine->RegisterObjectMethod(worldClass, "Light@ GetLight(string)",                asMETHOD(World,GetLightByName),           asCALL_THISCALL);
+  engine->RegisterObjectMethod(worldClass, "void   WriteToBam(string)",              asMETHOD(World,WriteToBam),               asCALL_THISCALL);
 
   const char* cameraClass = "Camera";
   engine->RegisterObjectType(cameraClass, 0, asOBJ_REF | asOBJ_NOCOUNT);

@@ -21,15 +21,16 @@ QString pathScriptCategories[N_SCRIPT_CAT] = {
 
 struct PandaTask : public AsyncTask
 {
-  MainWindow*      main_window;
-  QWidget*         panda_widget;
-  WindowFramework* window;
-  SceneCamera*     camera;
-  Mouse*           mouse;
-  QElapsedTimer    timer;
-  bool             camera_locked;
+  MainWindow*            main_window;
+  QWidget*               panda_widget;
+  WindowFramework*       window;
+  SceneCamera*           camera;
+  ParticleSystemManager* particle_system_manager;
+  Mouse*                 mouse;
+  QElapsedTimer          timer;
+  bool                   camera_locked;
 
-  PandaTask() : window(0), camera(0), mouse(0), camera_locked(false) { }
+  PandaTask() : window(0), camera(0), particle_system_manager(0), mouse(0), camera_locked(false) { }
 
   DoneStatus do_task(void)
   {
@@ -41,6 +42,8 @@ struct PandaTask : public AsyncTask
     camera->Run(elapsedTime);
     mouse->Run();
     timer.start();
+    if (particle_system_manager)
+      particle_system_manager->do_particles(ClockObject::get_global_clock()->get_dt());
     //main_window->ShowWaypointZone();
     return (AsyncTask::DS_cont);
   }
@@ -202,9 +205,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->charsheetDel,  SIGNAL(clicked()),                   this,                SLOT(DeleteCharsheet()));
     connect(ui->charsheetSave, SIGNAL(clicked()),                   ui->charsheetEditor, SLOT(Save()));
 
-    connect(ui->treeWidget, SIGNAL(FocusObject(MapObject*)),            this, SLOT(MapObjectFocus(MapObject*)));
-    connect(ui->treeWidget, SIGNAL(FocusDynamicObject(DynamicObject*)), this, SLOT(DynamicObjectFocus(DynamicObject*)));
-    connect(ui->treeWidget, SIGNAL(FocusLight(WorldLight*)),            this, SLOT(LightFocus(WorldLight*)));
+    connect(ui->treeWidget, SIGNAL(FocusObject(MapObject*)),              this, SLOT(MapObjectFocus(MapObject*)));
+    connect(ui->treeWidget, SIGNAL(FocusDynamicObject(DynamicObject*)),   this, SLOT(DynamicObjectFocus(DynamicObject*)));
+    connect(ui->treeWidget, SIGNAL(FocusLight(WorldLight*)),              this, SLOT(LightFocus(WorldLight*)));
+    connect(ui->treeWidget, SIGNAL(FocusParticleObject(ParticleObject*)), this, SLOT(ParticleObjectFocus(ParticleObject*)));
 
     connect(ui->freeCamera, SIGNAL(toggled(bool)), this, SLOT(SetFreeCamera(bool)));
     connect(ui->lockCamera, SIGNAL(toggled(bool)), this, SLOT(SetCameraLocked(bool)));
@@ -772,6 +776,7 @@ void MainWindow::PandaInitialized()
     my_task.window          = window;
     my_task.camera          = new SceneCamera(window, window->get_camera_group());
     my_task.mouse           = new Mouse(window);
+    my_task.particle_system_manager = ui->worldObjectWidget->GetParticleSystemManager();
 
     connect(ui->widget, SIGNAL(MousePressed(QMouseEvent*)), this, SLOT(PandaButtonPressed(QMouseEvent*)));
     connect(ui->widget, SIGNAL(MouseRelease(QMouseEvent*)), this, SLOT(PandaButtonRelease(QMouseEvent*)));
@@ -812,10 +817,11 @@ void MainWindow::PandaInitialized()
 
 // DYNAMICOBJECTS
      ui->objectAddButton->setMenu(&level_add_object_menu);
-     level_add_object_menu.addAction(ui->treeWidget->icon_map_object, "Map Object",     this, SLOT(MapObjectWizard()));
-     level_add_object_menu.addAction(ui->treeWidget->icon_dyn_object, "Dynamic Object", this, SLOT(DynamicObjectWizard()));
-     level_add_object_menu.addAction(ui->treeWidget->icon_light,      "Light",          this, SLOT(LightAdd()));
-     level_add_object_menu.addAction(ui->treeWidget->icon_character,  "Character",      this, SLOT(CharacterAdd()));
+     level_add_object_menu.addAction(ui->treeWidget->icon_map_object,      "Map Object",      this, SLOT(MapObjectWizard()));
+     level_add_object_menu.addAction(ui->treeWidget->icon_dyn_object,      "Dynamic Object",  this, SLOT(DynamicObjectWizard()));
+     level_add_object_menu.addAction(ui->treeWidget->icon_light,           "Light",           this, SLOT(LightAdd()));
+     level_add_object_menu.addAction(ui->treeWidget->icon_particle_object, "Particle Effect", this, SLOT(ParticleObjectAdd()));
+     level_add_object_menu.addAction(ui->treeWidget->icon_character,       "Character",       this, SLOT(CharacterAdd()));
 
      connect(ui->objectDeleteButton, SIGNAL(clicked()), this, SLOT(DeleteSelection()));
 
@@ -845,6 +851,23 @@ void MainWindow::PandaInitialized()
       if (level != "")
         LoadMap(level);
     }
+}
+
+void MainWindow::ParticleObjectAdd()
+{
+  QString        name = QInputDialog::getText(this, "Add Particle Object", "Unique name");
+  ParticleObject particle_object;
+
+  particle_object.SetName(name.toStdString());
+  world->particleObjects.push_back(particle_object);
+  ui->treeWidget->AddParticleObject(world->GetParticleObjectByName(name.toStdString()));
+  ParticleObjectFocus(world->GetParticleObjectByName(name.toStdString()));
+}
+
+void MainWindow::ParticleObjectFocus(ParticleObject* object)
+{
+  if (object != 0)
+    ui->worldObjectWidget->SetSelection(object);
 }
 
 void MainWindow::ObjectAdd()

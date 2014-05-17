@@ -107,6 +107,8 @@ struct WorldLight : public Utils::Serializable
       nodePath.set_pos(position);
   }
 
+  void   SetFrustumVisible(bool);
+
   bool operator==(const std::string& comp) { return (name == comp); }
 
   void Unserialize(Utils::Packet& packet);
@@ -153,7 +155,8 @@ struct WorldLight : public Utils::Serializable
   ShadowSettings shadow_settings;
   Collider       collider;
 
-  std::list<NodePath> enlightened;
+  std::list<NodePath>      enlightened;
+  std::vector<std::string> enlightened_index;
 #ifdef GAME_EDITOR
   NodePath    symbol;
 #endif

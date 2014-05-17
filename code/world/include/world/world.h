@@ -43,6 +43,7 @@ LPoint3f operator*(LPoint3f,LPoint3f);
 #include "world/map_object.hpp"
 #include "world/dynamic_object.hpp"
 #include "world/light.hpp"
+#include "world/particle_object.hpp"
 #include "world/zone.hpp"
 
 struct World
@@ -53,11 +54,12 @@ struct World
 #else
     typedef std::list<Waypoint>      Waypoints;
 #endif
-    typedef std::list<MapObject>     MapObjects;
-    typedef std::list<DynamicObject> DynamicObjects;
-    typedef std::list<WorldLight>    WorldLights;
-    typedef std::list<Zone>          Zones;
-    typedef std::vector<NodePath>    Floors;
+    typedef std::list<MapObject>      MapObjects;
+    typedef std::list<DynamicObject>  DynamicObjects;
+    typedef std::list<ParticleObject> ParticleObjects;
+    typedef std::list<WorldLight>     WorldLights;
+    typedef std::list<Zone>           Zones;
+    typedef std::vector<NodePath>     Floors;
 
     WindowFramework* window;
 
@@ -76,6 +78,9 @@ struct World
     NodePath         rootLights;
     WorldLights      lights;
     bool             sunlight_enabled;
+
+    NodePath         rootParticleObjects;
+    ParticleObjects  particleObjects;
 #ifdef GAME_EDITOR
     NodePath         lightSymbols;
     bool             do_compile_doors;
@@ -86,6 +91,8 @@ struct World
 
     World(WindowFramework* window);
     ~World(void);
+
+    void      WriteToBam(const std::string& name);
 
     void      FloorResize(int);
 
@@ -153,6 +160,8 @@ struct World
 
     void           ObjectChangeFloor(MapObject&, unsigned char floor, unsigned short type);
 
+    MapObject*     GetObjectFromName(const std::string& name);
+
     MapObject*     AddMapObject(const std::string& name, const std::string& model, const std::string& texture, float x, float y, float z);
     void           DeleteMapObject(MapObject*);
     MapObject*     GetMapObjectFromName(const std::string& name);
@@ -183,6 +192,9 @@ struct World
     void           DeleteLight(const std::string&);
     WorldLight*    GetLightByName(const std::string&);
     void           CompileLight(WorldLight*, unsigned char = ColMask::Render);
+
+    ParticleObject* GetParticleObjectByName(const std::string&);
+    void            DeleteParticleObject(const std::string&);
 
     typedef std::function<void (const std::string&, float)> ProgressCallback;
 

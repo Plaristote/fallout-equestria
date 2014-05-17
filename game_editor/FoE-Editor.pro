@@ -26,12 +26,13 @@ CONFIG(debug, debug|releqse) {
 win32:LIBS +=  ../3rd_parties/lib/libp3framework.lib \
                ../3rd_parties/lib/libpanda.lib \
                ../3rd_parties/lib/libpandafx.lib \
+               ../3rd_parties/lib/libpandaphysics.lib \
                ../3rd_parties/lib/libpandaexpress.lib \
                ../3rd_parties/lib/libp3dtoolconfig.lib \
                ../3rd_parties/lib/libp3dtool.lib \
                ../3rd_parties/lib/libp3direct.lib \
                ../3rd_parties/lib/python27.lib
-unix:LIBS   += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3direct -lX11
+unix:LIBS   += -L/usr/lib/panda3d -lp3framework -lpanda -lpandafx -lpandaphysics -lpandaexpress -lp3dtoolconfig -lp3dtool -lp3direct -lX11
 
 INCLUDEPATH += ../3rd_parties/include \
                ../code/editor/include \
@@ -84,6 +85,7 @@ SOURCES += main.cpp\
            dynamic_object.cpp \
            zone.cpp \
            light.cpp \
+           particle_effect.cpp \
     worldobjectwidget.cpp \
     inventoryeditor.cpp
 
@@ -127,6 +129,7 @@ HEADERS  += globals.hpp \
             world/waypoint.hpp \
             world/zone.hpp \
             world/scene_camera.hpp \
+            world/particle_effect.hpp \
             divide_and_conquer.hpp \
     worldobjectwidget.h \
     inventoryeditor.h
