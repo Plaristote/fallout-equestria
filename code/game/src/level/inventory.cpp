@@ -32,7 +32,7 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts
     if (script["file"].Value() != "")
     {
       _object.asDefineMethod("CanWeild", "bool CanWeild(Item@, Character@, string, int)");
-      _object.asDefineMethod("SetEquiped", "void SetEquiped(Item@, Character@, bool)");
+      _object.asDefineMethod("SetEquiped", "void SetEquiped(Item@, Character@, string, int, string, bool)");
     }
   }
 
@@ -112,15 +112,18 @@ bool InventoryObject::IsWeapon(void) const
   return (false);
 }
 
-void InventoryObject::SetEquiped(ObjectCharacter* character, bool set)
+void InventoryObject::SetEquiped(ObjectCharacter* character, bool set, std::string slot, unsigned short mode, std::string joint)
 {
   if (_equiped != set && _object.IsDefined("SetEquiped"))
   {
     AngelScript::Type<InventoryObject*> this_param(this);
     AngelScript::Type<ObjectCharacter*> character_param(character);
     AngelScript::Type<bool>             set_param(set);
+    AngelScript::Type<std::string*>     slot_param(&slot);
+    AngelScript::Type<unsigned short>   mode_param(mode);
+    AngelScript::Type<std::string*>     joint_param(&joint);
 
-    _object.Call("SetEquiped", 3, &this_param, &character_param, &set_param);
+    _object.Call("SetEquiped", 6, &this_param, &character_param, &slot_param, &mode_param, &joint_param, &set_param);
   }
   _equiped = set;
 }

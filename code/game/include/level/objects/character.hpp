@@ -44,7 +44,8 @@ public:
   const Inventory&         GetInventory(void) const   { return (*_inventory); }
   const std::string        GetFactionName(void) const { return (_faction ? _faction->name : ""); }
   unsigned int             GetFaction(void) const     { return (_faction ? _faction->flag : 0);  }
-    
+  NodePath                 GetJoint(const std::string& name);
+
   void                     SetFurtive(bool do_set);
   void                     AddFlag(unsigned char flag)       { _flags |= flag; }
   void                     DelFlag(unsigned char flag)       { if (HasFlag(flag)) { _flags -= flag; } }

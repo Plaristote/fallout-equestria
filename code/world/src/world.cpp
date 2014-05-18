@@ -3,7 +3,7 @@
 #include <panda3d/collisionBox.h>
 #include <panda3d/collisionSphere.h>
 #include <panda3d/collisionRay.h>
-#define CURRENT_BLOB_REVISION 13
+#define CURRENT_BLOB_REVISION 14
 
 using namespace std;
 
@@ -921,6 +921,21 @@ void           World::UpdateMapTree(void)
   std::for_each(dynamicObjects.begin(), dynamicObjects.end(), [this, &set_relations](DynamicObject& object)
   { set_relations(object.nodePath, object.nodePath.get_name()); });
   set_relations(floors_node, "");
+  std::for_each(particleObjects.begin(), particleObjects.end(), [this](ParticleObject& object)
+  {
+    object.SetParticleEffect(object.GetParticleEffectName());
+    if (object.parent_name == "")
+      object.ParticleEffect::ReparentTo(rootParticleObjects);
+    else
+    {
+      MapObject* map_object = GetObjectFromName(object.parent_name);
+
+      if (map_object)
+        object.ReparentTo(map_object);
+      else
+        object.ParticleEffect::ReparentTo(rootParticleObjects);
+    }
+  });
 }
 
 void           World::Serialize(Utils::Packet& packet, std::function<void (const std::string&, float)> progress_callback)

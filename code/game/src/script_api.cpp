@@ -578,6 +578,8 @@ void AngelScriptInitialize(void)
   const char* charClass      = "Character";
   const char* doorClass      = "Door";
   const char* shelfClass     = "Shelf";
+  const char* taskClass      = "Task";
+  const char* tasksClass     = "Tasks";
   engine->RegisterObjectType(itemClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(inventoryClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(dynObjectClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
@@ -585,6 +587,8 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectType(doorClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(shelfClass,     0, asOBJ_REF | asOBJ_NOCOUNT);
   engine->RegisterObjectType(partyClass,     0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectType(taskClass,      0, asOBJ_REF | asOBJ_NOCOUNT);
+  engine->RegisterObjectType(tasksClass,     0, asOBJ_REF | asOBJ_NOCOUNT);
 
   Script::StdList<string>::Register(engine, "ItemList", "Item@");
   engine->RegisterObjectMethod(inventoryClass, "void      AddObject(string)",             asMETHODPR(Inventory,AddObject, (const string&), InventoryObject*), asCALL_THISCALL);
@@ -597,6 +601,18 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(inventoryClass, "ItemList  GetContent()",                  asMETHODPR(Inventory,GetContent, (void), Script::StdList<InventoryObject*>&), asCALL_THISCALL);
   engine->RegisterObjectMethod(inventoryClass, "Item@     GetEquipedItem(string, int)",   asMETHOD(Inventory,GetEquipedItem), asCALL_THISCALL);
   engine->RegisterObjectMethod(inventoryClass, "void      SetEquipedItem(string, int, Item@, string)", asMETHODPR(Inventory,SetEquipedItem, (const string&, unsigned int, InventoryObject*, const string&), void), asCALL_THISCALL);
+
+  engine->RegisterObjectMethod(dynObjectClass, "Tasks@ GetTaskSet()", asMETHOD(InstanceDynamicObject,GetTaskSet), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass,      "Tasks@ GetTaskSet()", asMETHOD(ObjectCharacter,GetTaskSet),       asCALL_THISCALL);
+  engine->RegisterObjectMethod(doorClass,      "Tasks@ GetTaskSet()", asMETHOD(ObjectDoor,GetTaskSet),            asCALL_THISCALL);
+  engine->RegisterObjectMethod(shelfClass,     "Tasks@ GetTaskSet()", asMETHOD(ObjectShelf,GetTaskSet),           asCALL_THISCALL);
+
+  engine->RegisterObjectMethod(tasksClass, "Task@ PushTask(string)",   asMETHOD(TaskSet,PushTask),   asCALL_THISCALL);
+  engine->RegisterObjectMethod(tasksClass, "Task@ GetTask(string)",    asMETHOD(TaskSet,GetTask),    asCALL_THISCALL);
+  engine->RegisterObjectMethod(tasksClass, "void  RemoveTask(string)", asMETHOD(TaskSet,RemoveTask), asCALL_THISCALL);
+
+  engine->RegisterObjectMethod(taskClass, "void AddGfx(string, string)", asMETHOD(ScriptedTask,AddGfx),    asCALL_THISCALL);
+  engine->RegisterObjectMethod(taskClass, "void DeleteGfx(string)",      asMETHOD(ScriptedTask,DeleteGfx), asCALL_THISCALL);
 
   engine->RegisterObjectMethod(itemClass, "string GetName() const",                                asMETHOD(InventoryObject,GetName),               asCALL_THISCALL);
   engine->RegisterObjectMethod(itemClass, "Data   AsData()",                                       asFUNCTION(asUtils::ItemAsData),                 asCALL_CDECL_OBJFIRST);

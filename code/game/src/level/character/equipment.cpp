@@ -81,10 +81,11 @@ void ObjectCharacter::Equipment::EquipDefaultItemForSlot(const std::string& slot
 
 void ObjectCharacter::Equipment::EquipItem(InventoryObject *item)
 {
-  EquipedItem   equiped_item;
-  std::string   slot_type     = (*item)["equiped"]["target"].Value();
-  unsigned char slot_number   = (int)((*item)["equiped"]["slot"].Or(0));
-  NodePath      joint         = GetJointForSlot(slot_type, slot_number);
+  EquipedItem    equiped_item;
+  std::string    slot_type     = (*item)["equiped"]["target"].Value();
+  unsigned char  slot_number   = (int)((*item)["equiped"]["slot"].Or(0));
+  unsigned short slot_mode     = (short)((*item)["equiped"]["mode"].Or(0));
+  NodePath       joint         = GetJointForSlot(slot_type, slot_number);
 
   cout << "Equipment::EquipItem " << item->GetName() << endl;
   if (joint.is_empty())
@@ -97,7 +98,7 @@ void ObjectCharacter::Equipment::EquipItem(InventoryObject *item)
     equiped_item.render->GetNodePath().reparent_to(joint);
   else
     cout << "Item " << item->GetName() << " has no render" << endl;
-  equiped_item.item->SetEquiped(&character, true);
+  equiped_item.item->SetEquiped(&character, true, slot_type, slot_mode, (joint.is_empty() ? "" : joint.get_name()));
   ClearSlot(slot_type, slot_number);
   equiped_items.push_back(equiped_item);
   if (slot_type == "equiped") // Quick access interface update
@@ -167,8 +168,6 @@ NodePath ObjectCharacter::Equipment::GetJointForSlot(const string &slot_name, un
   if (inventory)
   {
     Inventory::Slot&         slot        = inventory->GetItemSlot(slot_name, slot_number);
-    PT(CharacterJointBundle) body_bundle = character._character->get_bundle(0);
-    PT(CharacterJoint)       joint;
     stringstream             joint_name;
     string                   equip_mode_name = character.GetLevel()->GetEquipModes().GetNameForMode(slot.mode);
 
@@ -177,15 +176,6 @@ NodePath ObjectCharacter::Equipment::GetJointForSlot(const string &slot_name, un
       joint_name << '-' << equip_mode_name;
     joint_name << '#' << (slot_number + 1);*/
     joint_name << "Horn"; // TODO Get models with the proper joints
-    joint = character._character->find_joint(joint_name.str());
-    if (joint)
-    {
-      NodePath body_node  = character.GetNodePath().find("**/+Character");
-      NodePath joint_node = body_node.attach_new_node(joint_name.str());
-
-      body_bundle->control_joint(joint_name.str(), joint_node.node());
-      return (joint_node);
-    }
+    return (character.GetJoint(joint_name.str()));
   }
-  return (NodePath());
 }

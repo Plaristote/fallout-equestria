@@ -77,7 +77,25 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   ForEach(world->zones,           [this](Zone& zone)          { zones.RegisterZone(zone);  });
   LoadingScreen::AppendText("Analyzing surrounding objects...");
   ForEach(world->dynamicObjects,  [this](DynamicObject& dobj) { InsertDynamicObject(dobj); });
-  ForEach(world->particleObjects, [this](ParticleObject& obj) { if (!(obj.GetParticleSystem().is_null())) { particle_manager.attach_particlesystem(obj.GetParticleSystem()); } });
+  for_each(world->particleObjects.begin(), world->particleObjects.end(), [this](ParticleObject& obj)
+  {
+    //obj.SetParticleEffect(obj.GetParticleEffectName());
+    if (!(obj.GetParticleSystem().is_null()))
+    {
+      /*if (obj.parent_name == "")
+        obj.ParticleEffect::ReparentTo(world->rootParticleObjects);
+      else
+      {
+        MapObject* parent = world->GetObjectFromName(obj.parent_name);
+
+        if (parent)
+          obj.ParticleEffect::ReparentTo(parent->nodePath);
+        else
+          obj.ParticleEffect::ReparentTo(world->rootParticleObjects);
+      }*/
+      particle_manager.attach_particlesystem(obj.GetParticleSystem());
+    }
+  });
 
   world->SetWaypointsVisible(false);
   

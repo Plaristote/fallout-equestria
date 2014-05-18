@@ -47,7 +47,7 @@ public:
 
   bool              CanUse(ObjectCharacter*, InstanceDynamicObject* target, unsigned int use_type);
   bool              CanWeild(ObjectCharacter*, std::string slot, unsigned char mode = 0);
-  void              SetEquiped(ObjectCharacter*, bool set);
+  void              SetEquiped(ObjectCharacter*, bool set, std::string slot = "", unsigned short mode = 0, std::string joint = "");
   bool              IsEquiped(void) const { return ((*this)["equiped"].NotNil()); }
   bool              IsGroupableWith(const InventoryObject*) const;
   bool              IsHidden(void)  const { return ((*this)["hidden"] == 1); }

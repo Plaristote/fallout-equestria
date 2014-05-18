@@ -91,6 +91,22 @@ void ObjectCharacter::SetupScript(AngelScript::Object* script)
   Target::SetupScript(script);
 }
 
+NodePath ObjectCharacter::GetJoint(const string& joint_name)
+{
+  PT(CharacterJointBundle) body_bundle = _character->get_bundle(0);
+  PT(CharacterJoint)       joint       = _character->find_joint(joint_name);
+
+  if (joint)
+  {
+    NodePath body_node  = GetNodePath().find("**/+Character");
+    NodePath joint_node = body_node.attach_new_node(joint_name);
+
+    body_bundle->control_joint(joint_name, joint_node.node());
+    return (joint_node);
+  }
+  return (NodePath());
+}
+
 void ObjectCharacter::ActionTalkTo(ObjectCharacter* user)
 {
   bool open_dialog = _object->dialog != "";
