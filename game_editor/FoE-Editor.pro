@@ -87,7 +87,8 @@ SOURCES += main.cpp\
            light.cpp \
            particle_effect.cpp \
     worldobjectwidget.cpp \
-    inventoryeditor.cpp
+    inventoryeditor.cpp \
+    enlightenedobjectswidget.cpp
 
 
 HEADERS  += globals.hpp \
@@ -132,7 +133,8 @@ HEADERS  += globals.hpp \
             world/particle_effect.hpp \
             divide_and_conquer.hpp \
     worldobjectwidget.h \
-    inventoryeditor.h
+    inventoryeditor.h \
+    enlightenedobjectwidget.h
 
 FORMS    += mainwindow.ui \
             dialognewscript.ui \

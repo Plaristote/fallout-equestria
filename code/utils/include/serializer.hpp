@@ -78,7 +78,8 @@ public:
     Array  = 6,
     UInt   = 7,
     UShort = 8,
-    UChar  = 9
+    UChar  = 9,
+    Bool   = 10
   };
 
   /*! \brief Use to create an empty Packet. */
@@ -300,6 +301,7 @@ private:
   template<> struct Packet::TypeToCode<unsigned int>   { enum { TypeCode = Packet::UInt   }; };
   template<> struct Packet::TypeToCode<unsigned short> { enum { TypeCode = Packet::UShort }; };
   template<> struct Packet::TypeToCode<unsigned char>  { enum { TypeCode = Packet::UChar  }; };
+  template<> struct Packet::TypeToCode<bool>           { enum { TypeCode = Packet::Bool   }; };
 }
 
 #endif

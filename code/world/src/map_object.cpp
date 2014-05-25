@@ -1,5 +1,7 @@
 #include "world/world.h"
 #include "world/map_object.hpp"
+#include "world/waypoint.hpp"
+#include "world/light.hpp"
 #include "serializer.hpp"
 #ifdef GAME_EDITOR
 # include "qpandaapplication.h"
@@ -305,4 +307,19 @@ bool MapObject::IsCuttable(void) const
   }
 #endif
   return (false);
+}
+
+void MapObject::SetLight(WorldLight *light, bool is_active)
+{
+  if (light)
+  {
+    /*if (light->enabled == true && is_active == true)
+      render.set_light(light->nodePath, light->priority);
+    else
+      render.set_light_off(light->nodePath);*/
+    for_each(waypoints.begin(), waypoints.end(), [&light, is_active](Waypoint* waypoint)
+    {
+      waypoint->SetLight(light, is_active);
+    });
+  }
 }

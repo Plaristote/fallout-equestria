@@ -161,6 +161,7 @@ struct World
     void           ObjectChangeFloor(MapObject&, unsigned char floor, unsigned short type);
 
     MapObject*     GetObjectFromName(const std::string& name);
+    MapObject*     GetObjectFromNodePath(const NodePath nodepath);
 
     MapObject*     AddMapObject(const std::string& name, const std::string& model, const std::string& texture, float x, float y, float z);
     void           DeleteMapObject(MapObject*);

@@ -10,6 +10,7 @@
 
 struct Waypoint;
 struct World;
+struct WorldLight;
 
 struct MapObject : public Utils::Serializable
 {
@@ -47,6 +48,7 @@ struct MapObject : public Utils::Serializable
   static void   InitializeTree(World* world);
   void          InitializeCollideMask();
   virtual int   GetObjectCollideMask() { return (ColMask::Object); }
+  void          SetLight(WorldLight* light, bool is_active);
   
   bool          IsCuttable(void) const;
 };

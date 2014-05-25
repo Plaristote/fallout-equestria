@@ -45,9 +45,18 @@ void ParticleEffect::ReparentTo(NodePath nodePath)
 {
   if (!particle_system.is_null())
   {
+    {
+      NodePath floor_node = nodePath;
+#ifdef GAME_EDITOR
+      while (floor_node.has_parent())
+        floor_node = floor_node.get_parent();
+#else
+      while (floor_node.has_parent() && !(starts_with(floor_node.get_name(), "floor-")))
+        floor_node = floor_node.get_parent();
+#endif
+      particle_system->set_render_parent(floor_node);
+    }
     particle_system->set_spawn_render_node_path(nodePath);
-    particle_system->set_render_parent(nodePath);
-    nodePath.show();
   }
 }
 

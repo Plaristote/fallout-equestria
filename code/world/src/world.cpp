@@ -3,7 +3,7 @@
 #include <panda3d/collisionBox.h>
 #include <panda3d/collisionSphere.h>
 #include <panda3d/collisionRay.h>
-#define CURRENT_BLOB_REVISION 14
+#define CURRENT_BLOB_REVISION 15
 
 using namespace std;
 
@@ -272,6 +272,13 @@ MapObject* World::GetObjectFromName(const string& name)
   return (result != 0 ? result : GetObjectFromName(name, dynamicObjects));
 }
 
+MapObject* World::GetObjectFromNodePath(const NodePath nodepath)
+{
+  MapObject* result = GetObjectFromNodePath(nodepath, objects);
+
+  return (result != 0 ? result : GetObjectFromNodePath(nodepath, dynamicObjects));
+}
+
 MapObject* World::GetMapObjectFromName(const string &name)
 {
   return (GetObjectFromName(name, objects));
@@ -462,6 +469,14 @@ string get_nodepath_path(NodePath np)
 
 void        World::CompileLight(WorldLight* light, unsigned char colmask)
 {
+  if (light)
+  {
+    light->InitializeEnlightenedObjects(this);
+    light->collider.SetLightOnCollidingObjects(this, light);
+    light->SetEnabled(light->enabled);
+  }
+  /*if (!light)
+    return ;
   PT(CollisionSphere)       colSphere = new CollisionSphere(light->nodePath.get_x(),
                                light->nodePath.get_y(),
                                light->nodePath.get_z(),
@@ -482,6 +497,8 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
   else
     colNp = light->collider.node;
   colNode = reinterpret_cast<CollisionNode*>(light->collider.node.node());
+  if (!colNode)
+    return ;
   cout << colNp.get_scale().get_x() << ", " << colNp.get_scale().get_y() << ", " << colNp.get_scale().get_z() << endl;
   traverser.add_collider(colNp, handlerQueue);
 
@@ -500,10 +517,10 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
     else
       ++it;
   }
-#endif
+#endif*/
 
   // Detecting the new collisions with colmask, and setting the light
-  colNode->set_into_collide_mask(colmask);
+  /*colNode->set_into_collide_mask(colmask);
   colNode->set_from_collide_mask(colmask);
   traverser.traverse(window->get_render());
 
@@ -560,18 +577,18 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
         node.set_light(light->nodePath, light->priority);
       }
     }
-  }
+  }*/
 
-  std::for_each(light->enlightened_index.begin(), light->enlightened_index.end(), [this, &light](const string& object_name)
+  /*std::for_each(light->enlightened_index.begin(), light->enlightened_index.end(), [this, &light](const string& object_name)
   {
     MapObject* object = GetObjectFromName(object_name);
 
     if (object)
     {
       light->enlightened.push_back(object->nodePath);
-      object->nodePath.set_light(light->nodePath, light->priority);
+      object->SetLight(light, true);
     }
-  });
+  });*/
 
   //cout << "Number of enlightened objects -> " << light->enlightened.size() << endl;
 

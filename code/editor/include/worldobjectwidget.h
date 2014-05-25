@@ -72,6 +72,7 @@ public slots:
   void UpdateLightZoneSize();
   void UpdateLightPriority();
   void UpdateShadowCaster();
+  void UpdateEnlightenedObject();
 
   void UpdateParticleEffect(void);
   void RestartParticleEffect(void);

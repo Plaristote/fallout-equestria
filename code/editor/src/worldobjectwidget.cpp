@@ -60,6 +60,8 @@ WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
   connect(ui->addLightTarget,    SIGNAL(clicked()),             this, SLOT(AddEnlightenedObject()));
   connect(ui->deleteLightTarget, SIGNAL(clicked()),             this, SLOT(DeleteEnlightenedObject()));
   connect(ui->showFrustum,       SIGNAL(toggled(bool)),         this, SLOT(LightShowFrustum(bool)));
+  connect(ui->lightTargets,      SIGNAL(updatedPriority()),     this, SLOT(UpdateEnlightenedObject()));
+  connect(ui->lightTargets,      SIGNAL(updatedPropagation()),  this, SLOT(UpdateEnlightenedObject()));
 
   // Light -> Shadow caster
   connect(ui->shadowFilmSize,    SIGNAL(valueChanged(int)),     this, SLOT(UpdateShadowCaster()));
@@ -122,7 +124,7 @@ void WorldObjectWidget::AddEnlightenedObject(void)
 {
   if (selection_type == 3)
   {
-      std::string name = QInputDialog::getText(this, "Chose an object", "Name").toStdString();
+    std::string name = QInputDialog::getText(this, "Chose an object", "Name").toStdString();
     auto        it = std::find(selection.light->enlightened_index.begin(), selection.light->enlightened_index.end(), name);
 
     if (it == selection.light->enlightened_index.end())
@@ -131,11 +133,34 @@ void WorldObjectWidget::AddEnlightenedObject(void)
 
       if (object)
       {
-        object->nodePath.set_light(selection.light->nodePath, selection.light->priority);
-        ui->lightTargets->addItem(name.c_str());
-        selection.light->enlightened_index.push_back(name);
+        ui->lightTargets->AddEnlightenedObject(name.c_str(), selection.light->priority, false);
+        selection.light->enlightened_index.push_back(WorldLight::EnlightenedObjectSettings(name, selection.light->priority, false));
+        LightCompile();
       }
     }
+  }
+}
+
+void WorldObjectWidget::UpdateEnlightenedObject(void)
+{
+  if (selection_type == 3)
+  {
+    int            current_row        = ui->lightTargets->currentRow();
+    unsigned short priority           = ui->lightTargets->GetPriority(current_row);
+    bool           propagates         = ui->lightTargets->PropagatesToChildren(current_row);
+    QString        name               = ui->lightTargets->Name(current_row);
+    auto           enlightened_object = std::find(selection.light->enlightened_index.begin(),
+                                                  selection.light->enlightened_index.end(),
+                                                  name.toStdString());
+
+    if (enlightened_object != selection.light->enlightened_index.end())
+    {
+      enlightened_object->priority           = priority;
+      enlightened_object->inherited_property = propagates;
+      LightCompile();
+    }
+    else
+      cout << "No enlightened object by the name of " << name.toStdString() << endl;
   }
 }
 
@@ -143,20 +168,15 @@ void WorldObjectWidget::DeleteEnlightenedObject(void)
 {
   if (selection_type == 3)
   {
-    QListWidgetItem* item   = ui->lightTargets->currentItem();
+    QString name = ui->lightTargets->Name(ui->lightTargets->currentRow());
+    auto           enlightened_object = std::find(selection.light->enlightened_index.begin(),
+                                                  selection.light->enlightened_index.end(),
+                                                  name.toStdString());
 
-    if (item != 0)
-    {
-      std::string      name   = item->text().toStdString();
-      MapObject*       object = world->GetObjectFromName(name);
-      auto             it     = std::find(selection.light->enlightened_index.begin(), selection.light->enlightened_index.end(), name);
-
-      if (object)
-        object->nodePath.set_light_off(selection.light->nodePath);
-      if (it != selection.light->enlightened_index.end())
-        selection.light->enlightened_index.erase(it);
-      delete item;
-    }
+    ui->lightTargets->removeRow(ui->lightTargets->currentRow());
+    if (enlightened_object != selection.light->enlightened_index.end())
+      selection.light->enlightened_index.erase(enlightened_object);
+    LightCompile();
   }
 }
 
@@ -307,8 +327,10 @@ void WorldObjectWidget::SetSelection(WorldLight* light)
   }
 
   ui->lightTargets->clear();
-  std::for_each(light->enlightened_index.begin(), light->enlightened_index.end(), [this](const std::string& name)
-  { ui->lightTargets->addItem(name.c_str()); });
+  std::for_each(light->enlightened_index.begin(), light->enlightened_index.end(), [this](const WorldLight::EnlightenedObjectSettings& settings)
+  {
+    ui->lightTargets->AddEnlightenedObject(settings.name.c_str(), settings.priority, settings.inherited_property);
+  });
 
   ui->lightTypesList->setCurrentIndex((int)light->type);
   InitializeShadowCaster(light);

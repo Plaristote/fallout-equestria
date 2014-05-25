@@ -1,5 +1,6 @@
 #include "world/world.h"
 #include "world/waypoint.hpp"
+#include "world/light.hpp"
 #include "world/world.h"
 #include "dices.hpp"
 
@@ -391,4 +392,12 @@ void Waypoint::Serialize(World* world, Utils::Packet &packet)
   packet << posx << posy << posz;
   packet << floor << floor_above << suggested_floor_above;
   packet << arcs;
+}
+
+void Waypoint::SetLight(WorldLight *light, bool is_active)
+{
+  if (is_active)
+    lights.push_back(light);
+  else
+    lights.erase(find(lights.begin(), lights.end(), light));
 }

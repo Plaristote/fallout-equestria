@@ -77,6 +77,7 @@ struct Waypoint
   void                 UpdateArcDirection(Waypoint*);
   void                 SetSelected(bool);
   bool                 IsSelected(void) const { return (selected); }
+  void                 SetLight(WorldLight* light, bool is_active);
 
   void                 SetArcsVisible(bool);
 

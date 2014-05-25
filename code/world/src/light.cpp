@@ -9,6 +9,59 @@
 using namespace std;
 
 extern unsigned int blob_revision;
+string get_nodepath_path(NodePath);
+
+void WorldLight::SetColor(float r, float g, float b, float a)
+{
+  LColor color(r, g, b, a);
+
+  light->set_color(color);
+}
+
+LVecBase3f WorldLight::GetAttenuation(void) const
+{
+  switch (type)
+  {
+    case Point:
+    {
+      PT(PointLight) point_light = reinterpret_cast<PointLight*>(light.p());
+
+      return (point_light->get_attenuation());
+    }
+    case Spot:
+    {
+      PT(Spotlight) spot_light = reinterpret_cast<Spotlight*>(light.p());
+
+      return (spot_light->get_attenuation());
+    }
+    default:
+        break;
+  }
+  return (LVecBase3f(0, 0, 0));
+}
+
+void WorldLight::SetAttenuation(float a, float b, float c)
+{
+  switch (type)
+  {
+    case Point:
+    {
+      PT(PointLight) point_light = reinterpret_cast<PointLight*>(light.p());
+
+      point_light->set_attenuation(LVecBase3(a, b, c));
+      break ;
+    }
+    case Spot:
+    {
+      PT(Spotlight) spot_light = reinterpret_cast<Spotlight*>(light.p());
+
+      spot_light->set_attenuation(LVecBase3(a, b, c));
+      break ;
+    }
+    default:
+      break ;
+  }
+}
 
 void WorldLight::SetFrustumVisible(bool set_visible)
 {
@@ -40,12 +93,10 @@ void WorldLight::SetFrustumVisible(bool set_visible)
   }
   if (!(camera.is_null()))
   {
-    cout << "dafuck" << endl;
     if (set_visible)
       camera->show_frustum();
     else
       camera->hide_frustum();
-    cout << "lol wat" << endl;
   }
 }
 
@@ -152,7 +203,6 @@ void WorldLight::ReparentTo(MapObject* object)
   nodePath.reparent_to(parent);
 }
 
-
 void WorldLight::SetEnabled(bool set_enabled)
 {
   std::function<void (NodePath)> set_light;
@@ -164,9 +214,41 @@ void WorldLight::SetEnabled(bool set_enabled)
   for_each(enlightened.begin(), enlightened.end(), enabled ? set_light : unset_light);
 }
 
+void WorldLight::InitializeEnlightenedObjects(World* world)
+{
+  DiscardEnlightenedObjects();
+  for_each(enlightened_index.begin(), enlightened_index.end(), [this, &world](const EnlightenedObjectSettings& settings)
+  {
+    MapObject* object = world->GetObjectFromName(settings.name);
+
+    AddEnlightenedObject(object, settings.priority, settings.inherited_property);
+  });
+}
+
+void WorldLight::AddEnlightenedObject(MapObject* object, unsigned int priority, bool propagate_to_children)
+{
+  if (object)
+  {
+    enlightened.push_back(object->render);
+    object->SetLight(this, true);
+    if (propagate_to_children)
+    {
+      std::for_each(object->children.begin(), object->children.end(), [this, priority](MapObject* child)
+      {
+        AddEnlightenedObject(child, priority, true);
+      });
+    }
+  }
+}
+
+void WorldLight::DiscardEnlightenedObjects(void)
+{
+  SetEnabled(false);
+  enlightened.clear();
+}
+
 void WorldLight::Destroy(void)
 {
-  cout << "WorldLightDestroy??" << endl;
   SetEnabled(false);
   nodePath.detach_node();
 #ifdef GAME_EDITOR
@@ -205,14 +287,27 @@ void WorldLight::Unserialize(Utils::Packet& packet)
   switch (parent_type)
   {
     case Type_MapObject:
-      ReparentTo(world->GetMapObjectFromName(parent_name));
+      {
+        MapObject* object = world->GetMapObjectFromName(parent_name);
+
+        if (object)
+          ReparentTo(object);
+        else
+          ReparentTo(world);
+      }
       break ;
     case Type_DynamicObject:
-      ReparentTo(world->GetDynamicObjectFromName(parent_name));
+      {
+        DynamicObject* object = world->GetDynamicObjectFromName(parent_name);
+
+        if (object)
+          ReparentTo(object);
+        else
+          ReparentTo(world);
+      }
       break ;
     case Type_None:
-      parent   = world->rootLights;
-      parent_i = 0;
+      ReparentTo(world);
       break ;
   }
   cout << "Light type = " << (int)type << endl;
@@ -243,8 +338,15 @@ void WorldLight::Unserialize(Utils::Packet& packet)
     collider.parent = nodePath;
     collider.type   = Collider::NONE;
   }
-  if (blob_revision >= 12)
+  if (blob_revision >= 15)
     packet >> enlightened_index;
+  else if (blob_revision >= 12)
+  {
+    std::vector<std::string> tmp;
+    packet >> tmp;
+    for_each(tmp.begin(), tmp.end(), [this](std::string name)
+    { enlightened_index.push_back(WorldLight::EnlightenedObjectSettings(name)); });
+  }
 }
 
 void WorldLight::ShadowSettings::Serialize(Utils::Packet& packet) const
@@ -280,4 +382,33 @@ void WorldLight::Serialize(Utils::Packet& packet) const
     packet << shadow_settings;
   packet << collider;
   packet << enlightened_index;
+}
+
+void WorldLight::LightCollider::SetLightOnCollidingObjects(World *world, WorldLight *light)
+{
+  if (light->collider.type == Collider::SPHERE)
+  {
+    NodePath                  collision_node = light->collider.node;
+    CollisionTraverser        traverser;
+    PT(CollisionHandlerQueue) handler_queue = new CollisionHandlerQueue();
+    string                    last_path;
+
+    if (collision_node.node() == 0) return ;
+    traverser.add_collider(collision_node, handler_queue);
+    traverser.traverse(world->window->get_render());
+
+    for (unsigned int i = 0 ; i < handler_queue->get_num_entries() ; ++i)
+    {
+      NodePath   collision_entry = handler_queue->get_entry(i)->get_into_node_path();
+      string     path            = get_nodepath_path(collision_entry);
+      MapObject* object;
+
+      if (path == last_path)
+        continue ;
+      last_path = path;
+      object    = world->GetObjectFromNodePath(collision_entry);
+      if (object)
+        light->AddEnlightenedObject(object, light->priority, false);
+    }
+  }
 }
