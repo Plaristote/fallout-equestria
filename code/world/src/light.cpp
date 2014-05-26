@@ -243,8 +243,14 @@ void WorldLight::AddEnlightenedObject(MapObject* object, unsigned int priority, 
 
 void WorldLight::DiscardEnlightenedObjects(void)
 {
-  SetEnabled(false);
-  enlightened.clear();
+  if (enabled)
+  {
+    SetEnabled(false);
+    enlightened.clear();
+    SetEnabled(true);
+  }
+  else
+    enlightened.clear();
 }
 
 void WorldLight::Destroy(void)
@@ -272,7 +278,7 @@ void WorldLight::Unserialize(Utils::Packet& packet)
   packet >> name >> tmp_enabled >> zoneSize;
   packet >> _type >> _ptype;
   cout << "[World] Loading light " << name << endl;
-  enabled     = tmp_enabled != 0;
+  enabled     = (bool)tmp_enabled;
   type        = (WorldLight::Type)_type;
   parent_type = (WorldLight::ParentType)_ptype;
   if (parent_type != Type_None)

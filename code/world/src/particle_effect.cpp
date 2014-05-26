@@ -86,7 +86,6 @@ void ParticleEffect::LoadConfiguration(Data data)
   {
     string emitter = data["emitter"]["type"].Or(string("sphere-volume"));
 
-    cout << "debug#0" << endl;
     for (unsigned int i = 0 ; i < EMITTER_INITIALIZERS_COUNT ; ++i)
     {
       if (emitter == emitter_initializers[i].name)
@@ -109,7 +108,6 @@ void ParticleEffect::LoadConfiguration(Data data)
       else
         particle_emitter->set_emission_type(BaseParticleEmitter::ET_CUSTOM);
     }
-    cout << "debug#3" << endl;
 
     particle_emitter->set_amplitude(data["emitter"]["amplitude"].Or(10));
     particle_emitter->set_amplitude_spread(data["emitter"]["amplitude-spread"].Or(0));
@@ -126,7 +124,6 @@ void ParticleEffect::LoadConfiguration(Data data)
                                                      data["emitter"]["radiate-origin"]["y"].Or(0),
                                                      data["emitter"]["radiate-origin"]["z"].Or(0)));
 
-    cout << "debug#4" << endl;
   }
   // LoadRendererConfiguration
   {

@@ -338,6 +338,8 @@ void WorldObjectWidget::SetSelection(WorldLight* light)
   ui->lightPriority->setValue(light->priority);
   ui->objectName->setEnabled(true);
   ui->objectName->setText(QString::fromStdString(light->name));
+  ui->lightSetEnabled->setChecked(light->enabled);
+  ui->lightSetDisabled->setChecked(!light->enabled);
   selection.light = light;
   selection_type  = 3;
   ui->tabWidget->addTab(ui->lightTab,        "Light");
@@ -815,15 +817,21 @@ void WorldObjectWidget::LightShowFrustum(bool toggled)
 
 void WorldObjectWidget::LightSetDisabled(bool disabled)
 {
-  if (disabled)
-    ui->lightSetEnabled->setChecked(false);
+  if (selection_type == 3)
+  {
+    if (disabled)
+      ui->lightSetEnabled->setChecked(false);
+  }
 }
 
 void WorldObjectWidget::LightSetEnabled(bool enabled)
 {
-  if (enabled)
-    ui->lightSetDisabled->setChecked(false);
-  selection.light->SetEnabled(enabled);
+  if (selection_type == 3)
+  {
+    if (enabled)
+      ui->lightSetDisabled->setChecked(false);
+    selection.light->SetEnabled(enabled);
+  }
 }
 
 void WorldObjectWidget::PickModel()
