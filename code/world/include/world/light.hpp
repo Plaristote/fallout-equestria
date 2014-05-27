@@ -18,8 +18,8 @@ namespace Utils
   template<typename A, typename B>
   struct Pair : public std::pair<A, B>, public Utils::Serializable
   {
-    void Serialize(Utils::Packet& packet) const { packet << first << second; }
-    void Unserialize(Utils::Packet& packet)     { packet >> first >> second; }
+    void Serialize(Utils::Packet& packet) const { packet << this->first << this->second; }
+    void Unserialize(Utils::Packet& packet)     { packet >> this->first >> this->second; }
   };
 }
 
