@@ -353,6 +353,7 @@ void WorldLight::Unserialize(Utils::Packet& packet)
     for_each(tmp.begin(), tmp.end(), [this](std::string name)
     { enlightened_index.push_back(WorldLight::EnlightenedObjectSettings(name)); });
   }
+  collider.node.set_collide_mask(0);
 }
 
 void WorldLight::ShadowSettings::Serialize(Utils::Packet& packet) const

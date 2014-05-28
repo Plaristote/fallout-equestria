@@ -317,9 +317,9 @@ void MapObject::SetLight(WorldLight *light, bool is_active)
       render.set_light(light->nodePath, light->priority);
     else
       render.set_light_off(light->nodePath);*/
-    for_each(waypoints.begin(), waypoints.end(), [&light, is_active](Waypoint* waypoint)
+    /*for_each(waypoints.begin(), waypoints.end(), [&light, is_active](Waypoint* waypoint)
     {
       waypoint->SetLight(light, is_active);
-    });
+    });*/
   }
 }
