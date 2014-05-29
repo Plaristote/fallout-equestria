@@ -54,7 +54,6 @@ Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, U
   try
   {
     world->UnSerialize(packet);
-    _light_iterator = world->lights.begin();
   }
   catch (unsigned int&)
   {

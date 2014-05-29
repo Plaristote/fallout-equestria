@@ -193,8 +193,6 @@ private:
   Zones::Manager        zones;
   EquipModes            equip_modes;
   Exit                  exit;
-
-  World::WorldLights::iterator _light_iterator;
 };
 
 #endif
