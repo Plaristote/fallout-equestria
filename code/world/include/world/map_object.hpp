@@ -47,7 +47,7 @@ struct MapObject : public Utils::Serializable
   virtual void  Serialize(Utils::Packet& packet) const;
   static void   InitializeTree(World* world);
   void          InitializeCollideMask();
-  virtual int   GetObjectCollideMask() { return (ColMask::Object); }
+  virtual int   GetObjectCollideMask() const { return (ColMask::Object); }
   void          SetLight(WorldLight* light, bool is_active);
   
   bool          IsCuttable(void) const;

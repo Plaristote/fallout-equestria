@@ -12,7 +12,7 @@ struct DynamicObject : public MapObject
 
   void Unserialize(Utils::Packet& packet);
   void Serialize(Utils::Packet& packet) const;
-  virtual int   GetObjectCollideMask() { return (ColMask::DynObject); }
+  virtual int   GetObjectCollideMask() const { return (ColMask::DynObject); }
 
   enum Type
   {
