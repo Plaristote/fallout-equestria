@@ -35,10 +35,11 @@ struct PandaTask : public AsyncTask
   DoneStatus do_task(void)
   {
     float elapsedTime = timer.elapsed();
+    bool  lock_camera;
 
     elapsedTime /= 1000;
-    camera_locked = camera_locked || !(dynamic_cast<MouseWatcher*>(window->get_mouse().node())->has_mouse());
-    camera->SetCameraLocked(camera_locked);
+    lock_camera = camera_locked || !(dynamic_cast<MouseWatcher*>(window->get_mouse().node())->has_mouse());
+    camera->SetCameraLocked(lock_camera);
     camera->Run(elapsedTime);
     mouse->Run();
     timer.start();
