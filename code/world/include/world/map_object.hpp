@@ -41,11 +41,12 @@ struct MapObject : public Utils::Serializable
   void          SetTexture(const std::string&);
   void          SetFloor(unsigned char floor);
   void          ReparentTo(MapObject* object);
+  void          ReparentToFloor(World* world, unsigned char floor);
 
   void          UnserializeWaypoints(World*, Utils::Packet& packet);
   virtual void  Unserialize(Utils::Packet& packet);
   virtual void  Serialize(Utils::Packet& packet) const;
-  static void   InitializeTree(World* world);
+  void          InitializeTree(World* world);
   void          InitializeCollideMask();
   virtual int   GetObjectCollideMask() const { return (ColMask::Object); }
   void          SetLight(WorldLight* light, bool is_active);

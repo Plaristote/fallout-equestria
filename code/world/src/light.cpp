@@ -233,8 +233,10 @@ void WorldLight::AddEnlightenedObject(MapObject* object, unsigned int priority, 
     object->SetLight(this, true);
     if (propagate_to_children)
     {
+      cout << "Propagates to children (" << object->name << ")" << endl;
       std::for_each(object->children.begin(), object->children.end(), [this, priority](MapObject* child)
       {
+        cout << "Propagating to children" << endl;
         AddEnlightenedObject(child, priority, true);
       });
     }
@@ -283,10 +285,7 @@ void WorldLight::Unserialize(Utils::Packet& packet)
   parent_type = (WorldLight::ParentType)_ptype;
   if (parent_type != Type_None)
     packet >> parent_name;
-  if (blob_revision >= 9)
-    packet >> priority;
-  else
-    priority = 7;
+  packet >> priority;
   packet >> r >> g >> b >> a;
   packet >> pos_x >> pos_y >> pos_z;
   packet >> hpr_x >> hpr_y >> hpr_z;
@@ -318,7 +317,6 @@ void WorldLight::Unserialize(Utils::Packet& packet)
   }
   cout << "Light type = " << (int)type << endl;
   Initialize();
-  if (blob_revision >= 3)
   {
     float     attenuation[3];
 

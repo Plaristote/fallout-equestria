@@ -338,11 +338,7 @@ void Waypoint::Unserialize(Utils::Packet &packet)
 
   packet >> (int&)(id);
   packet >> posx >> posy >> posz;
-  packet >> floor;
-  if (blob_revision > 7)
-    packet >> floor_above;
-  if (blob_revision > 9)
-    packet >> suggested_floor_above;
+  packet >> floor >> floor_above >> suggested_floor_above;
   packet >> tmpArcs;
   nodePath.set_pos(posx, posy, posz);
 }
