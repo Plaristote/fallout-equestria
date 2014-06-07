@@ -7,6 +7,7 @@
 # include "qpandaapplication.h"
 #else
   extern PandaFramework* framework;
+  extern bool world_is_game_save;
 #endif
 
 using namespace std;
@@ -15,21 +16,19 @@ extern unsigned int blob_revision;
 
 void MapObject::InitializeTree(World *world)
 {
-  std::function<void (MapObject&)> find_parents = [world](MapObject& object)
+  std::function<void (MapObject&)> find_children = [this, world](MapObject& object)
   {
-    if (object.parent != "")
-    {
-      MapObject*     parent = world->GetMapObjectFromName(object.parent);
-
-      if (parent == 0)
-        parent = world->GetDynamicObjectFromName(object.parent);
-      if (parent)
-        object.nodePath.reparent_to(parent->nodePath);
-    }
+    if (name == object.parent)
+      object.ReparentTo(this);
   };
-
-  for_each(world->objects.begin(),        world->objects.begin(),        [find_parents](MapObject&     object) { find_parents(object); });
-  for_each(world->dynamicObjects.begin(), world->dynamicObjects.begin(), [find_parents](DynamicObject& object) { find_parents(object); });
+  for_each(world->objects.begin(),        world->objects.end(),        find_children);
+  for_each(world->dynamicObjects.begin(), world->dynamicObjects.end(), [find_children](DynamicObject& object) { find_children(object); });
+  if (parent == "")
+  {
+    if (world->floors.size() <= floor)
+      world->FloorResize(floor + 1);
+    nodePath.reparent_to(world->floors[floor]);
+  }
 }
 
 void MapObject::SetFloor(unsigned char floor)
@@ -49,6 +48,12 @@ void MapObject::SetFloor(unsigned char floor)
 MapObject::~MapObject()
 {
   ReparentTo(0);
+  for_each(children.begin(), children.end(), [this](MapObject* child)
+  {
+    child->nodePath.reparent_to(nodePath.get_parent());
+    child->parent        = "";
+    child->parent_object = 0;
+  });
 }
 
 void MapObject::ReparentTo(MapObject* object)
@@ -60,12 +65,38 @@ void MapObject::ReparentTo(MapObject* object)
   {
     parent        = object->nodePath.get_name();
     object->children.push_back(this);
+#ifdef GAME_EDITOR
     if (object->floor != floor)
       SetFloor(object->floor);
+#else
+    if (object->floor != floor && inherits_floor)
+      SetFloor(object->floor);
+#endif
     nodePath.reparent_to(object->nodePath);
+#ifndef GAME_EDITOR
+    if (inherits_floor)
+      ReparentToFloor(World::LoadingWorld, floor);
+#endif
   }
   else
     parent = "";
+}
+
+void MapObject::ReparentToFloor(World* world, unsigned char floor)
+{
+  LPoint3f current_pos   = nodePath.get_pos(world->window->get_render());
+  LPoint3f current_hpr   = nodePath.get_hpr(world->window->get_render());
+  LPoint3f current_scale = nodePath.get_scale(world->window->get_render());
+
+  world->MapObjectChangeFloor(*this, floor);
+#ifndef GAME_EDITOR
+  if (!world_is_game_save)
+  {
+    nodePath.set_pos(world->window->get_render(), current_pos);
+    nodePath.set_hpr(world->window->get_render(), current_hpr);
+    nodePath.set_scale(world->window->get_render(), current_scale);
+  }
+#endif
 }
 
 void MapObject::SetName(const std::string& name)
@@ -88,8 +119,6 @@ void MapObject::SetModel(const std::string& model)
   strModel = model;
   render   = panda_framework.get_window(0)->load_model(panda_framework.get_models(), MODEL_ROOT + strModel);
   render.set_name("render-" + nodePath.get_name());
-  //render.set_shader_auto();
-  //SetCollideMaskOnSingleNodepath(render, ColMask::Render);
   render.set_collide_mask(CollideMask(ColMask::Render));
   render.reparent_to(nodePath);
   if (!(render.is_empty()))
@@ -124,11 +153,7 @@ void MapObject::Unserialize(Utils::Packet& packet)
   world = World::LoadingWorld;
   packet >> name >> strModel >> strTexture;
   packet >> posX >> posY >> posZ >> rotX >> rotY >> rotZ >> scaleX >> scaleY >> scaleZ;
-  packet >> floor;
-  if (blob_revision >= 1)
-    packet >> parent;
-  if (blob_revision >= 10)
-    packet >> inherits_floor;
+  packet >> floor >> parent >> inherits_floor;
   this->inherits_floor = inherits_floor;
 
   if (name == "")
@@ -148,21 +173,9 @@ void MapObject::Unserialize(Utils::Packet& packet)
     world->MapObjectChangeFloor(*this, floor);
   }
 
-  if (blob_revision >= 2)
-    UnserializeWaypoints(world, packet);
-  if (blob_revision >= 4)
-  {
-    collider.parent = nodePath;
-    packet >> collider;
-  }
-  else
-  {
-    LPoint3f scale = NodePathSize(render) / 2;
-
-    collider.parent = nodePath;
-    collider.InitializeCollider(Collider::MODEL, LPoint3f(0, 0, 0), scale, LPoint3f(0, 0, 0));
-  }
-
+  UnserializeWaypoints(world, packet);
+  collider.parent = nodePath;
+  packet >> collider;
   InitializeCollideMask();
 }
 
@@ -313,13 +326,13 @@ void MapObject::SetLight(WorldLight *light, bool is_active)
 {
   if (light)
   {
-    /*if (light->enabled == true && is_active == true)
+    if (light->enabled == true && is_active == true)
       render.set_light(light->nodePath, light->priority);
     else
-      render.set_light_off(light->nodePath);*/
-    /*for_each(waypoints.begin(), waypoints.end(), [&light, is_active](Waypoint* waypoint)
+      render.set_light_off(light->nodePath);
+    for_each(waypoints.begin(), waypoints.end(), [&light, is_active](Waypoint* waypoint)
     {
       waypoint->SetLight(light, is_active);
-    });*/
+    });
   }
 }

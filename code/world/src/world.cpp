@@ -403,9 +403,6 @@ Zone* World::GetZoneByName(const std::string& name)
 void World::AddLight(WorldLight::Type type, const std::string& name)
 {
   lights.push_back(WorldLight(type, WorldLight::Type_None, rootLights, name));
-#ifdef GAME_EDITOR
-  lights.rbegin()->symbol.reparent_to(rootLights);
-#endif
 }
 
 void World::AddLight(WorldLight::Type type, const std::string& name, MapObject* parent)
@@ -443,7 +440,6 @@ WorldLight* World::GetLightByName(const std::string& name)
 {
   WorldLights::iterator it = std::find(lights.begin(), lights.end(), name);
 
-  cout << "Getting light by name... light count: " << lights.size() << endl;
   if (it != lights.end())
     return (&(*it));
   return (0);
@@ -479,11 +475,13 @@ void        World::CompileLight(WorldLight* light, unsigned char colmask)
 
 void World::DynamicObjectSetWaypoint(DynamicObject& object, Waypoint& waypoint)
 {
+#ifndef GAME_EDITOR
   if (object.waypoint == 0 || object.waypoint->floor != waypoint.floor)
   {
     DynamicObjectChangeFloor(object, waypoint.floor);
     object.nodePath.set_alpha_scale(floors[waypoint.floor].get_color_scale().get_w());
   }
+#endif
   object.waypoint = &waypoint;
 }
 
@@ -575,131 +573,13 @@ void           World::UnSerialize(Utils::Packet& packet)
     }
   }
 
-    cout << "Unserialize map objects" << endl;
-  // MapObjects
-  if (blob_revision < 11)
-  {
-    int size;
-
-    packet >> size;
-    for (int it = 0 ; it < size ; ++it)
-    {
-      MapObject     object;
-
-      packet >> object;
-      objects.push_back(object);
-    }
-  }
-  else
-    packet >> objects;
-
-    cout << "Unserialize dynamic objects" << endl;
-  // DynamicObjects
-  if (blob_revision < 11)
-  {
-    int size;
-
-    packet >> size;
-    for (int it = 0 ; it < size ; ++it)
-    {
-      DynamicObject object;
-      unsigned char floor;
-
-      packet >> object;
-      floor        = object.floor;
-      object.floor = (floor == 0 ? 1 : 0);
-      DynamicObjectChangeFloor(object, floor);
-      object.nodePath.set_collide_mask(CollideMask(ColMask::DynObject));
-      dynamicObjects.push_back(object);
-    }
-  }
-  else
-    packet >> dynamicObjects;
-
-    cout << "Unserialize lights" << endl;
-  // Lights
-  if (blob_revision >= 7)
-    packet >> lights;
-  else
-  {
-    int size;
-
-    packet >> size;
-    for (int it = 0 ; it < size ; ++it)
-    {
-      WorldLight light(window->get_render());
-
-      light.Unserialize(packet);
-      lights.push_back(light);
-    }
-  }
+  packet >> objects >> dynamicObjects >> lights;
 
   cout << "Unserialize particle objects" << endl;
   if (blob_revision >= 13)
     packet >> particleObjects;
 
-  cout << "Unserialize zones" << endl;
-  if (blob_revision >= 7)
-    packet >> zones;
-  else // Revisions < 7 used EntryZone and ExitZone types
-  {
-    // ExitZones
-    {
-      int size;
-
-      packet >> size;
-      for (int it = 0 ; it < size ; ++it)
-      {
-        Zone       zone;
-        std::list<int> waypointsId;
-
-        packet >> zone.name;
-        packet >> zone.destinations;
-        packet >> waypointsId;
-
-        std::list<int>::iterator begin = waypointsId.begin();
-        std::list<int>::iterator end   = waypointsId.end();
-
-        for (; begin != end ; ++begin)
-        {
-          Waypoint* wp = GetWaypointFromId(*begin);
-
-        if (wp)
-          zone.waypoints.push_back(wp);
-        }
-        zones.push_back(zone);
-      }
-    }
-
-    // EntryZone
-    {
-      int size;
-
-      packet >> size;
-      for (int it = 0 ; it < size ; ++it)
-      {
-        Zone      zone;
-        std::list<int> waypointsId;
-
-        packet >> zone.name;
-        packet >> waypointsId;
-        std::list<int>::iterator begin = waypointsId.begin();
-        std::list<int>::iterator end   = waypointsId.end();
-
-        for (; begin != end ; ++begin)
-        {
-          Waypoint* wp = GetWaypointFromId(*begin);
-
-          if (wp)
-          {
-            zone.waypoints.push_back(wp);
-            zone.waypoints_ids.push_back(wp->id);
-          }
-        }
-        zones.push_back(zone);
-      }
-    }
-  } // End compatibility with Revision < 7
+  packet >> zones;
 
   cout << "Unserialize sunlight" << endl;
   {
@@ -716,27 +596,23 @@ void           World::UnSerialize(Utils::Packet& packet)
   UpdateMapTree();
 
 #ifdef GAME_EDITOR
-  if (blob_revision >= 6)
+  std::for_each(objects.begin(), objects.end(), [this](MapObject& object)
   {
-    std::for_each(objects.begin(), objects.end(), [this](MapObject& object)
-    {
-      unsigned int i = 0;
+    unsigned int i = 0;
 
-      for (; i < object.waypoints.size() ; ++i)
-      {
-        Waypoint* wp = object.waypoints[i];
-        wp->nodePath.set_pos(window->get_render(), wp->nodePath.get_pos());
-      }
-    });
-  }
+    for (; i < object.waypoints.size() ; ++i)
+    {
+      Waypoint* wp = object.waypoints[i];
+      wp->nodePath.set_pos(window->get_render(), wp->nodePath.get_pos());
+    }
+  });
 #endif
 
 #ifndef GAME_EDITOR
-  //if (blob_revision < 8)
-    CompileWaypointsFloorAbove();
+  CompileWaypointsFloorAbove();
 #endif
 
-    cout << "Compiling lights" << endl;
+  cout << "Compiling lights" << endl;
   // Post-loading stuff
 #ifndef GAME_EDITOR
   for_each(lights.begin(), lights.end(), [this](WorldLight& light) { CompileLight(&light, ColMask::Object | ColMask::DynObject | ColMask::Waypoint); });
@@ -748,7 +624,7 @@ void           World::UnSerialize(Utils::Packet& packet)
 
 void           World::UpdateMapTree(void)
 {
-  std::function<void (NodePath, std::string)> set_relations = [this, &set_relations](NodePath parent, std::string solving_for)
+  /*std::function<void (NodePath, std::string)> set_relations = [this, &set_relations](NodePath parent, std::string solving_for)
   {
     // Solving for MapObjects
     {
@@ -819,7 +695,13 @@ void           World::UpdateMapTree(void)
   { set_relations(object.nodePath, object.nodePath.get_name()); });
   std::for_each(dynamicObjects.begin(), dynamicObjects.end(), [this, &set_relations](DynamicObject& object)
   { set_relations(object.nodePath, object.nodePath.get_name()); });
-  set_relations(floors_node, "");
+  set_relations(floors_node, "");*/
+
+  for_each(objects.begin(), objects.end(), [this](MapObject& object)
+  { object.InitializeTree(this); });
+  for_each(dynamicObjects.begin(), dynamicObjects.end(), [this](DynamicObject& object)
+  { object.InitializeTree(this); });
+
   std::for_each(particleObjects.begin(), particleObjects.end(), [this](ParticleObject& object)
   {
     object.SetParticleEffect(object.GetParticleEffectName());
