@@ -178,4 +178,5 @@ NodePath ObjectCharacter::Equipment::GetJointForSlot(const string &slot_name, un
     joint_name << "Horn"; // TODO Get models with the proper joints
     return (character.GetJoint(joint_name.str()));
   }
+  return (NodePath());
 }

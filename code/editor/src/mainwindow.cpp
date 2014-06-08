@@ -797,12 +797,17 @@ void MainWindow::CharacterAdd()
                                                        DynamicObject::Character,
                                                        appearance["model"].Value(),
                                                        appearance["texture"].Value());
-        dynamicObjectHovered->charsheet    = name.toStdString();
-        dynamicObjectHovered->script       = data["Behaviour"]["script"].Value();
-        dynamicObjectHovered->dialog       = data["Behaviour"]["dialog"].Value();
-        dynamicObjectHovered->interactions = 0;
-        ui->treeWidget->AddDynamicObject(dynamicObjectHovered);
-        DynamicObjectSelect();
+        if (dynamicObjectHovered != 0)
+        {
+          dynamicObjectHovered->charsheet    = name.toStdString();
+          dynamicObjectHovered->script       = data["Behaviour"]["script"].Value();
+          dynamicObjectHovered->dialog       = data["Behaviour"]["dialog"].Value();
+          dynamicObjectHovered->interactions = 0;
+          ui->treeWidget->AddDynamicObject(dynamicObjectHovered);
+          DynamicObjectSelect();
+        }
+        else
+          QMessageBox::warning(this, "Cannot insert character", "The character does not have a valid model");
       }
       delete charsheet;
     }

@@ -347,12 +347,15 @@ DynamicObject* World::AddDynamicObject(const string &name, DynamicObject::Type t
   DynamicObject  object;
   DynamicObject* ptr;
 
-  object.name         = name;
-  object.type         = type;
-  object.interactions = 0;
-  object.strModel     = model;
-  object.strTexture   = texture;
-  ptr                 = InsertDynamicObject(object);
+  object.name           = name;
+  object.type           = type;
+  object.interactions   = 0;
+  object.strModel       = model;
+  object.strTexture     = texture;
+  object.floor          = 0;
+  object.inherits_floor = true;
+  object.collider.type  = Collider::NONE;
+  ptr                   = InsertDynamicObject(object);
   if (ptr && !(ptr->nodePath.is_empty()))
     ptr->nodePath.set_name(name);
   return (ptr);
