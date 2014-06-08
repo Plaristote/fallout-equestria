@@ -23,6 +23,7 @@
 # include "objects/door.hpp"
 # include "objects/dropped_object.hpp"
 # include "objects/character.hpp"
+# include "objects/default.hpp"
 
 # include "ui/level_ui.hpp"
 # include "dialog.hpp"

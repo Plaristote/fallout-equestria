@@ -43,7 +43,7 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="lightTab">
       <attribute name="title">
@@ -344,6 +344,11 @@
          <item>
           <property name="text">
            <string>Item</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Other</string>
           </property>
          </item>
         </widget>

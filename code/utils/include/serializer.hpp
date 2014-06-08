@@ -234,6 +234,18 @@ public:
     return (*this);
   }
 
+  template<typename T>
+  bool isNextObjectOfType(void)
+  {
+    if (canIHaz(sizeof(char), 1))
+    {
+      char typeCode = *(reinterpret_cast<T*>(reading));
+
+      return (typeCode == TypeToCode<T>::TypeCode);
+    }
+    return (false);
+  }
+
 private:
   template<typename T> void	SerializeArray(T& tehList)
   {

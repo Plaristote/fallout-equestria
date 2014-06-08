@@ -60,6 +60,17 @@ void ParticleEffect::ReparentTo(NodePath nodePath)
   }
 }
 
+string ParticleEffect::GetParentName(void) const
+{
+  if (!particle_system.is_null())
+  {
+    NodePath spawn_node = particle_system->get_spawn_render_node_path();
+
+    return (spawn_node.is_empty() ? "" : spawn_node.get_name());
+  }
+  return ("");
+}
+
 void ParticleEffect::LoadConfiguration(const string& filepath)
 {
   DataTree* data = DataTree::Factory::JSON(filepath);

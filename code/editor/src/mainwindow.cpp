@@ -280,119 +280,20 @@ void MainWindow::CopyClicked()
 {
   if (clipboard)
     delete clipboard;
-  clipboard = new Utils::Packet;
-  Copy(*clipboard);
+  clipboard = ui->worldObjectWidget->Copy();
+  //Copy(*clipboard);
 }
 
 void MainWindow::PasteClicked()
 {
   if (clipboard)
   {
-    Utils::Packet dup(clipboard->raw(), clipboard->size());
-
-    Paste(dup);
+    World::LoadingWorld = world; // Sets a context for unserialized objects to plug into
+    ui->worldObjectWidget->Paste(*clipboard);
+    world->UpdateMapTree();
+    ui->treeWidget->SetWorld(world);
+    World::LoadingWorld = 0;
   }
-}
-
-void MainWindow::Copy(Utils::Packet& packet)
-{
-  if (mapobjectSelected)
-  {
-    std::function<void (std::list<MapObject*>&, const std::string&)> get_children;
-    std::list<MapObject*>                                            objects;
-
-    objects.push_back(mapobjectSelected);
-    // Recursively look for each children of the current object and
-    // duplicate them as well.
-    get_children = [this, &get_children](std::list<MapObject*>& objects, const std::string& parent)
-    {
-      auto                  it  = world->objects.begin();
-      auto                  end = world->objects.end();
-
-      for (; it != end ; ++it)
-      {
-         if (it->parent == parent)
-         {
-           objects.push_back(&(*it));
-           get_children(objects, it->nodePath.get_name());
-         }
-      }
-    };
-    get_children(objects, mapobjectSelected->nodePath.get_name());
-    // Now we record the amount of objects serialized, and we serialize them.
-    // The waypoints must not be part of the copy/paste, thus we temporarily remove them
-    // from the duplicated object when serializing.
-    packet << (int)objects.size();
-    std::for_each(objects.begin(), objects.end(), [&packet](MapObject* object)
-    {
-      MapObject::Waypoints waypoints = object->waypoints;
-
-      object->waypoints.clear();
-      object->Serialize(packet);
-      object->waypoints = waypoints;
-    });
-  }
-}
-
-void MainWindow::Paste(Utils::Packet& packet)
-{
-   int                   object_count;
-   QMap<QString,QString> name_map;
-
-   World::LoadingWorld = world; // Sets a context for unserialized objects to plug into
-   packet >> object_count;
-   for (int i = 0 ; i < object_count ; ++i)
-   {
-       MapObject object;
-
-       packet >> object;
-       object.nodePath.set_collide_mask(CollideMask(ColMask::Object));
-
-       QString old_name  = QString::fromStdString(object.nodePath.get_name());
-       QString base_name = old_name;
-       QString name;
-       unsigned short ii = 0;
-
-       // remove_number_from_name
-       {
-         QRegExp regexp("#[0-9]+$");
-
-         if (base_name.contains(regexp))
-           base_name = base_name.replace(regexp, "");
-       }
-
-       // Change the object's name,
-       // Change the object's parent name if relevant
-       do
-       {
-         ++ii;
-         name = base_name + '#' + QString::number(ii);
-       } while ((world->GetMapObjectFromName(name.toStdString()) != 0) ||
-                (world->GetDynamicObjectFromName(name.toStdString()) != 0) ||
-                (world->GetLightByName(name.toStdString()) != 0));
-       object.name = name.toStdString();
-       object.nodePath.set_name(object.name);
-       name_map.insert(old_name, name);
-
-       {
-         auto parent_it = name_map.find(QString::fromStdString(object.parent));
-
-         if (parent_it != name_map.end())
-           object.parent = parent_it->toStdString();
-         else
-         {
-           MapObject* selection = ui->worldObjectWidget->GetSelectedObject();
-
-           if (selection)
-             object.parent = selection->name;
-         }
-       }
-
-       world->objects.push_back(object);
-   }
-   world->UpdateMapTree();
-   ui->treeWidget->SetWorld(world);
-   World::LoadingWorld = 0;
 }
 
 void MainWindow::AddCharsheet()

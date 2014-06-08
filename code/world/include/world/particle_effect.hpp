@@ -54,9 +54,10 @@ public:
 
   ParticleEffect();
 
-  void LoadConfiguration(const std::string& filepath);
-  void LoadConfiguration(Data configuration);
-  void ReparentTo(NodePath nodePath);
+  void        LoadConfiguration(const std::string& filepath);
+  void        LoadConfiguration(Data configuration);
+  void        ReparentTo(NodePath nodePath);
+  std::string GetParentName(void) const;
 
   PT(ParticleSystem) GetParticleSystem(void) const { return (particle_system); }
 

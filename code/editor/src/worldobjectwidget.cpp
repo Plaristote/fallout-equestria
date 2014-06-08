@@ -180,6 +180,16 @@ void WorldObjectWidget::DeleteEnlightenedObject(void)
   }
 }
 
+WorldLight* WorldObjectWidget::GetSelectedWorldLight(void) const
+{
+  return (selection_type == 3 ? selection.light : 0);
+}
+
+DynamicObject* WorldObjectWidget::GetSelectedDynamicObject(void) const
+{
+  return (selection_type == 2 ? selection.dynamic_object : 0);
+}
+
 MapObject* WorldObjectWidget::GetSelectedObject(void) const
 {
   return (selection_type > 0 && selection_type < 3 ? selection.object : 0);
@@ -509,6 +519,7 @@ void WorldObjectWidget::UpdateBehaviour()
       show_widgets(inventory_widgets, false);
     case DynamicObject::Locker:
       show_widgets(key_widgets, true);
+    case DynamicObject::Other:
     case DynamicObject::Shelf:
       ui->dynamicObject->show();
       break ;
@@ -931,4 +942,229 @@ void WorldObjectWidget::SelectCurrentWaypoint()
 {
   if (selection_type == 2)
     SelectWaypointFromObject(selection.dynamic_object);
+}
+
+/*
+ * Copy Paste Bullshit
+ */
+void WorldObjectWidget::Copy(Utils::Packet& packet, MapObject* object)
+{
+  auto waypoint_backup = object->waypoints;
+
+  object->waypoints.clear();
+  packet << 1;
+  packet << *object;
+  CopyChildren(packet, object->name);
+  object->waypoints = waypoint_backup;
+}
+
+void WorldObjectWidget::Copy(Utils::Packet& packet, DynamicObject* object)
+{
+  packet << 2;
+  packet << *object;
+  CopyChildren(packet, object->name);
+}
+
+void WorldObjectWidget::Copy(Utils::Packet& packet, WorldLight* light)
+{
+  packet << 3;
+  packet << *light;
+}
+
+void WorldObjectWidget::Copy(Utils::Packet& packet, ParticleObject* particle_object)
+{
+  packet << 4;
+  packet << *particle_object;
+}
+
+void WorldObjectWidget::CopyChildren(Utils::Packet& packet, const std::string& parent_name)
+{
+  for_each(world->objects.begin(), world->objects.end(), [this, &packet, parent_name](MapObject& object)
+  {
+    if (object.parent == parent_name)
+      Copy(packet, &object);
+  });
+  for_each(world->dynamicObjects.begin(), world->dynamicObjects.end(), [this, &packet, parent_name](DynamicObject& object)
+  {
+    if (object.parent == parent_name)
+      Copy(packet, &object);
+  });
+  for_each(world->lights.begin(), world->lights.end(), [this, &packet, parent_name](WorldLight& light)
+  {
+    if (!light.parent.is_empty() && light.parent.get_name() == parent_name)
+      Copy(packet, &light);
+  });
+  for_each(world->particleObjects.begin(), world->particleObjects.end(), [this, &packet, parent_name](ParticleObject& particle_object)
+  {
+    if (particle_object.GetParentName() == parent_name)
+      Copy(packet, &particle_object);
+  });
+}
+
+Utils::Packet* WorldObjectWidget::Copy()
+{
+  Utils::Packet* packet = new Utils::Packet;
+
+  switch (selection_type)
+  {
+    case 1:
+      Copy(*packet, selection.object);
+      break ;
+    case 2:
+      Copy(*packet, selection.dynamic_object);
+      break ;
+    case 3:
+      Copy(*packet, selection.light);
+      break ;
+    case 4:
+      Copy(*packet, selection.particle_object);
+      break ;
+    default:
+      delete packet;
+      return (0);
+  }
+  return (packet);
+}
+
+void WorldObjectWidget::Paste(Utils::Packet& packet)
+{
+  Utils::Packet dup(packet.raw(), packet.size());
+
+  clipboard_name_map.clear();
+  while (dup.isNextObjectOfType<int>())
+  {
+    int object_type;
+
+    dup >> object_type;
+    switch (object_type)
+    {
+    case 1:
+      PasteObject(dup);
+      break ;
+    case 2:
+      PasteDynamicObject(dup);
+      break ;
+    case 3:
+      PasteWorldLight(dup);
+      break ;
+    case 4:
+      PasteParticleEffect(dup);
+      break ;
+    }
+  }
+  ReparentPastedObjects();
+}
+
+QString WorldObjectWidget::GenerateNewName(QString base_name)
+{
+  unsigned int ii = 0;
+  QString name;
+  QRegExp regexp("#[0-9]+$");
+
+  if (base_name.contains(regexp))
+    base_name = base_name.replace(regexp, "");
+  do
+  {
+    ++ii;
+    name = base_name + '#' + QString::number(ii);
+  } while ((world->GetMapObjectFromName(name.toStdString()) != 0) ||
+           (world->GetDynamicObjectFromName(name.toStdString()) != 0) ||
+           (world->GetLightByName(name.toStdString()) != 0));
+  return (name);
+}
+
+void WorldObjectWidget::PasteObject(Utils::Packet& packet)
+{
+  MapObject object;
+  QString   name;
+
+  packet >> object;
+  name        = GenerateNewName(QString::fromStdString(object.name));
+  clipboard_name_map.insert(object.name.c_str(), name);
+  object.name = name.toStdString();
+  object.nodePath.set_name(object.name);
+  world->objects.push_back(object);
+}
+
+void WorldObjectWidget::PasteDynamicObject(Utils::Packet& packet)
+{
+  DynamicObject object;
+  QString   name;
+
+  packet >> object;
+  name        = GenerateNewName(QString::fromStdString(object.name));
+  clipboard_name_map.insert(object.name.c_str(), name);
+  object.name = name.toStdString();
+  object.nodePath.set_name(object.name);
+  world->dynamicObjects.push_back(object);
+}
+
+void WorldObjectWidget::PasteWorldLight(Utils::Packet& packet)
+{
+  WorldLight object;
+  QString   name;
+
+  packet >> object;
+  name        = GenerateNewName(QString::fromStdString(object.name));
+  clipboard_name_map.insert(object.name.c_str(), name);
+  object.name = name.toStdString();
+  world->lights.push_back(object);
+}
+
+void WorldObjectWidget::PasteParticleEffect(Utils::Packet& packet)
+{
+  ParticleObject object;
+  QString        old_name = object.GetName().c_str();
+
+  packet >> object;
+  object.SetName(GenerateNewName(QString::fromStdString(object.GetName())).toStdString());
+  clipboard_name_map.insert(old_name, object.GetName().c_str());
+  world->particleObjects.push_back(object);
+}
+
+void WorldObjectWidget::ReparentPastedObjects()
+{
+  foreach (QString object_name, clipboard_name_map)
+  {
+    MapObject*      current_object = world->GetObjectFromName(object_name.toStdString());
+    WorldLight*     current_light  = world->GetLightByName(object_name.toStdString());
+    ParticleObject* current_effect = world->GetParticleObjectByName(object_name.toStdString());
+    std::string     parent_name;
+
+    if (current_object)
+      parent_name = current_object->parent;
+    else if (current_light)
+      parent_name = current_light->parent.get_name();
+    else if (current_effect)
+      parent_name = current_effect->GetParentName();
+    auto parent_it = clipboard_name_map.find(QString::fromStdString(parent_name));
+
+    if (parent_it != clipboard_name_map.end())
+    {
+      MapObject*     parent_map_object = world->GetMapObjectFromName(parent_it->toStdString());
+      DynamicObject* parent_dyn_object = world->GetDynamicObjectFromName(parent_it->toStdString());
+
+      if (current_object)
+      {
+        if (parent_dyn_object)
+          current_object->ReparentTo(parent_dyn_object);
+        else if (parent_map_object)
+          current_object->ReparentTo(parent_map_object);
+      }
+      else if (current_light)
+      {
+        if (parent_dyn_object)
+          current_light->ReparentTo(parent_dyn_object);
+        else if (parent_map_object)
+          current_light->ReparentTo(parent_map_object);
+      }
+      else if (current_effect)
+      {
+        if (parent_dyn_object)
+          current_effect->ReparentTo(parent_dyn_object);
+        else if (parent_map_object)
+          current_effect->ReparentTo(parent_map_object);
+      }
+    }
+  }
 }

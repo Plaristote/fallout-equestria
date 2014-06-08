@@ -261,6 +261,9 @@ void Level::InsertDynamicObject(DynamicObject& object)
     case DynamicObject::Locker:
       instance = new ObjectLocker(this, &object);
       break ;
+    case DynamicObject::Other:
+      instance = new ObjectDefault(this, &object);
+      break ;
     default:
     {
       stringstream stream;

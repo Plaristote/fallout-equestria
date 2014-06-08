@@ -45,9 +45,6 @@ public:
     void LoadAllMaps(void);
     void LoadAllStatsheets(void);
 
-    void  Copy(Utils::Packet&);
-    void  Paste(Utils::Packet&);
-
     bool CloseAllScript(void);
 
     void ShowWaypointZone(void);

@@ -36,7 +36,9 @@ public:
   void SetSelection(WorldLight*);
   void SetSelection(ParticleObject*);
 
-  MapObject* GetSelectedObject(void) const;
+  WorldLight*    GetSelectedWorldLight(void) const;
+  DynamicObject* GetSelectedDynamicObject(void) const;
+  MapObject*     GetSelectedObject(void) const;
 
 public slots:
   void UnsetSelection();
@@ -109,6 +111,26 @@ private:
   Selection              selection;
   char                   selection_type;
   ParticleSystemManager  particle_system_manager;
+
+  /*
+   * Copy Paste Bullshit. Impossible to understand. Sorry for that.
+   */
+public:
+  Utils::Packet* Copy(void);
+  void           Paste(Utils::Packet&);
+private:
+  void Copy(Utils::Packet&, MapObject*);
+  void Copy(Utils::Packet&, DynamicObject*);
+  void Copy(Utils::Packet&, WorldLight*);
+  void Copy(Utils::Packet&, ParticleObject*);
+  void CopyChildren(Utils::Packet&, const std::string& parent_name);
+  void PasteObject(Utils::Packet&);
+  void PasteDynamicObject(Utils::Packet&);
+  void PasteWorldLight(Utils::Packet&);
+  void PasteParticleEffect(Utils::Packet&);
+  void ReparentPastedObjects(void);
+  QString GenerateNewName(QString base_name);
+  QMap<QString,QString> clipboard_name_map;
 };
 
 #endif // WORLDOBJECTWIDGET_H

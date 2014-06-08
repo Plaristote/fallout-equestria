@@ -20,7 +20,8 @@ struct DynamicObject : public MapObject
     Shelf,
     Locker,
     Character,
-    Item
+    Item,
+    Other
   };
 
   Waypoint*   waypoint;

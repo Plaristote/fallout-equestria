@@ -123,6 +123,7 @@ struct WorldLight : public Utils::Serializable
   NodePath                 nodePath;
   Type                     type;
   ParentType               parent_type;
+  NodePath                 parent;
   PT(Light)                light;
   Lens*                    lens;
   float                    zoneSize; // DEPRECATED
@@ -136,7 +137,6 @@ struct WorldLight : public Utils::Serializable
   NodePath                 symbol;
 #endif
 private:
-  NodePath                 parent;
   MapObject*               parent_i;
 };
 
