@@ -19,8 +19,16 @@ bool ProcessAttack(Item@ item, string action, string hit_sound, Character@ user,
     if (critical)
       message         += " critically";
     message           += " for " + damage + " hit points";
-    target.SetHitPoints(target.GetHitPoints() - damage);
+    {
+      int hit_points = target.GetHitPoints();
+
+      if (hit_points > damage)
+        target.SetHitPoints(hit_points - damage);
+      else
+        target.SetHitPoints(0);
+    }
     level.PlaySound("hoof2hoof/" + hit_sound);
+    Cout("ProcessAttack: damage: " + damage);
   }
   else
   {
@@ -33,12 +41,18 @@ bool ProcessAttack(Item@ item, string action, string hit_sound, Character@ user,
 
 bool HoovesHit(Item@ item, Character@ user, Character@ target)
 {
+  Cout("Calling HoovesHit");
+  if (@user == null || @target == null)
+  {
+    Cout("Error: called HoovesHit with user or target null");
+    return (false);
+  }
   return (ProcessAttack(item, "hooves", "punch", user, target));
 }
 
 bool BuckHit(Item@ item, Character@ user, Character@ target)
 {
-  bool success = ProcessAttack(item, "buck", "whack", user, target);
+  bool success = false;//ProcessAttack(item, "buck", "whack", user, target);
 
   if (success)
   {

@@ -1,0 +1,256 @@
+{
+"hooves": {
+  "script": {
+    "file": "objectsUnarmed.as"
+  }
+,
+  "hidden": 1,
+  "actions": {
+    "hooves": {
+      "ap-cost": 3,
+      "combat": 1,
+      "range": 10,
+      "damage": 5,
+      "hookWeapon": "HoovesHit",
+      "hookHitChances": "UnarmedSuccessChance"
+    }
+
+  }
+,
+  "ammo": ""
+}
+,
+"buck": {
+  "icon": "buck.png",
+  "script": {
+    "file": "objectsUnarmed.as"
+  }
+,
+  "hidden": 1,
+  "actions": {
+    "buck": {
+      "ap-cost": 4,
+      "combat": 1,
+      "range": 15,
+      "damage": 10,
+      "hookWeapon": "BuckHit",
+      "hookHitChances": "UnarmedSuccessChance"
+    }
+
+  }
+,
+  "model": "",
+  "texture": "",
+  "scale": 0,
+  "weight": 0,
+  "mode-mouth": 1,
+  "mode-magic": 1,
+  "mode-battlesaddle": 0,
+  "ammo": ""
+}
+,
+"Key": {
+  "icon": "key.png",
+  "texture": "lpip.png",
+  "model": "horse.obj",
+  "scale": 1,
+  "weight": 5,
+  "script": {
+    "file": "objectsItems.as"
+  }
+,
+  "actions": {
+    "use on": {
+      "ap-cost": 2,
+      "hookDoors": "UseKeyOnDoor",
+      "range": 999,
+      "combat": 0,
+      "targeted": 1,
+      "damage": 999,
+      "damage-max": 999
+    }
+
+  }
+,
+  "mode-mouth": 1,
+  "mode-magic": 1,
+  "mode-battlesaddle": 0,
+  "ammo": ""
+}
+,
+"ammoCaliber22": {
+  "script": {
+    "file": ""
+  }
+,
+  "quantity": 42,
+  "icon": "22caliber.png",
+  "model": "",
+  "texture": "",
+  "scale": 0,
+  "weight": 0,
+  "mode-mouth": 0,
+  "mode-magic": 0,
+  "mode-battlesaddle": 0,
+  "ammo": ""
+}
+,
+"Shotgun": {
+  "script": {
+    "file": "shotgun.as"
+  }
+,
+  "icon": "shotgun.png",
+  "model": "Shotgun.obj",
+  "texture": "shotgun.tga",
+  "scale": 0.07,
+  "offset": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  }
+,
+  "rotation": {
+    "x": 90,
+    "y": 90,
+    "z": 90
+  }
+,
+  "ammo": {
+    "types": [
+"ammoCaliber22"    
+]
+,
+    "maximum": 2
+  }
+,
+  "weight": 15,
+  "mode-mouth": 0,
+  "mode-magic": 1,
+  "mode-battlesaddle": 1,
+  "actions": {
+    "Shoot": {
+      "ap-cost": 5,
+      "range": 50,
+      "combat": 1,
+      "targeted": 1,
+      "damage": 15,
+      "damage-max": 20,
+      "type": "Small Guns",
+      "hookHitChanges": "ShootSuccessChance",
+      "hookWeapon": "Shoot",
+      "hookCanUse": "CanUse",
+      "hookHitChances": "ShootSuccessChance",
+      "animations": {
+        "projectiles": {
+          "attack": {
+            "light": { "red": 100, "green": 200, "blue": 125 }
+          }
+        }
+      }
+    }
+,
+    "Reload": {
+      "ap-cost": 2,
+      "range": 0,
+      "combat": 0,
+      "targeted": 0,
+      "damage": 0,
+      "damage-max": 0,
+      "hookUse": "ReloadWeapon",
+      "type": "",
+      "hookCanUse": "",
+      "hookHitChances": ""
+    }
+
+  }
+
+}
+,
+"caps": {
+  "ammo": {
+    "maximum": 0
+  }
+,
+  "script": {
+    "file": ""
+  }
+,
+  "icon": "caps.png",
+  "model": "",
+  "texture": "",
+  "scale": 1,
+  "quantity": 12,
+  "weight": 0
+}
+,
+"sparkle-cola": {
+  "ammo": {
+    "maximum": 0
+  }
+,
+  "script": {
+    "file": "sparkle-cola.as"
+  }
+,
+  "quantity": 3,
+  "icon": "sparkle-cola.png",
+  "model": "",
+  "texture": "",
+  "scale": 1,
+  "weight": 1,
+  "actions": {
+    "drink": {
+      "type": "",
+      "ap-cost": 3,
+      "range": 0,
+      "combat": 0,
+      "targeted": 0,
+      "damage": 0,
+      "damage-max": 0,
+      "hookCanUse": "",
+      "hookHitChances": "",
+      "hookUse": "DrinkCola"
+    }
+
+  }
+
+}
+,
+"healing-potion": {
+  "ammo": {
+    "maximum": 0
+  }
+,
+  "script": {
+    "file": "healing-potion.as"
+  }
+,
+  "quantity": 2,
+  "icon": "healing-potion.png",
+  "model": "",
+  "texture": "",
+  "scale": 1,
+  "weight": 0,
+  "actions": {
+    "Use on": {
+      "type": "Medicine",
+      "ap-cost": 2,
+      "range": 0,
+      "combat": 0,
+      "targeted": 1,
+      "damage": 0,
+      "damage-max": 0,
+      "hookCanUse": "",
+      "hookHitChances": "",
+      "hookCharacters": "GivePotion",
+      "hookUse": "DrinkPotion"
+    }
+
+  }
+
+}
+
+
+}
+

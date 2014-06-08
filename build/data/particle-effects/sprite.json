@@ -4,7 +4,7 @@
   "litter-size":         10,
   "litter-spread":       0,
   "local-velocity-flag": 1,
-  "grows-older":         1,
+  "grows-older":         0,
   "lifespan":            3,
   "active":              1,
 

@@ -1,11 +1,19 @@
 
-string default_weapon_1()
+void ia_debug(string str)
 {
+  // Comment this to disable IA debug
+  Cout(str);
+}
+
+string default_item_for_equiped_1(Character@ user)
+{
+  ia_debug("default_item_for_equiped_1");
   return ("hooves");
 }
 
-string default_weapon_2()
+string default_item_for_equiped_2(Character@ user)
 {
+  ia_debug("default_item_for_equiped_2");
   return ("buck");
 }
 
@@ -39,7 +47,7 @@ bool LootingTest(DynamicObject@ self_obj, Character@ user, Item@ item)
       max_throw = 95;
     else if (max_throw < 5)
       max_throw = 5;
-    if (throw <= max_throw)
+    //if (throw <= max_throw)
       return (true);
     // If didn't return in the past line, the steal check has failed.
     self.SetAsEnemy(user, true);

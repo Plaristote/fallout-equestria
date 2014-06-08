@@ -1,0 +1,65 @@
+{
+  "Special": {
+    "STR": 7,
+    "PER": 7,
+    "END": 7,
+    "CHA": 3,
+    "INT": 3,
+    "AGI": 3,
+    "LUC": 4
+  },
+  "Variables": {
+    "Hit Points": 42,
+    "Level": 2
+  },
+  "Statistics": {
+    "Action Points": 5,
+    "Armor Class": 3,
+    "Bonus Damage": 0,
+    "Carry Weight": 200,
+    "Critical Chance": 4,
+    "Damage Resistance": 0,
+    "Healing Rate": 2,
+    "Hit Points": 42,
+    "Melee Damage": 2,
+    "Perk Rate": 3,
+    "Poison Resistance": 35,
+    "Radiation Resistance": 12,
+    "Skill Rate": 11
+  },
+  "Skills": {
+    "Small Guns": 50,
+    "Big Guns": 13,
+    "Energy Guns": 9,
+    "Explosives": 20,
+    "Unarmed": 50,
+    "Lockpick": 70,
+    "Melee Weapons": 40,
+    "Medicine": 25,
+    "Repair": 16,
+    "Science": 12,
+    "Sneak": 14,
+    "Spellcasting": 75,
+    "Steal": 9,
+    "Barter": 12,
+    "Outdoorspony": 25,
+    "Speech": 18,
+    "Gambling": 19
+  },
+  "Skill Points": "",
+  "Statistics Modifiers": "",
+  "Appearance": {
+    "model": "characters/MrHoofy.egg",
+    "texture": "characters/MrHoofy.png"
+  },
+  "Behaviour": {
+    "interactions": 62,
+    "script": "",
+    "dialog": ""
+  },
+  "Name": "Mr. Hoofy",
+  "Age": 99,
+  "Race": "Robot",
+  "Faction": "",
+  "Gender": "Male",
+}

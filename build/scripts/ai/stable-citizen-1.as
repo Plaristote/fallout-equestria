@@ -38,3 +38,7 @@ void main(Character@ self, float elapsedTime)
     }
   }
 }
+void combat(Character@ self)
+{
+  Cout("Stable citizen in Combat mode");
+}

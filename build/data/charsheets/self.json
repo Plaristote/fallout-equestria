@@ -1,0 +1,107 @@
+{
+  "Special": {
+    "STR": 5,
+    "PER": 5,
+    "END": 5,
+    "CHA": 5,
+    "INT": 10,
+    "AGI": 5,
+    "LUC": 5
+  },
+  "Variables": {
+    "Hit Points": 33,
+    "Level": 1,
+    "Special Points": 0,
+    "Perks": 0,
+    "Traits": 0,
+    "Affinities": 108002358
+  },
+  "Appearance": {
+    "model": "lpip.egg",
+    "texture": "characters/lpip.png"
+  },
+  "Behaviour": {
+    "interactions": 54,
+    "script": "",
+    "dialog": ""
+  },
+  "Name": "",
+  "Age": 25,
+  "Race": "Unicorn",
+  "Faction": "",
+  "Gender": "Male",
+  "Statistics": {
+    "Action Points": 5,
+    "Armor Class": "-5",
+    "Bonus Damage": 25,
+    "Carry Weight": 150,
+    "Critical Chance": "-15",
+    "Damage Resistance": 0,
+    "Healing Rate": 1,
+    "Hit Points": 33,
+    "Melee Damage": 5,
+    "Perk Rate": 3,
+    "Poison Resistance": 25,
+    "Radiation Resistance": 8,
+    "Skill Rate": 25
+  },
+  "Skills": {
+    "Small Guns": 25,
+    "Big Guns": 15,
+    "Energy Guns": 20,
+    "Explosives": 20,
+    "Unarmed": 50,
+    "Lockpick": 70,
+    "Melee Weapons": 40,
+    "Medicine": 30,
+    "Repair": 35,
+    "Science": 40,
+    "Sneak": 20,
+    "Spellcasting": 50,
+    "Steal": 15,
+    "Barter": 20,
+    "Outdoorspony": 35,
+    "Speech": 35,
+    "Gambling": 25
+  },
+  "Skill Points": "",
+  "Statistics Modifiers": {
+    "Bonus Damage": 25,
+    "Armor Class": "-10",
+    "Melee Damage": 4,
+    "Critical Chance": "-20"
+  },
+  "Inventory": [{
+      "Name": "Shotgun",
+      "ammo": ""
+    }, {
+      "Name": "ammoCaliber22",
+      "ammo": {
+        "current": ""
+      },
+      "quantity": 4
+    }, {
+      "Name": "sparkle-cola",
+      "ammo": ""
+    }, {
+      "Name": "healing-potion",
+      "ammo": {
+        "current": ""
+      },
+      "quantity": 2
+    }, {
+      "Name": "caps",
+      "ammo": {
+        "current": ""
+      },
+      "quantity": 72
+    }],
+  "Traits": {
+    "Kamikaze": 1,
+    "Heavy Hoofed": 1
+  },
+  "Affinities": {
+    "Explosives": 1,
+    "Melee Weapons": 1
+  }
+}

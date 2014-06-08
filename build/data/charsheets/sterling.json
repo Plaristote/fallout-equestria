@@ -90,6 +90,14 @@
   "Radiation Resistance": 0,
   "Skill Rate": 0
 }
+,
+"Appearence": "",
+"Appearecne": "",
+"Behaviour": {
+  "interactions": 62,
+  "script": "",
+  "dialog": ""
+}
 
 
 }

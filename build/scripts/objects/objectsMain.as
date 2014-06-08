@@ -18,13 +18,23 @@ bool UseKeyOnDoor(Item@ item, Character@ user, Door@ door)
   return (true);
 }
 
+int get_statistic(Character@ user, string key)
+{
+  Data user_stats         = user.GetStatistics();
+  Data statistic_variable = user_stats["Variables"][key];
+  
+  if (statistic_variable.Nil())
+    statistic_variable = user_stats["Statistics"][key];
+  return (statistic_variable.Nil() ? 0 : statistic_variable.AsInt());
+}
+
 int UnarmedSuccessChance(Item@ item, Character@ user, Character@ target)
 {
   Data  user_stats   = user.GetStatistics();
   Data  target_stats = target.GetStatistics();
   int   perception   = user_stats["Special"]["PER"].AsInt();
   int   skill        = user_stats["Skills"]["Unarmed"].AsInt();
-  int   armor_class  = target_stats["Statistics"]["Armor Class"].AsInt();
+  int   armor_class  = get_statistic(user, "Armor Class");
   float distance     = user.GetDistance(target.AsObject());
   int   hit_chances;
 
@@ -103,7 +113,7 @@ float ComputeDamageResistance(Item@ item, string action_name, Character@ target,
 {
   string damage_type         = "Melee";
   Data   statistics          = target.GetStatistics();
-  int    resistance_modifier = statistics["Statistics"]["Damage Resistance"].AsInt();
+  int    resistance_modifier = get_statistic(target, "Damage Resistance");
   int    armor_resistance;
 
   if (@item != null)
@@ -143,7 +153,7 @@ float ComputeDamage(Item@ item, string action, Character@ user, Character@ targe
 
   if (@item == null)
   {
-    max_damage = statistics["Statistics"]["Melee Damage"].AsInt();
+    max_damage = get_statistic(user, "Melee Damage");
     min_damage = max_damage / 1.5;
   }
   else
@@ -153,18 +163,21 @@ float ComputeDamage(Item@ item, string action, Character@ user, Character@ targe
     Data damage_min = item_data["damage"];
 
     if (damage_max.Nil())
-      damage_max = statistics["Statistics"]["Melee Damage"];
+      damage_max = get_statistic(user, "Melee Damage") + 2;
     if (damage_min.Nil())
-      damage_min = statistics["Statistics"]["Melee Damage"];
+      damage_min = get_statistic(user, "Melee Damage");
     max_damage = damage_max.Nil() ? 10 : damage_max.AsInt();
-    min_damage = damage_min.Nil() ? 10 : damage_min.AsInt();
+    min_damage = damage_min.Nil() ? 8  : damage_min.AsInt();
     Cout("Max Damage: " + max_damage);
     Cout("Min Damage: " + min_damage);
   }
   damage = ComputeBaseDamage(min_damage, max_damage);
+  Cout("Base damage: " + damage);
   damage = ComputeDamageResistance(item, action, target, damage);
+  Cout("Damage - resistance: " + damage);
   if (ComputeIfCritical(user, critical_roll))
     damage = ComputeCriticalDamage(damage, critical_roll);
+  Cout("Damage after critical test: " + damage);
   return (damage);
 }
 

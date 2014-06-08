@@ -151,6 +151,7 @@ void AddToStatModifier(Data sheet, string statistic, int value)
 // This must contains all the modifications to derived statistics and skills from SPECIAL and Traits changes
 void UpdateAllValues(Data sheet)
 {
+  int level        = sheet["Variables"]["Level"].Nil() ? 1 : sheet["Variables"]["Level"].AsInt();
   int strength     = sheet["Special"]["STR"].AsInt();
   int perception   = sheet["Special"]["PER"].AsInt();
   int endurance    = sheet["Special"]["END"].AsInt();
@@ -172,30 +173,30 @@ void UpdateAllValues(Data sheet)
   derivedStatistics["Critical Chance"]      = statsModifiers["Critical Chance"].AsInt()      + luck;
   derivedStatistics["Damage Resistance"]    = statsModifiers["Damage Resistance"].AsInt()    + 0;
   derivedStatistics["Healing Rate"]         = statsModifiers["Healing Rate"].AsInt()         + (endurance / 3 > 1 ? endurance / 3 : 1);
-  derivedStatistics["Hit Points"]           = statsModifiers["Hit Points"].AsInt()           + 15 + strength + 2 * endurance;
+  derivedStatistics["Hit Points"]           = statsModifiers["Hit Points"].AsInt()           + 15 + strength + 2 * endurance + level * 3;
   derivedStatistics["Melee Damage"]         = statsModifiers["Melee Damage"].AsInt()         + (strength - 5  > 1 ? strength - 5 : 1);
   derivedStatistics["Perk Rate"]            = statsModifiers["Perk Rate"].AsInt()            + 3;
   derivedStatistics["Poison Resistance"]    = statsModifiers["Poison Resistance"].AsInt()    + endurance * 5;
   derivedStatistics["Radiation Resistance"] = statsModifiers["Radiation Resistance"].AsInt() + (endurance - 1) * 2;
   derivedStatistics["Skill Rate"]           = statsModifiers["Skill Rate"].AsInt()           + 5 + intelligence * 2;
   
-  skills["Small Guns"]    = skillPoints["Small Guns"].AsInt()    + 35 + agility;
-  skills["Big Guns"]      = skillPoints["Big Guns"].AsInt()      + 10 + agility;
-  skills["Energy Guns"]   = skillPoints["Energy Guns"].AsInt()   + 10 + agility;
-  skills["Explosives"]    = skillPoints["Explosives"].AsInt()    + 20 + (5 * perception) + (5 * agility);
-  skills["Unarmed"]       = skillPoints["Unarmed"].AsInt()       + 40 + (5 * agility) + (5 * strength);
+  skills["Small Guns"]    = skillPoints["Small Guns"].AsInt()    + 5            + 4 * agility;
+  skills["Big Guns"]      = skillPoints["Big Guns"].AsInt()      + strength     + 2 * agility;
+  skills["Energy Guns"]   = skillPoints["Energy Guns"].AsInt()   + intelligence + 2 * agility;
+  skills["Explosives"]    = skillPoints["Explosives"].AsInt()    + 10 + perception + agility;
+  skills["Unarmed"]       = skillPoints["Unarmed"].AsInt()       + 30 + (2 * (agility + strength));
   skills["Lockpick"]      = skillPoints["Lockpick"].AsInt()      + 20 + (5 * perception) + (5 * agility);
-  skills["Melee Weapons"] = skillPoints["Melee Weapons"].AsInt() + 55 + (5 * agility) + (5 * strength);
-  skills["Medicine"]      = skillPoints["Medicine"].AsInt()      + 15 + (5 * perception) + (5 * intelligence);
-  skills["Repair"]        = skillPoints["Repair"].AsInt()        + 20 + intelligence;
-  skills["Science"]       = skillPoints["Science"].AsInt()       + 25 + 2 * intelligence;
-  skills["Sneak"]         = skillPoints["Sneak"].AsInt()         + 25 + agility;
+  skills["Melee Weapons"] = skillPoints["Melee Weapons"].AsInt() + 20 + (2 * (agility + strength));
+  skills["Medicine"]      = skillPoints["Medicine"].AsInt()      + 15 + perception + intelligence;
+  skills["Repair"]        = skillPoints["Repair"].AsInt()        + perception + (3 * intelligence);
+  skills["Science"]       = skillPoints["Science"].AsInt()       + 4 * intelligence;
+  skills["Sneak"]         = skillPoints["Sneak"].AsInt()         + 5 + 3 * agility;
   skills["Spellcasting"]  = skillPoints["Spellcasting"].AsInt()  + 25 + (2 * intelligence) + luck;
-  skills["Steal"]         = skillPoints["Steal"].AsInt()         + 0 + agility;
-  skills["Barter"]        = skillPoints["Barter"].AsInt()        + 20 + 2 * charisma;
-  skills["Outdoorspony"]  = skillPoints["Outdoorspony"].AsInt()  + 5 + (5 * endurance) + (5 * intelligence);
-  skills["Speech"]        = skillPoints["Speech"].AsInt()        + 25 + 2 * charisma;
-  skills["Gambling"]      = skillPoints["Gambling"].AsInt()      + 20 + 3 * luck;
+  skills["Steal"]         = skillPoints["Steal"].AsInt()         + 3 * agility;
+  skills["Barter"]        = skillPoints["Barter"].AsInt()        + 4 * charisma;
+  skills["Outdoorspony"]  = skillPoints["Outdoorspony"].AsInt()  + 5 + (2 * endurance) + (2 * intelligence);
+  skills["Speech"]        = skillPoints["Speech"].AsInt()        + 5 * charisma + intelligence;
+  skills["Gambling"]      = skillPoints["Gambling"].AsInt()      + charisma + 4 * luck;
 }
 
 StringList AvailableTraits(Data sheet)

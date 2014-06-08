@@ -19,6 +19,30 @@ bool CanWeild(Item@ item, Character@ user, string slot, int mode)
   return (false);
 }
 
+void SetEquiped(Item@ item, Character@ user, string slot, int mode, string joint, bool set_equiped)
+{
+  Cout("SetEquiped " + slot + " shotgun" + mode);
+  Data data = item.AsData();
+
+  if (slot == "equiped")
+  {
+    if (mode == 0)
+    {
+      string task_name = "equiped-" + data["equiped"]["target"].AsString() + "-" + data["equiped"]["slot"].AsString();
+    
+      if (set_equiped)
+      {
+        Task@ task = user.GetTaskSet().PushTask(task_name);
+
+        Cout("Adding gfx");
+        task.AddGfx("sparkle", joint);
+      }
+      else
+        user.GetTaskSet().RemoveTask(task_name);
+    }
+  }
+}
+
 bool ShotgunShoot(Item@ item, Character@ user, Character@ target)
 {
   Cout("Shooting shotgun");
