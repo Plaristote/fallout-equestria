@@ -85,7 +85,7 @@ void                  GameTask::LoadClicked(Rocket::Core::Event&)
   _signals.push_back(&ui_load->LoadSlot);
   _signals.push_back(&ui_load->Done);
   ui_load->LoadSlot.SetDirect(false);
-  ui_load->LoadSlot.Connect (*this, &GameTask::LoadSlot);
+  ui_load->LoadSlot.Connect (*this, &GameTask::DoLoadSlot);
   ui_load->EraseSlot.Connect(*this, &GameTask::EraseSlot);
   ui_load->Done.SetDirect(false);
   ui_load->Done.Connect([this, ui_load]()
@@ -366,7 +366,12 @@ bool GameTask::CompressSave(const std::string& slotPath)
   return (true);
 }
 
-void GameTask::LoadSlot(unsigned char slot)
+void GameTask::DoLoadSlot(unsigned char slot)
+{
+  LoadSlot(slot);
+}
+
+bool GameTask::LoadSlot(unsigned char slot)
 {
   std::stringstream slot_path;
 
@@ -375,7 +380,7 @@ void GameTask::LoadSlot(unsigned char slot)
   try
   {
     Utils::DirectoryCompressor::Uncompress(slot_path.str(), save_path);
-    LoadGame();
+    return (LoadGame());
   }
   catch (const std::exception& exception)
   {
@@ -383,6 +388,7 @@ void GameTask::LoadSlot(unsigned char slot)
     if (world_map == 0 && level == 0) // If nothin's running, go back to main menu
       _continue = 0;
   }
+  return (false);
 }
 
 void GameTask::RemoveCurrentProgression(void)

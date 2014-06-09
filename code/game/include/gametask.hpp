@@ -30,7 +30,8 @@ public:
   void                  ExitLevel(void);
 
   void                  SaveToSlot(unsigned char slot);
-  void                  LoadSlot(unsigned char slot);
+  void                  DoLoadSlot(unsigned char slot);
+  bool                  LoadSlot(unsigned char slot);
   void                  Exit(Rocket::Core::Event&);
 
   void                  SetLevelEncounter(const Encounter&);

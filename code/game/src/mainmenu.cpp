@@ -135,18 +135,22 @@ AsyncTask::DoneStatus MainMenu::do_task()
 
 void MainMenu::AsyncCreateLevel(void)
 {
+  bool loading_success;
+
   _levelTask = new GameTask(_window, _generalUi);
   _view.Hide();
   if (slotToLoadPlz >= 0)
-    _levelTask->LoadSlot(slotToLoadPlz);
+    loading_success = _levelTask->LoadSlot(slotToLoadPlz);
   else
-    _levelTask->LoadGame();
+    loading_success = _levelTask->LoadGame();
   slotToLoadPlz  = -1;
   if (_new_game_task)
   {
     delete _new_game_task;
     _new_game_task = 0;
   }
+  if (loading_success == false)
+    _view.Show();
   createLevelPlz = false;
 }
 

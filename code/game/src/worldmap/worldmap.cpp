@@ -5,6 +5,7 @@
 #include "ui/alert_ui.hpp"
 #include "ui/loading_screen.hpp"
 #include "scheduled_task.hpp"
+#include "loading_exception.hpp"
 
 using namespace std;
 using namespace Rocket;
@@ -58,6 +59,8 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, Time
   _current_pos_y = _goal_y = _dataEngine["worldmap"]["pos-y"];
   
   _mapTree = DataTree::Factory::JSON("saves/map.json");
+  if (!_mapTree)
+    throw LoadingException("Couldn't load map file (saves/map.json)");
   MapTileGenerator(_mapTree);
 
   _task.SetAsHourlyTask(DateTime::Minutes(1));
@@ -75,6 +78,8 @@ WorldMap::WorldMap(WindowFramework* window, GameUi* gameUi, DataEngine& de, Time
 
       std::for_each(cities.begin(), cities.end(), [this](Data city) { AddCityToList(city); });
     }
+    else
+      throw LoadingException("Couldn't load city file (saves/cities.json");
 
     //
     // Get some required elements

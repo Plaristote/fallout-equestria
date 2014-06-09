@@ -56,14 +56,14 @@ bool CharacterActionPoints::UseActionPoints(unsigned short amount)
 
 unsigned short CharacterActionPoints::GetMaxActionPoints(void) const
 {
-  return (controller->GetData()["Statistics"]["Action Points"]);
+  return (controller->GetData()["Statistics"]["Action Points"].Or(0));
 }
 
 unsigned short CharacterActionPoints::GetActionPoints(void) const
 {
   if (!(_level->GetState() == Level::Fight))
     return (GetMaxActionPoints());
-  return (controller->GetData()["Variables"]["Action Points"]);
+  return (controller->GetData()["Variables"]["Action Points"].Or(0));
 }
 
 void CharacterActionPoints::ConvertRemainingActionPointsToArmorClass(void)
@@ -76,7 +76,7 @@ void CharacterActionPoints::ConvertRemainingActionPointsToArmorClass(void)
     Data bonus     = variables["Armor Class Bonus From Action Points"];
 
     bonus                    = action_points;
-    controller->SetArmorClass((int)variables["Armor Class"] + (int)bonus);
+    controller->SetArmorClass(controller->Model().GetArmorClass() + (int)bonus);
   }
 }
 
@@ -87,7 +87,7 @@ void CharacterActionPoints::RemoveArmorClassBonusFromActionPoints(void)
   
   if (bonus.NotNil())
   {
-    controller->SetArmorClass((int)variables["Armor Class"] - (int)bonus);
+    controller->SetArmorClass(controller->Model().GetArmorClass() - (int)bonus);
     bonus.Remove();
   }
 }
