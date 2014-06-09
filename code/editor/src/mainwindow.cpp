@@ -199,6 +199,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect(&this->waypointGenerate, SIGNAL(Generate()), this, SLOT(MapObjectGenerateWaypoints()));
     connect(ui->waypointGenerateObject, SIGNAL(clicked()), &this->waypointGenerate, SLOT(show()));
+    connect(ui->hideAllWaypoints, SIGNAL(clicked()), this, SLOT(HideAlLWaypoints()));
 
     connect(ui->characterSearch, SIGNAL(textChanged(QString)), this, SLOT(FilterCharacters(QString)));
     connect(ui->charsheetList, SIGNAL(currentTextChanged(QString)), ui->charsheetEditor, SLOT(Load(QString)));
@@ -753,6 +754,17 @@ void MainWindow::PandaInitialized()
       if (level != "")
         LoadMap(level);
     }
+}
+
+void MainWindow::HideAlLWaypoints()
+{
+  if (world)
+  {
+    for_each(world->objects.begin(), world->objects.end(), [](MapObject& object)
+    {
+      object.waypoints_root.hide();
+    });
+  }
 }
 
 void MainWindow::ParticleObjectAdd()

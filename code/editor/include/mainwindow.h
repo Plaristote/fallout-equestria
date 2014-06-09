@@ -110,6 +110,7 @@ private slots:
     void TerrainPickerPicked(bool);
     void TerrainSelectorPicked(bool);
     void WaypointForceFloorAbove(void);
+    void HideAlLWaypoints(void);
 
     // ZONES
     void ZoneAdd(void);
