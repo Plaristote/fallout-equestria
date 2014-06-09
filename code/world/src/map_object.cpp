@@ -65,13 +65,8 @@ void MapObject::ReparentTo(MapObject* object)
   {
     parent        = object->nodePath.get_name();
     object->children.push_back(this);
-#ifdef GAME_EDITOR
-    if (object->floor != floor)
-      SetFloor(object->floor);
-#else
     if (object->floor != floor && inherits_floor)
       SetFloor(object->floor);
-#endif
     nodePath.reparent_to(object->nodePath);
 #ifndef GAME_EDITOR
     if (inherits_floor)
