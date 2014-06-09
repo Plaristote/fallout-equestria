@@ -69,7 +69,7 @@ void MapObject::ReparentTo(MapObject* object)
       SetFloor(object->floor);
     nodePath.reparent_to(object->nodePath);
 #ifndef GAME_EDITOR
-    if (inherits_floor)
+    if (!inherits_floor)
       ReparentToFloor(World::LoadingWorld, floor);
 #endif
   }
@@ -79,9 +79,11 @@ void MapObject::ReparentTo(MapObject* object)
 
 void MapObject::ReparentToFloor(World* world, unsigned char floor)
 {
+#ifndef GAME_EDITOR
   LPoint3f current_pos   = nodePath.get_pos(world->window->get_render());
   LPoint3f current_hpr   = nodePath.get_hpr(world->window->get_render());
   LPoint3f current_scale = nodePath.get_scale(world->window->get_render());
+#endif
 
   world->MapObjectChangeFloor(*this, floor);
 #ifndef GAME_EDITOR

@@ -43,6 +43,7 @@ void Floors::SetCurrentFloor(unsigned char floor)
   unsigned char floorAbove       = floor + 1;
   bool          isInsideBuilding = IsInsideBuilding(floorAbove);
 
+  cout << "Floor above: " << (int)floorAbove << endl;
   if (floorAbove < floor)
     ShowOnlyFloor(floor);
   else

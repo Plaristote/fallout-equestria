@@ -233,10 +233,8 @@ void WorldLight::AddEnlightenedObject(MapObject* object, unsigned int priority, 
     object->SetLight(this, true);
     if (propagate_to_children)
     {
-      cout << "Propagates to children (" << object->name << ")" << endl;
       std::for_each(object->children.begin(), object->children.end(), [this, priority](MapObject* child)
       {
-        cout << "Propagating to children" << endl;
         AddEnlightenedObject(child, priority, true);
       });
     }

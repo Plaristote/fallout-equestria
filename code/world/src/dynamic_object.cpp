@@ -1,6 +1,8 @@
 #include "world/world.h"
 #include "world/dynamic_object.hpp"
-
+#ifndef GAME_EDITOR
+  extern bool world_is_game_save;
+#endif
 using namespace std;
 
 extern unsigned int blob_revision;
@@ -108,4 +110,24 @@ void DynamicObject::Serialize(Utils::Packet& packet) const
       for (; it != end ; ++it)
         packet << (*it).first << (*it).second;
     }
+}
+
+void DynamicObject::ReparentToFloor(World *world, unsigned char floor)
+{
+  // TODO Fix inherits_floor feature for dynamic objects ?
+/*#ifndef GAME_EDITOR
+  LPoint3f current_pos   = nodePath.get_pos(world->window->get_render());
+  LPoint3f current_hpr   = nodePath.get_hpr(world->window->get_render());
+  LPoint3f current_scale = nodePath.get_scale(world->window->get_render());
+#endif
+
+  world->DynamicObjectChangeFloor(*this, floor);
+#ifndef GAME_EDITOR
+  if (!world_is_game_save)
+  {
+    nodePath.set_pos(world->window->get_render(), current_pos);
+    nodePath.set_hpr(world->window->get_render(), current_hpr);
+    nodePath.set_scale(world->window->get_render(), current_scale);
+  }
+#endif*/
 }

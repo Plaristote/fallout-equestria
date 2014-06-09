@@ -13,6 +13,7 @@ struct DynamicObject : public MapObject
   void Unserialize(Utils::Packet& packet);
   void Serialize(Utils::Packet& packet) const;
   virtual int   GetObjectCollideMask() const { return (ColMask::DynObject); }
+  virtual void  ReparentToFloor(World* world, unsigned char floor);
 
   enum Type
   {

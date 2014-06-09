@@ -41,7 +41,7 @@ struct MapObject : public Utils::Serializable
   void          SetTexture(const std::string&);
   void          SetFloor(unsigned char floor);
   void          ReparentTo(MapObject* object);
-  void          ReparentToFloor(World* world, unsigned char floor);
+  virtual void  ReparentToFloor(World* world, unsigned char floor);
 
   void          UnserializeWaypoints(World*, Utils::Packet& packet);
   virtual void  Unserialize(Utils::Packet& packet);
