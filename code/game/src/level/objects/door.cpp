@@ -94,6 +94,11 @@ void ObjectDoor::SetOpened(bool set_open)
   _closed = !set_open;
 }
 
+void ObjectDoor::SetLocked(bool set_locked)
+{
+    _object->locked = set_locked;
+}
+
 bool ObjectDoor::IsWayBlocked(void)
 {
   bool is_way_blocked;

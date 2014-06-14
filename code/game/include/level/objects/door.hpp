@@ -36,6 +36,7 @@ public:
   void               Open(void)  { SetOpened(true);  }
   void               Close(void) { SetOpened(false); }
   void               SetOpened(bool set_open);
+  void               SetLocked(bool set_locked);
 
   void               ActionUse(InstanceDynamicObject* object);
   

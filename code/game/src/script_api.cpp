@@ -357,6 +357,7 @@ namespace asUtils
 {
   InstanceDynamicObject* CharacterAsObject(ObjectCharacter* character)    { return (character); }
   ObjectCharacter*       DynObjAsCharacter(InstanceDynamicObject* object) { return (object->Get<ObjectCharacter>()); }
+  ObjectDoor*            DynObjAsDoor(InstanceDynamicObject* object)      { return (object->Get<ObjectDoor>()); }
   Data                   ItemAsData(InventoryObject* item)                { return (*item); }
 
   void SerializeInt   (Utils::Packet* packet, int i)                      { (*packet) << i;     }
@@ -389,6 +390,13 @@ namespace asUtils
   {
     if (obj != 0)
       obj->ActionUse(user);
+  }
+
+  void TalkTo(InstanceDynamicObject* obj, ObjectCharacter* user)
+  {
+    cout << "asUtils::ActionTalkTo" << endl;
+    if (obj != 0)
+      obj->ActionTalkTo(user);
   }
 
   namespace LevelUtils
@@ -636,6 +644,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "CharacterList GetNearbyEnemies()", asMETHOD(ObjectCharacter,GetNearbyEnemies), asCALL_THISCALL);
 
   engine->RegisterObjectMethod(dynObjectClass, "Character@ AsCharacter()",                      asFUNCTION(asUtils::DynObjAsCharacter),       asCALL_CDECL_OBJLAST);
+  engine->RegisterObjectMethod(dynObjectClass, "Door@      AsDoor()",                           asFUNCTION(asUtils::DynObjAsDoor),            asCALL_CDECL_OBJLAST);
   engine->RegisterObjectMethod(dynObjectClass, "string GetName()",                              asMETHOD(InstanceDynamicObject,GetName),      asCALL_THISCALL);
   engine->RegisterObjectMethod(dynObjectClass, "void AddTextBox(string, int, int, int, float)", asMETHOD(InstanceDynamicObject,AddTextBox),   asCALL_THISCALL);
 
@@ -648,7 +657,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass,      "void Use(DynamicObject@)",                          asFUNCTION(asUtils::ActionUse), asCALL_CDECL_OBJFIRST);
   //engine->RegisterObjectMethod(dynObjectClass, "void Use(DynamicObject@)",                          asMETHOD(Interactions::Target,ActionUse), asCALL_THISCALL);
   //engine->RegisterObjectMethod(charClass,      "void Use(DynamicObject@)",                          asMETHOD(ObjectCharacter,ActionUse), asCALL_THISCALL);
-  engine->RegisterObjectMethod(dynObjectClass, "void TalkTo(Character@)",                       asMETHOD(Interactions::Target,ActionTalkTo), asCALL_THISCALL);
+  engine->RegisterObjectMethod(dynObjectClass, "void TalkTo(Character@)",                       asFUNCTION(asUtils::TalkTo), asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(charClass,      "void TalkTo(Character@)",                       asMETHOD(ObjectCharacter,ActionTalkTo), asCALL_THISCALL);
 
   //engine->RegisterObjectMethod(charClass, "void SetRunning(const bool)",              asMETHOD(ObjectCharacter,SetRunning), asCALL_THISCALL);
@@ -698,6 +707,7 @@ void AngelScriptInitialize(void)
 
   engine->RegisterObjectMethod(doorClass, "void   Open()",       asMETHOD(ObjectDoor,Open),         asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "void   Close()",      asMETHOD(ObjectDoor,Close),        asCALL_THISCALL);
+  engine->RegisterObjectMethod(doorClass, "void   SetLocked(bool)", asMETHOD(ObjectDoor,SetLocked), asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "void   Unlock()",     asMETHOD(Lockable,Unlock),         asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "bool   IsLocked()",   asMETHOD(Lockable,IsLocked),       asCALL_THISCALL);
   engine->RegisterObjectMethod(doorClass, "bool   IsOpen()",     asMETHOD(Lockable,IsOpen),         asCALL_THISCALL);

@@ -65,12 +65,14 @@ bool Interactions::Target::TryToStartConversation(ObjectCharacter* user)
   InstanceDynamicObject* self = static_cast<InstanceDynamicObject*>(this);
   bool                   open_dialog = self->GetDynamicObject()->dialog != "";
 
+  cout << "Dialog: " << self->GetDynamicObject()->dialog << endl;
   if (script && script->IsDefined("TalkTo"))
   {
     AngelScript::Type<InstanceDynamicObject*> param_self(self);
     AngelScript::Type<ObjectCharacter*>       param_player(user);
 
     open_dialog = open_dialog && (bool)(script->Call("TalkTo", 2, &param_self, &param_player));
+    cout << "open_dialog: " << open_dialog << endl;
   }
   return (open_dialog);
 }
