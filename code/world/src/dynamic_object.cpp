@@ -21,7 +21,7 @@ void DynamicObject::Unserialize(Utils::Packet& packet)
   packet >> iType >> interactions;
   type = (Type)iType;
 
-  if      (type == Character)
+  if      (type == Character || type == Other)
     packet >> script >> charsheet >> dialog;
   else if (type == Door || type == Locker)
   {
@@ -78,7 +78,7 @@ void DynamicObject::Serialize(Utils::Packet& packet) const
 
     packet << iType << interactions;
 
-    if      (type == Character)
+    if      (type == Character || type == Other)
       packet << script << charsheet << dialog;
     else if (type == Door || type == Locker)
       packet << iLocked << key;

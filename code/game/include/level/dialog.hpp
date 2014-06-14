@@ -61,7 +61,8 @@ private:
 class DialogController : public DialogView
 {
 public:
-  DialogController(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* character, Data i18n);
+  DialogController(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter*       character);
+  DialogController(WindowFramework* window, Rocket::Core::Context* context, InstanceDynamicObject* dynamic_object);
   ~DialogController();
 
   ObjectCharacter* WithCharacter(void) const { return (_character); }
@@ -70,15 +71,17 @@ public:
   Sync::Signal<void (ObjectCharacter*)> StartBarter;
 
 private:
+  void             Initialize(void);
   void             ExecuteAnswer(Rocket::Core::Event& event);
   void             SetCurrentNode(const std::string& nodeName);
   void             OpenBarter(Rocket::Core::Event& event);
 
   std::string      SolveStringVariables(const std::string&);
 
-  AngelScript::Object _script;
-  DialogModel         _model;
-  ObjectCharacter*    _character;
+  AngelScript::Object    _script;
+  DialogModel            _model;
+  ObjectCharacter*       _character;
+  InstanceDynamicObject* interlocutor;
 };
 
 

@@ -109,15 +109,7 @@ NodePath ObjectCharacter::GetJoint(const string& joint_name)
 
 void ObjectCharacter::ActionTalkTo(ObjectCharacter* user)
 {
-  bool open_dialog = _object->dialog != "";
-
-  if (script && script->IsDefined("TalkTo"))
-  {
-    AngelScript::Type<ObjectCharacter*> param(user);
-    
-    open_dialog = open_dialog && (bool)(script->Call("TalkTo", 1, &param));
-  }
-  if (open_dialog)
+  if (TryToStartConversation(user))
   {
     DialogController* controller = _level->GetLevelUi().OpenUiDialog(this);
     
@@ -547,7 +539,6 @@ void     ObjectCharacter::SetFaction(unsigned int flag)
 
 void     ObjectCharacter::SetAsEnemy(ObjectCharacter* other, bool enemy)
 {
-  cout << "SetAsEnemy: " << GetName() << " -> " << other->GetName() << endl;
   if (_faction && other->GetFaction() != 0)
   {
     WorldDiplomacy& diplomacy = GameTask::CurrentGameTask->GetDiplomacy();

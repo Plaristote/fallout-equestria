@@ -6,10 +6,10 @@
 # include "level/skill_target.hpp"
 # include "level/interactions/interaction.hpp"
 
-class Level;
-class InstanceDynamicObject;
-class ObjectCharacter;
-class DynamicObject;
+class  Level;
+class  InstanceDynamicObject;
+class  ObjectCharacter;
+struct DynamicObject;
 
 namespace Interactions
 {
@@ -34,6 +34,7 @@ namespace Interactions
     void                 ThatDoesNothing(InstanceDynamicObject* user);
 
   protected:
+    bool                 TryToStartConversation(ObjectCharacter* user);
     void                 SetupScript(AngelScript::Object* script);
     
     SkillTarget          skill_target;

@@ -57,6 +57,7 @@ public:
   UiNextZone*                     OpenZonePicker(const std::vector<std::string>& destinations);
   UiBarter*                       OpenUiBarter(ObjectCharacter* player, ObjectCharacter* trader);
   DialogController*               OpenUiDialog(ObjectCharacter* target);
+  DialogController*               OpenUiDialog(InstanceDynamicObject* target);
   InteractMenu*                   OpenInteractMenu(InstanceDynamicObject*);
 
   bool                            HasOpenedWindows(void) const;

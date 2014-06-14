@@ -11,9 +11,9 @@ Interactions::Target::Target(Level* level, DynamicObject* object) : skill_target
 void Interactions::Target::SetupScript(AngelScript::Object* script)
 {
   this->script = script;
-  script->asDefineMethod("LookAt", "bool look_at(Character@)");
-  script->asDefineMethod("Use",    "void use(Character@)");
-  script->asDefineMethod("TalkTo", "bool talk_to(Character@)");
+  script->asDefineMethod("LookAt", "bool look_at(DynamicObject@, Character@)");
+  script->asDefineMethod("Use",    "void use(DynamicObject@, Character@)");
+  script->asDefineMethod("TalkTo", "bool talk_to(DynamicObject@, Character@)");
 }
 
 void Interactions::Target::ActionUseSkill(ObjectCharacter* user, const std::string& skill)
@@ -29,9 +29,10 @@ void Interactions::Target::ActionLookAt(InstanceDynamicObject* user)
 
     if (script && script->IsDefined("LookAt"))
     {
-      AngelScript::Type<ObjectCharacter*> param((ObjectCharacter*)(user));
+      AngelScript::Type<InstanceDynamicObject*> param_self(reinterpret_cast<InstanceDynamicObject*>(this));
+      AngelScript::Type<ObjectCharacter*>       param_player(user->Get<ObjectCharacter>());
 
-      script_success = script->Call("LookAt", 1, &param);
+      script_success = script->Call("LookAt", 2, &param_self, &param_player);
     }
     if (!script_success)
     {
@@ -50,22 +51,35 @@ void Interactions::Target::ActionUse(InstanceDynamicObject* user)
   cout << "ActionUse instancedynamicobject" << endl;
   if (script && script->IsDefined("Use"))
   {
-    AngelScript::Type<ObjectCharacter*> param((ObjectCharacter*)(user));
+    AngelScript::Type<InstanceDynamicObject*> param_self(reinterpret_cast<InstanceDynamicObject*>(this));
+    AngelScript::Type<ObjectCharacter*>       param_player(user->Get<ObjectCharacter>());
 
-    script->Call("Use", 1, &param);
+    script->Call("Use", 2, &param_self, &param_player);
   }
   else
     ThatDoesNothing(user);
 }
 
-void Interactions::Target::ActionTalkTo(ObjectCharacter* user)
+bool Interactions::Target::TryToStartConversation(ObjectCharacter* user)
 {
+  InstanceDynamicObject* self        = reinterpret_cast<InstanceDynamicObject*>(this);
+  bool                   open_dialog = self->GetDynamicObject()->dialog != "";
+
   if (script && script->IsDefined("TalkTo"))
   {
-    AngelScript::Type<ObjectCharacter*> param((ObjectCharacter*)(user));
+    AngelScript::Type<InstanceDynamicObject*> param_self(reinterpret_cast<InstanceDynamicObject*>(this));
+    AngelScript::Type<ObjectCharacter*>       param_player(user);
 
-    script->Call("TalkTo", 1, &param);
+    open_dialog = open_dialog && (bool)(script->Call("TalkTo", 2, &param_self, &param_player));
   }
+  return (open_dialog);
+}
+
+void Interactions::Target::ActionTalkTo(ObjectCharacter* user)
+{
+  cout << "ActionTalkTo" << endl;
+  if (TryToStartConversation(user))
+    Level::CurrentLevel->GetLevelUi().OpenUiDialog(reinterpret_cast<InstanceDynamicObject*>(this));
   else
     ThatDoesNothing(user);
 }

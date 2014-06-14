@@ -105,15 +105,28 @@ void DialogView::CleanView(const DialogAnswers& answers)
 }
 
 // CONTROLLER
-DialogController::DialogController(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* character, Data l18n) : DialogView(window, context), _script("scripts/dialogs/" + character->GetDialog() + ".as"), _model(character->GetDialog())
+DialogController::DialogController(WindowFramework* window, Rocket::Core::Context* context, ObjectCharacter* character) : DialogView(window, context), _script("scripts/dialogs/" + character->GetDialog() + ".as"), _model(character->GetDialog())
 {
-  _character = character;
+  _character   = character;
+  interlocutor = character;
+  Initialize();
+}
+
+DialogController::DialogController(WindowFramework* window, Rocket::Core::Context* context, InstanceDynamicObject* dynamic_object) : DialogView(window, context), _script("scripts/dialogs/" + dynamic_object->GetDialog() + ".as"), _model(dynamic_object->GetDialog())
+{
+  _character   = 0;
+  interlocutor = dynamic_object;
+  Initialize();
+}
+
+void DialogController::Initialize()
+{
   AnswerSelected.EventReceived.Connect(*this, &DialogController::ExecuteAnswer);
-  _script.asDefineMethod("HookInit", "string HookInit(Character@)");
+  _script.asDefineMethod("HookInit", "string HookInit(DynamicObject@)");
   try
   {
-    string                              npc_line;
-    AngelScript::Type<ObjectCharacter*> self(character);
+    string                                    npc_line;
+    AngelScript::Type<InstanceDynamicObject*> self(interlocutor);
 
     npc_line = *(string*)(_script.Call("HookInit", 1, &self));
 
@@ -137,7 +150,8 @@ DialogController::~DialogController()
 void DialogController::OpenBarter(Core::Event& event)
 {
   cout << "OpenBarter executed" << endl;
-  StartBarter.Emit(_character);
+  if (_character)
+    StartBarter.Emit(_character);
 }
 
 void DialogController::SetCurrentNode(const string& node)

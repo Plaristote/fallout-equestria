@@ -86,6 +86,7 @@ WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
   connect(ui->character,            SIGNAL(textChanged(QString)),     this, SLOT(UpdateBehaviour()));
   connect(ui->dialog,               SIGNAL(textChanged(QString)),     this, SLOT(UpdateBehaviour()));
   connect(ui->script,               SIGNAL(textChanged(QString)),     this, SLOT(UpdateBehaviour()));
+  connect(ui->doorLocked,           SIGNAL(toggled(bool)),            this, SLOT(UpdateBehaviour()));
   connect(ui->key,                  SIGNAL(textChanged(QString)),     this, SLOT(UpdateBehaviour()));
   connect(ui->interactionUse,       SIGNAL(toggled(bool)),            this, SLOT(UpdateBehaviour()));
   connect(ui->interactionUseSkill,  SIGNAL(toggled(bool)),            this, SLOT(UpdateBehaviour()));
@@ -498,6 +499,7 @@ void WorldObjectWidget::InitializeBehaviour(DynamicObject* object)
   ui->interactionUseSpell->setChecked (object->interactions & Interactions::UseSpell);
   ui->interactionTalkTo->setChecked   (object->interactions & Interactions::TalkTo);
   ui->interactionLookAt->setChecked   (object->interactions & Interactions::LookAt);
+  ui->doorLocked->setChecked(object->locked);
 }
 
 void WorldObjectWidget::UpdateBehaviour()
@@ -549,6 +551,7 @@ void WorldObjectWidget::UpdateBehaviour()
         break ;
       default:
         object->key          = ui->key->text().toStdString();
+        object->locked       = ui->doorLocked->isChecked();
         object->script       = ui->script->text().toStdString();
         object->dialog       = ui->dialog->text().toStdString();
         object->interactions = (ui->interactionUse->isChecked() ? Interactions::Use : 0) +

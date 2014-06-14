@@ -113,9 +113,20 @@ UiBarter*          LevelUi::OpenUiBarter(ObjectCharacter* player, ObjectCharacte
   return (ui_barter);
 }
 
+DialogController*  LevelUi::OpenUiDialog(InstanceDynamicObject* object)
+{
+  DialogController* ui_dialog = new DialogController(window, GetContext(), object);
+
+  GetMainBar().Hide();
+  SetUi<UiItRunningDialog>(ui_dialog);
+  ui_dialog->DialogEnded.Connect(*this,        &LevelUi::CloseRunningUi<UiItRunningDialog>);
+  ui_dialog->DialogEnded.Connect(GetMainBar(), &UiBase::Show);
+  return (ui_dialog);
+}
+
 DialogController*  LevelUi::OpenUiDialog(ObjectCharacter* target)
 {
-  DialogController* ui_dialog = new DialogController(window, GetContext(), target, Data());
+  DialogController* ui_dialog = new DialogController(window, GetContext(), target);
   
   GetMainBar().Hide();
   SetUi<UiItRunningDialog>(ui_dialog);
