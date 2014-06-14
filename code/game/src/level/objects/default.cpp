@@ -4,7 +4,7 @@ using namespace std;
 
 ObjectDefault::ObjectDefault(Level* level, DynamicObject* object) : InstanceDynamicObject(level, object)
 {
-  cout << "Init default with script " << object->script << endl;
+  _type = ObjectType2Code<ObjectDefault>::Type;
   if (object->script != "")
   {
     string prefixPath = "scripts/ai/";
@@ -13,8 +13,8 @@ ObjectDefault::ObjectDefault(Level* level, DynamicObject* object) : InstanceDyna
     script = new AngelScript::Object(scriptPath);
     skill_target.Initialize(scriptPath, script->GetContext());
     SetupScript(script);
+    cout << "This: " << this << endl;
+    TryToStartConversation(0);
   }
-  if (object->name == "control-room-terminal")
-    exit(0);
   inventory.LoadInventory(object);
 }

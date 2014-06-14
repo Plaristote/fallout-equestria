@@ -18,7 +18,7 @@ namespace Interactions
   public:
     Target(Level* level, DynamicObject* object);
 
-    virtual std::string GetName(void) const = 0;
+    virtual std::string    GetName(void) const = 0;
 
     InteractionList&     GetInteractions(void) {return (interactions); }
     void                 AddInteraction(const std::string& name, Trigger& trigger);
@@ -36,7 +36,7 @@ namespace Interactions
   protected:
     bool                 TryToStartConversation(ObjectCharacter* user);
     void                 SetupScript(AngelScript::Object* script);
-    
+
     SkillTarget          skill_target;
 
   private:
