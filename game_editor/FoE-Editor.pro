@@ -18,10 +18,10 @@ unix:QMAKE_CXXFLAGS += -std=c++0x
 win32:QMAKE_CFLAGS_RELEASE  = -O2 -MD -zi
 win32:QMAKE_LFLAGS_RELEASE  = /INCREMENTAL:NO /DEBUG
 
-CONFIG(debug, debug|releqse) {
-  unix:QMAKE_CXXFLAGS_DEBUG += -fsanitize=address
-  unix:LIBS += -lasan
-}
+#CONFIG(debug, debug|releqse) {
+#  unix:QMAKE_CXXFLAGS_DEBUG += -fsanitize=address
+#  unix:LIBS += -lasan
+#}
 
 win32:LIBS +=  ../3rd_parties/lib/libp3framework.lib \
                ../3rd_parties/lib/libpanda.lib \
@@ -86,9 +86,10 @@ SOURCES += main.cpp\
            zone.cpp \
            light.cpp \
            particle_effect.cpp \
-    worldobjectwidget.cpp \
-    inventoryeditor.cpp \
-    enlightenedobjectswidget.cpp
+           worldobjectwidget.cpp \
+           inventoryeditor.cpp \
+           enlightenedobjectswidget.cpp \
+           factiondialog.cpp
 
 
 HEADERS  += globals.hpp \
@@ -132,9 +133,10 @@ HEADERS  += globals.hpp \
             world/scene_camera.hpp \
             world/particle_effect.hpp \
             divide_and_conquer.hpp \
-    worldobjectwidget.h \
-    inventoryeditor.h \
-    enlightenedobjectwidget.h
+            worldobjectwidget.h \
+            inventoryeditor.h \
+            enlightenedobjectwidget.h \
+            factiondialog.h
 
 FORMS    += mainwindow.ui \
             dialognewscript.ui \
@@ -153,5 +155,6 @@ FORMS    += mainwindow.ui \
             charsheeteditor.ui \
             formkeyvalue.ui \
             citysplashdialog.ui \
-    worldobjectwidget.ui \
-    inventoryeditor.ui
+            worldobjectwidget.ui \
+            inventoryeditor.ui \
+            factiondialog.ui

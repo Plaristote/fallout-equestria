@@ -2,6 +2,7 @@
 #define FACTIONDIALOG_H
 
 #include <QDialog>
+#include "datatree.hpp"
 
 namespace Ui {
   class FactionDialog;
@@ -17,11 +18,14 @@ public:
 
   const QString& GetCurrentFaction(void) const;
 
+  void Initialize();
+  void Save();
 public slots:
   void UpdateCurrentFaction(QString);
 
 private slots:
-  void Initialize();
+  void AddFaction();
+  void RemoveFaction();
   void AddToAllies();
   void AddToEnemies();
   void RemoveFromAllies();
@@ -32,6 +36,9 @@ private:
   void AddToEnemies(const QString&);
   void RemoveFromAllies(const QString&);
   void RemoveFromEnemies(const QString&);
+
+  void InitializeAllies();
+  void InitializeEnemies();
 
   Data GetCurrentFactionData(void);
 

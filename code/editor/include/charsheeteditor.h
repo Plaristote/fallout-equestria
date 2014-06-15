@@ -5,6 +5,7 @@
 # include "datatree.hpp"
 # include <QSpinBox>
 # include "formkeyvalue.h"
+# include "factiondialog.h"
 
 namespace Ui {
 class CharsheetEditor;
@@ -33,6 +34,8 @@ private slots:
     void SelectDialog(void);
     void SelectModel(void);
     void SelectTexture(void);
+    void SelectFaction(void);
+    void FactionSelected(void);
 
 private:
     Ui::CharsheetEditor *ui;
@@ -48,6 +51,8 @@ private:
     typedef FormKeyValue* StatWidget;
     QList<StatWidget> statistics_widgets;
     QList<StatWidget> skills_widgets;
+
+    FactionDialog faction_dialog;
 };
 
 #endif // CHARSHEETEDITOR_H

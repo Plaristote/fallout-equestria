@@ -34,6 +34,7 @@ public:
     ADD_SELECTABLE_RESOURCE(Dialogs)
     ADD_SELECTABLE_RESOURCE(ObjectScript)
     ADD_SELECTABLE_RESOURCE(Items)
+    ADD_SELECTABLE_RESOURCE(Factions)
 
 private slots:
     void SearchList(void);

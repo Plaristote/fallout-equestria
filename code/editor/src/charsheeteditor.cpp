@@ -13,7 +13,7 @@ using namespace std;
 
 CharsheetEditor::CharsheetEditor(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::CharsheetEditor)
+    ui(new Ui::CharsheetEditor), faction_dialog(this)
 {
   QIcon iconAppearance("icons/appearance.png");
   QIcon iconInventory("icons/item.png");
@@ -54,11 +54,31 @@ CharsheetEditor::CharsheetEditor(QWidget *parent) :
     connect(ui->pickDialog,  SIGNAL(clicked()), this, SLOT(SelectDialog()));
     connect(ui->pickModel,   SIGNAL(clicked()), this, SLOT(SelectModel()));
     connect(ui->pickTexture, SIGNAL(clicked()), this, SLOT(SelectTexture()));
+    connect(ui->pickFaction, SIGNAL(clicked()), this, SLOT(SelectFaction()));
+    connect(&faction_dialog, SIGNAL(accepted()), this, SLOT(FactionSelected()));
 }
 
 CharsheetEditor::~CharsheetEditor()
 {
     delete ui;
+}
+
+void CharsheetEditor::SelectFaction()
+{
+  faction_dialog.Initialize();
+  faction_dialog.UpdateCurrentFaction(ui->faction->text());
+  faction_dialog.open();
+}
+
+void CharsheetEditor::FactionSelected()
+{
+  if (charsheet)
+  {
+    QString faction_name = faction_dialog.GetCurrentFaction();
+
+    ui->faction->setText(faction_name);
+    faction_dialog.Save();
+  }
 }
 
 void CharsheetEditor::SelectScript()
