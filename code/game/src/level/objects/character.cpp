@@ -277,8 +277,13 @@ bool ObjectCharacter::IsInterrupted() const
     LPoint3f pos    = GetNodePath().get_pos();
 
     if (target.get_x() != pos.get_x() && target.get_y() != pos.get_y())
+      {
+      //  cout << "Not yet in position" << endl;
       return (true);
+      }
   }
+  //else if (AnimationEndForObject.ObserverCount() > 0)
+  //  cout << "Not yet done with animations" << endl;
   return (AnimationEndForObject.ObserverCount() > 0);
 }
 
@@ -328,6 +333,8 @@ void ObjectCharacter::RunCombatBehaviour(float)
 
     if (nodepath.get_x() == waypoint_nodepath.get_x() && nodepath.get_y() == waypoint_nodepath.get_y())
       _level->GetCombat().NextTurn();
+    else
+      cout << "Waiting end of movement to pass turn" << endl;
   }
   else if (!IsBusy())
     {
@@ -357,6 +364,8 @@ void ObjectCharacter::RunCombatBehaviour(float)
           cout << "Character " << GetName() << " is playing" << endl;
       }
     }
+  else
+    cout << "Combat AI: Nothing to do (playing animation: " << PlayingAnimationName() << ")" << endl;
 }
 
 bool ObjectCharacter::IsBusy(void) const
@@ -548,7 +557,6 @@ void     ObjectCharacter::SetAsEnemy(ObjectCharacter* other, bool enemy)
   }
   else if (other->GetFaction() != 0)
   {
-    cout << "Using self enemy mask: " << other->GetFactionName() << ':' << other->GetFaction() << endl;
     if (enemy)
       _self_enemyMask |= other->GetFaction();
     else if (_self_enemyMask & other->GetFaction())

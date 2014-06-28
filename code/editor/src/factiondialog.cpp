@@ -3,6 +3,8 @@
 #include "selectableresource.h"
 #include <QInputDialog>
 
+using namespace std;
+
 FactionDialog::FactionDialog(QWidget *parent) : QDialog(parent),
   ui(new Ui::FactionDialog)
 {

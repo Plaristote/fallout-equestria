@@ -40,20 +40,9 @@ asIScriptContext*                   AngelScript::ContextLock::current_context = 
 asIScriptModule*                    AngelScript::ContextLock::current_module  = 0;
 AngelScript::ContextLock::ObjectPtr AngelScript::ContextLock::current_object;
 
-AngelScript::Object::Object(const std::string& filepath) : filepath(filepath), module(0)
+AngelScript::Object::Object(const std::string& filepath) :  module(0)
 {
-  asIScriptEngine* engine = Script::Engine::Get();
-
-  required_module  = false;
-  required_context = true;
-  if (engine)
-    context = engine->CreateContext();
-  else
-  {
-    context = 0;
-    std::cerr << "[AngelScript] Could not create context." << std::endl;
-  }
-  Initialize();
+  LoadFromFile(filepath);
 }
 
 AngelScript::Object::Object(asIScriptContext* context, const std::string& filepath) : filepath(filepath), context(context), module(0)
@@ -85,10 +74,30 @@ AngelScript::Object::~Object()
     context->Release();
 }
 
+void AngelScript::Object::LoadFromFile(const std::string& filepath)
+{
+  if (!module)
+  {
+    asIScriptEngine* engine = Script::Engine::Get();
+
+    this->filepath   = filepath;
+    required_module  = false;
+    required_context = true;
+    if (engine)
+      context = engine->CreateContext();
+    else
+    {
+      context = 0;
+      std::cerr << "[AngelScript] Could not create context." << std::endl;
+    }
+    Initialize();
+  }
+}
+
 void AngelScript::Object::Initialize(void)
 {
   if (!context)
-    ; // throw something
+    throw AngelScript::Exception(AngelScript::Exception::CannotLoadContext); // throw something
   if (module)
     Script::ModuleManager::Release(module);
   if (filepath[filepath.size() - 1] != '/' && Filesystem::FileExists(filepath))
@@ -97,7 +106,7 @@ void AngelScript::Object::Initialize(void)
     if (module)
       required_module = true;
     else
-      cout << "[AngelScript] Failed to load script " << filepath << endl;
+      throw AngelScript::Exception(AngelScript::Exception::CannotLoadModule, filepath);
   }
   else
     cout << "[AngelScript] Script " << filepath << " does not exist." << endl;

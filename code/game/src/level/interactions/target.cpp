@@ -23,7 +23,7 @@ void Interactions::Target::ActionUseSkill(ObjectCharacter* user, const std::stri
 
 void Interactions::Target::ActionLookAt(InstanceDynamicObject* user)
 {
-  if (IsPlayer(user))
+  //if (IsPlayer(user))
   {
     bool script_success = false;
 
@@ -33,7 +33,10 @@ void Interactions::Target::ActionLookAt(InstanceDynamicObject* user)
       AngelScript::Type<ObjectCharacter*>       param_player(user->Get<ObjectCharacter>());
 
       script_success = script->Call("LookAt", 2, &param_self, &param_player);
+      cout << "Runned script returned " << script_success << endl;
     }
+    else
+      cout << "Cant run script" << endl;
     if (!script_success)
     {
       const InstanceDynamicObject* self = static_cast<const InstanceDynamicObject*>(this);
@@ -65,13 +68,12 @@ bool Interactions::Target::TryToStartConversation(ObjectCharacter* user)
   InstanceDynamicObject* self = static_cast<InstanceDynamicObject*>(this);
   bool                   open_dialog = self->GetDynamicObject()->dialog != "";
 
-  cout << "Dialog: " << self->GetDynamicObject()->dialog << endl;
   if (script && script->IsDefined("TalkTo"))
   {
     AngelScript::Type<InstanceDynamicObject*> param_self(self);
     AngelScript::Type<ObjectCharacter*>       param_player(user);
 
-    open_dialog = open_dialog && (bool)(script->Call("TalkTo", 2, &param_self, &param_player));
+    open_dialog = (bool)(script->Call("TalkTo", 2, &param_self, &param_player)) && open_dialog;
     cout << "open_dialog: " << open_dialog << endl;
   }
   return (open_dialog);

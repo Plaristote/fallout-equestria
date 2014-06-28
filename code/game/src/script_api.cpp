@@ -95,6 +95,11 @@ namespace ScriptApi
   class Character
   {
   public:
+    static bool HasEnemiesInSight(ObjectCharacter* character)
+    {
+      return (character != 0 && character->GetFieldOfView().HasLivingEnemiesInSight());
+    }
+
     static void GoTo(ObjectCharacter* character, int waypoint_id)
     {
       if (character)
@@ -695,6 +700,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "void   SetAsEnemy(Character@, bool)",      asMETHOD(ObjectCharacter,SetAsEnemy),     asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool   IsEnemy(const Character@) const",   asMETHOD(ObjectCharacter,IsEnemy),        asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool   IsAlly(const Character@) const",    asMETHOD(ObjectCharacter,IsAlly),         asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "bool HasEnemiesInSight()",                 asFUNCTION(ScriptApi::Character::HasEnemiesInSight), asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(charClass, "Special@ GetStatController()",             asMETHODPR(ObjectCharacter,GetStatController,() const,StatController*), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "void   SetFurtive(bool)",                  asMETHOD(ObjectCharacter,SetFurtive),        asCALL_THISCALL);
 

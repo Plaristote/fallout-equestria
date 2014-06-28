@@ -48,7 +48,6 @@ void                     AnimatedObject::PlayAnimation(const std::string& name, 
     PlayAnimation(ANIMATION_DEFAULT, loop);
   else
   {
-    cout << "ELSE!" << endl;
     AnimationEnd.Emit();
     AnimationEndForObject.Emit(this);
   }

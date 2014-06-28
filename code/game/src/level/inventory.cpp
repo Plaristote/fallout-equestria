@@ -11,7 +11,13 @@ using namespace std;
 
 InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts/objects/" + data["script"]["file"].Value())
 {
-  // Duplicate the DataBranch into the InventoryObject
+  if (data["icon"].Nil() && GameTask::CurrentGameTask)
+  {
+    Data items = GameTask::CurrentGameTask->GetItemIndex();
+    if (items[data.Key()].NotNil())
+      Duplicate(items[data.Key()]);
+    _object.LoadFromFile("scripts/objects/" + (*this)["script"]["file"].Value());
+  }
   Duplicate(data);
 
   // Set the default values
@@ -25,7 +31,7 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts
 
   _equiped = (*this)["equiped"].NotNil();
 
-  Data script = data["script"];
+  Data script = (*this)["script"];
 
   if (!(script.Nil()))
   {
@@ -36,7 +42,7 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts
     }
   }
 
-  std::for_each(data["actions"].begin(), data["actions"].end(), [this](Data action)
+  std::for_each((*this)["actions"].begin(), (*this)["actions"].end(), [this](Data action)
   {
     AngelScript::Object     hooks(this->_object.GetContext(), this->_object.GetModule());
     Data                    action_data  = (*this)["actions"][action.Key()];

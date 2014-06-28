@@ -15,7 +15,9 @@ namespace AngelScript
       UndeclaredFunction,
       UnloadableFunction,
       AngelScriptException,
-      InternalError
+      InternalError,
+      CannotLoadContext,
+      CannotLoadModule
     };
 
     Exception(Code code, const std::string& target = "")
@@ -33,6 +35,12 @@ namespace AngelScript
         break ;
       case AngelScriptException:
         message = "An exception has been thrown inside the function " + target;
+        break ;
+      case CannotLoadContext:
+        message = "Context couldn't be loaded.";
+        break ;
+      case CannotLoadModule:
+        message = "Cannot load file " + target;
         break ;
       }
     }
@@ -114,8 +122,10 @@ namespace AngelScript
     Sync::Signal<void>    ObjectDestroyed;
 
     std::weak_ptr<Object> GetPtr(void) { return (shared_ptr); }
+
+    void                  LoadFromFile(const std::string& filepath);
   protected:
-    void Initialize(void);    
+    void Initialize(void);
   public:
     void asDefineMethod(const std::string& name, const std::string& declaration);
     void asUndefineMethod(const std::string& name);
@@ -187,7 +197,7 @@ namespace AngelScript
 
     ReturnType Call(const std::string name, unsigned int argc = 0, ...);
   private:
-    const std::string       filepath;
+    std::string             filepath;
     asIScriptContext*       context;
     asIScriptModule*        module;
     bool                    required_module, required_context;
