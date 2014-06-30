@@ -6,7 +6,8 @@ Projectile::Projectile(World* world, NodePath parent, NodePath target, Data data
 {
   Data light_data = data["light"];
 
-  enlightened     = world->floors_node;
+  //enlightened     = world->floors_node;
+  enlightened     = world->window->get_render();
   if (data["model"].NotNil())
   {
     node_path.detach_node();
@@ -22,10 +23,11 @@ Projectile::Projectile(World* world, NodePath parent, NodePath target, Data data
     is_moving     = false;
   if (light_data.NotNil())
   {
-    light         = new PointLight("projectile-light");
-    light_node    = node_path.attach_new_node(light);
-    enlightened.set_light(light_node, 8);
-    SetAttenuation(0, 0, light_data["attenuation"] || 1);
+    light            = new PointLight("projectile-light");
+    light_node       = node_path.attach_new_node(light);
+    base_attenuation = light_data["attenuation"].Or(1);
+    enlightened.set_light(light_node, 7);
+    SetAttenuation(0, 0, base_attenuation);
     SetColor(light_data["red"]   || 255,
              light_data["green"] || 255,
              light_data["blue"]  || 255, 1);
@@ -48,13 +50,17 @@ void Projectile::SetTimeout(float timeout)
 
 void Projectile::SetAttenuation(float a, float b, float c)
 {
-  light->set_attenuation(LPoint3f(a, b, c));
+  if (!(light.is_null()))
+    light->set_attenuation(LPoint3f(a, b, c));
 }
 
 void Projectile::SetColor(float red, float green, float blue, float alpha)
 {
-  color = LColor(red, green, blue, alpha);
-  light->set_color(color);
+  if (!(light.is_null()))
+  {
+    color = LColor(red, green, blue, alpha);
+    light->set_color(color);
+  }
 }
 
 bool Projectile::HasReachedDestination(void) const
@@ -77,15 +83,7 @@ void Projectile::Run(float elapsed_time)
 
     time_left -= elapsed_time;
     factor     = time_left / timeout;
-    if (!(light.is_null()))
-    {
-      LColor current_color = color;
-
-      current_color.set_x(color.get_x() * factor);
-      current_color.set_y(color.get_y() * factor);
-      current_color.set_z(color.get_z() * factor);
-      light->set_color(current_color);
-    }
+    SetAttenuation(0, 0, base_attenuation * factor);
   }
   else
   {

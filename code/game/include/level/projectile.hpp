@@ -49,6 +49,7 @@ private:
   PT(PointLight)     light;
   float              timeout;
   float              time_left;
+  float              base_attenuation;
   LColor             color;
 };
 

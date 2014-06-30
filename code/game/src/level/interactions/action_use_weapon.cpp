@@ -79,14 +79,18 @@ void Actions::UseWeaponOn::TargetAnimate()
     if (enemy_died)
       target->PlayAnimation("death");
     else
-      target->PlayAnimation("use");
+    {
+      Data target_animation = action["animations"]["target"];
+
+      target->PlayAnimation(target_animation.Nil() ? "use" : target_animation.Value());
+    }
   }
 }
 
 void Actions::UseWeaponOn::FireProjectile()
 {
   cout << "FIRING PROJECTILE!" << endl;
-  Data                   projectile_data = action["animations"]["projectiles"]["attack"];
+  Data                   projectile_data = action["animations"]["projectile"];
   NodePath               destination, weapon_node;
   InstanceDynamicObject* target = GetObjectTarget();
   Projectile*            projectile;
@@ -106,7 +110,7 @@ void Actions::UseWeaponOn::FireProjectile()
 
 bool Actions::UseWeaponOn::HasProjectile(void) const
 {
-  return (action["animations"]["projectiles"]["attack"].NotNil());
+  return (action["animations"]["projectile"].NotNil());
 }
 
 void Actions::UseWeaponOn::FindEquipedIterator()

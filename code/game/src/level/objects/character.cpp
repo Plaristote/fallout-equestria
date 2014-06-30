@@ -234,7 +234,7 @@ NodePath ObjectCharacter::Equipment::GetEquipedItemNode(const std::string& slot,
 
   if (equiped_item != 0 && equiped_item->render != 0)
     return (equiped_item->render->GetNodePath());
-  return (NodePath());
+  return (character.GetNodePath());
 }
 
 void ObjectCharacter::RefreshEquipment(void)
