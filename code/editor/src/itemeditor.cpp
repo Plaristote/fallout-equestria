@@ -120,7 +120,7 @@ void ItemEditor::SelectModel(void)
 
 void ItemEditor::SelectTexture(void)
 {
-  QString   filter    = "Images (*.png *.jpg *.bmp)";
+  QString   filter    = "Images (*.png *.jpg *.bmp, *.tga)";
   QString   base_path = QDir::currentPath() + "/textures/";
   QString   path = QFileDialog::getOpenFileName(this, "Select a texture", base_path, filter);
   QFileInfo info(path);
@@ -144,7 +144,7 @@ void ItemEditor::SelectTexture(void)
 
 void ItemEditor::SelectIcon(void)
 {
-  QString   filter    = "Images (*.png *.jpg *.bmp)";
+  QString   filter    = "Images (*.png *.jpg *.bmp, *.tga)";
   QString   base_path = QDir::currentPath() + "/textures/itemIcons/";
   QString   path = QFileDialog::getOpenFileName(this, "Select an icon", base_path, filter);
   QFileInfo info(path);

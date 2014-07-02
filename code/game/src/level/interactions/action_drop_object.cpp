@@ -9,6 +9,7 @@ using namespace Interactions;
 Actions::DropObject::DropObject(ObjectCharacter* character, InventoryObject* item, ::Waypoint* drop_on): ActionRunner(character), item(item), drop_on(drop_on)
 {
   SetActionPointCost(AP_COST_USE);
+  RunAction();
 }
 
 void Actions::DropObject::RunAction(void)
@@ -18,6 +19,7 @@ void Actions::DropObject::RunAction(void)
   World*           world         = level->GetWorld();
   DynamicObject*   item_graphics = item->CreateDynamicObject(world);
   
+  cout << "has item graphcis ?" << endl;
   if (item_graphics)
   {
     ObjectItem*    object_item;
@@ -31,6 +33,7 @@ void Actions::DropObject::RunAction(void)
     world->DynamicObjectSetWaypoint(*item_dynamic_object, *drop_on);
     item_dynamic_object->nodePath.set_pos(drop_on->nodePath.get_pos());
     level->InsertInstanceDynamicObject(object_item);
+    cout << "DROPPED OBJECT" << endl;
   }
 }
 
@@ -41,7 +44,7 @@ ActionRunner* Actions::DropObject::Factory(ObjectCharacter* character, Inventory
   if (character && object)
   {
     ::Waypoint*   waypoint = character->GetOccupiedWaypoint();
-    
+
     if (waypoint)
       runner = new DropObject(character, object, waypoint);
   }

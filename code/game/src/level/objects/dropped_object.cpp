@@ -4,7 +4,7 @@
 
 using namespace std;
 
-ObjectItem::ObjectItem(Level* level, DynamicObject* object, InventoryObject* item) : InstanceDynamicObject(level, object), _item(item)
+ObjectItem::ObjectItem(Level* level, DynamicObject* object, InventoryObject* item) : InstanceDynamicObject(level, object), _item(item), has_waypoint(false)
 {
   _type = ObjectTypes::Item;
   if (object->inventory.size() == 0)
@@ -17,7 +17,7 @@ ObjectItem::ObjectItem(Level* level, DynamicObject* object, InventoryObject* ite
   }
 }
 
-void ObjectItem::CallbackActionUse(InstanceDynamicObject* user)
+void ObjectItem::ActionUse(InstanceDynamicObject* user)
 {
   ObjectCharacter* character = user->Get<ObjectCharacter>();
   
@@ -33,4 +33,15 @@ void ObjectItem::CallbackActionUse(InstanceDynamicObject* user)
     else
       _level->GetLevelUi().GetMainBar().AppendToConsole(character->GetName() + " " + i18n::T("can't carry this"));
   }
+}
+
+Pathfinding::Path ObjectItem::GetPathTowardsObject(Collider* character)
+{
+  Pathfinding::Path path;
+
+  character->UnprocessCollisions();
+  path.FindPath(character->GetOccupiedWaypoint(), GetOccupiedWaypoint());
+  path.StripFirstWaypointFromList();
+  character->ProcessCollisions();
+  return (path);
 }

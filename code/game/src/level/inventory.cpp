@@ -249,12 +249,13 @@ DynamicObject* InventoryObject::CreateDynamicObject(World* world) const
   DynamicObject* object;
   Data           self = *this;
 
-  object               = world->AddDynamicObject("item" + Key(), DynamicObject::Item, self["model"], self["texture"]);
+  object               = world->AddDynamicObject("item-" + Key(), DynamicObject::Item, self["model"], self["texture"]);
   if (object)
   {
     object->interactions = Interactions::Use;
     object->waypoint     = 0;
     object->type         = DynamicObject::Item;
+    object->render.set_scale((float)(*this)["scale"]);
   }
   else
     AlertUi::NewAlert.Emit("Could not load graphical assets for item " + Key());
