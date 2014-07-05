@@ -9,8 +9,9 @@ ScriptedTask::ScriptedTask(const string& name, InstanceDynamicObject* target) : 
   object.asDefineMethod("Start",    "void start(Task@)");
   object.asDefineMethod("Finalize", "void finalize(Task@");
   object.asDefineMethod("Run",      "void run(Task@)");
-  Start();
+  object.asDefineMethod("NextTurn", "void next_turn(Task@)");
   data = new DataTree;
+  Start();
 }
 
 ScriptedTask::~ScriptedTask()
@@ -67,6 +68,23 @@ void ScriptedTask::Start(void)
     catch (const std::exception& exception)
     {
       cout << "[AngelScript][ScriptTask][" << name << "][Start] script crashed: " << exception.what() << endl;
+    }
+  }
+}
+
+void ScriptedTask::NextTurn(void)
+{
+  if (object.IsDefined("NextTurn"))
+  {
+    try
+    {
+      AngelScript::Type<ScriptedTask*> task(this);
+
+      object.Call("NextTurn", 1, &task);
+    }
+    catch (const std::exception& exception)
+    {
+      cout << "[AngelScript][ScriptTask][" << name << "][NextTurn] script crashed: " << exception.what() << endl;
     }
   }
 }

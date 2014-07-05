@@ -112,6 +112,7 @@ void Combat::InitializeCharacterTurn(ObjectCharacter* character)
   cout << "Starting turn for character " << character->GetName() << endl;
   character->GetFieldOfView().RunCheck();
   character->RefreshActionPoints();
+  RefreshScriptedTasks(character);
   if (character->GetActionPoints() == 0)
   {
     NextTurn();
@@ -128,6 +129,18 @@ void Combat::InitializeCharacterTurn(ObjectCharacter* character)
     else
       character->TruncatePath(0);
   }
+}
+
+void Combat::RefreshScriptedTasks(ObjectCharacter* character)
+{
+  auto task_set = character->GetTaskSet();
+
+  cout << "Refreshing tasks for character " << character->GetName() << endl;
+  for_each(task_set.begin(), task_set.end(), [](pair<string, ScriptedTask*> task)
+  {
+    cout << "Refreshing task " << task.first << endl;
+    task.second->NextTurn();
+  });
 }
 
 void Combat::FinishFightForCharacter(ObjectCharacter* character)

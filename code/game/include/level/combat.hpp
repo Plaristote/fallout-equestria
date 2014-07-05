@@ -28,6 +28,7 @@ private:
   void             FinalizeCharacterTurn(ObjectCharacter* character);
   void             InitializeCharacterTurn(ObjectCharacter* character);
   void             FinishFightForCharacter(ObjectCharacter* character);
+  void             RefreshScriptedTasks(ObjectCharacter* character);
   void             InitializeLevelForFight(void);
   void             FinalizeFightForLevel(void);
 

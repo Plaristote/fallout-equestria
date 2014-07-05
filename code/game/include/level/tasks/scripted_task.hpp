@@ -37,6 +37,7 @@ public:
 
   void                   AddGfx(const std::string& name, const std::string& joint = "");
   void                   DeleteGfx(const std::string& name);
+  void                   NextTurn(void);
 
   void                   Serialize(Utils::Packet&);
   void                   Unserialize(Utils::Packet&);

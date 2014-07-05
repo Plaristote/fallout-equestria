@@ -493,18 +493,21 @@ void AngelScriptInitialize(void)
 
   Script::StdList<string>::Register(engine, "StringList", "string");
 
+#define SCHEDULED_TASK_BINDINGS(target, klass) \
+  engine->RegisterObjectMethod(target, "void Launch()",                       asMETHOD(klass,Launch),                       asCALL_THISCALL); \
+  engine->RegisterObjectMethod(target, "void Interrupt()",                    asMETHOD(klass,Interrupt),                    asCALL_THISCALL); \
+  engine->RegisterObjectMethod(target, "void SetAsRepetitiveTask(bool)",      asMETHOD(klass,SetAsRepetitiveTask),          asCALL_THISCALL); \
+  engine->RegisterObjectMethod(target, "void SetIntervalDuration(int)",       asMETHOD(klass,SetIntervalDurationInSeconds), asCALL_THISCALL); \
+  engine->RegisterObjectMethod(target, "void SetAsDailyTask(int, int)",       asMETHOD(klass,SetAsDailyTask),               asCALL_THISCALL); \
+  engine->RegisterObjectMethod(target, "void SetAsHourlyTask(int)",           asMETHOD(klass,SetAsHourlyTask),              asCALL_THISCALL); \
+  engine->RegisterObjectMethod(target, "void SetAsWeeklyTask(int, int, int)", asMETHOD(klass,SetAsWeeklyTask),              asCALL_THISCALL);
+
   const char* scriptTaskClass = "ScheduledTask";
   engine->RegisterObjectType(scriptTaskClass, sizeof(ScheduledScriptTask), asOBJ_VALUE | asOBJ_APP_CLASS | asOBJ_APP_CLASS_CONSTRUCTOR | asOBJ_APP_CLASS_DESTRUCTOR);
   engine->RegisterObjectBehaviour(scriptTaskClass, asBEHAVE_CONSTRUCT, "void f()",     asFUNCTION(ScheduledScriptTask::asConstructor),             asCALL_CDECL_OBJLAST);
   engine->RegisterObjectBehaviour(scriptTaskClass, asBEHAVE_DESTRUCT,  "void f()",     asFUNCTION(ScheduledScriptTask::asDestructor),              asCALL_CDECL_OBJLAST);
   engine->RegisterObjectMethod(scriptTaskClass, "void SetCallback(string)",            asMETHOD(ScheduledScriptTask,SetCallback),                  asCALL_THISCALL);
-  engine->RegisterObjectMethod(scriptTaskClass, "void Launch()",                       asMETHOD(ScheduledScriptTask,Launch),                       asCALL_THISCALL);
-  engine->RegisterObjectMethod(scriptTaskClass, "void Interrupt()",                    asMETHOD(ScheduledScriptTask,Interrupt),                    asCALL_THISCALL);
-  engine->RegisterObjectMethod(scriptTaskClass, "void SetAsRepetitiveTask(bool)",      asMETHOD(ScheduledScriptTask,SetAsRepetitiveTask),          asCALL_THISCALL);
-  engine->RegisterObjectMethod(scriptTaskClass, "void SetIntervalDuration(int)",       asMETHOD(ScheduledScriptTask,SetIntervalDurationInSeconds), asCALL_THISCALL);
-  engine->RegisterObjectMethod(scriptTaskClass, "void SetAsDailyTask(int, int)",       asMETHOD(ScheduledScriptTask,SetAsDailyTask),               asCALL_THISCALL);
-  engine->RegisterObjectMethod(scriptTaskClass, "void SetAsHourlyTask(int)",           asMETHOD(ScheduledScriptTask,SetAsHourlyTask),              asCALL_THISCALL);
-  engine->RegisterObjectMethod(scriptTaskClass, "void SetAsWeeklyTask(int, int, int)", asMETHOD(ScheduledScriptTask,SetAsWeeklyTask),              asCALL_THISCALL);
+  SCHEDULED_TASK_BINDINGS(scriptTaskClass, ScheduledScriptTask);
 
   const char* musicmanagerClass = "Music";
   engine->RegisterObjectType(musicmanagerClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
@@ -573,6 +576,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod   (dataClass, "int    AsInt()",                 asFUNCTION(asData::getAsInt),       asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod   (dataClass, "float  AsFloat()",               asFUNCTION(asData::getAsFloat),     asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod   (dataClass, "void   Output()",                asMETHOD(Data,Output),              asCALL_THISCALL);
+  engine->RegisterObjectMethod   (dataClass, "void   Remove()",                asMETHOD(Data,Remove),              asCALL_THISCALL);
 
   const char* statsheetClass = "Special";
   engine->RegisterObjectType(statsheetClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
@@ -626,6 +630,9 @@ void AngelScriptInitialize(void)
 
   engine->RegisterObjectMethod(taskClass, "void AddGfx(string, string)", asMETHOD(ScriptedTask,AddGfx),    asCALL_THISCALL);
   engine->RegisterObjectMethod(taskClass, "void DeleteGfx(string)",      asMETHOD(ScriptedTask,DeleteGfx), asCALL_THISCALL);
+  engine->RegisterObjectMethod(taskClass, "Data GetData()",              asMETHOD(ScriptedTask,GetData),   asCALL_THISCALL);
+  engine->RegisterObjectMethod(taskClass, "DynamicObject@ GetTarget()",  asMETHOD(ScriptedTask,GetTarget), asCALL_THISCALL);
+  SCHEDULED_TASK_BINDINGS(taskClass, ScriptedTask);
 
   engine->RegisterObjectMethod(itemClass, "string GetName() const",                                asMETHOD(InventoryObject,GetName),               asCALL_THISCALL);
   engine->RegisterObjectMethod(itemClass, "Data   AsData()",                                       asFUNCTION(asUtils::ItemAsData),                 asCALL_CDECL_OBJFIRST);
