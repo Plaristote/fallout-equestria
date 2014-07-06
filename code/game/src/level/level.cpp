@@ -502,6 +502,28 @@ void Level::SetInterrupted(bool set)
     SetState(combat.GetCurrentCharacter() == 0 ? Normal : Fight);
 }
 
+float GetDistance(LPoint3f pos_1, LPoint3f pos_2);
+
+list<InstanceDynamicObject*> Level::GetObjectsInRadius(LPoint3f position, float radius)
+{
+  list<InstanceDynamicObject*> objects;
+
+  for_each(world->dynamicObjects.begin(), world->dynamicObjects.end(), [this, position, radius, &objects](const DynamicObject& dyn_object)
+  {
+    InstanceDynamicObject* instance;
+    LPoint3f               object_position;
+
+    if (dyn_object.type == DynamicObject::Character)
+      instance      = GetCharacter(dyn_object.name);
+    else
+      instance      = this->GetObject(dyn_object.name);
+    object_position = instance->GetDynamicObject()->nodePath.get_pos(window->get_render());
+    if (GetDistance(object_position, position) <= radius)
+      objects.push_back(instance);
+  });
+  return (objects);
+}
+
 AsyncTask::DoneStatus Level::do_task(void)
 {
   float elapsedTime = timer.GetElapsedTime();

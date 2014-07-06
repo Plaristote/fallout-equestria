@@ -1,6 +1,7 @@
 #include "level/interactions/action_use_weapon.hpp"
 #include "level/objects/character.hpp"
 #include "level/level.hpp"
+#include "dices.hpp"
 
 using namespace std;
 using namespace Interactions;
@@ -28,19 +29,20 @@ void Actions::UseWeaponOn::PlayAnimation()
   user->PlayEquipedItemAnimation(equiped_it, "attack", GetObjectTarget());
 }
 
-void Actions::UseWeaponOn::RunAction()
+void Actions::UseWeaponOn::ApplyEffect()
 {
-  cout << "Use weapon, play action" << endl;
+  cout << "APPLY EFFECT" << endl;
   ObjectCharacter* target      = GetObjectTarget()->Get<ObjectCharacter>();
   StatController*  target_stat = target->GetStatController();
 
-  observers.Connect(target_stat->Died, *this, &UseWeaponOn::TargetDied);
-  hit_success = weapon->UseAsWeapon(GetUser(), target, action_it);
-  observers.DisconnectAllFrom(target_stat->Died);
-  if (HasProjectile())
-    FireProjectile();
-  else
+  observers.Connect(GetLevel()->CharacterDied, *this, &UseWeaponOn::TargetDied);
+  if (hit_success)
+  {
+    weapon->UseAsWeapon(GetUser(), target, action_it);
     TargetAnimate();
+  }
+  weapon->ApplySplashEffect(GetUser(), hit_position, action_it);
+  observers.DisconnectAllFrom(GetLevel()->CharacterDied);
   //mouse.MouseRightClicked();
 
   // TODO Once new diplomacy is ready, make this less shitty:
@@ -52,11 +54,24 @@ void Actions::UseWeaponOn::RunAction()
   }
 }
 
-void Actions::UseWeaponOn::TargetDied()
+void Actions::UseWeaponOn::RunAction()
+{
+  ObjectCharacter* target = GetObjectTarget()->Get<ObjectCharacter>();
+  int              score  = Dices::Throw(100);
+
+  cout << "Use weapon, play action" << endl;
+  hit_success = weapon->HitSuccessRate(GetUser(), target, action_it) >= score;
+  if (HasProjectile())
+    FireProjectile();
+  else
+    ApplyEffect();
+}
+
+void Actions::UseWeaponOn::TargetDied(ObjectCharacter* target)
 {
   cout << "Target died" << endl;
   StatController* controller = GetUser()->GetStatController();
-  Data            stats      = GetObjectTarget()->Get<ObjectCharacter>()->GetStatistics();
+  Data            stats      = target->GetStatistics();
   Data            xp_reward  = stats["Variable"]["XpReward"];
 
   if (controller)
@@ -96,13 +111,13 @@ void Actions::UseWeaponOn::FireProjectile()
   Projectile*            projectile;
   World*                 world = GetLevel()->GetWorld();
 
-  destination = hit_success ? target->GetNodePath() : target->GetOccupiedWaypoint()->GetRandomWaypoint()->nodePath;
-  weapon_node = GetUser()->GetEquipment().GetEquipedItemNode("equiped", equiped_it);
-  projectile  = new Projectile(world, weapon_node, destination, projectile_data);
+  destination  = hit_success ? target->GetNodePath() : target->GetOccupiedWaypoint()->GetRandomWaypoint()->nodePath;
+  hit_position = destination.get_pos();
+  weapon_node  = GetUser()->GetEquipment().GetEquipedItemNode("equiped", equiped_it);
+  projectile   = new Projectile(world, weapon_node, destination, projectile_data);
   projectile->SetTimeout(projectile_data["timeout"] || 10);
   projectile->SetColor(255, 255, 0, 1);
-  if (hit_success)
-    observers.Connect(projectile->HitsTarget, *this, &UseWeaponOn::TargetAnimate);
+  observers.Connect(projectile->HitsTarget, *this, &UseWeaponOn::ApplyEffect);
   if (projectile->HasReachedDestination())
     projectile->HitsTarget.Emit();
   GetLevel()->InsertProjectile(projectile);

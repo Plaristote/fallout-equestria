@@ -40,9 +40,10 @@ private:
   void               Cleanup(void);
   void               CharacterFirstLoading(void);
 
-  Metabolism*        metabolism;
-  DataTree*          data_tree;
-  string             character_sheet_name;
+  Sync::ObserverHandler observers;
+  Metabolism*           metabolism;
+  DataTree*             data_tree;
+  string                character_sheet_name;
 };
 
 #endif

@@ -17,16 +17,18 @@ namespace Interactions
       unsigned char    action_it;
       unsigned int     equiped_it;
       bool             enemy_died, hit_success;
+      LPoint3f         hit_position;
       
       UseWeaponOn(ObjectCharacter* user, ObjectCharacter* target, InventoryObject* item, unsigned char action_it);
 
       void         Run(void);
       virtual void PlayAnimation();
       virtual void RunAction();
-      void         TargetDied();
+      void         TargetDied(ObjectCharacter*);
       void         TargetAnimate();
       void         FireProjectile();
       bool         HasProjectile(void) const;
+      void         ApplyEffect(void);
       void         FindEquipedIterator();
 
     public:

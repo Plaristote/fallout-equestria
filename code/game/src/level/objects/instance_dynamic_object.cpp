@@ -84,3 +84,30 @@ void InstanceDynamicObject::UnserializeDataStore(Utils::Packet& packet)
     delete data_store;
   data_store = DataTree::Factory::StringJSON(data_store_json);
 }
+
+float GetDistance(LPoint3f pos_1, LPoint3f pos_2)
+{
+  float   dist_x = pos_1.get_x() - pos_2.get_x();
+  float   dist_y = pos_1.get_y() - pos_2.get_y();
+
+  return (SQRT(dist_x * dist_x + dist_y * dist_y));
+}
+
+float               InstanceDynamicObject::GetDistance(const InstanceDynamicObject* object) const
+{
+  if (object != this)
+  {
+    LPoint3 pos_1 = _object->nodePath.get_pos(_level->GetWindow()->get_render());
+    LPoint3 pos_2 = object->GetNodePath().get_pos(_level->GetWindow()->get_render());
+
+    return (::GetDistance(pos_1, pos_2));
+  }
+  return (0);
+}
+
+list<InstanceDynamicObject*> InstanceDynamicObject::GetObjectsInRadius(float radius) const
+{
+  LPoint3f position = GetDynamicObject()->nodePath.get_pos(_level->GetWindow()->get_render());
+
+  return (_level->GetObjectsInRadius(position, radius));
+}

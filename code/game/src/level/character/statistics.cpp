@@ -94,6 +94,7 @@ void CharacterStatistics::Cleanup(void)
 {
   if (data_tree != 0)
   {
+    observers.DisconnectAll();
     if (metabolism) delete metabolism;
     delete controller;
     delete data_tree;
@@ -116,6 +117,13 @@ void  CharacterStatistics::RefreshStatistics()
 {
   if (controller)
     controller->Died.DisconnectAll();
+  if (controller)
+  {
+    observers.Connect(controller->Died, [this]()
+    {
+      GetLevel()->CharacterDied.Emit((ObjectCharacter*)this);
+    });
+  }
 }
 
 short CharacterStatistics::GetMaxHitPoints(void) const

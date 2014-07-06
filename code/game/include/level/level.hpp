@@ -83,6 +83,10 @@ public:
   void                    RemovePartyFromLevel(Party& party);
   void                    RunForPartyMembers(Party& party, std::function<void (Party::Member*,ObjectCharacter*)>);
 
+  std::list<InstanceDynamicObject*> GetObjectsInRadius(LPoint3f position, float radius);
+
+  Sync::Signal<void (ObjectCharacter*)> CharacterDied;
+
   ~Level();
 
   enum State

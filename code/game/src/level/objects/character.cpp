@@ -400,20 +400,6 @@ void                ObjectCharacter::GoToRandomWaypoint(void)
   }
 }*/
 
-float               ObjectCharacter::GetDistance(const InstanceDynamicObject* object) const
-{
-  if (object != this)
-  {
-    LPoint3 pos_1  = _object->nodePath.get_pos();
-    LPoint3 pos_2  = object->GetNodePath().get_pos();
-    float   dist_x = pos_1.get_x() - pos_2.get_x();
-    float   dist_y = pos_1.get_y() - pos_2.get_y();
-
-    return (SQRT(dist_x * dist_x + dist_y * dist_y));
-  }
-  return (0);
-}
-
 bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* object)
 {
   return (line_of_sight.HasLineOfSight(object));

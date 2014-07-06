@@ -365,6 +365,11 @@ namespace asUtils
   ObjectDoor*            DynObjAsDoor(InstanceDynamicObject* object)      { return (object->Get<ObjectDoor>()); }
   Data                   ItemAsData(InventoryObject* item)                { return (*item); }
 
+  list<InstanceDynamicObject*> GetObjectsInRadius(Level* self, float x, float y, float z, float radius)
+  {
+    return (self->GetObjectsInRadius(LPoint3f(x, y, z), radius));
+  }
+
   void SerializeInt   (Utils::Packet* packet, int i)                      { (*packet) << i;     }
   void SerializeString(Utils::Packet* packet, const std::string& str)     { (*packet) << str;   }
   void SerializeStrArr(Utils::Packet* packet, std::list<string> array)    { (*packet) << array; }
@@ -655,6 +660,9 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "CharacterList GetNearbyAllies()",  asMETHOD(ObjectCharacter,GetNearbyAllies),  asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "CharacterList GetNearbyEnemies()", asMETHOD(ObjectCharacter,GetNearbyEnemies), asCALL_THISCALL);
 
+  Script::StdList<ObjectCharacter*>::Register(engine, "ObjectList", "DynamicObject@");
+  engine->RegisterObjectMethod(dynObjectClass, "ObjectList GetObjectsInRadius(float)",          asMETHOD(InstanceDynamicObject,GetObjectsInRadius), asCALL_THISCALL);
+  engine->RegisterObjectMethod(dynObjectClass, "float GetDistance()",                           asMETHOD(InstanceDynamicObject,GetDistance),        asCALL_THISCALL);
   engine->RegisterObjectMethod(dynObjectClass, "Character@ AsCharacter()",                      asFUNCTION(asUtils::DynObjAsCharacter),       asCALL_CDECL_OBJLAST);
   engine->RegisterObjectMethod(dynObjectClass, "Door@      AsDoor()",                           asFUNCTION(asUtils::DynObjAsDoor),            asCALL_CDECL_OBJLAST);
   engine->RegisterObjectMethod(dynObjectClass, "string GetName()",                              asMETHOD(InstanceDynamicObject,GetName),      asCALL_THISCALL);
@@ -772,6 +780,7 @@ void AngelScriptInitialize(void)
   OBJ_REF_REGISTER_METHOD(Level, World@,       GetWorld,       ());
   OBJ_REF_REGISTER_METHOD(Level, Camera@,      GetCamera,      ());
   OBJ_REF_REGISTER_METHOD(Level, ZoneManager@, GetZoneManager, ());
+  engine->RegisterObjectMethod(levelClass, "ObjectList     GetObjectsInRadius(float,float,float,float)", asFUNCTION(asUtils::GetObjectsInRadius), asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(levelClass, "Character@     GetCharacter(string)",                  asMETHODPR(Level,GetCharacter,(const std::string&),ObjectCharacter*), asCALL_THISCALL);
   engine->RegisterObjectMethod(levelClass, "Character@     GetPlayer()",                           asMETHOD(Level,GetPlayer),              asCALL_THISCALL);  
   engine->RegisterObjectMethod(levelClass, "DynamicObject@ GetObject(string)",                     asMETHOD(Level,GetObject),              asCALL_THISCALL);

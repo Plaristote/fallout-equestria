@@ -52,21 +52,23 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts
     if (action_data["targeted"].Nil())
       action_data["targeted"] = 1;
     if (sanity_check("hookUse"))
-      hooks.asDefineMethod("Use",            "bool " + action["hookUse"].Value() + "(Item@, Character@)");
+      hooks.asDefineMethod("Use",             "bool " + action["hookUse"].Value() + "(Item@, Character@)");
     if (sanity_check("hookCharacters"))
-      hooks.asDefineMethod("UseOnCharacter", "bool " + action["hookCharacters"].Value() + "(Item@, Character@, Character@)");
+      hooks.asDefineMethod("UseOnCharacter",  "bool " + action["hookCharacters"].Value() + "(Item@, Character@, Character@)");
     if (sanity_check("hookDoors"))
-      hooks.asDefineMethod("UseOnDoor",      "bool " + action["hookDoors"].Value() + "(Item@, Character@, Door@)");
+      hooks.asDefineMethod("UseOnDoor",       "bool " + action["hookDoors"].Value() + "(Item@, Character@, Door@)");
     if (sanity_check("hookOthers"))
-      hooks.asDefineMethod("UseOnOthers",    "bool " + action["hookOthers"].Value() + "(Item@, Character@, DynamicObject@)");
+      hooks.asDefineMethod("UseOnOthers",     "bool " + action["hookOthers"].Value() + "(Item@, Character@, DynamicObject@)");
     if (sanity_check("hookWeapon"))
-      hooks.asDefineMethod("UseAsWeapon",    "bool " + action["hookWeapon"].Value() + "(Item@, Character@, Character@)");
+      hooks.asDefineMethod("UseAsWeapon",     "bool " + action["hookWeapon"].Value() + "(Item@, Character@, Character@)");
     if (sanity_check("hookHitChances"))
-      hooks.asDefineMethod("HitChances",     "int " + action["hookHitChances"].Value() + "(Item@, Character@, Character@)");
+      hooks.asDefineMethod("HitChances",      "int " + action["hookHitChances"].Value() + "(Item@, Character@, Character@)");
     if (sanity_check("hookCanUse"))
-      hooks.asDefineMethod("CanUse",         "bool " + action["hookCanUse"].Value() + "(Item@, Character@, DynamicObject@)");
+      hooks.asDefineMethod("CanUse",          "bool " + action["hookCanUse"].Value() + "(Item@, Character@, DynamicObject@)");
     if (sanity_check("hookActionPoints"))
       hooks.asDefineMethod("ActionPointCost", "int " + action["hookActionPoints"].Value() + "(Item@, Character@, DynamicObject@)");
+    if (sanity_check("hookSplashEffect"))
+      hooks.asDefineMethod("SplashEffect",    "void " + action["hookSplashEffect"].Value() + "(Item@, Character@, float, float, float)");
     _actionHooks.push_back(hooks);
   });
 }
@@ -294,7 +296,7 @@ int               InventoryObject::HitSuccessRate(ObjectCharacter* user, ObjectC
   }
   else
     cout << "[HitSuccessRate] No action '" << (int)use_type << "' for item " << GetName() << endl;
-  return (0);
+  return (100);
 }
 
 unsigned short    InventoryObject::GetActionPointCost(ObjectCharacter* user, unsigned char use_type)
@@ -374,6 +376,27 @@ bool InventoryObject::ExecuteHook(const std::string& hook, ObjectCharacter* user
     AlertUi::NewAlert.Emit("Script crashed: " + std::string(exception.what()));
   }
   return (false);
+}
+
+void InventoryObject::ApplySplashEffect(ObjectCharacter *user, LPoint3f position, unsigned char use_type)
+{
+  try
+  {
+    AngelScript::Object& handle = _actionHooks[use_type];
+
+    if (handle.IsDefined("SplashEffect"))
+    {
+      AngelScript::Type<InventoryObject*> this_param(this);
+      AngelScript::Type<ObjectCharacter*> user_param(user);
+      AngelScript::Type<float>            pos_x(position.get_x()), pos_y(position.get_y()), pos_z(position.get_z());
+
+      handle.Call("SplashEffect", 5, &this_param, &user_param, &pos_x, &pos_y, &pos_z);
+    }
+  }
+  catch (const AngelScript::Exception& exception)
+  {
+    AlertUi::NewAlert.Emit("Script crashed: " + std::string(exception.what()));
+  }
 }
 
 /*

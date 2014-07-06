@@ -52,6 +52,9 @@ public:
   TaskSet&                  GetTaskSet(void)                          { return (tasks);                                }
   Data                      GetDataStore(void)                  const { return (data_store);                           }
 
+  float                             GetDistance(const InstanceDynamicObject*) const;
+  std::list<InstanceDynamicObject*> GetObjectsInRadius(float radius) const;
+
   void                      AddTextBox(const std::string& text, unsigned short r, unsigned short g, unsigned short b, float timeout = 5.f);
   ISampleInstance*          PlaySound(const std::string& name);
   
