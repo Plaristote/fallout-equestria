@@ -145,5 +145,21 @@ So, you wanna do some business now ?",
   "10088": "[Walk away laughing]",
   "10089": "That's a likely story. Just get away from my face. [Walk away]",
   "10090": "So there's a reward ? Fine then, count me in.",
-  "10091": "You don't have to pay me anything. I'll do it for the magic of friendship."
+  "10091": "You don't have to pay me anything. I'll do it for the magic of friendship.",
+  "10092": "Authentication required. Please enter user password.
+#{left_password_guesses} attempts left.",
+  "10093": "",
+  "10094": "Enter a command...",
+  "10095": "Intruder detected. Please remain where you are. Securitrons will intercept you shortly.
+Thank you for chosing Stable-Tech.",
+  "10096": "Granting access to elevator...
+Done.",
+  "10097": "[Leave]",
+  "10098": "FUCKINGPASSWORD",
+  "10099": "ALLYOURBASEAREBELONGTOUSNOW",
+  "10100": "[Leave]",
+  "10101": "Oh shi...",
+  "10102": "Wait what ?",
+  "10103": "[Enable elevator]",
+  "10104": "[Leave]"
 }

@@ -28,7 +28,7 @@
     "Skill Rate": 11
   },
   "Skills": {
-    "Small Guns": 50,
+    "Small Guns": 17,
     "Big Guns": 13,
     "Energy Guns": 9,
     "Explosives": 20,
@@ -39,7 +39,7 @@
     "Repair": 16,
     "Science": 12,
     "Sneak": 14,
-    "Spellcasting": 75,
+    "Spellcasting": 35,
     "Steal": 9,
     "Barter": 12,
     "Outdoorspony": 25,
@@ -54,12 +54,12 @@
   },
   "Behaviour": {
     "interactions": 62,
-    "script": "",
+    "script": "dungeon-mr-hoofy",
     "dialog": ""
   },
   "Name": "Mr. Hoofy",
   "Age": 99,
   "Race": "Robot",
-  "Faction": "",
+  "Faction": "Dungeon Security",
   "Gender": "Male",
 }

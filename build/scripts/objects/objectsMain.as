@@ -96,7 +96,15 @@ int GetCharacterResistance(Character@ character, string attack_type)
 {
   Data statistics = character.GetStatistics();
   Data resistance = statistics["Armor"]["Resistance"][attack_type];
-  
+
+  // Handle EMP attacks
+  if (attack_type == "EMP")
+  {
+    if (statistics["Race"].AsString() == "Robot")
+      return (50);
+    attack_type = "Energy";
+  }
+  // END EMP
   if (resistance.Nil())
     return (0);
   return (resistance.AsInt());
@@ -118,8 +126,8 @@ float ComputeDamageResistance(Item@ item, string action_name, Character@ target,
 
   if (@item != null)
   {
-    Data damage_type_data = item.AsData()["actions"][action_name]["damage_type"];
-    
+    Data damage_type_data = item.AsData()["actions"][action_name]["damage-type"];
+
     if (damage_type_data.NotNil())
       damage_type = damage_type_data.AsString();
   }
@@ -158,9 +166,10 @@ float ComputeDamage(Item@ item, string action, Character@ user, Character@ targe
   }
   else
   {
-    Data item_data  = item.AsData();
-    Data damage_max = item_data["damage-max"];
-    Data damage_min = item_data["damage"];
+    Data item_data   = item.AsData();
+    Data action_data = item_data["actions"][action];
+    Data damage_max  = action_data["damage-max"];
+    Data damage_min  = action_data["damage"];
 
     if (damage_max.Nil())
       damage_max = get_statistic(user, "Melee Damage") + 2;
@@ -208,40 +217,22 @@ int DamageCalculation(Item@ item, string action_name, Character@ user, Character
 
 bool Shoot(Item@ item, Character@ user, Character@ target)
 {
-  Data   item_data = item.AsData();
-  Data   action    = item_data["actions"]["Shoot"];
-  float  range     = action["range"].AsFloat();
-  float  distance  = user.GetDistance(target.AsObject());
-  string user_name = user.GetName() == "self" ? "You" : user.GetName();
+  Data   item_data     = item.AsData();
+  Data   action        = item_data["actions"]["Shoot"];
+  string user_name     = user.GetName() == "self" ? "You" : user.GetName();
+  int    ammo          = GetAmmoAmount(item_data);
+  int    critical_roll = Random() % 100;
+  int    damage        = ceil(ComputeDamage(item, "Shoot", user, target, critical_roll));
+  bool   is_critical   = critical_roll <= user.GetStatistics()["Statistics"]["Critical Chance"].AsInt();
 
-  if (distance > range)
-    level.AppendToConsole("Out of range");
+  SetAmmoAmount(item_data, ammo - 1);
+  level.PlaySound("shoot/shotgun");
+  target.SetHitPoints(target.GetHitPoints() - damage);
+  if (is_critical)
+    level.AppendToConsole(user_name + " critically hit " + target.GetName() + " for " + damage + " Hit Points.");
   else
-  {
-    int   ammo      = GetAmmoAmount(item_data);
-    int   roll      = Random() % 100;
-    int   success_rate;
-
-    SetAmmoAmount(item_data, ammo - 1);
-    level.PlaySound("shoot/shotgun");
-    success_rate   = ShootSuccessChance(item, user, target);
-    if (roll <= success_rate)
-    {
-      int  critical_roll = Random() % 100;
-      int  damage        = ceil(ComputeDamage(item, "Shoot", user, target, critical_roll));
-      bool is_critical   = critical_roll <= user.GetStatistics()["Statistics"]["Critical Chance"].AsInt();
-
-      target.SetHitPoints(target.GetHitPoints() - damage);
-      if (is_critical)
-        level.AppendToConsole(user_name + " critically hit " + target.GetName() + " for " + damage + " Hit Points.");
-      else
-        level.AppendToConsole(user_name + " hit " + target.GetName() + " for " + damage + " Hit Points.");
-      return (true);
-    }
-    else
-      level.AppendToConsole("You missed");
-  }
-  return (false);
+    level.AppendToConsole(user_name + " hit " + target.GetName() + " for " + damage + " Hit Points.");
+  return (true);
 }
 
 string GetAmmoType(Data item)

@@ -1,0 +1,54 @@
+{
+  "authentication-required": {
+    "npcLine": 10092,
+    "10098": {
+      "HookAvailable": "",
+      "HookExecute": "good_password",
+      "DefaultAnswer": ""
+    },
+    "10099": {
+      "HookAvailable": "",
+      "HookExecute": "wrong_password",
+      "DefaultAnswer": ""
+    },
+    "10100": {
+      "HookAvailable": "",
+      "HookExecute": "",
+      "DefaultAnswer": ""
+    }
+  },
+  "command-input": {
+    "npcLine": 10094,
+    "10103": {
+      "HookAvailable": "",
+      "HookExecute": "unlock_elevator",
+      "DefaultAnswer": ""
+    },
+    "10104": {
+      "HookAvailable": "",
+      "HookExecute": "",
+      "DefaultAnswer": ""
+    }
+  },
+  "intruder-detected": {
+    "npcLine": 10095,
+    "10101": {
+      "HookAvailable": "",
+      "HookExecute": "",
+      "DefaultAnswer": ""
+    },
+    "10102": {
+      "HookAvailable": "",
+      "HookExecute": "",
+      "DefaultAnswer": ""
+    }
+  },
+  "elevator-unlocked": {
+    "npcLine": 10096,
+    "10097": {
+      "HookAvailable": "",
+      "HookExecute": "",
+      "DefaultAnswer": "command-input"
+    }
+  }
+}
