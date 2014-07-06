@@ -133,7 +133,7 @@ void Combat::InitializeCharacterTurn(ObjectCharacter* character)
 
 void Combat::RefreshScriptedTasks(ObjectCharacter* character)
 {
-  auto task_set = character->GetTaskSet();
+  const TaskSet& task_set = character->GetTaskSet();
 
   cout << "Refreshing tasks for character " << character->GetName() << endl;
   for_each(task_set.begin(), task_set.end(), [](pair<string, ScriptedTask*> task)

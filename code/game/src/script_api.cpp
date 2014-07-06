@@ -110,6 +110,17 @@ namespace ScriptApi
           character->GoTo(waypoint);
       }
     }
+
+    static int GetCurrentWaypoint(ObjectCharacter* character)
+    {
+      if (character)
+      {
+        Waypoint* waypoint = character->GetOccupiedWaypoint();
+
+        return (waypoint == 0 ? 0 : waypoint->id);
+      }
+      return (0);
+    }
     
     static void TeleportTo(ObjectCharacter* character, int waypoint_id)
     {
@@ -697,7 +708,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(charClass, "Inventory@ GetInventory()",                asMETHODPR(ObjectCharacter,GetInventory, (), Inventory&), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "Data GetStatistics()",                     asMETHOD(ObjectCharacter,GetStatistics), asCALL_THISCALL);
   //MSVC2010 strangeness for this function: Base/Derived thingymajig complications
-  engine->RegisterObjectMethod(charClass, "int  GetCurrentWaypoint() const",          asMETHODPR(Pathfinding::Collider,GetOccupiedWaypointAsInt, (void) const, unsigned int), asCALL_THISCALL);
+  engine->RegisterObjectMethod(charClass, "int  GetCurrentWaypoint() const",          asFUNCTION(ScriptApi::Character::GetCurrentWaypoint), asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(charClass, "int  GetPathSize() const",                 asFUNCTION(ScriptApi::Character::GetPathSize), asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(charClass, "bool IsInterrupted() const",               asMETHOD(ObjectCharacter,IsInterrupted), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass, "bool IsMoving() const",                    asMETHOD(ObjectCharacter,IsMoving), asCALL_THISCALL);

@@ -33,7 +33,6 @@ void Actions::UseWeaponOn::ApplyEffect()
 {
   cout << "APPLY EFFECT" << endl;
   ObjectCharacter* target      = GetObjectTarget()->Get<ObjectCharacter>();
-  StatController*  target_stat = target->GetStatController();
 
   observers.Connect(GetLevel()->CharacterDied, *this, &UseWeaponOn::TargetDied);
   if (hit_success)

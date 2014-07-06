@@ -340,7 +340,6 @@ void Level::InsertParty(Party& party, const std::string& zone_name)
   if (party.GetName() == "player")
     SetAsPlayerParty(party);
   parties.push_back(&party);
-  cout << ">>>>>>>>>>>> Insert party size " << parties.size() << endl;
 }
 
 void Level::MatchPartyToExistingCharacters(Party& party)

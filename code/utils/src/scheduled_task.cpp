@@ -161,17 +161,26 @@ void ScheduledTask::Serialize(Utils::Packet& packet)
 {
   unsigned int duration_1 = interval_duration.seconds;
   unsigned int duration_2 = interval_until_next_execution.seconds;
+  bool         has_task   = task != 0;
 
-  task->Serialize(packet);
+  packet << has_task;
+  if (has_task)
+    task->Serialize(packet);
   packet << duration_1 << duration_2;
 }
 
 void ScheduledTask::Unserialize(Utils::Packet& packet)
 {
+  bool has_task;
+
   if (!task)
     task        = time_manager.AddTask(0, DateTime::Seconds(1));
-  task->Unserialize(packet);
-  is_repetitive = task->loop;
-  task_level    = task->level;
+  packet >> has_task;
+  if (has_task)
+  {
+    task->Unserialize(packet);
+    is_repetitive = task->loop;
+    task_level    = task->level;
+  }
   packet >> interval_duration.seconds >> interval_until_next_execution.seconds;
 }
