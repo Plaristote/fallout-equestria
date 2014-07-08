@@ -15,7 +15,7 @@ namespace Pathfinding
     typedef std::list<WithdrawedArc>        WithdrawedArcs;
 
   public:
-    Collider() : waypoint_occupied(0), collision_processed(false)
+    Collider() : can_be_walked_on(false), waypoint_occupied(0), collision_processed(false)
     {}
 
     virtual NodePath          GetNodePath()                  const = 0;
@@ -38,6 +38,7 @@ namespace Pathfinding
     void                      WithdrawArc(Waypoint* first, Waypoint* second);
 
     std::list<std::pair<int, int> >         waypoint_disconnected;
+    bool                                    can_be_walked_on;
   private:
     Waypoint*                               waypoint_occupied;
     WithdrawedArcs                          withdrawed_arcs;

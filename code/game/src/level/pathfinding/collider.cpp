@@ -35,7 +35,8 @@ Path      Pathfinding::Collider::GetPathTowardsObject(Collider* character)
     UnprocessCollisions();
     path.FindPath(character->GetOccupiedWaypoint(), GetOccupiedWaypoint());
     path.StripFirstWaypointFromList();
-    path.StripLastWaypointFromList();
+    if (!can_be_walked_on)
+      path.StripLastWaypointFromList();
     ProcessCollisions();
     character->ProcessCollisions();
   }

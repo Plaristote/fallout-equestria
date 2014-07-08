@@ -31,7 +31,6 @@ void Actions::UseWeaponOn::PlayAnimation()
 
 void Actions::UseWeaponOn::ApplyEffect()
 {
-  cout << "APPLY EFFECT" << endl;
   ObjectCharacter* target      = GetObjectTarget()->Get<ObjectCharacter>();
 
   observers.Connect(GetLevel()->CharacterDied, *this, &UseWeaponOn::TargetDied);
@@ -42,7 +41,6 @@ void Actions::UseWeaponOn::ApplyEffect()
   }
   weapon->ApplySplashEffect(GetUser(), hit_position, action_it);
   observers.DisconnectAllFrom(GetLevel()->CharacterDied);
-  //mouse.MouseRightClicked();
 
   // TODO Once new diplomacy is ready, make this less shitty:
   if (!enemy_died)
@@ -51,6 +49,7 @@ void Actions::UseWeaponOn::ApplyEffect()
     if (!(target->IsAlly(GetUser())))
       target->GetFieldOfView().SetEnemyDetected(*GetUser());
   }
+  observers.DisconnectAll();
 }
 
 void Actions::UseWeaponOn::RunAction()
@@ -114,8 +113,6 @@ void Actions::UseWeaponOn::FireProjectile()
   hit_position = destination.get_pos();
   weapon_node  = GetUser()->GetEquipment().GetEquipedItemNode("equiped", equiped_it);
   projectile   = new Projectile(world, weapon_node, destination, projectile_data);
-  projectile->SetTimeout(projectile_data["timeout"] || 10);
-  projectile->SetColor(255, 255, 0, 1);
   observers.Connect(projectile->HitsTarget, *this, &UseWeaponOn::ApplyEffect);
   if (projectile->HasReachedDestination())
     projectile->HitsTarget.Emit();

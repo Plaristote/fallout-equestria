@@ -32,6 +32,7 @@ Projectile::Projectile(World* world, NodePath parent, NodePath target, Data data
              light_data["green"] || 255,
              light_data["blue"]  || 255, 1);
   }
+  SetTimeout(data["timeout"].Or(1));
 }
 
 Projectile::~Projectile(void)
@@ -79,11 +80,13 @@ void Projectile::Run(float elapsed_time)
 {
   if (HasReachedDestination())
   {
-    float factor;
+    float factor, attenuation;
 
+    cout << "Timeout: " << timeout << ", time_left: " << time_left << endl;
     time_left -= elapsed_time;
     factor     = time_left / timeout;
-    SetAttenuation(0, 0, base_attenuation * factor);
+    attenuation = base_attenuation / factor;
+    SetAttenuation(0, 0, (attenuation < 0 ? 1000 : attenuation));
   }
   else
   {

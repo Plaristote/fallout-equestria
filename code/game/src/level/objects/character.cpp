@@ -405,6 +405,24 @@ bool                ObjectCharacter::HasLineOfSight(InstanceDynamicObject* objec
   return (line_of_sight.HasLineOfSight(object));
 }
 
+Pathfinding::Path   ObjectCharacter::GetPathTowardsObject(Collider* character)
+{
+  Pathfinding::Path path;
+
+  if (IsAlive())
+    path = Pathfinding::Collider::GetPathTowardsObject(character);
+  else
+  {
+    character->UnprocessCollisions();
+    UnprocessCollisions();
+    path.FindPath(character->GetOccupiedWaypoint(), GetOccupiedWaypoint());
+    path.StripFirstWaypointFromList();
+    ProcessCollisions();
+    character->ProcessCollisions();
+  }
+  return (path);
+}
+
 void                ObjectCharacter::RunDeath()
 {
   cout << "Running death" << endl;
@@ -421,6 +439,7 @@ void                ObjectCharacter::RunDeath()
   cout << "- etting hit points if superior to 0" << endl;
   if (GetHitPoints() > 0)
     SetHitPoints(0);
+  can_be_walked_on = true;
   cout << "Death ran" << endl;
 }
 

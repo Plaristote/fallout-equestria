@@ -21,6 +21,8 @@ public:
   ObjectCharacter(Level* level, DynamicObject* object);
   ~ObjectCharacter(void);
 
+  Pathfinding::Path        GetPathTowardsObject(Collider* character);
+
   void                     Unserialize(Utils::Packet&);
   void                     Serialize(Utils::Packet&);
 
