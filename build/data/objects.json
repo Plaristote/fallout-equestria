@@ -144,7 +144,7 @@
               "green": 200,
               "blue": 125
             },
-            "timeout": 3
+            "timeout": 0.1
           }
         }
       },

@@ -82,7 +82,6 @@ void Projectile::Run(float elapsed_time)
   {
     float factor, attenuation;
 
-    cout << "Timeout: " << timeout << ", time_left: " << time_left << endl;
     time_left -= elapsed_time;
     factor     = time_left / timeout;
     attenuation = base_attenuation / factor;
