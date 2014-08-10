@@ -7,8 +7,11 @@
 #include <dices.hpp>
 #include <iterator>
 #include "gametask.hpp"
+#include "debuginfo.hpp"
 
 using namespace std;
+
+extern DebugInfo warning, info, debug;
 
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
   CharacterVisibility(level, object),
@@ -129,7 +132,7 @@ void ObjectCharacter::ActionTalkTo(ObjectCharacter* user)
 
 void ObjectCharacter::ActionUse(InstanceDynamicObject* user)
 {
-  cout << "ActionUse character" << endl;
+  debug.out() << "ActionUse character" << endl;
   if (user == _level->GetPlayer())
   {
     if (IsAlive())
@@ -252,7 +255,7 @@ void ObjectCharacter::ItemNextUseType(unsigned short it)
 
   if (equiped_item && equiped_item->item)
   {
-    cout << "Equiped item on slot " << it << " is " << equiped_item->item->GetName() << endl;
+    debug.out() << "Equiped item on slot " << it << " is " << equiped_item->item->GetName() << endl;
     Data             itemData   = *(equiped_item->item);
     Data             actionData = itemData["actions"];
     unsigned char    action     = equiped_item->current_action;
@@ -269,6 +272,12 @@ void ObjectCharacter::ItemNextUseType(unsigned short it)
   }
 }
 
+std::ostream& operator<<(std::ostream& out, const LPoint3f point)
+{
+  out << '(' << point.get_x() << ", " << point.get_y() << ", " << point.get_z() << ')';
+  return (out);
+}
+
 bool ObjectCharacter::IsInterrupted() const
 {
   if (HasOccupiedWaypoint())
@@ -276,14 +285,15 @@ bool ObjectCharacter::IsInterrupted() const
     LPoint3f target = GetOccupiedWaypoint()->nodePath.get_pos();
     LPoint3f pos    = GetNodePath().get_pos();
 
-    if (target.get_x() != pos.get_x() && target.get_y() != pos.get_y())
+    if (std::abs(target.get_x() - pos.get_x()) > 0.01f ||
+        std::abs(target.get_y() - pos.get_y()) > 0.01f)
       {
-      //  cout << "Not yet in position" << endl;
+        debug.out() << "Not yet in position " << pos << " - " << target << endl;
       return (true);
       }
   }
   //else if (AnimationEndForObject.ObserverCount() > 0)
-  //  cout << "Not yet done with animations" << endl;
+    debug.out() << "Not yet done with animations" << endl;
   return (AnimationEndForObject.ObserverCount() > 0);
 }
 
@@ -294,11 +304,11 @@ void ObjectCharacter::Run(float elapsedTime)
 
   CharacterVisibility::Run(elapsedTime);
   field_of_view.MarkForUpdate();
-  if (!(IsInterrupted()))
+  if (!(IsInterrupted()) && GetHitPoints() > 0)
   {
     try
     {
-      if (state == Level::Normal && GetHitPoints() > 0 && script->IsDefined("main"))
+      if (state == Level::Normal && script->IsDefined("main"))
         RunRegularBehaviour(elapsedTime);
       else if (state == Level::Fight)
         RunCombatBehaviour(elapsedTime);
@@ -310,6 +320,8 @@ void ObjectCharacter::Run(float elapsedTime)
         _level->GetCombat().NextTurn();
     }
   }
+  else
+    debug.out() << "Character " << GetName() << " is interrupted (" << IsInterrupted() << ")" << endl;
   //profile.Profile("Level:Characters:AI");
 }
 
@@ -334,38 +346,38 @@ void ObjectCharacter::RunCombatBehaviour(float)
     if (nodepath.get_x() == waypoint_nodepath.get_x() && nodepath.get_y() == waypoint_nodepath.get_y())
       _level->GetCombat().NextTurn();
     else
-      cout << "Waiting end of movement to pass turn" << endl;
+      debug.out() << "Waiting end of movement to pass turn" << endl;
   }
   else if (!IsBusy())
+  {
+    PStatCollector collector_ai("Level:Characters:AI");
+    bool           idle_during_fights = (this != _level->GetPlayer() && !script->IsDefined("combat"));
+
+    if (GetHitPoints() <= 0 || GetActionPoints() == 0 || idle_during_fights)
+      _level->GetCombat().NextTurn();
+    else if (script->IsDefined("combat"))
     {
-      PStatCollector collector_ai("Level:Characters:AI");
-      bool           idle_during_fights = (this != _level->GetPlayer() && !script->IsDefined("combat"));
+      AngelScript::Type<ObjectCharacter*> self(this);
+      unsigned int                        ap_before = GetActionPoints();
 
-      if (GetHitPoints() <= 0 || GetActionPoints() == 0 || idle_during_fights)
-        _level->GetCombat().NextTurn();
-      else if (script->IsDefined("combat"))
+      debug.out() << "Calling AI" << endl;
+      collector_ai.start();
+      script->Call("combat", 1, &self);
+      debug.out() << "End Calling AI" << endl;
+      collector_ai.stop();
+      if (ap_before == GetActionPoints() && !IsBusy()) // If stalled, skip turn
       {
-        AngelScript::Type<ObjectCharacter*> self(this);
-        unsigned int                        ap_before = GetActionPoints();
-
-        cout << "Calling AI" << endl;
-        collector_ai.start();
-        script->Call("combat", 1, &self);
-        cout << "End Calling AI" << endl;
-        collector_ai.stop();
-        if (ap_before == GetActionPoints() && !IsBusy()) // If stalled, skip turn
-        {
-          cout << "Character " << GetName() << " is stalling" << endl;
-          _level->GetCombat().NextTurn();
-        }
-        else if (IsMoving())
-          cout << "Character " << GetName() << " is moving" << endl;
-        else
-          cout << "Character " << GetName() << " is playing" << endl;
+        debug.out() << "Character " << GetName() << " is stalling" << endl;
+        _level->GetCombat().NextTurn();
       }
+      else if (IsMoving())
+        debug.out() << "Character " << GetName() << " is moving" << endl;
+      else
+        debug.out() << "Character " << GetName() << " is playing" << endl;
     }
+  }
   else
-    cout << "Combat AI: Nothing to do (playing animation: " << PlayingAnimationName() << ")" << endl;
+    debug.out() << "Combat AI: Nothing to do (playing animation: " << PlayingAnimationName() << ")" << endl;
 }
 
 bool ObjectCharacter::IsBusy(void) const
@@ -425,22 +437,22 @@ Pathfinding::Path   ObjectCharacter::GetPathTowardsObject(Collider* character)
 
 void                ObjectCharacter::RunDeath()
 {
-  cout << "Running death" << endl;
-  cout << "- unequipping items" << endl;
+  debug.out() << "Running death" << endl;
+  debug.out() << "- unequipping items" << endl;
   if (_inventory)
     _inventory->UnequipAllItems();
-  cout << "- clearing interactions" << endl;
+  debug.out() << "- clearing interactions" << endl;
   ClearInteractions();
-  cout << "- adding looting interaction" << endl;
+  debug.out() << "- adding looting interaction" << endl;
   AddInteraction("use", _level->GetInteractions().Use);
 
   GetNodePath().set_hpr(0, 0, 90);
   UnprocessCollisions();
-  cout << "- etting hit points if superior to 0" << endl;
+  debug.out() << "- etting hit points if superior to 0" << endl;
   if (GetHitPoints() > 0)
     SetHitPoints(0);
   can_be_walked_on = true;
-  cout << "Death ran" << endl;
+  debug.out() << "Death ran" << endl;
 }
 
 bool ObjectCharacter::IsPlayer(void) const
@@ -541,7 +553,7 @@ void     ObjectCharacter::SetFaction(const std::string& name)
   WorldDiplomacy& diplomacy = GameTask::CurrentGameTask->GetDiplomacy();
 
   _faction = diplomacy.GetFaction(name);
-  cout << "Faction pointer for " << name << " is " << _faction << endl;
+  debug.out() << "Faction pointer for " << name << " is " << _faction << endl;
 }
 
 void     ObjectCharacter::SetFaction(unsigned int flag)
@@ -557,7 +569,7 @@ void     ObjectCharacter::SetAsEnemy(ObjectCharacter* other, bool enemy)
   {
     WorldDiplomacy& diplomacy = GameTask::CurrentGameTask->GetDiplomacy();
 
-    cout << "Factions are now enemies: " << GetFactionName() << " -> " << other->GetFactionName() << endl;
+    debug.out() << "Factions are now enemies: " << GetFactionName() << " -> " << other->GetFactionName() << endl;
     diplomacy.SetAsEnemy(enemy, _faction->flag, other->GetFaction());
   }
   else if (other->GetFaction() != 0)

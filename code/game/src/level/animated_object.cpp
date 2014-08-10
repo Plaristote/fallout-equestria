@@ -39,8 +39,9 @@ void                     AnimatedObject::PlayAnimation(const std::string& name, 
       return ;
     anim->loop(true);
     anim->play();
-    _anim     = anim;
-    _animLoop = loop;
+    current_animation = name;
+    _anim             = anim;
+    _animLoop         = loop;
   }
   else if (LoadAnimation(name))
     PlayAnimation(name, loop);
@@ -76,6 +77,7 @@ void                      AnimatedObject::PlayIdleAnimation(void)
   MapAnims::iterator     it   = _mapAnims.find("idle");
   AnimControl*           anim = (it != _mapAnims.end() ? it->second : 0);
 
+  current_animation = "idle";
   if (anim)
     anim->play();
 }

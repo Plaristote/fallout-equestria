@@ -25,6 +25,9 @@
 
 //#include "gameui.hpp"
 #include "ui/alert_ui.hpp"
+#include "debuginfo.hpp"
+
+DebugInfo warning, info, debug;
 
 void ScriptApiDeclareFunction(const std::string& name, const std::string& decl)
 {
@@ -371,6 +374,8 @@ namespace asData
 
 namespace asUtils
 {
+  void SetDebugOutputEnabled(bool enabled) { debug.set_enabled(enabled); }
+
   InstanceDynamicObject* CharacterAsObject(ObjectCharacter* character)    { return (character); }
   ObjectCharacter*       DynObjAsCharacter(InstanceDynamicObject* object) { return (object->Get<ObjectCharacter>()); }
   ObjectDoor*            DynObjAsDoor(InstanceDynamicObject* object)      { return (object->Get<ObjectDoor>()); }
@@ -496,6 +501,7 @@ void AngelScriptInitialize(void)
 
   Script::Engine::ScriptError.Connect(asConsole, &asConsoleOutput::OutputError);
   
+  engine->RegisterGlobalFunction("void SetDebugOutputEnabled(bool)", asFUNCTION(asUtils::SetDebugOutputEnabled), asCALL_CDECL);
   engine->RegisterGlobalFunction("void Cout(string)", asFUNCTION(AngelCout), asCALL_CDECL);
   engine->RegisterGlobalFunction("void LF()", asFUNCTION( GameConsole::ListFunctions ), asCALL_CDECL);
   engine->RegisterGlobalFunction("void PrintScenegraph()", asFUNCTION( GameConsole::PrintScenegraph ), asCALL_CDECL);

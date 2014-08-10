@@ -32,7 +32,7 @@ public:
   void                      StopAnimationLoop(void) { _animLoop = false; }
 
   bool                      IsPlayingAnimation(void)   const { return (_anim != 0); }
-  std::string               PlayingAnimationName(void) const { return (_anim == 0 ? "idle" : _anim->get_name()); }
+  std::string               PlayingAnimationName(void) const { return (_anim == 0 ? "idle" : current_animation); }
 
   /**
    * @brief ... Triggered when a not looping animation ends.
@@ -53,7 +53,9 @@ protected:
   AnimControlCollection     _anims;
   MapAnims                  _mapAnims;
   AnimControl*              _anim;
-  bool                      _animLoop;  
+  bool                      _animLoop;
+private:
+  std::string               current_animation;
 };
 
 #endif

@@ -65,6 +65,9 @@ namespace Pathfinding
     void                     FindNewWayOrAbort(void);
     bool                     GoThroughNextWaypoint(void);
     LPoint3                  GetDistanceToNextWaypoint(void) const;
+    LPoint3                  GetDistanceToWaypoint(const Waypoint&) const;
+    const Waypoint*          GetNextWaypoint(void) const;
+    bool                     IsDistanceNull(LPoint3f) const;
     bool                     HasReachedTarget(void);
     void                     TriggerDestinationReached(void);
     

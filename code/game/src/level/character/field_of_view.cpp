@@ -135,13 +135,13 @@ void FieldOfView::DetectCharacters()
   {
     ObjectCharacter* checking_character = *iterator;
 
-    if (checking_character->IsAlive() && checking_character != &character)
+    if (checking_character != &character)
     {
       if (character.IsAlly(checking_character))
         SetCharacterDetected(*checking_character);
       else if (character.HasLineOfSight(checking_character) && CheckIfEnemyIsDetected(*checking_character))
       {
-        if (character.IsEnemy(checking_character))
+        if (character.IsEnemy(checking_character) && checking_character->IsAlive())
           SetEnemyDetected(*checking_character);
         else
           SetCharacterDetected(*checking_character);

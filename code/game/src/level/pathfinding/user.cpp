@@ -21,10 +21,13 @@ Pathfinding::User::User(Level* level, DynamicObject* object) : InstanceDynamicOb
 
 void Pathfinding::User::Run(float elapsed_time)
 {
-  if (path.Size() > 0)
-    RunMovement(elapsed_time);
-  if (rotation_goal != _object->nodePath.get_hpr().get_x())
-    RunRotate(elapsed_time);
+  if (GetOccupiedWaypoint() != 0)
+  {
+    if (path.Size() > 0 || !IsDistanceNull(GetDistanceToWaypoint(*GetOccupiedWaypoint())))
+      RunMovement(elapsed_time);
+    if (rotation_goal != _object->nodePath.get_hpr().get_x())
+      RunRotate(elapsed_time);
+  }
   InstanceDynamicObject::Run(elapsed_time);
 }
 
@@ -248,9 +251,8 @@ void Pathfinding::User::TriggerDestinationReached(void)
   PlayIdleAnimation();
 }
 
-LPoint3             Pathfinding::User::GetDistanceToNextWaypoint(void) const
+LPoint3             Pathfinding::User::GetDistanceToWaypoint(const Waypoint& next_waypoint) const
 {
-  const Waypoint& next_waypoint    = path.Front();
   LPoint3         current_position = _object->nodePath.get_pos();
   LPoint3         objective        = next_waypoint.nodePath.get_pos();
   LPoint3         waypoint_size    = NodePathSize(next_waypoint.nodePath);
@@ -260,9 +262,24 @@ LPoint3             Pathfinding::User::GetDistanceToNextWaypoint(void) const
   return (current_position - objective);
 }
 
+LPoint3             Pathfinding::User::GetDistanceToNextWaypoint(void) const
+{
+  return (GetDistanceToWaypoint(*GetNextWaypoint()));
+}
+
+const Waypoint*     Pathfinding::User::GetNextWaypoint(void) const
+{
+  return (path.Size() > 0 ? &(path.Front()) : GetOccupiedWaypoint());
+}
+
 bool                Pathfinding::User::IsMoving(void) const
 {
   return (path.Size() > 0);
+}
+
+bool                Pathfinding::User::IsDistanceNull(LPoint3f distance) const
+{
+  return ((std::abs(distance.get_x()) < 0.01 && (std::abs(distance.get_y()) < 0.01) && std::abs(distance.get_z()) < 0.01));
 }
 
 void                Pathfinding::User::RunMovement(float elapsedTime)
@@ -274,14 +291,11 @@ void                Pathfinding::User::RunMovement(float elapsedTime)
   int               dirX, dirY, dirZ;
 
   max_speed   = movement_speed * elapsedTime;
-  if (std::abs(distance.get_x()) < 0.01 && (std::abs(distance.get_y()) < 0.01) && std::abs(distance.get_z()) < 0.01)
-  {
-    //cout << "run next movement" << endl;
+  if (IsDistanceNull(distance))
     RunNextMovement(elapsedTime);
-  }
   else
   {
-    LPoint3f target = path.Front().nodePath.get_pos();
+    LPoint3f target = GetNextWaypoint()->nodePath.get_pos();
       //cout << "run movement" << endl;
       //cout << distance.get_x() << ", " << distance.get_y() << ", " << distance.get_z() << endl;
     dirX = dirY = dirZ = 1;

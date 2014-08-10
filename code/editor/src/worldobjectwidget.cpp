@@ -76,6 +76,13 @@ WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
   connect(ui->objectModel,   SIGNAL(textChanged(QString)), this, SLOT(UpdateRender()));
   connect(ui->objectTexture, SIGNAL(textChanged(QString)), this, SLOT(UpdateRender()));
   connect(ui->objectFocus,   SIGNAL(clicked()), this, SLOT(FocusCurrentObject()));
+  connect(ui->useColor,      SIGNAL(toggled(bool)), this, SLOT(UpdateRender()));
+  connect(ui->useOpacity,    SIGNAL(toggled(bool)), this, SLOT(UpdateRender()));
+  connect(ui->colorRed,      SIGNAL(valueChanged(float)), SLOT(UpdateRender()));
+  connect(ui->colorGreen,    SIGNAL(valueChanged(float)), SLOT(UpdateRender()));
+  connect(ui->colorBlue,     SIGNAL(valueChanged(float)), SLOT(UpdateRender()));
+  connect(ui->opacity,       SIGNAL(valueChanged(float)), SLOT(UpdateRender()));
+  connect(ui->objectToggleVisibility, SIGNAL(clicked()), this, SLOT(ToogleCurrentObject()));
 
   // Waypoint
   connect(ui->setCurrentWaypoint, SIGNAL(clicked()), this, SLOT(SetCurrentWaypoint()));
@@ -898,14 +905,42 @@ void WorldObjectWidget::UpdateRender()
 {
   if (selection_type > 0 && selection_type < 3)
   {
-    MapObject*  object      = selection.object;
-    std::string new_model   = ui->objectModel->text().toStdString();
-    std::string new_texture = ui->objectTexture->text().toStdString();
+    MapObject*  object       = selection.object;
+    std::string new_model    = ui->objectModel->text().toStdString();
+    std::string new_texture  = ui->objectTexture->text().toStdString();
+    bool        uses_color   = ui->useColor->isChecked();
+    bool        uses_opacity = ui->useOpacity->isChecked();
 
     if (object->strModel != new_model)
       selection.object->SetModel(new_model);
     if (object->strTexture != new_texture)
       selection.object->SetTexture(new_texture);
+    object->use_color   = uses_color;
+    object->use_opacity = uses_opacity;
+    ui->colorRed->setEnabled(uses_color);
+    ui->colorGreen->setEnabled(uses_color);
+    ui->colorBlue->setEnabled(uses_color);
+    ui->opacity->setEnabled(uses_opacity);
+    object->render.set_all_color_scale(uses_color ? 100 : 0);
+    object->render.set_transparency(uses_opacity ? TransparencyAttrib::M_alpha : TransparencyAttrib::M_none);
+    if (uses_color)
+    {
+      LColor color;
+
+      color.set_x(ui->colorRed->value());
+      color.set_y(ui->colorGreen->value());
+      color.set_z(ui->colorBlue->value());
+      object->render.set_color(color);
+      cout << "Setting color" << endl;
+    }
+    if (uses_opacity)
+    {
+      LColor color = object->render.get_color();
+
+      color.set_w(ui->opacity->value());
+      object->render.set_color(color);
+      cout << "Setting opacity" << endl;
+    }
   }
 }
 
@@ -923,6 +958,31 @@ void WorldObjectWidget::FocusCurrentObject()
         object.render.hide();
       else
         object.render.show();
+    };
+
+    for_each(world->objects.begin(), world->objects.end(), functor);
+    for_each(world->dynamicObjects.begin(), world->dynamicObjects.end(), functor);
+  }
+}
+
+void WorldObjectWidget::ToogleCurrentObject()
+{
+  if (selection_type > 0 && selection_type < 3)
+  {
+    NodePath selected_nodepath = selection.object->nodePath;
+    bool     was_visible       = !selection.object->render.is_hidden();
+    auto     functor = [this, selected_nodepath, was_visible](MapObject& object)
+    {
+      NodePath nodePath = object.nodePath;
+
+      if (nodePath == selected_nodepath ||
+          selected_nodepath.is_ancestor_of(nodePath))
+      {
+          if (was_visible)
+            object.render.hide();
+          else
+            object.render.show();
+      }
     };
 
     for_each(world->objects.begin(), world->objects.end(), functor);

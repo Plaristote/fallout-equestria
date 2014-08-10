@@ -81,6 +81,7 @@ public slots:
   void SelectParticleEffect(void);
 
   void FocusCurrentObject();
+  void ToogleCurrentObject();
 
   void SelectCurrentWaypoint();
   void SetCurrentWaypoint();
