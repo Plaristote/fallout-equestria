@@ -20,7 +20,7 @@ namespace Zones
       Resident(InstanceDynamicObject* object) : object(object), waypoint(object->GetOccupiedWaypoint()) {}
 
       bool operator==(InstanceDynamicObject* object) const { return (this->object == object);                    }
-      bool HasMoved(void)                            const { return (object->GetOccupiedWaypoint() == waypoint); }
+      bool HasMoved(void)                            const { return (object->GetOccupiedWaypoint() != waypoint); }
 
       InstanceDynamicObject* object;
       Waypoint*              waypoint;
