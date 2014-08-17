@@ -30,37 +30,40 @@ namespace Zones
   public:
     Controller(Zone& zone);
 
-    void         SetManager(Manager* manager) { this->manager = manager; }
-    bool         operator==(const std::string& name) const { return (zone.name == name);            }
-    bool         IsExitZone(void)                    const { return (zone.destinations.size() > 0); }
-    bool         IsEnabled(void)                     const { return (enabled);                      }
-    bool         IsInZone(InstanceDynamicObject*)    const;
-    bool         IsInZone(Waypoint*)                 const;
-    void         Refresh(void);
-    void         SetEnabled(bool);
-    void         DisableZone(void);
-    void         AddDestination(const std::string& name) { zone.AddDestination(name); }
-    void         DelDestination(const std::string& name) { zone.DelDestination(name); }
-    void         GoFromHereTo(const std::string& destination);
-    void         InsertObject(InstanceDynamicObject*);
+    void               SetManager(Manager* manager)              { this->manager = manager;               }
+    const std::string& GetName(void)                       const { return (zone.name);                    }
+    bool               operator==(const std::string& name) const { return (zone.name == name);            }
+    bool               IsExitZone(void)                    const { return (zone.destinations.size() > 0); }
+    bool               IsEnabled(void)                     const { return (enabled);                      }
+    bool               IsInZone(InstanceDynamicObject*)    const;
+    bool               IsInZone(Waypoint*)                 const;
+    void               Refresh(void);
+    void               SetEnabled(bool);
+    void               DisableZone(void);
+    void               AddDestination(const std::string& name) { zone.AddDestination(name); }
+    void               DelDestination(const std::string& name) { zone.DelDestination(name); }
+    void               GoFromHereTo(const std::string& destination);
+    void               InsertObject(InstanceDynamicObject*);
 
-    Event        EnteredZone;
-    Event        MovedWithinZone;
-    Event        ExitedZone;
+    Event              EnteredZone;
+    Event              MovedWithinZone;
+    Event              ExitedZone;
 
   protected:
-    void         InsertObjectOnWaypoint(InstanceDynamicObject*,Waypoint*);
-    void         ObjectMovesWithinZone(InstanceDynamicObject*);
-    void         ExitingZone(InstanceDynamicObject*);
-    void         RegisterResident(InstanceDynamicObject*);
-    void         InsertResident(Resident);
-    void         RefreshResident(Resident&);
+    void               InsertObjectOnWaypoint(InstanceDynamicObject*,Waypoint*);
+    void               ObjectMovesWithinZone(InstanceDynamicObject*);
+    void               ExitingZone(InstanceDynamicObject*);
+    void               LocalExit(InstanceDynamicObject*);
+    void               LevelExit(InstanceDynamicObject*);
+    void               RegisterResident(InstanceDynamicObject*);
+    void               InsertResident(Resident);
+    void               RefreshResident(Resident&);
 
   private:
-    Manager*     manager;
-    Zone&        zone;
-    Residents    residents;
-    bool         enabled;
+    Manager*           manager;
+    Zone&              zone;
+    Residents          residents;
+    bool               enabled;
   };  
 }
 

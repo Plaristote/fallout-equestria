@@ -42,33 +42,39 @@ void Zones::Controller::GoFromHereTo(const string& destination)
 void Zones::Controller::ExitingZone(InstanceDynamicObject* object)
 {
   if (starts_with(zone.name, "LocalExit"))
-  {
-    ObjectCharacter* character = object->Get<ObjectCharacter>();
-
-    if (zone.destinations.size() == 1)
-      manager->InsertObjectInZone(object, zone.destinations.front());
-    else if (character->IsPlayer())
-    {
-      UiNextZone* ui = manager->level.GetLevelUi().OpenZonePicker(zone.destinations);
-
-      ui->Done.Connect            (manager->level.GetLevelUi(), &LevelUi::CloseRunningUi<LevelUi::UiItNextZone>);
-      ui->NextZoneSelected.Connect([this, object](const string& destination)
-      {
-        manager->InsertObjectInZone(object, destination);
-      });
-    }
-  }
+    LocalExit(object);
   else if (manager->level.GetPlayer() == object)
+    LevelExit(object);
+}
+
+void Zones::Controller::LocalExit(InstanceDynamicObject* object)
+{
+  ObjectCharacter* character = object->Get<ObjectCharacter>();
+
+  if (zone.destinations.size() == 1)
+    manager->InsertObjectInZone(object, zone.destinations.front());
+  else if (character->IsPlayer())
   {
-    if (zone.destinations.size() == 1)
-      GoFromHereTo(zone.destinations.front());
-    else
+    UiNextZone* ui = manager->level.GetLevelUi().OpenZonePicker(zone.destinations);
+
+    ui->Done.Connect            (manager->level.GetLevelUi(), &LevelUi::CloseRunningUi<LevelUi::UiItNextZone>);
+    ui->NextZoneSelected.Connect([this, object](const string& destination)
     {
-      UiNextZone* ui = manager->level.GetLevelUi().OpenZonePicker(zone.destinations);
-      
-      ui->Done.Connect            (manager->level.GetLevelUi(), &LevelUi::CloseRunningUi<LevelUi::UiItNextZone>);
-      ui->NextZoneSelected.Connect(*this,                       &Zones::Controller::GoFromHereTo);
-    }
+      manager->InsertObjectInZone(object, destination);
+    });
+  }
+}
+
+void Zones::Controller::LevelExit(InstanceDynamicObject* object)
+{
+  if (zone.destinations.size() == 1)
+    GoFromHereTo(zone.destinations.front());
+  else
+  {
+    UiNextZone* ui = manager->level.GetLevelUi().OpenZonePicker(zone.destinations);
+
+    ui->Done.Connect            (manager->level.GetLevelUi(), &LevelUi::CloseRunningUi<LevelUi::UiItNextZone>);
+    ui->NextZoneSelected.Connect(*this,                       &Zones::Controller::GoFromHereTo);
   }
 }
 
@@ -141,6 +147,7 @@ void Zones::Controller::Refresh(void)
 
     if (resident.HasMoved())
     {
+      cout << "Resident has moved" << endl;
       if (IsInZone(resident.object))
         resident.waypoint = resident.object->GetOccupiedWaypoint();
       else

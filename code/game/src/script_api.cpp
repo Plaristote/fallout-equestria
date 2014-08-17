@@ -755,12 +755,14 @@ void AngelScriptInitialize(void)
 
   const char* zoneClass = "Zone";
   engine->RegisterObjectType(zoneClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(zoneClass, "void SetEnabled(bool)",            asMETHOD(ScriptZone,SetEnabled), asCALL_THISCALL);
-  engine->RegisterObjectMethod(zoneClass, "bool IsEnabled() const",           asMETHOD(ScriptZone,IsEnabled), asCALL_THISCALL);
-  engine->RegisterObjectMethod(zoneClass, "bool IsInside(DynamicObject@)",    asMETHOD(ScriptZone,IsInside), asCALL_THISCALL);
-  engine->RegisterObjectMethod(zoneClass, "void Delete()",                    asMETHOD(ScriptZone,Delete), asCALL_THISCALL);
-  engine->RegisterObjectMethod(zoneClass, "void SetEnterCallback(string)",    asMETHOD(ScriptZone,SetEnterCallback), asCALL_THISCALL);
-  engine->RegisterObjectMethod(zoneClass, "void SetExitCallback(string)",     asMETHOD(ScriptZone,SetExitCallback), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "string GetName() const",                  asMETHOD(ScriptZone,GetZoneName),      asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void SetEnabled(bool)",                   asMETHOD(ScriptZone,SetEnabled),       asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "bool IsEnabled() const",                  asMETHOD(ScriptZone,IsEnabled),        asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "bool IsInside(DynamicObject@)",           asMETHOD(ScriptZone,IsInside),         asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void Delete()",                           asMETHOD(ScriptZone,Delete),           asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void SetEnterCallback(string)",           asMETHOD(ScriptZone,SetEnterCallback), asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void SetExitCallback(string)",            asMETHOD(ScriptZone,SetExitCallback),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void SetMovedWithinZoneCallback(string)", asMETHOD(ScriptZone,SetMovedWithinZoneCallback), asCALL_THISCALL);
   engine->RegisterGlobalFunction("Zone@ Zone_Factory(string)", asFUNCTION(ScriptZone::Factory), asCALL_CDECL);
 
   const char* worldLight = "Light";

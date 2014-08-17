@@ -13,8 +13,10 @@ public:
   ScriptZone(Zones::Controller& zone, asIScriptContext*, asIScriptModule*);
   ~ScriptZone();
 
+  const std::string& GetZoneName(void) const;
   void SetExitCallback(const std::string& signature);
   void SetEnterCallback(const std::string& signature);
+  void SetMovedWithinZoneCallback(const std::string& signature);
   void SetEnabled(bool enabled)                      { zone.SetEnabled(enabled);       }
   bool IsEnabled(void)                         const { return (zone.IsEnabled());      }
   bool IsInside(InstanceDynamicObject* object) const { return (zone.IsInZone(object)); }
