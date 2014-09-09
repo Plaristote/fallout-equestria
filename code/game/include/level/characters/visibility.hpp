@@ -1,12 +1,13 @@
-#ifndef  CHARACTER_VISIBILITY_HPP
-# define CHARACTER_VISIBILITY_HPP
+#ifndef  OBJECT_VISIBILITY_HPP
+# define OBJECT_VISIBILITY_HPP
 
-# include "level/characters/action_points.hpp"
+# include "animatedobject.hpp"
+# include "serializer.hpp"
 
-class CharacterVisibility : public CharacterActionPoints
+class ObjectVisibility : public AnimatedObject
 {
 public:
-  CharacterVisibility(Level* level, DynamicObject* dynamic_object);
+  ObjectVisibility(WindowFramework*);
 
   virtual void Run(float elapsed_time);
   void         RunFade(float elapsedTime);
@@ -17,6 +18,8 @@ public:
   virtual void Serialize(Utils::Packet&);
   virtual void Unserialize(Utils::Packet&);
 
+protected:
+  void         Initialize(void);
 private:
   void         Fading(void);
 

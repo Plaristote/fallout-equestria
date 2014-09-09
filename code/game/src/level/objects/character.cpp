@@ -14,7 +14,7 @@ using namespace std;
 extern DebugInfo warning, info, debug;
 
 ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
-  CharacterVisibility(level, object),
+  CharacterActionPoints(level, object),
   line_of_sight(*level->GetWorld(), _window->get_render(), GetNodePath()),
   field_of_view(*level, *this), equipment(*this)
 {
@@ -23,9 +23,9 @@ ObjectCharacter::ObjectCharacter(Level* level, DynamicObject* object) :
 
   _type                = ObjectTypes::Character;
   _inventory           = 0;
-  _flags               = 0;
   _character           = dynamic_cast<Character*>(body_node.node());
   current_action       = 0;
+  GetNodePath().set_color(1, 1, 1, 0); // Transparent until proven visible
 
   SetMovementAnimation("run");
 
@@ -302,7 +302,7 @@ void ObjectCharacter::Run(float elapsedTime)
   //Timer profile;
   Level::State state = _level->GetState();
 
-  CharacterVisibility::Run(elapsedTime);
+  CharacterActionPoints::Run(elapsedTime);
   field_of_view.MarkForUpdate();
   if (!(IsInterrupted()) && GetHitPoints() > 0)
   {
@@ -600,7 +600,7 @@ bool     ObjectCharacter::IsAlly(const ObjectCharacter* other) const
 void ObjectCharacter::Unserialize(Utils::Packet& packet)
 {
   packet >> _self_enemyMask >> _flags;
-  CharacterVisibility::Unserialize(packet);
+  CharacterActionPoints::Unserialize(packet);
   if (GetHitPoints() <= 0)
     RunDeath();
 }
@@ -608,5 +608,5 @@ void ObjectCharacter::Unserialize(Utils::Packet& packet)
 void ObjectCharacter::Serialize(Utils::Packet& packet)
 {
   packet << _self_enemyMask << _flags;
-  CharacterVisibility::Serialize(packet);
+  CharacterActionPoints::Serialize(packet);
 }

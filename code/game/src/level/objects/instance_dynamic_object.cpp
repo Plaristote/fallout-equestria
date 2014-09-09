@@ -6,18 +6,20 @@ using namespace Sync;
 using namespace ObjectTypes;
 
 InstanceDynamicObject::InstanceDynamicObject(Level* level, DynamicObject* object) :
-  AnimatedObject(level->GetWorld()->window),
+  ObjectVisibility(level->GetWorld()->window),
   Interactions::Target(level, object),
   _object(object),
   tasks(this)
 {
   _type                 = Other;
   _level                = level;
+  _flags                = 0;
   data_store            = new DataTree;
   idle_size             = NodePathSize(object->nodePath);
   waypoint_disconnected = object->lockedArcs;
   SetModelNameFromPath(object->strModel);
   SetOccupiedWaypoint(object->waypoint);
+  ObjectVisibility::Initialize();
 }
 
 InstanceDynamicObject::~InstanceDynamicObject()
@@ -50,6 +52,7 @@ void InstanceDynamicObject::Unserialize(Utils::Packet& packet)
   }
   tasks.Unserialize(packet);
   UnserializeDataStore(packet);
+  ObjectVisibility::Unserialize(packet);
 }
 
 void InstanceDynamicObject::Serialize(Utils::Packet& packet)
@@ -65,6 +68,7 @@ void InstanceDynamicObject::Serialize(Utils::Packet& packet)
     packet << '0';
   tasks.Serialize(packet);
   SerializeDataStore(packet);
+  ObjectVisibility::Serialize(packet);
 }
 
 void InstanceDynamicObject::SerializeDataStore(Utils::Packet& packet)

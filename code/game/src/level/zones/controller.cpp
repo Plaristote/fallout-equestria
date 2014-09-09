@@ -145,7 +145,6 @@ void Zones::Controller::Refresh(void)
   {
     Resident& resident = *it;
 
-    cout << "Resident is on waypoint " << resident.object->GetOccupiedWaypointAsInt() << " / " << resident.waypoint->id << endl;
     if (resident.HasMoved())
     {
       if (IsInZone(resident.object))

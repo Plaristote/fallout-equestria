@@ -9,12 +9,12 @@
 # include "level/diplomacy.hpp"
 # include "level/characters/line_of_sight.hpp"
 # include "level/characters/field_of_view.hpp"
-# include "level/characters/visibility.hpp"
+# include "level/characters/action_points.hpp"
 # include "level/interactions/action_runner.hpp"
 # include <panda3d/character.h>
 # include <panda3d/pointLight.h>
 
-class ObjectCharacter : public CharacterVisibility
+class ObjectCharacter : public CharacterActionPoints
 {
   friend class Interactions::ActionRunner;
 public:
@@ -48,9 +48,6 @@ public:
   NodePath                 GetJoint(const std::string& name);
 
   void                     SetFurtive(bool do_set);
-  void                     AddFlag(unsigned char flag)       { _flags |= flag; }
-  void                     DelFlag(unsigned char flag)       { if (HasFlag(flag)) { _flags -= flag; } }
-  bool                     HasFlag(unsigned char flag) const { return ((_flags & flag) != 0); }
 
   void                     PlayEquipedItemAnimation(unsigned short it, const std::string& name, InstanceDynamicObject* target);
   void                     RefreshEquipment(void);
@@ -90,7 +87,6 @@ private:
   StatController*                _stats;
   const WorldDiplomacy::Faction* _faction;
   unsigned int                   _self_enemyMask;
-  unsigned char                  _flags;
   LineOfSight                    line_of_sight;
   FieldOfView                    field_of_view;
   AngelScript::Object*           script;

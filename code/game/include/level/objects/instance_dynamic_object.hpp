@@ -17,6 +17,7 @@
 # include "level/tasks/task_set.hpp"
 # include "level/objects/object_types.hpp"
 # include "level/interactions/target.hpp"
+# include "level/characters/visibility.hpp"
 
 //HAIL MICROSOFT
 #ifdef WIN32
@@ -30,7 +31,7 @@ class Level;
 class ObjectCharacter;
 class ISampleInstance;
 
-class InstanceDynamicObject : public virtual Pathfinding::Collider, public AnimatedObject, public Interactions::Target
+class InstanceDynamicObject : public virtual Pathfinding::Collider, public ObjectVisibility, public Interactions::Target
 {
   friend class SkillTarget;
 public:
@@ -39,7 +40,7 @@ public:
 
   virtual void              Unserialize(Utils::Packet&);
   virtual void              Serialize(Utils::Packet&);
-  virtual void              Run(float elapsedTime)                    { TaskAnimation();                               }
+  virtual void              Run(float elapsedTime)                    { ObjectVisibility::Run(elapsedTime);            }
   bool                      operator==(NodePath np)             const { return (_object->nodePath.is_ancestor_of(np)); }
   bool                      operator==(const std::string& name) const { return (GetName() == name);                    }
   virtual std::string       GetName(void)                       const { return (_object->name);                        }
@@ -51,6 +52,10 @@ public:
   const DynamicObject*      GetDynamicObject(void)              const { return (_object);                              }
   TaskSet&                  GetTaskSet(void)                          { return (tasks);                                }
   Data                      GetDataStore(void)                  const { return (data_store);                           }
+
+  void                     AddFlag(unsigned char flag)       { _flags |= flag; }
+  void                     DelFlag(unsigned char flag)       { if (HasFlag(flag)) { _flags -= flag; } }
+  bool                     HasFlag(unsigned char flag) const { return ((_flags & flag) != 0); }
 
   float                             GetDistance(const InstanceDynamicObject*) const;
   std::list<InstanceDynamicObject*> GetObjectsInRadius(float radius) const;
@@ -72,6 +77,7 @@ protected:
   TaskSet                  tasks;
   LPoint3                  idle_size;
   DataTree*                data_store;
+  unsigned char            _flags;
 };
 
 

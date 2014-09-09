@@ -3,14 +3,18 @@
 
 using namespace std;
 
-CharacterVisibility::CharacterVisibility(Level *level, DynamicObject *dynamic_object) : CharacterActionPoints(level, dynamic_object)
+ObjectVisibility::ObjectVisibility(WindowFramework* window) : AnimatedObject(window)
 {
   _fading_in = _fading_off = false;
-  GetNodePath().set_transparency(TransparencyAttrib::M_alpha);
-  GetNodePath().set_color(1, 1, 1, 0);
 }
 
-void CharacterVisibility::SetVisible(bool do_set)
+void ObjectVisibility::Initialize()
+{
+  GetNodePath().set_transparency(TransparencyAttrib::M_alpha);
+  GetNodePath().set_color(1, 1, 1, 1);
+}
+
+void ObjectVisibility::SetVisible(bool do_set)
 {
   LColor color = GetNodePath().get_color();
 
@@ -26,19 +30,19 @@ void CharacterVisibility::SetVisible(bool do_set)
   }
 }
 
-void CharacterVisibility::Run(float elapsed_time)
+void ObjectVisibility::Run(float elapsed_time)
 {
   RunFade(elapsed_time);
-  Pathfinding::User::Run(elapsed_time);
+  TaskAnimation();
 }
 
-void CharacterVisibility::RunFade(float) // TODO must use elapsedTime in ObjectCharacter::Fading
+void ObjectVisibility::RunFade(float) // TODO must use elapsedTime in ObjectCharacter::Fading
 {
   if (_fading_in || _fading_off)
     Fading();
 }
 
-void CharacterVisibility::Fading(void)
+void ObjectVisibility::Fading(void)
 {
   LColor color = GetNodePath().get_color();
 
@@ -72,24 +76,22 @@ void CharacterVisibility::Fading(void)
     GetNodePath().show();
 }
 
-void CharacterVisibility::Serialize(Utils::Packet& packet)
+void ObjectVisibility::Serialize(Utils::Packet& packet)
 {
   unsigned char is_fading_in  = _fading_in  ? 1 : 0;
   unsigned char is_fading_out = _fading_off ? 1 : 0;
   float         alpha         = GetNodePath().get_color().get_w();
 
   packet << is_fading_in << is_fading_out << alpha;
-  CharacterStatistics::Serialize(packet);
 }
 
-void CharacterVisibility::Unserialize(Utils::Packet& packet)
+void ObjectVisibility::Unserialize(Utils::Packet& packet)
 {
   unsigned char is_fading_in;
   unsigned char is_fading_out;
   float         alpha;
 
   packet >> is_fading_in >> is_fading_out >> alpha;
-  CharacterStatistics::Unserialize(packet);
   _fading_in  = is_fading_in  == 1;
   _fading_off = is_fading_out == 1;
   GetNodePath().set_color(1, 1, 1, alpha);

@@ -19,7 +19,7 @@ void SkillTarget::Initialize(const std::string& filepath, asIScriptContext* cont
     script = new AngelScript::Object(context, filepath);
   else
     script = new AngelScript::Object(filepath);
-  script->asDefineMethod("UseSkill", "bool UseSkill(DynamicObject@, Character@, string)");
+  script->asDefineMethod("UseSkill", "bool use_skill(DynamicObject@, Character@, string)");
 }
 
 void SkillTarget::UseSkill(ObjectCharacter* user, std::string skill)
