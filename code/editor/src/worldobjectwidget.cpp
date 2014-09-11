@@ -78,10 +78,10 @@ WorldObjectWidget::WorldObjectWidget(QWidget *parent) :
   connect(ui->objectFocus,   SIGNAL(clicked()), this, SLOT(FocusCurrentObject()));
   connect(ui->useColor,      SIGNAL(toggled(bool)), this, SLOT(UpdateRender()));
   connect(ui->useOpacity,    SIGNAL(toggled(bool)), this, SLOT(UpdateRender()));
-  connect(ui->colorRed,      SIGNAL(valueChanged(float)), SLOT(UpdateRender()));
-  connect(ui->colorGreen,    SIGNAL(valueChanged(float)), SLOT(UpdateRender()));
-  connect(ui->colorBlue,     SIGNAL(valueChanged(float)), SLOT(UpdateRender()));
-  connect(ui->opacity,       SIGNAL(valueChanged(float)), SLOT(UpdateRender()));
+  connect(ui->colorRed,      SIGNAL(valueChanged(double)), SLOT(UpdateRender()));
+  connect(ui->colorGreen,    SIGNAL(valueChanged(double)), SLOT(UpdateRender()));
+  connect(ui->colorBlue,     SIGNAL(valueChanged(double)), SLOT(UpdateRender()));
+  connect(ui->opacity,       SIGNAL(valueChanged(double)), SLOT(UpdateRender()));
   connect(ui->objectToggleVisibility, SIGNAL(clicked()), this, SLOT(ToogleCurrentObject()));
 
   // Waypoint
@@ -652,9 +652,21 @@ void WorldObjectWidget::SelectScript()
 
 void WorldObjectWidget::InitializeRender(MapObject* object)
 {
+  LColor color = object->render.get_color();
+
   ui->tabWidget->addTab(ui->renderTab, "Render");
   ui->objectModel->setText(QString::fromStdString(object->strModel));
   ui->objectTexture->setText(QString::fromStdString(object->strTexture));
+  ui->useColor->setChecked(object->use_color);
+  ui->useOpacity->setChecked(object->use_opacity);
+  if (object->use_color)
+  {
+    ui->colorRed->setValue(color.get_x());
+    ui->colorGreen->setValue(color.get_y());
+    ui->colorBlue->setValue(color.get_z());
+  }
+  if (object->use_opacity)
+    ui->opacity->setValue(color.get_w());
 }
 
 void WorldObjectWidget::InitializeGeometry(NodePath nodePath)
@@ -921,7 +933,7 @@ void WorldObjectWidget::UpdateRender()
     ui->colorGreen->setEnabled(uses_color);
     ui->colorBlue->setEnabled(uses_color);
     ui->opacity->setEnabled(uses_opacity);
-    object->render.set_all_color_scale(uses_color ? 100 : 0);
+    //object->render.set_all_color_scale(uses_color ? 100 : 0);
     object->render.set_transparency(uses_opacity ? TransparencyAttrib::M_alpha : TransparencyAttrib::M_none);
     if (uses_color)
     {
@@ -930,8 +942,9 @@ void WorldObjectWidget::UpdateRender()
       color.set_x(ui->colorRed->value());
       color.set_y(ui->colorGreen->value());
       color.set_z(ui->colorBlue->value());
+      object->render.set_texture_off();
       object->render.set_color(color);
-      cout << "Setting color" << endl;
+      cout << "Updating color to " << color.get_x() << ", " << color.get_y() << ", " << color.get_z() << endl;
     }
     if (uses_opacity)
     {
@@ -939,7 +952,6 @@ void WorldObjectWidget::UpdateRender()
 
       color.set_w(ui->opacity->value());
       object->render.set_color(color);
-      cout << "Setting opacity" << endl;
     }
   }
 }

@@ -18,16 +18,21 @@ void ObjectVisibility::SetVisible(bool do_set)
 {
   LColor color = GetNodePath().get_color();
 
-  if (do_set == true && color.get_w() < 1)
+  if (do_set == true && (color.get_w() < 1 || _fading_off == true))
   {
     _fading_off = false;
     _fading_in  = true;
   }
-  else if (do_set == false && color.get_w() > 0)
+  else if (do_set == false && (color.get_w() > 0 || _fading_in == true))
   {
     _fading_off = true;
     _fading_in  = false;
   }
+}
+
+bool ObjectVisibility::IsHidden(void) const
+{
+  return (_fading_off || (!_fading_in && GetNodePath().get_color().get_w() <= 0));
 }
 
 void ObjectVisibility::Run(float elapsed_time)

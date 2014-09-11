@@ -12,6 +12,7 @@ public:
   virtual void Run(float elapsed_time);
   void         RunFade(float elapsedTime);
   void         SetVisible(bool do_set);
+  bool         IsHidden(void) const;
 
   virtual bool HasFlag(unsigned char) const = 0;
 

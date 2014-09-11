@@ -684,6 +684,8 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(dynObjectClass, "Door@      AsDoor()",                           asFUNCTION(asUtils::DynObjAsDoor),            asCALL_CDECL_OBJLAST);
   engine->RegisterObjectMethod(dynObjectClass, "string GetName()",                              asMETHOD(InstanceDynamicObject,GetName),      asCALL_THISCALL);
   engine->RegisterObjectMethod(dynObjectClass, "void AddTextBox(string, int, int, int, float)", asMETHOD(InstanceDynamicObject,AddTextBox),   asCALL_THISCALL);
+  engine->RegisterObjectMethod(dynObjectClass, "void SetVisible(bool)",                         asMETHODPR(InstanceDynamicObject,SetVisible, (bool),       void), asCALL_THISCALL);
+  engine->RegisterObjectMethod(dynObjectClass, "bool IsHidden() const",                         asMETHODPR(InstanceDynamicObject,IsHidden,   (void) const, bool), asCALL_THISCALL);
 
   engine->RegisterObjectMethod(dynObjectClass, "Data GetDataStore()",                           asMETHOD(InstanceDynamicObject,GetDataStore), asCALL_THISCALL);
   engine->RegisterObjectMethod(charClass,      "Data GetDataStore()",                           asMETHOD(ObjectCharacter,GetDataStore),       asCALL_THISCALL);
