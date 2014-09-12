@@ -17,7 +17,7 @@ struct MapObject : public Utils::Serializable
   typedef std::vector<Waypoint*>  Waypoints;
   typedef std::vector<MapObject*> Children;
 
-  MapObject() : parent_object(0), world(0), use_color(false), use_opacity(false) {}
+  MapObject() : parent_object(0), world(0), use_texture(true), use_color(false), use_opacity(false), base_color(1, 1, 1, 1) {}
   virtual ~MapObject();
 
   NodePath      nodePath, render;
@@ -35,7 +35,8 @@ struct MapObject : public Utils::Serializable
   Children      children;
   MapObject*    parent_object;
   World*        world;
-  bool          use_color, use_opacity;
+  bool          use_texture, use_color, use_opacity;
+  LColorf       base_color;
 
   void          SetName(const std::string&);
   void          SetModel(const std::string&);

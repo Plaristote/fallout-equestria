@@ -37,6 +37,7 @@ namespace Zones
     bool               IsEnabled(void)                     const { return (enabled);                      }
     bool               IsInZone(InstanceDynamicObject*)    const;
     bool               IsInZone(Waypoint*)                 const;
+    bool               CanGoThrough(InstanceDynamicObject*);
     void               Refresh(void);
     void               SetEnabled(bool);
     void               DisableZone(void);
@@ -44,6 +45,7 @@ namespace Zones
     void               DelDestination(const std::string& name) { zone.DelDestination(name); }
     void               GoFromHereTo(const std::string& destination);
     void               InsertObject(InstanceDynamicObject*);
+    void               SetZoneBlocked(bool);
 
     Event              EnteredZone;
     Event              MovedWithinZone;
@@ -63,7 +65,7 @@ namespace Zones
     Manager*           manager;
     Zone&              zone;
     Residents          residents;
-    bool               enabled;
+    bool               enabled, can_move_through;
   };  
 }
 

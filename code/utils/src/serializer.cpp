@@ -19,6 +19,8 @@ namespace Utils
   template Packet& Packet::operator<< <char>(const char& i);
   template Packet& Packet::operator<< <unsigned short>(const unsigned short& i);
   template Packet& Packet::operator<< <unsigned char>(const unsigned char& i);  
+  template Packet& Packet::operator<< <bool>(bool&);
+  template Packet& Packet::operator<< <bool>(const bool&);
 
   template Packet& Packet::operator>> <std::int32_t>(std::int32_t& i);
   template Packet& Packet::operator>> <short>(short& i);
@@ -26,6 +28,7 @@ namespace Utils
   template Packet& Packet::operator>> <float>(float& i);
   template Packet& Packet::operator>> <unsigned short>(unsigned short& i);
   template Packet& Packet::operator>> <unsigned char>(unsigned char& i);
+  template Packet& Packet::operator>> <bool>(bool& i);
 
   template Packet& Packet::operator<< <std::int32_t>(const list<int>& list);
   template Packet& Packet::operator<< <float>(const list<float>& list);
@@ -272,7 +275,7 @@ namespace Utils
     std::cout << "[Packet::PrintContent] isn't implemented yet" << std::endl;
   }
   
-  std::string Packet::Exception::type_names[] = { "[unsupported type]", "std::string", "int", "float", "short", "char", "array", "unsigned int", "unsigned short", "unsigned char" };
+  std::string Packet::Exception::type_names[] = { "[unsupported type]", "std::string", "int", "float", "short", "char", "array", "unsigned int", "unsigned short", "unsigned char", "bool" };
   
   Packet::CorruptPacket::CorruptPacket(Packet* packet)
   {

@@ -35,8 +35,13 @@ bool Zones::Observer::CanGoThrough(Waypoint* from, Waypoint* to, void* _object)
 
   for_each(passage_ways.begin(), passage_ways.end(), [from, to, object, &can_go_through](PassageWay* entry)
   {
-    if (entry->ConnectsWaypoints(from, to))
-      can_go_through = can_go_through && entry->CanGoThrough(object);
+    if (can_go_through && entry->ConnectsWaypoints(from, to))
+      can_go_through = entry->CanGoThrough(object);
+  });
+  for_each(zones.begin(), zones.end(), [object, &can_go_through](Controller* entry)
+  {
+    if (can_go_through)
+      can_go_through = entry->CanGoThrough(object);
   });
   return (can_go_through);
 }

@@ -6,7 +6,7 @@
 
 using namespace std;
 
-Zones::Controller::Controller(Zone& zone) : manager(0), zone(zone), enabled(true)
+Zones::Controller::Controller(Zone& zone) : manager(0), zone(zone), enabled(true), can_move_through(true)
 {
 }
 
@@ -174,6 +174,18 @@ void Zones::Controller::DisableZone(void)
     ExitedZone.Emit(resident.object);
   });
   residents.clear();
+}
+
+void Zones::Controller::SetZoneBlocked(bool blocked)
+{
+  can_move_through = !blocked;
+}
+
+bool Zones::Controller::CanGoThrough(InstanceDynamicObject* object)
+{
+  if (enabled == true)
+    return (can_move_through);
+  return (true);
 }
 
 bool Zones::Controller::IsInZone(Waypoint* waypoint) const

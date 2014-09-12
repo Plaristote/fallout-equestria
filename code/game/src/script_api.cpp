@@ -764,6 +764,7 @@ void AngelScriptInitialize(void)
   engine->RegisterObjectMethod(zoneClass, "void Delete()",                           asMETHOD(ScriptZone,Delete),           asCALL_THISCALL);
   engine->RegisterObjectMethod(zoneClass, "void SetEnterCallback(string)",           asMETHOD(ScriptZone,SetEnterCallback), asCALL_THISCALL);
   engine->RegisterObjectMethod(zoneClass, "void SetExitCallback(string)",            asMETHOD(ScriptZone,SetExitCallback),  asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "void SetBlocked(bool)",                   asMETHOD(ScriptZone,SetBlocked),       asCALL_THISCALL);
   engine->RegisterObjectMethod(zoneClass, "void SetMovedWithinZoneCallback(string)", asMETHOD(ScriptZone,SetMovedWithinZoneCallback), asCALL_THISCALL);
   engine->RegisterGlobalFunction("Zone@ Zone_Factory(string)", asFUNCTION(ScriptZone::Factory), asCALL_CDECL);
 

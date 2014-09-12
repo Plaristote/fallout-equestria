@@ -3,7 +3,7 @@
 #include <panda3d/collisionBox.h>
 #include <panda3d/collisionSphere.h>
 #include <panda3d/collisionRay.h>
-#define CURRENT_BLOB_REVISION 15
+#define CURRENT_BLOB_REVISION 16
 
 using namespace std;
 

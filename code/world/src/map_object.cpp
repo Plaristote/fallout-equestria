@@ -117,8 +117,10 @@ void MapObject::SetModel(const std::string& model)
   render   = panda_framework.get_window(0)->load_model(panda_framework.get_models(), MODEL_ROOT + strModel);
   render.set_name("render-" + nodePath.get_name());
   render.set_collide_mask(CollideMask(ColMask::Render));
+  if (use_color || use_opacity)
+    render.set_color_scale(base_color);
   render.reparent_to(nodePath);
-  if (!(render.is_empty()))
+  if (!(render.is_empty()) && use_texture == true)
     SetTexture(strTexture);
   else
     std::cerr << "[MapObject][SetModel] Could not load model " << strModel << " for object '" << name << '\'' << std::endl;
@@ -152,6 +154,14 @@ void MapObject::Unserialize(Utils::Packet& packet)
   packet >> posX >> posY >> posZ >> rotX >> rotY >> rotZ >> scaleX >> scaleY >> scaleZ;
   packet >> floor >> parent >> inherits_floor;
   this->inherits_floor = inherits_floor;
+  if (blob_revision > 15)
+  {
+    float red, blue, green, alpha;
+
+    packet >> use_texture >> use_color >> use_opacity;
+    packet >> red >> blue >> green >> alpha;
+    base_color = LColor(red, blue, green, alpha);
+  }
 
   if (name == "")
     name = "name-not-found";
@@ -161,6 +171,7 @@ void MapObject::Unserialize(Utils::Packet& packet)
     nodePath   = world->window->get_render().attach_new_node(name);
     nodePath.set_name(name);
     SetModel(strModel);
+    nodePath.set_transparency(use_opacity ? TransparencyAttrib::M_alpha : TransparencyAttrib::M_none);
     nodePath.set_depth_offset(1);
     nodePath.set_two_sided(false);
     nodePath.set_hpr(rotX, rotY, rotZ);
@@ -221,6 +232,10 @@ void MapObject::Serialize(Utils::Packet& packet) const
   packet << floor;
   packet << parent; // Revision #1
   packet << (char)inherits_floor;
+  {
+    packet << use_texture << use_color << use_opacity;
+    packet << base_color.get_x() << base_color.get_y() << base_color.get_z() << base_color.get_w();
+  } // # Revision 16
   {
     std::vector<int> waypoint_ids;
 

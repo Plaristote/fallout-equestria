@@ -10,15 +10,17 @@ ObjectVisibility::ObjectVisibility(WindowFramework* window) : AnimatedObject(win
 
 void ObjectVisibility::Initialize()
 {
+  base_color = GetNodePath().get_color();
+  base_color.set_w(GetDynamicObject()->base_color.get_w());
   GetNodePath().set_transparency(TransparencyAttrib::M_alpha);
-  GetNodePath().set_color(1, 1, 1, 1);
+  GetNodePath().set_color(base_color);
 }
 
 void ObjectVisibility::SetVisible(bool do_set)
 {
   LColor color = GetNodePath().get_color();
 
-  if (do_set == true && (color.get_w() < 1 || _fading_off == true))
+  if (do_set == true && (color.get_w() < base_color.get_w() || _fading_off == true))
   {
     _fading_off = false;
     _fading_in  = true;
@@ -61,7 +63,7 @@ void ObjectVisibility::Fading(void)
   }
   else if (_fading_in)
   {
-    float max_alpha = HasFlag(FLAG_CHARACTER_SNEAK) ? 0.5 : 1;
+    float max_alpha = HasFlag(FLAG_CHARACTER_SNEAK) ? 0.5 : base_color.get_w();
 
     if (color.get_w() < max_alpha)
       color.set_w(color.get_w() + 0.05);
@@ -86,18 +88,23 @@ void ObjectVisibility::Serialize(Utils::Packet& packet)
   unsigned char is_fading_in  = _fading_in  ? 1 : 0;
   unsigned char is_fading_out = _fading_off ? 1 : 0;
   float         alpha         = GetNodePath().get_color().get_w();
+  float         red           = base_color.get_x();
+  float         green         = base_color.get_y();
+  float         blue          = base_color.get_z();
 
   packet << is_fading_in << is_fading_out << alpha;
+  packet << red << green << blue;
 }
 
 void ObjectVisibility::Unserialize(Utils::Packet& packet)
 {
   unsigned char is_fading_in;
   unsigned char is_fading_out;
-  float         alpha;
+  float         alpha, red, green, blue;
 
   packet >> is_fading_in >> is_fading_out >> alpha;
+  packet >> red >> green >> blue;
   _fading_in  = is_fading_in  == 1;
   _fading_off = is_fading_out == 1;
-  GetNodePath().set_color(1, 1, 1, alpha);
+  GetNodePath().set_color(red, green, blue, alpha);
 }
