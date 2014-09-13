@@ -7,7 +7,7 @@ struct Zone : public Utils::Serializable
 {
   bool operator==(const std::string& comp)     const { return (name == comp); }
 
-  bool Contains(unsigned int id) const;
+  bool Contains(int id) const;
 
   bool Contains(Waypoint* wp)                  const { return (Contains(wp->id));                                                                }
   bool HasDestination(const std::string& name) const { return (std::find(destinations.begin(), destinations.end(), name) != destinations.end()); }
