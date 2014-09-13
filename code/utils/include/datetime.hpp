@@ -65,6 +65,7 @@ public:
     float end;
   };
 
+  DateTime(unsigned int timestamp);
   DateTime(TimeUnit time) : year(0), month(0), day(0), hour(0), minute(0), second(time.seconds) { adjust_values(); }
   DateTime(unsigned int h, unsigned int m, unsigned int s) : year(0), month(0), day(0), hour(h), minute(m), second(s) { adjust_values(); }
   DateTime(unsigned int year, unsigned int month, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second) : year(year), month(month), day(day), hour(hour), minute(minute), second(second) { adjust_values(); }
@@ -89,12 +90,13 @@ public:
   unsigned short  GetHour(void)           const { return (hour);   }
   unsigned short  GetMinute(void)         const { return (minute); }
   unsigned short  GetSecond(void)         const { return (second); }
-  time_t          GetTimestamp(void)      const;
   Seconds         GetTimeOfTheDay(void)   const;
   Seconds         GetTimeOfTheWeek(void)  const;
   Seconds         GetTimeOfTheMonth(void) const;
   unsigned short  GetDayOfTheWeek(void)   const;
   unsigned short  GetDayOfTheYear(void)   const;
+  time_t          GetTimestamp(void)      const;
+  void            SetFromTimestamp(time_t);
 
   static unsigned short days_per_months(unsigned short month, unsigned short year = 1);
 

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-bool Zone::Contains(unsigned int id) const
+bool Zone::Contains(int id) const
 {
   auto      it = waypoints_ids.begin(), end = waypoints_ids.end();
 

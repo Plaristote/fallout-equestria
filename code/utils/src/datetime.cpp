@@ -141,7 +141,7 @@ std::string DateTime::ToString(const std::string& format) const
           number  = second;
           break ;
         default:
-          number -= 1;
+          number  = -1;
           result << format[i] << format[i + 1];
           break ;
       }

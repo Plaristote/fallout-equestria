@@ -90,6 +90,8 @@ void WorldLight::SetFrustumVisible(bool set_visible)
       camera = spot_light;
       break ;
     }
+    case Ambient:
+      break ;
   }
   if (!(camera.is_null()))
   {
@@ -400,7 +402,7 @@ void WorldLight::LightCollider::SetLightOnCollidingObjects(World *world, WorldLi
     traverser.add_collider(collision_node, handler_queue);
     traverser.traverse(world->window->get_render());
 
-    for (unsigned int i = 0 ; i < handler_queue->get_num_entries() ; ++i)
+    for (int i = 0 ; i < handler_queue->get_num_entries() ; ++i)
     {
       NodePath   collision_entry = handler_queue->get_entry(i)->get_into_node_path();
       string     path            = get_nodepath_path(collision_entry);
