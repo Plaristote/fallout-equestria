@@ -67,6 +67,9 @@ AngelScript::Object::Object(const Object &copy) : filepath(copy.filepath),
 
 AngelScript::Object::~Object()
 {
+  cout << "Destroying object " << this << endl;
+  if (module)
+    cout << "--> Name: " << module->GetName() << endl;
   ObjectDestroyed.Emit();
   if (required_module == true)
     Script::ModuleManager::Release(module);

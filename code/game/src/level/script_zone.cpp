@@ -5,7 +5,39 @@
 
 using namespace std;
 
+list<ScriptZone*> ScriptZone::scripted_zones;
+
+void        ScriptZone::DestroyAll()
+{
+  for_each(scripted_zones.begin(), scripted_zones.end(), [](ScriptZone* zone)
+  {
+    delete zone;
+  });
+  scripted_zones.clear();
+}
+
+ScriptZone* ScriptZone::GetZoneFromName(const string &zone_name)
+{
+  ScriptZone* result = 0;
+
+  for_each(scripted_zones.begin(), scripted_zones.end(), [&result, zone_name](ScriptZone* zone)
+  {
+    if (zone->GetZoneName() == zone_name)
+      result = zone;
+  });
+  return (result);
+}
+
 ScriptZone* ScriptZone::Factory(const std::string& zone_name)
+{
+  ScriptZone* zone = GetZoneFromName(zone_name);
+
+  if (zone == 0)
+    zone = CreateScriptZone(zone_name);
+  return (zone);
+}
+
+ScriptZone* ScriptZone::CreateScriptZone(const std::string& zone_name)
 {
   if (Level::CurrentLevel != 0)
   {

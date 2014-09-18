@@ -26,13 +26,17 @@ public:
   void Delete(void);
 
   static ScriptZone* Factory(const std::string& zone);
+  static void        DestroyAll(void);
 
 private:
+  static ScriptZone*    CreateScriptZone(const std::string& zone);
+  static ScriptZone*    GetZoneFromName(const std::string& zone);
   void                  CallCallback(const std::string& callback, InstanceDynamicObject*);
 
-  Zones::Controller&    zone;
-  Sync::ObserverHandler signals;
-  bool                  effect_enabled;
+  Zones::Controller&            zone;
+  Sync::ObserverHandler         signals;
+  bool                          effect_enabled;
+  static std::list<ScriptZone*> scripted_zones;
 };
 
 #endif

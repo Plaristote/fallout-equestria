@@ -75,6 +75,7 @@ InventoryObject::InventoryObject(Data data) : Data(&_dataTree), _object("scripts
 
 InventoryObject::~InventoryObject()
 {
+  cout << "Destroying InventoryObject" << endl;
 }
 
 void InventoryObject::ResetFromFixture(void)

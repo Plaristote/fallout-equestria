@@ -22,6 +22,7 @@ StatModel::StatModel(Data statsheet) : AngelScript::Object("scripts/ai/special.a
 
 StatModel::~StatModel(void)
 {
+  cout << "Destroying StatModel" << endl;
 }
 
 void StatModel::Backup(void)

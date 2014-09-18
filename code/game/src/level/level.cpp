@@ -21,6 +21,18 @@
 
 using namespace std;
 
+MainScript::MainScript(const std::string& level_name) : AngelScript::Object("scripts/level/" + level_name + ".as")
+{
+  asDefineMethod("Run",        "void run(float)");
+  asDefineMethod("Initialize", "void initialize()");
+  asDefineMethod("Finalize",   "void finalize()");
+}
+
+MainScript::~MainScript()
+{
+  cout << "Destroying MainScript" << endl;
+}
+
 Level* Level::CurrentLevel = 0;
 Level::Level(const std::string& name, WindowFramework* window, GameUi& gameUi, Utils::Packet& packet, TimeManager& tm) : window(window),
   camera(*this, window, window->get_camera_group()),
@@ -190,6 +202,7 @@ Level::~Level()
   projectiles.CleanUp();
   ForEach(characters,  [](ObjectCharacter* obj)       { delete obj;        });
   ForEach(objects,     [](InstanceDynamicObject* obj) { delete obj;        });
+  ScriptZone::DestroyAll();
   CurrentLevel = 0;
   if (sunlight) delete sunlight;
   zones.UnregisterAllZones();

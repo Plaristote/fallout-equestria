@@ -425,6 +425,19 @@ namespace asUtils
       obj->ActionTalkTo(user);
   }
 
+  namespace Zone
+  {
+    string GetZoneName(ScriptZone* zone)
+    {
+      if (zone)
+      {
+        cout << "Getting zone name " << zone->GetZoneName() << endl;
+        return (zone->GetZoneName());
+      }
+      return ("");
+    }
+  }
+
   namespace LevelUtils
   {
     void SunlightNearFar(Level* level, float a, float b)
@@ -757,7 +770,7 @@ void AngelScriptInitialize(void)
 
   const char* zoneClass = "Zone";
   engine->RegisterObjectType(zoneClass, 0, asOBJ_REF | asOBJ_NOCOUNT);
-  engine->RegisterObjectMethod(zoneClass, "string GetName() const",                  asMETHOD(ScriptZone,GetZoneName),      asCALL_THISCALL);
+  engine->RegisterObjectMethod(zoneClass, "string GetName()",                        asFUNCTION(asUtils::Zone::GetZoneName), asCALL_CDECL_OBJFIRST);
   engine->RegisterObjectMethod(zoneClass, "void SetEnabled(bool)",                   asMETHOD(ScriptZone,SetEnabled),       asCALL_THISCALL);
   engine->RegisterObjectMethod(zoneClass, "bool IsEnabled() const",                  asMETHOD(ScriptZone,IsEnabled),        asCALL_THISCALL);
   engine->RegisterObjectMethod(zoneClass, "bool IsInside(DynamicObject@)",           asMETHOD(ScriptZone,IsInside),         asCALL_THISCALL);
