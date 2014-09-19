@@ -35,12 +35,15 @@ void TargetOutliner::MakeOutlinesForListWithColor(const std::vector<ObjectCharac
 {
   for_each(targets.begin(), targets.end(), [this, color](ObjectCharacter* character)
   {
-    Outline outline(character);
+    if (character->IsAlive())
+    {
+      Outline outline(character);
 
-    outline.SetColor(color);
-    outlines.push_back(outline);
-    outlines.rbegin()->Initialize();
-    outlines.rbegin()->Show();
+      outline.SetColor(color);
+      outlines.push_back(outline);
+      outlines.rbegin()->Initialize();
+      outlines.rbegin()->Show();
+    }
   });
 }
 

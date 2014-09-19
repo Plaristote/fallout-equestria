@@ -86,7 +86,12 @@ void Interactions::Player::ActionTargetUse(short unsigned int it)
         ActionRunner*    runner    = 0;
 
         if (character != 0 && action["combat"].Value() == "1")
-          runner = Interactions::Actions::UseWeaponOn::Factory(player, character, item, action_it);
+        {
+          if (character->IsAlive())
+            runner = Interactions::Actions::UseWeaponOn::Factory(player, character, item, action_it);
+          else
+            level.GetLevelUi().GetMainBar().AppendToConsole(i18n::T("It's already dead."));
+        }
         else
           runner = Interactions::Actions::UseObjectOn::Factory(player, object,    item, action_it);
         if (runner)

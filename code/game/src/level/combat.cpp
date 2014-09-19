@@ -19,12 +19,13 @@ bool Combat::CanStop(void) const
 
   for (; it != end ; ++it)
   {
-    if (!((*it)->IsAlly(level.GetPlayer())))
+    if ((*it)->IsAlive() && !((*it)->IsAlly(level.GetPlayer())))
     {
-      list<ObjectCharacter*> listEnemies = (*it)->GetNearbyEnemies();
-
-      if (!(listEnemies.empty()) && (*it)->IsAlive())
+      if (!((*it)->GetNearbyEnemies().empty()))
+      {
+        cout << "Can't stop combat: " << (*it)->GetName() << " has enemies in sight." << endl;
         return (false);
+      }
     }
   }
   return (true);
