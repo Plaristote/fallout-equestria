@@ -948,7 +948,10 @@ void MainWindow::WaypointConnect()
 {
     std::list<Waypoint*>::iterator it  = waypointsSelection.begin();
     std::list<Waypoint*>::iterator end = waypointsSelection.end();
+    float                          max_arc_length = 0.f;
 
+    if (ui->waypointUseMaxArcLength->isChecked())
+      max_arc_length = ui->waypointMaxArcLength->value();
     for (; it != end ; ++it)
     {
       std::list<Waypoint*>::iterator subIt  = waypointsSelection.begin();
@@ -958,6 +961,16 @@ void MainWindow::WaypointConnect()
       {
         if (it == subIt)
           continue ;
+        if (max_arc_length > 0)
+        {
+          LPoint3f pos1 = (*it)->nodePath.get_pos();
+          LPoint3f pos2 = (*subIt)->nodePath.get_pos();
+
+          if (std::abs(pos1.get_x() - pos2.get_x()) > max_arc_length ||
+              std::abs(pos1.get_y() - pos2.get_y()) > max_arc_length ||
+              std::abs(pos1.get_z() - pos2.get_z()) > max_arc_length)
+            continue ;
+        }
         (*it)->Connect(*subIt);
         (*it)->SetSelected(false);
         (*it)->SetSelected(true);
