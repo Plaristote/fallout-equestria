@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
+#include "heightmapdialog.h"
 
 extern QString objectTypes[];
 
@@ -13,8 +14,9 @@ WizardObject::WizardObject(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->pickModel,   SIGNAL(clicked()), this, SLOT(SelectModel()));
-    connect(ui->pickTexture, SIGNAL(clicked()), this, SLOT(SelectTexture()));
+    connect(ui->pickModel,       SIGNAL(clicked()), this, SLOT(SelectModel()));
+    connect(ui->pickTexture,     SIGNAL(clicked()), this, SLOT(SelectTexture()));
+    connect(ui->importHeightmap, SIGNAL(clicked()), this, SLOT(ImportHeightmap()));
 }
 
 WizardObject::~WizardObject()
@@ -60,6 +62,19 @@ float         WizardObject::GetScale(void) const
 const QString WizardObject::GetType(void) const
 {
     return ("ui->type->currentText()");
+}
+
+void WizardObject::ImportHeightmap(void)
+{
+  HeightmapDialog* heightmap_dialog = new HeightmapDialog(this);
+
+  connect(heightmap_dialog, SIGNAL(heightmapCreated(QString)), this, SLOT(ImportedHeightmap(QString)));
+  heightmap_dialog->open();
+}
+
+void WizardObject::ImportedHeightmap(QString filename)
+{
+  ui->model->setText(filename);
 }
 
 void WizardObject::SelectModel(void)

@@ -18,7 +18,7 @@ unix:QMAKE_CXXFLAGS += -std=c++0x
 win32:QMAKE_CFLAGS_RELEASE  = -O2 -MD -zi
 win32:QMAKE_LFLAGS_RELEASE  = /INCREMENTAL:NO /DEBUG
 
-#CONFIG(debug, debug|releqse) {
+#CONFIG(debug, debug|release) {
 #  unix:QMAKE_CXXFLAGS_DEBUG += -fsanitize=address
 #  unix:LIBS += -lasan
 #}
@@ -89,7 +89,8 @@ SOURCES += main.cpp\
            worldobjectwidget.cpp \
            inventoryeditor.cpp \
            enlightenedobjectswidget.cpp \
-           factiondialog.cpp
+           factiondialog.cpp \
+           heightmapdialog.cpp
 
 
 HEADERS  += globals.hpp \
@@ -136,7 +137,8 @@ HEADERS  += globals.hpp \
             worldobjectwidget.h \
             inventoryeditor.h \
             enlightenedobjectwidget.h \
-            factiondialog.h
+            factiondialog.h \
+            heightmapdialog.h
 
 FORMS    += mainwindow.ui \
             dialognewscript.ui \
@@ -157,4 +159,5 @@ FORMS    += mainwindow.ui \
             citysplashdialog.ui \
             worldobjectwidget.ui \
             inventoryeditor.ui \
-            factiondialog.ui
+            factiondialog.ui \
+            heightmapdialog.ui

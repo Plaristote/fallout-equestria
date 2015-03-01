@@ -2,7 +2,7 @@
 #define WIZARDOBJECT_H
 
 # include <panda3d/cmath.h>
-#include <QWizard>
+# include <QWizard>
 
 namespace Ui {
 class WizardObject;
@@ -26,6 +26,8 @@ public:
     float         GetScale(void) const;
 
 private slots:
+    void ImportHeightmap(void);
+    void ImportedHeightmap(QString);
     void SelectTexture(void);
     void SelectModel(void);
 

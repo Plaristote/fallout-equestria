@@ -7,6 +7,44 @@
 
 using namespace std;
 
+class WaypointGeneratorCollider
+{
+public:
+  WaypointGeneratorCollider(MapObject* object, LPoint4 margin, LPoint2 spacing, bool corner_origin)
+  {
+    LPoint3f size = NodePathSize(object->render);
+
+    spacingx = spacing.get_x();
+    spacingy = spacing.get_y();
+    sizex    = (size.get_x() - (margin.get_x() + margin.get_z())) / spacingx + 1;
+    sizey    = (size.get_y() - (margin.get_y() + margin.get_w())) / spacingy + 1;
+
+    if (corner_origin)
+    {
+      initPosX = -(margin.get_x() - size.get_x());
+      initPosY = -(margin.get_y() - size.get_y());
+      spacingx = -spacingx;
+      spacingy = -spacingy;
+    }
+    else
+    {
+      initPosX = margin.get_x() - (size.get_x() / 2);
+      initPosY = margin.get_y() - (size.get_y() / 2);
+    }
+    if (!(object->collider.node.is_empty()))
+    {
+      LPoint3f collision_node_pos = object->collider.node.get_pos();
+
+      initPosX -= collision_node_pos.get_x();
+      initPosY -= collision_node_pos.get_y();
+    }
+    initPosZ = size.get_z() + 50.f;
+  }
+
+private:
+  float spacingx, spacingy, sizex, sizey, initPosX, initPosY, initPosZ;
+};
+
 WaypointGenerator::WaypointGenerator(World* world, MapObject* object, LPoint4 margin, LPoint2 spacing, bool corner_origin) : world(world), object(object)
 {
   LPoint3f size = NodePathSize(object->render);
@@ -48,6 +86,7 @@ void WaypointGenerator::ClearObject(void)
     UpdateProgress("Waypoint Clearing (1/4): %p%", i / object->waypoints.size() * 100);
     i++;
   });
+  cout << "Deleted " << object->waypoints.size() << endl;
   object->waypoints.clear();
 }
 

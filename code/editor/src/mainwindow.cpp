@@ -920,10 +920,10 @@ void MainWindow::MapObjectGenerateWaypoints(void)
                                          waypointGenerate.GetMargin(),
                                          waypointGenerate.GetSpacing(),
                                          waypointGenerate.IsOriginCorner());
-    connect(wp_generator, SIGNAL(Started()),                     this,            SLOT(DisableLevelEditor()),             Qt::QueuedConnection);
+    //connect(wp_generator, SIGNAL(Started()),                     this,            SLOT(DisableLevelEditor()),             Qt::QueuedConnection);
     connect(wp_generator, SIGNAL(Started()),                     ui->progressBar, SLOT(show()),                           Qt::QueuedConnection);
     connect(wp_generator, SIGNAL(UpdateProgress(QString,float)), this,            SLOT(UpdateProgressBar(QString,float)), Qt::QueuedConnection);
-    connect(wp_generator, SIGNAL(Done()),                        this,            SLOT(EnableLevelEditor()),              Qt::QueuedConnection);
+    //connect(wp_generator, SIGNAL(Done()),                        this,            SLOT(EnableLevelEditor()),              Qt::QueuedConnection);
     connect(wp_generator, SIGNAL(Done()),                        ui->progressBar, SLOT(hide()),                           Qt::QueuedConnection);
 
     wp_generator->Run();
@@ -963,8 +963,8 @@ void MainWindow::WaypointConnect()
           continue ;
         if (max_arc_length > 0)
         {
-          LPoint3f pos1 = (*it)->nodePath.get_pos();
-          LPoint3f pos2 = (*subIt)->nodePath.get_pos();
+          LPoint3f pos1 = (*it)->nodePath.get_pos(world->window->get_render());
+          LPoint3f pos2 = (*subIt)->nodePath.get_pos(world->window->get_render());
 
           if (std::abs(pos1.get_x() - pos2.get_x()) > max_arc_length ||
               std::abs(pos1.get_y() - pos2.get_y()) > max_arc_length ||
